@@ -5,15 +5,13 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     n = Math.round(n);
     var ahrefId = $(link);
     var status = ahrefId.text();
-    var blockType = getRadioValue($('input[name=blockType'+n+']:radio:checked'));
+    var blockType = $('#blockType' + n + '  option:selected').val();
     var newStatus;
     if (status.trim().toUpperCase() == 'Unblock'.toUpperCase()) {
         newStatus = 'UNBLOCKED';
-        $('input[name=blockType'+n+']:radio:checked').removeAttr("checked");
     } else if(blockType == 'blockProduction') {
     	newStatus = 'PROD_ONLY_BLOCKED';
     } else {
-    	$('input[name=blockType'+n+']').attr('checked', 'checked');
         newStatus = 'BLOCKED';
     }
     jagg.post("/site/blocks/users-keys/ajax/subscriptions.jag", {
@@ -27,10 +25,10 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
         if (!result.error) {
             if (newStatus == 'UNBLOCKED') {
             	$('input[name=blockType'+n+']').removeAttr('disabled');
-                ahrefId.html('<i class="glyphicon glyphicon-ban-circle"></i> Block');
+                ahrefId.html('<span class="icon fw-stack"><i class="fw fw-block fw-stack-1x"></i></span> Block');
             } else {
             	$('input[name=blockType'+n+']').attr('disabled', 'disabled');
-            	ahrefId.html('<i class="glyphicon glyphicon-ok-circle"></i> Unblock');
+            	ahrefId.html('<span class="icon fw-stack"><i class="fw fw-check fw-stack-1x"></i></span> Unblock');
             }
 
         } else {
@@ -51,3 +49,16 @@ var getRadioValue = function (radioButton) {
         return 0;
     }
 };
+
+
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+    $('#manage-subscriptions').datatables_extended({
+    	responsive:true,
+    	 "order": [[ 3, "asc" ]]
+    });
+});
+    
