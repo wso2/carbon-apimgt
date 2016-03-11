@@ -8085,7 +8085,7 @@ public class ApiMgtDAO {
      * @param policy policy object defining the throttle policy
      * @throws APIManagementException
      */
-    public void addThrottlingPolicy(Policy policy) throws APIManagementException {
+    public void addThrottlingPolicy(APIPolicy policy) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
