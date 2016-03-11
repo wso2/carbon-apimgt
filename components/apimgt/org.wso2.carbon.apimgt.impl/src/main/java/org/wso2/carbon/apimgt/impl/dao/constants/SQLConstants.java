@@ -2004,8 +2004,8 @@ public class SQLConstants {
             "SELECT CONDITION_ID FROM AM_CONDITION WHERE POLICY_ID = ? ";
 
     public static final String INSERT_POLICY_SQL =
-            "INSERT INTO AM_POLICY(NAME,TYPE,TENANT_ID,USER_LEVEL,DESCRIPTION,DEFAULT_QUOTA_POLICY_TYPE,DEFAULT_QUOTA,DEFAULT_UNIT_TIME,DEFAULT_TIME_UNIT,RATE_LIMIT_COUNT,RATE_LIMIT_TIME_UNIT) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            "INSERT INTO AM_POLICY(NAME,TENANT_ID,USER_LEVEL,DESCRIPTION,DEFAULT_QUOTA_POLICY_TYPE,DEFAULT_QUOTA,DEFAULT_UNIT_TIME,DEFAULT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_CONDITION_SQL =
             "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE,ENDING_DATE,SPECIFIC_DATE,QUOTA_POLICY_TYPE,QUOTA,UNIT_TIME,TIME_UNIT) \n" +
@@ -2047,12 +2047,34 @@ public class SQLConstants {
             "   TYPE = ?"+
             "   AND TENANT_ID =?";
 
-    public static final String GET_POLICIES =
+    public static final String GET_API_POLICIES =
             " SELECT "+
             "   * " +
             "FROM " +
-            "   AM_POLICY " +
+            "   AM_API_POLICY " +
             " WHERE" +
-            "   TYPE = ?"+
             "   AND TENANT_ID =?";
+
+    public static final String GET_APP_POLICIES =
+            " SELECT "+
+                    "   * " +
+                    "FROM " +
+                    "   AM_APP_POLICY " +
+                    " WHERE" +
+                    "   AND TENANT_ID =?";
+    public static final String GET_SUBSCRIPTION_POLICIES =
+            " SELECT "+
+                    "   * " +
+                    "FROM " +
+                    "   AM_SUBSCRIPTION_POLICY " +
+                    " WHERE" +
+                    "   AND TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICIES =
+            " SELECT "+
+                    "   * " +
+                    "FROM " +
+                    "   AM_GLOBAL_POLICY " +
+                    " WHERE" +
+                    "   AND TENANT_ID =?";
 }

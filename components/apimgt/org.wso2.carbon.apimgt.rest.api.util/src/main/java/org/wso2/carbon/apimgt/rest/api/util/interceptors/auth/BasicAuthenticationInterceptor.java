@@ -29,6 +29,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -52,6 +53,12 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         super(Phase.PRE_INVOKE);
     }
     public void handleMessage(Message inMessage) {
+        //by-passes the interceptor if user calls an anonymous api
+        if (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !Boolean.parseBoolean(RestApiConstants.AUTHENTICATION_REQUIRED)) {
+            return;
+        }
+
         if(handleRequest(inMessage, null)){
             /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
             if(requestedTenant!=null){

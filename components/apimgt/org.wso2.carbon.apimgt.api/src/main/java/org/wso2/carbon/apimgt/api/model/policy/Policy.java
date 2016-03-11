@@ -24,17 +24,13 @@ import java.util.List;
 
 public class Policy implements Serializable{
     private String policyName;
-    private String policyLevel;
     private String userLevel;
     private String description;
-    private List<Pipeline> pipelines;
     private QuotaPolicy defaultQuotaPolicy;
-    private int rateLimitCount;
     private int tenantId;
-    private String ratelimitTimeUnit;
 
-    public Policy() {
-
+    public Policy(String name){
+        this.policyName=name;
     }
 
     public int getTenantId() {
@@ -43,26 +39,6 @@ public class Policy implements Serializable{
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public String getRatelimitTimeUnit() {
-        return ratelimitTimeUnit;
-    }
-
-    public void setRatelimitTimeUnit(String ratelimitTimeUnit) {
-        this.ratelimitTimeUnit = ratelimitTimeUnit;
-    }
-
-    public int getRateLimitCount() {
-        return rateLimitCount;
-    }
-
-    public void setRateLimitCount(int rateLimitCount) {
-        this.rateLimitCount = rateLimitCount;
-    }
-
-    public Policy(String name){
-        this.policyName=name;
     }
 
     public String getUserLevel() {
@@ -89,22 +65,6 @@ public class Policy implements Serializable{
         this.policyName = policyName;
     }
 
-    public List<Pipeline> getPipelines() {
-        return pipelines;
-    }
-
-    public void setPipelines(List<Pipeline> pipelines) {
-        this.pipelines = pipelines;
-    }
-
-    public String getPolicyLevel() {
-        return policyLevel;
-    }
-
-    public void setPolicyLevel(String policyLevel) {
-        this.policyLevel = policyLevel;
-    }
-
     public void setDefaultQuotaPolicy(QuotaPolicy defaultQuotaPolicy) {
         this.defaultQuotaPolicy = defaultQuotaPolicy;
     }
@@ -115,11 +75,12 @@ public class Policy implements Serializable{
 
     @Override
     public String toString() {
-        return "Policy [policyName=" + policyName + ", policyLevel=" + policyLevel + ", userLevel=" + userLevel
-                + ", description=" + description + ", pipelines=" + pipelines + ", defaultQuotaPolicy="
-                + defaultQuotaPolicy + ", rateLimitCount=" + rateLimitCount + ", tenantId=" + tenantId
-                + ", ratelimitTimeUnit=" + ratelimitTimeUnit + "]";
+        return "Policy{" +
+                "defaultQuotaPolicy=" + defaultQuotaPolicy +
+                ", policyName='" + policyName + '\'' +
+                ", userLevel='" + userLevel + '\'' +
+                ", description='" + description + '\'' +
+                ", tenantId=" + tenantId +
+                '}';
     }
-   
-    
 }

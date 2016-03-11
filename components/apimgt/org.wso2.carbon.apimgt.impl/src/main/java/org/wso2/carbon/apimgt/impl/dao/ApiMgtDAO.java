@@ -8080,7 +8080,7 @@ public class ApiMgtDAO {
     }
 
     //Method to save Throttling policy details into the database
-    public void addThrottlingPolicy(Policy policy) throws APIManagementException {
+    public void addThrottlingPolicy(APIPolicy policy) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -8093,32 +8093,29 @@ public class ApiMgtDAO {
                 // Adding data to the AM_POLICY  table
                 psPolicy = conn.prepareStatement(sqlAddQuery);
                 psPolicy.setString(1, policy.getPolicyName());
-                psPolicy.setString(2, policy.getPolicyLevel());
-                psPolicy.setInt(3, policy.getTenantId());
-                psPolicy.setString(4, policy.getUserLevel());
-                psPolicy.setString(5, policy.getDescription());
-                psPolicy.setString(6, policy.getDefaultQuotaPolicy().getType());
+                psPolicy.setInt(2, policy.getTenantId());
+                psPolicy.setString(3, policy.getUserLevel());
+                psPolicy.setString(4, policy.getDescription());
+                psPolicy.setString(5, policy.getDefaultQuotaPolicy().getType());
 
                 if( PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
-                    psPolicy.setLong(7, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+                    psPolicy.setLong(6, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
                 }
                 //if Bandwidth type, convert to kilobytes
                 else if(PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
                     if("KB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
+                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
                     }
                     else if("MB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount()*1024);
+                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount()*1024);
                     }
                     else if("GB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
+                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
                     }
                 }
 
-                psPolicy.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-                psPolicy.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-                psPolicy.setInt(10, policy.getRateLimitCount());
-                psPolicy.setString(11, policy.getRatelimitTimeUnit());
+                psPolicy.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+                psPolicy.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
                 psPolicy.executeUpdate();
                 rs= psPolicy.getGeneratedKeys(); //get the inserted POLICY_ID (auto incremented value)
                 while (rs.next()) {
@@ -8305,54 +8302,167 @@ public class ApiMgtDAO {
         }
     }
 
-    public Policy[] getPolicies(String policyLevel, String username) throws APIManagementException {
-        List<Policy> policies = new ArrayList<Policy>();
+    /**
+     * get API level policies
+     *
+     * @param tenantID policies are selected using tenantID
+     * @return APIPolicy ArrayList
+     * @throws APIManagementException
+     */
+    public APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException {
+        List<APIPolicy> policies = new ArrayList<APIPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        int tenantId = APIUtil.getTenantId(username);
-        String sqlQuery = SQLConstants.GET_POLICIES;
+
+        String sqlQuery = SQLConstants.GET_API_POLICIES;
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_POLICIES;
+            sqlQuery = SQLConstants.GET_API_POLICIES;
         }
 
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, policyLevel);
-            ps.setInt(2, tenantId);
+            ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                Policy policy = new Policy(rs.getString("NAME"));
+                APIPolicy apiPolicy = new APIPolicy(rs.getString("NAME"));
                 QuotaPolicy quotaPolicy = new QuotaPolicy();
-                policy.setPolicyLevel(rs.getString("USER_LEVEL"));
-                policy.setDescription(rs.getString("DESCRIPTION"));
+                apiPolicy.setUserLevel(rs.getString("USER_LEVEL"));
+                apiPolicy.setDescription(rs.getString("DESCRIPTION"));
                 quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
-                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)){
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
                     RequestCountLimit reqLimit = new RequestCountLimit();
                     reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
                     reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
                     reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
                     quotaPolicy.setLimit(reqLimit);
                 }
-                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)){
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
                     BandwidthLimit bandLimit = new BandwidthLimit();
                     bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
                     bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
                     bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
                     quotaPolicy.setLimit(bandLimit);
                 }
-                policy.setRateLimitCount(rs.getInt("RATE_LIMIT_COUNT"));
-                policy.setRatelimitTimeUnit(rs.getString("RATE_LIMIT_TIME_UNIT"));
-                policy.setDefaultQuotaPolicy(quotaPolicy);
-                policies.add(policy);
+                apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+                policies.add(apiPolicy);
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
-        return policies.toArray(new Policy[policies.size()]);
+        return policies.toArray(new APIPolicy[policies.size()]);
+    }
+
+    /**
+     * get application level polices
+     *
+     * @param tenantID polices are selected only belong to specific tenantID
+     * @return AppilicationPolicy array list
+     */
+    public ApplicationPolicy[] getAppPolicies(int tenantID) throws APIManagementException {
+        List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_APP_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APP_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString("NAME"));
+                QuotaPolicy quotaPolicy = new QuotaPolicy();
+                appPolicy.setUserLevel(rs.getString("USER_LEVEL"));
+                appPolicy.setDescription(rs.getString("DESCRIPTION"));
+                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                    RequestCountLimit reqLimit = new RequestCountLimit();
+                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(reqLimit);
+                }
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                    BandwidthLimit bandLimit = new BandwidthLimit();
+                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(bandLimit);
+                }
+                appPolicy.setDefaultQuotaPolicy(quotaPolicy);
+                policies.add(appPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new ApplicationPolicy[policies.size()]);
+    }
+
+    /**
+     * get all subscription level policeis belongs to specific tenant
+     *
+     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @return subscriptionPolicy array list
+     */
+    public SubscriptionPolicy[] getAPolicies(int tenantID) throws APIManagementException {
+        List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_APP_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APP_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(rs.getString("NAME"));
+                QuotaPolicy quotaPolicy = new QuotaPolicy();
+                subPolicy.setUserLevel(rs.getString("USER_LEVEL"));
+                subPolicy.setDescription(rs.getString("DESCRIPTION"));
+                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                    RequestCountLimit reqLimit = new RequestCountLimit();
+                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(reqLimit);
+                }
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                    BandwidthLimit bandLimit = new BandwidthLimit();
+                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(bandLimit);
+                }
+                subPolicy.setRateLimitCount(rs.getInt("RATE_LIMIT_COUNT"));
+                subPolicy.setRateLimitTimeUnit(rs.getString("RATE_LIMIT_TIME_UNIT"));
+                subPolicy.setDefaultQuotaPolicy(quotaPolicy);
+                policies.add(subPolicy);
+
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new SubscriptionPolicy[policies.size()]);
     }
 
     public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {

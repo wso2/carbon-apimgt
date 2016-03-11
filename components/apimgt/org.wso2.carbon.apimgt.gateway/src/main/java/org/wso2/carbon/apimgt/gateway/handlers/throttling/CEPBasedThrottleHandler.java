@@ -65,7 +65,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
-        boolean canAccess = true;
+        boolean isThrottled = true;
         String appKey;
         String apiKey;
         String resourceKey;
@@ -131,9 +131,9 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             propertiesMap.put("roleID", roleID);
 
             Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
-            canAccess = throttler.isThrottled(objects);
+            isThrottled = throttler.isThrottled(objects);
         }
-        return canAccess;
+        return isThrottled;
     }
 
 
@@ -146,14 +146,18 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doThrottle(MessageContext messageContext) {
-        boolean canAccess = true;
+        boolean isThrottled = false;
         if (!messageContext.isResponse()) {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
             ConfigurationContext cc = axis2MC.getConfigurationContext();
-            doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
+            isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
-        return canAccess;
+        if (isThrottled) {
+            handleThrottleOut(messageContext);
+            return false;
+        }
+        return true;
     }
 
 

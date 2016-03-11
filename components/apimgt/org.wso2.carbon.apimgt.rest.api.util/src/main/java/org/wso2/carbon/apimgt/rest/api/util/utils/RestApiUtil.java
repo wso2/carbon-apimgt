@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -61,6 +63,7 @@ import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.uri.template.URITemplateException;
 
 import javax.validation.ConstraintViolation;
 import java.io.File;
@@ -68,8 +71,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +89,7 @@ public class RestApiUtil {
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
 
     public static void setThreadLocalRequestedTenant(String user) {
@@ -990,6 +997,64 @@ public class RestApiUtil {
             }
             return publisherResourceMappings;
         }
+    }
+
+    /**
+     * Returns the white-listed URIs and associated HTTP methods for REST API by reading api-manager.xml configuration
+     *
+     * @return A Dictionary with the white-listed URIs and the associated HTTP methods
+     * @throws APIManagementException
+     */
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getWhiteListedURIsToMethodsMapFromConfig()
+            throws APIManagementException {
+        Hashtable<org.wso2.uri.template.URITemplate, List<String>> uriToMethodsMap = new Hashtable<>();
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        List<String> uriList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_WHITELISTED_URI_URI);
+        List<String> methodsList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_WHITELISTED_URI_HTTPMethods);
+
+        if (uriList != null && methodsList != null) {
+            if (uriList.size() != methodsList.size()) {
+                String errorMsg = "Provided White-listed URIs for REST API are invalid."
+                        + " Every 'WhiteListedURI' should include 'URI' and 'HTTPMethods' elements";
+                log.error(errorMsg);
+                return new Hashtable<>();
+            }
+
+            for (int i = 0; i < uriList.size(); i++) {
+                String uri = uriList.get(i);
+                try {
+                    org.wso2.uri.template.URITemplate uriTemplate = new org.wso2.uri.template.URITemplate(uri);
+                    String methodsForUri = methodsList.get(i);
+                    List<String> methodListForUri = Arrays.asList(methodsForUri.split(","));
+                    uriToMethodsMap.put(uriTemplate, methodListForUri);
+                } catch (URITemplateException e) {
+                    String msg = "Error in parsing uri " + uri + " when retrieving white-listed URIs for REST API";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+        }
+        return uriToMethodsMap;
+    }
+
+    /**
+     * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads 
+     * api-manager.xml configuration, store the results in a static reference and returns the results. 
+     * Otherwise returns previously stored the static reference object.
+     *
+     * @return A Dictionary with the white-listed URIs and the associated HTTP methods
+     * @throws APIManagementException
+     */
+    public static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getWhiteListedURIsToMethodsMap()
+            throws APIManagementException {
+
+        if (uriToHttpMethodsMap == null) {
+            uriToHttpMethodsMap = getWhiteListedURIsToMethodsMapFromConfig();
+        }
+        return uriToHttpMethodsMap;
     }
 
     /**
