@@ -584,5 +584,8 @@
     <StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatisticClientProvider>
     <!-- For APIM implemented Statistic client for RDBMS -->
     <!--StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatisticClientProvider-->
+    
+    <!-- To use global event processor for throttling -->
+    <EnableGlogbalCEPThrottling>false</EnableGlogbalCEPThrottling>
 
 </APIManager>

@@ -208,6 +208,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_THUMBNAIL_URL="overview_thumbnail";
     public static final String API_OVERVIEW_STATUS="overview_status";
     public static final String API_OVERVIEW_TIER="overview_tier";
+    public static final String API_OVERVIEW_SUB_POLICY="overview_subPolicy";
+    public static final String API_OVERVIEW_API_POLICY="overview_apiPolicy";
     public static final String API_OVERVIEW_IS_LATEST ="overview_isLatest";
     public static final String API_URI_TEMPLATES ="uriTemplates_entry";
     public static final String API_OVERVIEW_TEC_OWNER ="overview_technicalOwner";
@@ -428,7 +430,8 @@ public final class APIConstants {
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
-
+    
+    public static final String API_GLOBAL_CEP_ENABLE = "EnableGlogbalCEPThrottling";
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
     public static final String OPEN_ID_SCOPE_NAME = "openid";
