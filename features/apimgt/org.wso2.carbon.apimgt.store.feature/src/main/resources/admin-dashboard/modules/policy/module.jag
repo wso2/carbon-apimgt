@@ -18,11 +18,11 @@ jagg.module("policy", {
     },
 
     deleteSubscriptionPolicy:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").deleteSubscriptionPolicy.apply(this, arguments);
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-manage.jag").deleteSubscriptionPolicy.apply(this, arguments);
     },
 
     getAllSubscriptionPolicies:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").getAllSubscriptionPolicies.apply(this, arguments);
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-manage.jag").getAllSubscriptionPolicies.apply(this, arguments);
     }
 });
 %>

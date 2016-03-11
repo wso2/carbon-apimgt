@@ -160,11 +160,11 @@
              location.reload(true);
         });
 
-        var isNewTier = true;
+        var isNewPolicy = true;
         if('<%=policyName%>' != 'null'){
-            isNewTier = false;
+            isNewPolicy = false;
         }
-        if(!isNewTier){
+        if(!isNewPolicy){
           $('#policyName').val("<%=policyName%>");
           $('#description').val("<%=description%>");
           $('#defaultUnitTime').val("<%=defaultUnitTime%>");

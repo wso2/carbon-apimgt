@@ -1,15 +1,50 @@
 <% jagg.template("policy/subscription/edit", function(inputs, outputs, jagg) { %>
+<%
+    var policyName = request.getParameter("policyName");
+    var pageTitle = "Add subscription Level Policy";
+    var nameFieldDisableStatus = "";
 
-<div id='tier-add-container' class="row-fluid"  style="display:inline">
+    if(policyName != null){
+        pageTitle = "Edit Subscription Level Policy";
+        nameFieldDisableStatus = "readonly";
+        var subscriptionPolicies = session.get("subscriptionPolicies");
+        var subscriptionPolicy;
+        // subscriptionPolicies contains an array that was returned. Hence we need to get the correct policy and proceed
+        for(j = 0; j < subscriptionPolicies.length; j++) {
+            if(policyName.equalsIgnoreCase(subscriptionPolicies[j].getPolicyName())){
+                subscriptionPolicy = subscriptionPolicies[j];
+                break;
+            }
+        }
+        var description = subscriptionPolicy.getDescription() == null ? "" : subscriptionPolicy.getDescription();
+        var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
+        if (defaultQuotaPolicy == "RequestCount"){
+            var  defaultRequestCount = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        }
+        else if (defaultQuotaPolicy == "Bandwidth"){
+            var defaultBandwidth = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount();
+            var defaultBandwidthUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
+        }
 
-    <div class="title-section">
-        <label id="tierTopic" class='control-label' style='display:inline;'><h2>Add Subscription Level Policy</h2></label>
-    </div>
+        var defaultUnitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
+        var defaultTimeUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
 
-    <div class="content-section shadow-up">
-        <div class="content-data">
-            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
-                value='<%=i18n.localize("errorMsgRequired")%>'/>
+        var rateLimitCount = subscriptionPolicy.getRateLimitCount() == null ? "" : subscriptionPolicy.getRateLimitCount();
+        var rateLimitTimeUnit = subscriptionPolicy.getRatelimitTimeUnit();
+    }
+    %>
+
+
+    <div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+        <div class="title-section">
+            <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+        </div>
+
+        <div class="content-section shadow-up">
+            <div class="content-data">
+                <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                    value='<%=i18n.localize("errorMsgRequired")%>'/>
                 <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
                 value='<%=i18n.localize("errorMessageInvalid")%>'/>
                 <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
@@ -25,7 +60,7 @@
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label"><%="Name"%></label>
                             <div class="controls cnls">
-                                <input type="text" id="policyName" name="policyName" />
+                                <input type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
@@ -142,6 +177,30 @@
         $('#cancel-tier-btn').on('click',function(){
              location.reload(true);
         });
+        var isNewPolicy = true;
+        if('<%=policyName%>' != 'null'){
+            isNewPolicy = false;
+        }
+        if(!isNewPolicy){
+          $('#policyName').val("<%=policyName%>");
+          $('#description').val("<%=description%>");
+          $('#defaultUnitTime').val("<%=defaultUnitTime%>");
+          $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
+          $('#rateLimitCount').val("<%=rateLimitCount%>");
+          $('#rateLimitTimeUnit').val("<%=rateLimitTimeUnit%>");
+
+          if("<%=defaultQuotaPolicy%>" == ("RequestCount")){
+            $('#requestCountType').prop('checked',true);
+            $('#defaultRequestCount').val("<%=defaultRequestCount%>");
+          }
+          else if("<%=defaultQuotaPolicy%>" == ("Bandwidth")){
+            $('#bandwidthType').prop('checked',true);
+            $('#defaultBandwidth').val("<%=defaultBandwidth%>");
+            // TODO set the bandwidth unit when database modified with bandwidth unit field
+            $('#defaultBandwidthUnit').val("KB");
+          }
+
+        }
         showHideDefaultQuotaPolicy();
 
     });

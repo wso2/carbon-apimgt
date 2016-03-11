@@ -18,39 +18,50 @@
             </tr>
         </thead>
 
-          <!--      <tr>
-                    <td>Ultimate</td>
-                    <td>Request Count</td>
-                    <td>1000</td>
-                    <td>1 min</td>
-                    <td>
-                        <a id="editButton1" >
-                            <i class="icon-edit"></i> 
-                                Edit 
-                        </a>
-                        <a id="deleteButton1" >
-                            <i class="icon-trash"></i>
-                                Delete
-                        </a>
-                    </td>
-                </tr>
+        <%
+
+    var subscriptionPolicyArray = outputs.subscriptionPolicies;
+    var count = 0;
+
+    for(j = 0; j < subscriptionPolicyArray.length; j++) {
+        var subscriptionPolicy = subscriptionPolicyArray[j];
+        var policyName = subscriptionPolicy.getPolicyName();
+        var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
+        if (defaultQuotaPolicy == "RequestCount"){
+            var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        }
+        else if (defaultQuotaPolicy == "Bandwidth"){
+            var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" KB";
+        }
+
+        var unitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime()+" "+subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
+        var rateLimitCount = subscriptionPolicy.getRateLimitCount();
+        var rateLimitTimeUnit = subscriptionPolicy.getRatelimitTimeUnit();
+        %>
                 <tr>
-                    <td>Medium</td>
-                    <td>Bandwidth</td>
-                    <td>100 MB</td>
-                    <td>1 sec</td>
+                    <td><%=policyName%></td>
+                    <td><%=defaultQuotaPolicy%></td>
+                    <td><%=quota%></td>
+                    <td><%=unitTime%></td>
+                    <td><%=rateLimitCount%></td>
+                    <td><%=rateLimitTimeUnit%></td>
                     <td>
-                        <a id="editButton2" >
+                        <a id="editButton<%=count%>" onClick="editSubscriptionPolicy('<%=policyName%>')">
                             <i class="icon-edit"></i>
                                 Edit
                         </a>
-                        <a id="deleteButton2" >
+                        <a id="deleteButton<%=count%>" onclick="deleteSubscriptionTier('<%=policyName%>')">
                             <i class="icon-trash"></i>
-                                Delete
+                            Delete
                         </a>
                     </td>
 
-                </tr> -->
+                </tr>
+            <%
+        count++;
+    }
+    %>
+
     </table>
     </div>
 
@@ -61,6 +72,10 @@
 </div>
 
 <script>
+    function editSubscriptionPolicy(policyName){
+            console.log(policyName);
+            location.href = "<%= jagg.url('/subscription-policy-edit')%>?policyName="+policyName;
+    }
 
     $(document).ready(function(){
         $('#add-policy-btn').on('click',function(){

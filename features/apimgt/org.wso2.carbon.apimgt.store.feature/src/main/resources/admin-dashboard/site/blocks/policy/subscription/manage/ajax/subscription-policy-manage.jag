@@ -8,15 +8,15 @@ include("/jagg/jagg.jag");
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag");
 
-    /*if(jagg.getUser() == null){
+    if(jagg.getUser() == null){
         print({
             error:true,
             message:'timeout'
         });        
     } else if (request.getMethod() == 'POST') {
-        if (action == "deleteTier" ) {
-            mod = jagg.module("tier");
-            result = mod.deleteTier(request.getParameter("tier", "UTF-8"));
+        if (action == "deleteSubscriptionPolicy" ) {
+            mod = jagg.module("policy");
+            result = mod.deleteSubscriptionPolicy(request.getParameter("policy", "UTF-8"));
             if (result.error) {
                 obj = {
                     error:true,
@@ -29,38 +29,19 @@ include("/jagg/jagg.jag");
                 }
             }
             print(obj);
-        } else if (action == "getAllTiers" ) {
-            mod = jagg.module("tier");
-            result = mod.getAllTiers();
-	    var tierArray = result.tiers.toArray();
-	    var tierListSize  = result.tiers.size();
-	    var count = 0;
+        } else if (action == "getAllSubscriptionPolicies" ) {
+            mod = jagg.module("policy");
+            result = mod.getAllSubscriptionPolicies();
+            var subscriptionPolicyArray = result.subscriptionPolicies;
 
-	    var tiersList = [];
-	    for(j = 0; j < tierListSize; j++) {
-			var tierObj = {};
-			var tier = tierArray[j];
-		        var tierDisplayName = tier.getDisplayName();
-		        var tierName = tier.getName();
-		        var requestCount, unitTime, description, tierPlan, stopOnQuotaReach;
-		        var displayStatus = "No";
-		        if("Unlimited".equalsIgnoreCase(tierName)){
-		            continue;
-		        } else {
-		            requestCount = tier.getRequestCount();
-		            unitTime = tier.getUnitTime();
-		        }
-		        tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
-		        description = tier.getDescription() == null ? "" : tier.getDescription();
-
-		        stopOnQuotaReach = tier.isStopOnQuotaReached();
-		        if("true".equalsIgnoreCase(stopOnQuotaReach)){
-		            displayStatus = "Yes";
-		        }
-			tierObj.tierDisplayName=tierDisplayName;
-			tierObj.tierName=tierName
-			tiersList.push(tierObj);
-		}
+            var subscriptionPolicyList = [];
+            for(j = 0; j < subscriptionPolicyArray.length; j++) {
+                var subscriptionPolicyObj = {};
+                var subscriptionPolicy = subscriptionPolicyArray[j];
+                var policyName = subscriptionPolicy.getName();
+                subscriptionPolicy.policyName=policyName
+                subscriptionPolicyList.push(subscriptionPolicyObj);
+            }
             if (result.error) {
                 obj = {
                     error:true,
@@ -69,11 +50,11 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error:false,
-                    response:tiersList
+                    response:subscriptionPolicyList
                 }
             }
             print(obj);
         }
-    } */
+    }
  }());  
 %>
