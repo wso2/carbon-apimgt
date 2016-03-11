@@ -3,6 +3,7 @@
 
 <%
 var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, deniedTiers = outputs.deniedTiers, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
+var isGlobalCEPEnabled = outputs.isGlobalCEPEnabled;
 var urlPrefix;
 var tenant=request_tenant;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -186,55 +187,110 @@ urlPrefix = jagg.getTenantURLPrefix("&");
 
                            </select>
                         <% }if(user && api) { %>
-                        <Label><b><%=i18n.localize("tiers")%></b></Label>
-                        <select id="tiers-list" name="tiers-list">
-                            <%var tiersList = api.tiers, denied = false, tiersAvailable = false;
-                            var existingFirstTierDesc = [];
+                            
+                            <% if(isGlobalCEPEnabled) { %>
+                                        <Label><b><%=i18n.localize("tiers")%></b></Label>
+                                        <select id="tiers-list" name="tiers-list">
+                                            <%var tiersList = api.policies, denied = false, tiersAvailable = false;
+                                            var existingFirstTierDesc = [];
 
-                            for(var j=0;j<tiersList.length;j++){
-                            	for (var k=0;k<deniedTiers.length;k++) {
-                            		if (tiersList[j].tierName == deniedTiers[k].tierName) {
-                            			denied = true;
-                            		}
-                            	}
-                            	if (!denied) {
-                            		var tier=tiersList[j].tierName;
-                            		var tierDisplayName=tiersList[j].tierDisplayName;
-                            		tiersAvailable = true;
+                                            for(var j=0;j<tiersList.length;j++){
+                                                 //TODO add policy permissions to check denied policies   
+                                                /*
+                                                for (var k=0;k<deniedTiers.length;k++) {
+                                                    if (tiersList[j].tierName == deniedTiers[k].tierName) {
+                                                        denied = true;
+                                                    }
+                                                }
+                                                */
+                                                if (!denied) {
+                                                    var tier=tiersList[j].policyName;
+                                                    var tierDisplayName=tiersList[j].policyDisplayName;
+                                                    tiersAvailable = true;
 
-                            		//adding the description of existing tiers to the list
-                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
-                            %>
-                            <option value="<%=tier%>"><%=tierDisplayName%></option>
-                            <%}
-                            denied = false;
-                             } %>
-                        </select>
-                        <%
-                            var firstTierDesc = '';
-                            if(existingFirstTierDesc.length ==0){
-                                firstTierDesc = '';
-                            } else{ firstTierDesc = existingFirstTierDesc[0]; }
-                        %>
-                        <span class="help-block" id="tierDesc"><%=firstTierDesc%>
-                        <%if(api.tiers[0].tierAttributes!=null){
-                        var tierAttrs=api.tiers[0].tierAttributes.split(',');
-                        for(var k=0;k<tierAttrs.length;k++){
-                        var tierKey=tierAttrs[k].split("::")[0];
-                        var tierVal=tierAttrs[k].split("::")[1];
-                        %>
-                            <%if(tierKey!=''){%><br/><%=tierKey%> : <%=tierVal%>
-                        <%}}}%>
-                        </span>
+                                                    //adding the description of existing tiers to the list
+                                                    existingFirstTierDesc.push(tiersList[j].policyDescription);
+                                            %>
+                                            <option value="<%=tier%>"><%=tierDisplayName%></option>
+                                            <%}
+                                            denied = false;
+                                             } %>
+                                        </select>
+                                        <%
+                                            var firstTierDesc = '';
+                                            if(existingFirstTierDesc.length ==0){
+                                                firstTierDesc = '';
+                                            } else{ firstTierDesc = existingFirstTierDesc[0]; }
+                                        %>
+                                        <span class="help-block" id="tierDesc"><%=firstTierDesc%>
+                             
+                                        </span>
 
-                        <div class="simple-space-maker">
-                            <button onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
-                                class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%>
-                            </button>
-                            <%if(!tiersAvailable){%>
-                                <span id="subsBtnDesc" class="help-block"><%=i18n.localize("noTiers")%></span>
-                            <%}%>
-                        </div>
+                                        <div class="simple-space-maker">
+                                            <button onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
+                                                class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%>
+                                            </button>
+                                            <%if(!tiersAvailable){%>
+                                                <span id="subsBtnDesc" class="help-block"><%=i18n.localize("noTiers")%></span>
+                                            <%}%>
+                                        </div>
+
+                            <% }else{ %> 
+                                      <Label><b><%=i18n.localize("tiers")%></b></Label>
+                                        <select id="tiers-list" name="tiers-list">
+                                            <%var tiersList = api.tiers, denied = false, tiersAvailable = false;
+                                            var existingFirstTierDesc = [];
+
+                                            for(var j=0;j<tiersList.length;j++){
+                                                for (var k=0;k<deniedTiers.length;k++) {
+                                                    if (tiersList[j].tierName == deniedTiers[k].tierName) {
+                                                        denied = true;
+                                                    }
+                                                }
+                                                if (!denied) {
+                                                    var tier=tiersList[j].tierName;
+                                                    var tierDisplayName=tiersList[j].tierDisplayName;
+                                                    tiersAvailable = true;
+
+                                                    //adding the description of existing tiers to the list
+                                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
+                                            %>
+                                            <option value="<%=tier%>"><%=tierDisplayName%></option>
+                                            <%}
+                                            denied = false;
+                                             } %>
+                                        </select>
+                                        <%
+                                            var firstTierDesc = '';
+                                            if(existingFirstTierDesc.length ==0){
+                                                firstTierDesc = '';
+                                            } else{ firstTierDesc = existingFirstTierDesc[0]; }
+                                        %>
+                                        <span class="help-block" id="tierDesc"><%=firstTierDesc%>
+                                        <%if(api.tiers[0].tierAttributes!=null){
+                                        var tierAttrs=api.tiers[0].tierAttributes.split(',');
+                                        for(var k=0;k<tierAttrs.length;k++){
+                                        var tierKey=tierAttrs[k].split("::")[0];
+                                        var tierVal=tierAttrs[k].split("::")[1];
+                                        %>
+                                            <%if(tierKey!=''){%><br/><%=tierKey%> : <%=tierVal%>
+                                        <%}}}%>
+                                        </span>
+
+                                        <div class="simple-space-maker">
+                                            <button onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
+                                                class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%>
+                                            </button>
+                                            <%if(!tiersAvailable){%>
+                                                <span id="subsBtnDesc" class="help-block"><%=i18n.localize("noTiers")%></span>
+                                            <%}%>
+                                        </div>
+
+                            <% } %> 
+
+
+
+
                         <% } }%>
 
                     </div>

@@ -2077,4 +2077,7 @@ public class SQLConstants {
                     "   AM_GLOBAL_POLICY " +
                     " WHERE" +
                     "   AND TENANT_ID =?";
+
+    public static final String DELETE_POLICY_SQL =
+            "DELETE FROM AM_POLICY WHERE TENANT_ID = ? AND TYPE = ? AND NAME = ?";
 }

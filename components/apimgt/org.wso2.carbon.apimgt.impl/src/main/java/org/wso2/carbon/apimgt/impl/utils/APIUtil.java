@@ -77,6 +77,8 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -299,23 +301,53 @@ public final class APIUtil {
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
+            
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
 
-            Set<Tier> availableTier = new HashSet<Tier>();
-            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Map<String, Tier> definedTiers = getTiers(tenantId);
-            if (tiers != null && !"".equals(tiers)) {
-                String[] tierNames = tiers.split("\\|\\|");
-                for (String tierName : tierNames) {
-                    Tier definedTier = definedTiers.get(tierName);
-                    if (definedTier != null) {
-                        availableTier.add(definedTier);
-                    } else {
-                        log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+
+            if(isGlobalThrottlingEnabled){
+                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                
+               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               if (policies != null && !"".equals(policies)) {
+                   String[] policyNames = policies.split("\\|\\|");
+                   for (String policyName : policyNames) {
+                       if(definedPolicyNames.contains(policyName)){
+                           Policy p = new Policy(policyName);
+                           availablePolicy.add(p);
+                       } else {
+                           log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
+                       }
+                   }
+               }
+               
+               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+                
+            } else {
+                //deprecated throttling method
+                Set<Tier> availableTier = new HashSet<Tier>();
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Map<String, Tier> definedTiers = getTiers(tenantId);
+                if (tiers != null && !"".equals(tiers)) {
+                    String[] tierNames = tiers.split("\\|\\|");
+                    for (String tierName : tierNames) {
+                        Tier definedTier = definedTiers.get(tierName);
+                        if (definedTier != null) {
+                            availableTier.add(definedTier);
+                        } else {
+                            log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+                        }
                     }
                 }
+                api.addAvailableTiers(availableTier);
+                api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
             }
-            api.addAvailableTiers(availableTier);
-            api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
+            
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -491,21 +523,49 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
-            Set<Tier> availableTier = new HashSet<Tier>();
-            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Map<String, Tier> definedTiers = getTiers(tenantId);
-            if (tiers != null && !"".equals(tiers)) {
-                String[] tierNames = tiers.split("\\|\\|");
-                for (String tierName : tierNames) {
-                    Tier definedTier = definedTiers.get(tierName);
-                    if (definedTier != null) {
-                        availableTier.add(definedTier);
-                    } else {
-                        log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+
+            if(isGlobalThrottlingEnabled){
+                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                
+               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               if (policies != null && !"".equals(policies)) {
+                   String[] policyNames = policies.split("\\|\\|");
+                   for (String policyName : policyNames) {
+                       if(definedPolicyNames.contains(policyName)){
+                           Policy p = new Policy(policyName);
+                           availablePolicy.add(p);
+                       } else {
+                           log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
+                       }
+                   }
+               }
+               
+               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+                
+            } else {
+                //deprecated throttling method
+                Set<Tier> availableTier = new HashSet<Tier>();
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Map<String, Tier> definedTiers = getTiers(tenantId);
+                if (tiers != null && !"".equals(tiers)) {
+                    String[] tierNames = tiers.split("\\|\\|");
+                    for (String tierName : tierNames) {
+                        Tier definedTier = definedTiers.get(tierName);
+                        if (definedTier != null) {
+                            availableTier.add(definedTier);
+                        } else {
+                            log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+                        }
                     }
                 }
+                api.addAvailableTiers(availableTier);
             }
-            api.addAvailableTiers(availableTier);
             // This contains the resolved context
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
@@ -638,20 +698,49 @@ public final class APIUtil {
                 //ignore
             }
             api.setCacheTimeout(cacheTimeout);
+            
+        
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
 
-            Set<Tier> availableTier = new HashSet<Tier>();
-            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            if (tiers != null) {                
-                String[] tierNames = tiers.split("\\|\\|");
-                for (String tierName : tierNames) {
-                    Tier tier = new Tier(tierName);
-                    availableTier.add(tier);
+            if(isGlobalThrottlingEnabled){
+                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                
+               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               if (policies != null && !"".equals(policies)) {
+                   String[] policyNames = policies.split("\\|\\|");
+                   for (String policyName : policyNames) {
+                       if(definedPolicyNames.contains(policyName)){
+                           Policy p = new Policy(policyName);
+                           availablePolicy.add(p);
+                       } else {
+                           log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
+                       }
+                   }
+               }
+               
+               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+                
+            } else {
+                //deprecated throttling method
+                Set<Tier> availableTier = new HashSet<Tier>();
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                if (tiers != null) {                
+                    String[] tierNames = tiers.split("\\|\\|");
+                    for (String tierName : tierNames) {
+                        Tier tier = new Tier(tierName);
+                        availableTier.add(tier);
 
+                    }
+
+                    api.addAvailableTiers(availableTier);
+                    String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+                    api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
                 }
-
-                api.addAvailableTiers(availableTier);
-                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-                api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
             }
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
@@ -797,19 +886,42 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+            
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            
+            if(isGlobalThrottlingEnabled){
+                StringBuilder policyBuilder = new StringBuilder();
+                for (Policy policy : api.getAvailableSubscriptionLevelPolicies()) {
+                    policyBuilder.append(policy.getPolicyName());
+                    policyBuilder.append("||");
+                }           
+                
+                String policies = policyBuilder.toString();
 
-            StringBuilder tiersBuilder = new StringBuilder();
-            for (Tier tier : api.getAvailableTiers()) {
-                tiersBuilder.append(tier.getName());
-                tiersBuilder.append("||");
+                if (!"".equals(policies)) {
+                    policies = policies.substring(0, policies.length() - 2);
+                    artifact.setAttribute(APIConstants.API_OVERVIEW_SUB_POLICY, policies);
+                }
+                
+                artifact.setAttribute(APIConstants.API_OVERVIEW_API_POLICY, api.getApiLevelPolicy());
+            } else {
+                //deprecated tier policy method
+                StringBuilder tiersBuilder = new StringBuilder();
+                for (Tier tier : api.getAvailableTiers()) {
+                    tiersBuilder.append(tier.getName());
+                    tiersBuilder.append("||");
+                }           
+                
+                String tiers = tiersBuilder.toString();
+
+                if (!"".equals(tiers)) {
+                    tiers = tiers.substring(0, tiers.length() - 2);
+                    artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
+                }
             }
-
-            String tiers = tiersBuilder.toString();
-
-            if (!"".equals(tiers)) {
-                tiers = tiers.substring(0, tiers.length() - 2);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
-            }
+            
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -2178,22 +2290,52 @@ public final class APIUtil {
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
+            
 
-            Set<Tier> availableTier = new HashSet<Tier>();
-            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Map<String, Tier> definedTiers = getTiers(tenantId);
-            if (tiers != null && !"".equals(tiers)) {
-                String[] tierNames = tiers.split("\\|\\|");
-                for (String tierName : tierNames) {
-                    Tier definedTier = definedTiers.get(tierName);
-                    if (definedTier != null) {
-                        availableTier.add(definedTier);
-                    } else {
-                        log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+
+            if(isGlobalThrottlingEnabled){
+                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                
+               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               if (policies != null && !"".equals(policies)) {
+                   String[] policyNames = policies.split("\\|\\|");
+                   for (String policyName : policyNames) {
+                       if(definedPolicyNames.contains(policyName)){
+                           Policy p = new Policy(policyName);
+                           availablePolicy.add(p);
+                       } else {
+                           log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
+                       }
+                   }
+               }
+               
+               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+                
+            } else {
+                //deprecated throttling method
+                Set<Tier> availableTier = new HashSet<Tier>();
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Map<String, Tier> definedTiers = getTiers(tenantId);
+                if (tiers != null && !"".equals(tiers)) {
+                    String[] tierNames = tiers.split("\\|\\|");
+                    for (String tierName : tierNames) {
+                        Tier definedTier = definedTiers.get(tierName);
+                        if (definedTier != null) {
+                            availableTier.add(definedTier);
+                        } else {
+                            log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+                        }
                     }
                 }
+                api.addAvailableTiers(availableTier);
             }
-            api.addAvailableTiers(availableTier);
+        
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));

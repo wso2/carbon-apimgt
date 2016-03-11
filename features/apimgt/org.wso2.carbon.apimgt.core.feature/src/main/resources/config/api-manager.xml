@@ -584,6 +584,9 @@
     <StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatisticClientProvider>
     <!-- For APIM implemented Statistic client for RDBMS -->
     <!--StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatisticClientProvider-->
+    
+    <!-- To use global event processor for throttling -->
+    <EnableGlogbalCEPThrottling>false</EnableGlogbalCEPThrottling>
 
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
