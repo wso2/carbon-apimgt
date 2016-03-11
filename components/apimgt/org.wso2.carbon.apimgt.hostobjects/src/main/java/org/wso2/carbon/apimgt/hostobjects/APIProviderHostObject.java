@@ -485,9 +485,9 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information ", e);
             }
-            
+
             apiProvider.saveSwagger20Definition(api.getId(),
-                    addSecurityDef((String) apiData.get("swagger", apiData), "pet", scopes));
+                    addSecurityDef((String) apiData.get("swagger", apiData), scopes));
         }
 
         // removing scopes from cache
@@ -4784,7 +4784,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
 
-    public static String addSecurityDef(String spec,String securityName,Set<Scope> scopes){
+    public static String addSecurityDef(String spec,Set<Scope> scopes){
 
 
         List<String> scopeNames = new ArrayList<String>();
@@ -4793,7 +4793,7 @@ public class APIProviderHostObject extends ScriptableObject {
         Operation operation;
         APISecuritySchemeDefinition apiSecuritySchemeDefinition = new APISecuritySchemeDefinition();
         apiSecuritySchemeDefinition.setType("oauth2");
-        apiSecuritySchemeDefinition.setAuthorizationUrl("wso2.com/token");
+        apiSecuritySchemeDefinition.setAuthorizationUrl(getAuthorizationUrl());
         apiSecuritySchemeDefinition.setFlow("implicit");
 
         for (Scope s : scopes) {
@@ -4801,6 +4801,7 @@ public class APIProviderHostObject extends ScriptableObject {
             apiSecuritySchemeDefinition.setScopes(s.getName(),s.getDescription());
         }
 
+        String securityName= swagger.getInfo().getTitle().toLowerCase()+"_oauth";
 
         for (Map.Entry<String, Path> entry : paths.entrySet()) {
             operation = paths.get(entry.getKey()).getGet();
@@ -4808,35 +4809,37 @@ public class APIProviderHostObject extends ScriptableObject {
                 paths.get(entry.getKey()).getGet().addSecurity(securityName,scopeNames);
             }
 
-            operation = paths.get(entry.getKey()).getPost();
-            if (operation!= null && operation.getSecurity()== null){
-                paths.get(entry.getKey()).getPost().addSecurity(securityName,scopeNames);
+            operation = paths.get(entry.getKey()).getPatch();
+            if (operation!= null){
+                paths.get(entry.getKey()).getPatch().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getDelete();
-            if (operation!= null && operation.getSecurity()== null){
+            if (operation!= null){
                 paths.get(entry.getKey()).getDelete().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getHead();
-            if (operation!= null && operation.getSecurity()== null){
+            if (operation!= null){
                 paths.get(entry.getKey()).getHead().addSecurity(securityName,scopeNames);
             }
 
-            operation = paths.get(entry.getKey()).getPatch();
-            if (operation!= null && operation.getSecurity()== null){
-                paths.get(entry.getKey()).getPatch().addSecurity(securityName,scopeNames);
+            operation = paths.get(entry.getKey()).getPost();
+            if (operation!= null){
+                paths.get(entry.getKey()).getPost().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getPut();
-            if (operation!= null && operation.getSecurity()== null){
+            if (operation!= null){
                 paths.get(entry.getKey()).getPut().addSecurity(securityName,scopeNames);
             }
 
+            operation = paths.get(entry.getKey()).getOptions();
+            if (operation!= null){
+                paths.get(entry.getKey()).getOptions().addSecurity(securityName,scopeNames);
+            }
 
         }
-
-
 
         Map<String,SecuritySchemeDefinition> securityDefMap = new HashMap<String, SecuritySchemeDefinition>();
 
@@ -4846,5 +4849,29 @@ public class APIProviderHostObject extends ScriptableObject {
 
         swagger.setPaths(paths);
         return Json.pretty(swagger);
+    }
+
+    private static String getAuthorizationUrl(){
+
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+
+        for (Environment environment : environments.values()) {
+            String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
+            if(environment.isShowInConsole()){
+                List<String> urlsList = new ArrayList<String>();
+                urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
+                ListIterator<String> it = urlsList.listIterator();
+
+                while (it.hasNext()) {
+                    String url = it.next();
+                    if (url != null && url.startsWith("https:")) {
+                        return url+"/token";
+                    }
+                }
+            }
+
+        }
+        return null;
     }
 }
