@@ -2,20 +2,16 @@
 ##
 ###generate key
 #macro( getKey )##
-#if($policy.getPolicyLevel() == $POLICY_LEVEL_APP)
-str:concat('${policy.getPolicyLevel()}_${policy.getPolicyName()}_', app_key,'_key')##
-#end
+str:concat('app_${policy.getPolicyName()}_', app_key,'_key')##
 #end
 ###generate rule
 #macro( getRule $policy)
-#if($policy.getPolicyLevel() == $POLICY_LEVEL_APP)
-${policy.getPolicyLevel()}_${policy.getPolicyName()}##
+app_${policy.getPolicyName()}##
 #end
-#end
-<policy tier="$policy.getPolicyLevel()_$policy.getPolicyName()" level="$policy.getPolicyLevel()" name="#getRule($policy)">
+<policy tier="app_$policy.getPolicyName()" level="app" name="#getRule($policy)">
 	<eligibilityQuery>
 		FROM RequestStream
-		SELECT '#getRule($policy)' AS rule, messageID, ( app_tier == '${policy.getPolicyName()}'${condition}) AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
+		SELECT '#getRule($policy)' AS rule, messageID, ( app_tier == '${policy.getPolicyName()}') AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
 		INSERT INTO EligibilityStream;
 	</eligibilityQuery>
 	<decisionQuery>	

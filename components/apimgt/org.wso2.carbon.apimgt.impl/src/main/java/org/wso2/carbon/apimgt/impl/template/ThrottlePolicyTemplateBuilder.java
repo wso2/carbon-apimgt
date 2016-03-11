@@ -241,12 +241,6 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
-            /*if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
-                context.put("condition", " AND " + conditionString);
-            } else {
-                context.put("condition", "");
-            }*/
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
             template.merge(context, writer);
             if (log.isDebugEnabled()) {
@@ -291,13 +285,6 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
-           /* if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
-                context.put("condition", " AND " + conditionString);
-            } else {
-                context.put("condition", "");
-            }*/
-
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
             t.merge(context, writer);
             if (log.isDebugEnabled()) {
