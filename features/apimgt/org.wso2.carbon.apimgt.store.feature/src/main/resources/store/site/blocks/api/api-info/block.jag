@@ -32,6 +32,7 @@ jagg.block("api/api-info", {
                 user = jagg.getUser();
         var showConsole = true;
         var isAdvertiseOnly;
+        var isGlobalCEPEnabled;
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
         }
@@ -68,6 +69,7 @@ jagg.block("api/api-info", {
                     }
             result = jagg.module("tiers").getDeniedTiers();
             deniedTiers = result.tiers;
+            isGlobalCEPEnabled = jagg.module("tiers").isGlobalCEPThrottlingEnabled();
 
         }
         if (!isAdvertiseOnly) {
@@ -80,6 +82,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -153,6 +156,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -216,6 +220,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -277,6 +282,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -329,6 +335,7 @@ jagg.block("api/api-info", {
                 "user": user,
                 "uriTemplates": uriTemplates,
                 "isRatingActivated": isRatingActivated,
+                "isGlobalCEPEnabled": isGlobalCEPEnabled,
                 "tabs": {
                     "tabs": [
                         {

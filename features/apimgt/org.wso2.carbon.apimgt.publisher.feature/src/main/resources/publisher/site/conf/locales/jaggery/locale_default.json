@@ -16,6 +16,8 @@
     "icon" : "Icon" ,
     "tags" : "Tags" ,
     "tier" : "Tier Availability" ,
+    "apiPolicy" : "API level Policy" ,
+    "subPolicy" : "Subscription level Policy" ,
     "busiOwner" : "Business Owner" ,
     "busiOwnerMail" : "Business Owner Email" ,
     "techOwner" : "Technical Owner" ,

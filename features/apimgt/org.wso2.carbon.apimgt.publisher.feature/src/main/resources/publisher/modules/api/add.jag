@@ -275,6 +275,73 @@ var getTiers = function () {
     }
 };
 
+var getSubsriptionLevelPolicies = function () {
+    var log = new Log();
+
+    var username = user.username;
+
+    try {
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_SUB);
+        
+
+        if (log.isDebugEnabled()) {
+            log.debug("getSubsriptionLevelPolicies " +  " : " + stringify(policies));
+        }
+
+        return {
+            error:false,
+            policies:policies
+        };
+    } catch (e) {
+        log.error("getSubsriptionLevelPolicies" + e.message);
+        return {
+            error:e,
+            policies:null
+        };
+    }
+};
+
+var getAPILevelPolicies = function () {
+    var log = new Log();
+
+    var username = user.username;
+
+    try {
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_API);
+        
+
+        if (log.isDebugEnabled()) {
+            log.debug("getAPILevelPolicies " +  " : " + stringify(policies));
+        }
+
+        return {
+            error:false,
+            policies:policies
+        };
+    } catch (e) {
+        log.error("getAPILevelPolicies" + e.message);
+        return {
+            error:e,
+            policies:null
+        };
+    }
+};
+
+var isGlobalCEPThrottlingEnabled = function() {
+    var carbon = require('carbon');
+    var log = new Log();
+    try{
+        var enabled = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("EnableGlogbalCEPThrottling");
+        return enabled == 'true';
+    } catch (e) {
+        log.error("isGlobalCEPThrottlingEnabled" + e.message);
+        return false;
+    }
+    
+};
+
 var getResourceTiers = function () {
     var tier,tiers,list=[],log = new Log();
     var tier;

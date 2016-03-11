@@ -213,6 +213,8 @@ if(jagg.isCSRFTokenValid())
 
             apiData.swagger = request.getParameter("swagger", "UTF-8");
             apiData.tier = request.getParameter("tiersCollection");
+            apiData.apiPolicy = request.getParameter("apiPolicyCollection");
+            apiData.subsLevelPolicy = request.getParameter("subPolicyCollection") 
             if(request.getParameter("transport_http") == null && request.getParameter("transport_https") == null)   {
                 apiData.transports = null;
             } else if(request.getParameter("transport_http") != null && request.getParameter("transport_https") != null) {
