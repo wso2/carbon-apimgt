@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
@@ -54,6 +55,16 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO.removeThrottlingPolicy("app", "Bronze", -1234);
     }
 
+    public void testGetApplicationPolicies() throws APIManagementException {
+        apiMgtDAO.getAppPolicies(-1234);
+    }
+
+    public void testGetSubscriptionPolicies() throws APIManagementException {
+        apiMgtDAO.getSubscriptionPolicies(-1234);
+    }
+
+    public void testGetApiPolicies() throws APIManagementException {
+        apiMgtDAO.getAPIPolicies(-1234);
     }
 
     private Policy getPolicyAPILevelPerUser(){
@@ -63,24 +74,24 @@ public class ThrottlingPolicyTest extends TestCase {
         policy.setDescription("Description");
         policy.setTenantId(-1234);
 
-        RequestCountLimit defaultLimit = new RequestCountLimit();
+        BandwidthLimit defaultLimit = new BandwidthLimit();
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(5);
-        defaultLimit.setRequestCount(400);
-
+        defaultLimit.setDataAmount(400);
+        defaultLimit.setDataUnit("MB");
 
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setLimit(defaultLimit);
-        defaultQuotaPolicy.setType("RequestCount");
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
 
         policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
-
 
         List<Pipeline> pipelines;
         Pipeline p;
         QuotaPolicy quotaPolicy;
         List<Condition> condition;
-        RequestCountLimit countlimit;
+        BandwidthLimit bandwidthLimit;
+        RequestCountLimit requestCountLimit;
         Condition cond;
         pipelines = new ArrayList<Pipeline>();
 
@@ -89,12 +100,13 @@ public class ThrottlingPolicyTest extends TestCase {
         p = new Pipeline();
 
         quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setType("RequestCount");
-        countlimit = new RequestCountLimit();
-        countlimit.setTimeUnit("min");
-        countlimit.setUnitTime(5);
-        countlimit.setRequestCount(100);
-        quotaPolicy.setLimit(countlimit);
+        quotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+        bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setTimeUnit("min");
+        bandwidthLimit.setUnitTime(5);
+        bandwidthLimit.setDataAmount(100);
+        bandwidthLimit.setDataUnit("GB");
+        quotaPolicy.setLimit(bandwidthLimit);
 
         condition =  new ArrayList<Condition>();
         HTTPVerbCondition verbCond = new HTTPVerbCondition();
@@ -122,11 +134,11 @@ public class ThrottlingPolicyTest extends TestCase {
 
         quotaPolicy = new QuotaPolicy();
         quotaPolicy.setType("RequestCount");
-        countlimit = new RequestCountLimit();
-        countlimit.setTimeUnit("min");
-        countlimit.setUnitTime(50);
-        countlimit.setRequestCount(1000);
-        quotaPolicy.setLimit(countlimit);
+        requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("min");
+        requestCountLimit.setUnitTime(50);
+        requestCountLimit.setRequestCount(1000);
+        quotaPolicy.setLimit(requestCountLimit);
 
         condition =  new ArrayList<Condition>();
 

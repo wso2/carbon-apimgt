@@ -8356,7 +8356,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * get API level policies
+     * Get API level policies. Result only contains basic details of the policy,
+     * it doesn't contain pipeline information.
      *
      * @param tenantID policies are selected using tenantID
      * @return APIPolicy ArrayList
@@ -8379,23 +8380,27 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                APIPolicy apiPolicy = new APIPolicy(rs.getString("NAME"));
                 QuotaPolicy quotaPolicy = new QuotaPolicy();
-                apiPolicy.setUserLevel(rs.getString("USER_LEVEL"));
-                apiPolicy.setDescription(rs.getString("DESCRIPTION"));
-                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                APIPolicy apiPolicy = new APIPolicy(rs.getString(SQLConstants.COLUMN_NAME));
+                apiPolicy.setUserLevel(rs.getString(SQLConstants.COLUMN_USER_LEVEL));
+                apiPolicy.setDescription(rs.getString(SQLConstants.COLUMN_DESCRIPTION));
+                apiPolicy.setTenantId(rs.getShort(SQLConstants.COLUMN_TENANT_ID));
+                quotaPolicy.setType(rs.getString(SQLConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
+
+                if (rs.getString(SQLConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE)
+                        .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
                     RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    reqLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_DEFAULT_UNIT_TIME));
+                    reqLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_DEFAULT_TIME_UNIT));
+                    reqLimit.setRequestCount(rs.getInt(SQLConstants.COLUMN_DEFAULT_QUOTA));
                     quotaPolicy.setLimit(reqLimit);
-                }
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                } else if (rs.getString(SQLConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE)
+                        .equals(PolicyConstants.BANDWIDTH_TYPE)) {
                     BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    bandLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_DEFAULT_UNIT_TIME));
+                    bandLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_DEFAULT_TIME_UNIT));
+                    bandLimit.setDataAmount(rs.getInt(SQLConstants.COLUMN_DEFAULT_QUOTA));
+                    bandLimit.setDataUnit(rs.getString(SQLConstants.COLUMN_DEFAULT_QUOTA_UNIT));
                     quotaPolicy.setLimit(bandLimit);
                 }
                 apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
@@ -8410,7 +8415,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * get application level polices
+     * Get application level polices
      *
      * @param tenantID polices are selected only belong to specific tenantID
      * @return AppilicationPolicy array list
@@ -8432,23 +8437,24 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString("NAME"));
                 QuotaPolicy quotaPolicy = new QuotaPolicy();
-                appPolicy.setUserLevel(rs.getString("USER_LEVEL"));
-                appPolicy.setDescription(rs.getString("DESCRIPTION"));
-                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(SQLConstants.COLUMN_NAME));
+                appPolicy.setDescription(rs.getString(SQLConstants.COLUMN_DESCRIPTION));
+                appPolicy.setTenantId(rs.getShort(SQLConstants.COLUMN_TENANT_ID));
+                quotaPolicy.setType(rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE));
+
+                if (rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE).equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
                     RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    reqLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_UNIT_TIME));
+                    reqLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_TIME_UNIT));
+                    reqLimit.setRequestCount(rs.getInt(SQLConstants.COLUMN_QUOTA));
                     quotaPolicy.setLimit(reqLimit);
-                }
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                } else if (rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE).equals(PolicyConstants.BANDWIDTH_TYPE)) {
                     BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    bandLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_UNIT_TIME));
+                    bandLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_TIME_UNIT));
+                    bandLimit.setDataAmount(rs.getInt(SQLConstants.COLUMN_QUOTA));
+                    bandLimit.setDataUnit(rs.getString(SQLConstants.COLUMN_QUOTA_UNIT));
                     quotaPolicy.setLimit(bandLimit);
                 }
                 appPolicy.setDefaultQuotaPolicy(quotaPolicy);
@@ -8463,20 +8469,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * get all subscription level policeis belongs to specific tenant
+     * Get all subscription level policeis belongs to specific tenant
      *
      * @param tenantID tenantID filters the polices belongs to specific tenant
      * @return subscriptionPolicy array list
      */
-    public SubscriptionPolicy[] getAPolicies(int tenantID) throws APIManagementException {
+    public SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException {
         List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        String sqlQuery = SQLConstants.GET_APP_POLICIES;
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES;
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_APP_POLICIES;
+            sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES;
         }
 
         try {
@@ -8485,30 +8491,31 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                SubscriptionPolicy subPolicy = new SubscriptionPolicy(rs.getString("NAME"));
                 QuotaPolicy quotaPolicy = new QuotaPolicy();
-                subPolicy.setUserLevel(rs.getString("USER_LEVEL"));
-                subPolicy.setDescription(rs.getString("DESCRIPTION"));
-                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(SQLConstants.COLUMN_NAME);
+                subPolicy.setDescription(rs.getString(SQLConstants.COLUMN_DESCRIPTION));
+                subPolicy.setTenantId(rs.getShort(SQLConstants.COLUMN_TENANT_ID));
+                quotaPolicy.setType(rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE));
+
+                if (rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE).equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
                     RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    reqLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_UNIT_TIME));
+                    reqLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_TIME_UNIT));
+                    reqLimit.setRequestCount(rs.getInt(SQLConstants.COLUMN_QUOTA));
                     quotaPolicy.setLimit(reqLimit);
-                }
-                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                } else if (rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE).equals(PolicyConstants.BANDWIDTH_TYPE)) {
                     BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
-                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
-                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    bandLimit.setUnitTime(rs.getInt(SQLConstants.COLUMN_UNIT_TIME));
+                    bandLimit.setTimeUnit(rs.getString(SQLConstants.COLUMN_TIME_UNIT));
+                    bandLimit.setDataAmount(rs.getInt(SQLConstants.COLUMN_QUOTA));
+                    bandLimit.setDataUnit(rs.getString(SQLConstants.COLUMN_QUOTA_UNIT));
                     quotaPolicy.setLimit(bandLimit);
                 }
-                subPolicy.setRateLimitCount(rs.getInt("RATE_LIMIT_COUNT"));
-                subPolicy.setRateLimitTimeUnit(rs.getString("RATE_LIMIT_TIME_UNIT"));
+
+                subPolicy.setRateLimitCount(rs.getInt(SQLConstants.COLUMN_RATE_LIMIT_COUNT));
+                subPolicy.setRateLimitTimeUnit(rs.getString(SQLConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setDefaultQuotaPolicy(quotaPolicy);
                 policies.add(subPolicy);
-
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
@@ -8522,7 +8529,7 @@ public class ApiMgtDAO {
      * Retrieves list of available policy names under <code>policyLevel</code> and user <code>username</code>'s tenant
      *
      * @param policyLevel policY level to filter policies
-     * @param username username will be used to get the tenant
+     * @param username    username will be used to get the tenant
      * @return array of policy names
      * @throws APIManagementException
      */
@@ -8544,7 +8551,7 @@ public class ApiMgtDAO {
             ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             while (rs.next()) {
-                names.add(rs.getString("NAME"));
+                names.add(rs.getString(SQLConstants.COLUMN_NAME));
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
