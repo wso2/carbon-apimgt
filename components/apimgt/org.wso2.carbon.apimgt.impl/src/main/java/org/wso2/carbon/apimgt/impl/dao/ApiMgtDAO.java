@@ -8199,7 +8199,7 @@ public class ApiMgtDAO {
      *
      * @param pipeline condition pipeline
      * @param policyID id of the policy to add pipeline
-     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @param conn     database connection. This should be provided inorder to rollback transaction
      * @throws APIManagementException
      * @throws SQLException
      */
@@ -8220,15 +8220,15 @@ public class ApiMgtDAO {
 
             // add Throttling parameters which have multiple entries
             while (rs.next()) {
-                int conditionID = rs.getInt(1); // get the inserted CONDITION_ID (auto incremented value)
-                for (Condition condition: conditionList) {
+                int pipelineId = rs.getInt(1); // get the inserted CONDITION_ID (auto incremented value)
+                for (Condition condition : conditionList) {
                     String type = condition.getType();
                     if (PolicyConstants.HEADER_TYPE.equals(type)) {
-                        addHeaderCondition((HeaderCondition) condition, conditionID, conn);
+                        addHeaderCondition((HeaderCondition) condition, pipelineId, conn);
                     } else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(type)) {
-                        addQueryParameterCondition((QueryParameterCondition) condition, conditionID, conn);
+                        addQueryParameterCondition((QueryParameterCondition) condition, pipelineId, conn);
                     } else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(type)) {
-                        addJWTClaimsCondition((JWTClaimsCondition) condition, conditionID, conn);
+                        addJWTClaimsCondition((JWTClaimsCondition) condition, pipelineId, conn);
                     }
                 }
             }
@@ -8242,20 +8242,20 @@ public class ApiMgtDAO {
     /**
      * Add HEADER throttling condition to AM_HEADER_FIELD_CONDITION table
      *
-     * @param headerCondition
-     * @param conditionID
-     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @param headerCondition {@link HeaderCondition} with header fieled and value
+     * @param pipelineId      id of the pipeline which this condition belongs to
+     * @param conn            database connection. This should be provided inorder to rollback transaction
      * @throws APIManagementException
      * @throws SQLException
      */
-    private void addHeaderCondition(HeaderCondition headerCondition, int conditionID, Connection conn)
+    private void addHeaderCondition(HeaderCondition headerCondition, int pipelineId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement psHeaderCondition = null;
 
         try {
             String sqlQuery = SQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
             psHeaderCondition = conn.prepareStatement(sqlQuery);
-            psHeaderCondition.setInt(1, conditionID);
+            psHeaderCondition.setInt(1, pipelineId);
             psHeaderCondition.setString(2, headerCondition.getHeaderName());
             psHeaderCondition.setString(3, headerCondition.getValue());
             psHeaderCondition.executeUpdate();
@@ -8269,20 +8269,20 @@ public class ApiMgtDAO {
     /**
      * Add QUERY throttling condition to AM_QUERY_PARAMETER_CONDITION table
      *
-     * @param queryParameterCondition
-     * @param conditionID
-     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @param queryParameterCondition {@link QueryParameterCondition} with parameter name and value
+     * @param pipelineId              id of the pipeline which this condition belongs to
+     * @param conn                    database connection. This should be provided inorder to rollback transaction
      * @throws APIManagementException
      * @throws SQLException
      */
-    private void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int conditionID,
+    private void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int pipelineId,
             Connection conn) throws APIManagementException, SQLException {
         PreparedStatement psQueryParameterCondition = null;
 
         try {
             String sqlQuery = SQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
             psQueryParameterCondition = conn.prepareStatement(sqlQuery);
-            psQueryParameterCondition.setInt(1, conditionID);
+            psQueryParameterCondition.setInt(1, pipelineId);
             psQueryParameterCondition.setString(2, queryParameterCondition.getParameter());
             psQueryParameterCondition.setString(3, queryParameterCondition.getValue());
             psQueryParameterCondition.executeUpdate();
@@ -8296,20 +8296,20 @@ public class ApiMgtDAO {
     /**
      * Add JWTCLAIMS throttling condition to AM_JWT_CLAIM_CONDITION table
      *
-     * @param jwtClaimsCondition
-     * @param conditionID
-     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @param jwtClaimsCondition {@link JWTClaimsCondition} with claim url and claim attribute
+     * @param pipelineId         id of the pipeline which this condition belongs to
+     * @param conn               database connection. This should be provided inorder to rollback transaction
      * @throws APIManagementException
      * @throws SQLException
      */
-    private void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int conditionID, Connection conn)
+    private void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int pipelineId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement psJWTClaimsCondition = null;
 
         try {
             String sqlQuery = SQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
             psJWTClaimsCondition = conn.prepareStatement(sqlQuery);
-            psJWTClaimsCondition.setInt(1, conditionID);
+            psJWTClaimsCondition.setInt(1, pipelineId);
             psJWTClaimsCondition.setString(2, jwtClaimsCondition.getClaimUrl());
             psJWTClaimsCondition.setString(3, jwtClaimsCondition.getAttribute());
             psJWTClaimsCondition.executeUpdate();
@@ -8547,8 +8547,9 @@ public class ApiMgtDAO {
         }
         return names.toArray(new String[names.size()]);
     }
+
     /**
-     * Populates attribute data of the <code>policy</code> to <code>policyStatement</code>
+     * Populates common attribute data of the <code>policy</code> to <code>policyStatement</code>
      *
      * @param policyStatement prepared statement initialized of policy operation
      * @param policy          <code>Policy</code> object with data
@@ -8622,23 +8623,16 @@ public class ApiMgtDAO {
         conditionStatement.setString(9, pipeline.getQuotaPolicy().getType());
 
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
-            conditionStatement.setLong(10, ((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
-        }
-        //if Bandwidth type, convert to kilobytes
-        else if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
-            String dataunite = ((BandwidthLimit) pipeline.getQuotaPolicy().getLimit()).getDataUnit();
-            if ("KB".equals(dataunite)) {
-                conditionStatement.setLong(10, ((BandwidthLimit) pipeline.getQuotaPolicy().getLimit()).getDataAmount());
-            } else if ("MB".equals(dataunite)) {
-                conditionStatement.setLong(10,
-                        ((BandwidthLimit) pipeline.getQuotaPolicy().getLimit()).getDataAmount() * 1024);
-            } else if ("GB".equals(dataunite)) {
-                conditionStatement.setLong(10,
-                        ((BandwidthLimit) pipeline.getQuotaPolicy().getLimit()).getDataAmount() * 1024 * 1024);
-            }
+            conditionStatement
+                    .setLong(10, ((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
+            conditionStatement.setString(11, null);
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+            BandwidthLimit limit = (BandwidthLimit) pipeline.getQuotaPolicy().getLimit();
+            conditionStatement.setLong(10, limit.getDataAmount());
+            conditionStatement.setString(11, limit.getDataUnit());
         }
 
-        conditionStatement.setLong(11, pipeline.getQuotaPolicy().getLimit().getUnitTime());
-        conditionStatement.setString(12, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+        conditionStatement.setLong(12, pipeline.getQuotaPolicy().getLimit().getUnitTime());
+        conditionStatement.setString(13, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
     }
 }
