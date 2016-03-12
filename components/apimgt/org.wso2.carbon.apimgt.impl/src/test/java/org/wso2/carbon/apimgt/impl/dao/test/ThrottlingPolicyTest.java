@@ -50,8 +50,10 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser());
     }
 
-    public void testDeltePolicy() throws APIManagementException {
-        apiMgtDAO.removeThrottlingPolicy("app", "Bronze", "admin");
+    public void testDeletePolicy() throws APIManagementException {
+        apiMgtDAO.removeThrottlingPolicy("app", "Bronze", -1234);
+    }
+
     }
 
     private Policy getPolicyAPILevelPerUser(){

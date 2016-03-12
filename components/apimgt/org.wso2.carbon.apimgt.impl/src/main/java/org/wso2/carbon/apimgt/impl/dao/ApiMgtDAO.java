@@ -8324,23 +8324,29 @@ public class ApiMgtDAO {
      * Removes a throttling policy from the database
      *
      * @param policyLevel level of the policy to be deleted
-     * @param policyName name of the policy
-     * @param username used to get the tenant id
+     * @param policyName  name of the policy
+     * @param tenantId    used to get the tenant id
      * @throws APIManagementException
      */
-    public void removeThrottlingPolicy(String policyLevel, String policyName, String username)
+    public void removeThrottlingPolicy(String policyLevel, String policyName, int tenantId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement deleteStatement = null;
+        String query = null;
+
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            query = SQLConstants.DELETE_APPLICATION_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            query = SQLConstants.DELETE_API_POLICY_SQL;
+        }
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            int tenantId = APIUtil.getTenantId(username);
-            String query = SQLConstants.DELETE_POLICY_SQL;
             deleteStatement = connection.prepareStatement(query);
             deleteStatement.setInt(1, tenantId);
-            deleteStatement.setString(2, policyLevel);
-            deleteStatement.setString(3, policyName);
+            deleteStatement.setString(2, policyName);
             deleteStatement.execute();
         } catch (SQLException e) {
             handleException("Failed to remove policy " + policyName, e);
