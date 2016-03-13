@@ -173,48 +173,5 @@
         <div id="chart1"></div>
     </div>
 </div>
-
-<!-- Row -->
-<%if(createPermitted){%>
-        <script>
-            var provider = '<%=api.provider%>';
-        </script>
-<div class="row-fluid">
-    <form id="copyApiForm">
-    <div class="well form-inline" id="copy-api" style="display: none;">
-        <input type="hidden" id="overviewAPIVersion" value="<%=api.version%>"/>
-        <input type="hidden" id="overviewAPIName" value="<%=api.name%>"/>
-
-            <div class="form-group">
-                <label><%=i18n.localize("toVersion")%></label>
-                <input type="text" class="required form-control" id="new-version"/>
-                <p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
-                <span class="help-inline "><%=i18n.localize("versionHelpMsg")%></span>
-                <a class="glyphicon glyphicon-question-sign help_popup" help_data="versionCopy_help"></a>
-            </div>
-        <br />
-        <div class="default-version form-group">
-            <div class="checkbox">
-                <label class="control-label">Default Version &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" class="form-control default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/></label>
-            </div>
-                <input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value=""/>
-                 <%if(api.hasDefaultVersion){%>
-                    <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
-                <%}else{%>
-                    <p class="help-block">No default version defined for the current API</p>
-                <%}%>
-        </div>
-       
-        
-        <div class="copy-buttons">
-            <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
-            <button type="button" class="btn btn-default cancel-button" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("cancel")%></button>
-        </div>
-
-
-    </div>
-    </form>
-</div>
-<%}%>
 <% }); %>
 

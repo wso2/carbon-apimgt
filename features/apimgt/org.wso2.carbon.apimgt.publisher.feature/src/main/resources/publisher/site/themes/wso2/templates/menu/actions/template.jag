@@ -19,18 +19,21 @@
                 var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
                 var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;
                 
-                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag");
-                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;;
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;;
                 
                 var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag") + urlPrefix;
                 var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag") + urlPrefix;
                 
-                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag");
-                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;
                 
-                var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag");
-                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag");
-                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag");
+                var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
+                var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
+                
+                var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag") + urlPrefix;
+                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag") + urlPrefix;
                 
                 isCreatePermitted = jagg.getCreatePermitted().permitted;
                 isPublishPermitted = jagg.getPublishPermitted().permitted;
@@ -90,6 +93,15 @@
 	                                <%=i18n.localize("editAPI")%>
 	                            </a>
 	                        </li>
+	                        <li>
+	                            <a href="<%=jagg.url("/version")%>?<%=apiUrlId%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                <%=i18n.localize("CreateNewVersion")%>
+	                            </a>
+	                        </li>
 	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        
 	                        <li>
 	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>">
@@ -100,7 +112,19 @@
 	                                <%=i18n.localize("manageAPI")%>
 	                            </a>
 	                        </li>
-	                        <%} %>
+	                        <%} %>	                        
+                        <%} %>
+                        <% if(reqUrl.indexOf(versionUrl)>=0 ||reqUrl.indexOf(versionMappedUrl)>=0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
                         <%} %>
                     </ul>
            </div>

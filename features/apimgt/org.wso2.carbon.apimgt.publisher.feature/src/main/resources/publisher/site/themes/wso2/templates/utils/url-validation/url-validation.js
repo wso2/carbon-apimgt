@@ -15,7 +15,9 @@ $(document).ready(function(){
                 type = "http";
             }
             else {
-                type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            	if ($("#endpoint_config").val() && $("#endpoint_config").val() != "") {
+            		type = $.parseJSON($("#endpoint_config").val())['endpoint_type'];
+            	}                
             }
         }
         if (!providerName && !apiName && !apiVersion) {
