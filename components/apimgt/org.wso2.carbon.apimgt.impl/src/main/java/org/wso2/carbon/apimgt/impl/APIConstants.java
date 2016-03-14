@@ -431,7 +431,7 @@ public final class APIConstants {
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
     
-    public static final String API_GLOBAL_CEP_ENABLE = "EnableGlogbalCEPThrottling";
+    public static final String API_GLOBAL_CEP_ENABLE = "EnableGlobalCEPThrottling";
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
     public static final String OPEN_ID_SCOPE_NAME = "openid";

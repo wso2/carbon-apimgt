@@ -8534,30 +8534,30 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
+       
+        //TODO call policy name column from the tables directly 
+        
         List<String> names = new ArrayList<String>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        int tenantId = APIUtil.getTenantId(username);
-        String sqlQuery = SQLConstants.GET_POLICY_NAMES;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_POLICY_NAMES;
-        }
+       
+        Policy[] policies = null;      
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, policyLevel);
-            ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                names.add(rs.getString(SQLConstants.COLUMN_NAME));
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        int tenantID = APIUtil.getTenantId(username);
+
+        if(PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)){
+            policies = getAPIPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
+            policies = getAppPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
+            policies = getSubscriptionPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
+   
         }
+        if(policies != null){
+            for (Policy policy : policies) {
+                names.add(policy.getPolicyName());
+            } 
+        }
+       
         return names.toArray(new String[names.size()]);
     }
 
