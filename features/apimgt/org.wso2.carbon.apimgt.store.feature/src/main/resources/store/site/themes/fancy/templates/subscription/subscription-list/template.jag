@@ -50,33 +50,6 @@
         }
         %>><%= encode.forHtml(app.name)%></option>
             <% } %>
-        </select>
-        <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/subscription-list.js"))%>"></script>
-         <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/downloadLoading.css"))%>" />
-         <select id ="ddl" name="ddl" onmousedown="this.value='';" onchange="generateAndroidSdk('<%=selectedApp.name%>',this.value)">
-          <option value='java'>Java SDK</option>
-          <option value='android'>Android SDK</option>
-          </select>
-        <div class ="cssload-contain" id="cssload-contain" style="display:none;">
-  <div class="cssload-wrap" id="cssload-wrap1">
-    <div class="cssload-ball" id="cssload-ball1"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap2">
-    <div class="cssload-ball" id="cssload-ball2"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap3">
-    <div class="cssload-ball" id="cssload-ball3"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap4">
-    <div class="cssload-ball" id="cssload-ball4"></div>
-  </div>
-</div>
-
-        <a class="icon-question-sign help_popup_cli_gen"></a>
-         <div id="cligen_help"></div>
         <%
     if(lenI != 0 ){
         %>
@@ -86,7 +59,7 @@
                 <div class="row-fluid">
                     <div class="span12">
                         <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900,
-            length:totalLength,page:outputs.page,itemsPerPage:outputs.itemsPerPage}); %>
+            length:totalLength,page:outputs.page,itemsPerPage:outputs.itemsPerPage,appName:selectedApp.name}); %>
                     </div>
                 </div>
             </div>
@@ -105,5 +78,4 @@
                         </div>
                     </div>
 
-<% }); %>
 <% }); %>

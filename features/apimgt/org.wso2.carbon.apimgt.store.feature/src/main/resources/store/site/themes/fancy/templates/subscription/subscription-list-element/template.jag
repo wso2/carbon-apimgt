@@ -1,25 +1,25 @@
 <% jagg.template("subscription/subscription-list-element", function(inputs, outputs, jagg) { %>
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
-   var str_i = String(i).replace('.','_');
-   var gatewayurlendpoint = outputs.gatewayurl;
+	var str_i = String(i).replace('.','_');
+	var gatewayurlendpoint = outputs.gatewayurl;
 
-   var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
+	var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
 
-   if (customURL != null) {
-       gatewayurlendpoint = customURL;
-   }
+	if (customURL != null) {
+		gatewayurlendpoint = customURL;
+	}
 
 	var log = new Log();
 	var userName=jagg.getUser().username;
 
-   if(app!=null){
-	   var apis = app.subscriptions;
-	   var length = outputs.length;
+	if(app!=null){
+		var apis = app.subscriptions;
+		var length = outputs.length;
 
-	   var page = outputs.page;
-	   var itemsPerPage = outputs.itemsPerPage;
-	   var numberOfPages = parseInt(length / itemsPerPage);
-	   if (length % itemsPerPage != 0) {
+		var page = outputs.page;
+		var itemsPerPage = outputs.itemsPerPage;
+		var numberOfPages = parseInt(length / itemsPerPage);
+		if (length % itemsPerPage != 0) {
 	   		numberOfPages++;
 	   }
 	   var prodKeyScopeArray, sandKeyScopeArray;
@@ -41,29 +41,29 @@
 	   			<div class="span6">
 
                         <%
-                         var log = new Log();
-                         var prodVadidataionTime = app.prodValidityTime;
-                         var sandVadidataionTime = app.sandValidityTime;
-                         var scopes = app.scopes;
-                         lenS = scopes.length;
+		var log = new Log();
+		var prodVadidataionTime = app.prodValidityTime;
+		var sandVadidataionTime = app.sandValidityTime;
+		var scopes = app.scopes;
+		lenS = scopes.length;
 
 
-                         <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
-                         if (prodVadidataionTime != null) {
-                            var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
-                            var prodValidityTime = prod_tmp[0];
+		<!-- This is required to remove the decimal points getting added by jaggery to validation time-->
+		if (prodVadidataionTime != null) {
+			var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
+			var prodValidityTime = prod_tmp[0];
 
-                         }
+		}
 
-                         if (sandVadidataionTime != null) {
-                            var sand_tmp = String(Math.ceil(sandVadidataionTime)).split(".");
-                            var sandValidityTime = sand_tmp[0];
-                         }
+		if (sandVadidataionTime != null) {
+			var sand_tmp = String(Math.ceil(sandVadidataionTime)).split(".");
+			var sandValidityTime = sand_tmp[0];
+		}
 
-                        %>
+		%>
 
-                        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null )
-	   { %>
+        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null )
+		{ %>
                         <!-- START Show key info -->
 
                         <div class="row-fluid keys">
@@ -563,31 +563,41 @@
         </div>
 
         <h3 data-section="api-listing" class="js_toggle">Subscribed APIs <i class="icon-chevron-down icon-keys"></i></h3>
+        
         <div class="container-fluid subsApiListing api-section">
             <div class="row-fluid">
 
             <%
-            var tenant=request_tenant;
-            var urlPrefix = jagg.getTenantURLPrefix();
-            var apis = app.subscriptions;
-            lenJ = apis.length;
-            for(j = 0; j < lenJ; j++) {
-                api = apis[j];
-                thumbURL = api.thumburl;
-				if(!thumbURL) {
-					thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png")) ;
-				}else{
-					thumbURL = jagg.getRegistryPath(thumbURL);
-				}
-                prodKey = api.prodKey;
-                clazz = (j%2) == 0 ? "even" : "odd";
+		var tenant=request_tenant;
+		var urlPrefix = jagg.getTenantURLPrefix();
+		var apis = app.subscriptions;
+		lenJ = apis.length;
+		for(j = 0; j < lenJ; j++) {
+			api = apis[j];
+			thumbURL = api.thumburl;
+			if(!thumbURL) {
+				thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png")) ;
+			}else{
+				thumbURL = jagg.getRegistryPath(thumbURL);
+			}
+			prodKey = api.prodKey;
+			clazz = (j%2) == 0 ? "even" : "odd";
                 path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ "&"+urlPrefix;
                 var apiName = api.name;
                 if(api.name.length > 12){
                     apiName = api.name.substring(0,10)+ "..";
                 }
             %>
-                <div class="span4 keyListPadding">
+          <div class="container">
+  <h2>Dynamic Tabs</h2>
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">Subscribed APIs</a></li>
+    <li><a data-toggle="tab" href="#menu1">Generate SDK</a></li>
+  </ul>
+
+
+            <div class="tab-content">
+                <div id="home" class="span4 keyListPadding tab-pane fade in active ">
                     <div id="<%=api.name%>" class="thumbnail <% if(api.status == "DEPRECATED" || api.status == "RETIRED" || api.status == "BLOCKED") { %>deprecated<% } %>">
                         <div class="deprecatedLabel">
                             <% if(api.status == "DEPRECATED") { %>
@@ -616,7 +626,7 @@
                                         <% if(api.businessOwner != null){%>
                                             <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
                                         <%}
-                                        <% else {%>
+		<% else {%>
                                             <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
                                         <%}%>
                                     </div>
@@ -627,9 +637,42 @@
                     </div>
                 </div>
             <% } %>
+            <div id="menu1" class="tab-pane fade">
+              </select>
+        <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/generateSdk.js"))%>"></script>
+         <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/downloadLoading.css"))%>" />
+         <button onclick="generateAndroidSdk('<%=app.name%>','android')" type="button">Android</button>
+          <button onclick="generateAndroidSdk('<%=app.name%>','java')" type="button">Java</button>
+          <a class="icon-question-sign help_popup_cli_gen"></a>
+         <div id="cligen_help"></div>
+          <div class ="cssload-contain" id="cssload-contain" style="display:none;">
+  <div class="cssload-wrap" id="cssload-wrap1">
+    <div class="cssload-ball" id="cssload-ball1"></div>
+  </div>
+
+  <div class="cssload-wrap" id="cssload-wrap2">
+    <div class="cssload-ball" id="cssload-ball2"></div>
+  </div>
+
+  <div class="cssload-wrap" id="cssload-wrap3">
+    <div class="cssload-ball" id="cssload-ball3"></div>
+  </div>
+
+  <div class="cssload-wrap" id="cssload-wrap4">
+    <div class="cssload-ball" id="cssload-ball4"></div>
+  </div>
+</div>
+    </div>
             </div><!-- End row -->
-            <%
-	   if(numberOfPages > 1) { %>
+<%
+	var log = new Log();
+	log.info(app.name);
+	%>
+
+                </div>
+                </div>
+                <%
+	if(numberOfPages > 1) { %>
             <div class="pagination">
                 <ul>
                     <li <% if(page == 1) { %> class="disabled" <% } %> >
@@ -641,34 +684,34 @@
 					</li>
                     <!-- Displaying differently for lengthy pagination -->
                     <%
-		   var pConst = 7;
-		   if(numberOfPages <= (pConst+6)){
-			   for(var i=1;i<=numberOfPages;i++) { %>
+		var pConst = 7;
+		if(numberOfPages <= (pConst+6)){
+			for(var i=1;i<=numberOfPages;i++) { %>
                     					<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     		  <%}
-		   }
+		}
 
-		   else{
-			   if (page <= (pConst+6)){
-				   if(page<pConst){
-					   for(var i=1;i<=((pConst+6) -4);i++) { %>
+		else{
+			if (page <= (pConst+6)){
+				if(page<pConst){
+					for(var i=1;i<=((pConst+6) -4);i++) { %>
                     						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     				 <% } %>
                     					<li class="disabled"><a href="#">...</a></li>
                     					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
                     					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     			<% }
-				   else if((numberOfPages - page) < pConst){ %>
+				else if((numberOfPages - page) < pConst){ %>
                     					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
                     					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                     					<li class="disabled"><a href="#">...</a></li>
                                         <%
-					   for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
+					for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
                    							 <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     		         <% }
 
-				   }
-				   else { %>
+				}
+				else { %>
 											<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
                     						<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                     						<li class="disabled"><a href="#">...</a></li>
@@ -680,16 +723,16 @@
                     					   <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
                     					   <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     		   <% }
-			   }
-			   else{ //  cp 14, 15 ...
-				   if (numberOfPages - page < pConst){   %>
+			}
+			else{ //  cp 14, 15 ...
+				if (numberOfPages - page < pConst){   %>
                    					 <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
                     				 <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                    				     <li class="disabled"><a href="#">...</a></li>
                     		        <%for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
                                      	<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                      			   <% }
-				   }else{  %>
+				}else{  %>
                     					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
                     					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                     					<li class="disabled"><a href="#">...</a></li>
@@ -701,8 +744,8 @@
                     					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
                     					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                              <% }
-			   }
-		   }%>
+			}
+		}%>
 
                       <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%>&<%=urlPrefix%>"<% } %>>&gt;&gt;</a></li>
                 </ul>
@@ -721,59 +764,59 @@
 
                                 <% for (var i = 0; i < lenS; i++) {
 
-                                         %><li><input type="checkbox" name="<%= encode.forHtml(scopes[i].scopeName)%>" value="<%=  encode.forHtml(scopes[i].scopeKey)%>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxProd" <%
-                                         	if(app.prodKeyScopeValue != null){
-                                         		for(var j = 0; j < prodKeyScopeArray.length; j++){
-	                                         		if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
-	                                         			%>checked<%
-	                                         			break;
-	                                         		}
-                                         		}
-                                         	}
-                                         	
-                                         %>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
-                                        }
-                                        %></ul><%
-                                 %>
-                    </div>
+		%><li><input type="checkbox" name="<%= encode.forHtml(scopes[i].scopeName)%>" value="<%=  encode.forHtml(scopes[i].scopeKey)%>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxProd" <%
+		if(app.prodKeyScopeValue != null){
+			for(var j = 0; j < prodKeyScopeArray.length; j++){
+				if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+					%>checked<%
+					break;
+				}
+			}
+		}
 
-                    <div class="modal-footer">
-                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                    </div>
-            </div>
-            
-            <div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3><%=i18n.localize("selectScopes")%></h3>
+		%>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
+	}
+		%></ul><%
+		%>
+</div>
+
+<div class="modal-footer">
+<input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
+<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+</div>
+</div>
+
+<div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+<h3><%=i18n.localize("selectScopes")%></h3>
                     </div>
                     <div class="modal-body">
                         <ul>
 
                                 <% for (var i = 0; i < lenS; i++) {
-                                         %><li><input type="checkbox" name="<%=  encode.forHtml(scopes[i].scopeName) %>" value="<%=  encode.forHtml(scopes[i].scopeKey) %>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxSand" <%
-                                         if(app.sandKeyScopeValue != null){
-                                         	for(var j = 0; j < sandKeyScopeArray.length; j++){
-                                         		if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
-                                         			%>checked<%
-                                         			break;
-                                         		}
-                                         	}
-                                         }
-                                         	
-                                         %>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
-                                        }
-                                        %></ul><%
-                                 %>
-                    </div>
+			%><li><input type="checkbox" name="<%=  encode.forHtml(scopes[i].scopeName) %>" value="<%=  encode.forHtml(scopes[i].scopeKey) %>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxSand" <%
+			if(app.sandKeyScopeValue != null){
+				for(var j = 0; j < sandKeyScopeArray.length; j++){
+					if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
+						%>checked<%
+						break;
+					}
+				}
+			}
 
-                    <div class="modal-footer">
-                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPopSand" value="Select">
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                    </div>
-            </div>
-        <% } %>
+			%>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
+		}
+		%></ul><%
+		%>
+</div>
+
+<div class="modal-footer">
+<input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPopSand" value="Select">
+<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+</div>
+</div>
+<% } %>
 		<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/ZeroClipboard.min.js"))%>"></script>
 		<script>
 
