@@ -30,7 +30,7 @@
         var defaultTimeUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
 
         var rateLimitCount = subscriptionPolicy.getRateLimitCount() == null ? "" : subscriptionPolicy.getRateLimitCount();
-        var rateLimitTimeUnit = subscriptionPolicy.getRatelimitTimeUnit();
+        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
     }
     %>
 

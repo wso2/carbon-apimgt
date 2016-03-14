@@ -28,7 +28,7 @@ var addSubscriptionPolicy = function (policyName, description, defaultQuotaPolic
 
 var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit) {
-    var Policy = Packages.org.wso2.carbon.apimgt.api.model.policy.Policy;
+    var SubscriptionPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
     var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
     var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
     var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -36,14 +36,13 @@ var constructPolicyObject = function (userName, policyName, description, default
     var ArrayList = Packages.java.util.ArrayList;
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var policy = new Policy(policyName);
+    var subscriptionPolicy = new SubscriptionPolicy(policyName);
 
-    policy.setPolicyName(policyName);
-    policy.setDescription(description);
-    policy.setPolicyLevel("sub");
+    subscriptionPolicy.setPolicyName(policyName);
+    subscriptionPolicy.setDescription(description);
 
     var tenantId = APIUtil.getTenantId(userName);
-    policy.setTenantId(tenantId);
+    subscriptionPolicy.setTenantId(tenantId);
 
     var default_quotaPolicy = new QuotaPolicy();
 
@@ -65,12 +64,10 @@ var constructPolicyObject = function (userName, policyName, description, default
         default_quotaPolicy.setLimit(bandwidthLimit);
     }
 
-    policy.setDefaultQuotaPolicy(default_quotaPolicy);
-    policy.setRateLimitCount(rateLimitCount);
-    policy.setRatelimitTimeUnit(rateLimitTimeUnit);
+    subscriptionPolicy.setDefaultQuotaPolicy(default_quotaPolicy);
+    subscriptionPolicy.setRateLimitCount(rateLimitCount);
+    subscriptionPolicy.setRateLimitTimeUnit(rateLimitTimeUnit);
 
-    var pipelines = new ArrayList();
-    policy.setPipelines(pipelines);
-    return policy;
+    return subscriptionPolicy;
 }
 %>

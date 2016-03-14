@@ -559,4 +559,6 @@ public interface APIProvider extends APIManager {
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
     Policy[] getPolicies(int tenantId) throws APIManagementException;
+
+    Policy[] getPolicies(String username, String level) throws APIManagementException;
 }

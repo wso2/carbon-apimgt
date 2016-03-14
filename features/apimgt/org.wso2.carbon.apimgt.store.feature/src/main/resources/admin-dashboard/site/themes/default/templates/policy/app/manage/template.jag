@@ -44,7 +44,7 @@
                             <i class="icon-edit"></i>
                                 Edit
                         </a>
-                        <a id="deleteButton<%=count%>" onclick="deleteAppTier('<%=policyName%>')">
+                        <a id="deleteButton<%=count%>" onclick="deleteAppPolicy('<%=policyName%>')">
                             <i class="icon-trash"></i>
                             Delete
                         </a>

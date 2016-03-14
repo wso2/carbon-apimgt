@@ -36,7 +36,7 @@
 
         var unitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime()+" "+subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
         var rateLimitCount = subscriptionPolicy.getRateLimitCount();
-        var rateLimitTimeUnit = subscriptionPolicy.getRatelimitTimeUnit();
+        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
         %>
                 <tr>
                     <td><%=policyName%></td>
@@ -50,7 +50,7 @@
                             <i class="icon-edit"></i>
                                 Edit
                         </a>
-                        <a id="deleteButton<%=count%>" onclick="deleteSubscriptionTier('<%=policyName%>')">
+                        <a id="deleteButton<%=count%>" onclick="deleteSubscriptionPolicy('<%=policyName%>')">
                             <i class="icon-trash"></i>
                             Delete
                         </a>

@@ -28,7 +28,7 @@ var addAppPolicy = function (policyName, description, defaultQuotaPolicy, defaul
 
 var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit) {
-    var Policy = Packages.org.wso2.carbon.apimgt.api.model.policy.Policy;
+    var ApplicationPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
     var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
     var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
     var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -36,14 +36,13 @@ var constructPolicyObject = function (userName, policyName, description, default
     var ArrayList = Packages.java.util.ArrayList;
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var policy = new Policy(policyName);
+    var appPolicy = new ApplicationPolicy(policyName);
 
-    policy.setPolicyName(policyName);
-    policy.setDescription(description);
-    policy.setPolicyLevel("app");
+    appPolicy.setPolicyName(policyName);
+    appPolicy.setDescription(description);
 
     var tenantId = APIUtil.getTenantId(userName);
-    policy.setTenantId(tenantId);
+    appPolicy.setTenantId(tenantId);
 
     var default_quotaPolicy = new QuotaPolicy();
 
@@ -65,10 +64,8 @@ var constructPolicyObject = function (userName, policyName, description, default
         default_quotaPolicy.setLimit(bandwidthLimit);
     }
 
-    policy.setDefaultQuotaPolicy(default_quotaPolicy);
+    appPolicy.setDefaultQuotaPolicy(default_quotaPolicy);
 
-    var pipelines = new ArrayList();
-    policy.setPipelines(pipelines);
-    return policy;
+    return appPolicy;
 }
 %>

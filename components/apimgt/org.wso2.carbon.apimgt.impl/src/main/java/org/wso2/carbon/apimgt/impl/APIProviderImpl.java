@@ -3616,17 +3616,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy apiPolicy = new APIPolicy(policy.getPolicyName());
                 apiPolicy = ((APIPolicy) policy);
                 policies = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy, apiName, apiVersion, apiContext);
-
+                apiMgtDAO.addAPIPolicy(apiPolicy);
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = new ApplicationPolicy(policy.getPolicyName());
                 appPolicy = ((ApplicationPolicy) policy);
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 policies.add(policyString);
+                apiMgtDAO.addApplicationPolicy(appPolicy);
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(policy.getPolicyName());
                 subPolicy = ((SubscriptionPolicy) policy);
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 policies.add(policyString);
+                apiMgtDAO.addSubscriptionPolicy(subPolicy);
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = new GlobalPolicy(policy.getPolicyName());
                 globalPolicy = ((GlobalPolicy) policy);
@@ -3690,6 +3692,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public Policy[] getPolicies(int tenantId) throws APIManagementException {
         Policy[] policies = apiMgtDAO.getAPIPolicies(tenantId);
+        return policies;
+    }
+
+    public Policy[] getPolicies(String username, String level) throws APIManagementException {
+        tenantId = APIUtil.getTenantId(username);
+        Policy[] policies =  null;
+        if (level.equals(PolicyConstants.POLICY_LEVEL_API)) {
+            policies = apiMgtDAO.getAPIPolicies(tenantId);
+        }
+        else if (level.equals(PolicyConstants.POLICY_LEVEL_APP)){
+            policies = apiMgtDAO.getAppPolicies(tenantId);
+        }
+        else if (level.equals(PolicyConstants.POLICY_LEVEL_SUB)){
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+        }
         return policies;
     }
 }
