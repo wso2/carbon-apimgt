@@ -8492,7 +8492,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 QuotaPolicy quotaPolicy = new QuotaPolicy();
-                SubscriptionPolicy subPolicy = new SubscriptionPolicy(SQLConstants.COLUMN_NAME);
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(rs.getString(SQLConstants.COLUMN_NAME));
                 subPolicy.setDescription(rs.getString(SQLConstants.COLUMN_DESCRIPTION));
                 subPolicy.setTenantId(rs.getShort(SQLConstants.COLUMN_TENANT_ID));
                 quotaPolicy.setType(rs.getString(SQLConstants.COLUMN_QUOTA_POLICY_TYPE));
