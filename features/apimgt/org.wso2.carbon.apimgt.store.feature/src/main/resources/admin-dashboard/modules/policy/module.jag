@@ -23,6 +23,9 @@ jagg.module("policy", {
 
     getAllSubscriptionPolicies:function () {
         return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-manage.jag").getAllSubscriptionPolicies.apply(this, arguments);
+    },
+    addGlobalPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/global-policy-edit.jag").addGlobalPolicy.apply(this, arguments);
     }
 });
 %>

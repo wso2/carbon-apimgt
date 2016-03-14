@@ -1,0 +1,45 @@
+<% jagg.template("policy/global", function(inputs, outputs, jagg) { %>
+<%
+    var pageTitle = "Add Global Level Policy";
+%>
+
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+    <div class="title-section">
+        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+    </div>
+
+    <div>
+        <div class="content-data">
+            <div class="row-fluid">
+                <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                    action="/admin-dashboard/site/blocks/policy/global/ajax/global-policy-edit.jag">
+
+                        <div>
+                            <div>
+                                <textarea id="globalPolicyString" class="text"  name="globalPolicyString" style="width:99%;height:300px">
+                                </textarea>
+                            </div>
+                        </div>
+
+
+                    <div class="form-actions">
+                        <input id="add-tier-btn" onclick="addGlobalPolicy()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
+                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#cancel-tier-btn').on('click',function(){
+             location.reload(true);
+        });
+    });
+</script>
+
+<%});%>

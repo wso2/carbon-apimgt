@@ -1,0 +1,23 @@
+<%
+var log = new Log();
+
+var addGlobalPolicy = function (globalPolicyString) {
+    try {
+        log.info(globalPolicyString);
+        return {
+            error: false
+        };
+    }catch (ex) {
+        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var constructPolicyObject = function () {
+
+}
+%>

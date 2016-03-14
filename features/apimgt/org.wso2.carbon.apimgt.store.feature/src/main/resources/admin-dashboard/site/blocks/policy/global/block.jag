@@ -1,0 +1,17 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("policy/global", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+
+        getOutputs:function (inputs) {
+
+        }
+});
+%>
