@@ -2060,6 +2060,38 @@ public class SQLConstants {
             "   TYPE = ?"+
             "   AND TENANT_ID =?";
 
+    public static final String GET_API_POLICY_NAMES =
+            " SELECT "+
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_API " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_APP_POLICY_NAMES =
+            " SELECT "+
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_APPLICATION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_SUB_POLICY_NAMES =
+            " SELECT "+
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICY_NAMES =
+            " SELECT "+
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
     public static final String GET_API_POLICIES =
             " SELECT "+
             "   * " +
