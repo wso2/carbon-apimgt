@@ -555,7 +555,15 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
-
+    
+    
+    /**
+     * Get a policy names for given policy level and user name
+     * @param username
+     * @param level
+     * @return
+     * @throws APIManagementException
+     */
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
     Policy[] getPolicies(int tenantId) throws APIManagementException;

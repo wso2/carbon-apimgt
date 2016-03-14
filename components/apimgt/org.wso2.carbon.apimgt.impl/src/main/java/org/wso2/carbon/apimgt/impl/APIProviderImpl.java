@@ -1548,23 +1548,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                            Collections.<String,String>emptyMap());
-
+            
             Map<String, String> properties = new HashMap<String, String>();
-            properties.put("id", "A");
-            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+            
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            
+            if(isGlobalThrottlingEnabled){
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.CEPBasedThrottleHandler",
+                        Collections.<String, String> emptyMap());
+            } else {
+                properties.put("id", "A");
+                properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+                properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+                properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
 
-            if(api.getProductionMaxTps() != null){
-                properties.put("productionMaxCount",api.getProductionMaxTps());
+                if(api.getProductionMaxTps() != null){
+                    properties.put("productionMaxCount",api.getProductionMaxTps());
+                }
+
+                if(api.getSandboxMaxTps() != null){
+                    properties.put("sandboxMaxCount",api.getSandboxMaxTps());
+                }
+
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
             }
-
-            if(api.getSandboxMaxTps() != null){
-                properties.put("sandboxMaxCount",api.getSandboxMaxTps());
-            }
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
-
+    
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler", Collections.<String,String>emptyMap());
 
             properties = new HashMap<String, String>();
@@ -3690,8 +3700,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policyNames;
     }
 
-    public Policy[] getPolicies(int tenantId) throws APIManagementException {
-        Policy[] policies = apiMgtDAO.getAPIPolicies(tenantId);
+    public Policy[] getPolicies(String username, String level) throws APIManagementException {
+        Policy[] policies = null;      
+
+        int tenantID = APIUtil.getTenantId(username);
+
+        if(PolicyConstants.POLICY_LEVEL_API.equals(level)){
+            policies = apiMgtDAO.getAPIPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(level)){
+            policies = apiMgtDAO.getAppPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(level)){
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)){
+   
+        }
+        
         return policies;
     }
 
