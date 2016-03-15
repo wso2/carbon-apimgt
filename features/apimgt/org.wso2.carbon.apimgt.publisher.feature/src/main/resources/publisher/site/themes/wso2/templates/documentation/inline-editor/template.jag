@@ -23,26 +23,6 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
         <div id="layout-base" class="container-fluid content-section" style="padding:20px">
             <div class="row">
                 <div class="col-md-12">
-                    <ul class="breadcrumb">
-                        <li>
-                            <%
-                                var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("apiName")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
-                            %>
-                            <a href="<%=apiUrl%>" onclick="navigateBack('overview')"><%= encode.forHtml(request.getParameter("apiName"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
-                        </li>
-                        <li>
-                            <span class="divider">/</span>
-                        </li>
-                        <li>
-                            <a href="<%=apiUrl%>" onclick="navigateBack('docs')">Docs</a>
-                        </li>
-                        <li>
-                            <span class="divider">/</span>
-                        </li>
-                        <li>
-                            <%= encode.forHtml(request.getParameter("docName"))%>
-                        </li>
-                    </ul>
                 </div>
                 <div class="col-md-12">
                     <div id="apiDeatils">
