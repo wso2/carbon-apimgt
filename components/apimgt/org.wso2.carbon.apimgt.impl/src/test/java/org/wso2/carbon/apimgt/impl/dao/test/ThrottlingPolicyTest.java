@@ -24,11 +24,8 @@ import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +53,7 @@ public class ThrottlingPolicyTest extends TestCase {
     }
 
     public void testGetApplicationPolicies() throws APIManagementException {
-        apiMgtDAO.getAppPolicies(-1234);
+        apiMgtDAO.getApplicationPolicies(-1234);
     }
 
     public void testGetSubscriptionPolicies() throws APIManagementException {

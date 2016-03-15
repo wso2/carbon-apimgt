@@ -8423,7 +8423,7 @@ public class ApiMgtDAO {
      * @param tenantID polices are selected only belong to specific tenantID
      * @return AppilicationPolicy array list
      */
-    public ApplicationPolicy[] getAppPolicies(int tenantID) throws APIManagementException {
+    public ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException {
         List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
         Connection conn = null;
         PreparedStatement ps = null;
