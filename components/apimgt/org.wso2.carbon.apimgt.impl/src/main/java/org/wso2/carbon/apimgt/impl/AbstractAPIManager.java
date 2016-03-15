@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -1218,5 +1220,23 @@ public abstract class AbstractAPIManager implements APIManager {
             contextTemplate = "/t/" + tenantDomain + contextTemplate;
         }
         return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
+    }
+    
+    public Policy[] getPolicies(String username, String level) throws APIManagementException {
+        Policy[] policies = null;      
+
+        int tenantID = APIUtil.getTenantId(username);
+
+        if(PolicyConstants.POLICY_LEVEL_API.equals(level)){
+            policies = apiMgtDAO.getAPIPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(level)){
+            policies = apiMgtDAO.getAppPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(level)){
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantID);
+        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)){
+   
+        }
+        
+        return policies;
     }
 }
