@@ -105,6 +105,7 @@ var drawAPIUsage = function (from,to) {
     var toDate = to;
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
                 function (json) {
+    				$('#spinner').hide();
                     if (!json.error) {
                         var length = json.usage.length, data = [];
                         var newLength=0;
@@ -203,7 +204,7 @@ var drawAPIUsage = function (from,to) {
                         else{
                                 $('#apiUsageByUserTable').hide();
                                 $('#noData').html('');
-                                $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
 
                         }
                     }
@@ -235,7 +236,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
 
                 } else {
                     $('#apiUsage_note').removeClass('hide');
@@ -427,7 +428,7 @@ var drawChart = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
 
-                    var table = $('#apiSelectTable').DataTable({
+                    var table = $('#apiSelectTable').datatables_extended({
                         "order": [[ 2, "desc" ]],
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()

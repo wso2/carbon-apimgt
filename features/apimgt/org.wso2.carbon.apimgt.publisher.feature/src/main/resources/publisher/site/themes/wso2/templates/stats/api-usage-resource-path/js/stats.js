@@ -132,7 +132,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                 if (length == 0) {
                     $('#resourcePathUsageTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
 
                 } else {
 
@@ -423,7 +423,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#chartContainer').append($('<div id="lineWithFocusChart"><svg style="height:450px;"></svg></div>'));
                     $('#tableContainer').show();
-                    $('#resourcePathUsageTable').DataTable({
+                    $('#resourcePathUsageTable').datatables_extended({
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#resourcePathUsageTable_length option:selected" ).val()
                             || $("#resourcePathUsageTable_length option:selected" ).val()==-1)

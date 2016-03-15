@@ -124,7 +124,7 @@ var pupulateAPIList = function() {
                     .trigger('change');
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                //$('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -153,7 +153,7 @@ var pupulateAppList = function(apiName) {
 
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                $('#chartContainer').append($('<div class="center-wrapper"/><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -282,11 +282,11 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                //$('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {

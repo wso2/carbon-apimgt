@@ -458,8 +458,8 @@
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
         <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter">
 		<span class="fw-stack">
-                                <i class="fw fw-ring fw-stack-2x"></i>
                                 <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>
 	</a></td>
         </tr> 
@@ -530,8 +530,8 @@
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}">
 		<span class="fw-stack">
-                                <i class="fw fw-ring fw-stack-2x"></i>
                                 <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>
 	    </a></td>
         </tr>

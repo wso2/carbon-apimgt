@@ -2,6 +2,12 @@
 jagg.initializer("usage", {
 
     preInitialize:function () {
+	    jagg.addHeaderCSS("stats", " dataTable","lib/dataTables/css/dataTables.bootstrap.css");
+	    jagg.addHeaderCSS("stats", "datepicker","lib/datepicker/css/daterangepicker-bs3.css");
+	
+	    jagg.addFooterJS("stats", "jquery-dataTable","lib/dataTables/js/jquery.dataTables.min.js");
+	    jagg.addFooterJS("stats", "moment", "lib/datepicker/js/moment.js");
+	    jagg.addFooterJS("stats", "datepicker", "lib/datepicker/js/daterangepicker.js");
     }
 });
 %>

@@ -34,26 +34,26 @@ var statsEnabled = isDataPublishingEnabled();
                             getDateTime(currentDay,currentDay-(604800000*4));
                         });
 
-                        $('#date-range').click(function(){
+                        $('#date-pick').click(function(){
                              $(this).removeClass('active');
                         });
 
                         //date picker
-                        $('#date-range').daterangepicker({
+                        $('#date-pick').daterangepicker({
                               timePicker: true,
                               timePickerIncrement: 30,
                               format: 'YYYY-MM-DD h:mm',
                               opens: 'left',
                         });
 
-                        $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                        $('#date-pick').on('apply.daterangepicker', function(ev, picker) {
                            btnActiveToggle(this);
                            var from = convertTimeString(picker.startDate);
                            var to = convertTimeString(picker.endDate);
                            var fromStr = from.split(" ");
                            var toStr = to.split(" ");
                            var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
-                           $("#date-range span").html(dateStr);
+                           $("#date-pick span").html(dateStr);
                            drawProviderAPIVersionUserLastAccess(from,to);
                         });
 
@@ -64,7 +64,7 @@ var statsEnabled = isDataPublishingEnabled();
                         getDateTime(to,from);
 
 
-                        $('#date-range').click(function (event) {
+                        $('#date-pick').click(function (event) {
                         event.stopPropagation();
                         });
 
@@ -77,13 +77,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -140,17 +140,17 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
-                    $dataTable.append($('<tr><td>' + json.usage[i].api_name + '</td><td>' + json.usage[i].api_version + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccess)+ '</td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].apiVersion + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccessTime)+ '</td></tr>'));
                 }
                 if (length == 0) {
                     $('#lastAccessTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
-                    $('#lastAccessTable').dataTable({
+                    $('#lastAccessTable').datatables_extended({
                          "order": [[ 3, "desc" ]],
                           "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#lastAccessTable_length option:selected" ).val()
@@ -218,8 +218,8 @@ function getDateTime(currentDay,fromDay){
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range span").html(dateStr);
-    $('#date-range').data('daterangepicker').setStartDate(from);
-    $('#date-range').data('daterangepicker').setEndDate(to);
+    $("#date-pick span").html(dateStr);
+    $('#date-pick').data('daterangepicker').setStartDate(from);
+    $('#date-pick').data('daterangepicker').setEndDate(to);
     drawProviderAPIVersionUserLastAccess(from,to);
 }
