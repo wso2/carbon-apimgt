@@ -24,10 +24,10 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     }, function (result) {
         if (!result.error) {
             if (newStatus == 'UNBLOCKED') {
-            	$('#blockType' + n).prop('disabled', 'false');
+            	$('#blockType' + n).prop('disabled', false);
                 ahrefId.html('<span class="icon fw-stack"><i class="fw fw-block fw-stack-1x"></i></span> Block');
             } else {
-            	$('#blockType' + n).prop('disabled', 'true');
+            	$('#blockType' + n).prop('disabled', true);
             	ahrefId.html('<span class="icon fw-stack"><i class="fw fw-check fw-stack-1x"></i></span> Unblock');
             }
 
