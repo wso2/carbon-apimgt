@@ -1,19 +1,23 @@
-<% jagg.template("stats/api-latencytime", function(inputs, outputs, jagg) { %>
+<% jagg.template("stats/api-geolocation-usage", function(inputs, outputs, jagg) { %>
 
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
-
-<!--bar chart-->
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/d3.v3.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/js/nv.d3.js"))%>"></script>
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/css/nv.d3.css"))%>"/>
 <!--datepicker-->
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/maps/d3.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/maps/topojson.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/maps/vega.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/maps/VizGrammar.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/js/stats.js"))%>"></script>
 
 <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
 
-<div class="title-section"> <h2><%=i18n.localize("apiLatencyTimeTitle")%></h2> </div>
+<div class="title-section"> <h2><%=i18n.localize("apiGeoLocationUsageTitle")%></h2> </div>
+<input id="countryInfo" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/countryInfo.json"))%>">
+<input id="world" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/world.json"))%>">
+<input id="usainfo" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/usaInfo.json"))%>">
+<input id="usa" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/usa.json"))%>">
 
 <div class="content-section shadow-up">
 <div class="content-data">
@@ -25,21 +29,13 @@
         <select id="apiSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
         <label class="control-label">Version</label>
         <select id="versionSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
-        <button id="compare-btn" type="button" class="btn btn-default date-range">Compare</button>        
-        <div id="compareVersion-div" style="display:none;">
-        <select id="compareVersion" name="compareVersion" multiple="multiple" style="display: none;"></select>
-        <label class="control-label" id="label-mediationType">Mediation Type</label>
-        <select id="mediationType" class="selectpicker" data-live-search="true" style="margin-left :10px;"></select>      
-        <button id="clear-btn" type="button" class="btn btn-default">Clear</button>
-        </div>
-                
+        </div>                
     </div>
     <div id="rangeSliderWrapper" class="pull-right">
         <div class="row-fluid">
         <div class="span12">
             <div id="dateRangePickerContainer">
                 <div class="btn-group" role="group">
-                    <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
                     <button id="today-btn" type="button" class="btn btn-default date-range">Day</button>
                     <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
                     <button id="month-btn" type="button" class="btn btn-default date-range">Month</button>
@@ -61,11 +57,9 @@
         </div>
     </div>
 
-    <div class="span11">
-        <div id="chartContainer" style="margin-bottom :20px;height: 100%"></div>
-                <div id="chartContainer1" style="margin-bottom :20px;height: 100%"></div>
-        <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
-        <!--div id="tableContainer"></div-->
+    <div class="span11" style="margin-top :20px;height: 100%;width:100%">
+        <div id="chartContainer" style="margin-bottom :20px;height: 100%;width:100%"></div>
+        <!--div id="displayMsg" style="height:30px;margin-bottom:20px"></div-->
     </div>
 
     </div>

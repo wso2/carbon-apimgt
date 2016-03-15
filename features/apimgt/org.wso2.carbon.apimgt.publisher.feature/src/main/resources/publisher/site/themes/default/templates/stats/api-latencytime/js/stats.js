@@ -21,7 +21,11 @@ $( document ).ready(function() {
     $("#versionSelect").change(function (e) {
       version = this.value;
       comparedVersion[version] = version;
-      renderGraph(from,to,depth);
+      if (versionComparison) {
+             populateVersionList(apiName,true);  
+      }else{
+      renderGraph(from,to,depth);        
+      }
     });
     $("#mediationType").change(function (e) {
       mediationName = this.value;
@@ -136,10 +140,13 @@ var populateAPIList = function(){
 var populateVersionList = function(apiName,compare){
         var i=0;
         if (compare) {
-       $('#compareVersion').empty();
+          $('#compareVersion').multiselect();      
+           $('#compareVersion option').each(function(index, option) {
+              $(option).remove();
+            });
         for (var ver in apiNameVersionMap[apiName]) {
             var tempVersion = apiNameVersionMap[apiName][ver];
-            if (tempVersion != version) {
+            if (tempVersion != $('#versionSelect option:selected').val()) {
                     if (i==0) {
                     $('#compareVersion').append('<option selected="selected" value'+tempVersion+'>' + tempVersion + '</option>');
                 }else{
@@ -148,7 +155,7 @@ var populateVersionList = function(apiName,compare){
                 i++;
               }
         }
-        $('#compareVersion').multiselect();
+        $('#compareVersion').multiselect('rebuild');          
         $('#compareVersion').trigger('change');
         }else{
        $('#versionSelect').empty();
@@ -161,6 +168,11 @@ var populateVersionList = function(apiName,compare){
                 }
                 i++;
         }
+if (versionComparison){
+        if (apiNameVersionMap[apiName].length == 1) {
+            $('#clear-btn').trigger('click');
+        }  
+}
           $('#versionSelect').trigger('change');
         }
 };

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
@@ -738,4 +739,23 @@ public abstract class APIUsageStatisticsClient {
         }
         resultList.addAll(tempList);
     }
+    /**
+     * Return list of Latency time for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @return List of latency Times
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+    public abstract List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version,
+                                                                                String tenantDomain, String fromDate,
+                                                                                String toDate, String drillDown,
+                                                                                String country)
+            throws
+            APIMgtUsageQueryServiceClientException;
 }

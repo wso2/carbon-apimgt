@@ -1,0 +1,14 @@
+<%
+jagg.initializer("stats/api-geolocation-usage", {
+
+    preInitialize:function () {
+     }
+});
+%>
+
+
+
+
+
+
+
