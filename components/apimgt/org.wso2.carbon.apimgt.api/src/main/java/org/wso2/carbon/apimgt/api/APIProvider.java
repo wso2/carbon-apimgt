@@ -567,13 +567,11 @@ public interface APIProvider extends APIManager {
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
     /**
-     * Get policy object for given level and user name
+     * Delete throttling policy
      * @param username
-     * @param level
-     * @return
+     * @param policyLevel
+     * @param policyName
      * @throws APIManagementException
      */
-    Policy[] getPolicies(String username, String level) throws APIManagementException;
-
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
 }
