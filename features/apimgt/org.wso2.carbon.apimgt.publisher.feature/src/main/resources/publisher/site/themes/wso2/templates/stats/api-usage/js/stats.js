@@ -226,7 +226,7 @@ var drawProviderAPIUsage = function(from,to){
 
                     var div = d3.select("body").append("div").attr("class", "toolTip");
                     var width = 450,
-                        height = 400,
+                        height = 300,
                         margin = 80,
                         radius = Math.min(width - margin, height - margin) / 2,
                         // Pie layout will use the "val" property of each data object entry
@@ -428,7 +428,7 @@ var drawProviderAPIUsage = function(from,to){
                         $('#tableContainer').append($dataTable);
                         $('#tableContainer').show();
 
-                        $('#apiTable').dataTable({
+                        $('#apiTable').datatables_extended({
                             "order": [[ 1, "desc" ]],
                             "fnDrawCallback": function(){
                                  if(this.fnSettings().fnRecordsDisplay()<=$("#apiTable_length option:selected" ).val()
@@ -443,7 +443,7 @@ var drawProviderAPIUsage = function(from,to){
                 } else {
                     $('#apiTable').hide();
                     $('#apiChart').css("fontSize", 14);
-                    $('#apiChart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                 }
 
             } else {

@@ -1,8 +1,5 @@
 <% jagg.template("usage", function(inputs, outputs, jagg) { %>
 
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/css/nv.d3.css"))%>"/>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
 
 <div class="page-header">
 	<p class="lead"><%=i18n.localize("apiUsageByVersionTitle")%></p>

@@ -1,7 +1,7 @@
 /*A jQuery plugin which add loading indicators into buttons*/
 
 (function ($) {
-
+    $('.has-spinner').attr("disabled", false);
     $.fn.buttonLoader = function (action) {
         var self = $(this);
         if (action == 'start') {

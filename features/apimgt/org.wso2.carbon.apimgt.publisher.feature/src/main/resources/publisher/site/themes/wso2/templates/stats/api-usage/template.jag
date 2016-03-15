@@ -26,14 +26,18 @@
             <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
         </div>
 
-        <br />
+       <div id="noData"></div>
+    	<br/>
         <div class="row">
             <div class="col-md-3"></div>
             <div class="col-md-6"><div id="apiChart"></div></div>
             <div class="col-md-3"></div>
         </div>
-
-        <div id="tableContainer" ></div>
+	
+		<div class="row">
+			<div class="col-md-10"><div id="tableContainer" ></div></div>
+            <div class="col-md-2"></div>        	
+        </div>
     </div>
 </div>
 
