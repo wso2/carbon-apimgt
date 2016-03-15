@@ -1,8 +1,7 @@
 var updatePermissions = function (tierName, n, btn) {
     $('.' + btn).buttonLoader('start');
     var permissiontype, roles;
-    //permissiontype = getRadioValue($('input[name=permissionType'+n+']:radio:checked'));
-    permissiontype = $('#div'+n+' label.active input').val()
+    permissiontype = getRadioValue($('input[name=permissionType'+n+']:radio:checked'));
     roles = document.getElementById('roles'+n).value;
 
     jagg.post("/site/blocks/tiers/ajax/tiers.jag", {

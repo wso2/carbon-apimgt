@@ -103,11 +103,11 @@
 
     <div class="row">
         <div class="col-sm-12">
-            <form class="form-horizontal" method="POST"
+            <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
 
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div id="accordion" role="tablist" aria-multiselectable="true">
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="headingOne">
       <h4 class="panel-title">
@@ -116,7 +116,7 @@
         </a>
       </h4>
     </div>
-    <div id="collapseOne" role="tabpanel" aria-labelledby="headingOne">
+    <div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
       <div class="panel-body">
 
             <div class="form-group form-inline">
@@ -250,15 +250,15 @@
             		result = mod.isMultipleTenantsAvailable();
                 	var isMultipleTenantsAvailable = result.status;
             		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-            			<div class="form-group ">
+            			<div class="form-group form-inline">
                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
                         <div class="controls col-sm-8">
                             <% if(api.visibility!="public") {%>
-                            <select class="select required" id="subscriptions" name="subscriptions" >
+                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
                             </select>
                             <%} else {%>
-                                <select class="select required" id="subscriptions" name="subscriptions" >
+                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
                                 <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
                                     <% if(!(enableSelectedTenantSubscription == 'false')) {%>
@@ -267,7 +267,7 @@
                                 </select>
                             <%}%>
                                 <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
-                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
                        </div>
 
                         </br>
@@ -288,7 +288,7 @@
       </div>
     </div>
   </div><!-- End of configuration panel -->
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingTwo">
       <h4 class="panel-title">
         <a class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -354,7 +354,7 @@
     </div>
   </div><!-- Gateway environments -->
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingThree">
       <h4 class="panel-title">
         <a class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
@@ -392,7 +392,7 @@
     </div>
   </div><!-- Business Information -->
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingFour">
       <h4 class="panel-title">
         <a class="" data-toggle="collapse" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">

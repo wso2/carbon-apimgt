@@ -2,14 +2,9 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URL;
@@ -38,7 +33,7 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                     APIMgtGatewayConstants.CONSUMER_KEY));
             faultPublisherDTO.setContext((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONTEXT));
-            faultPublisherDTO.setApi_version((String) messageContext.getProperty(
+            faultPublisherDTO.setApiVersion((String) messageContext.getProperty(
                     APIMgtGatewayConstants.API_VERSION));
             faultPublisherDTO.setApi((String) messageContext.getProperty(
                     APIMgtGatewayConstants.API));

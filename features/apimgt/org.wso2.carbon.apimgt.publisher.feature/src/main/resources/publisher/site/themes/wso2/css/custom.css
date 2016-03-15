@@ -59,3 +59,48 @@ div.image-container {
     padding-top: 100px;
     padding-bottom: 100px;
 }
+
+/* ========================================================================
+ * Media panels tablist
+ * ======================================================================== */
+
+#accordion h4 a{
+    text-decoration:none;
+    font-weight:bold;
+}
+#accordion h4 p{
+    padding:10px 20px;
+    margin-bottom:0px;
+}
+#accordion .panel{
+    margin-bottom:10px;
+}
+#accordion .panel-heading{
+    padding:10px;
+    background:#e2e2e2;
+    margin-bottom:0px;
+    border:none;
+}
+#accordion .panel-collapse{
+    padding:10px;
+    border:1px solid #e2e2e2;
+}
+
+/* ========================================
+ * Tooltip 
+ * ======================================== */
+
+.toolTip {
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: left;
+} 

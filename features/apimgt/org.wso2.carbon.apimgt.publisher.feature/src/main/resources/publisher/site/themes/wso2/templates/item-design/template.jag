@@ -131,7 +131,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 id="swaggerUploadLabel">Import API Definition</h3>
+        <h4 id="swaggerUploadLabel">Import API Definition</h4>
       </div>
         <div class="modal-body" style="height:140px;">
             <div id="swagger_help" class="alert alert-danger hide" role="alert">
@@ -170,11 +170,11 @@
 
     <div class="row">
         <div class="col-sm-12">     
-            <form class="form-horizontal" method="POST"
+            <form class="form-horizontal apim-form" method="POST"
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
 
-<div class="panel-group" id="accordion" role="tablist">
+<div id="accordion" role="tablist">
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="headingOne">
       <h4 class="panel-title">
@@ -189,13 +189,13 @@
 <div class="row">
   <div class="col-md-6">
 <% if(!api){ %>    
-    <div class="form-group">
+    <div class="form-group form-inline">
         <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-6">
-            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>            
-        </div>
-        <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
-        <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
+            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
+            <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
+        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
+        </div>        
     </div>
 
     <div class="form-group">
@@ -411,6 +411,8 @@
                     <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
 
                 </div>
+                </div>
+                </div>
             </form>
 
         </div>
@@ -456,8 +458,8 @@
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
         <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter">
 		<span class="fw-stack">
-                                <i class="fw fw-ring fw-stack-2x"></i>
                                 <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>
 	</a></td>
         </tr> 
@@ -528,8 +530,8 @@
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}">
 		<span class="fw-stack">
-                                <i class="fw fw-ring fw-stack-2x"></i>
                                 <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>
 	    </a></td>
         </tr>
