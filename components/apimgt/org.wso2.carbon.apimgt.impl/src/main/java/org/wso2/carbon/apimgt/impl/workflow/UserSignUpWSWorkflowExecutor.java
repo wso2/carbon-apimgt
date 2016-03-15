@@ -129,6 +129,8 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
                     updateRolesOfUser(serverURL, adminUsername, adminPassword, tenantAwareUserName,
                             SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
                 } catch (Exception e) {
+
+                    // updateRolesOfUser throws generic Exception. Therefore generic Exception is caught
                     throw new WorkflowException("Error while assigning role to user", e);
                 }
             } else {
