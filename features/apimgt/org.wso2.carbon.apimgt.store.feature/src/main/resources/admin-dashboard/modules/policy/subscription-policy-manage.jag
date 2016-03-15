@@ -2,7 +2,24 @@
 var log = new Log();
 
 var deleteSubscriptionPolicy = function (policyName) {
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
 
+        var appPolicies = apiProvider.deletePolicy(provider, "sub", policyName);
+        return {
+            error: false,
+            appPolicies: appPolicies
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while deleting policy: " + policyName + " (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
 };
 
 var getAllSubscriptionPolicies = function () {

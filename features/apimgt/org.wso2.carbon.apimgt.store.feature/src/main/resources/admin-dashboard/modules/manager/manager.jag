@@ -57,12 +57,10 @@ var isGlobalCEPThrottlingEnabled = function() {
     var carbon = require('carbon');
     var log = new Log();
     try{
-        var enabled = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("EnableGlogbalCEPThrottling");
-        log.info("CEP Enabled - "+(enabled == 'true'))
+        var enabled = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("EnableGlobalCEPThrottling");
         return enabled == 'true';
     } catch (e) {
         log.error("isGlobalCEPThrottlingEnabled" + e.message);
-        log.info("CEP Enabled - "+(enabled == 'false'))
         return false;
     }
 };

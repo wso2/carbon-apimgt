@@ -3718,18 +3718,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policies;
     }
 
-    public Policy[] getPolicies(String username, String level) throws APIManagementException {
-        tenantId = APIUtil.getTenantId(username);
-        Policy[] policies =  null;
-        if (level.equals(PolicyConstants.POLICY_LEVEL_API)) {
-            policies = apiMgtDAO.getAPIPolicies(tenantId);
-        }
-        else if (level.equals(PolicyConstants.POLICY_LEVEL_APP)){
-            policies = apiMgtDAO.getAppPolicies(tenantId);
-        }
-        else if (level.equals(PolicyConstants.POLICY_LEVEL_SUB)){
-            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
-        }
-        return policies;
+    public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(username);
+        apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
     }
+
 }
