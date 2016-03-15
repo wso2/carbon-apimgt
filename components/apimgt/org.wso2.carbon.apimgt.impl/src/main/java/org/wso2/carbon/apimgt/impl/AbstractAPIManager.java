@@ -1141,7 +1141,8 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                    || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
                 tierMap = APIUtil.getAllTiers();
             } else {
                 tierMap = APIUtil.getAllTiers(requestedTenantId);
@@ -1190,7 +1191,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Map<String, Tier> tierMap;
         int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+        if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getTiers();
         } else {
             tierMap = APIUtil.getTiers(requestedTenantId);
