@@ -24,5 +24,9 @@ jagg.module("manager", {
     getAPIProviderObj:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIProviderObj.apply(this, arguments);
      },
+
+    isGlobalCEPThrottlingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isGlobalCEPThrottlingEnabled.apply(this, arguments);
+    }
  });
  %>
