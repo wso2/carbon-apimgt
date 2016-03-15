@@ -53,18 +53,12 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
 
     public void testGetThrottlePolicyForAPILevelPerUser() throws Exception {
         APIPolicy policy = getPolicyAPILevelPerUser();
-        String apiContext = "/weather";
-        String apiName = "weather";
-        String apiVersion = "1.0.0";
-        System.out.println(templateBuilder.getThrottlePolicyForAPILevel(policy, apiName, apiVersion, apiContext));
+        System.out.println(templateBuilder.getThrottlePolicyForAPILevel(policy));
     }
     
     public void  testGetThrottlePolicyForAPILevelPerAPI() throws Exception {
         APIPolicy policy = getPolicyAPILevelPerAPI();
-        String apiContext = "/weather";
-        String apiName = "weather";
-        String apiVersion = "1.0.0";
-        System.out.println(templateBuilder.getThrottlePolicyForAPILevel(policy, apiName, apiVersion, apiContext));
+        System.out.println(templateBuilder.getThrottlePolicyForAPILevel(policy));
     }
     
     public void  testGetThrottlePolicyForGlobalLevel() throws Exception {        
@@ -84,7 +78,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     } 
     
     private APIPolicy getPolicyAPILevelPerAPI(){
-        APIPolicy policy = new APIPolicy("Gold");
+        APIPolicy policy = new APIPolicy("custom1");
         
         policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
@@ -165,7 +159,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     
     
     private APIPolicy getPolicyAPILevelPerUser(){
-        APIPolicy policy = new APIPolicy("Gold");
+        APIPolicy policy = new APIPolicy("custom1");
         
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");    
