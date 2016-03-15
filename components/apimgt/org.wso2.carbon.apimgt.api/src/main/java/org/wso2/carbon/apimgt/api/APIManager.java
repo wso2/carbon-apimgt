@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.util.List;
 import java.util.Map;
@@ -419,4 +420,14 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
+    
+
+    /**
+     * Get policy object for given level and user name
+     * @param username
+     * @param level
+     * @return
+     * @throws APIManagementException
+     */
+    Policy[] getPolicies(String username, String level) throws APIManagementException;
 }
