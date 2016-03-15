@@ -589,7 +589,6 @@
                 }
             %>
           <div class="container">
-  <h2>Dynamic Tabs</h2>
   <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#home">Subscribed APIs</a></li>
     <li><a data-toggle="tab" href="#menu1">Generate SDK</a></li>
@@ -640,28 +639,10 @@
             <div id="menu1" class="tab-pane fade">
               </select>
         <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/generateSdk.js"))%>"></script>
-         <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/downloadLoading.css"))%>" />
          <button onclick="generateAndroidSdk('<%=app.name%>','android')" type="button">Android</button>
           <button onclick="generateAndroidSdk('<%=app.name%>','java')" type="button">Java</button>
           <a class="icon-question-sign help_popup_cli_gen"></a>
          <div id="cligen_help"></div>
-          <div class ="cssload-contain" id="cssload-contain" style="display:none;">
-  <div class="cssload-wrap" id="cssload-wrap1">
-    <div class="cssload-ball" id="cssload-ball1"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap2">
-    <div class="cssload-ball" id="cssload-ball2"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap3">
-    <div class="cssload-ball" id="cssload-ball3"></div>
-  </div>
-
-  <div class="cssload-wrap" id="cssload-wrap4">
-    <div class="cssload-ball" id="cssload-ball4"></div>
-  </div>
-</div>
     </div>
             </div><!-- End row -->
 <%
