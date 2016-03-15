@@ -61,13 +61,10 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = applicationWorkflowDTO.getApplication();
-        Connection conn = null;
-        String errorMsg;
+        String errorMsg = null;
+
         try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            apiMgtDAO.deleteApplication(application, conn);
-            conn.commit();
+            apiMgtDAO.deleteApplication(application);
         } catch (APIManagementException e) {
             if (e.getMessage() == null) {
                 errorMsg = "Couldn't complete simple application deletion workflow for application: " + application
@@ -76,29 +73,8 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
                 errorMsg = e.getMessage();
             }
             throw new WorkflowException(errorMsg, e);
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-
-                    // exception is not thrown since it is caught when closing the database connection
-                    log.error("Failed to rollback remove application ", ex);
-                }
-            }
-            errorMsg = "Couldn't remove application entry for application: " + application.getName();
-            throw new WorkflowException(errorMsg, e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-
-                // exception is not thrown since it is caught when closing the database connection in a finally block
-                log.error("Couldn't close database connection of delete application workflow", e);
-            }
         }
+
         return new GeneralWorkflowResponse();
     }
 

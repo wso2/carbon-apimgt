@@ -60,8 +60,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         SubscriptionWorkflowDTO subWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        Connection conn = null;
-        String errorMsg;
+        String errorMsg = null;
 
         try {
             APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
@@ -69,35 +68,10 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
             int applicationIdID = apiMgtDAO.getApplicationId(subWorkflowDTO.getApplicationName(), subWorkflowDTO
                     .getSubscriber());
 
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            apiMgtDAO.removeSubscription(identifier, applicationIdID, conn);
-            conn.commit();
+            apiMgtDAO.removeSubscription(identifier, applicationIdID);
         } catch (APIManagementException e) {
             errorMsg = "Could not complete subscription deletion workflow for api: " + subWorkflowDTO.getApiName();
             throw new WorkflowException(errorMsg, e);
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-
-                    // exception is not thrown since it is caught when closing the database connection
-                    log.error("Failed to rollback remove subscription ", ex);
-                }
-            }
-            errorMsg = "Couldn't remove subscription entry for api: " + subWorkflowDTO.getApiName();
-            throw new WorkflowException(errorMsg, e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-
-                // exception is not thrown since it is caught when closing the database connection in a finally block
-                log.error("Couldn't close database connection for subscription deletion workflow", e);
-            }
         }
         return new GeneralWorkflowResponse();
     }
