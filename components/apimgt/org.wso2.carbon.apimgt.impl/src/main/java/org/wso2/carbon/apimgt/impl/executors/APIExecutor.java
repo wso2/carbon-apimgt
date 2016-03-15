@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -114,18 +116,33 @@ public class APIExecutor implements Execution {
             APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
             
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled = Boolean
+                    .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 
                                    //custom state to default api state
                 if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
                         && APIStatus.PUBLISHED.equals(newStatus)) {
                     Set<Tier> tiers = api.getAvailableTiers();
+                    Set<Policy> subPolicies = api.getAvailableSubscriptionLevelPolicies();
+                    String apiLevelPolicy = api.getApiLevelPolicy();
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
-                        if (tiers == null || tiers.size() <= 0) {
-                            throw new APIManagementException("Failed to publish service to API store while executing " +
-                                                             "APIExecutor. No Tiers selected");
+                        if(isGlobalThrottlingEnabled){
+                            if(subPolicies == null || subPolicies.isEmpty() || apiLevelPolicy == null){
+                                throw new APIManagementException("Failed to publish service to API store while executing " +
+                                        "APIExecutor. No policy selected");
+                            } 
+                        } else {
+                            if (tiers == null || tiers.size() <= 0) {
+                                throw new APIManagementException("Failed to publish service to API store while executing " +
+                                                                 "APIExecutor. No Tiers selected");
+                            }
                         }
+                        
                     } else {
                         throw new APIManagementException("Failed to publish service to API store while executing"
                                 + " APIExecutor. No endpoint selected");
