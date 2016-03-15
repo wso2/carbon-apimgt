@@ -104,7 +104,7 @@ public final class ThrottlingDBUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
-        String sqlQuery = "select THROTTLE_KEY from ThrotleTable";
+        String sqlQuery = "select THROTTLE_KEY from ThrottleTable";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
@@ -151,7 +151,7 @@ public final class ThrottlingDBUtil {
             Connection conn = null;
             PreparedStatement ps = null;
             ResultSet rs = null;
-            String sqlQuery = "select THROTTLE_KEY from ThrotleTable";
+            String sqlQuery = "select THROTTLE_KEY from ThrottleTable";
             try {
                 conn = ThrottlingDBUtil.getConnection();
                 ps = conn.prepareStatement(sqlQuery);
@@ -189,7 +189,7 @@ public final class ThrottlingDBUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
-        String sqlQuery = "select THROTTLE_KEY from ThrotleTable WHERE THROTTLE_KEY = '"+query+"'";
+        String sqlQuery = "select THROTTLE_KEY from ThrottleTable WHERE THROTTLE_KEY = '"+query+"'";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
