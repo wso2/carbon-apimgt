@@ -5,9 +5,7 @@
     <br>
     <div class="col-md-12">
 
-        <div id="spinner" class="center-wrapper">
-            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
-        </div>
+        
 
         <div id="pie-chart">
             <div class="progress progress-striped active">
