@@ -68,18 +68,14 @@ public class ThrottlePolicyTemplateBuilder {
      * 
      * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in 
      *            the api level. Policy can have multiple pipelines and a default condition which will be used as 
-     *            else condition
-     * @param apiName
-     * @param apiVersion
-     * @param apiContext
+     *            else condition  
      * @return
      * @throws APITemplateException
      */
-    public List<String> getThrottlePolicyForAPILevel(APIPolicy policy, String apiName, String apiVersion,
-            String apiContext) throws APITemplateException {
+    public List<String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for apiLevel :" + policy.toString() + " " +  apiName + " " + apiVersion  + " " + apiContext);
+            log.debug("Generating policy for apiLevel :" + policy.toString());
         }
         List<String> policyArray = new ArrayList<String>();
         Set<String> conditionsSet = new HashSet<String>();
@@ -106,12 +102,7 @@ public class ThrottlePolicyTemplateBuilder {
                 context = new VelocityContext();
                 setConstantContext(context);
                 context.put("pipelineItem", pipeline);
-                context.put("policy", policy);
-
-                // stuff from the api
-                context.put("apiname", apiName);
-                context.put("apicontext", apiContext);
-                context.put("apiversion", apiVersion);
+                context.put("policy", policy);               
 
                 context.put("quotaPolicy", pipeline.getQuotaPolicy());
                 //pipeline name is defined as 'condition0' 'condition1' etc
@@ -138,11 +129,7 @@ public class ThrottlePolicyTemplateBuilder {
            //default policy is defined as 'elseCondition' 
             context.put("pipeline", "elseCondition"); //// constant
             context.put("pipelineItem", null);
-            context.put("policy", policy);
-            // stuff from the api
-            context.put("apiname", apiName);
-            context.put("apicontext", apiContext);
-            context.put("apiversion", apiVersion);
+            context.put("policy", policy);           
 
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
             context.put("condition", " AND " + getConditionForDefault(conditionsSet));

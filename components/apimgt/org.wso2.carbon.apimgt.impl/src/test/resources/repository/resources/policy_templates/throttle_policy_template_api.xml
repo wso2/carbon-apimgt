@@ -3,23 +3,23 @@
 ###generate key
 #macro( getKey )##
 #if($policy.getUserLevel() == $ACROSS_ALL)
-str:concat('${apiname}_all_','${pipeline}' ,'_key')##
+str:concat('api_${policy.getPolicyName()}_all_','${pipeline}', '_', api_key ,'_key')##
 #else
-str:concat('${apiname}_per_','${pipeline}_' ,user_id ,'_key')##
+str:concat('api_${policy.getPolicyName()}_per_','${pipeline}', '_', api_key , '_', user_id ,'_key')##
 #end
 #end
 ###generate rule
 #macro( getRule $policy)
 #if($policy.getUserLevel() == $ACROSS_ALL)
-${apiname}_all_${pipeline}##
+api_${policy.getPolicyName()}_all_${pipeline}##
 #else
-${apiname}_per_${pipeline}##
+api_${policy.getPolicyName()}_per_${pipeline}##
 #end
 #end
 <policy tier="api_$policy.getPolicyName()" level="api" name="#getRule($policy)">
 	<eligibilityQuery>
 		FROM RequestStream
-		SELECT '#getRule($policy)' AS rule, messageID, ( api_key == '${apicontext}:${apiversion}' ) AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
+		SELECT '#getRule($policy)' AS rule, messageID, ( api_tier == '${policy.getPolicyName()}'$condition ) AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
 		INSERT INTO EligibilityStream; 
 	</eligibilityQuery>
 	<decisionQuery>	
