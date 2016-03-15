@@ -24,7 +24,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
     public DataBridgeRequestPublisherDTO (RequestPublisherDTO requestPublisherDTO){
         setConsumerKey(requestPublisherDTO.getConsumerKey());
         setContext(requestPublisherDTO.getContext());
-        setApi_version(requestPublisherDTO.getApi_version());
+        setApiVersion(requestPublisherDTO.getApiVersion());
         setApi(requestPublisherDTO.getApi());
         setResourcePath(requestPublisherDTO.getResourcePath());
         setResourceTemplate(requestPublisherDTO.getResourceTemplate());
@@ -88,10 +88,10 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),
-                            getResourceTemplate(), getMethod(), getVersion(), getRequestCount(),getRequestTime(),
-                            getUsername(),getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(),
-                            getApplicationId(), getUserAgent(), getTier(), isContinuedOnThrottleOut(),getClientIp()};
+        return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(), getResourcePath(),
+                            getResourceTemplate(), getMethod(), getVersion(), getRequestCount(), getRequestTime(),
+                            getUsername(), getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(),
+                            getApplicationId(), getUserAgent(), getTier(), isContinuedOnThrottleOut(), getClientIp()};
 
     }
 

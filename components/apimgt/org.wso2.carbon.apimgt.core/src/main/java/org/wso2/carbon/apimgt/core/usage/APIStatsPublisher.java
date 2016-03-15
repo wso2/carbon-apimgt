@@ -57,7 +57,7 @@ public class APIStatsPublisher {
         requestPublisherDTO.setConsumerKey(keyValidationDTO.getConsumerKey());
         requestPublisherDTO.setContext(contextPath);
         //TODO Remove Hard Coded Version and use proper
-        requestPublisherDTO.setApi_version(keyValidationDTO.getApiName() + ":v1.0.0");
+        requestPublisherDTO.setApiVersion(keyValidationDTO.getApiName() + ":v1.0.0");
         requestPublisherDTO.setApi(keyValidationDTO.getApiName());
         //TODO Remove Hard Coded Version and use proper
         requestPublisherDTO.setVersion("1.0.0");
@@ -103,7 +103,7 @@ public class APIStatsPublisher {
         responsePublisherDTO.setUsername(keyValidationDTO.getEndUserName());
         responsePublisherDTO.setContext(contextPath);
         //TODO Remove Hard Coded Version and use proper
-        responsePublisherDTO.setApi_version(keyValidationDTO.getApiName() + ":v1.0.0");
+        responsePublisherDTO.setApiVersion(keyValidationDTO.getApiName() + ":v1.0.0");
         responsePublisherDTO.setApi(keyValidationDTO.getApiName());
         //TODO Remove Hard Coded Version and use proper
         responsePublisherDTO.setVersion("1.0.0");

@@ -129,7 +129,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
             requestPublisherDTO.setContext(context);
-            requestPublisherDTO.setApi_version(apiVersion);
+            requestPublisherDTO.setApiVersion(apiVersion);
             requestPublisherDTO.setApi(api);
             requestPublisherDTO.setVersion(version);
             requestPublisherDTO.setResourcePath(resource);

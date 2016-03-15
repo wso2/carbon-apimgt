@@ -27,7 +27,7 @@ public abstract class PublisherDTO {
 
     private String context;
 
-    private String api_version;
+    private String apiVersion;
 
     private String api;
 
@@ -107,12 +107,12 @@ public abstract class PublisherDTO {
         this.resourceTemplate = resourceTemplate;
     }
 
-    public String getApi_version() {
-        return api_version;
+    public String getApiVersion() {
+        return apiVersion;
     }
 
-    public void setApi_version(String api_version) {
-        this.api_version = api_version;
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 
     public void setApi(String api) {
