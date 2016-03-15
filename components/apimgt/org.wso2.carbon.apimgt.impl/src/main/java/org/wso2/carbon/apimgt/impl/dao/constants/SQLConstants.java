@@ -2010,8 +2010,7 @@ public class SQLConstants {
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, \n" +
-                    "RATE_LIMIT_TIME_UNIT) \n" +
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_SQL =
@@ -2131,36 +2130,4 @@ public class SQLConstants {
 
     public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
-
-    public static final String COLUMN_NAME = "NAME";
-
-    public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
-
-    public static final String COLUMN_TENANT_ID = "TENANT_ID";
-
-    public static final String COLUMN_RATE_LIMIT_COUNT = "RATE_LIMIT_COUNT";
-
-    public static final String COLUMN_RATE_LIMIT_TIME_UNIT = "RATE_LIMIT_TIME_UNIT";
-
-    public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_POLICY_TYPE";
-
-    public static final String COLUMN_QUOTA = "QUOTA";
-
-    public static final String COLUMN_QUOTA_UNIT = "QUOTA_UNIT";
-
-    public static final String COLUMN_UNIT_TIME = "UNIT_TIME";
-
-    public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
-
-    public static final String COLUMN_USER_LEVEL = "USER_LEVEL";
-
-    public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_POLICY_TYPE";
-
-    public static final String COLUMN_DEFAULT_UNIT_TIME = "DEFAULT_UNIT_TIME";
-
-    public static final String COLUMN_DEFAULT_TIME_UNIT = "DEFAULT_TIME_UNIT";
-
-    public static final String COLUMN_DEFAULT_QUOTA = "DEFAULT_QUOTA";
-
-    public static final String COLUMN_DEFAULT_QUOTA_UNIT = "DEFAULT_QUOTA_UNIT";
 }
