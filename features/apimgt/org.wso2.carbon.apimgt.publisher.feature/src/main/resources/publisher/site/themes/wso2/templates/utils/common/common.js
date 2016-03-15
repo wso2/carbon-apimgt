@@ -100,3 +100,27 @@ $.fn.generateBgcolor = function(options){
 
     };
 }( jQuery ));
+
+/***********************************************************
+ *  accordion config
+ ***********************************************************/
+
+$('#accordion').on('shown.bs.collapse', function (e,f) {
+	console.log("ccc");
+var elem = $(this).children().children('.in');
+var icon = $(elem).prev().find('.status').children();
+
+if($(elem).hasClass('in')){
+    $(elem).prev().find('input[type=radio]').prop('checked',true);
+}
+icon.removeClass('fw-down');
+icon.addClass('fw-up');
+});
+
+$('#accordion').on('hidden.bs.collapse', function (e,f) {
+var elem = $(this).children().children();
+var icon = $(elem).prev().find('.status').children();
+
+icon.removeClass('fw-up');
+icon.addClass('fw-down');
+});
