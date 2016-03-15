@@ -8534,30 +8534,38 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
-       
-        //TODO call policy name column from the tables directly 
-        
+
         List<String> names = new ArrayList<String>();
-       
-        Policy[] policies = null;      
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
 
         int tenantID = APIUtil.getTenantId(username);
 
-        if(PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)){
-            policies = getAPIPolicies(tenantID);
-        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
-            policies = getAppPolicies(tenantID);
-        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
-            policies = getSubscriptionPolicies(tenantID);
-        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
-   
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_API_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_APP_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_SUB_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
+            }
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                names.add(rs.getString(SQLConstants.COLUMN_NAME));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
-        if(policies != null){
-            for (Policy policy : policies) {
-                names.add(policy.getPolicyName());
-            } 
-        }
-       
         return names.toArray(new String[names.size()]);
     }
 
