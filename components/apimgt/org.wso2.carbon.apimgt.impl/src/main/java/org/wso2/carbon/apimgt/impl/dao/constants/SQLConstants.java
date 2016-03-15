@@ -2061,7 +2061,7 @@ public class SQLConstants {
             "   AND TENANT_ID =?";
 
     public static final String GET_API_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_API " +
@@ -2069,7 +2069,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_APP_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION " +
@@ -2077,7 +2077,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_SUB_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
@@ -2085,7 +2085,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_GLOBAL " +
@@ -2093,12 +2093,12 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_API_POLICIES =
-            " SELECT "+
-            "   * " +
-            "FROM " +
-            "   AM_POLICY_API " +
-            " WHERE" +
-            "   TENANT_ID =?";
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_API " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
 
     public static final String GET_APP_POLICIES =
             " SELECT "+
@@ -2108,7 +2108,7 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =?";
     public static final String GET_SUBSCRIPTION_POLICIES =
-            " SELECT "+
+            " SELECT " +
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
@@ -2116,7 +2116,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
-            " SELECT "+
+            " SELECT " +
                     "   * " +
                     "FROM " +
                     "   AM_GLOBAL_POLICY " +
