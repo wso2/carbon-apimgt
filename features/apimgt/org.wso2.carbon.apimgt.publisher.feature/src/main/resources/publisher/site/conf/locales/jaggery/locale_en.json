@@ -149,6 +149,7 @@
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "apiLatencyTime" : "API Latency Time",
+    "apiGeoLocationUsage" : "API Usage Across Geo Locations",
     "apiUsageFromDestination" : "API Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
@@ -157,6 +158,7 @@
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",
+    "apiGeoLocationUsageTitle" : "API Usage Across Geo Locations",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",
     "overallAPIResponseTimesTitle": "API Response Times (Across All Versions)",
     "overallAPILastAccessTimesTitle": "API Last Access Times (Across All Versions)",

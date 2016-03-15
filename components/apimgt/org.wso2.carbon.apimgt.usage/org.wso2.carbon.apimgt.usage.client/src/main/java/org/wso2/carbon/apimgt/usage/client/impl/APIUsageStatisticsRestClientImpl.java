@@ -2380,8 +2380,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
         }
         if (mediationType != null && mediationType != "ALL") {
-            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":").append
-                    (mediationType);
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":'").append
+                    (mediationType).append("'");
         }
         RequestSearchBean request;
         String tableName = getExecutionTimeTableByView(drillDown);
@@ -2402,6 +2402,62 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while Connecting to DAS REST API", e);
         } catch (ParseException e) {
             handleException("Couldn't parse the date", e);
+        }
+        return obj;
+    }
+
+    @Override
+    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String country) throws
+            APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        int aggregateLevel = 0;
+        if (version != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND requestTime : [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (drillDown != null) {
+            if (drillDown != "ALL") {
+                aggregateLevel = 1;
+                query.append(" AND country :'").append(drillDown).append("'");
+            } else {
+                aggregateLevel = 0;
+            }
+        }
+        SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
+                APIUsageStatisticsClientConstants
+                .COUNTRY_CITY_FACET, APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
+        fields.add(f);
+        request.setAggregateFields(fields);
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<PerGeoLocationUsageCount>>>() {
+        }.getType();
+
+        List<Result<PerGeoLocationUsageCount>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        if (obj == null) {
+            obj = Collections.emptyList();
         }
         return obj;
     }
