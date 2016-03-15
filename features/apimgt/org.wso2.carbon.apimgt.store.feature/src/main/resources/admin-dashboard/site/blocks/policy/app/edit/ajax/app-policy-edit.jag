@@ -15,7 +15,6 @@ include("/jagg/jagg.jag");
         });
     } else if (request.getMethod() == 'POST') {
         if (action == "addAppPolicy" ) {
-            var policyLevel =  request.getParameter("policyLevel", "UTF-8");
             var policyName =  request.getParameter("policyName", "UTF-8");
             var description =  request.getParameter("description", "UTF-8");
             var defaultQuotaPolicy =  request.getParameter("defaultQuotaPolicy", "UTF-8");

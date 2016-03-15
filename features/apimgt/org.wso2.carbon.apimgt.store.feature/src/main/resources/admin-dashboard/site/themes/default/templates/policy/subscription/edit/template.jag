@@ -29,7 +29,7 @@
         var defaultUnitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
         var defaultTimeUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
 
-        var rateLimitCount = subscriptionPolicy.getRateLimitCount() == null ? "" : subscriptionPolicy.getRateLimitCount();
+        var rateLimitCount = subscriptionPolicy.getRateLimitCount() < 0 ? "" : subscriptionPolicy.getRateLimitCount();
         var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
     }
     %>
@@ -196,8 +196,7 @@
           else if("<%=defaultQuotaPolicy%>" == ("Bandwidth")){
             $('#bandwidthType').prop('checked',true);
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
-            // TODO set the bandwidth unit when database modified with bandwidth unit field
-            $('#defaultBandwidthUnit').val("KB");
+            $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
           }
 
         }

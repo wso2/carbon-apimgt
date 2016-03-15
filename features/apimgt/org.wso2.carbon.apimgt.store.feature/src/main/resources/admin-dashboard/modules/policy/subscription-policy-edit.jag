@@ -65,8 +65,15 @@ var constructPolicyObject = function (userName, policyName, description, default
     }
 
     subscriptionPolicy.setDefaultQuotaPolicy(default_quotaPolicy);
-    subscriptionPolicy.setRateLimitCount(rateLimitCount);
-    subscriptionPolicy.setRateLimitTimeUnit(rateLimitTimeUnit);
+
+    if (rateLimitCount != "") {
+        subscriptionPolicy.setRateLimitCount(rateLimitCount);
+        subscriptionPolicy.setRateLimitTimeUnit(rateLimitTimeUnit);
+    }
+    else {
+        subscriptionPolicy.setRateLimitCount(-1);
+        subscriptionPolicy.setRateLimitTimeUnit("NA");
+    }
 
     return subscriptionPolicy;
 }

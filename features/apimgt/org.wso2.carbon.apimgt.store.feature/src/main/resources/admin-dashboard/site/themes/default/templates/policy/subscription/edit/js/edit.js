@@ -118,7 +118,7 @@ function validateNumbersInput(text, element, requiredMsg, invalidErrorMsg){
     }
 }
 
-function validateNumbersInput(text, element, invalidErrorMsg){
+function validateNullableNumbersInput(text, element, invalidErrorMsg){
     var elementId = element.attr('id');
     text = text.trim();
     if(text == ""){
@@ -246,7 +246,7 @@ function validateInputs() {
     if (!validateNumbersInput(defaultUnitTimeTxt, defaultUnitTime, requiredMsg, invalidErrorMsg)) {
         return false;
     }
-    if (!validateNumbersInput(rateLimitCountTxt, rateLimitCount, invalidErrorMsg)) {
+    if (!validateNullableNumbersInput(rateLimitCountTxt, rateLimitCount, invalidErrorMsg)) {
         return false;
     }
 

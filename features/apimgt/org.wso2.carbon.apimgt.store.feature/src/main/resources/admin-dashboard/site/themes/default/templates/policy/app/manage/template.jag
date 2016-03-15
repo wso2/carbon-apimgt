@@ -29,7 +29,7 @@
             var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
         else if (defaultQuotaPolicy == "Bandwidth"){
-            var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" KB";
+            var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+appPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
 
         var unitTime = appPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime()+" "+appPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
