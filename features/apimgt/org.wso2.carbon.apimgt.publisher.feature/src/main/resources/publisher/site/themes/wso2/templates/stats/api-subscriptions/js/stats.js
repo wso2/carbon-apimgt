@@ -443,7 +443,7 @@ var statsEnabled = isDataPublishingEnabled();
                     });
                     }
                 }else{
-                    $('#pie-chart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {

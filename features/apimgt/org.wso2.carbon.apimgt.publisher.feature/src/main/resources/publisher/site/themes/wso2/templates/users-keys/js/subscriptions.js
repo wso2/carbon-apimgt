@@ -24,10 +24,10 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     }, function (result) {
         if (!result.error) {
             if (newStatus == 'UNBLOCKED') {
-            	$('input[name=blockType'+n+']').removeAttr('disabled');
+            	$('#blockType' + n).prop('disabled', false);
                 ahrefId.html('<span class="icon fw-stack"><i class="fw fw-block fw-stack-1x"></i></span> Block');
             } else {
-            	$('input[name=blockType'+n+']').attr('disabled', 'disabled');
+            	$('#blockType' + n).prop('disabled', true);
             	ahrefId.html('<span class="icon fw-stack"><i class="fw fw-check fw-stack-1x"></i></span> Unblock');
             }
 
@@ -56,9 +56,21 @@ $(function(){
     /***********************************************************
      *  data-tables config
      ***********************************************************/
-    $('#manage-subscriptions').datatables_extended({
-    	responsive:true,
-    	 "order": [[ 3, "asc" ]]
-    });
+	$('#manage-subscriptions').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#manage-subscriptions_length option:selected" ).val()
+	     || $("#manage-subscriptions_length option:selected" ).val()==-1)
+	       $('#manage-subscriptions_paginate').hide();
+	       else $('#manage-subscriptions_paginate').show();
+	     } ,
+         "aoColumns": [
+         { "bSortable": false },
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
 });
     

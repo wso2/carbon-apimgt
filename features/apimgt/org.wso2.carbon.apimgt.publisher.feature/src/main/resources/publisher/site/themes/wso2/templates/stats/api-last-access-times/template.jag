@@ -13,7 +13,7 @@
                    </button>
                    <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
                    <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
-                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
+                   <buttton id="date-pick" type="button" class="btn btn-default date-range last-child" >
                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                      <span></span> <b class="caret"></b>
                    </button>
