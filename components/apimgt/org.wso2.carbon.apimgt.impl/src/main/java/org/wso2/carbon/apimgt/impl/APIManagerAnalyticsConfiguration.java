@@ -33,6 +33,10 @@ public class APIManagerAnalyticsConfiguration {
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
+    private String dasServerUrl;
+    private String dasServerUser;
+    private String dasServerPassword;
+
     private boolean analyticsEnabled;
     private boolean skipEventReceiverConnection;
     private boolean buildMsg;
@@ -47,13 +51,6 @@ public class APIManagerAnalyticsConfiguration {
     private String throttleStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
-        analyticsEnabled = APIUtil.isAnalyticsEnabled();
-        if (analyticsEnabled) {
-            Map<String, String> analyticsConfigs = APIUtil.getAnalyticsConfigFromRegistry();
-            bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-            bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
-            bamServerPassword = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-        }
     }
 
     public static synchronized APIManagerAnalyticsConfiguration getInstance() {
@@ -88,6 +85,17 @@ public class APIManagerAnalyticsConfiguration {
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
         }
+
+        bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+        bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+        bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+
+        dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
+        dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
+        dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
+        String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
+
         String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
         buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
     }
@@ -166,5 +174,29 @@ public class APIManagerAnalyticsConfiguration {
 
     public boolean isBuildMsg() {
         return buildMsg;
+    }
+
+    public String getDasServerUrl() {
+        return dasServerUrl;
+    }
+
+    public void setDasServerUrl(String dasServerUrl) {
+        this.dasServerUrl = dasServerUrl;
+    }
+
+    public String getDasServerUser() {
+        return dasServerUser;
+    }
+
+    public void setDasServerUser(String dasServerUser) {
+        this.dasServerUser = dasServerUser;
+    }
+
+    public String getDasServerPassword() {
+        return dasServerPassword;
+    }
+
+    public void setDasServerPassword(String dasServerPassword) {
+        this.dasServerPassword = dasServerPassword;
     }
 }
