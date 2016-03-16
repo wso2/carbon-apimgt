@@ -24,7 +24,6 @@ import java.util.List;
 
 public class Policy implements Serializable{
     private String policyName;
-    private String userLevel;
     private String description;
     private QuotaPolicy defaultQuotaPolicy;
     private int tenantId;
@@ -39,14 +38,6 @@ public class Policy implements Serializable{
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public String getUserLevel() {
-        return userLevel;
-    }
-
-    public void setUserLevel(String userLevel) {
-        this.userLevel = userLevel;
     }
 
     public String getDescription() {
@@ -78,7 +69,6 @@ public class Policy implements Serializable{
         return "Policy{" +
                 "defaultQuotaPolicy=" + defaultQuotaPolicy +
                 ", policyName='" + policyName + '\'' +
-                ", userLevel='" + userLevel + '\'' +
                 ", description='" + description + '\'' +
                 ", tenantId=" + tenantId +
                 '}';
