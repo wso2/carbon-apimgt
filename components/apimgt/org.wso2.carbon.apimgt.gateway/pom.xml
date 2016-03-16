@@ -213,7 +213,6 @@
                             org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
                             org.osgi.framework.*,
-                            org.wso2.carbon.bam.service.data.publisher.*,
                             org.wso2.carbon.rest.api.stub.*,
                             org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.context,
