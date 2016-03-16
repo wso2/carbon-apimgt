@@ -54,7 +54,7 @@
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 %>
-<center>
+<!-- <center>
 <%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
@@ -78,7 +78,7 @@
 </ul>
 <%}%>
 
-</center>
+</center>-->
 	<div class="page-header">
  		<h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
         <% if(api){ %>
@@ -88,20 +88,34 @@
  	</div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
-    <div class="alert alert-danger" id="addAPIError" style="display:none">
-        <span id="addErrorSpan"></span>
-    </div>
-<%
-    if(api != null && api.subs > 0){%>
-    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
-        <span id="editWarnSpan"><b>Warning!</b><br/>
-        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.
-        </span>
-    </div>
-  <%  }%>
-
-    <div class="row">
+	    <div class="alert alert-danger" id="addAPIError" style="display:none">
+	        <span id="addErrorSpan"></span>
+	    </div>
+		<% if(api != null && api.subs > 0){%>
+		    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
+		        <span id="editWarnSpan"><b>Warning!</b><br/>
+		        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+		        active subscriptions.
+		        </span>
+		    </div>
+		  <%  }%>
+		  
+		  
+		  <div class="container">
+                <div class="row">
+                    <div class="wizard">
+                        <div class="wizard-inner">
+                        	<%if(createPermitted){%>
+	                            <ol class="wiz-nav-inner no-controls" >
+	                                <li class="wiz-step completed"><a href="<%= design_w_link %>"><span>1</span><span class="hidden-xs">Design</span></a></li>
+	                                <li class="wiz-step completed"><a href="<%= implement_w_link %>"><span>2</span><span class="hidden-xs">Implement</span></a></li>
+	                                <li class="wiz-step current"><a href="<%= manage_w_link %>"><span>3</span><span class="hidden-xs">Manage</span></a></li>
+	                            </ol>
+	                        <%} %>
+                        </div>
+                        <div class="wiz-content">
+                        
+                        		   <div class="row">
         <div class="col-sm-12">
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
@@ -462,6 +476,13 @@
 
 
     </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+ 
     </div>
     </div>
 </div>

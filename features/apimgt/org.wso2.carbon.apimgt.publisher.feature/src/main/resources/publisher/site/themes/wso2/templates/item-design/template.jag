@@ -39,7 +39,7 @@
 
     var implement_wlabel = "";    
     if(api && api.implementation != null){
-        implement_wlabel = "wizard-done"
+        implement_wlabel = "completed"
     }
     else{
         implement_w_link = '#';
@@ -47,40 +47,21 @@
 
     var manage_wlabel = "";
     if(api && api.availableTiers !=""){
-        manage_wlabel = "wizard-done";      
+        manage_wlabel = "completed";      
     }else{
         var manage_w_link = '#';        
     }         
 %>
-<center>
-<ul class="new-sub-menu-wizard" style="margin:0 auto">
-    <li>
-        <a href="<%= design_w_link %>" class="wizard-active">
-            <div class="wizard-number">1</div>
-            <span>Design</span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= implement_w_link %>" class="<%= implement_wlabel%>">
-            <div class="wizard-number">2</div>
-            <span>Implement</span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= manage_w_link %>" class="<%= manage_wlabel%>">
-            <div class="wizard-number" >3</div>
-            <span>Manage</span>
-        </a>
-    </li>
-</ul>
-</center>
+
+
 	<div class="page-header">
-        <% if(api){ %> 
+		<% if(api){ %>
             <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
-        <% } %>
-    </div>     
+        <% } %>    
+    </div> 
+
     <div class="content-section shadow-up">
     <div class="content-data">   
     <div class="alert alert-danger" id="addAPIError" style="display:none">
@@ -88,13 +69,290 @@
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
-        <span id="editWarnSpan"><b>Warning!</b><br/>
-        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.<br/>
-        </span>
-    </div>
-  <%  }%>
+	    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
+	        <span id="editWarnSpan"><b>Warning!</b><br/>
+	        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.<br/>
+	        </span>
+	    </div>
+  <% }%>
+<div class="container">
+                <div class="row">
+                    <div class="wizard">
+                        <div class="wizard-inner">
+                            <ol class="wiz-nav-inner no-controls" >
+                                <li class="wiz-step current"><a href="<%= design_w_link %>"><span>1</span><span class="hidden-xs">Design</span></a></li>
+                                <li class="wiz-step <%= implement_wlabel%>"><a href="<%= implement_w_link %>"><span>2</span><span class="hidden-xs">Implement</span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>"><span>3</span><span class="hidden-xs">Manage</span></a></li>
+                            </ol>
+                        </div>
+                        <div class="wiz-content">
+						    <div class="row">
+						        <div class="col-sm-12">     
+						            <form class="form-horizontal apim-form" method="POST"
+						              id="design_form"
+						              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
+						
+										<div id="accordion" role="tablist">
+										  <div class="panel panel-default">
+										    <div class="panel-heading" role="tab" id="headingOne">
+										      <h4 class="panel-title">
+										        <a data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+										          <strong><%=i18n.localize("generalDetailsTitle")%></strong>
+										        </a>
+										      </h4>
+										    </div>
+										    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+										      <div class="panel-body">
+										
+										<div class="row">
+										  <div class="col-md-6">
+										<% if(!api){ %>    
+										    <div class="form-group form-inline">
+										        <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
+										        <div class="col-sm-6">
+										            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
+										            <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
+										        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
+										        </div>        
+										    </div>
+										
+										    <div class="form-group">
+										        <label class="col-sm-4 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
+										        <div class="col-sm-6">
+										            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />            
+										        </div>
+										        <a class="help_popup" help_data="context_help"><i class="fa fa-question-circle"></i></a>
+										        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
+										    </div>
+										
+										    <div class="form-group">
+										        <label class="col-sm-4 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
+										        <div class="col-sm-4">
+										            <input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0, v1.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
+										        </div>
+										    </div>
+										    <% }else{ %>
+										                <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+										                <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+										                <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+										                <input type="hidden" name="context" value="<%= encode.forHtml(api.context) %>" />
+										    <% } %>
+										
+										    <div class="form-group">
+										        <label class="col-sm-4  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
+										        <div class="col-sm-6">
+										        <select class="select required form-control" id="visibility" name="visibility">
+										    <% mod = jagg.module("api");
+										     result = mod.isMultipleTenantsAvailable();
+										         var isMultipleTenantsAvailable = result.status;
+										    %>
+										            <% if (api) {%>
+										                <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
+										        <% if(isMultipleTenantsAvailable == true) {%>
+										                <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
+										        <% } %>
+										                <% if(!(enableRestrictByRoles == 'false')) {%>
+										                         <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
+										                <% } %>
+										                
+										            <%} else {%>
+										                <option value="public"><%=i18n.localize("public")%></option>
+										        <% if(isMultipleTenantsAvailable == true) {%>
+										                <option value="private"><%=i18n.localize("private")%></option>
+										        <% } %>
+										                <% if(!(enableRestrictByRoles == 'false')) {%>
+										                         <option value="restricted"><%=i18n.localize("restricted")%></option>
+										                <% } %> 
+										            <%}%>
+										        </select>
+										        </div>
+										        <a class="help_popup" help_data="role_help"><i class="fa fa-question-circle"></i></a>
+										        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
+										    </div>
+										
+										    <%if(api) { %>
+										        <div class="form-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
+										                <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+										                    <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
+										                </label>
+										                <div class="col-sm-6">
+										                    <input type="text" class="form-control required validInput validateRoles"
+										                    id="roles" name="roles"  value="<%=api.roles%>"/>
+										                    <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+										                </div>
+										            </div>
+										    <%} else {%>
+										        <div class="form-group" id="rolesDiv" style="display: none;">
+										            <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+										                <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
+										            </label>
+										            <div class="col-sm-6">
+										                <input type="text" class="form-control required validInput validateRoles"
+										                id="roles" name="roles"/>
+										                <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+										            </div>
+										        </div>
+										     <%}%>
+										
+										     <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+										         <div class="modal-header">
+										         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+										         <h3>API Publisher - Error</h3>
+										         </div>
+										         <div class="modal-body">
+										         <table>
+										             <tbody>
+										                 <tr>
+										                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10"></td>
+										                     <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
+										             </tbody>
+										         </table>
+										         </div>
+										         <div class="modal-footer successMsgFooter">
+										             <div class="pull-right">
+										             <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+										             </div>
+										         </div>
+										     </div>
+										
+										
+										
+										                <div class="form-group">
+										                   <label class="col-md-4 control-label" for="description"><%=i18n.localize("description")%>:</label>
+										                   <div class="col-md-8">
+										                       <textarea class="form-control validateDescriptionLength" id="description" name="description" rows="3"><%= _description %></textarea>
+										                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
+										                   </div>
+										               </div>
+										
+										                <div class="form-group">
+										                    <label class="col-md-4 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
+										                    <div class="col-md-7 tagContainer">
+										                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
+										                        onkeyup="$(this).validate()"/>
+										                        <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
+										                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
+										            <p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
+										                        <label class="tags-error error pull-left"></label>
+										                        <label class="add-tags-error error pull-left"></label>
+										                    </div>
+										                </div>      
+										  </div><!-- left -->
+										
+										  <div class="col-md-6">
+										        <div class="form-group">
+										            <label class="col-sm-12" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
+										            <div class="col-sm-12">
+										                <div class="fileinput fileinput-new" data-provides="fileinput">
+										                  <div class="fileinput-new thumbnail" style="width: 150px; height: 150px;">
+										                    <% if(api && api.thumb!=null){ %>
+										                        <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>" style="width: 150px; height: 150px;"/>                         
+										                    <% }else{ %>
+										                        <img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
+										                    <%}%>
+										                  </div>
+										                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
+										                  <div>
+										                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
+										                    <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+										                  </div>
+										                </div>
+										                <p class="help-block" id="rolesHelp"><%=i18n.localize("imgHelpMsg2")%></p>
+										            </div>
+										        </div>
+										  </div>  
+										</div>      
+										
+										      </div>
+										    </div>
+										  </div>
+										  <div class="panel panel-default">
+										    <div class="panel-heading" role="tab" id="headingTwo">
+										      <h4 class="panel-title">
+										        <a class="collapsed" data-toggle="collapse"  href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+										          <strong>API Definition</strong>
+										        </a>
+										      </h4>
+										    </div>
+										    <div id="collapseTwo" class="panel-collapse" role="tabpanel" aria-labelledby="headingTwo">
+										      <div class="panel-body">
+										                <% if(session.get("wsdl") || ( api && api.wsdl )) {
+										                    var wsdl = session.get("wsdl");
+										                    if(api && api.wsdl){
+										                        wsdl = api.wsdl;
+										                    }
+										
+										                    session.put( "wsdl", null );
+										                %>
+										                <div id="api_designer">                    
+										                    <div class="form-group api_wsdl">
+										                        <label class="col-sm-2 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+										                        <div class="col-sm-10">
+										                        <div class="input-append">
+										                        <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
+										                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
+										                        <a class="help_popup" help_data="wsdldesc_help"><i class="fa fa-question-circle"></i></a>
+										                        <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
+										                    </div>
+										                    <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
+										                </div>
+										                <% }else{ %>
+										                <div id="api_designer">
+										                    <a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
+										                    <a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>                
+										                    <div id ="resource_details">
+										                    </div>
+										                </div>      
+										                <% } %>      
+										      </div>
+										    </div>
+										  </div>  
+										</div>
+										      
+										    <%if(api!=null){%>
+										                <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
+										                <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
+										                <input type = "hidden" name = "techOwner" value = "<%=api.techOwner%>" />
+										                <input type = "hidden" name = "techOwnerMail" value = "<%=api.techOwnerMail%>" />
+										        			<%}%>
+										                <input type="hidden" name="action" value="design" />
+										                <input type="hidden" id="swagger" name="swagger" value="" />
+										                <div class="form-actions" style="display:none" id="saveMessage">
+										                    <div class="btn loadingButton">Saving API. Please wait..</div>
+										                </div>
+										                <div class="form-actions" id="saveButtons">
+										
+										                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>
+										                    <input type="hidden" value="Save" action="design"/>
+										
+										                    <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
+										
+										                </div>
+										                </div>
+										                </div>
+						            </form>						
+						        </div>
+						    </div>
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+	
 
 
 <script>
@@ -166,257 +424,6 @@
   </div>
 </div>
 
-
-
-    <div class="row">
-        <div class="col-sm-12">     
-            <form class="form-horizontal apim-form" method="POST"
-              id="design_form"
-              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
-
-<div id="accordion" role="tablist">
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-          <strong><%=i18n.localize("generalDetailsTitle")%></strong>
-        </a>
-      </h4>
-    </div>
-    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-      <div class="panel-body">
-
-<div class="row">
-  <div class="col-md-6">
-<% if(!api){ %>    
-    <div class="form-group form-inline">
-        <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-6">
-            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
-            <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
-        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
-        </div>        
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-4 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-6">
-            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />            
-        </div>
-        <a class="help_popup" help_data="context_help"><i class="fa fa-question-circle"></i></a>
-        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-4 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
-        <div class="col-sm-4">
-            <input type="text" class="form-control required validInput noSpace" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
-            <p class="help-block"><%=i18n.localize("versionsHelpMsg")%></p>
-        </div>
-    </div>
-    <% }else{ %>
-                <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
-                <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
-                <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
-                <input type="hidden" name="context" value="<%= encode.forHtml(api.context) %>" />
-    <% } %>
-
-    <div class="form-group">
-        <label class="col-sm-4  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
-        <div class="col-sm-6">
-        <select class="select required form-control" id="visibility" name="visibility">
-    <% mod = jagg.module("api");
-     result = mod.isMultipleTenantsAvailable();
-         var isMultipleTenantsAvailable = result.status;
-    %>
-            <% if (api) {%>
-                <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
-        <% if(isMultipleTenantsAvailable == true) {%>
-                <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
-        <% } %>
-                <% if(!(enableRestrictByRoles == 'false')) {%>
-                         <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
-                <% } %>
-                
-            <%} else {%>
-                <option value="public"><%=i18n.localize("public")%></option>
-        <% if(isMultipleTenantsAvailable == true) {%>
-                <option value="private"><%=i18n.localize("private")%></option>
-        <% } %>
-                <% if(!(enableRestrictByRoles == 'false')) {%>
-                         <option value="restricted"><%=i18n.localize("restricted")%></option>
-                <% } %> 
-            <%}%>
-        </select>
-        </div>
-        <a class="help_popup" help_data="role_help"><i class="fa fa-question-circle"></i></a>
-        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
-    </div>
-
-    <%if(api) { %>
-        <div class="form-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
-                <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
-                    <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
-                </label>
-                <div class="col-sm-6">
-                    <input type="text" class="form-control required validInput validateRoles"
-                    id="roles" name="roles"  value="<%=api.roles%>"/>
-                    <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
-                </div>
-            </div>
-    <%} else {%>
-        <div class="form-group" id="rolesDiv" style="display: none;">
-            <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
-                <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
-            </label>
-            <div class="col-sm-6">
-                <input type="text" class="form-control required validInput validateRoles"
-                id="roles" name="roles"/>
-                <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
-            </div>
-        </div>
-     <%}%>
-
-     <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-         <div class="modal-header">
-         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-         <h3>API Publisher - Error</h3>
-         </div>
-         <div class="modal-body">
-         <table>
-             <tbody>
-                 <tr>
-                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10"></td>
-                     <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
-             </tbody>
-         </table>
-         </div>
-         <div class="modal-footer successMsgFooter">
-             <div class="pull-right">
-             <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
-             </div>
-         </div>
-     </div>
-
-
-
-                <div class="form-group">
-                   <label class="col-md-4 control-label" for="description"><%=i18n.localize("description")%>:</label>
-                   <div class="col-md-8">
-                       <textarea class="form-control validateDescriptionLength" id="description" name="description" rows="3"><%= _description %></textarea>
-                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
-                   </div>
-               </div>
-
-                <div class="form-group">
-                    <label class="col-md-4 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
-                    <div class="col-md-7 tagContainer">
-                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
-                        onkeyup="$(this).validate()"/>
-                        <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
-            <p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
-                        <label class="tags-error error pull-left"></label>
-                        <label class="add-tags-error error pull-left"></label>
-                    </div>
-                </div>      
-  </div><!-- left -->
-
-  <div class="col-md-6">
-        <div class="form-group">
-            <label class="col-sm-12" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
-            <div class="col-sm-12">
-                <div class="fileinput fileinput-new" data-provides="fileinput">
-                  <div class="fileinput-new thumbnail" style="width: 150px; height: 150px;">
-                    <% if(api && api.thumb!=null){ %>
-                        <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>" style="width: 150px; height: 150px;"/>                         
-                    <% }else{ %>
-                        <img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
-                    <%}%>
-                  </div>
-                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
-                  <div>
-                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
-                    <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
-                  </div>
-                </div>
-                <p class="help-block" id="rolesHelp"><%=i18n.localize("imgHelpMsg2")%></p>
-            </div>
-        </div>
-  </div>  
-</div>      
-
-      </div>
-    </div>
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingTwo">
-      <h4 class="panel-title">
-        <a class="collapsed" data-toggle="collapse"  href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-          <strong>API Definition</strong>
-        </a>
-      </h4>
-    </div>
-    <div id="collapseTwo" class="panel-collapse" role="tabpanel" aria-labelledby="headingTwo">
-      <div class="panel-body">
-                <% if(session.get("wsdl") || ( api && api.wsdl )) {
-                    var wsdl = session.get("wsdl");
-                    if(api && api.wsdl){
-                        wsdl = api.wsdl;
-                    }
-
-                    session.put( "wsdl", null );
-                %>
-                <div id="api_designer">                    
-                    <div class="form-group api_wsdl">
-                        <label class="col-sm-2 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
-                        <div class="col-sm-10">
-                        <div class="input-append">
-                        <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
-                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
-                        <a class="help_popup" help_data="wsdldesc_help"><i class="fa fa-question-circle"></i></a>
-                        <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
-                    </div>
-                    <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
-                </div>
-                <% }else{ %>
-                <div id="api_designer">
-                    <a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
-                    <a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>                
-                    <div id ="resource_details">
-                    </div>
-                </div>      
-                <% } %>      
-      </div>
-    </div>
-  </div>  
-</div>
-      
-    <%if(api!=null){%>
-                <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
-                <input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
-                <input type = "hidden" name = "techOwner" value = "<%=api.techOwner%>" />
-                <input type = "hidden" name = "techOwnerMail" value = "<%=api.techOwnerMail%>" />
-        			<%}%>
-                <input type="hidden" name="action" value="design" />
-                <input type="hidden" id="swagger" name="swagger" value="" />
-                <div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
-                </div>
-                <div class="form-actions" id="saveButtons">
-
-                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>
-                    <input type="hidden" value="Save" action="design"/>
-
-                    <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
-
-                </div>
-                </div>
-                </div>
-            </form>
-
-        </div>
-    </div>
     </div>
     </div>
 </div>
