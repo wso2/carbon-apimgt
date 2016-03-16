@@ -53,5 +53,16 @@ var loadTenantRegistry = function (tenantDomain) {
     }    
 };
 
+var isGlobalCEPThrottlingEnabled = function() {
+    var carbon = require('carbon');
+    var log = new Log();
+    try{
+        var enabled = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("EnableGlobalCEPThrottling");
+        return enabled == 'true';
+    } catch (e) {
+        log.error("isGlobalCEPThrottlingEnabled" + e.message);
+        return false;
+    }
+};
 
 %>

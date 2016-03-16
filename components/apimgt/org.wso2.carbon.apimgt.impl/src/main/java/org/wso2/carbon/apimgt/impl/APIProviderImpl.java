@@ -3696,5 +3696,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policyNames;
     }
 
-    
+    public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(username);
+        apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
+    }
 }

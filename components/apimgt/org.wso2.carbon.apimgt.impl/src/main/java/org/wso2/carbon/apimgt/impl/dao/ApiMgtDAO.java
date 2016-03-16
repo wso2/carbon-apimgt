@@ -8344,10 +8344,12 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             deleteStatement = connection.prepareStatement(query);
             deleteStatement.setInt(1, tenantId);
             deleteStatement.setString(2, policyName);
-            deleteStatement.execute();
+            deleteStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             handleException("Failed to remove policy " + policyName, e);
         } finally {
