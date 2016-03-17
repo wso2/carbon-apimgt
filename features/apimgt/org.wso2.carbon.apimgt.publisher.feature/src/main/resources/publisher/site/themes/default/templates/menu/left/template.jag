@@ -26,6 +26,7 @@
     var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
     var tierPermissionsUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag");
     var tierPermissionsMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag");
+    var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
 
 	var page = request.getParameter("page");
     	if(page == null ) {
@@ -122,7 +123,11 @@
 			<li class="nav-header"><%=i18n.localize("tierPermissions")%></li>
 			<li <% if(reqUrl.indexOf(tierPermissionsUrl)>=0||reqUrl.indexOf(tierPermissionsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=tierPermissionsMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierPermissionsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("tierPermissions")%></a></li>
 		<%}%>
-        
+        <!-- TODO use correct permission when throttle policy management implement -->
+        <%if(isManageTierPermitted){%>
+			<li class="nav-header"><%=i18n.localize("throttlePolicies")%></li>
+			<li <% if(reqUrl.indexOf(throttlePolicyUrl)>=0||reqUrl.indexOf(throttlePolicyUrl)>=0){%>class="active"<% } %>><a href="<%=throttlePolicyUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=throttlePolicyUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("throttlePolicies")%></a></li>
+		<%}%>
      </ul>
 </div>
 
