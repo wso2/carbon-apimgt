@@ -219,7 +219,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private ApplicationPolicy getPolicyAppLevel(){
         ApplicationPolicy policy = new ApplicationPolicy("gold");
         
-        policy.setUserLevel(PolicyConstants.ACROSS_ALL); 
+       // policy.setUserLevel(PolicyConstants.ACROSS_ALL); 
         policy.setDescription("Description");    
        // policy.setPolicyLevel("app");
        
@@ -241,7 +241,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private GlobalPolicy getPolicyGlobalLevel(){
         GlobalPolicy policy = new GlobalPolicy("1");
         
-        policy.setUserLevel(PolicyConstants.ACROSS_ALL);
+        //policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
        // policy.setPolicyLevel("global");
        
