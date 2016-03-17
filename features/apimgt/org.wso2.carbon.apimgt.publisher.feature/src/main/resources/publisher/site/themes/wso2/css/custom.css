@@ -1,0 +1,200 @@
+.api-wrapper {
+	background-color: #EFEFEF;
+	position: relative;
+}
+
+.apim-form {
+	max-width: 100% !important;
+}
+
+div.image-container {
+	width: auto;
+	height: 100%;
+	overflow: hidden;
+}
+
+.app-data h5, .launch-app-data h5 {
+	margin-top: 0px;
+}
+
+.launch-app-data h4 {
+	margin-top: 0px;
+}
+
+.api-name-icon {
+	color: #fff;
+	width: 100%;
+	font-size: 6.5em;
+	text-align: center;
+	font-weight: 200;
+	text-transform: capitalize;
+}
+
+/* api Thumbnail image */
+.apiThumb {
+	min-width: 150px;
+	min-height: 150px;
+	max-height: 150px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	cursor: pointer;
+}
+
+
+.tab-content {
+	border-width: 0px 1px 1px 1px;
+	border-style: solid;
+	border-color: #ddd;
+	padding: 20px;
+	min-height: 300px
+}
+
+.center-wrapper{
+    margin:0 auto;
+    margin-left:auto;
+    margin-right:auto;
+    align:center;
+    text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+/* ========================================================================
+ * Media panels tablist
+ * ======================================================================== */
+
+#accordion h4 a{
+    text-decoration:none;
+    font-weight:bold;
+}
+#accordion h4 p{
+    padding:10px 20px;
+    margin-bottom:0px;
+}
+#accordion .panel{
+    margin-bottom:10px;
+}
+#accordion .panel-heading{
+    padding:10px;
+    background:#e2e2e2;
+    margin-bottom:0px;
+    border:none;
+}
+#accordion .panel-collapse{
+    padding:10px;
+    border:1px solid #e2e2e2;
+}
+
+/* ========================================
+ * Tooltip 
+ * ======================================== */
+
+.toolTip {
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: left;
+} 
+
+/* ========================================================================
+ * Wizard Component
+ * ======================================================================== */
+.wiz-nav-inner{
+    border: 1px solid #E5E5E5;
+    text-align: center;
+}
+.wiz-nav-inner{
+    list-style: none;
+    display: table;
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+}
+.wiz-nav-inner li {
+    display: table-cell;
+    border-right: 1px solid #E5E5E5;
+    text-align: center;
+    padding: 1.5% 2%;
+    border-bottom: 2px solid #3598db;
+}
+.wiz-nav-inner li span {
+    display: block;
+}
+.wiz-nav-inner .wiz-control {
+    padding: 1.5% 0.5%;
+    background-color: #EDE8EF;
+}
+.wiz-control i{
+    display: block;
+    margin-top: 15%;
+    margin-bottom: 15%;
+}
+.wiz-step {
+    position: relative;
+}
+.wiz-step.current{
+    background-color: #3598db;
+    color: #fff;
+}
+.wiz-step.current:before{
+    border-left-color: #E5E5E5;
+}
+.wiz-step.current:after{
+    border-left-color: #3598db;
+}
+.wiz-step.completed{
+    background-color: #344860;
+    color: #fff;
+}
+.wiz-step.completed:before{
+    border-left-color: #E5E5E5;
+}
+.wiz-step.completed:after{
+    border-left-color: #344860;
+}
+.wiz-step:after, .wiz-step:before {
+    left: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.wiz-step:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-left-color: #FFFFFF;
+    border-width: 11px;
+    margin-top: -11px;
+    z-index: 2;
+}
+.wiz-step:before {
+    border-color: rgba(194, 225, 245, 0);
+    border-left-color: #E5E5E5;
+    border-width: 13px;
+    margin-top: -13px;
+    z-index: 1;
+}
+.with-controls li:nth-last-child(2):before, .with-controls li:nth-last-child(2):after{
+    border: 0px;
+}
+.no-controls li:nth-last-child(1):before, .no-controls li:nth-last-child(1):after{
+    border: 0px;
+}
+.wiz-content{
+    min-height: 300px;
+    border-left: 1px solid #E5E5E5;
+    border-right: 1px solid #E5E5E5;
+    border-bottom: 2px solid #3598db;
+    margin-top: -1px;
+}

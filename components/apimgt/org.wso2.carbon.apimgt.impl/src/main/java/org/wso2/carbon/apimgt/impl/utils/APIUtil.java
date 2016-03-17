@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -91,9 +92,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
-import org.wso2.carbon.bam.service.data.publisher.conf.RESTAPIConfigData;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -2689,8 +2687,9 @@ public final class APIUtil {
     /**
      * Load the throttling policy  to the registry for tenants
      *
-     * @param tenant
      * @param tenantID
+     * @param location
+     * @param fileName
      * @throws APIManagementException
      */
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
@@ -3037,70 +3036,7 @@ public final class APIUtil {
     }
 
     public static boolean isAnalyticsEnabled() {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        if (serviceDataPublisherAdmin != null) {
-            return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
-        }
-        return false;
-    }
-
-
-    /**
-     * If Analytics is enabled through api-manager.xml this method will write the details to registry.
-     *
-     * @param configuration api-manager.xml
-     */
-    public static void writeAnalyticsConfigurationToRegistry(APIManagerConfiguration configuration) {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        String usageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        if (usageEnabled != null && serviceDataPublisherAdmin != null) {
-            log.debug("APIUsageTracking set to : " + usageEnabled);
-            boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
-            EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
-            RESTAPIConfigData restApiConfigData = serviceDataPublisherAdmin.getRestAPIConfigData();
-            eventingConfigData.setServiceStatsEnable(usageEnabledState);
-            try {
-                if (usageEnabledState) {
-                    String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-                    String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                    String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                    eventingConfigData.setUrl(bamServerURL);
-                    eventingConfigData.setUserName(bamServerUser);
-                    eventingConfigData.setPassword(bamServerPassword);
-
-                    String restAPIURL = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
-                    String restAPIUser = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
-                    String restAPIPassword = configuration
-                            .getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
-                    restApiConfigData.setUrl(restAPIURL);
-                    restApiConfigData.setUserName(restAPIUser);
-                    restApiConfigData.setPassword(restAPIPassword);
-                    if (log.isDebugEnabled()) {
-                        log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
-                                "BAMServerPassword : " + bamServerPassword);
-                    }
-                    APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, MultitenantConstants.SUPER_TENANT_ID);
-                }
-
-                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
-                serviceDataPublisherAdmin.configureRestAPI(restApiConfigData);
-            } catch (APIManagementException e) {
-                log.error("Error occurred while adding BAMServerProfile", e);
-            } catch (Exception e) {
-                log.error("Error occurred while updating EventingConfiguration", e);
-            }
-        }
-    }
-
-    public static Map<String, String> getAnalyticsConfigFromRegistry() {
-
-        Map<String, String> propertyMap = new HashMap<String, String>();
-        EventingConfigData eventingConfigData = APIManagerComponent.
-                getDataPublisherAdminService().getEventingConfigData();
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS, eventingConfigData.getUrl());
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_USER, eventingConfigData.getUserName());
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_PASSWORD, eventingConfigData.getPassword());
-        return propertyMap;
+        return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
 
     /**

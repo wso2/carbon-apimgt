@@ -5,10 +5,15 @@ jagg.block("menu/primary", {
     },
 
     getOutputs:function (inputs) {
-
+       
+        var tenantDomain=request.getParameter("tenant");
         var user =jagg.getUser();
         return {
-            "user": user
+            "user": user,
+            "breadcrumb": [{
+                "name":"breadcumb",
+                "inputs":{"tenant":tenantDomain}
+            }], 
         };
     }
 

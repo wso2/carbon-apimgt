@@ -41,6 +41,12 @@
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
 
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
 </script>
 <div id="item-add">
 <%
@@ -179,6 +185,47 @@
                 <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                 </div>
              </div>
+
+            <% if (isSynapseGateway) { %>
+
+            <div class="form-group">
+                            <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("throttle")%></label>
+                            <div class="controls col-sm-8">
+                            <label class="checkbox">
+                                <input type="checkbox" id="toggleThrottle" name="throttle_check" id="throttle_check"
+                            <%
+                            if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+                            checked="checked"<%}%>><%=i18n.localize("throttleMsg")%>
+                            </label>
+                            <table class="table table-bordered table-striped" id="throttleTable"
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th><%=i18n.localize("maxCount")%></th>
+                                    </tr>
+                                </thead>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("prodLimit")%>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("sandLimit")%>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+            <%}%>
+
 
             <!--Response Caching -->
                 <div class="form-group form-inline">
@@ -377,7 +424,9 @@
                 <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
                 <input type="hidden" name="action" value="manage" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
-
+				<div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
                 <div class="form-actions" id="saveButtons">
 
                     <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
@@ -551,10 +600,13 @@
                                      var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
                                      var divPublish="",divUnpublished="";
                                      for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
-                                        divPublish+=failedToPublishEnvironments.split(",")[i]+"<br>";
+                                        var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
+                                        divPublish+=splitPublished[0]+"<br>"+splitPublished[1]+"<br>";
                                          }
                                      for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
-                                        divUnpublished+=failedToUnpublishedEnvironments.split(",")[i]+"<br>";
+                                        var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
+
+                                        divUnpublished+=splitUnPublished[0]+"<br>"+splitUnPublished[1]+"<br>";
                                          }
                                        $( "#modal-published-content" ).empty();
                                        $( "#modal-unpublished-content" ).empty();
@@ -661,6 +713,11 @@
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
             thisID = $(this).attr('id');
+                if(!$("#toggleThrottle").attr('checked')) {
+                // Setting text field values to null if check box is not selected.
+                    $('#productionTps').val(null);
+                    $('#sandboxTps').val(null);
+            } 
             $("#manage_form").submit();
         });
 
