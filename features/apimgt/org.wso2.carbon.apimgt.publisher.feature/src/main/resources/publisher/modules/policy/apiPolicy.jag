@@ -206,7 +206,7 @@ var jsonToObject = function (policy) {
         var defaultQuotaPolicyBandwidth = policy.defaultQuotaPolicy.limit.dataAmount;
         var defaultQuotaPolicyDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
 
-        alert(policyName + policyLevel + enabled + quotaPolicyType + requestCount + id + defaultQuotaPolicyBandwidth + defaultQuotaPolicyDataUnit);
+        return apiPolicyobj;
     } catch (ex) {
         var errorMessage = "Error occurred while adding policy";
         log.error(errorMessage);
@@ -214,8 +214,6 @@ var jsonToObject = function (policy) {
             error: true,
             message: errorMessage
         };
-
-        return apiPolicyobj;
     }
 };
 %>
