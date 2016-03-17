@@ -24,7 +24,7 @@ jagg.initializer("policy-add", {
 
          jagg.addFooterJS("yaml2json", "jagg", "templates/item-design/js/js-yaml.min.js");
          jagg.addFooterJS("url-validation", "jagg", "templates/utils/url-validation/url-validation.js");
-         jagg.addFooterJS("policy-add", "jagg", "templates/policy-add/js/policy-design.js");
+         //jagg.addFooterJS("policy-add", "jagg", "templates/policy-add/js/policy-design.js");
          jagg.addFooterJS("policy-add", "jagg", "templates/policy-add/js/policy-create.js");
          jagg.addFooterJS("policy-add", "jagg", "templates/policy-add/js/policy-designer-new.js");
     }
