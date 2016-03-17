@@ -38,26 +38,49 @@ var getApplicationTiers = function () {
         } else {
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer();
         }
+       
+        if(isGlobalCEPThrottlingEnabled) {
+            var tierList = store.getPolicies(username,org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_APP);
+            //var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
 
-        var tiers = store.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_APPLICATION_TYPE, username);
-        var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
+            for(i = 0; i < tierList.length; i++) {
+                tier = {};
+                tier.tierName = tierList[i].getPolicyName();
+                tier.tierDisplayName = tierList[i].getPolicyName();
+                tier.tierDescription = tierList[i].getDescription() != null ? tierList[i].getDescription() : "";
+                //tier.defaultTier = (i == 0);
+                tierArray[i] = tier;                
+            }
 
-        for(i = 0; i < tierList.size(); i++) {
-            tier = {};
-            tier.tierName = tierList.get(i).getName();
-            tier.tierDisplayName = tierList.get(i).getDisplayName();
-            tier.tierDescription = tierList.get(i).getDescription() != null ? tierList.get(i).getDescription() : "";
-            tier.defaultTier = (i == 0);
-            tierArray[i] = tier;
-        }
+            if (log.isDebugEnabled()) {
+                log.debug("getTiers : " + stringify(tierArray));
+            }
+            return {
+                error:false,
+                tiers:tierArray
+            };     
+         } else {
+            var tiers = store.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_APPLICATION_TYPE, username);
+            var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
 
-        if (log.isDebugEnabled()) {
-            log.debug("getTiers : " + stringify(tierArray));
-        }
-        return {
-            error:false,
-            tiers:tierArray
-        };
+            for(i = 0; i < tierList.size(); i++) {
+                tier = {};
+                tier.tierName = tierList.get(i).getName();
+                tier.tierDisplayName = tierList.get(i).getDisplayName();
+                tier.tierDescription = tierList.get(i).getDescription() != null ? tierList.get(i).getDescription() : "";
+                tier.defaultTier = (i == 0);
+                tierArray[i] = tier;
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("getTiers : " + stringify(tierArray));
+            }
+            return {
+                error:false,
+                tiers:tierArray
+            };
+         }
+       
     } catch (e) {
         log.error(e.message);
         return {
