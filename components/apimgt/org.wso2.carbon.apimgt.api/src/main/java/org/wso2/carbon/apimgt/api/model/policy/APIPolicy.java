@@ -23,6 +23,15 @@ import java.util.List;
 public class APIPolicy extends Policy {
 
     private List<Pipeline> pipelines;
+    private String userLevel;
+
+    public String getUserLevel() {
+        return userLevel;
+    }
+
+    public void setUserLevel(String userLevel) {
+        this.userLevel = userLevel;
+    }
 
     public APIPolicy(String name) {
         super(name);
