@@ -63,7 +63,7 @@ $(document).ready(function(){
 
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
-        var designer = PolicyDesigner();
+        var designer = APIDesigner();
         APP.update_ep_config("managed");
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
@@ -72,7 +72,7 @@ $(document).ready(function(){
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
              if (!responseText.error) {
-                var designer = PolicyDesigner();
+                var designer = APIDesigner();
                 designer.saved_api = {};
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
@@ -111,7 +111,7 @@ $(document).ready(function(){
 
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
-        var designer = PolicyDesigner();
+        var designer = APIDesigner();
         var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http","implementation_status":"prototyped"}
         $('.swagger').val(JSON.stringify(designer.api_doc));
         $('.prototype_config').val(JSON.stringify(endpoint_config));
@@ -121,7 +121,7 @@ $(document).ready(function(){
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
              if (!responseText.error) {
-                var designer = PolicyDesigner();
+                var designer = APIDesigner();
                 designer.saved_api = {};
                 designer.saved_api.name = responseText.data.apiName;
                 designer.saved_api.version = responseText.data.version;
@@ -155,7 +155,7 @@ $(document).ready(function(){
     $("#prototyped_api").click(function(e){
         $("body").on("prototype_saved", function(e){
             $("body").unbind("prototype_saved");
-                var designer = PolicyDesigner();
+                var designer = APIDesigner();
                 $.ajax({
                     type: "POST",
                     url: jagg.site.context + "/site/blocks/life-cycles/ajax/life-cycles.jag",
