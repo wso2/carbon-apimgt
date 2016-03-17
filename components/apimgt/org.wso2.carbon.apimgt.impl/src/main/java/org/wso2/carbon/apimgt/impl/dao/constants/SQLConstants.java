@@ -2018,6 +2018,12 @@ public class SQLConstants {
                     "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, USER_LEVEL) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?)";
 
+    public static final String INSERT_API_POLICY_WITH_ID_SQL =
+            "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
+                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n" +
+                    "USER_LEVEL, POLICY_ID) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+
     public static final String INSERT_CONDITION_SQL =
             "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE, \n" +
                     "ENDING_DATE,SPECIFIC_DATE,QUOTA_POLICY_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n" +
@@ -2121,6 +2127,39 @@ public class SQLConstants {
                     "   AM_GLOBAL_POLICY " +
                     " WHERE" +
                     "   AND TENANT_ID =?";
+
+    public static final String GET_API_POLICY_ID_SQL =
+            "SELECT " +
+                    "POLICY_ID " +
+                    "FROM " +
+                    "AM_POLICY_API " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_POLICY_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_POLICY_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String DELETE_API_POLICY_SQL =
             "DELETE FROM AM_POLICY_API WHERE TENANT_ID = ? AND NAME = ?";
