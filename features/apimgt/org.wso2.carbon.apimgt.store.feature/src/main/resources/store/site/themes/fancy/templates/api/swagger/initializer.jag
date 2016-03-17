@@ -14,6 +14,8 @@ jagg.initializer("api/swagger", {
 		jagg.addHeaderJS("api/api-info", "api-info8", "templates/api/swagger/swagger/swagger-ui.min.js");
 		jagg.addHeaderJS("api/api-info", "api-info9", "templates/api/swagger/swagger/lib/highlight.7.3.pack.js");
 		jagg.addHeaderJS("api/api-info", "api-info10", "templates/api/swagger/swagger/lib/marked.js");
+		jagg.addHeaderJS("api/api-info", "api-info11", "templates/api/swagger/swagger/lib/swagger-oauth.js");
+		jagg.addHeaderJS("api/api-info", "api-info12", "templates/api/swagger/swagger/lib/jsoneditor.min.js");
 
 		jagg.addHeaderCSS("api/api-info", "api-info13", "templates/api/swagger/swagger/css/screen.css");
 		jagg.addHeaderCSSCode("api/api-info", "api-info15", "#swagger-ui-container {max-width: 100%;}");

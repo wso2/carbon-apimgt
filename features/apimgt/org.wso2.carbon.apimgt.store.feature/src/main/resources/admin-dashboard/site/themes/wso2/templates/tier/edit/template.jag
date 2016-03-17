@@ -1,0 +1,160 @@
+<% jagg.template("tier/edit", function(inputs, outputs, jagg) { %>
+	<%
+        var tierName = request.getParameter("tierName");
+        var pageTitle = i18n.localize("tierAddTitle");
+        var nameFieldDisableStatus = "";
+
+        if(tierName != null){
+            pageTitle = i18n.localize("tierEditTitle");
+            nameFieldDisableStatus = "readonly";
+            var tiers = session.get("tiers");
+            var tier;
+            // tiers contains a Set<Tier> that was returned. Hence we need to get the correct tier and proceed
+            var tierArray = tiers.toArray();
+            for(j = 0; j < tiers.size(); j++) {
+                if(tierName.equalsIgnoreCase(tierArray[j].getName())){
+                    tier = tierArray[j];
+                    break;
+                }
+            }
+
+            var tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
+            var description = tier.getDescription() == null ? "" : tier.getDescription();
+            var stopOnQuotaReached = tier.isStopOnQuotaReached();
+            var unitTime = tier.getUnitTime() == null ? "" : (tier.getUnitTime()/1000).toString();
+            var requestCount = tier.getRequestCount() == null ? "" : tier.getRequestCount();
+            var customAttributes = tier.getTierAttributes();
+            var customAttributeList = {};
+            var isCustomAttributesExist = false;
+
+            if(customAttributes != null){
+                isCustomAttributesExist = true;
+                var numberOfCustomAttributes = customAttributes.size();
+                for(i = 0; i < numberOfCustomAttributes; i++ ){
+                    var attributeName = customAttributes.keySet().toArray()[i];
+                    var attributeValue = customAttributes.get(attributeName);
+                    customAttributeList[attributeName] = attributeValue;
+                }
+            }
+        }
+	%>
+
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+    <div class="title-section">
+        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+    </div>
+
+    <div class="content-section shadow-up">
+        <div class="content-data">
+            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+            <div class="row-fluid">
+                <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                    action="/admin-dashboard/site/blocks/tier/edit/ajax/tier-edit.jag">
+                    <fieldset>
+                        <legend>General Details</legend>
+
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("tierName")%>
+                                <span class="requiredAstrix">*</span></label>
+                            <div class="controls cnls">
+                                <input type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("requestCount")%>
+                                <span class="requiredAstrix">*</span></label>
+                            <div class="controls cnls">
+                                <input type="text" id="requestCount" name="requestCount" />
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("unitTime")%>
+                                <span class="requiredAstrix">*</span></label>
+                            <div class="controls cnls">
+                                <input type="text" id="unitTime" name="unitTime" />
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
+                            <div class="controls cnls">
+                                <textarea id="description" class="text" cols="40" rows ="4" name="description">
+                                </textarea>
+                            </div>
+                        </div>
+
+                        <legend>Policy Flags (WSO2 Specific Attributes)</legend>
+
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("stopOnQuotaReach")%></label>
+                            <div class="controls cnls">
+                                <input type="checkbox" id="stopOnQuotaReach" name="stopOnQuotaReach"/>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("tierPlan")%></label>
+                            <div class="controls cnls">
+                                <select class="select required" id="tierPlan" name="tierPlan" style="width:15%">
+                                    <option value="FREE" selected="true">Free</option>
+                                    <option value="COMMERCIAL">Commercial</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <legend>Custom Attributes</legend>
+
+                        <div class="control-group cnl-group">
+                            <button id="add-attribute-btn" name="add-attribute-btn" type="button" class="btn"
+                                value="<%=i18n.localize('customAttributes')%>" >
+                                <i class="icon-plus-sign"></i>
+                                    Add Custom Attribute
+                            </button>
+                            <table id="custom-attribute-table">
+                                <tbody id="custom-attribute-tbody" name="custom-attribute-tbody"/>
+                            </table>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-actions">
+                        <input id="add-tier-btn" onclick="addTier()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
+                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        var isNewTier = true;
+        if('<%=tierName%>' != 'null'){
+            isNewTier = false;
+        }
+        if(!isNewTier){
+            $('#tierName').val("<%=tierName%>");
+            $('#tierPlan').val("<%=tierPlan%>");
+            $('#description').val("<%=description%>");
+            $('#unitTime').val("<%=unitTime%>");
+            $('#requestCount').val("<%=requestCount%>");
+
+            $('#stopOnQuotaReach').prop('checked', <%=stopOnQuotaReached%>);
+
+            if('<%=isCustomAttributesExist%>' == 'true'){
+//                var customAttributeListOfCurrentTier = <%=customAttributeList%>;
+                populateCustomerAttributes(<%=customAttributeList%>);
+            }
+        }
+        $('#cancel-tier-btn').on('click',function(){
+             location.href = "<%= jagg.url('/tier-manage')%>"; 
+        });
+    });
+</script>
+
+<%});%>

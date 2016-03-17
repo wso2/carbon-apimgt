@@ -386,6 +386,27 @@ $(document).ready(function () {
         ]
     };
 
+    APP.form.default_endpoint = {
+        "schema": {
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoint"),
+                "type": "endpoint"
+            },
+            sandbox_endpoints: {
+                title: i18n.t("endpointUi.Sandbox Endpoint"),
+                type: 'endpoint'
+
+            }
+        },
+        form: [{
+            key: 'production_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
+        }, {
+            key: 'sandbox_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
+        }]
+    };
+
 // this will convert the config in to json form value
     APP.endpointConfig2JsonForm = function(config){
 
@@ -494,6 +515,14 @@ $(document).ready(function () {
         }
         else{
             $('.api_wsdl').show();
+        }
+
+        if($('#endpoint_type').val() == 'default'){
+            $('[name="production_endpoints"]').val("Default");
+            $('[name="production_endpoints"]').attr('readonly','readonly');
+            $('[name="sandbox_endpoints"]').val("Default");
+            $('[name="sandbox_endpoints"]').attr('readonly','readonly');
+            $("#help-block").text("Please upload the sequence file to Message Mediation Policies having TO header ");
         }
     });
 

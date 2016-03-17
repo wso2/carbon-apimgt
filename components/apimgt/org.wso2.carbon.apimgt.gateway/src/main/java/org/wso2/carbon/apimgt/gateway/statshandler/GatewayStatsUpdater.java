@@ -28,8 +28,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.AbstractAdmin;
 
@@ -41,6 +39,7 @@ public class GatewayStatsUpdater extends AbstractAdmin {
 
     private static final Log log = LogFactory.getLog(GatewayStatsUpdater.class);
 
+    //commented since it is not required
     /**
      * This method updates the stat publishing status in gateway domain
      *
@@ -53,7 +52,7 @@ public class GatewayStatsUpdater extends AbstractAdmin {
      * @throws Exception if an error occurs while updating EventingConfiguration
      */
 
-    public void updateStatPublishGateway(String receiverUrl, String user, String password, Boolean statUpdateStatus)
+    /*public void updateStatPublishGateway(String receiverUrl, String user, String password, Boolean statUpdateStatus)
             throws APIManagementException, ClusteringFault, Exception {
 
         if (log.isDebugEnabled()) {
@@ -112,5 +111,5 @@ public class GatewayStatsUpdater extends AbstractAdmin {
             }
             clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus, receiverUrl, user, password), true);
         }
-    }
+    }*/
 }
