@@ -22,7 +22,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Policy implements Serializable{
+public class Policy implements Serializable {
+    private int policyId;
     private String policyName;
     private String userLevel;
     private String description;
@@ -30,7 +31,9 @@ public class Policy implements Serializable{
     private int tenantId;
 
     public Policy(String name){
-        this.policyName=name;
+        this.policyName = name;
+        this.policyId = -1;
+        this.tenantId = -1;
     }
 
     public int getTenantId() {
@@ -71,6 +74,14 @@ public class Policy implements Serializable{
 
     public QuotaPolicy getDefaultQuotaPolicy() {
         return defaultQuotaPolicy;
+    }
+
+    public int getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(int policyId) {
+        this.policyId = policyId;
     }
 
     @Override
