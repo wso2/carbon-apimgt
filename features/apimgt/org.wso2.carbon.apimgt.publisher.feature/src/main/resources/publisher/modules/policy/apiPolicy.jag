@@ -2,219 +2,220 @@
 
 var log = new Log();
 // adding apiPolicy
-var addApiPolicy = function(policy) {
-  var policy = jsonToObject(policy);
-  try{
-    var provider = jagg.getUser().username;
-    var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-    var apiProvider = new APIProviderImpl(provider);
+var addApiPolicy = function (policy) {
+    var policy = jsonToObject(policy);
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
 
-    var apiPolicy = jsonToObject(policy);
+        var apiPolicy = jsonToObject(policy);
 
-    apiProvider.addPolicy(apiPolicy);
-    log.info(apiPolicy.toString());
-    return {
-        error: false
-    };
-  } catch (ex) {
-    var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
-    log.error(errorMessage);
-    return {
-        error: true,
-        message: errorMessage
-    };
-  }
+        apiProvider.addPolicy(apiPolicy);
+        log.info(apiPolicy.toString());
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
 }
 
 // inserting json file data to ApiPolicy Object
-var jsonToObject = function  (policy) {
+var jsonToObject = function (policy) {
 
-  try{
+    try {
 
-    var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.APIPolicy;
-    var AppPolicy = Packages.org.wso2.carbon.apimgt.api.model.ApplicationPolicy;
-    var SubPolicy = Packages.org.wso2.carbon.apimgt.api.model.SubscriptionPolicy;
-    var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.IPCondition;
-    var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.IPRangeCondition;
-    var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.DateCondition;
-    var DateRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.DateRangeCondition;
-    var HeaderCondition = Packages.org.wso2.carbon.apimgt.api.model.HeaderCondition;
-    var HTTPVerbCondition = Packages.org.wso2.carbon.apimgt.api.model.HTTPVerbCondition;
-    var JWTClaimsCondition = Packages.org.wso2.carbon.apimgt.api.model.JWTClaimsCondition;
-    var QueryParameterCondition = Packages.org.wso2.carbon.apimgt.api.model.QueryParameterCondition;
-    var Limit = Packages.org.wso2.carbon.apimgt.api.model.Limit;
-    var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.RequestCountLimit;
-    var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.BandwidthLimit;
-    var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.Pipeline;
-    var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.QuotaPolicy;
+        var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.APIPolicy;
+        var AppPolicy = Packages.org.wso2.carbon.apimgt.api.model.ApplicationPolicy;
+        var SubPolicy = Packages.org.wso2.carbon.apimgt.api.model.SubscriptionPolicy;
+        var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.IPCondition;
+        var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.IPRangeCondition;
+        var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.DateCondition;
+        var DateRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.DateRangeCondition;
+        var HeaderCondition = Packages.org.wso2.carbon.apimgt.api.model.HeaderCondition;
+        var HTTPVerbCondition = Packages.org.wso2.carbon.apimgt.api.model.HTTPVerbCondition;
+        var JWTClaimsCondition = Packages.org.wso2.carbon.apimgt.api.model.JWTClaimsCondition;
+        var QueryParameterCondition = Packages.org.wso2.carbon.apimgt.api.model.QueryParameterCondition;
+        var Limit = Packages.org.wso2.carbon.apimgt.api.model.Limit;
+        var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.RequestCountLimit;
+        var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.BandwidthLimit;
+        var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.Pipeline;
+        var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.QuotaPolicy;
 
-    // Extracting basic policy info
-    var policyName = policy.policyName;
-    var policyLevel = policy.policyLevel;
-    var policyDescription = policy.policyDescription;
-    var i = 0;    //to iterate through execution flows
-    var pipeline = policy.executionFlows;
+        // Extracting basic policy info
+        var policyName = policy.policyName;
+        var policyLevel = policy.policyLevel;
+        var policyDescription = policy.policyDescription;
+        var i = 0;    //to iterate through execution flows
+        var pipeline = policy.executionFlows;
 
-    var apiPolicyobj = new APIPolicy(policyName);
-    APIPolicy.setDescription(policyDescription);
-    var pipelineObj = new Pipeline();
-    //exract pipeline info
-    while ( pipeline[i]) {
-      var pipe = new Pipeline();
-      var quotaPolicy = new QuotaPolicy();
-      var limit = new Limit();
-      var requestCountLimit = new RequestCountLimit();
-      var bandwidthLimit = new BandwidthLimit();
-      var enabled = pipeline[i].enabled;
-      var quotaPolicyType = pipeline[i].quotaPolicy.type;
-      var requestCount = pipeline[i].quotaPolicy.limit.requestCount;
-      var timeUnit = pipeline[i].quotaPolicy.limit.timeUnit;
-      var dataAmount = pipeline[i].quotaPolicy.limit.dataAmount;
-      var dataUnit = pipeline[i].quotaPolicy.limit.dataUnit;
-      var id =  pipeline[i].id;
-      var conditionsList = new ArrayList();
-      pipe.setEnabled(enabled);
-      quotaPolicy.setType(quotaPolicyType);
-      if(quotaPolicyType=="RequestCount"){
-        var requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount();
-        requestCountLimit.setTimeUnit();
-        requestCountLimit.setUnitTime();
-        quotaPolicy.setLimit(requestCountLimit);
-      }else if(quotaPolicyType=="Bandwidth"){
-        var bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount();
-        bandwidthLimit.setDataUnit();
-        quotaPolicy.setLimit(bandwidthLimit);
-      }
+        var apiPolicyobj = new APIPolicy(policyName);
+        APIPolicy.setDescription(policyDescription);
+        var pipelineObj = new Pipeline();
+        //exract pipeline info
+        while (pipeline[i]) {
+            var pipe = new Pipeline();
+            var quotaPolicy = new QuotaPolicy();
+            var limit = new Limit();
+            var requestCountLimit = new RequestCountLimit();
+            var bandwidthLimit = new BandwidthLimit();
+            var enabled = pipeline[i].enabled;
+            var quotaPolicyType = pipeline[i].quotaPolicy.type;
+            var requestCount = pipeline[i].quotaPolicy.limit.requestCount;
+            var timeUnit = pipeline[i].quotaPolicy.limit.timeUnit;
+            var dataAmount = pipeline[i].quotaPolicy.limit.dataAmount;
+            var dataUnit = pipeline[i].quotaPolicy.limit.dataUnit;
+            var id = pipeline[i].id;
+            var conditionsList = new ArrayList();
+            pipe.setEnabled(enabled);
+            quotaPolicy.setType(quotaPolicyType);
+            if (quotaPolicyType == "RequestCount") {
+                var requestCountLimit = new RequestCountLimit();
+                requestCountLimit.setRequestCount();
+                requestCountLimit.setTimeUnit();
+                requestCountLimit.setUnitTime();
+                quotaPolicy.setLimit(requestCountLimit);
+            } else if (quotaPolicyType == "Bandwidth") {
+                var bandwidthLimit = new BandwidthLimit();
+                bandwidthLimit.setDataAmount();
+                bandwidthLimit.setDataUnit();
+                quotaPolicy.setLimit(bandwidthLimit);
+            }
 
-      var j = 0;   //to iterate through conditions
-      var condition = pipeline[i].conditions;
-      var pipeLines = new ArrayList();
+            var j = 0;   //to iterate through conditions
+            var condition = pipeline[i].conditions;
+            var pipeLines = new ArrayList();
 
-      //extract conditions within a pipeline
-      while (condition[j]){
-        var type = condition[j].type;
-        var invertCondition = condition[j].invertCondition;
-        var conditionEnabled = condition[j].enabled;
-        if(type == "IP"){
-          var ipType = condition[j].ipType;
-          var startingIP = condition[j].startingIP;
-          var endingIP = condition[j].endingIP;
-          var specificIP = condition[j].specificIP;
-          //check if the IP is specific
-          if(ipType=="specific"){ 
-            var ipSpecific = new IPCondition();
-            ipSpecific.setSpecificIP(specificIP);
-            ipSpecific.setInvertCondition(invertCondition);
-            ipSpecific.setConditionEnabled(conditionEnabled);
-            conditionsList.add(ipSpecific);
-          }else{  //if IP range is given
-            var ipRange = new IPRangeCondition();
-            ipRange.setStartingIP(startingIP);
-            ipRange.setEndingIP(endingIP);
-            ipRange.setInvertCondition(invertCondition);
-            ipRange.setConditionEnabled(conditionEnabled);
-            conditionsList.add(ipRange);
-          }
+            //extract conditions within a pipeline
+            while (condition[j]) {
+                var type = condition[j].type;
+                var invertCondition = condition[j].invertCondition;
+                var conditionEnabled = condition[j].enabled;
+                if (type == "IP") {
+                    var ipType = condition[j].ipType;
+                    var startingIP = condition[j].startingIP;
+                    var endingIP = condition[j].endingIP;
+                    var specificIP = condition[j].specificIP;
+                    //check if the IP is specific
+                    if (ipType == "specific") {
+                        var ipSpecific = new IPCondition();
+                        ipSpecific.setSpecificIP(specificIP);
+                        ipSpecific.setInvertCondition(invertCondition);
+                        ipSpecific.setConditionEnabled(conditionEnabled);
+                        conditionsList.add(ipSpecific);
+                    } else {  //if IP range is given
+                        var ipRange = new IPRangeCondition();
+                        ipRange.setStartingIP(startingIP);
+                        ipRange.setEndingIP(endingIP);
+                        ipRange.setInvertCondition(invertCondition);
+                        ipRange.setConditionEnabled(conditionEnabled);
+                        conditionsList.add(ipRange);
+                    }
 
-        }else if ( type == "Date"){
-          var dateType = condition[j].dateType;
-          var startingDate = condition[j].startingDate;
-          var endingDate = condition[j].endingDate;
-          var specificDate  = condition[j].specificDate;
-          //if the date is specific
-          if(dateType=="specific")
-            var dateSpecific = new DateCondition();
-            dateSpecific.setSpecificDate(specificDate);
-            dateSpecific.setInvertCondition(invertCondition);
-            dateSpecific.setConditionEnabled(conditionEnabled);
-            conditionsList.add(dateSpecific);
-          }else{ //id date range is given
-            var ipRange = new IPRangeCondition();
-            dateRange.setStartingDate(startingDate);
-            dateRange.setEndingDate(endingDate);
-            dateRange.setInvertCondition(invertCondition);
-            dateRange.setConditionEnabled(conditionEnabled);
-            conditionsList.add(dateRange);
-          }
+                } else if (type == "Date") {
+                    var dateType = condition[j].dateType;
+                    var startingDate = condition[j].startingDate;
+                    var endingDate = condition[j].endingDate;
+                    var specificDate = condition[j].specificDate;
+                    //if the date is specific
+                    if (dateType == "specific") {
+                        var dateSpecific = new DateCondition();
+                        dateSpecific.setSpecificDate(specificDate);
+                        dateSpecific.setInvertCondition(invertCondition);
+                        dateSpecific.setConditionEnabled(conditionEnabled);
+                        conditionsList.add(dateSpecific);
+                    } else { //id date range is given
+                        var ipRange = new IPRangeCondition();
+                        dateRange.setStartingDate(startingDate);
+                        dateRange.setEndingDate(endingDate);
+                        dateRange.setInvertCondition(invertCondition);
+                        dateRange.setConditionEnabled(conditionEnabled);
+                        conditionsList.add(dateRange);
+                    }
 
-        }else if (type == "JWTClaims"){
-          var jwtClaimsObj = new JWTClaimsCondition();
-          var hasValues = condition[j].hasValues;
-          jwtClaimsObj.setInvertCondition(invertCondition);
-          jwtClaimsObj.setEnabled(enabled);
-          conditionsList.add(jwtClaimsObj);
+                }
+                else if (type == "JWTClaims") {
+                    var jwtClaimsObj = new JWTClaimsCondition();
+                    var hasValues = condition[j].hasValues;
+                    jwtClaimsObj.setInvertCondition(invertCondition);
+                    jwtClaimsObj.setEnabled(enabled);
+                    conditionsList.add(jwtClaimsObj);
 
-        }else if ( type == "Header"){
-          var headerObj = new HeaderCondition();
-          var headerName = condition[j].headerKeyValPairs.headerName;
-          var headerVal = condition[j].headerKeyValPairs.headerVal;
-          headerObj.setHeaderName(headerName);
-          headerObj.setValue(headerVal);
-          headerObj.setInvertCondition(invertCondition);
-          headerObj.setEnabled(enabled);
-          conditionsList.add(headerObj);
+                } else if (type == "Header") {
+                    var headerObj = new HeaderCondition();
+                    var headerName = condition[j].headerKeyValPairs.headerName;
+                    var headerVal = condition[j].headerKeyValPairs.headerVal;
+                    headerObj.setHeaderName(headerName);
+                    headerObj.setValue(headerVal);
+                    headerObj.setInvertCondition(invertCondition);
+                    headerObj.setEnabled(enabled);
+                    conditionsList.add(headerObj);
 
-        }else if ( type == "HTTPVerb"){
-          var httpVerbObj = new HTTPVerb();
-          var httpVerb = condition[j].httpVerb;
-          httpVerbObj.setHttpVerb(httpVerb);
-          httpVerbObj.setInvertCondition(invertCondition);
-          httpVerbObj.setEnabled(enabled);
-          conditionsList.add(httpVerbObj);
+                } else if (type == "HTTPVerb") {
+                    var httpVerbObj = new HTTPVerb();
+                    var httpVerb = condition[j].httpVerb;
+                    httpVerbObj.setHttpVerb(httpVerb);
+                    httpVerbObj.setInvertCondition(invertCondition);
+                    httpVerbObj.setEnabled(enabled);
+                    conditionsList.add(httpVerbObj);
 
-        }else if ( type == "Context"){
-          var contextObj = new Context();
-          var contextName = condition[j].contextName;
-          contextObj.setInvertCondition(invertCondition);   //yet to be added to object model
-          contextObj.setEnabled(enabled);
-          conditionsList.add(contextObj);
+                } else if (type == "Context") {
+                    var contextObj = new Context();
+                    var contextName = condition[j].contextName;
+                    contextObj.setInvertCondition(invertCondition);   //yet to be added to object model
+                    contextObj.setEnabled(enabled);
+                    conditionsList.add(contextObj);
 
-        }else if ( type == "QueryParam"){
-          var queryParamObj = new QueryParameterCondition();
-          var hasValues = condition[j].hasValues;
-          queryParamObj.setInvertCondition(invertCondition);
-          queryParamObj.setEnabled(enabled);
-          conditionsList.add(queryParamObj);
+                } else if (type == "QueryParam") {
+                    var queryParamObj = new QueryParameterCondition();
+                    var hasValues = condition[j].hasValues;
+                    queryParamObj.setInvertCondition(invertCondition);
+                    queryParamObj.setEnabled(enabled);
+                    conditionsList.add(queryParamObj);
 
-        }else if ( type == "Payload"){
-          var payloadObj = new Payload();
-          var maxSize = condition[j].maxSize;
-          payloadObj.setInvertCondition(invertCondition);
-          payloadObj.setEnabled(enabled);
-          conditionsList.add(payloadObj);
+                } else if (type == "Payload") {
+                    var payloadObj = new Payload();
+                    var maxSize = condition[j].maxSize;
+                    payloadObj.setInvertCondition(invertCondition);
+                    payloadObj.setEnabled(enabled);
+                    conditionsList.add(payloadObj);
+                }
+                j++;
+            }
+            //end of extracting conditions of a pipline
+            //adding conditions to pipe
+            pipe.setConditions(conditionsList);
+            //adding pipe to pipelines object
+            pipeLines.add(pipe);
+            i++;
         }
-        j++; 
-      }
-      //end of extracting conditions of a pipline
-      //adding conditions to pipe
-      pipe.setConditions(conditionsList); 
-      //adding pipe to pipelines object
-      pipeLines.add(pipe);
-      i++;
+        //end of pipeline info extracttion
+        //adding pipelines to policy
+        apiPolicyobj.setPipelines(pipeLines);
+
+        //default quota policy details
+        var defaultQuotaPolicyType = policy.defaultQuotaPolicy.type;
+        var defaultQuotaPolicyReqCount = policy.defaultQuotaPolicy.limit.requestCount;
+        var defaultQuotaPolicyTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
+        var defaultQuotaPolicyBandwidth = policy.defaultQuotaPolicy.limit.dataAmount;
+        var defaultQuotaPolicyDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
+
+        alert(policyName + policyLevel + enabled + quotaPolicyType + requestCount + id + defaultQuotaPolicyBandwidth + defaultQuotaPolicyDataUnit);
+    } catch (ex) {
+        var errorMessage = "Error occurred while adding policy";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+
+        return apiPolicyobj;
     }
-    //end of pipeline info extracttion
-    //adding pipelines to policy
-    apiPolicyobj.setPipelines(pipeLines);
-
-    //default quota policy details
-    var defaultQuotaPolicyType = policy.defaultQuotaPolicy.type;
-    var defaultQuotaPolicyReqCount = policy.defaultQuotaPolicy.limit.requestCount;
-    var defaultQuotaPolicyTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
-    var defaultQuotaPolicyBandwidth = policy.defaultQuotaPolicy.limit.dataAmount;
-    var defaultQuotaPolicyDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
-
-    alert(policyName + policyLevel+ enabled + quotaPolicyType+ requestCount+id + defaultQuotaPolicyBandwidth +defaultQuotaPolicyDataUnit);
-  } catch (ex) {
-    var errorMessage = "Error occurred while adding policy";
-    log.error(errorMessage);
-    return {
-      error :true;
-      message: errorMessage;
-    };
-
-  }
-  return apiPolicyobj;  
 };
 %>
