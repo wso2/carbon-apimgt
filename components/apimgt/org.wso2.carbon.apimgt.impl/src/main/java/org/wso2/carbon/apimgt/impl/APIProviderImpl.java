@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -3694,6 +3695,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
         int tenantID = APIUtil.getTenantId(username);
+        List<String> policyFileNames = new ArrayList<String>();
+        String policyFile = null ;
+        if(PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)){
+            //need to load whole policy object to get the pipelines
+            APIPolicy policy = null;/////// TODO load from database
+            
+            if(PolicyConstants.ACROSS_ALL.equals(policy.getUserLevel())){
+                policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_all_";
+            } else if (PolicyConstants.PER_USER.equals(policy.getUserLevel())){
+                policyFile = PolicyConstants.POLICY_LEVEL_API + "_"  + policyName + "_per_";
+            }
+            //add default policy file name
+            policyFileNames.add(policyFile + "elseCondition");
+           
+            for (int i = 0; i < policy.getPipelines().size(); i++) {               
+                policyFileNames.add(policyFile + "condition" + i );                
+            }
+            
+        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
+            policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+            policyFileNames.add(policyFile);
+        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
+            policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
+            policyFileNames.add(policyFile);
+        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
+                
+        }
+        
+        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
+        //remove from the gateway managers
+        //TODO create service method to bulk delete policies
+        for (String file : policyFileNames) {
+            manager.undeployPolicyFromGatewayManager(file);
+        }
+        //undeploy from global cep
+        manager.undeployPolicyFromGlobalCEP(policyFileNames);
+        
+        //remove from database             
         apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
     }
 }

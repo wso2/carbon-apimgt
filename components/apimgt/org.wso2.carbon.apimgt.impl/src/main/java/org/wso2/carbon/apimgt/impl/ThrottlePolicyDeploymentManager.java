@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -26,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -83,6 +86,15 @@ public class ThrottlePolicyDeploymentManager {
             throw new APIManagementException(msg);
         }
     }
+    
+    /**
+     * Undeploy policy from global CEP. 
+     * @param policies names of the policy files.
+     * @throws APIManagementException
+     */
+    public void undeployPolicyFromGlobalCEP(List<String> policies) throws APIManagementException {
+        //TODO
+    }
 
     /**
      * deploy policy in the gateway manager
@@ -113,4 +125,29 @@ public class ThrottlePolicyDeploymentManager {
         }
         
     }   
+    
+    /**
+     * Undeploy policy from the gateway manager nodes
+     * @param policyName
+     * @return
+     * @throws APIManagementException 
+     */
+    public void undeployPolicyFromGatewayManager(String policyName) throws APIManagementException{
+        
+        for (Map.Entry<String, Environment> environment : environments.entrySet()) {
+            if(log.isDebugEnabled()){
+                log.debug("undeploy policy from gateway : " + environment.getValue().getName());
+            }
+            APIGatewayAdminClient client;
+            try {
+                client = new APIGatewayAdminClient(null , environment.getValue());
+                client.removePolicy(policyName);
+            } catch (AxisFault axisFault) {
+                String msg = "Error occurred when undeploying from gateway " + environment.getValue().getName();
+                log.error(msg, axisFault);
+                throw new APIManagementException(msg);
+            }            
+        }
+        
+    }
 }
