@@ -1402,7 +1402,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else  {
-            api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);
+            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
         }
     }
 

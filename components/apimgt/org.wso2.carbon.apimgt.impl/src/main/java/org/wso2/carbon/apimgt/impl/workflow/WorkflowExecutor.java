@@ -89,7 +89,6 @@ public abstract class WorkflowExecutor implements Serializable {
      */
     public abstract List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException;
 
-
     /**
      * Method generates and returns UUID
      *

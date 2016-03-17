@@ -1631,9 +1631,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {           
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1653,9 +1650,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1690,9 +1684,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -1836,16 +1827,22 @@ public final class APIUtil {
      * @param registry     registry to access tiers config
      * @param tierLocation registry location of tiers config
      * @return map containing available tiers
-     * @throws RegistryException      when registry action fails
-     * @throws XMLStreamException     when xml parsing fails
      * @throws APIManagementException when fails to retrieve tier attributes
      */
-    private static Map<String, Tier> getTiers(Registry registry, String tierLocation)
-            throws RegistryException, XMLStreamException, APIManagementException {
-        Map<String, Tier> tiers = getAllTiers(registry, tierLocation);
+    private static Map<String, Tier> getTiers(Registry registry, String tierLocation) throws APIManagementException {
+        Map<String, Tier> tiers = null;
         try {
+            tiers = getAllTiers(registry, tierLocation);
             tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (RegistryException e) {
+            handleException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {
+            handleException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+        } catch (APIManagementException e) {
+            handleException("Unable to get tier attributes", e);
         } catch (Exception e) {
+
+            // generic exception is caught to catch exceptions thrown from map remove method
             handleException("Unable to remove Unauthenticated tier from tiers list", e);
         }
         return tiers;
