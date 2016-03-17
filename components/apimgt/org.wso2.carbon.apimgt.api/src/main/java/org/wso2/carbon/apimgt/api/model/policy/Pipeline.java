@@ -23,8 +23,16 @@ import java.util.List;
 public class Pipeline {
 
     private QuotaPolicy quotaPolicy;
-
     private List<Condition> conditions;
+    private boolean enabled;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public List<Condition> getConditions() {
         return conditions;
