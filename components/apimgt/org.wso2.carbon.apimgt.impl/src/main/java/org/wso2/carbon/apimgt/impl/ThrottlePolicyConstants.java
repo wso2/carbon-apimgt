@@ -55,4 +55,32 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_DEFAULT_QUOTA = "DEFAULT_QUOTA";
 
     public static final String COLUMN_DEFAULT_QUOTA_UNIT = "DEFAULT_QUOTA_UNIT";
+
+    public static final String COLUMN_SPECIFIC_DATE = "SPECIFIC_DATE";
+
+    public static final String COLUMN_STARTING_DATE = "STARTING_DATE";
+
+    public static final String COLUMN_ENDING_DATE = "ENDING_DATE";
+
+    public static final String COLUMN_SPECIFIC_IP = "SPECIFIC_IP";
+
+    public static final String COLUMN_STARTING_IP = "STARTING_IP";
+
+    public static final String COLUMN_ENDING_IP = "ENDING_IP";
+
+    public static final String COLUMN_HTTP_VERB = "HTTP_VERB";
+
+    public static final String COLUMN_CONDITION_ID = "CONDITION_ID";
+
+    public static final String COLUMN_PARAMETER_NAME = "PARAMETER_NAME";
+
+    public static final String COLUMN_PARAMETER_VALUE = "PARAMETER_VALUE";
+
+    public static final String COLUMN_CLAIM_URL = "CLAIM_URL";
+
+    public static final String COLUMN_CLAIM_ATTRIBUTE = "CLAIM_ATTRIBUTE";
+
+    public static final String COLUMN_HEADER_FIELD_NAME = "HEADER_FIELD_NAME";
+
+    public static final String COLUMN_HEADER_FIELD_VALUE = "HEADER_FIELD_VALUE";
 }
