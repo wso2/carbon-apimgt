@@ -22,15 +22,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Policy implements Serializable{
+public class Policy implements Serializable {
+    private int policyId;
     private String policyName;
-    private String userLevel;
     private String description;
     private QuotaPolicy defaultQuotaPolicy;
     private int tenantId;
 
     public Policy(String name){
-        this.policyName=name;
+        this.policyName = name;
+        this.policyId = -1;
+        this.tenantId = -1;
     }
 
     public int getTenantId() {
@@ -39,14 +41,6 @@ public class Policy implements Serializable{
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public String getUserLevel() {
-        return userLevel;
-    }
-
-    public void setUserLevel(String userLevel) {
-        this.userLevel = userLevel;
     }
 
     public String getDescription() {
@@ -73,12 +67,19 @@ public class Policy implements Serializable{
         return defaultQuotaPolicy;
     }
 
+    public int getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(int policyId) {
+        this.policyId = policyId;
+    }
+
     @Override
     public String toString() {
         return "Policy{" +
                 "defaultQuotaPolicy=" + defaultQuotaPolicy +
                 ", policyName='" + policyName + '\'' +
-                ", userLevel='" + userLevel + '\'' +
                 ", description='" + description + '\'' +
                 ", tenantId=" + tenantId +
                 '}';

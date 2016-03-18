@@ -44,7 +44,7 @@ public class SubscriptionPolicy extends Policy {
 
     @Override
     public String toString() {
-        return "SubscriptionPolicy [policyName=" + getPolicyName() + ", userLevel=" + getUserLevel()
+        return "SubscriptionPolicy [policyName=" + getPolicyName()
                 + ", description=" + getDescription() + ", defaultQuotaPolicy=" + getDefaultQuotaPolicy() +
                 "rateLimitCount=" + rateLimitCount + ", tenantId=" + getTenantId() + ", ratelimitTimeUnit=" + rateLimitTimeUnit + "]";
     }

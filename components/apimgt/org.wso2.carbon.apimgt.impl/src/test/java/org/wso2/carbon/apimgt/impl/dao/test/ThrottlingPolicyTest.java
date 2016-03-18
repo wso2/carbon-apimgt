@@ -24,15 +24,11 @@ import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class ThrottlingPolicyTest extends TestCase {
     ApiMgtDAO apiMgtDAO;
@@ -47,8 +43,83 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
-    public void testInsertPolicy() throws APIManagementException {
+    public void testInsertApplicationPolicy() throws APIManagementException {
+        apiMgtDAO.addApplicationPolicy((ApplicationPolicy) getApplicationPolicy());
+    }
+
+    public void testInsertSubscriptionPolicy() throws APIManagementException {
+        apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) getSubscriptionPolicy());
+    }
+
+    public void testInsertAPIPolicy() throws APIManagementException {
         apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser());
+    }
+
+    public void testUpdateApplicationPolicy() throws APIManagementException {
+        ApplicationPolicy policy = (ApplicationPolicy) getApplicationPolicy();
+        policy.setDescription("Updated application description");
+        apiMgtDAO.updateApplicationPolicy(policy);
+    }
+
+    public void testUpdateSubscriptionPolicy() throws APIManagementException {
+        SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy();
+        policy.setDescription("Updated subscription description");
+        apiMgtDAO.updateSubscriptionPolicy(policy);
+    }
+
+    public void testUpdateAPIPolicy() throws APIManagementException {
+        APIPolicy policy = (APIPolicy) getPolicyAPILevelPerUser();
+        policy.setDescription("New Description");
+
+        ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
+
+        Pipeline p = new Pipeline();
+
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("RequestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("min");
+        requestCountLimit.setUnitTime(50);
+        requestCountLimit.setRequestCount(1000);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        ArrayList<Condition> conditions =  new ArrayList<Condition>();
+
+        DateCondition dateCondition = new DateCondition();
+        dateCondition.setSpecificDate("2016-03-03");
+        conditions.add(dateCondition);
+
+        HeaderCondition headerCondition1 = new HeaderCondition();
+        headerCondition1.setHeader("User-Agent");
+        headerCondition1.setValue("Chrome");
+        conditions.add(headerCondition1);
+
+        HeaderCondition headerCondition2 = new HeaderCondition();
+        headerCondition2.setHeader("Accept-Ranges");
+        headerCondition2.setValue("bytes");
+        conditions.add(headerCondition2);
+
+        QueryParameterCondition queryParameterCondition1 = new QueryParameterCondition();
+        queryParameterCondition1.setParameter("test1");
+        queryParameterCondition1.setValue("testValue1");
+        conditions.add(queryParameterCondition1);
+
+        QueryParameterCondition queryParameterCondition2 = new QueryParameterCondition();
+        queryParameterCondition2.setParameter("x");
+        queryParameterCondition2.setValue("abc");
+        conditions.add(queryParameterCondition2);
+
+        JWTClaimsCondition jwtClaimsCondition1= new JWTClaimsCondition();
+        jwtClaimsCondition1.setClaimUrl("test_url");
+        jwtClaimsCondition1.setAttribute("test_attribute");
+        conditions.add(jwtClaimsCondition1);
+
+        p.setQuotaPolicy(quotaPolicy);
+        p.setConditions(conditions);
+        pipelines.add(p);
+
+        policy.setPipelines(pipelines);
+        apiMgtDAO.updateAPIPolicy(policy);
     }
 
     public void testDeletePolicy() throws APIManagementException {
@@ -56,7 +127,7 @@ public class ThrottlingPolicyTest extends TestCase {
     }
 
     public void testGetApplicationPolicies() throws APIManagementException {
-        apiMgtDAO.getAppPolicies(-1234);
+        apiMgtDAO.getApplicationPolicies(-1234);
     }
 
     public void testGetSubscriptionPolicies() throws APIManagementException {
@@ -92,7 +163,6 @@ public class ThrottlingPolicyTest extends TestCase {
         List<Condition> condition;
         BandwidthLimit bandwidthLimit;
         RequestCountLimit requestCountLimit;
-        Condition cond;
         pipelines = new ArrayList<Pipeline>();
 
 
@@ -182,6 +252,45 @@ public class ThrottlingPolicyTest extends TestCase {
         ///////////pipeline item 2 end//////
 
         policy.setPipelines(pipelines);
+        return policy;
+    }
+
+    private Policy getApplicationPolicy(){
+        ApplicationPolicy policy = new ApplicationPolicy("Bronze");
+
+        policy.setDescription("Application policy Description");
+        policy.setTenantId(4);
+
+        BandwidthLimit defaultLimit = new BandwidthLimit();
+        defaultLimit.setTimeUnit("min");
+        defaultLimit.setUnitTime(5);
+        defaultLimit.setDataAmount(600);
+        defaultLimit.setDataUnit("KB");
+
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setLimit(defaultLimit);
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+
+        policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return policy;
+    }
+
+    private Policy getSubscriptionPolicy(){
+        SubscriptionPolicy policy = new SubscriptionPolicy("Silver");
+
+        policy.setDescription("Subscription policy Description");
+        policy.setTenantId(6);
+
+        RequestCountLimit defaultLimit = new RequestCountLimit();
+        defaultLimit.setTimeUnit("min");
+        defaultLimit.setUnitTime(50);
+        defaultLimit.setRequestCount(800);
+
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setLimit(defaultLimit);
+        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+
+        policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return policy;
     }
 }

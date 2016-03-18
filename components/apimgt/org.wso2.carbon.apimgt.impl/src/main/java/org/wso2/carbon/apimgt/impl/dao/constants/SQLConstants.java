@@ -2010,14 +2010,19 @@ public class SQLConstants {
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, \n" +
-                    "RATE_LIMIT_TIME_UNIT) \n" +
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_SQL =
             "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
                     "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, USER_LEVEL) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_API_POLICY_WITH_ID_SQL =
+            "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
+                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n" +
+                    "USER_LEVEL, POLICY_ID) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_CONDITION_SQL =
             "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE, \n" +
@@ -2066,7 +2071,7 @@ public class SQLConstants {
             "   AND TENANT_ID =?";
 
     public static final String GET_API_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_API " +
@@ -2074,7 +2079,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_APP_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_APPLICATION " +
@@ -2082,7 +2087,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_SUB_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
@@ -2090,7 +2095,7 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICY_NAMES =
-            " SELECT "+
+            " SELECT " +
                     "   NAME " +
                     "FROM " +
                     "   AM_POLICY_GLOBAL " +
@@ -2098,12 +2103,12 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_API_POLICIES =
-            " SELECT "+
-            "   * " +
-            "FROM " +
-            "   AM_POLICY_API " +
-            " WHERE" +
-            "   TENANT_ID =?";
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_API " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
 
     public static final String GET_APP_POLICIES =
             " SELECT "+
@@ -2113,7 +2118,7 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =?";
     public static final String GET_SUBSCRIPTION_POLICIES =
-            " SELECT "+
+            " SELECT " +
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
@@ -2121,12 +2126,45 @@ public class SQLConstants {
                     "   TENANT_ID =?";
 
     public static final String GET_GLOBAL_POLICIES =
-            " SELECT "+
+            " SELECT " +
                     "   * " +
                     "FROM " +
                     "   AM_GLOBAL_POLICY " +
                     " WHERE" +
                     "   AND TENANT_ID =?";
+
+    public static final String GET_API_POLICY_ID_SQL =
+            "SELECT " +
+                    "POLICY_ID " +
+                    "FROM " +
+                    "AM_POLICY_API " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_POLICY_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_POLICY_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String DELETE_API_POLICY_SQL =
             "DELETE FROM AM_POLICY_API WHERE TENANT_ID = ? AND NAME = ?";
@@ -2136,36 +2174,4 @@ public class SQLConstants {
 
     public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
-
-    public static final String COLUMN_NAME = "NAME";
-
-    public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
-
-    public static final String COLUMN_TENANT_ID = "TENANT_ID";
-
-    public static final String COLUMN_RATE_LIMIT_COUNT = "RATE_LIMIT_COUNT";
-
-    public static final String COLUMN_RATE_LIMIT_TIME_UNIT = "RATE_LIMIT_TIME_UNIT";
-
-    public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_POLICY_TYPE";
-
-    public static final String COLUMN_QUOTA = "QUOTA";
-
-    public static final String COLUMN_QUOTA_UNIT = "QUOTA_UNIT";
-
-    public static final String COLUMN_UNIT_TIME = "UNIT_TIME";
-
-    public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
-
-    public static final String COLUMN_USER_LEVEL = "USER_LEVEL";
-
-    public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_POLICY_TYPE";
-
-    public static final String COLUMN_DEFAULT_UNIT_TIME = "DEFAULT_UNIT_TIME";
-
-    public static final String COLUMN_DEFAULT_TIME_UNIT = "DEFAULT_TIME_UNIT";
-
-    public static final String COLUMN_DEFAULT_QUOTA = "DEFAULT_QUOTA";
-
-    public static final String COLUMN_DEFAULT_QUOTA_UNIT = "DEFAULT_QUOTA_UNIT";
 }

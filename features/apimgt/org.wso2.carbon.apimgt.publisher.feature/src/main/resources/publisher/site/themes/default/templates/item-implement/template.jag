@@ -40,19 +40,19 @@
     var manage_wlabel = "";
     if(mod.isGlobalCEPThrottlingEnabled()){
          if( api.availableSubscriptionPolicy !="" ){
-            manage_wlabel = "wizard-done";      
+            manage_wlabel = "wizard-done";
         } else {
-            var manage_w_link = '#';        
+            var manage_w_link = '#';
         }
     } else {
-        
+
         if( api.availableTiers !="" ){
-            manage_wlabel = "wizard-done";      
+            manage_wlabel = "wizard-done";
         } else {
-            var manage_w_link = '#';        
+            var manage_w_link = '#';
         }
     }
-   
+
 %>
 <center>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">

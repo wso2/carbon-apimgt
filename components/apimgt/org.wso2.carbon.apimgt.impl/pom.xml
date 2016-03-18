@@ -133,10 +133,6 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.deployment</groupId>
-            <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
         </dependency>
@@ -168,7 +164,7 @@
         <dependency>
             <artifactId>org.wso2.carbon.event.throttle.core</artifactId>
             <groupId>org.wso2.carbon.event-processing</groupId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>2.0.13-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -290,7 +286,6 @@
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.core.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.bam.service.data.publisher.*,
                             org.wso2.carbon.user.core.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.user.api;version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",

@@ -35,7 +35,7 @@ public class ApplicationPolicy extends Policy {
 
     @Override
     public String toString() {
-        return "ApplicationPolicy [policyName=" + getPolicyName() + ", userLevel=" + getUserLevel()
+        return "ApplicationPolicy [policyName=" + getPolicyName()
                 + ", applicationId =" + applicationId + ", description=" + getDescription() + ", defaultQuotaPolicy="
                 + getDefaultQuotaPolicy() + "]";
     }

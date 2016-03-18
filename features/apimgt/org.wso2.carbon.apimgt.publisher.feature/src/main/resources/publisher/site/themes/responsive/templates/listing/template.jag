@@ -59,16 +59,11 @@
         <%
         var i, api,path,mode=outputs.mode,apis = outputs.apis,length;
         var reqUrl = request.getRequestURI();
-        if(apis!=null){length = apis.length;}
+        length = outputs.totalLength;
         var itemsPerPage = 10; //reduce this number to preview the pagination
         var currentPage = 1;
-        var numberOfPages = parseInt(length / itemsPerPage);
-
-        if (length % itemsPerPage != 0) {
-            numberOfPages++;
-        }
-
-         if (request.getParameter('page') != null) {
+        var numberOfPages = outputs.numberOfPages;
+        if (request.getParameter('page') != null) {
            currentPage = parseInt(request.getParameter('page'));
            if((currentPage-1)*itemsPerPage == length){
                 if(String(currentPage)=='1'){%>
