@@ -60,6 +60,7 @@ div.image-container {
     padding-bottom: 100px;
 }
 
+
 /* ========================================================================
  * Media panels tablist
  * ======================================================================== */
@@ -198,3 +199,45 @@ div.image-container {
     border-bottom: 2px solid #3598db;
     margin-top: -1px;
 }
+
+.btn{
+    background-color: #0E75DC;
+    color: #fff;
+}
+.btn .disabled{
+    background-color: #0E75DC;
+    color: #fff;
+}
+.btn:hover {
+    background-color: #005ABA;
+    color: #fff;
+}
+.btn-default{
+    background-color: #064973;
+    color: #fff;
+    border: none;
+}
+.btn-default:hover{
+    background-color: #085b8f;
+    color: #fff;
+    border: none;
+}
+.btn-primary{
+    background-color: #064973;
+    color: #fff;
+    border: none;
+}
+.btn-primary:hover{
+    background-color: #085b8f;
+    color: #fff;
+    border: none;
+}
+.btn-secondary{
+    background-color: #444;
+    color: #fff;
+}
+.btn-secondary:hover{
+    background-color: #686868;
+    color: #fff;
+}
+>>>>>>> Stashed changes
