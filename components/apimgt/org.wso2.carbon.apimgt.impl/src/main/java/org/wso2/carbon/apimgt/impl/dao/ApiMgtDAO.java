@@ -8320,6 +8320,39 @@ public class ApiMgtDAO {
         }
     }
 
+    public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement policyStatement = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
+            policyStatement = conn.prepareStatement(addQuery);
+            setCommonParametersForPolicy(policyStatement, policy);
+
+            InputStream siddhiQueryInputStream;
+            siddhiQueryInputStream = new ByteArrayInputStream(policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            policyStatement.setBinaryStream(9, siddhiQueryInputStream);
+            System.out.println(policyStatement);
+            policyStatement.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+
+                    // rollback failed. exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to add Global Policy: " + policy, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+        }
+    }
+
+
     /**
      * Removes a throttling policy from the database
      *

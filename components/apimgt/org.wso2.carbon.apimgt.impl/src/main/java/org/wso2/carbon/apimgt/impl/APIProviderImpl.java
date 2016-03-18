@@ -3640,6 +3640,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policies.add(policyString);
+                apiMgtDAO.addGlobalPolicy(globalPolicy);
             }
          
         } catch (APITemplateException e) {

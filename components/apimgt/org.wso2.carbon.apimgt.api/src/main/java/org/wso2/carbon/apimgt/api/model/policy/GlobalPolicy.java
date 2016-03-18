@@ -19,7 +19,23 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class GlobalPolicy extends Policy {
+    private String siddhiQuery;
+
     public GlobalPolicy(String name) {
         super(name);
+    }
+
+    public String getSiddhiQuery() {
+        return siddhiQuery;
+    }
+
+    public void setSiddhiQuery(String siddhiQuery) {
+        this.siddhiQuery = siddhiQuery;
+    }
+
+    @Override
+    public String toString() {
+        return "GlobalPolicy [policyName=" + getPolicyName() + ", description=" + getDescription() + ", quotaPolicy=" + getDefaultQuotaPolicy() +
+                ", tenantId=" + getTenantId() + ", siddhiQuery=" + getSiddhiQuery() + "]";
     }
 }

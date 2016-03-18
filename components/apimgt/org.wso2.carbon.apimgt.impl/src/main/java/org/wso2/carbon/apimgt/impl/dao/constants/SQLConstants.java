@@ -2036,6 +2036,11 @@ public class SQLConstants {
             "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_ID,CLAIM_URL,CLAIM_ATTRIBUTE) \n" +
             "VALUES (?,?,?)";
 
+    public static final String INSERT_GLOBAL_POLICY_SQL =
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,QUOTA_POLICY_TYPE ,QUOTA ," +
+                    "QUOTA_UNIT, UNIT_TIME ,TIME_UNIT ,SIDDHI_QUERY) \n" +
+                    "VALUES (?,?,?,?,?,?,?,?,?)";
+
     public static final String UPDATE_POLICY_SQL =
             "UPDATE AM_POLICY " +
             "SET " +
