@@ -92,42 +92,38 @@
 						            <form class="form-horizontal apim-form" method="POST"
 						              id="design_form"
 						              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
-						
-										<div id="accordion" role="tablist">
-										  <div class="panel panel-default">
-										    <div class="panel-heading" role="tab" id="headingOne">
+						            	<div class="form-heading">
 										      <h4 class="panel-title">
-										        <a data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-										          <strong><%=i18n.localize("generalDetailsTitle")%></strong>
-										        </a>
+										      	 <div>
+                   									<div class="heading"><%=i18n.localize("generalDetailsTitle")%></div>
+												</div>
+                    							<div class="clearfix"></div>										        
 										      </h4>
 										    </div>
-										    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-										      <div class="panel-body">
-										
+
 										<div class="row">
-										  <div class="col-md-6">
+										  <div class="col-md-9">
 										<% if(!api){ %>    
 										    <div class="form-group form-inline">
-										        <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
-										        <div class="col-sm-6">
+										        <label class="col-sm-3 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
+										        <div class="col-sm-9">
 										            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
-										            <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
+										            <a class="help_popup" help_data="name_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 										        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
 										        </div>        
 										    </div>
 										
-										    <div class="form-group">
-										        <label class="col-sm-4 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
-										        <div class="col-sm-6">
-										            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />            
-										        </div>
-										        <a class="help_popup" help_data="context_help"><i class="fa fa-question-circle"></i></a>
-										        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
+										    <div class="form-group form-inline">
+										        <label class="col-sm-3 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
+										        <div class="col-sm-9">
+										            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
+										            <a class="help_popup" help_data="context_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
+										        	<p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>            
+										        </div>										        
 										    </div>
 										
 										    <div class="form-group">
-										        <label class="col-sm-4 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
+										        <label class="col-sm-3 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
 										        <div class="col-sm-4">
 										            <input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0, v1.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
 										        </div>
@@ -139,12 +135,12 @@
 										                <input type="hidden" name="context" value="<%= encode.forHtml(api.context) %>" />
 										    <% } %>
 										
-										    <div class="form-group">
-										        <label class="col-sm-4  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
-										        <div class="col-sm-6">
-										        <select class="select required form-control" id="visibility" name="visibility">
+										    <div class="form-group form-inline">
+										        <label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
+										        <div class="col-sm-9">
+										        	<select class="select required form-control" id="visibility" name="visibility">
 										    <% mod = jagg.module("api");
-										     result = mod.isMultipleTenantsAvailable();
+										     	result = mod.isMultipleTenantsAvailable();
 										         var isMultipleTenantsAvailable = result.status;
 										    %>
 										            <% if (api) {%>
@@ -166,31 +162,29 @@
 										                <% } %> 
 										            <%}%>
 										        </select>
-										        </div>
-										        <a class="help_popup" help_data="role_help"><i class="fa fa-question-circle"></i></a>
+										        <a class="help_popup" help_data="role_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 										        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
+										        </div>										        
 										    </div>
 										
 										    <%if(api) { %>
 										        <div class="form-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
-										                <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+										                <label class="col-sm-3 control-label" for="roles" id="rolesLabel" name="rolesLabel">
 										                    <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 										                </label>
-										                <div class="col-sm-6">
+										                <div class="col-sm-9">
 										                    <input type="text" class="form-control required validInput validateRoles"
-										                    id="roles" name="roles"  value="<%=api.roles%>"/>
-										                    <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+										                    id="roles" name="roles"  value="<%=api.roles%>" placeholder="<%=i18n.localize("rolesHelpMsg")%>"/>
 										                </div>
 										            </div>
 										    <%} else {%>
 										        <div class="form-group" id="rolesDiv" style="display: none;">
-										            <label class="col-sm-4 control-label" for="roles" id="rolesLabel" name="rolesLabel">
+										            <label class="col-sm-3 control-label" for="roles" id="rolesLabel" name="rolesLabel">
 										                <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 										            </label>
-										            <div class="col-sm-6">
+										            <div class="col-sm-9">
 										                <input type="text" class="form-control required validInput validateRoles"
-										                id="roles" name="roles"/>
-										                <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+										                id="roles" name="roles" placeholder="<%=i18n.localize("rolesHelpMsg")%>"/>
 										            </div>
 										        </div>
 										     <%}%>
@@ -219,28 +213,27 @@
 										
 										
 										                <div class="form-group">
-										                   <label class="col-md-4 control-label" for="description"><%=i18n.localize("description")%>:</label>
-										                   <div class="col-md-8">
+										                   <label class="col-md-3 control-label" for="description"><%=i18n.localize("description")%>:</label>
+										                   <div class="col-md-9">
 										                       <textarea class="form-control validateDescriptionLength" id="description" name="description" rows="3"><%= _description %></textarea>
 										                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
 										                   </div>
 										               </div>
 										
 										                <div class="form-group">
-										                    <label class="col-md-4 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
+										                    <label class="col-md-3 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
 										                    <div class="col-md-7 tagContainer">
-										                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
+										                        <input type="text" placeholder="<%=i18n.localize("tagsHelpLabel")%>" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
 										                        onkeyup="$(this).validate()"/>
 										                        <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 										                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
-										            <p class="help-block"><%=i18n.localize("tagsHelpLabel")%></p>
 										                        <label class="tags-error error pull-left"></label>
 										                        <label class="add-tags-error error pull-left"></label>
 										                    </div>
 										                </div>      
 										  </div><!-- left -->
 										
-										  <div class="col-md-6">
+										  <div class="col-md-3">
 										        <div class="form-group">
 										            <label class="col-sm-12" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
 										            <div class="col-sm-12">
@@ -263,19 +256,16 @@
 										        </div>
 										  </div>  
 										</div>      
-										
-										      </div>
-										    </div>
-										  </div>
-										  <div class="panel panel-default">
-										    <div class="panel-heading" role="tab" id="headingTwo">
+
+										    <!--============================================================================-->
+										    <div class="form-heading">
 										      <h4 class="panel-title">
-										        <a class="collapsed" data-toggle="collapse"  href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-										          <strong>API Definition</strong>
-										        </a>
+										      	 <div>
+                   									<div class="heading">API Definition</div>
+												</div>
+                    							<div class="clearfix"></div>										        
 										      </h4>
 										    </div>
-										    <div id="collapseTwo" class="panel-collapse" role="tabpanel" aria-labelledby="headingTwo">
 										      <div class="panel-body">
 										                <% if(session.get("wsdl") || ( api && api.wsdl )) {
 										                    var wsdl = session.get("wsdl");
@@ -285,10 +275,10 @@
 										
 										                    session.put( "wsdl", null );
 										                %>
-										                <div id="api_designer">                    
+										                <div id="api_designer" class="col-sm-9">                    
 										                    <div class="form-group api_wsdl">
-										                        <label class="col-sm-2 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
-										                        <div class="col-sm-10">
+										                        <label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+										                        <div class="col-sm-9">
 										                        <div class="input-append">
 										                        <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
 										                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
@@ -297,18 +287,18 @@
 										                    </div>
 										                    <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
 										                </div>
+										                </div>
+										    </div>
 										                <% }else{ %>
-										                <div id="api_designer">
-										                    <a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
-										                    <a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>                
-										                    <div id ="resource_details">
-										                    </div>
+										                <div id="api_designer">		
+										                	<a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
+										                    	<a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>    								                                
+										                    <div id ="resource_details">										                    
+										                    </div>										                   
 										                </div>      
 										                <% } %>      
-										      </div>
-										    </div>
+										      
 										  </div>  
-										</div>
 										      
 										    <%if(api!=null){%>
 										                <input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
@@ -329,25 +319,10 @@
 										                    <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
 										
 										                </div>
-										                </div>
-										                </div>
 						            </form>						
 						        </div>
-						    </div>
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-							
-                        </div>
+						    </div>							
+</div>
                     </div>
                 </div>
             </div>
@@ -480,10 +455,10 @@
 
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
-    <div class="resource_create">
+    <div class="resource_create col-sm-9">
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="inputPassword">URL Pattern</label>
-            <div class="col-sm-6">
+            <label class="col-sm-3 control-label" for="inputPassword">URL Pattern</label>
+            <div class="col-sm-9">
                 <div class="input-group">
                     <% if(api){ %>
                         <span class="input-group-addon" id="resource_url_pattern_refix"><%= encode.forHtml(api.context)%></span>
@@ -495,22 +470,35 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label" for=""></label>
-            <div class="col-sm-10">
-                {{#each verbs}}             
-                    <label class="checkbox checkbox-inline" style="text-transform:uppercase;">
-                    <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
-                    </label>
+            <label class="col-sm-3 control-label" for=""></label>
+            <div class="col-sm-9">
+                {{#each verbs}}    
+					<label class="checkbox" style="text-transform:uppercase;">
+                            <input type="checkbox" value="{{ . }}" class="http_verb_select">
+                            <span class="helper"> {{ . }}</span>
+                    </label>         
                 {{/each}}
-                    <div class "checkbox inline" id="options" style="display: none;" >
-                        <label class="checkbox checkbox-inline">
-                        &nbsp;<input type="checkbox" value="options" class="http_verb_select"> OPTIONS
-                        </label>
+                    <div id="options" style="display: none;" >
+						<label class="checkbox">
+                            <input type="checkbox" value="options" class="http_verb_select">
+                            <span class="helper"> OPTIONS</span>
                         &nbsp;<a class="help_popup" help_data="options_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
                         <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
-                        <label id="less" class="checkbox-inline">less</label>
+                    </label>  
+
+                        <label id="less">
+						<span class="icon fw-stack">
+	                                    <i class="fw fw-minus fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                 	</span>
+						</label>
                     </div>
-                    <label id="more" class="checkbox-inline">more</label>
+					<label id="more">
+					 <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                 </span>
+                    </label>
             </div>
         </div>
         <!-- div class="form-group">
@@ -520,12 +508,15 @@
             </div>
         </div -->
         <div class="form-group">
-            <label class="col-sm-2 control-label"></label>
-            <div class="col-sm-10">
+            <label class="col-sm-3 control-label"></label>
+            <div class="col-sm-9">
                 <button class="btn btn-default" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="fa fa-plus"></i>&nbsp;Add</button>
             </div>
         </div>        
     </div>
+
+<div class="col-sm-12">	
+
 <table style="width:100%">                       
 {{#each doc.paths}}
     {{# each this}}
@@ -545,7 +536,8 @@
         <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
-</table>                                         
+</table>  
+</div>                                       
 </script>
 
 <script>

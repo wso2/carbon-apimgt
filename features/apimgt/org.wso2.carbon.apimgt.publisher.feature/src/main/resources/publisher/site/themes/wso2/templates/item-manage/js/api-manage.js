@@ -84,11 +84,11 @@ $(document).ready(function(){
 	$('#toggleSequence').parent().next().hide();
     }
     
-    if( $("#toggleThrottle").attr('checked') ) {
-    $('#toggleThrottle').parent().next().show();
+    if( $("#toggleThrottle").is(":checked")) {
+    	$(this).parent().parent().parent().next().children().next().children().show();
     } 
     else {
-    $('#toggleThrottle').parent().next().hide();
+    	$(this).parent().parent().parent().next().children().next().children().hide();
     }
 
 });
@@ -109,9 +109,10 @@ $('.js_hidden_section_title').click(function(){
 
 $("#toggleThrottle").change(function(e){
     if($(this).is(":checked")){
-        $(this).parent().next().show();
+    	console.log('checl');
+        $(this).parent().parent().parent().next().children().next().children().show();
     }else{
-        $(this).parent().next().hide();
+    	$(this).parent().parent().parent().next().children().next().children().hide();
     }
 });
 

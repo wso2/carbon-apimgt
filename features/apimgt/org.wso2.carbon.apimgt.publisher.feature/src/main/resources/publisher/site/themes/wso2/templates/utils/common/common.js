@@ -102,10 +102,10 @@ $.fn.generateBgcolor = function(options){
 }( jQuery ));
 
 /***********************************************************
- *  accordion config
+ *  accordion1 config
  ***********************************************************/
 
-$('#accordion').on('shown.bs.collapse', function (e,f) {
+$('#accordion1').on('shown.bs.collapse', function (e,f) {
 	console.log("ccc");
 var elem = $(this).children().children('.in');
 var icon = $(elem).prev().find('.status').children();
@@ -117,7 +117,7 @@ icon.removeClass('fw-down');
 icon.addClass('fw-up');
 });
 
-$('#accordion').on('hidden.bs.collapse', function (e,f) {
+$('#accordion1').on('hidden.bs.collapse', function (e,f) {
 var elem = $(this).children().children();
 var icon = $(elem).prev().find('.status').children();
 

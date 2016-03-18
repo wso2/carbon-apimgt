@@ -5,99 +5,120 @@
 </div>
 
 <div class="row">
-	<div id="accordion" role="tablist" aria-multiselectable="true">
+	<div id="accordion1" class="panel-group" role="tablist" aria-multiselectable="true">
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingOne">
+			<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 				<h4 class="panel-title">
-					<input class="create-api" type="radio" name="create-api"
-						data-toggle="collapse" data-parent="#accordion"
-						href="#collapseOne" aria-expanded="true"
-						aria-controls="collapseOne" /> <a data-toggle="collapse"
-						data-parent="#accordion" href="#collapseOne" aria-expanded="false"
-						aria-controls="collapseOne"> I have an Existing API</a>
-					<p><%=i18n.localize("createFromExistingAPI")%></p>
+					<label class="radio">
+                                    <input class="create-api" type="radio" name="create-api" />
+                                    <span class="helper"></span>
+                    </label>
+                    <div>
+                   		<div class="heading">I have an Existing API</div>
+                        <div class="description truncate" title="<%=i18n.localize("createFromExistingAPI")%>"><%=i18n.localize("createFromExistingAPI")%></div>
+                        <div class="status">
+                        	<i class="fw fw-down"></i>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
 				</h4>
 			</div>
-			<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-				 <form class="form-horizontal" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
-					<div class="form-group">
-						<div class="col-sm-12 toggleRadios">
-							<label class="radio sub-labels checkbox-inline"> <input type="radio"
-								name="import-definition" id="" value="swagger-file"> <span class="helper">Swagger File</span>
-							</label> <label class="radio sub-labels urlSelect-label checkbox-inline"> <input type="radio"
-								name="import-definition" value="swagger-url"> <span class="helper">Swagger URL</span>
-							</label>
+			<div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+				<div class="panel-body">
+					 <form class="form-horizontal" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+						<div class="form-group">
+							<div class="col-sm-12 toggleRadios">
+								<label class="radio sub-labels checkbox-inline"> <input type="radio"
+									name="import-definition" id="" value="swagger-file"> <span class="helper">Swagger File</span>
+								</label> <label class="radio sub-labels urlSelect-label checkbox-inline"> <input type="radio"
+									name="import-definition" value="swagger-url"> <span class="helper">Swagger URL</span>
+								</label>
+							</div>
 						</div>
-					</div>
-					<div class="form-group toggleContainers">
-						<div class="controls col-sm-8">
-							<div class="input-group input-wrap file-upload-control">
-								<input type="text" class="form-control" readonly> 
-								<input id="swagger-file" name="swagger-file" type="file" class="form-control" multiple>
-								<div class="input-group-btn">
-									<button class="btn browse" type="button" title="Browse File">
-										<i class="fw fw-file-browse" aria-hidden="true"></i> <span
-											class="hidden-xs">Browse</span>
-									</button>
+						<div class="form-group toggleContainers">
+							<div class="controls col-sm-8">
+								<div class="input-group input-wrap file-upload-control">
+									<input type="text" class="form-control" readonly> 
+									<input id="swagger-file" name="swagger-file" type="file" class="form-control" multiple>
+									<div class="input-group-btn">
+										<button class="btn browse" type="button" title="Browse File">
+											<i class="fw fw-file-browse" aria-hidden="true"></i> <span
+												class="hidden-xs">Browse</span>
+										</button>
+									</div>
 								</div>
 							</div>
-						</div>
-						<div class="controls col-sm-8">
-							<div class="col-sm-8">
-								<input name="swagger-url" id="swagger-url" class="form-control"
-									type="text" placeholder="http://petstore.swagger.io/v2/swagger.json"/>
+							<div class="controls col-sm-8">
+								<div class="col-sm-8">
+									<input name="swagger-url" id="swagger-url" class="form-control"
+										type="text" placeholder="http://petstore.swagger.io/v2/swagger.json"/>
+								</div>
 							</div>
-						</div>
-					</div>					
-		          <input name="action" value="start" type="hidden"/>
-		          <input name="type" value="rest" type="hidden"/>
-		          <button id="startFromExistingAPI" class="btn btn-primary has-spinner" type="button">Start Creating</button>
-				</form>
+						</div>					
+			          <input name="action" value="start" type="hidden"/>
+			          <input name="type" value="rest" type="hidden"/>
+			          <button id="startFromExistingAPI" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+					</form>
+				</div>
 			</div>
 		</div>
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingTwo">
+			<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 				<h4 class="panel-title">
-					<input class="create-api" type="radio" name="create-api"
-						data-toggle="collapse" data-parent="#accordion"
-						href="#collapseTwo" aria-expanded="true"
-						aria-controls="collapseTwo" /> <a data-toggle="collapse"
-						data-parent="#accordion" href="#collapseTwo" aria-expanded="false"
-						aria-controls="collapseTwo"> I have a SOAP Endpoint</a>
-					<p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p>
-				</h4>
-			</div>
-			<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-				<form class="form-horizontal" id="startFromExistingSOAPEndpoint-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
-					<div class="form-group">
-                               <div class="col-sm-8">
-                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
-                                   <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
-                               </div>
+					<label class="radio">
+                                    <input class="create-api" type="radio" name="create-api" />
+                                    <span class="helper"></span>
+                    </label>
+                    <div>
+                   		<div class="heading">I have a SOAP Endpoint</div>
+                        <div class="description truncate" title="<%=i18n.localize("createFromExistingSOAPEndpoint")%>"><%=i18n.localize("createFromExistingSOAPEndpoint")%></div>
+                        <div class="status">
+                        	<i class="fw fw-down"></i>
                         </div>
-                        <input name="action" value="start" type="hidden"/>
-                        <input name="type" value="soap" type="hidden"/>
-                        <div class = "col-sm-12"></div>
-                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
-				</form>
+                    </div>
+                    <div class="clearfix"></div>
+				</h4>
+			</div>
+			<div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+				<div class="panel-body">
+					<form class="form-horizontal" id="startFromExistingSOAPEndpoint-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+						<div class="form-group">
+	                               <div class="col-sm-8">
+	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
+	                                   <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+	                               </div>
+	                        </div>
+	                        <input name="action" value="start" type="hidden"/>
+	                        <input name="type" value="soap" type="hidden"/>
+	                        <div class = "col-sm-12"></div>
+	                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+					</form>
+				</div>
 			</div>
 		</div>
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingThree">
+			<div class="panel-heading" role="tab" id="headingThree" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse3" aria-expanded="true" aria-controls="accordion1-collapse3">
 				<h4 class="panel-title">
-					<input id="create-new-api" class="create-api" type="radio" name="create-api"
-						data-toggle="collapse" data-parent="#accordion"
-						href="#collapseThree" aria-expanded="true"
-						aria-controls="collapseThree" /> <a data-toggle="collapse"
-						data-parent="#accordion" href="#collapseThree" aria-expanded="false"
-						aria-controls="collapseThree">Design New API</a>
-					<p><%=i18n.localize("designNewAPI")%></p>
+					<label class="radio">
+                                    <input class="create-api" type="radio" name="create-api" />
+                                    <span class="helper"></span>
+                    </label>
+                    <div>
+                   		<div class="heading">Design New API</div>
+                        <div class="description truncate" title="<%=i18n.localize("designNewAPI")%>"><%=i18n.localize("designNewAPI")%></div>
+                        <div class="status">
+                        	<i class="fw fw-down"></i>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
 				</h4>
 			</div>
-			<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-				<form class="form-horizontal">
-                        <button onclick="location.href='<%=jagg.url("/design")%>'" id="designNewAPI" id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
-				</form>
+			<div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+				<div class="panel-body">
+					<form class="form-horizontal">
+	                        <button onclick="location.href='<%=jagg.url("/design")%>'" id="designNewAPI" id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+					</form>
+				</div>
 			</div>
 		</div>	
 	</div>

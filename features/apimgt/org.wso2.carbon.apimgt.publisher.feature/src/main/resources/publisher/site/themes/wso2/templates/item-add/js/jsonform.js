@@ -344,14 +344,13 @@ jsonform.elementTypes = {
       '<%= (node.readOnly ? " readonly=\'readonly\'" : "") %>' +
       '<%= (node.schemaElement && node.schemaElement.maxLength ? " maxlength=\'" + node.schemaElement.maxLength + "\'" : "") %>' +
       '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " required=\'required\'" : "") %>' +
-      '<%= (node.placeholder? "placeholder=" + \'"\' + escape(node.placeholder) + \'"\' : "")%>' +
+      'placeholder="E.g.: http://appserver/resource"' +
       ' />'+
+      '<a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <i class="fa fa-question-circle" data-original-title="" title=""></i></a>'+
       '<div class="btn-group"><button class="btn btn-default advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
       '<button class="btn btn-default check_url_valid" type="button" providerName="<%= apiProvider%>" apiName="<%= apiName%>" apiVersion="<%= apiVersion %>" >Test</button></div>'+
-      '<a id="endpoint_tooltip" style="margin-left:3px" class="glyphicon glyphicon-question-sign help_popup"  help_data="test_help" data-original-title="" title=""></a>'+
       '<div id="test_help" class="hide"><p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p></div>' +
-      '</div>' +
-      '<p class="help-block">E.g.: http://appserver/resource</p>',
+      '</div>',
     'fieldtemplate': true,
     'inputfield': true
     },
