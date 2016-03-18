@@ -8497,30 +8497,9 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                QuotaPolicy quotaPolicy = new QuotaPolicy();
                 APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(apiPolicy, rs);
                 apiPolicy.setUserLevel(rs.getString(ThrottlePolicyConstants.COLUMN_USER_LEVEL));
-                apiPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                apiPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-                quotaPolicy.setType(rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
-
-                if (rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
-                    RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_DEFAULT_UNIT_TIME));
-                    reqLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_TIME_UNIT));
-                    reqLimit.setRequestCount(rs.getInt(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA));
-                    quotaPolicy.setLimit(reqLimit);
-                } else if (rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.BANDWIDTH_TYPE)) {
-                    BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_DEFAULT_UNIT_TIME));
-                    bandLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_TIME_UNIT));
-                    bandLimit.setDataAmount(rs.getInt(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA));
-                    bandLimit.setDataUnit(rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_UNIT));
-                    quotaPolicy.setLimit(bandLimit);
-                }
-                apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
                 policies.add(apiPolicy);
             }
         } catch (SQLException e) {
@@ -8554,29 +8533,8 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                QuotaPolicy quotaPolicy = new QuotaPolicy();
                 ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                appPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                appPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-                quotaPolicy.setType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
-
-                if (rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
-                    RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-                    reqLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-                    reqLimit.setRequestCount(rs.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
-                    quotaPolicy.setLimit(reqLimit);
-                } else if (rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.BANDWIDTH_TYPE)) {
-                    BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-                    bandLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-                    bandLimit.setDataAmount(rs.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
-                    bandLimit.setDataUnit(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
-                    quotaPolicy.setLimit(bandLimit);
-                }
-                appPolicy.setDefaultQuotaPolicy(quotaPolicy);
+                setCommonPolicyDetails(appPolicy, rs);
                 policies.add(appPolicy);
             }
         } catch (SQLException e) {
@@ -8610,33 +8568,11 @@ public class ApiMgtDAO {
             ps.setInt(1, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
-                QuotaPolicy quotaPolicy = new QuotaPolicy();
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(
                         rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                subPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
-                subPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
-                quotaPolicy.setType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
-
-                if (rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
-                    RequestCountLimit reqLimit = new RequestCountLimit();
-                    reqLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-                    reqLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-                    reqLimit.setRequestCount(rs.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
-                    quotaPolicy.setLimit(reqLimit);
-                } else if (rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                        .equals(PolicyConstants.BANDWIDTH_TYPE)) {
-                    BandwidthLimit bandLimit = new BandwidthLimit();
-                    bandLimit.setUnitTime(rs.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-                    bandLimit.setTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-                    bandLimit.setDataAmount(rs.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
-                    bandLimit.setDataUnit(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
-                    quotaPolicy.setLimit(bandLimit);
-                }
-
+                setCommonPolicyDetails(subPolicy, rs);
                 subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
-                subPolicy.setDefaultQuotaPolicy(quotaPolicy);
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
@@ -8874,5 +8810,45 @@ public class ApiMgtDAO {
 
         policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+    }
+
+    /**
+     * Populated common attributes of policy type objects to <code>policy</code>
+     * from <code>resultSet</code>
+     *
+     * @param policy initiallized {@link Policy} object to populate
+     * @param resultSet {@link ResultSet} with data to populate <code>policy</code>
+     * @throws SQLException
+     */
+    private void setCommonPolicyDetails(Policy policy, ResultSet resultSet) throws SQLException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
+
+        if(policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
+        }
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+            RequestCountLimit reqLimit = new RequestCountLimit();
+            reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(reqLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equals(PolicyConstants.BANDWIDTH_TYPE)) {
+            BandwidthLimit bandLimit = new BandwidthLimit();
+            bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+            quotaPolicy.setLimit(bandLimit);
+        }
+
+        policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+        policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+        policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+        policy.setDefaultQuotaPolicy(quotaPolicy);
     }
 }
