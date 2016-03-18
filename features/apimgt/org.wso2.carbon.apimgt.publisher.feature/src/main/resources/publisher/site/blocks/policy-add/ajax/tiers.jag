@@ -53,11 +53,12 @@ if (jagg.isCSRFTokenValid())
                         error: false
                     }
                 }
-            }//adding application policy
-            else if (action == "addAppPolicy" && request.getMethod() == 'POST') {
+            }//remove api policy
+            else if (action == "removeApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");
-                var appPolicy = request.getJsonObj();
-                result = mod.addAppPolicy(appPolicy);
+                var policyName = request.getPolicyName();
+                var userName = request.getUserName();
+                result = mod.removeApiPolicy(subPolicy);
                 if (result.error) {
                     obj = {
                         error: result.error,
@@ -68,22 +69,8 @@ if (jagg.isCSRFTokenValid())
                         error: false
                     }
                 }
-            }//adding subscription policy
-            else if (action == "addSubPolicy" && request.getMethod() == 'POST') {
-                mod = jagg.module("policy");
-                var subPolicy = request.getJsonObj();
-                result = mod.addAppPolicy(subPolicy);
-                if (result.error) {
-                    obj = {
-                        error: result.error,
-                        message: result.message
-                    }
-                } else {
-                    obj = {
-                        error: false
-                    }
-                }
-            } else {
+            }
+            else {
                 print({
                     error: true,
                     message: msg.error.invalidAction(action)

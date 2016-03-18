@@ -26,6 +26,54 @@ var addApiPolicy = function (policy) {
     }
 }
 
+//removing api policy
+var removeApiPolicy = function (policyName, userName , policyLevel) {
+
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        apiProvider.removePolicy(policyName, userName, policyLevel);
+        return {
+            error: false
+        };
+
+    } catch (ex){
+        var errorMessage = "Error occurred while deleting the policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+
+}
+
+//update api policy
+var updateApiPolicy = function (policy){
+
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var updatedPolicy = jsonToObject(policy);
+        apiProvider.updatePolicy(policy);
+        return {
+            error: false
+        };
+
+    } catch (ex){
+        var errorMessage = "Error occurred while updating the policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+
+}
 // inserting json file data to ApiPolicy Object
 var jsonToObject = function (policy) {
 

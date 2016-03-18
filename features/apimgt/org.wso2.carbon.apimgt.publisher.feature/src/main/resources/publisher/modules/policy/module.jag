@@ -10,6 +10,7 @@ jagg.module("policy", {
     addSubPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/subPolicy.jag").addSubPolicy.apply(this, arguments);
     }
+
 });
 
 %>
