@@ -3,6 +3,12 @@ jagg.module("policy", {
 
     addApiPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").addApiPolicy.apply(this, arguments);
+    },
+    addAppPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/appPolicy.jag").addAppPolicy.apply(this, arguments);
+    },
+    addSubPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/subPolicy.jag").addSubPolicy.apply(this, arguments);
     }
 });
 

@@ -38,10 +38,11 @@ if (jagg.isCSRFTokenValid())
                 }
                 print(obj);
 
-            } else if (action == "addApiPolicy" && request.getMethod() == 'POST') {
+            } // adding api policy
+            else if (action == "addApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");
-                var policy = request.getJsonObj();
-                result = mod.addApiPolicy(policy);
+                var apiPolicy = request.getJsonObj();
+                result = mod.addApiPolicy(apiPolicy);
                 if (result.error) {
                     obj = {
                         error: result.error,
@@ -52,8 +53,37 @@ if (jagg.isCSRFTokenValid())
                         error: false
                     }
                 }
-            }
-            else {
+            }//adding application policy
+            else if (action == "addAppPolicy" && request.getMethod() == 'POST') {
+                mod = jagg.module("policy");
+                var appPolicy = request.getJsonObj();
+                result = mod.addAppPolicy(appPolicy);
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    }
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+            }//adding subscription policy
+            else if (action == "addSubPolicy" && request.getMethod() == 'POST') {
+                mod = jagg.module("policy");
+                var subPolicy = request.getJsonObj();
+                result = mod.addAppPolicy(subPolicy);
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    }
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+            } else {
                 print({
                     error: true,
                     message: msg.error.invalidAction(action)
@@ -63,4 +93,4 @@ if (jagg.isCSRFTokenValid())
         }
     }());
 %>   
-%>
+
