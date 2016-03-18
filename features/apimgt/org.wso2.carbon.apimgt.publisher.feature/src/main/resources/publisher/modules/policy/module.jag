@@ -9,6 +9,12 @@ jagg.module("policy", {
     },
     addSubPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/subPolicy.jag").addSubPolicy.apply(this, arguments);
+    },
+    removeApiPolicy:function(){
+        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").removeApiPolicy.apply(this, arguments);
+    },
+    updateApiPolicy:function(){
+        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").updateApiPolicy.apply(this, arguments);
     }
 
 });
