@@ -32,8 +32,6 @@ var jsonToObject = function (policy) {
     try {
 
         var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.APIPolicy;
-        var AppPolicy = Packages.org.wso2.carbon.apimgt.api.model.ApplicationPolicy;
-        var SubPolicy = Packages.org.wso2.carbon.apimgt.api.model.SubscriptionPolicy;
         var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.IPCondition;
         var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.IPRangeCondition;
         var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.DateCondition;
@@ -56,8 +54,7 @@ var jsonToObject = function (policy) {
         var pipeline = policy.executionFlows;
 
         var apiPolicyobj = new APIPolicy(policyName);
-        APIPolicy.setDescription(policyDescription);
-        var pipelineObj = new Pipeline();
+        apiPolicyobj.setDescription(policyDescription);
         //exract pipeline info
         while (pipeline[i]) {
             var pipe = new Pipeline();
@@ -76,15 +73,15 @@ var jsonToObject = function (policy) {
             pipe.setEnabled(enabled);
             quotaPolicy.setType(quotaPolicyType);
             if (quotaPolicyType == "RequestCount") {
-                var requestCountLimit = new RequestCountLimit();
-                requestCountLimit.setRequestCount();
-                requestCountLimit.setTimeUnit();
+                requestCountLimit = new RequestCountLimit();
+                requestCountLimit.setRequestCount(requestCount);
+                requestCountLimit.setTimeUnit(timeUnit);
                 requestCountLimit.setUnitTime();
                 quotaPolicy.setLimit(requestCountLimit);
             } else if (quotaPolicyType == "Bandwidth") {
-                var bandwidthLimit = new BandwidthLimit();
-                bandwidthLimit.setDataAmount();
-                bandwidthLimit.setDataUnit();
+                bandwidthLimit = new BandwidthLimit();
+                bandwidthLimit.setDataAmount(dataAmount);
+                bandwidthLimit.setDataUnit(dataUnit);
                 quotaPolicy.setLimit(bandwidthLimit);
             }
 
@@ -131,7 +128,7 @@ var jsonToObject = function (policy) {
                         dateSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(dateSpecific);
                     } else { //id date range is given
-                        var ipRange = new IPRangeCondition();
+                        var dateRange = new DateRangeCondition();
                         dateRange.setStartingDate(startingDate);
                         dateRange.setEndingDate(endingDate);
                         dateRange.setInvertCondition(invertCondition);
@@ -158,7 +155,7 @@ var jsonToObject = function (policy) {
                     conditionsList.add(headerObj);
 
                 } else if (type == "HTTPVerb") {
-                    var httpVerbObj = new HTTPVerb();
+                    var httpVerbObj = new HTTPVerbCondition();
                     var httpVerb = condition[j].httpVerb;
                     httpVerbObj.setHttpVerb(httpVerb);
                     httpVerbObj.setInvertCondition(invertCondition);
@@ -166,7 +163,7 @@ var jsonToObject = function (policy) {
                     conditionsList.add(httpVerbObj);
 
                 } else if (type == "Context") {
-                    var contextObj = new Context();
+                    var contextObj = new ContextCondition();
                     var contextName = condition[j].contextName;
                     contextObj.setInvertCondition(invertCondition);   //yet to be added to object model
                     contextObj.setEnabled(enabled);
@@ -200,12 +197,26 @@ var jsonToObject = function (policy) {
         apiPolicyobj.setPipelines(pipeLines);
 
         //default quota policy details
+        var defaultQuotaPolicy = new QuotaPolicy();
         var defaultQuotaPolicyType = policy.defaultQuotaPolicy.type;
-        var defaultQuotaPolicyReqCount = policy.defaultQuotaPolicy.limit.requestCount;
-        var defaultQuotaPolicyTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
-        var defaultQuotaPolicyBandwidth = policy.defaultQuotaPolicy.limit.dataAmount;
-        var defaultQuotaPolicyDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
-
+        var defaultRequestCount = policy.defaultQuotaPolicy.limit.requestCount;
+        var defaultTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
+        var defaultDataAmount = policy.defaultQuotaPolicy.limit.dataAmount;
+        var defaultDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
+        defaultQuotaPolicy.setType(quotaPolicyType);
+        if (defaultQuotaPolicyType == "RequestCount") {
+            requestCountLimit = new RequestCountLimit();
+            requestCountLimit.setRequestCount(defaultRequestCount);
+            requestCountLimit.setTimeUnit(defaultTimeUnit);
+            requestCountLimit.setUnitTime();
+            defaultQuotaPolicy.setLimit(requestCountLimit);
+        } else if (defaultQuotaPolicyType == "Bandwidth") {
+            bandwidthLimit = new BandwidthLimit();
+            bandwidthLimit.setDataAmount(defaultDataAmount);
+            bandwidthLimit.setDataUnit(defaultDataUnit);
+            defaultQuotaPolicy.setLimit(bandwidthLimit);
+        }
+        apiPolicyobj.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return apiPolicyobj;
     } catch (ex) {
         var errorMessage = "Error occurred while adding policy";
