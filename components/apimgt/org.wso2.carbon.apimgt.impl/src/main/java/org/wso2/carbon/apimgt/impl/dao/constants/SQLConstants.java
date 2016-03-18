@@ -2001,7 +2001,18 @@ public class SQLConstants {
             "SELECT POLICY_ID FROM AM_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
 
     public static final String GET_POLICY_CONDITIONS_SQL =
-            "SELECT CONDITION_ID FROM AM_CONDITION WHERE POLICY_ID = ? ";
+            "SELECT " +
+                    "STARTING_IP, " +
+                    "ENDING_IP, " +
+                    "SPECIFIC_IP, " +
+                    "HTTP_VERB, " +
+                    "STARTING_DATE, " +
+                    "ENDING_DATE, " +
+                    "SPECIFIC_DATE " +
+            "FROM " +
+                    "AM_CONDITION " +
+            "WHERE " +
+                    "CONDITION_ID = ? ";
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
@@ -2040,6 +2051,11 @@ public class SQLConstants {
     public static final String INSERT_JWT_CLAIM_CONDITION_SQL =
             "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_ID,CLAIM_URL,CLAIM_ATTRIBUTE) \n" +
             "VALUES (?,?,?)";
+
+    public static final String INSERT_GLOBAL_POLICY_SQL =
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,QUOTA_POLICY_TYPE ,QUOTA ," +
+                    "QUOTA_UNIT, UNIT_TIME ,TIME_UNIT ,SIDDHI_QUERY) \n" +
+                    "VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_POLICY_SQL =
             "UPDATE AM_POLICY " +
@@ -2131,11 +2147,80 @@ public class SQLConstants {
     public static final String GET_API_POLICY_ID_SQL =
             "SELECT " +
                     "POLICY_ID " +
-                    "FROM " +
+            "FROM " +
                     "AM_POLICY_API " +
             "WHERE " +
                     "NAME = ? AND " +
                     "TENANT_ID = ?";
+
+    public static final String GET_API_POLICY_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_API " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID =?";
+
+    public static final String GET_APPLICATION_POLICY_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_APPLICATION " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID =?";
+
+    public static final String GET_SUBSCRIPTION_POLICY_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_SUBSCRIPTION " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID =?";
+
+    public static final String GET_PIPELINES_SQL =
+            "SELECT "+
+                    "CONDITION_ID, " +
+                    "QUOTA_POLICY_TYPE, " +
+                    "QUOTA, " +
+                    "QUOTA_UNIT, " +
+                    "UNIT_TIME, " +
+                    "TIME_UNIT " +
+            "FROM " +
+                    "AM_CONDITION " +
+            "WHERE " +
+                    "POLICY_ID =?";
+
+    public static final String GET_HEADER_CONDITIONS_SQL =
+            "SELECT "+
+                    "HEADER_FIELD_NAME, " +
+                    "HEADER_FIELD_VALUE " +
+            "FROM " +
+                    "AM_HEADER_FIELD_CONDITION " +
+            "WHERE " +
+                    "CONDITION_ID =?";
+
+
+    public static final String GET_JWT_CLAIM_CONDITIONS_SQL =
+            "SELECT "+
+                    "CLAIM_URL, " +
+                    "CLAIM_ATTRIBUTE " +
+            "FROM " +
+                    "AM_JWT_CLAIM_CONDITION " +
+            "WHERE " +
+                    "CONDITION_ID =?";
+
+
+    public static final String GET_QUERY_PARAMETER_CONDITIONS_SQL =
+            "SELECT "+
+                    "PARAMETER_NAME, " +
+                    "PARAMETER_VALUE " +
+            "FROM " +
+                    "AM_QUERY_PARAMETER_CONDITION " +
+            "WHERE " +
+                    "CONDITION_ID =?";
 
     public static final String UPDATE_APPLICATION_POLICY_SQL =
             "UPDATE AM_POLICY_APPLICATION " +

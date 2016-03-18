@@ -3637,6 +3637,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policies.add(policyString);
+                apiMgtDAO.addGlobalPolicy(globalPolicy);
             }
          
         } catch (APITemplateException e) {
@@ -3724,14 +3725,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        //remove from the gateway managers
-        //TODO create service method to bulk delete policies
-        for (String file : policyFileNames) {
-            manager.undeployPolicyFromGatewayManager(file);
-        }
-        //undeploy from global cep
-        manager.undeployPolicyFromGlobalCEP(policyFileNames);
+        //remove from the gateway managers      
         
+        try {
+            for (String file : policyFileNames) {
+                manager.undeployPolicyFromGatewayManager(file);
+            }
+            //undeploy from global cep
+            manager.undeployPolicyFromGlobalCEP(policyFileNames);
+        } catch (Exception e) {
+            String msg = "Error while undeploying policy: ";
+            log.error(msg, e);
+
+            throw new APIManagementException(msg);
+        }
         //remove from database             
         apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
     }

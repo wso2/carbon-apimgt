@@ -9,19 +9,60 @@
         <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
     </div>
 
-    <div>
+    <div class="content-section shadow-up">
         <div class="content-data">
+            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
             <div class="row-fluid">
                 <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                     action="/admin-dashboard/site/blocks/policy/global/ajax/global-policy-edit.jag">
 
-                        <div>
-                            <div>
-                                <textarea id="globalPolicyString" class="text"  name="globalPolicyString" style="width:99%;height:300px">
+                    <fieldset>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%="Name"%></label>
+                            <div class="controls cnls">
+                                <input type="text" id="policyName" name="policyName" />
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
+                            <div class="controls cnls">
+                                <textarea id="description" class="text" cols="40" rows ="2" name="description">
                                 </textarea>
                             </div>
                         </div>
-
+                        <div id="requestCountBasedDiv">
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Request Count </label>
+                                <div class="controls cnls">
+                                    <input type="text" id="requestCount" name="requestCount" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                             <label class="control-label cnl-label">Unit Time </label>
+                             <div class="controls cnls">
+                                 <input type="text" id="unitTime" name="unitTime" />
+                                 <select class="select required" id="timeUnit" name="timeUnit" style="width:15%">
+                                    <option value="sec" selected="true">Second(s)</option>
+                                    <option value="min">Minute(s)</option>
+                                    <option value="hour">Hour(s)</option>
+                                    <option value="days">Day(s)</option>
+                                    <option value="months">Month(s)</option>
+                                 </select>
+                                </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label">Siddhi Query</label>
+                            <div class="controls cnls">
+                                    <textarea id="siddhiQuery" class="text"  name="siddhiQuery" style="width:99%;height:200px"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
 
                     <div class="form-actions">
                         <input id="add-tier-btn" onclick="addGlobalPolicy()" name="save-tier-btn" type="button"

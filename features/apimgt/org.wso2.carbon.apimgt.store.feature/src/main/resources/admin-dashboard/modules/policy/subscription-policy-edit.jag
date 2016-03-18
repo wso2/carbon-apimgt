@@ -32,8 +32,6 @@ var constructPolicyObject = function (userName, policyName, description, default
     var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
     var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
     var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-    var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.policy.Pipeline;
-    var ArrayList = Packages.java.util.ArrayList;
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
     var subscriptionPolicy = new SubscriptionPolicy(policyName);
