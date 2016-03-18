@@ -8396,6 +8396,12 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Add a Global level throttling policy to database
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
     public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
         Connection conn = null;
         PreparedStatement policyStatement = null;
