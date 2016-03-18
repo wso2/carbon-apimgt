@@ -1,9 +1,16 @@
 <%
 var log = new Log();
 
-var addGlobalPolicy = function (globalPolicyString) {
+var addGlobalPolicy = function (policyName, description, requestCount, unitTime, timeUnit, siddhiQuery) {
     try {
-        log.info(globalPolicyString);
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var policy = constructPolicyObject(provider, policyName, description, requestCount, unitTime, timeUnit, siddhiQuery);
+
+        apiProvider.addPolicy(policy);
+        log.info(policy.toString());
         return {
             error: false
         };
@@ -17,7 +24,32 @@ var addGlobalPolicy = function (globalPolicyString) {
     }
 };
 
-var constructPolicyObject = function () {
+var constructPolicyObject = function (userName, policyName, description, requestCount, unitTime, timeUnit, siddhiQuery) {
+    var GlobalPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+    var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+    var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+    var globalPolicy = new GlobalPolicy(policyName);
+
+    globalPolicy.setPolicyName(policyName);
+    globalPolicy.setDescription(description);
+
+    var tenantId = APIUtil.getTenantId(userName);
+    globalPolicy.setTenantId(tenantId);
+
+    var default_quotaPolicy = new QuotaPolicy();
+    var requestCountLimit = new RequestCountLimit();
+    requestCountLimit.setRequestCount(requestCount);
+    requestCountLimit.setUnitTime(unitTime);
+    requestCountLimit.setTimeUnit(timeUnit);
+    default_quotaPolicy.setType("RequestCount");
+    default_quotaPolicy.setLimit(requestCountLimit);
+
+    globalPolicy.setDefaultQuotaPolicy(default_quotaPolicy);
+    globalPolicy.setSiddhiQuery(siddhiQuery);
+
+    return globalPolicy;
 
 }
 %>
