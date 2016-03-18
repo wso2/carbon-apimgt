@@ -27,9 +27,9 @@ var addApiPolicy = function (policy) {
 }
 
 //removing api policy
-var removeApiPolicy = function (policyName, userName , policyLevel) {
+var removeApiPolicy = function (policyName, userName, policyLevel) {
 
-    try{
+    try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
@@ -39,7 +39,7 @@ var removeApiPolicy = function (policyName, userName , policyLevel) {
             error: false
         };
 
-    } catch (ex){
+    } catch (ex) {
         var errorMessage = "Error occurred while deleting the policy (Cause:" + ex.message + ")";
         log.error(errorMessage);
         return {
@@ -51,9 +51,9 @@ var removeApiPolicy = function (policyName, userName , policyLevel) {
 }
 
 //update api policy
-var updateApiPolicy = function (policy){
+var updateApiPolicy = function (policy) {
 
-    try{
+    try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
@@ -64,7 +64,7 @@ var updateApiPolicy = function (policy){
             error: false
         };
 
-    } catch (ex){
+    } catch (ex) {
         var errorMessage = "Error occurred while updating the policy (Cause:" + ex.message + ")";
         log.error(errorMessage);
         return {
