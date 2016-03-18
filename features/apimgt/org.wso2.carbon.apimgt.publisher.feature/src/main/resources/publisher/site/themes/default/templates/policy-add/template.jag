@@ -89,7 +89,9 @@
 
         </div>
     </div>
-
+    <div id="add-policy-button">
+        <button type="button" id="addNewAPIButton" name="addNeWThrottleButton" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner"><%=i18n.localize("addThrottlePolicy")%></button>
+    </div>
 </div>
 
 <script id="designer-policy-template" type="text/x-handlebars-template">
@@ -179,7 +181,7 @@
                     <h2 class="sub-title panel-title">
                         IP Condition Policy
                         <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#ip-condition-body-{{../../executionFlow.id}}">
-                            <input id="ip-condition-checkbox-{{../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
+                            <input id="ip-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
                             <span class="helper"></span>
                             <span class="text"></span>
                         </label>

@@ -1,7 +1,7 @@
 var index = 0;
 
-Handlebars.registerHelper('if_eq', function(a, b, opts) {
-    if(a == b) {
+Handlebars.registerHelper('if_eq', function (a, b, opts) {
+    if (a == b) {
         return opts.fn(this);
     } else {
         return opts.inverse(this);
@@ -42,7 +42,7 @@ var addPolicy = function () {
         "conditions": [
             {
                 "type": "IP",
-                "ipType" : "specific",
+                "ipType": "specific",
                 "startingIP": "",
                 "endingIP": "",
                 "specificIP": "",
@@ -51,9 +51,7 @@ var addPolicy = function () {
             },
             {
                 "type": "Header",
-                "keyValPairs" : [
-                    {"name": "test", "value": "test"}
-                ],
+                "keyValPairs": [],
                 "invertCondition": false,
                 "enabled": false
             },
@@ -68,7 +66,7 @@ var addPolicy = function () {
             },
             {
                 "type": "QueryParam",
-                "keyValPairs" : [],
+                "keyValPairs": [],
                 "invertCondition": false,
                 "enabled": false
             },
@@ -92,9 +90,9 @@ var addPolicy = function () {
             },
             {
                 "type": "JWTClaim",
-                "keyValPairs" : [],
+                "keyValPairs": [],
                 "invertCondition": false,
-                "hasValues" : false,
+                "hasValues": false,
                 "enabled": false
             }
         ]
@@ -115,19 +113,19 @@ var addPolicy = function () {
 };
 
 $(document).ready(function () {
-    $( "#default-policy-level" ).change(function () {
-            var selectedText = "";
-            $( "#default-policy-level option:selected" ).each(function() {
-                selectedText = $( this ).val();
-                if (selectedText == 'bandwidthVolume') {
-                    $( "#request-count-block").hide();
-                    $( "#bandwidth-block").show();
-                } else {
-                    $( "#bandwidth-block").hide();
-                    $( "#request-count-block").show();
-                }
-            });
+    $("#default-policy-level").change(function () {
+        var selectedText = "";
+        $("#default-policy-level option:selected").each(function () {
+            selectedText = $(this).val();
+            if (selectedText == 'bandwidthVolume') {
+                $("#request-count-block").hide();
+                $("#bandwidth-block").show();
+            } else {
+                $("#bandwidth-block").hide();
+                $("#request-count-block").show();
+            }
         });
+    });
 });
 
 var showAdvanceOperation = function (operation, button, id) {
@@ -138,56 +136,56 @@ var showAdvanceOperation = function (operation, button, id) {
     $(hiddenOperation + '[data-operation="' + operation + '"]').siblings().hide();
 };
 
-var onIpConditionChange = function(id, optionTextOb) {
+var onIpConditionChange = function (id, optionTextOb) {
     var selectedText = $(optionTextOb).val();
     if (selectedText == 'IPRange') {
-        $( "#specific-ip-block-" + id).hide();
-        $( "#ip-range-block-"+ id).show();
+        $("#specific-ip-block-" + id).hide();
+        $("#ip-range-block-" + id).show();
     } else {
-        $( "#ip-range-block-"+ id).hide();
-        $( "#specific-ip-block-" + id).show();
+        $("#ip-range-block-" + id).hide();
+        $("#specific-ip-block-" + id).show();
     }
 };
 
-var onExecutionFlowTypeChange = function(id, optionTextOb) {
+var onExecutionFlowTypeChange = function (id, optionTextOb) {
     var selectedText = $(optionTextOb).val();
     if (selectedText == 'requestCount') {
-        $( "#execution-flow-request-count-block-" + id).show();
-        $( "#execution-flow-bandwidth-block-"+ id).hide();
+        $("#execution-flow-request-count-block-" + id).show();
+        $("#execution-flow-bandwidth-block-" + id).hide();
     } else {
-        $( "#execution-flow-request-count-block-" + id).hide();
-        $( "#execution-flow-bandwidth-block-"+ id).show();
+        $("#execution-flow-request-count-block-" + id).hide();
+        $("#execution-flow-bandwidth-block-" + id).show();
     }
 };
 
-var onDateConditionChange = function(id, optionTextOb) {
+var onDateConditionChange = function (id, optionTextOb) {
     var selectedText = $(optionTextOb).val();
     if (selectedText == 'dateRange') {
-        $( "#specific-date-block-" + id).hide();
-        $( "#date-range-block-"+ id).show();
+        $("#specific-date-block-" + id).hide();
+        $("#date-range-block-" + id).show();
     } else {
-        $( "#date-range-block-"+ id).hide();
-        $( "#specific-date-block-" + id).show();
+        $("#date-range-block-" + id).hide();
+        $("#specific-date-block-" + id).show();
     }
 };
 
-var removeQueryParamRow = function(rowObj, flowId) {
-    $(rowObj).closest ('tr').remove ();
-    var rowCount = $('#query-param-value-table-content-'+ flowId +' tr').length;
+var removeQueryParamRow = function (rowObj, flowId) {
+    $(rowObj).closest('tr').remove();
+    var rowCount = $('#query-param-value-table-content-' + flowId + ' tr').length;
     //Using 1 here as even row is removed above the row count will not set to 0 during this flow
-    if(rowCount <= 1) {
-        $('#query-param-value-table-'+ flowId).hide();
+    if (rowCount <= 1) {
+        $('#query-param-value-table-' + flowId).hide();
     }
 };
 
-var addQueryParam = function(id) {
+var addQueryParam = function (id) {
     var source = $("#designer-query-pram-table-content").html();
     var paramName = $('#query-param-name-' + id).val();
     var paramValue = $('#query-param-value-' + id).val();
     var tableRow = {
-        "name" : paramName,
-        "value" : paramValue,
-        "flowId" : id
+        "name": paramName,
+        "value": paramValue,
+        "flowId": id
     };
 
     Handlebars.partials['designer-query-pram-table-content'] = Handlebars.compile(source);
@@ -196,29 +194,29 @@ var addQueryParam = function(id) {
     };
 
     var output = Handlebars.partials['designer-query-pram-table-content'](context);
-    $('#query-param-value-table-'+ id).show();
-    $('#query-param-value-table-content-'+ id +' > tbody:first').append(output);
+    $('#query-param-value-table-' + id).show();
+    $('#query-param-value-table-content-' + id + ' > tbody:first').append(output);
     $('#query-param-name-' + id).val("");
     $('#query-param-value-' + id).val("");
 };
 
-var removeHeaderRow = function(rowObj, flowId) {
-    $(rowObj).closest ('tr').remove ();
-    var rowCount = $('#header-value-table-content-'+ flowId +' tr').length;
+var removeHeaderRow = function (rowObj, flowId) {
+    $(rowObj).closest('tr').remove();
+    var rowCount = $('#header-value-table-content-' + flowId + ' tr').length;
     //Using 1 here as even row is removed above the row count will not set to 0 during this flow
-    if(rowCount <= 1) {
-        $('#header-value-table-'+ flowId).hide();
+    if (rowCount <= 1) {
+        $('#header-value-table-' + flowId).hide();
     }
 };
 
-var addHeader = function(id) {
+var addHeader = function (id) {
     var source = $("#designer-header-value-table-content").html();
     var headerName = $('#header-name-' + id).val();
     var headerValue = $('#header-value-' + id).val();
     var tableRow = {
-        "name" : headerName,
-        "value" : headerValue,
-        "flowId" : id
+        "name": headerName,
+        "value": headerValue,
+        "flowId": id
     };
 
     Handlebars.partials['designer-header-value-table-content'] = Handlebars.compile(source);
@@ -227,29 +225,29 @@ var addHeader = function(id) {
     };
 
     var output = Handlebars.partials['designer-header-value-table-content'](context);
-    $('#header-value-table-'+ id).show();
-    $('#header-value-table-content-'+ id +' > tbody:first').append(output);
+    $('#header-value-table-' + id).show();
+    $('#header-value-table-content-' + id + ' > tbody:first').append(output);
     $('#header-name-' + id).val("");
     $('#header-value-' + id).val("");
 };
 
-var removeJwtClaimRow = function(rowObj, flowId) {
-    $(rowObj).closest ('tr').remove ();
-    var rowCount = $('#jwt-claim-value-table-content-'+ flowId +' tr').length;
+var removeJwtClaimRow = function (rowObj, flowId) {
+    $(rowObj).closest('tr').remove();
+    var rowCount = $('#jwt-claim-value-table-content-' + flowId + ' tr').length;
     //Using 1 here as even row is removed above the row count will not set to 0 during this flow
-    if(rowCount <= 1) {
-        $('#jwt-claim-value-table-'+ flowId).hide();
+    if (rowCount <= 1) {
+        $('#jwt-claim-value-table-' + flowId).hide();
     }
 };
 
-var addJwtClaim = function(id) {
+var addJwtClaim = function (id) {
     var source = $("#designer-jwt-claim-value-table-content").html();
     var claimName = $('#jwt-claim-name-' + id).val();
     var claimValue = $('#jwt-claim-value-' + id).val();
     var tableRow = {
-        "name" : claimName,
-        "value" : claimValue,
-        "flowId" : id
+        "name": claimName,
+        "value": claimValue,
+        "flowId": id
     };
 
     Handlebars.partials['designer-jwt-claim-value-table-content'] = Handlebars.compile(source);
@@ -258,13 +256,13 @@ var addJwtClaim = function(id) {
     };
 
     var output = Handlebars.partials['designer-jwt-claim-value-table-content'](context);
-    $('#jwt-claim-value-table-'+ id).show();
-    $('#jwt-claim-value-table-content-'+ id +' > tbody:first').append(output);
+    $('#jwt-claim-value-table-' + id).show();
+    $('#jwt-claim-value-table-content-' + id + ' > tbody:first').append(output);
     $('#jwt-claim-name-' + id).val("");
     $('#jwt-claim-value-' + id).val("");
 };
 
-var addPolicyToBackend = function() {
+var addPolicyToBackend = function () {
     var policyName = $('#policy-name').val();
     var policyDescription = $('#policy-description').val();
     var policyLevel = $("#policy-level option:selected").val();
@@ -277,7 +275,7 @@ var addPolicyToBackend = function() {
     apiPolicy.policyLevel = policyLevel;
     apiPolicy.defaultQuotaPolicy.type = defaultPolicyType;
 
-    if(defaultPolicyType == 'requestCount') {
+    if (defaultPolicyType == 'requestCount') {
         defaultPolicyLimit = $('#request-count').val();
         defaultPolicyUnit = $("#request-count-unit option:selected").val();
         apiPolicy.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
@@ -290,12 +288,12 @@ var addPolicyToBackend = function() {
     }
 
     var executionFlow, executionFlowId, checked;
-    for(var i = 0 ; i < apiPolicy.executionFlows.length ; i++) {
+    for (var i = 0; i < apiPolicy.executionFlows.length; i++) {
         executionFlow = apiPolicy.executionFlows[i];
         executionFlowId = executionFlow.id;
         executionFlow = apiPolicy.executionFlows[i].enabled = true;
         for (var j = 0; j < apiPolicy.executionFlows[i].conditions.length; j++) {
-            if (apiPolicy.executionFlows[i].conditions[j].type = "IP") {
+            if (apiPolicy.executionFlows[i].conditions[j].type == "IP") {
                 checked = $('#ip-condition-checkbox-' + executionFlowId).attr('checked');
                 //Ip condition related properties
                 if (checked) {
@@ -319,7 +317,7 @@ var addPolicyToBackend = function() {
                 }
             }
 
-            if (apiPolicy.executionFlows[i].conditions[j].type = "Header") {
+            if (apiPolicy.executionFlows[i].conditions[j].type == "Header") {
                 //Header condition related properties
                 checked = $('#header-condition-checkbox-' + executionFlowId).attr('checked');
                 if (checked) {
@@ -338,8 +336,10 @@ var addPolicyToBackend = function() {
                     var headerInvertCondition = $('#header-condition-invert-' + executionFlowId).attr('checked');
                     apiPolicy.executionFlows[i].conditions[0].invertCondition = headerInvertCondition;
                 }
+            }
 
-                //Date Condition related properties
+            //Date Condition related properties
+            if (apiPolicy.executionFlows[i].conditions[j].type == "Date") {
                 checked = $('#date-condition-checkbox-' + executionFlowId).attr('checked');
                 if (checked) {
                     var dateConditionType = $("#date-condition-type-" + executionFlowId + " option:selected").val();
@@ -361,7 +361,7 @@ var addPolicyToBackend = function() {
             }
 
             //Query param condition related properties
-            if (apiPolicy.executionFlows[i].conditions[j].type = "QueryParam") {
+            if (apiPolicy.executionFlows[i].conditions[j].type == "QueryParam") {
                 checked = $('#query-param-condition-checkbox-' + executionFlowId).attr('checked');
                 if (checked) {
                     var queryParamName, queryParamVal;
@@ -379,10 +379,10 @@ var addPolicyToBackend = function() {
                     var queryParamInvertCondition = $('#query-param-condition-invert-' + executionFlowId).attr('checked');
                     apiPolicy.executionFlows[i].conditions[0].invertCondition = queryParamInvertCondition;
                 }
-
+            }
 
                 //HTTP Verb condition related properties
-                if (apiPolicy.executionFlows[i].conditions[j].type = "HTTPVerb") {
+                if (apiPolicy.executionFlows[i].conditions[j].type == "HTTPVerb") {
                     checked = $('#http-verb-condition-checkbox-' + executionFlowId).attr('checked');
                     if (checked) {
                         apiPolicy.executionFlows[i].conditions[4].enabled = true;
@@ -394,7 +394,7 @@ var addPolicyToBackend = function() {
                 }
 
                 //Payload condition related properties
-                if (apiPolicy.executionFlows[i].conditions[j].type = "Payload") {
+                if (apiPolicy.executionFlows[i].conditions[j].type == "Payload") {
                     checked = $('#payload-condition-checkbox-' + executionFlowId).attr('checked');
                     if (checked) {
                         apiPolicy.executionFlows[i].conditions[6].enabled = true;
@@ -406,7 +406,7 @@ var addPolicyToBackend = function() {
                 }
 
                 //Context related properties
-                if (apiPolicy.executionFlows[i].conditions[j].type = "Context") {
+                if (apiPolicy.executionFlows[i].conditions[j].type == "Context") {
                     checked = $('#context-condition-checkbox-' + executionFlowId).attr('checked');
                     if (checked) {
                         apiPolicy.executionFlows[i].conditions[6].enabled = true;
@@ -419,8 +419,7 @@ var addPolicyToBackend = function() {
 
                 //Jwt claim condition related properties
 
-                if (apiPolicy.executionFlows[i].conditions[j].type = "JWTClaim") {
-
+                if (apiPolicy.executionFlows[i].conditions[j].type == "JWTClaim") {
                     checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).attr('checked');
                     if (checked) {
                         var queryParamName, queryParamVal;
@@ -439,16 +438,17 @@ var addPolicyToBackend = function() {
                         apiPolicy.executionFlows[i].conditions[0].invertCondition = jwtClaimInvertCondition;
                     }
                 }
-            }
+
             var executionPolicyQuotaType = $("#execution-policy-level-" + executionFlowId + " option:selected").val();
             apiPolicy.executionFlows[i].quotaPolicy.type = executionPolicyQuotaType;
-            if(defaultPolicyType == 'requestCount') {
-                apiPolicy.executionFlows[i].quotaPolicy.requestCount =  $('#execution-flow-request-count-'+executionFlowId).val();
+            if (defaultPolicyType == 'requestCount') {
+                apiPolicy.executionFlows[i].quotaPolicy.requestCount = $('#execution-flow-request-count-' + executionFlowId).val();
                 apiPolicy.executionFlows[i].quotaPolicy.timeUnit = $("#execution-policy-level-" + executionFlowId + " option:selected").val();
             } else {
-                apiPolicy.executionFlows[i].quotaPolicy.dataAmount = $('#execution-flow-bandwidth-'+executionFlowId).val();
+                apiPolicy.executionFlows[i].quotaPolicy.dataAmount = $('#execution-flow-bandwidth-' + executionFlowId).val();
                 apiPolicy.executionFlows[i].quotaPolicy.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
             }
         }
+        console.log(JSON.stringify(apiPolicy));
     }
 };
