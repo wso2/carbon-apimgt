@@ -138,6 +138,18 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO.getAPIPolicies(-1234);
     }
 
+    public void testGetApplicationPolicy() throws APIManagementException {
+        apiMgtDAO.getApplicationPolicy("Bronze", 4);
+    }
+
+    public void testGetSubscriptionPolicy() throws APIManagementException {
+        apiMgtDAO.getSubscriptionPolicy("Silver", 6);
+    }
+
+    public void testGetApiPolicy() throws APIManagementException {
+        apiMgtDAO.getAPIPolicy("Bronze", -1234);
+    }
+
     private Policy getPolicyAPILevelPerUser(){
         APIPolicy policy = new APIPolicy("Bronze");
 
