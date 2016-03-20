@@ -29,11 +29,11 @@ if(outputs.isCreatePermitted){
                                         </td>
                                         <td>
                                         <div id="allOriginContainer">
-                                        <input type="checkbox" id="toggleallOrigin" name="toggleallOrigin" id="toggleallOrigin"
-                                        <%
-                                        if(corsJson.accessControlAllowOrigins =="*"){
-                                         %>
-                                        checked="checked"<%}%>><%=i18n.localize("allOrigins")%>
+                                        
+                                        <label class="checkbox">
+							                	<input type="checkbox" id="toggleallOrigin" name="toggleallOrigin" id="toggleallOrigin"   <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+							                    <span class="helper"><%=i18n.localize("allOrigins")%></span>
+							                </label>
                                         </div>
                                         <%
                                         var accessOrigin ="";
