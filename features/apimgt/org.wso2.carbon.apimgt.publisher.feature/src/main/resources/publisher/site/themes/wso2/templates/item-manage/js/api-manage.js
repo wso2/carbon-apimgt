@@ -109,10 +109,11 @@ $('.js_hidden_section_title').click(function(){
 
 $("#toggleThrottle").change(function(e){
     if($(this).is(":checked")){
-    	console.log('checl');
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();
+    	$('#productionTps').val('');
+    	$('#sandboxTps').val('');
     }
 });
 
