@@ -727,7 +727,7 @@ $(document).ready(function(){
         $('#swagger_file_help').hide();
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).parent().fadeIn();
+        $('#' + $(this).val()).parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
@@ -751,8 +751,8 @@ $(document).ready(function(){
     });
 
     $('#import_swagger').click(function () {
-        if ($('.toggleRadios input[type=radio]:checked').val() == 'swagger_import_file') {
-
+    	
+    	if ($('.toggleRadios input[type=radio]:checked').val() == 'swagger_import_file') {
             $('#import_swagger').buttonLoader('start');
             $('#swagger_help').hide();
             $('#swagger_file_help').hide();
@@ -870,6 +870,8 @@ $(document).ready(function(){
 
             if(tagName.match(/[^a-zA-Z0-9_ -]/g)){
                 $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
+                		$('.tags-error').show();
+                		$('.add-tags-error').hide();
                         $('.add-tags-error').html('');
                         $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
                         return '';
@@ -884,6 +886,8 @@ $(document).ready(function(){
         });
         $('.tags-error').html('');
         $("#tags").on('itemAdded', function(event) {
+        	 $('.tags-error').hide();
+    		 $('.add-tags-error').hide();
              $('.tags-error').html('');
              $('.add-tags-error').html('');
         });
@@ -891,10 +895,13 @@ $(document).ready(function(){
 
     $('.tagContainer .bootstrap-tagsinput input').blur(function() {
         if($(this).val().length > 0){
+        	$('.tags-error').hide();
+    		$('.add-tags-error').show();
             $('.add-tags-error').html('Please press Enter to add the tag.')
             $('.tags-error').html('');
         }
         else if($(this).val().length == 0){
+        	$('.add-tags-error').hide();
             $('.add-tags-error').html('');
         }
     });
