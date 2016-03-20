@@ -70,7 +70,7 @@
 	<div class="page-header">
 		<h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
         <% if(api){ %>
-               <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
+               <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %></h2>
 	</div>
     <div class="content-section shadow-up">
@@ -120,9 +120,11 @@
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
 							
-							                        <div class="form-group form-inline">
-							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
-							                                <div class="col-sm-9">
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            </label>
+							                                <div class="col-sm-4">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
 							                                        <option value="http"  selected="selected">HTTP Endpoint</option>
 							                                        <option value="address">Address Endpoint</option>
@@ -130,7 +132,6 @@
 							                                        <option value="load_balance">Load balanced Endpoint</option>
 							                                        <option value="default">Default Endpoint</option>
 							                                    </select>
-							                                    <a class="help_popup" help_data="endpoint_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 							                                </div>							
 							                        </div>
 							
@@ -155,33 +156,35 @@
 							                        <div id="more-options-endpoints"  style="display:none">
 							
 							
-							                        <div class="form-group form-inline">
-							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6">
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span>
+							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointType" name="endpointType" >
 							                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
 							                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
 							                            </select>
-							                            <a class="help_popup" help_data="endpointSec_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-							                            <p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
 							                            </div>
 							                        </div>
 							
-							                        <div class="form-group form-inline" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6">
+							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointAuthType" name="endpointAuthType" >
 							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
 							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
-							                            </select>
-							                            <a class="help_popup" help_data="endpointAuth_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-							                            <p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            </select>							                            
 							                            </div>
 							                        </div>
 							
-							                        <div class="form-group form-inline" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-8">
+							                            <div class="col-sm-6 form-inline">
 							                                <input type="text" class="col-sm-2 form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
 							                                <input type="password" class="col-sm-4 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
 							                            </div>
@@ -189,9 +192,9 @@
 							
 							                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
 							                        <!--Southboud statistics -->
-							                        <div class="form-group form-inline">
+							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
-							                              <div class="col-sm-3">
+							                              <div class="col-sm-4">
 							                               <select class="select required form-control" id="destinationStats" name="destinationStats">
 							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
 							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
@@ -261,7 +264,7 @@
 														    <input type="text" id="inSeqFileValue" class="form-control" readonly>
 														    <input type="file" id="inSeqFile" name="inSeqFile" class="form-control">
 														    <div class="input-group-btn">
-															<button class="btn btn-default btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+															<button class="btn btn-secondary btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
 															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
 															</button>
 														    </div>
@@ -280,7 +283,7 @@
 														    <input type="file" id="outSeqFile"  name="outSeqFile" class="form-control">
 														    <div class="input-group-btn"></div>
 														    <div class="input-group-btn">
-															<button class="btn btn-default btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+															<button class="btn btn-secondary btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
 															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
 															</button>
 														    </div>
@@ -303,7 +306,7 @@
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 							                    <input type="hidden" value="endpoint" name="implementation_methods" >
 							                    <div class="form-actions" id="saveButtons">
-							                        <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
+							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" >Save</button>
 							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
 							                    </div>
 							                    </form>
@@ -371,7 +374,7 @@
 							                            <div class="input-group">
 							                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
 							                                <span class="input-group-btn">
-							                                    <button type="button" id="prototype_test" class="btn btn-default check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
+							                                    <button type="button" id="prototype_test" class="btn btn-secondary check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
 							                                        <span>Test</span>
 							                                    </button>
 							                                </span>
@@ -394,7 +397,7 @@
 							                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
 							                    <input type="hidden" name="action" value="implement" />
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
-							                    <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+							                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
 							                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 							                </div>
 							                            </form>
@@ -422,8 +425,8 @@
 							                </div>
 							                <div class="modal-footer">
 							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
-							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default" >Go to API Store</a>
-							                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" >Go to API Store</a>
+							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
 							                </div>
 							                </div>
 							            </div>

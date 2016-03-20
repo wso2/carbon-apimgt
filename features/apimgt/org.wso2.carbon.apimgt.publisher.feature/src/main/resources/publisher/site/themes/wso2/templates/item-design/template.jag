@@ -56,7 +56,7 @@
 
 	<div class="page-header">
 		<% if(api){ %>
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-secondary pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>    
@@ -102,30 +102,31 @@
 										    </div>
 
 										<div class="row">
-										  <div class="col-md-9">
+										  <div class="col-sm-9">
 										<% if(!api){ %>    
-										    <div class="form-group form-inline">
-										        <label class="col-sm-3 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
-										        <div class="col-sm-9">
-										            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
-										            <a class="help_popup" help_data="name_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-										        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
+										    <div class="form-group">
+										        <label class="col-sm-3 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span> 
+										        	<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>   </label>
+										        <div class="col-sm-4">
+										            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>        
 										        </div>        
 										    </div>
 										
-										    <div class="form-group form-inline">
-										        <label class="col-sm-3 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
-										        <div class="col-sm-9">
-										            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
-										            <a class="help_popup" help_data="context_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-										        	<p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>            
+										    <div class="form-group">
+										        <label class="col-sm-3 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span>
+										        <a class="help_popup" help_data="context_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>  
+										        </label>
+										        <div class="col-sm-4">
+										            <input type="text" class="form-control required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />          
 										        </div>										        
 										    </div>
 										
 										    <div class="form-group">
 										        <label class="col-sm-3 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
 										        <div class="col-sm-4">
-										            <input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0, v1.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
+										            <input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
 										        </div>
 										    </div>
 										    <% }else{ %>
@@ -135,9 +136,11 @@
 										                <input type="hidden" name="context" value="<%= encode.forHtml(api.context) %>" />
 										    <% } %>
 										
-										    <div class="form-group form-inline">
-										        <label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("visibility")%>:</label>
-										        <div class="col-sm-9">
+										    <div class="form-group">
+										        <label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("visibility")%>:
+										        <a class="help_popup" help_data="role_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p></label>
+										        <div class="col-sm-4">
 										        	<select class="select required form-control" id="visibility" name="visibility">
 										    <% mod = jagg.module("api");
 										     	result = mod.isMultipleTenantsAvailable();
@@ -162,8 +165,6 @@
 										                <% } %> 
 										            <%}%>
 										        </select>
-										        <a class="help_popup" help_data="role_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-										        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
 										        </div>										        
 										    </div>
 										
@@ -172,7 +173,7 @@
 										                <label class="col-sm-3 control-label" for="roles" id="rolesLabel" name="rolesLabel">
 										                    <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 										                </label>
-										                <div class="col-sm-9">
+										                <div class="col-sm-4">
 										                    <input type="text" class="form-control required validInput validateRoles"
 										                    id="roles" name="roles"  value="<%=api.roles%>" placeholder="<%=i18n.localize("rolesHelpMsg")%>"/>
 										                </div>
@@ -182,7 +183,7 @@
 										            <label class="col-sm-3 control-label" for="roles" id="rolesLabel" name="rolesLabel">
 										                <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 										            </label>
-										            <div class="col-sm-9">
+										            <div class="col-sm-4">
 										                <input type="text" class="form-control required validInput validateRoles"
 										                id="roles" name="roles" placeholder="<%=i18n.localize("rolesHelpMsg")%>"/>
 										            </div>
@@ -213,27 +214,29 @@
 										
 										
 										                <div class="form-group">
-										                   <label class="col-md-3 control-label" for="description"><%=i18n.localize("description")%>:</label>
-										                   <div class="col-md-9">
+										                   <label class="col-sm-3 control-label" for="description"><%=i18n.localize("description")%>:</label>
+										                   <div class="col-sm-9">
 										                       <textarea class="form-control validateDescriptionLength" id="description" name="description" rows="3"><%= _description %></textarea>
 										                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
 										                   </div>
 										               </div>
 										
 										                <div class="form-group">
-										                    <label class="col-md-3 control-label" for="tags"><%=i18n.localize("tags")%>:</label>
-										                    <div class="col-md-7 tagContainer">
-										                        <input type="text" placeholder="<%=i18n.localize("tagsHelpLabel")%>" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
+										                    <label class="col-sm-3 control-label" for="tags"><%=i18n.localize("tags")%>:
+										                    <a class="help_popup" help_data="tag_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										                        <p id="tag_help" class="hide" style="font-size:9px"><%=i18n.localize("tagsHelpMsg")%></p></label>
+										                    <div class="col-sm-4 tagContainer">
+										                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
 										                        onkeyup="$(this).validate()"/>
-										                        <a class="help_popup" help_data="tag_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-										                        <p id="tag_help" class="hide"><%=i18n.localize("tagsHelpMsg")%></p>
-										                        <label class="tags-error error pull-left"></label>
-										                        <label class="add-tags-error error pull-left"></label>
+										                        
+										                        <label class="tags-error error pull-left" style="display:none"></label>
+										                        <label class="add-tags-error error pull-left" style="display:none"></label>
+										                        <p class="help-block" id="rolesHelp"><%=i18n.localize("tagsHelpLabel")%></p>
 										                    </div>
 										                </div>      
 										  </div><!-- left -->
 										
-										  <div class="col-md-3">
+										  <div class="col-sm-3">
 										        <div class="form-group">
 										            <label class="col-sm-12" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
 										            <div class="col-sm-12">
@@ -247,8 +250,8 @@
 										                  </div>
 										                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
 										                  <div>
-										                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
-										                    <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+										                    <span class="btn btn-secondary btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
+										                    <a href="#" class="btn btn-secondary fileinput-exists" data-dismiss="fileinput">Remove</a>
 										                  </div>
 										                </div>
 										                <p class="help-block" id="rolesHelp"><%=i18n.localize("imgHelpMsg2")%></p>
@@ -291,8 +294,8 @@
 										    </div>
 										                <% }else{ %>
 										                <div id="api_designer">		
-										                	<a  href="#swaggerUpload" role="button" class="btn btn-default pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
-										                    	<a  href="#" id="swaggerEditor" class="btn btn-default pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>    								                                
+										                	<a  href="#swaggerUpload" role="button" class="btn btn-secondary pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
+										                    	<a  href="#" id="swaggerEditor" class="btn btn-secondary pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>    								                                
 										                    <div id ="resource_details">										                    
 										                    </div>										                   
 										                </div>      
@@ -313,7 +316,7 @@
 										                </div>
 										                <div class="form-actions" id="saveButtons">
 										
-										                    <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>
+										                    <button type="submit" class="btn btn-secondary has-spinner" id="saveBtn">Save</button>
 										                    <input type="hidden" value="Save" action="design"/>
 										
 										                    <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
@@ -354,47 +357,72 @@
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/default/lib/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">
     <button class="btn btn-primary" id="update_swagger">Save</button>                    
-    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
+    <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
     </div>              
 </div>   
 
 <!-- Import Modal -->
 <div class="modal fade" id="swaggerUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content clearfix">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 id="swaggerUploadLabel">Import API Definition</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+        <h4 class="modal-title" id="swaggerUploadLabel">Import API Definition</h4>
       </div>
-        <div class="modal-body" style="height:140px;">
-            <div id="swagger_help" class="alert alert-danger hide" role="alert">
-                 Enter a valid url
-                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="form-inline">
-               <div class="form-group toggleRadios">
-                  <label class="col-sm-5 control-label sub-select-label">Upload API definition as</label>
-                  <div class="col-sm-7">
-                      <label class="radio-inline sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"/>Swagger File</label>
-                      <label class="radio-inline sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger_import_url"/>Swagger Url</label>
-                  </div>
-               </div>
-            </div>
-            <div class="form-group toggleContainers">
-                <div class="controls col-sm-12">
-                    <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
-                </div>
-                <div class="controls col-sm-12">
-                    <label>Definition URL:</label>
-                    <input type="text" placeholder="" class="form-control" id="swagger_import_url" name="swagger_import_url"/>
-                    <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
-                </div>
-            </div>
-        </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
-        <button class="btn  btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
-      </div>
+      <div class="">
+                            <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                            	<div id="swagger_help" class="alert alert-danger hide" role="alert">
+					                 Enter a valid url
+					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+					            </div>
+					            <div class="form-group toggleRadios">
+					            	<label class="col-sm-3 control-label sub-select-label">Upload API definition as</label>
+					            <div class="col-sm-7">
+	                                <label class="radio">
+	                                    <input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"> 
+	                                    <span class="helper">Swagger File</span>
+	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="import-definition" value="swagger_import_url">
+	                                    <span class="helper">Swagger Url</span>
+	                                </label>
+                                </div>
+					            </div>				            
+                                
+                                <div class="toggleContainers">
+                                	<div class="form-group">
+										<div class="controls col-sm-8">
+											<div class="input-group input-wrap file-upload-control">
+												<input type="text" class="form-control" readonly> 
+												<input id="swagger_import_file" name="swagger_import_file" type="file" class="form-control" multiple>
+												<div class="input-group-btn">
+													<button class="btn browse" type="button" title="Browse File">
+														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
+															class="hidden-xs">Browse</span>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="controls col-sm-8">
+											<div class="col-sm-10">
+												<input name="swagger-url" id="swagger_import_url" name="swagger_import_url"
+													type="text" class="form-control" placeholder="http://petstore.swagger.io/v2/swagger.json"/>
+											</div>
+										</div>
+									</div>
+						</div>	
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <div class="modal-footer">
+                                <button type="button" id="import_swagger" class="btn btn-primary has-spinner">Import</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+        
+
     </div>
   </div>
 </div>
@@ -449,7 +477,7 @@
     {{/if}}
     </table>
     <input type="text" style="width:200px;margin-right:5px;" class="parameter_name form-control input-sm pull-left" name="parameter_name" placeholder="Parameter Name"/>
-    <a class="btn btn-small btn-default add_parameter btn-sm" type="button" ><i class="fa fa-plus"></i>&nbsp;Add Parameter</a>
+    <a class="btn btn-small btn-secondary add_parameter btn-sm" type="button" ><i class="fa fa-plus"></i>&nbsp;Add Parameter</a>
 </div>  
 </script>
 
@@ -487,17 +515,11 @@
                     </label>  
 
                         <label id="less">
-						<span class="icon fw-stack">
-	                                    <i class="fw fw-minus fw-stack-1x"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                 	</span>
-						</label>
+					 less<span class="icon fw-stack"/> 
+                    </label>
                     </div>
 					<label id="more">
-					 <span class="icon fw-stack">
-	                                    <i class="fw fw-add fw-stack-1x"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                 </span>
+					 more<span class="icon fw-stack"/> 
                     </label>
             </div>
         </div>
@@ -510,7 +532,10 @@
         <div class="form-group">
             <label class="col-sm-3 control-label"></label>
             <div class="col-sm-9">
-                <button class="btn btn-default" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="fa fa-plus"></i>&nbsp;Add</button>
+                <button class="btn btn-secondary" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                 	</span></i>&nbsp;Add</button>
             </div>
         </div>        
     </div>
