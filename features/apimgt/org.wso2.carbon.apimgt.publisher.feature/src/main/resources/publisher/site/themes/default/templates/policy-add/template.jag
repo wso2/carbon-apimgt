@@ -237,8 +237,8 @@
                             </div>
                         {{/if_eq}}
                      <label class="control-label" for="ip-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="ip-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                     <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="ip-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -311,8 +311,8 @@
                     </div>
 
                     <label class="control-label" for="header-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="header-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input type="checkbox" {{#if ../invertCondition}}checked{{/if}} />
+                     <label id="header-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="header-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}} />
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -333,7 +333,7 @@
                     <h2 class="sub-title panel-title">
                         Date Condition Policy
                         <label id="date-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#date-condition-body-{{../../executionFlow.id}}">
-                            <input id="date-policy-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}} />
+                            <input id="date-condition-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}} />
                             <span class="helper"></span>
                             <span class="text"></span>
                         </label>
@@ -390,8 +390,8 @@
                      </div>
                     {{/if_eq}}
                     <label class="control-label" for="date-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="date-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                     <label id="date-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="date-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -466,8 +466,8 @@
                     </div>
 
                     <label class="control-label" for="query-param-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="query-param-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                     <label id="query-param-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="query-param-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
                             <span class="helper"></span>`
                             <span class="text"></span>
                      </label>
@@ -514,8 +514,8 @@
                     </select>
 
                     <label class="control-label" for="http-verb-invert-condition">Invert Condition:</label>
-                     <label id="http-verb-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                     <label id="http-verb-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input  id="http-verb-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -559,8 +559,8 @@
                     </div>
 
                     <label class="control-label" for="payload-invert-condition">Invert Condition:</label>
-                     <label id="payload-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
+                     <label id="payload-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="payload-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -604,8 +604,8 @@
                     </div>
 
                     <label class="control-label" for="context-invert-condition">Invert Condition:</label>
-                     <label id="context-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
+                     <label id="context-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="context-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
@@ -626,7 +626,7 @@
                     <h2 class="sub-title panel-title">
                         Jwt Condition Policy
                         <label id="jwt-claims-condition-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#jwt-claim-condition-body-{{../../executionFlow.id}}">
-                            <input id="jwt-claims-condition-checkbox-{{../../executionFlow.id}}"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
+                            <input id="jwt-claim-condition-checkbox-{{../../executionFlow.id}}"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
                             <span class="helper"></span>
                             <span class="text"></span>`
                         </label>
@@ -680,8 +680,8 @@
                     </div>
 
                     <label class="control-label" for="jwt-claim-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="jwt-claim-condition-invert-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
+                     <label id="jwt-claim-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="jwt-claim-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
                             <span class="helper"></span>
                             <span class="text"></span>
                      </label>
