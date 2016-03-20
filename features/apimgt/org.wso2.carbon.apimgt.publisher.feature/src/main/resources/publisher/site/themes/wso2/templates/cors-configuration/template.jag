@@ -88,11 +88,13 @@ if(outputs.isCreatePermitted){
                                             <%=i18n.localize("accessControlCredentials")%>
                                         </td>
                                         <td>
-                                         <div class="control credentialContailner">
-                                            <input type="checkbox" id="allowCredentials" name="allowCredentials" placeholder="Access Control Allow Credentials"     
-                                             <%
-                            if(corsJson != null && corsJson.accessControlAllowCredentials){ %>
-                            checked="checked"<%}%>>
+                                         <div class="controls credentialContailner">
+                                         
+                                         	<label class="checkbox">
+							                	<input type="checkbox" id="allowCredentials" name="allowCredentials" placeholder="Access Control Allow Credentials"   
+                                             <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+							                    <span class="helper">Check to send True</span>
+							                </label>
                             </div>
                                         </td>
                                     </tr>
