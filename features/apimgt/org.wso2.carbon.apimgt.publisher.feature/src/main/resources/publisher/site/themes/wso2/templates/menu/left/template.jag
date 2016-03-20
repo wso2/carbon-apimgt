@@ -68,7 +68,7 @@
 
    </script>
    <div class="sidebar-wrapper sidebar-nav" id="left-sidebar"
-		data-side="left" data-width="300" style="width: 300px; left: 0px;">
+		data-side="left" data-width="300" style="width: 300px; left: -300px;">
 		<div class="nano">
 			<div class="nano-content">
 				<ul class="nav navbar-stacked">

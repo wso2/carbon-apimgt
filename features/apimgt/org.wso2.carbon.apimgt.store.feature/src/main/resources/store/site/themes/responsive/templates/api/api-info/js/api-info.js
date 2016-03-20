@@ -28,20 +28,84 @@ function triggerSubscribe() {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
         if (result.error == false) {
-            if(result.status == 'REJECTED')    {
+            if(result.status.subscriptionStatus == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h4.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
+                $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
                 $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
                 $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
-            } else  {
-                $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h4.modal-title').html(i18n.t('info.subscription'));
-                if(result.status == 'ON_HOLD'){
+            } else {
+                var jsonPayload = result.status.workflowResponse.jsonPayload;
+                if(jsonPayload != null && jsonPayload != ""){
+                   var jsonObj = JSON.parse(jsonPayload);
+                   var additionalParameters = jsonObj.additionalParameters; 
+                       //add another condition to prevent unnecessary redirection
+		   if (jsonObj.redirectUrl != null) {
+		      if(jsonObj.redirectConfirmationMsg == null){
+                   if(additionalParameters != null && Object.keys(additionalParameters).length > 0) {
+                              var params = "";
+                              for (var key in additionalParameters) {
+                                if(params != ""){
+                                  params = params.concat("&");
+                                }
+                                if (additionalParameters.hasOwnProperty(key)) {
+                                  params = params.concat((key.concat("=")).concat(additionalParameters[key]));
+                                }
+                              }
+                               location.href=jsonObj.redirectUrl + "?" + params;
+                              }else{
+                                location.href=jsonObj.redirectUrl;
+                              }
+                    }else{
+                      $('#messageModal').html($('#confirmation-data').html());
+                      $('#messageModal h3.modal-title').html("Redirection");
+                      $('#messageModal div.modal-body').html(jsonObj.redirectConfirmationMsg);
+                      $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
+                      $('#messageModal a.btn-other').html(i18n.t('info.cancelSubs'));
+                      $('#messageModal a.btn-primary').click(function () {
+                         if(additionalParameters != null && Object.keys(additionalParameters).length > 0) {
+                             var params = "";
+                             for (var key in additionalParameters) {
+                               if(params != ""){
+                                  params = params.concat("&");
+                                }
+                               if (additionalParameters.hasOwnProperty(key)) {
+                                  params = params.concat((key.concat("=")).concat(additionalParameters[key]));
+                               }
+                              }
+                             location.href=jsonObj.redirectUrl + "?" + params;
+                            }
+                         });
+                       $('#messageModal a.btn-other').click(function () {
+                         jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
+                              action:"removeSubscription",
+                              name:api.name,
+                              version:api.version,
+                              provider:api.provider,
+                              applicationId:applicationId
+                         }, function (result) {
+                            if (!result.error) {
+                              $('#messageModal').modal("hide");
+                                window.location.reload();
+                            } else {
+                              jagg.message({content:result.message,type:"error"});
+                            }
+                          }, "json");;
+                       });
+                         $('#messageModal').modal(); 
+                     }
+                  }
+               }else {
+                 $('#messageModal').html($('#confirmation-data').html());
+                 $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                 if (result.status.subscriptionStatus == 'ON_HOLD') {
+                    $('#application-list :selected').remove();
+                    $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionPendingTitle'));
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
-                }else{
+                 } else {
+                    $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
                 }
                 $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
@@ -52,13 +116,32 @@ function triggerSubscribe() {
                 $('#messageModal a.btn-primary').click(function() {
                     urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
                     location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
-                });
-            }
-            $('#messageModal').modal();
-
-
-        } else {
-            jagg.message({content:result.message,type:"error"});
+                 });
+                   $('#messageModal').modal();
+                }
+              }
+        
+       } else {
+          jagg.message({content:result.message,type:"error"});
+        //$('#messageModal').html($('#confirmation-data').html());
+        /*$('#messageModal h3.modal-title').html('API Provider');
+          $('#messageModal div.modal-body').html('\n\nSuccessfully subscribed to the API.\n Do you want to go to the subscription page?');
+          $('#messageModal a.btn-primary').html('Yes');
+          $('#messageModal a.btn-other').html('No');
+         */
+         /*$('#messageModal a.btn-other').click(function(){
+             v.resetForm();
+         });*/
+         /*
+           $('#messageModal a.btn-primary').click(function() {
+           var current = window.location.pathname;
+           if (current.indexOf(".jag") >= 0) {
+              location.href = "index.jag";
+           } else {
+              location.href = 'site/pages/index.jag';
+           }
+          });*/
+         //                        $('#messageModal').modal();
         }
     }, "json");
 }
@@ -176,17 +259,8 @@ $('.rating-tooltip-manual').rating({
             provider:api.provider,
             rating:rating
         }, function (result) {
-            alert(result);
-            if (result.error == false) {                                
-                if(result.rating){
-                    $('.rate_td').prepend("<td><div class='average-rating'>"+result.rating+"</div></td>");
-                    $('.rate_td').attr('colspan',1);
-                    $('.your_rating').text(result.rating+"/5");
-                }else{
-                    $('.average-rating').remove();
-                    $('.rate_td').attr('colspan',2);
-                    $('.your_rating').text("N/A");
-                }
+            if (result.error == false) {
+                addRating(result.rating,rating);
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
@@ -198,3 +272,99 @@ $('.rating-tooltip-manual').rating({
 
 });
 
+var addRating = function (newRating, userRating) {
+    var tableRow = $('div.api-info').find('table.table > tbody > tr:nth-child(1)');
+    var firstHeader = tableRow.find('th');
+    var lastCell;
+    if (user) {
+        var averageRating = tableRow.find('div.average-rating');
+        if (averageRating.length > 0) {
+            averageRating.html(newRating);
+        } else {
+            $("<td></td>").append('<div class="average-rating">' + newRating + '</div>').insertAfter(firstHeader);
+        }
+        lastCell = tableRow.find('td:last')
+        lastCell.attr('colspan', 1);
+        if (user) {
+            $.getScript(context + '/site/themes/' + theme + '/utils/ratings/star-generator.js', function () {
+                lastCell.find('div.star-ratings').html(getDynamicStars(userRating));
+                jagg.initStars($(".api-info"), function (rating, api) {
+                    jagg.post("/site/blocks/api/api-info/ajax/api-info.jag", {
+                        action:"addRating",
+                        name:api.name,
+                        version:api.version,
+                        provider:api.provider,
+                        rating:rating
+                    }, function (result) {
+                        if (result.error == false) {
+                            addRating(result.rating, rating);
+                        } else {
+                            jagg.message({content:result.message, type:"error"});
+                        }
+                    }, "json");
+                }, function (api) {
+					removeRating(api);
+                }, jagg.api);
+
+            });
+        }
+    }
+};
+
+
+var removeRating = function(api) {
+    jagg.post("/site/blocks/api/api-info/ajax/api-info.jag", {
+        action:"removeRating",
+        name:api.name,
+        version:api.version,
+        provider:api.provider
+    }, function (result) {
+        if (!result.error) {
+            removeStars(result.rating);
+        } else {
+            jagg.message({content:result.message,type:"error"});
+        }
+    }, "json");
+
+};
+var removeStars = function (newRating) {
+    var tableRow = $('div.api-info').find('table.table > tbody > tr:nth-child(1)');
+    var firstHeader = tableRow.find('th');
+    var lastCell = tableRow.find('td:last');
+    if (user) {
+        var averageRating = tableRow.find('div.average-rating');
+        if (averageRating.length > 0) {
+            if (newRating > 0) {
+                averageRating.html(newRating);
+            } else {
+                lastCell.attr('colspan', 2);
+                averageRating.parent().remove();
+            }
+        }
+
+        if (user) {
+            $.getScript(context + '/site/themes/' + theme + '/utils/ratings/star-generator.js', function () {
+                lastCell.find('div.star-ratings').html(getDynamicStars(0));
+
+                jagg.initStars($(".api-info"), function (rating, api) {
+                    jagg.post("/site/blocks/api/api-info/ajax/api-info.jag", {
+                        action:"addRating",
+                        name:api.name,
+                        version:api.version,
+                        provider:api.provider,
+                        rating:rating
+                    }, function (result) {
+                        if (result.error == false) {
+                            addRating(result.rating, rating);
+                        } else {
+                            jagg.message({content:result.message, type:"error"});
+                        }
+                    }, "json");
+                }, function (api) {
+	   				removeRating(api);
+                }, jagg.api);
+
+            });
+        }
+    }
+};

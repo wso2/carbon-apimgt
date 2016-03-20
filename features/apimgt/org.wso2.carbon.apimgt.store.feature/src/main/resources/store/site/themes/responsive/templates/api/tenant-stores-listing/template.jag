@@ -13,7 +13,7 @@ var tenantDomains=outputs.tenantDomains;
                     </div>
                     <div class="span12" style="margin-left:14px">
                         <div class="title-section">
-                            <h2>API Stores available on this server</h2>
+                            <h2><%=i18n.localize("multipleAPIStoresHeading")%></h2>
                         </div>
                         <div class="clear"></div>
                         <div class="content-section shadow-up">
