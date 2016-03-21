@@ -711,10 +711,10 @@ function getExecutionTimeByMediationType(apiName,version,tenantDomain,fromDate,t
         };
     }
 }
-function getGeolocationUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown,country) {
+function getGeolocationUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
     var usage;
     try {
-              usage = usageClient.getGeoLocationsByApi(apiName,version,tenantDomain,fromDate,toDate,drilldown,country);            
+              usage = usageClient.getGeoLocationsByApi(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }

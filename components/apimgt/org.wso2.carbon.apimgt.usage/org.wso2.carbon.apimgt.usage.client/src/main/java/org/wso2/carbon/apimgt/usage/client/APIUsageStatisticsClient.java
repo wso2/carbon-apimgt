@@ -754,8 +754,7 @@ public abstract class APIUsageStatisticsClient {
 
     public abstract List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version,
                                                                                 String tenantDomain, String fromDate,
-                                                                                String toDate, String drillDown,
-                                                                                String country)
+                                                                                String toDate, String drillDown)
             throws
             APIMgtUsageQueryServiceClientException;
 }

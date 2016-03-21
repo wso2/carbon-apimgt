@@ -2379,7 +2379,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 handleException("Error occurred while Error parsing date", e);
             }
         }
-        if (mediationType != null && mediationType != "ALL") {
+        if (mediationType != null && !"ALL".equals(mediationType)) {
+            mediationType = mediationType.trim().replaceAll(" ","+");
             query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":'").append
                     (mediationType).append("'");
         }
@@ -2408,7 +2409,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     @Override
     public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown, String country) throws
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
         StringBuilder query = new StringBuilder("api:" + apiName);
         int aggregateLevel = 0;
@@ -2429,16 +2430,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
         }
         if (drillDown != null) {
-            if (drillDown != "ALL") {
+            if (!"ALL".equals(drillDown)) {
                 aggregateLevel = 1;
-                query.append(" AND country :'").append(drillDown).append("'");
+                drillDown = drillDown.trim().replaceAll(" ", "+");
+                query.append(" AND country :").append(drillDown);
             } else {
                 aggregateLevel = 0;
             }
         }
         SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
                 APIUsageStatisticsClientConstants
-                .COUNTRY_CITY_FACET, APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY);
+                        .COUNTRY_CITY_FACET, APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);

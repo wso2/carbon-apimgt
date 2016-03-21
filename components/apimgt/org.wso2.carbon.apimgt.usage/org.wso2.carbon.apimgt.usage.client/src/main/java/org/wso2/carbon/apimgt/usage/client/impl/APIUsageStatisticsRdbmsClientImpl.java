@@ -2477,7 +2477,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown, String country) throws APIMgtUsageQueryServiceClientException {
+            tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
                     + "that the data source is properly configured in the APIUsageTracker configuration.");

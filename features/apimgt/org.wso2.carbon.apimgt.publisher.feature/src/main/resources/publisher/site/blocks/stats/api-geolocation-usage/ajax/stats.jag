@@ -29,7 +29,7 @@ var log = new Log();
 
                 mod = jagg.module("statistics");
                 var data = {};
-                result = mod.getGeolocationUsageByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown,country);
+                result = mod.getGeolocationUsageByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
                 if (result.error == "true") {
                     obj = {
                         error: result.error,
