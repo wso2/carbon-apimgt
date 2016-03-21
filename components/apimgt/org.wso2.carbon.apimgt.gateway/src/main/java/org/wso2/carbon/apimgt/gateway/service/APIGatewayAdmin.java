@@ -385,7 +385,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      *
      * @param fileNames file names to be deleted
      */
-    public void unDeployPolicy(String[] fileNames) {
+    public void undeployPolicy(String[] fileNames) {
 
         for (int i = 0; i < fileNames.length; i++) {
             File file = new File(APIConstants.POLICY_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);

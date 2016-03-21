@@ -142,7 +142,7 @@ public class ThrottlePolicyDeploymentManager {
             APIGatewayAdminClient client;
             try {
                 client = new APIGatewayAdminClient(null, environment.getValue());
-                client.unDeployPolicy(policyNames);
+                client.undeployPolicy(policyNames);
             } catch (AxisFault axisFault) {
                 String msg = "Error occurred when undeploying from gateway " + environment.getValue().getName();
                 log.error(msg, axisFault);
