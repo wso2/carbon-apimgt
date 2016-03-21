@@ -1,5 +1,6 @@
 var appName = "";
 var currentLocation = window.location.pathname;
+var apiFilter = "allAPIs";
 var statsEnabled = isDataPublishingEnabled();
 
 //setting default date
@@ -47,6 +48,11 @@ $( document ).ready(function() {
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
                     });
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawThrottledTimeGraph(from,to,apiFilter);
+                    });
+                    
                     $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
                         from = convertTimeString(picker.startDate);
@@ -55,7 +61,7 @@ $( document ).ready(function() {
                         var toStr = to.split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
-                        drawThrottledTimeGraph(from, to);
+                        drawThrottledTimeGraph(from, to, apiFilter);
                     });
 
                     populateAppList();
@@ -112,7 +118,7 @@ var populateAppList = function() {
                     .trigger('change');
             } else {
                 $('#chartContainer').html('');
-                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -136,7 +142,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
         return;
     }
 
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", currentLocation : currentLocation, appName : appName, fromDate: fromDate, toDate: toDate },
+    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", currentLocation : currentLocation, appName : appName, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter },
 
         function (json) {
             $('#spinner').hide();
@@ -190,11 +196,11 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {

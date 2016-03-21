@@ -2,10 +2,18 @@ var currentLocation;
 var chartColorScheme=[];
 var colorRangeArray=[];
 var statsEnabled = isDataPublishingEnabled();
+var apiFilter = "allAPIs";
 
-    currentLocation = window.location.pathname;
+currentLocation = window.location.pathname;
 
-    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
+$("#apiFilter").change(function (e) {
+	console.log("xxxxxx");
+	apiFilter = this.value;
+	drawAPIUsage();
+});
+
+var drawAPIUsage = function () {
+    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation, apiFilter: apiFilter },
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -443,7 +451,7 @@ var statsEnabled = isDataPublishingEnabled();
                     });
                     }
                 }else{
-                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -453,6 +461,8 @@ var statsEnabled = isDataPublishingEnabled();
                 }
             }
         }, "json");
+    
+    }
 
 
 

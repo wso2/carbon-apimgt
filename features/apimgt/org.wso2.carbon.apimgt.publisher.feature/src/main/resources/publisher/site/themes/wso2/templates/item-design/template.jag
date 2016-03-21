@@ -56,7 +56,7 @@
 
 	<div class="page-header">
 		<% if(api){ %>
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-secondary pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-secondary pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>    
@@ -69,12 +69,11 @@
     </div>
 <%
     if(api != null && api.subs > 0){%>
-	    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
-	        <span id="editWarnSpan"><b>Warning!</b><br/>
-	        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-	        active subscriptions.<br/>
-	        </span>
-	    </div>
+    	<div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
   <% }%>
 <div class="container">
                 <div class="row">
@@ -280,16 +279,18 @@
 										                %>
 										                <div id="api_designer" class="col-sm-9">                    
 										                    <div class="form-group api_wsdl">
-										                        <label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
-										                        <div class="col-sm-9">
-										                        <div class="input-append">
-										                        <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
-										                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
-										                        <a class="help_popup" help_data="wsdldesc_help"><i class="fa fa-question-circle"></i></a>
-										                        <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
-										                    </div>
-										                    <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>                
-										                </div>
+										                        <label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:
+										                        		<a class="help_popup" help_data="wsdldesc_help" data-trigger="hover" data-placement="left"><i class="fa fa-question-circle"></i></a>
+										                        		<p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
+										                       	</label>
+										                        <div class="col-sm-6">
+										                        	<div class="input-append">
+										                        		<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />										                        		
+										                    		</div>             
+										                		</div>
+										                		<div class="col-sm-3">
+										                			<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
+										                		</div>
 										                </div>
 										    </div>
 										                <% }else{ %>

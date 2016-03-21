@@ -2,8 +2,16 @@
 
 <div id="apiSubscription-stat-page" class="stat-page">
 <div class="page-header"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
-    <br>
-    <div class="col-md-12">
+    <div class="row">
+    	<div class="form-group col-sm-2">
+	        <select class="select form-control" id="apiFilter" name="apiFilter">
+	        	<option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
+	        	<option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+	        </select>
+		</div>
+		<div class="col-sm-10"></div>
+    </div>
+    <div class="col-sm-12">
 
         <div id="spinner" class="center-wrapper">
           <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
