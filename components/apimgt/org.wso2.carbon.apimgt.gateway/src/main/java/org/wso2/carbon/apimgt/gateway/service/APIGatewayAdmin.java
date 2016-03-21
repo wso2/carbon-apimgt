@@ -381,18 +381,20 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
-     * Delete file with the "fileName"
+     * policy undeploy
      *
-     * @param fileName name of the file to be deleted
+     * @param fileNames file names to be deleted
      */
-    public void removePolicy(String fileName) {
+    public void unDeployPolicy(String[] fileNames) {
 
-        File file = new File(APIConstants.POLICY_FILE_LOCATION + fileName + APIConstants.XML_EXTENSION);
-        boolean deleted = file.delete();
-        if (deleted) {
-            log.info("File : " + fileName + " is deleted");
-        } else {
-            log.error("Error occurred in deleting file: " + fileName);
+        for (int i = 0; i < fileNames.length; i++) {
+            File file = new File(APIConstants.POLICY_FILE_LOCATION + fileNames[i] + APIConstants.XML_EXTENSION);
+            boolean deleted = file.delete();
+            if (deleted) {
+                log.info("File : " + fileNames[i] + " is deleted");
+            } else {
+                log.error("Error occurred in deleting file: " + fileNames[i]);
+            }
         }
     }
 }

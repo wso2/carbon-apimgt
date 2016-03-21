@@ -3689,57 +3689,68 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return ipAddressinLong;
     }
 
+    /**
+     *
+     * @param username username to recognize tenant
+     * @param level policy level to be applied
+     * @return
+     * @throws APIManagementException
+     */
     public String[] getPolicyNames(String username, String level) throws APIManagementException {
         String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
         return policyNames;
     }
 
+    /**
+     * @param username    username to recognize the tenant
+     * @param policyLevel policy level
+     * @param policyName  name of the policy to be deleted
+     * @throws APIManagementException
+     */
     public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
         int tenantID = APIUtil.getTenantId(username);
         List<String> policyFileNames = new ArrayList<String>();
-        String policyFile = null ;
-        if(PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)){
+        String policyFile = null;
+        if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = null;/////// TODO load from database
-            
-            if(PolicyConstants.ACROSS_ALL.equals(policy.getUserLevel())){
+
+            if (PolicyConstants.ACROSS_ALL.equals(policy.getUserLevel())) {
                 policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_all_";
-            } else if (PolicyConstants.PER_USER.equals(policy.getUserLevel())){
-                policyFile = PolicyConstants.POLICY_LEVEL_API + "_"  + policyName + "_per_";
+            } else if (PolicyConstants.PER_USER.equals(policy.getUserLevel())) {
+                policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_per_";
             }
             //add default policy file name
             policyFileNames.add(policyFile + "elseCondition");
-           
-            for (int i = 0; i < policy.getPipelines().size(); i++) {               
-                policyFileNames.add(policyFile + "condition" + i );                
+
+            for (int i = 0; i < policy.getPipelines().size(); i++) {
+                policyFileNames.add(policyFile + "condition" + i);
             }
-            
-        } else if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
+
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
             policyFileNames.add(policyFile);
-        } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
             policyFileNames.add(policyFile);
-        } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
-                
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+
         }
-        
+
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        //remove from the gateway managers      
-        
+        //remove from the gateway managers
+
         try {
-            for (String file : policyFileNames) {
-                manager.undeployPolicyFromGatewayManager(file);
-            }
+            //undeploy from gateway
+            manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
             //undeploy from global cep
             manager.undeployPolicyFromGlobalCEP(policyFileNames);
         } catch (Exception e) {
             String msg = "Error while undeploying policy: ";
             log.error(msg, e);
-
             throw new APIManagementException(msg);
         }
-        //remove from database             
+        //remove from database
         apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
     }
 }
