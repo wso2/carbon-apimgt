@@ -43,14 +43,6 @@
                          lenS = scopes.length;
 
 
-                         <!-- If token is not set to never expire, then take the expiration in seconds -->
-                         if (prodVadidataionTime > 0) {
-                            prodVadidataionTime = prodVadidataionTime / 1000;
-                         }
-                         if (sandVadidataionTime > 0) {
-                            sandVadidataionTime = sandVadidataionTime / 1000;
-                         }
-
                          <!-- This is required to remove the decimal points getting added by jaggery to validation time-->
                          if (prodVadidataionTime != null) {
                             var prod_tmp = String(Math.ceil(prodVadidataionTime)).split(".");
@@ -64,7 +56,7 @@
                          }
 
                         %>
-                        <% if(app.prodKey != null ) { %>
+                        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null) { %>
                         <!-- START Show key info -->
 
                         <div class="row keys">
@@ -162,7 +154,7 @@
 												<div class="form-inline proRegenerateForm pull-right">
 
 													<% if(lenS > 0){ %>
-												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
+												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" data-target="#scopePopupTarget" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
                                             						            <% } %>		
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
@@ -194,11 +186,22 @@
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                         		</div>
 							<%}%>
+
+							<% if(app.prodKeyState == "COMPLETED" && app.prodKey == null){ %>
+								<div class="errorMessage">
+							    	<%=i18n.localize("cleanUpSubscriptions")%>
+			   					</div>
+								<button title="<%=i18n.localize("cleanUpSubscriptions")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="PRODUCTION"
+										    data-applicationName="<%=app.name%>">
+											Clean up
+		   						</button>
+							<% } %>
                         <% } else{ %>
                         <%=i18n.localize("prodKeyMsg")%>
                         <% if(lenS > 0){ %>
                             <br><br>
-                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                            <a href="#scopePopup" role="dialog" data-target="#scopePopupTarget" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
                         	<div class="cDivParentOfManualAuthAppCreateProduction form-horizontal margin-top">
@@ -399,7 +402,7 @@
 											<div class="col-sm-10">
 												<div class="form-inline proRegenerateForm pull-right">
 												    <% if(lenS > 0){ %>
-													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													    <a href="#scopePopup" type="button" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
@@ -429,6 +432,16 @@
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
                         		</div>
 					   		<%}%>
+					   		<% if(app.sandboxKeyState == "COMPLETED" && app.sandboxKey == null){ %>
+								<div class="errorMessage">
+							    	<%=i18n.localize("cleanUpSubscriptions")%>
+			   					</div>
+								<button title="<%=i18n.localize("cleanUpSubscriptions")%>" class="btn btn-primary btn-providekeys generateAgainBtn"
+											data-keyType="SANDBOX"
+										    data-applicationName="<%=app.name%>">
+											Clean up
+		   						</button>
+							<% } %>
                        <% } else {%>
                        <%=i18n.localize("sandboxKeyMsg")%>
                        <% if(lenS > 0){ %>
@@ -717,9 +730,9 @@
         </div><!-- End container-fluid -->
 
         <% if(lenS > 0){ %>
-            <div id="scopePopup" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div id="scopePopupTarget" class="modal hide fade" tabindex="-1" role="dialog">
                     <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã—</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã</button>
                     <h3><%=i18n.localize("selectScopes")%></h3>
                     </div>
                     <div class="modal-body">

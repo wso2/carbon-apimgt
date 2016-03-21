@@ -53,6 +53,7 @@
     "createFromExistingAPI" : "Use an existing API's endpoint or the API definition to create an API.",
     "createFromExistingSOAPEndpoint" : "Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.",
     "designNewAPI" : "Design and prototype a new API.",
+    "apiDefinition" : "API Definition",
 
 
     "private": "Visible to my domain",
