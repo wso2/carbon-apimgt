@@ -3,9 +3,16 @@
 <div id="apiResponseTimes-stat-page" class="stat-page">
     <div class="page-header"> <h2><%=i18n.localize("overallAPIResponseTimesTitle")%></h2> </div>
 
-    <br/ >
-    <div class="col-md-12">
-
+    <div class="row">    
+    	<div class="form-group col-sm-2">
+	        <select class="select form-control" id="apiFilter" name="apiFilter">
+	        	<option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
+	        	<option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+	        </select>
+		</div>		
+		<div class="col-sm-4"></div>
+    
+    	<div class="col-sm-6">
         <div id="rangeSliderWrapper" >
            <div id="dateRangePickerContainer" style="text-align:right">
                <div class="btn-group" role="group">
@@ -21,21 +28,21 @@
                </div>
            </div>
         </div>
-
-        <div id="spinner" class="center-wrapper">
-            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
-        </div>
-
-        <div id="noData"></div>
-        <br/ >
-
-        <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
-            <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
-            <div id="tableContainer"></div>
-        </div>
     </div>
-</div>
+    
+    </div>    
+    
+ <div id="spinner" class="center-wrapper">
+ 	<i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+ </div>
 
+ <div id="noData"></div>
+ <br/>
+
+ <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
+ 	<div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
+    <div id="tableContainer"></div>
+ </div>
 <% }); %>
 
 

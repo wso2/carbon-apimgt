@@ -9,7 +9,7 @@ function validate_tiers(){
         return true;
     }
     //set error
-    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
+    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true">This field is required.</label>').focus();
     return false;
 }
 

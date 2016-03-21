@@ -102,25 +102,34 @@ $.fn.generateBgcolor = function(options){
 }( jQuery ));
 
 /***********************************************************
- *  accordion1 config
+ *  accordion config
  ***********************************************************/
 
 $('#accordion1').on('shown.bs.collapse', function (e,f) {
-	console.log("ccc");
-var elem = $(this).children().children('.in');
-var icon = $(elem).prev().find('.status').children();
+    var elem = $(this).children().children('.in');
+    var icon = $(elem).prev().find('.status').children();
 
-if($(elem).hasClass('in')){
-    $(elem).prev().find('input[type=radio]').prop('checked',true);
-}
-icon.removeClass('fw-down');
-icon.addClass('fw-up');
+    if($(elem).hasClass('in')){
+        $(elem).prev().find('input[type=radio]').prop('checked',true);
+    }
+    icon.removeClass('fw-down');
+    icon.addClass('fw-up');
 });
 
 $('#accordion1').on('hidden.bs.collapse', function (e,f) {
-var elem = $(this).children().children();
-var icon = $(elem).prev().find('.status').children();
+    var elem = $(this).children().children();
+    var icon = $(elem).prev().find('.status').children();
 
-icon.removeClass('fw-up');
-icon.addClass('fw-down');
+    icon.removeClass('fw-up');
+    icon.addClass('fw-down');
 });
+
+/***********************************************************
+ *  Secondary toggle navigation
+ ***********************************************************/
+
+$('.secondary-nav').on('shown.bs.collapse', function(e){
+    $('.secondary-nav-toggle').removeClass('fw-down').addClass('fw-up');
+}).on('hidden.bs.collapse',function(e){
+    $('.secondary-nav-toggle').removeClass('fw-up').addClass('fw-down');
+})

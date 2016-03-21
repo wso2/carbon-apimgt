@@ -68,7 +68,7 @@
 </center>-->
 
 	<div class="page-header">
-		<h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
+		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
         <% if(api){ %>
                <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %></h2>
@@ -80,12 +80,11 @@
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-block alert-warning" id="editAPIWarn" style="display:block">
-        <span id="editWarnSpan"><b>Warning!</b><br/>
-        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.
-        </span>
-    </div>
+   			<div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
   <%  }%>
 
 	<div class="container">
