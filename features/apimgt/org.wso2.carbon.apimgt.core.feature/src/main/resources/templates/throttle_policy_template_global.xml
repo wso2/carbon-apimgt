@@ -10,8 +10,6 @@ global_${policy.getPolicyName()}##
 #end
 <policy tier="global_$policy.getPolicyName()" level="global" name="#getRule($policy)">
 	<eligibilityQuery>
-		FROM RequestStream
-		SELECT '#getRule($policy)' AS rule, messageID, true AS isEligible, ($condition) as isLocallyThrottled, '#getKey()' AS throttle_key
-		INSERT INTO EligibilityStream;	
+$policy.getSiddhiQuery()
 	</eligibilityQuery>	
 </policy>
