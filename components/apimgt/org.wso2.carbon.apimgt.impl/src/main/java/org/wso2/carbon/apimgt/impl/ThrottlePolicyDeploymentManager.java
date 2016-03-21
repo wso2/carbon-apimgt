@@ -124,30 +124,31 @@ public class ThrottlePolicyDeploymentManager {
             throw new APIManagementException(msg);
         }
         
-    }   
-    
+    }
+
     /**
      * Undeploy policy from the gateway manager nodes
-     * @param policyName
+     *
+     * @param policyNames
      * @return
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
-    public void undeployPolicyFromGatewayManager(String policyName) throws APIManagementException{
-        
+    public void undeployPolicyFromGatewayManager(String[] policyNames) throws APIManagementException {
+
         for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("undeploy policy from gateway : " + environment.getValue().getName());
             }
             APIGatewayAdminClient client;
             try {
-                client = new APIGatewayAdminClient(null , environment.getValue());
-                client.removePolicy(policyName);
+                client = new APIGatewayAdminClient(null, environment.getValue());
+                client.undeployPolicy(policyNames);
             } catch (AxisFault axisFault) {
                 String msg = "Error occurred when undeploying from gateway " + environment.getValue().getName();
                 log.error(msg, axisFault);
                 throw new APIManagementException(msg);
-            }            
+            }
         }
-        
+
     }
 }

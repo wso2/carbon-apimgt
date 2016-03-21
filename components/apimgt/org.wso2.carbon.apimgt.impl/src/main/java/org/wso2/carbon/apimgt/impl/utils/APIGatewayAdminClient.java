@@ -469,15 +469,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * removing policy file
      *
-     * @param fileName name of the file to be removed
+     * @param fileNames name of the file to be removed
      * @throws AxisFault
-     *
      */
-    public void removePolicy(String fileName) throws AxisFault {
+    public void undeployPolicy(String[] fileNames) throws AxisFault {
         try {
-            apiGatewayAdminStub.removePolicy(fileName);
+            apiGatewayAdminStub.undeployPolicy(fileNames);
         } catch (RemoteException e) {
-            throw new AxisFault("Error occured in removing policy file " + fileName, e);
+            throw new AxisFault("Error occured in removing policy file ", e);
         }
     }
 }
