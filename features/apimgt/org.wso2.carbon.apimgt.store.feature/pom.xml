@@ -89,6 +89,51 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4.0.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.samskivert</groupId>
+            <artifactId>jmustache</artifactId>
+            <version>1.12</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>1.5.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -116,6 +161,14 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
+                                <bundleDef>com.google.guava:guava</bundleDef>
+                                <bundleDef>io.swagger:swagger-models</bundleDef>
+                                <bundleDef>io.swagger:swagger-annotations</bundleDef>
+                                <bundleDef>com.samskivert:jmustache</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
@@ -139,6 +192,7 @@
                                 <importFeatureDef>org.wso2.carbon.identity.user.registration.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
+                                <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:3.4.0.wso2v1</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>
