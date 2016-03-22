@@ -1119,7 +1119,6 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
 
 .sidebar-wrapper.affix {
   position: fixed;
-  top: 50px;
 }
 
 .sidebar-wrapper.inverse {
@@ -2996,4 +2995,11 @@ a.list-group-item:hover {
   .tab-content > .active {
     display: block !important;
   }
+}
+
+/* ========================================================================
+ * Copied from WSO2 Theme
+ * ======================================================================== */
+header .fw-inverse, header .fa-inverse {
+  color: #191919;
 }
