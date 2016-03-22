@@ -7,7 +7,6 @@ var apiFilter = "allAPIs";
 currentLocation = window.location.pathname;
 
 $("#apiFilter").change(function (e) {
-	console.log("xxxxxx");
 	apiFilter = this.value;
 	drawAPIUsage();
 });
