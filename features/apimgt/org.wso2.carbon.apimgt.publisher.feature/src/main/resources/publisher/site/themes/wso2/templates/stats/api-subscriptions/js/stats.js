@@ -464,7 +464,7 @@ var drawAPIUsage = function () {
     
     }
 
-
+drawAPIUsage();
 
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "isDataPublishingEnabled"},

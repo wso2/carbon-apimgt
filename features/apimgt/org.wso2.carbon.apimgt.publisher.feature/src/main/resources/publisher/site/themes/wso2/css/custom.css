@@ -343,7 +343,7 @@ div.image-container {
 /* ========================================================================
  * Sidebar secondary nav
  * ======================================================================== */
-.nav i{
+.sidebar-wrapper .nav i{
     margin: 0px 10px 2px 10px;
 }
 .secondary-nav li {
