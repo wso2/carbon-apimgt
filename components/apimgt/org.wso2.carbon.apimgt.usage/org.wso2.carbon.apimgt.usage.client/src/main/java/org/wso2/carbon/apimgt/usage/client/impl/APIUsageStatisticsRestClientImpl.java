@@ -52,8 +52,6 @@ import org.wso2.carbon.apimgt.usage.client.pojo.*;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
-import org.wso2.carbon.bam.service.data.publisher.conf.RESTAPIConfigData;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -142,21 +140,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     public void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         //get the config class
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        if (serviceDataPublisherAdmin != null) {
-
-            //check whether analytics enable
-            if (serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable()) {
-                //get REST API config data
-                RESTAPIConfigData restData = serviceDataPublisherAdmin.getRestAPIConfigData();
-
-                String url = restData.getUrl();
-                String user = restData.getUserName();
-                char[] pass = restData.getPassword().toCharArray();
-                //crete new restClient instance
-                restClient = new DASRestClient(url, user, pass);
-                //log.info("Initialised DASRestClient");
-            }
+        APIManagerAnalyticsConfiguration configs = APIManagerAnalyticsConfiguration.getInstance();
+        //check whether analytics enable
+        if (APIUtil.isAnalyticsEnabled()) {
+            //get REST API config data
+            String url = configs.getDasServerUrl();
+            String user = configs.getDasServerUser();
+            char[] pass = configs.getDasServerPassword().toCharArray();
+            //crete new restClient instance
+            restClient = new DASRestClient(url, user, pass);
         }
     }
 

@@ -3,21 +3,34 @@
 <div id="apiUsageDestination-stat-page" class="stat-page">
 <div class="page-header"> <h2><%=i18n.localize("apiUsageFromDestinationTitle")%></h2></div>
 
-        <div id="rangeSliderWrapper" >
-           <div id="dateRangePickerContainer" style="text-align:right">
-               <div class="btn-group" role="group">
-                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
-                   </button>
-                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
-                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
-                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
-                     <span></span> <b class="caret"></b>
-                   </button>
-               </div>
-           </div>
+        
+        <div class="row">
+        	<div class="form-group col-sm-2">
+		        <select class="select form-control" id="apiFilter" name="apiFilter">
+		        	<option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
+		        	<option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+		        </select>
+			</div>
+			<div class="col-sm-4"></div>
+			<div class="col-sm-6">
+				<div id="rangeSliderWrapper" >
+	           <div id="dateRangePickerContainer" style="text-align:right">
+	               <div class="btn-group" role="group">
+	                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+	                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
+	                   </button>
+	                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+	                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+	                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
+	                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+	                     <span></span> <b class="caret"></b>
+	                   </button>
+	               </div>
+	           </div>
         </div>
+			</div>
+        </div>
+        
 
         <div id="noData"></div>
 

@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -105,10 +104,7 @@ import java.util.List;
  * unbind="unsetTenantRegistryLoader"
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
- * bind="setIndexLoader" unbind="unsetIndexLoader"
- * @scr.reference name="bam.service.data.publisher"
- * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
- * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
+ * bind="setIndexLoader" unbind="unsetIndexLoader" *
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -116,8 +112,6 @@ public class APIManagerComponent {
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
     private ServiceRegistration registration;
-
-    private static ServiceDataPublisherAdmin dataPublisherAdminService;
 
     private static TenantRegistryLoader tenantRegistryLoader;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
@@ -170,8 +164,8 @@ public class APIManagerComponent {
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
-            APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
-            APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -235,30 +229,6 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
-    }
-
-    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
-        dataPublisherAdminService = service;
-        if (log.isDebugEnabled()) {
-            log.debug("Event Data Publisher service bound to the API usage handler");
-            log.debug("Writing Analytics Configuration to Registry...");
-        }
-
-        // we have persist the analytics configuration here also since at the other place, the dataPublisherAdmin
-        // could be null.
-        APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
-//        APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
-    }
-
-    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
-        if (log.isDebugEnabled()) {
-            log.debug("Event Data Publisher service unbound from the API usage handler");
-        }
-        dataPublisherAdminService = null;
-    }
-
-    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
-        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {

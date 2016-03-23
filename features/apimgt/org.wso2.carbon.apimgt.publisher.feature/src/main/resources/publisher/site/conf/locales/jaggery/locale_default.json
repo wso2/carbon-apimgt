@@ -53,6 +53,7 @@
     "createFromExistingAPI" : "Use an existing API's endpoint or the API definition to create an API.",
     "createFromExistingSOAPEndpoint" : "Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.",
     "designNewAPI" : "Design and prototype a new API.",
+    "apiDefinition" : "API Definition",
 
 
     "private": "Visible to my domain",
@@ -158,11 +159,15 @@
     "apiResponseTimes" : "API Response Times",
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
+    "usageResourcePath" : "Usage by Resource Path",
     "apiUsageFromDestination" : "API Usage by Destination",
+    "usageFromDestination" : "Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
     "apiThrottledCounts" : "API Throttled Out Requests",
+    "apiThrottledRequests" : "API Throttled Requests",
     "applicationThrottledCounts" : "App Throttled Out Requests",
+    "applicationThrottledRequests" : "App Throttled Requests",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",

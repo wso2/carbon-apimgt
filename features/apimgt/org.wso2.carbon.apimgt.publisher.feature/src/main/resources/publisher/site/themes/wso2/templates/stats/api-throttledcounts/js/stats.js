@@ -1,6 +1,7 @@
 var apiName = "";
 var appName = "";
 
+var apiFilter = "allAPIs";
 var currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
@@ -50,6 +51,12 @@ $( document ).ready(function() {
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
                     });
+                    
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawThrottledTimeGraph(apiName, appName, from,to,apiFilter);
+                    });
+                    
                     $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
                         from = convertTimeString(picker.startDate);
@@ -58,7 +65,7 @@ $( document ).ready(function() {
                         var toStr = to.split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
-                        drawThrottledTimeGraph(apiName, appName, from, to);
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
                     });
 
 
@@ -153,7 +160,7 @@ var pupulateAppList = function(apiName) {
 
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<div class="center-wrapper"/><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -183,7 +190,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
         return;
     }
 
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", currentLocation : currentLocation, apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate },
+    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", currentLocation : currentLocation, apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate, apiFilter:apiFilter },
 
         function (json) {
             $('#spinner').hide();
@@ -282,7 +289,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
@@ -322,15 +329,15 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawThrottledTimeGraph(apiName, appName, from, to);
+    drawThrottledTimeGraph(apiName, appName, from, to, apiFilter);
 }
 
 function convertDateToLong(date){

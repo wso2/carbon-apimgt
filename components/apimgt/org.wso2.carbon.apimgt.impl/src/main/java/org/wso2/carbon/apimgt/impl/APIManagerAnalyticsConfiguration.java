@@ -27,12 +27,14 @@ import java.util.Map;
 
 public class APIManagerAnalyticsConfiguration {
 
-    private static APIManagerAnalyticsConfiguration instance;
-
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
+    private String dasServerUrl;
+    private String dasServerUser;
+    private String dasServerPassword;
+
     private boolean analyticsEnabled;
     private boolean skipEventReceiverConnection;
     private boolean buildMsg;
@@ -50,30 +52,16 @@ public class APIManagerAnalyticsConfiguration {
 
     private APIManagerAnalyticsConfiguration() {
     }
-
-    /**
-     * This is an inner class to hold the instance of the APIManagerAnalyticsConfiguration.
-     * The reason for writing it like this is to guarantee that only one instance would be created.
-     * ref: Initialization-on-demand holder idiom
-     */
     private static class APIManagerAnalyticsConfigurationHolder {
         private static final APIManagerAnalyticsConfiguration INSTANCE = new APIManagerAnalyticsConfiguration();
 
         private APIManagerAnalyticsConfigurationHolder(){}
     }
-
     public static synchronized APIManagerAnalyticsConfiguration getInstance() {
         return APIManagerAnalyticsConfigurationHolder.INSTANCE;
     }
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
-        analyticsEnabled = APIUtil.isAnalyticsEnabled();
-        if (analyticsEnabled) {
-            bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-            bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-            bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-        }
-
         String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
         skipEventReceiverConnection = skipEventReceiverConnStr != null
                                       && JavaUtils.isTrueExplicitly(skipEventReceiverConnStr);
@@ -108,6 +96,16 @@ public class APIManagerAnalyticsConfiguration {
         if (executionTimeStreamName == null || executionTimeStreamVersion == null) {
             log.error("Execution Time stream name or version is null. Check api-manager.xml");
         }
+        bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+        bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+        bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+
+        dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
+        dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
+        dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
+        String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
+
         String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
         buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
     }
@@ -186,6 +184,30 @@ public class APIManagerAnalyticsConfiguration {
 
     public boolean isBuildMsg() {
         return buildMsg;
+    }
+
+    public String getDasServerUrl() {
+        return dasServerUrl;
+    }
+
+    public void setDasServerUrl(String dasServerUrl) {
+        this.dasServerUrl = dasServerUrl;
+    }
+
+    public String getDasServerUser() {
+        return dasServerUser;
+    }
+
+    public void setDasServerUser(String dasServerUser) {
+        this.dasServerUser = dasServerUser;
+    }
+
+    public String getDasServerPassword() {
+        return dasServerPassword;
+    }
+
+    public void setDasServerPassword(String dasServerPassword) {
+        this.dasServerPassword = dasServerPassword;
     }
 
     public String getExecutionTimeStreamVersion() {

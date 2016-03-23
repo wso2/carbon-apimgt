@@ -1,7 +1,12 @@
 var currentLocation;
 var statsEnabled = isDataPublishingEnabled();
+var apiFilter = "allAPIs";
 
-    currentLocation=window.location.pathname;
+//setting default date
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+currentLocation=window.location.pathname;
 
     jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
         function (json) {
@@ -45,6 +50,11 @@ var statsEnabled = isDataPublishingEnabled();
                           opens: 'left',
                     });
 
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawAPIUsageByDestination(from,to,apiFilter);
+                    });
+                    
                     $('#date-range').on('apply.daterangepicker', function(ev, picker) {
                        btnActiveToggle(this);
                        var from = convertTimeString(picker.startDate);
@@ -53,13 +63,10 @@ var statsEnabled = isDataPublishingEnabled();
                        var toStr = to.split(" ");
                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
-                       drawAPIUsageByDestination(from,to);
+                       drawAPIUsageByDestination(from,to,apiFilter);
                     });
 
-
-                    //setting default date
-                    var to = new Date();
-                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+                    
 
                     getDateTime(to,from);
 
@@ -101,7 +108,7 @@ var drawAPIUsageByDestination = function(from,to){
     var fromDate = from;
     var toDate = to;
 
-    jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getAPIUsageByDestination", currentLocation:currentLocation,fromDate:fromDate,toDate:toDate},
+    jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getAPIUsageByDestination", currentLocation:currentLocation,fromDate:fromDate,toDate:toDate, apiFilter: apiFilter},
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -124,8 +131,9 @@ var drawAPIUsageByDestination = function(from,to){
                 }
                 if (length == 0) {
                     $('#destinationBasedUsageTable').hide();
+                    $('div#destinationBasedUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
@@ -195,13 +203,13 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawAPIUsageByDestination(from,to);
+    drawAPIUsageByDestination(from,to,apiFilter);
 }
