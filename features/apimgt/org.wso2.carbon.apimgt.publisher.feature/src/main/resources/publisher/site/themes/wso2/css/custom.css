@@ -17,6 +17,10 @@ div.image-container {
 	margin-top: 0px;
 }
 
+.app-data h4 {
+	margin-bottom: 0px;
+}
+
 .launch-app-data h4 {
 	margin-top: 0px;
 }
@@ -60,30 +64,114 @@ div.image-container {
     padding-bottom: 100px;
 }
 
+
 /* ========================================================================
  * Media panels tablist
  * ======================================================================== */
 
-#accordion h4 a{
+#accordion1 h4 a,#accordion2 h4 a{
     text-decoration:none;
     font-weight:bold;
 }
-#accordion h4 p{
-    padding:10px 20px;
+#accordion1 h4 p,#accordion2 h4 p{
+    padding:10px;
     margin-bottom:0px;
 }
-#accordion .panel{
+#accordion1 .panel,#accordion2 .panel{
     margin-bottom:10px;
 }
-#accordion .panel-heading{
-    padding:10px;
+#accordion1 .panel-heading,#accordion2 .panel-heading{
     background:#e2e2e2;
     margin-bottom:0px;
+    padding-bottom:0px;
     border:none;
+    cursor:pointer;
 }
-#accordion .panel-collapse{
+#accordion1 .panel-heading:hover,#accordion2 .panel-heading:hover{
+    background:#efefef;
+}
+#accordion1 .panel-body,#accordion2 .panel-body{
     padding:10px;
     border:1px solid #e2e2e2;
+}
+#accordion1 h4 input[type=checkbox],#accordion1 h4 input[type=radio],
+#accordion2 h4 input[type=checkbox],#accordion2 h4 input[type=radio]{
+    margin-top:0px;
+    margin-right:4px;
+}
+#accordion1 .panel-heading .radio,#accordion2 .panel-heading .radio{
+    width:60px;
+    height:60px;
+    float:left;
+    margin-right:0px;
+    background:#ccc;
+}
+#accordion1 .panel-heading .radio .helper{
+    padding-top:0px;
+    top:20px;
+    left:20px;
+}
+#accordion1 .panel-heading .radio > i{
+    position:relative;
+    top:20px;
+    left:20px;
+}
+#accordion1 .panel-heading .radio > span{
+    position:relative;
+    top:10px;
+    left:10px;
+}
+#accordion1 .panel-heading div .status{
+    margin-top:-42px;
+}
+#accordion1 .panel-heading div .status i{
+    position:relative;
+    top:16px;
+    left:calc(100% - 100px);
+}
+#accordion1 .panel-heading p,#accordion2 .panel-heading p{
+    float:none;
+    width:auto;
+}
+#accordion1 .panel-heading div .heading{
+    font-weight:bold;
+    padding-top:10px;
+    padding-bottom:4px;
+    text-indent:10px;
+}
+#accordion1 .panel-heading div .description{
+    text-indent:10px;
+    margin-right:60px;
+}
+.truncate {
+  min-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#accordion1 h4 a i,#accordion2 h4 a i{
+    margin-top:-4px;
+}
+
+
+/* ========================================
+ * Form Styles 
+ * ======================================== */
+ 
+.form-heading{
+    background:#e2e2e2;
+    margin-bottom:10px;
+    padding-bottom:0px;
+    border:none;
+    cursor:pointer;
+}
+
+.form-heading div .heading{
+    font-weight:bold;
+    padding-top:10px;
+    padding-bottom:4px;
+    text-indent:10px;
 }
 
 /* ========================================
@@ -197,4 +285,78 @@ div.image-container {
     border-right: 1px solid #E5E5E5;
     border-bottom: 2px solid #3598db;
     margin-top: -1px;
+}
+
+.btn,a.btn{
+    background-color: #0E75DC;
+    color: #fff;
+}
+.btn .disabled,a.btn .disabled{
+    background-color: #0E75DC;
+    color: #fff;
+}
+.btn:hover,a.btn:hover {
+    background-color: #005ABA;
+    color: #fff;
+}
+.btn-default,a.btn-default{
+    background-color: #064973;
+    color: #fff;
+    border: none;
+}
+.btn-default:hover,a.btn-default:hover{
+    background-color: #085b8f;
+    color: #fff;
+    border: none;
+}
+.btn-primary,a.btn-primary{
+    background-color: #064973;
+    color: #fff;
+    border: none;
+}
+.btn-primary:hover,a.btn-primary:hover{
+    background-color: #085b8f;
+    color: #fff;
+    border: none;
+}
+.btn-secondary,a.btn-secondary{
+    background-color: #444;
+    color: #fff;
+    border:none;
+}
+.btn-secondary:hover,a.btn-secondary:hover{
+    background-color: #686868;
+    color: #fff;
+    border:none;
+}
+
+/* ========================================================================
+ * Form Validation Component
+ * ======================================================================== */
+
+.form-group label.error {
+    line-height: 1.5em;
+    color: rgb(255, 255, 255);
+    background-color: #e74c3c;
+    width: 100%;
+    padding: 5px 10px;
+    border-left: 5px solid #942F25;
+    font-weight: 500;
+}
+
+/* ========================================================================
+ * Sidebar secondary nav
+ * ======================================================================== */
+.sidebar-wrapper .nav i{
+    margin: 0px 10px 2px 10px;
+}
+.secondary-nav li {
+    padding-left: 20px;
+    float: none;
+}
+.secondary-nav-toggle{
+    float: right;
+    vertical-align: middle;
+    display: block;
+    margin: 9px 10px 2px 10px !important;
 }

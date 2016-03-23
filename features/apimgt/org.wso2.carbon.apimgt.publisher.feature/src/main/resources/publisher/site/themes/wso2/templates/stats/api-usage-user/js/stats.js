@@ -1,5 +1,11 @@
 var currentLocation;
+var apiFilter = "allAPIs";
 var statsEnabled = isDataPublishingEnabled();
+
+//setting default date
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
 
     currentLocation = window.location.pathname;
 
@@ -45,20 +51,22 @@ var statsEnabled = isDataPublishingEnabled();
                           opens: 'left',
                     });
 
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawAPIUsage(from,to,apiFilter);
+                    });
+
                     $('#date-range').on('apply.daterangepicker', function(ev, picker) {
                        btnActiveToggle(this);
-                       var from = convertTimeString(picker.startDate);
-                       var to = convertTimeString(picker.endDate);
+                       from = convertTimeString(picker.startDate);
+                       to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
-                       drawAPIUsage(from,to);
+                       drawAPIUsage(from,to,apiFilter);
                     });
-
-                    //setting default date
-                    var to = new Date();
-                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+                    
 
                     getDateTime(to,from);
 
@@ -99,11 +107,11 @@ var statsEnabled = isDataPublishingEnabled();
 var subscriberDetails=[];
 var groupData = [];
 
-var drawAPIUsage = function (from,to) {
+var drawAPIUsage = function (from,to,apiFilter) {
 
     var fromDate = from;
     var toDate = to;
-    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
+    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation, apiFilter: apiFilter },
                 function (json) {
     				$('#spinner').hide();
                     if (!json.error) {
@@ -202,9 +210,11 @@ var drawAPIUsage = function (from,to) {
                                  drawChart(from,to);
                         }
                         else{
-                                $('#apiUsageByUserTable').hide();
+                        		$('#chartContainer').empty();
+                        		$('div#apiSelectTable_wrapper.dataTables_wrapper.no-footer').remove();
+                        		$('#apiUsageByUserTable').hide();
                                 $('#noData').html('');
-                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
 
                         }
                     }
@@ -223,7 +233,7 @@ var drawChart = function (from, to) {
     var fromDate = from;
     var toDate = to;
 
-    jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
+    jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter},
         function (json) {
             if (!json.error) {
                 $('#spinner').hide();
@@ -236,7 +246,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
 
                 } else {
                     $('#apiUsage_note').removeClass('hide');
@@ -465,7 +475,7 @@ var drawChart = function (from, to) {
                                }
                     } );
 
-                    $('select').css('width','80px');
+                    //$('select').css('width','80px');
                     chart.data = dimple.filterData(data, "API", defaultFilterValues);
 
                     var count=20;
@@ -666,13 +676,13 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawAPIUsage(from,to);
+    drawAPIUsage(from,to,apiFilter);
 }

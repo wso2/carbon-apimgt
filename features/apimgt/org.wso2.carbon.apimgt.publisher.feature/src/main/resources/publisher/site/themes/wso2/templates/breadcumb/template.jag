@@ -185,7 +185,7 @@
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
 	                <li class="active">
-	                    <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
+	                    <a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
 	                </li>
                 <% } %>
 

@@ -80,9 +80,9 @@
 
 </center>-->
 	<div class="page-header">
- 		<h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
+ 		<h2> <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
         <% if(api){ %>
-           <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
+           <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %>
         </h2>
  	</div>     
@@ -92,12 +92,11 @@
 	        <span id="addErrorSpan"></span>
 	    </div>
 		<% if(api != null && api.subs > 0){%>
-		    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
-		        <span id="editWarnSpan"><b>Warning!</b><br/>
-		        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-		        active subscriptions.
-		        </span>
-		    </div>
+		    <div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
 		  <%  }%>
 		  
 		  
@@ -121,29 +120,29 @@
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
 
-<div id="accordion" role="tablist" aria-multiselectable="true">
+<div id="accordion1" role="tablist" aria-multiselectable="true">
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="headingOne">
-      <h4 class="panel-title">
-        <a href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-            <strong>Configurations</strong>
-        </a>
-      </h4>
-    </div>
+    	<h4 class="panel-title">
+			<div>
+	        	<div class="heading">Configurations</div>
+			</div>
+	        <div class="clearfix"></div>										        
+		</h4>
+	</div>
     <div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
       <div class="panel-body">
 
-            <div class="form-group form-inline">
-                        <label class = "col-sm-3 control-label">Make this the Default Version</label>
-                     <div class="col-sm-8">
-                         <div class = "checkbox">
-                             <label>
-                                 <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
-                             </label>
-                         </div>
-                         <a  class="glyphicon glyphicon-question-sign help_popup" help_data="default_api_help"></a>
-
+            <div class="form-group">
+                        <label class = "col-sm-3 control-label">Make this the Default Version:
+                        <a class="help_popup" help_data="default_api_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
                          <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+                         </label>
+                     	<div class="col-sm-8">
+                     	  <label class="checkbox">
+                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
+                            <span class="helper"></span>
+                    	</label>                         
 
                          <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
                              <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
@@ -156,7 +155,10 @@
             </div>
 
                 <div class="form-group">
-                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
+                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span>
+                        	<a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                        	<p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        </label>
 
                     <div class="controls col-sm-8 tierSelect">
                         <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
@@ -170,31 +172,24 @@
                         <script type="text/javascript">
 
                         </script>
-                        <a class=" help_popup" help_data="tier_help"></a>
-                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        
                     </div>
                 </div>
 
-                <div class="form-group form-inline transport-styles">
-                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+                <div class="form-group transport-styles">
+                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
+                	<a class="help_popup" help_data="http_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+                	<p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                </label>
                 <div class="controls col-sm-8">
-                    <div class="checkbox">
-                        <label >
+                	<label class="checkbox">
                             <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
-
-                            <%=i18n.localize("httpsTransport")%>
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label   >
-                            <input type="checkbox"  id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-
-                            <%=i18n.localize("httpTransport")%>
-                        </label>
-                        
-                    </div>
-                <a class="glyphicon glyphicon-question-sign help_popup" help_data="http_help"></a>
-                <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                    </label>
+                    <label class="checkbox">
+                            <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                    </label>                    
                 </div>
              </div>
 
@@ -202,14 +197,19 @@
 
             <div class="form-group">
                             <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("throttle")%></label>
-                            <div class="controls col-sm-8">
+                            <div class="col-sm-8">
                             <label class="checkbox">
-                                <input type="checkbox" id="toggleThrottle" name="throttle_check" id="throttle_check"
-                            <%
-                            if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
-                            checked="checked"<%}%>><%=i18n.localize("throttleMsg")%>
-                            </label>
-                            <table class="table table-bordered table-striped" id="throttleTable">
+	                            <input type="checkbox" name="throttle_check"   id="toggleThrottle"                         <%
+                            		if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+                            		checked="checked"<%}%>>
+	                            <span class="helper"><%=i18n.localize("throttleMsg")%></span>
+                    		</label>                            
+                            </div>
+                        </div>
+              <div class="form-group">
+              	<div class="col-sm-3"></div>
+              	<div class="col-sm-8">
+              		<table class="table table-bordered table-striped" id="throttleTable" <%if((!api.productionTps || ("none".equals(api.productionTps))) && (!api.sandboxTps || ("none".equals(api.sandboxTps)))){ %>style="display:none"<%} %>>
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -233,27 +233,28 @@
                                         </td>
                                     </tr>
                                 </table>
-                            </div>
-                        </div>
+              	</div>
+              </div>
 
             <%}%>
 
 
             <!--Response Caching -->
-                <div class="form-group form-inline">
-                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
-                      <div class="controls col-sm-8 responseCacheSelect">
+                <div class="form-group">
+                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
+                    	<a class="help_popup" help_data="cache_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
+                    </label>
+                      <div class="col-sm-4 responseCacheSelect">
                        <select class="select required form-control" id="responseCache" name="responseCache">
                             <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
                             <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>
-                        <a class="glyphicon glyphicon-question-sign help_popup" help_data="cache_help"></a>
-                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
+                        </select>                        
                      </div>
                 </div>
                 <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
                     <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="controls col-sm-8">
+                    <div class="col-sm-4">
                         <input type="text" style="text-align:right;" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
                     </div>
                 </div>
@@ -264,33 +265,32 @@
             		result = mod.isMultipleTenantsAvailable();
                 	var isMultipleTenantsAvailable = result.status;
             		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-            			<div class="form-group form-inline">
-                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
-                        <div class="controls col-sm-8">
-                            <% if(api.visibility!="public") {%>
-                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
-                            </select>
-                            <%} else {%>
-                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
-                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
-                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
-                                    <% } %>
-                                </select>
-                            <%}%>
-                                <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
-                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
-                       </div>
-
-                        </br>
+            			<div class="form-group">
+	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:
+	                        	<a class="help_popup" help_data="subscriptions_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+	                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
+	                        </label>
+	                        <div class="col-sm-4">
+	                            <% if(api.visibility!="public") {%>
+	                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
+	                                <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
+	                            </select>
+	                            <%} else {%>
+	                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
+	                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+	                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
+	                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+	                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+	                                    <% } %>
+	                                </select>
+	                            <%}%>                            	
+	                       </div>
                            </div>
                                <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
                                    <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
                                        <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
                                    </label>
-                                   <div class="col-sm-6">
+                                   <div class="col-sm-4">
                                        <input type="text" class="input form-control"
                                        id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
                                        <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
@@ -302,13 +302,15 @@
       </div>
     </div>
   </div><!-- End of configuration panel -->
-  <div class="panel panel-default" id="accordion">
+  <div class="panel panel-default" id="accordion1">
     <div class="panel-heading" role="tab" id="headingTwo">
-      <h4 class="panel-title">
-        <a class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-          <strong>Gateway Environments</strong>
-        </a>
-      </h4>
+    	<h4 class="panel-title">
+			<div class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+	        	<div class="heading">Gateway Environments</div>
+			</div>
+	        <div class="clearfix"></div>										        
+		</h4>
+
     </div>
     <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
         <table class="table table-striped table-hover table-bordered display data-table">
@@ -368,13 +370,14 @@
     </div>
   </div><!-- Gateway environments -->
 
-  <div class="panel panel-default" id="accordion">
+  <div class="panel panel-default" id="accordion1">
     <div class="panel-heading" role="tab" id="headingThree">
-      <h4 class="panel-title">
-        <a class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-          <strong><%=i18n.localize("businessInformationTitle")%></strong>
-        </a>
-      </h4>
+    	<h4 class="panel-title">
+			<div class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+	        	<div class="heading"><%=i18n.localize("businessInformationTitle")%></div>
+			</div>
+	        <div class="clearfix"></div>										        
+		</h4>
     </div>
     <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
       <div class="panel-body">
@@ -406,13 +409,14 @@
     </div>
   </div><!-- Business Information -->
 
-  <div class="panel panel-default" id="accordion">
+  <div class="panel panel-default" id="accordion1">
     <div class="panel-heading" role="tab" id="headingFour">
       <h4 class="panel-title">
-        <a class="" data-toggle="collapse" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
-                    <strong>Resources</strong>
-        </a>
-      </h4>
+			<div>
+	        	<div class="heading">Resources</div>
+			</div>
+	        <div class="clearfix"></div>										        
+		</h4>
     </div>
     <div id="collapseThree" class="panel-collapse " role="tabpanel" aria-labelledby="headingFour">
       <div class="panel-body">
@@ -442,10 +446,10 @@
                 </div>
                 <div class="form-actions" id="saveButtons">
 
-                    <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
+                    <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("save")%></button>
                     <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>
 
-                    <input type="reset" class="btn btn-default" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
+                    <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
             </form>
 
@@ -465,8 +469,8 @@
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
-                <button id="editAPI-btn" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
-                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default">Go to API Store</a>
+                <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary">Go to API Store</a>
                 <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
                 </div>
               </div>
@@ -554,7 +558,11 @@
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn">
+				<span class="icon fw-stack">
+	            	<i class="fw fw-add fw-stack-1x"></i>
+	                <i class="fw fw-circle-outline fw-stack-2x"></i>
+	            </span> Add Scopes</a>
     </div>
 </script>
 
