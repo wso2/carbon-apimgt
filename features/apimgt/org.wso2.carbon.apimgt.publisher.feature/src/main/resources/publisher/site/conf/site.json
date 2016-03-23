@@ -1,6 +1,6 @@
 {
     "theme" : {
-        "base" : "default",
+        "base" : "wso2",
         "subtheme" : "modern"
     },
     "context" : "/publisher",

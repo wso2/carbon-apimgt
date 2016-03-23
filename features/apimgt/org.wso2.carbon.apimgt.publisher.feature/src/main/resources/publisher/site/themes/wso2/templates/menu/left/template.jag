@@ -122,7 +122,11 @@
 								<% } %>><a class="substats"
 								href="<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>"
 								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("faultyInvocations")%></a></li>
-
+                            <!-- TODO use correct permission when throttle policy management implement -->
+                            <%if(isManageTierPermitted){%>
+			                    <li class="nav-header"><%=i18n.localize("throttlePolicies")%></li>
+			                    <li <% if(reqUrl.indexOf(throttlePolicyUrl)>=0||reqUrl.indexOf(throttlePolicyUrl)>=0){%>class="active"<% } %>><a href="<%=throttlePolicyUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=throttlePolicyUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("throttlePolicies")%></a></li>
+		                        <%}%>
 						</ul></li>
 					<%}%>
 
