@@ -3721,7 +3721,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
             policyFileNames.add(policyFile);
         } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
-                
         }
         
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();

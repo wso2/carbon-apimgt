@@ -2053,9 +2053,8 @@ public class SQLConstants {
             "VALUES (?,?,?)";
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
-            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,QUOTA_POLICY_TYPE ,QUOTA ," +
-                    "QUOTA_UNIT, UNIT_TIME ,TIME_UNIT ,SIDDHI_QUERY) \n" +
-                    "VALUES (?,?,?,?,?,?,?,?,?)";
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,SIDDHI_QUERY) \n" +
+            "VALUES (?,?,?,?)";
 
     public static final String UPDATE_POLICY_SQL =
             "UPDATE AM_POLICY " +
@@ -2140,9 +2139,9 @@ public class SQLConstants {
             " SELECT " +
                     "   * " +
                     "FROM " +
-                    "   AM_GLOBAL_POLICY " +
+                    "   AM_POLICY_GLOBAL " +
                     " WHERE" +
-                    "   AND TENANT_ID =?";
+                    "   TENANT_ID =?";
 
     public static final String GET_API_POLICY_ID_SQL =
             "SELECT " +
@@ -2254,4 +2253,7 @@ public class SQLConstants {
 
     public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
+
+    public static final String DELETE_GLOBAL_POLICY_SQL =
+            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
 }

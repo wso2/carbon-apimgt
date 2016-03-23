@@ -17,14 +17,11 @@ include("/jagg/jagg.jag");
         if (action == "addGlobalPolicy" ) {
             var policyName =  request.getParameter("policyName", "UTF-8");
             var description =  request.getParameter("description", "UTF-8");
-            var requestCount =  request.getParameter("requestCount", "UTF-8");
-            var unitTime =  request.getParameter("unitTime", "UTF-8");
-            var timeUnit =  request.getParameter("timeUnit", "UTF-8");
             var siddhiQuery =  request.getParameter("siddhiQuery", "UTF-8");
 
             mod = jagg.module("policy");
 
-            result = mod.addGlobalPolicy(policyName, description, requestCount, unitTime, timeUnit, siddhiQuery);
+            result = mod.addGlobalPolicy(policyName, description, siddhiQuery);
             if (result.error) {
                 obj = {
                     error:true,

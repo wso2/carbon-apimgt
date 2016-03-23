@@ -50,7 +50,7 @@
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= "App Level Policies" %></a></li>
         <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/subscription-policy-manage") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= "Subscription Level Policies" %></a></li>
-        <li <%if (reqUrl.match("global-policy-edit")){%>class="active"<% } %>><a href="<%= jagg.url("/global-policy-edit") %>"
+        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/global-policy-manage") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= "Global Level Policies" %></a></li>
      <%}%>
         </ul>

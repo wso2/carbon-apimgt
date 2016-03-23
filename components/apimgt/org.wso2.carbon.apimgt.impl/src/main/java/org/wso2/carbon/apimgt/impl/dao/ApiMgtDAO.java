@@ -8410,11 +8410,13 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
-            setCommonParametersForPolicy(policyStatement, policy);
+            policyStatement.setString(1, policy.getPolicyName());
+            policyStatement.setInt(2, policy.getTenantId());
+            policyStatement.setString(3, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
             siddhiQueryInputStream = new ByteArrayInputStream(policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
-            policyStatement.setBinaryStream(9, siddhiQueryInputStream);
+            policyStatement.setBinaryStream(4, siddhiQueryInputStream);
             System.out.println(policyStatement);
             policyStatement.executeUpdate();
             conn.commit();
@@ -8455,6 +8457,8 @@ public class ApiMgtDAO {
             query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             query = SQLConstants.DELETE_API_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            query = SQLConstants.DELETE_GLOBAL_POLICY_SQL;
         }
 
         try {
@@ -8581,6 +8585,50 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
+    }
+
+    /**
+     *Get all Global level policeis belongs to specific tenant
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    public GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException {
+        List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String siddhiQuery = null;
+                GlobalPolicy globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+
+                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicy.setSiddhiQuery(siddhiQuery);
+                policies.add(globalPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new GlobalPolicy[policies.size()]);
     }
 
     /**

@@ -26,6 +26,13 @@ jagg.module("policy", {
     },
     addGlobalPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/global-policy-edit.jag").addGlobalPolicy.apply(this, arguments);
+    },
+    deleteGlobalPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/global-policy-manage.jag").deleteGlobalPolicy.apply(this, arguments);
+    },
+
+    getAllGlobalPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/global-policy-manage.jag").getAllGlobalPolicies.apply(this, arguments);
     }
 });
 %>
