@@ -2477,7 +2477,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
                     + "that the data source is properly configured in the APIUsageTracker configuration.");
@@ -2510,24 +2511,25 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
             if (!"ALL".equals(drillDown)) {
-                    query.append(" AND country ='").append(drillDown).append("'");
+                query.append(" AND country ='").append(drillDown).append("'");
             }
             query.append(" GROUP BY country ");
             if (!"ALL".equals(drillDown)) {
-                    query.append(",city");
+                query.append(",city");
             }
             if (isTableExist(tableName, connection)) { //Tables exist
                 preparedStatement = connection.prepareStatement(query.toString());
                 rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
-                   int count = rs.getInt("count");
+                    int count = rs.getInt("count");
                     String country1 = rs.getString("country");
                     String city = rs.getString("city");
                     List<String> facetValues = new ArrayList<String>();
                     facetValues.add(country1);
                     facetValues.add(city);
-                    PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount(count,facetValues);
+                    PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount(count,
+                            facetValues);
                     result1.setValues(perGeoLocationUsageCount);
                     result1.setTableName(tableName);
                     result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
