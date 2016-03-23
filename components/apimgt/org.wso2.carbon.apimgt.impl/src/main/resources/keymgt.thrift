@@ -26,6 +26,8 @@ struct APIKeyValidationInfoDTO {
     15: optional set<string> scopes;
     16: optional i64 validityPeriod;
     17: optional i64 issuedTime;
+    18: optional bool isContentAware;
+    19: optional string apiTier;
 }
 
 struct URITemplate {
