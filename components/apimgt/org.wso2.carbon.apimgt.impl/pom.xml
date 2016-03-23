@@ -128,6 +128,24 @@
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
         </dependency>
+
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.um.ws.api.stub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>com.nimbusds.wso2</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
