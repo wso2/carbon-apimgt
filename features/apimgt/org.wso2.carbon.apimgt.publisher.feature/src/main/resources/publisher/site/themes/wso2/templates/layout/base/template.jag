@@ -13,7 +13,7 @@ if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 %>
 
    <!-- #page-content-wrapper -->
-    <div class="page-content-wrapper" style="<% if(outputs.left) { %> padding-left: 0px;<%}%>">
+    <div class="page-content-wrapper" style="<% if(outputs.left) { %> padding-left: 300px;<%}%>">
     
     
 	<% if (jagg.getUser()) {

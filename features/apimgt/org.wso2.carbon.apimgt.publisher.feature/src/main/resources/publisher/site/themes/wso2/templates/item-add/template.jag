@@ -85,7 +85,7 @@
 						<div class="form-group">
 	                               <div class="col-sm-8">
 	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
-	                                   <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+	                                   <label for="wsdl-url" class="error wsdlError" style="display:none">Please use a valid wsdl endpoint</label>
 	                               </div>
 	                        </div>
 	                        <input name="action" value="start" type="hidden"/>
@@ -116,7 +116,7 @@
 			<div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 				<div class="panel-body">
 					<form class="form-horizontal">
-	                        <button onclick="location.href='<%=jagg.url("/design")%>'" id="designNewAPI" id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+	                        <button onclick="location.href='<%=jagg.url("/design")%>'" id="designNewAPI" id="designNewAPI" class="btn btn-primary has-spinner" type="button">Start Creating</button>
 					</form>
 				</div>
 			</div>

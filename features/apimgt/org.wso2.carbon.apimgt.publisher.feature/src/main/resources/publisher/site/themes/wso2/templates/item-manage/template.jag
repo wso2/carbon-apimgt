@@ -80,7 +80,7 @@
 
 </center>-->
 	<div class="page-header">
- 		<h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
+ 		<h2> <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
         <% if(api){ %>
            <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %>
@@ -92,12 +92,11 @@
 	        <span id="addErrorSpan"></span>
 	    </div>
 		<% if(api != null && api.subs > 0){%>
-		    <div class="alert alert-warning" id="editAPIWarn" style="display:block">
-		        <span id="editWarnSpan"><b>Warning!</b><br/>
-		        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-		        active subscriptions.
-		        </span>
-		    </div>
+		    <div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
 		  <%  }%>
 		  
 		  
@@ -559,7 +558,11 @@
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn">
+				<span class="icon fw-stack">
+	            	<i class="fw fw-add fw-stack-1x"></i>
+	                <i class="fw fw-circle-outline fw-stack-2x"></i>
+	            </span> Add Scopes</a>
     </div>
 </script>
 
