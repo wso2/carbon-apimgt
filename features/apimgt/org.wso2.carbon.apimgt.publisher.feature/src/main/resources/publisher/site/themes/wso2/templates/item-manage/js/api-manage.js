@@ -3,13 +3,15 @@ var inSequencesLoaded = false;
 //hack to validate tiers
 function validate_tiers(){
     var selectedValues = $('#tier').val();
-    if(selectedValues && selectedValues.length > 0){
+    var selectedValuesApiPolicy = $('#apiPolicy').val();
+    var selectedValuesSubPolicy = $('#subPolicy').val();
+    if((selectedValues && selectedValues.length > 0 )|| (selectedValuesSubPolicy && selectedValuesSubPolicy.length > 0 ) || (selectedValuesApiPolicy && selectedValuesApiPolicy.length > 0 )){
         $("button.multiselect").removeClass('error-multiselect');
         $("#tier_error").remove();
         return true;
     }
     //set error
-    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true">This field is required.</label>').focus();
+    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
     return false;
 }
 
@@ -76,6 +78,41 @@ $(document).ready(function(){
             }
 
         });
+
+    $("select[name='apiPolicy']").change(function() {
+            // multipleValues will be an array
+            var multipleValues = $(this).val() || [];
+            var countLength = $('#apiPolicyCollection').length;
+            if (countLength == 0) {
+
+                $('<input>').attr('type', 'hidden')
+                        .attr('name', 'apiPolicyCollection')
+                        .attr('id', 'apiPolicyCollection')
+                        .attr('value', multipleValues)
+                        .appendTo('#manage_form');
+            } else {
+                $('#apiPolicyCollection').attr('value', multipleValues);
+
+            }
+
+        });
+    $("select[name='subPolicy']").change(function() {
+            // multipleValues will be an array
+            var multipleValues = $(this).val() || [];
+            var countLength = $('#subPolicyCollection').length;
+            if (countLength == 0) {
+
+                $('<input>').attr('type', 'hidden')
+                        .attr('name', 'subPolicyCollection')
+                        .attr('id', 'subPolicyCollection')
+                        .attr('value', multipleValues)
+                        .appendTo('#manage_form');
+            } else {
+                $('#subPolicyCollection').attr('value', multipleValues);
+
+            }
+
+     });
 
     if ( $("#toggleSequence").attr('checked') ) {
 	$('#toggleSequence').parent().next().show();

@@ -38,10 +38,19 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 
     var manage_wlabel = "";
-    if( api.availableTiers !=""){
-        manage_wlabel = "completed";      
-    }else{
-        var manage_w_link = '#';        
+	if(mod.isGlobalCEPThrottlingEnabled()){
+         if( api != null && api.availableSubscriptionPolicy !="" ){
+            manage_wlabel = "completed";      
+        } else {
+            var manage_w_link = '#';        
+        }
+    } else {
+        
+        if( api.availableTiers !="" ){
+            manage_wlabel = "completed";      
+        } else {
+            var manage_w_link = '#';        
+        }
     } 
 %>
 <!-- <center>
