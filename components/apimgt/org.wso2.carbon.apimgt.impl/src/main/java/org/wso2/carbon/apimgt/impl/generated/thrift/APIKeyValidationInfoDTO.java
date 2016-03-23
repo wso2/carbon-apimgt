@@ -47,6 +47,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final org.apache.thrift.protocol.TField SCOPES_FIELD_DESC = new org.apache.thrift.protocol.TField("scopes", org.apache.thrift.protocol.TType.SET, (short)15);
   private static final org.apache.thrift.protocol.TField VALIDITY_PERIOD_FIELD_DESC = new org.apache.thrift.protocol.TField("validityPeriod", org.apache.thrift.protocol.TType.I64, (short)16);
   private static final org.apache.thrift.protocol.TField ISSUED_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("issuedTime", org.apache.thrift.protocol.TType.I64, (short)17);
+  private static final org.apache.thrift.protocol.TField IS_CONTENT_AWARE_FIELD_DESC = new org.apache.thrift.protocol.TField("isContentAware", org.apache.thrift.protocol.TType.BOOL, (short)18);
+  private static final org.apache.thrift.protocol.TField API_TIER_FIELD_DESC = new org.apache.thrift.protocol.TField("apiTier", org.apache.thrift.protocol.TType.STRING, (short)19);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -71,6 +73,8 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   public Set<String> scopes; // optional
   public long validityPeriod; // optional
   public long issuedTime; // optional
+  public boolean isContentAware; // optional
+  public String apiTier; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -90,7 +94,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     AUTHORIZED_DOMAINS((short)14, "authorizedDomains"),
     SCOPES((short)15, "scopes"),
     VALIDITY_PERIOD((short)16, "validityPeriod"),
-    ISSUED_TIME((short)17, "issuedTime");
+    ISSUED_TIME((short)17, "issuedTime"),
+    IS_CONTENT_AWARE((short)18, "isContentAware"),
+    API_TIER((short)19, "apiTier");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -139,6 +145,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           return VALIDITY_PERIOD;
         case 17: // ISSUED_TIME
           return ISSUED_TIME;
+        case 18: // IS_CONTENT_AWARE
+          return IS_CONTENT_AWARE;
+        case 19: // API_TIER
+          return API_TIER;
         default:
           return null;
       }
@@ -183,8 +193,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final int __VALIDATIONSTATUS_ISSET_ID = 1;
   private static final int __VALIDITYPERIOD_ISSET_ID = 2;
   private static final int __ISSUEDTIME_ISSET_ID = 3;
-  private BitSet __isset_bit_vector = new BitSet(4);
-  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME};
+  private static final int __ISCONTENTAWARE_ISSET_ID = 4;
+  private BitSet __isset_bit_vector = new BitSet(5);
+  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME,_Fields.IS_CONTENT_AWARE,_Fields.API_TIER};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -224,6 +235,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
     tmpMap.put(_Fields.ISSUED_TIME, new org.apache.thrift.meta_data.FieldMetaData("issuedTime", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+    tmpMap.put(_Fields.IS_CONTENT_AWARE, new org.apache.thrift.meta_data.FieldMetaData("isContentAware", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
+    tmpMap.put(_Fields.API_TIER, new org.apache.thrift.meta_data.FieldMetaData("apiTier", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(APIKeyValidationInfoDTO.class, metaDataMap);
   }
@@ -288,6 +303,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     }
     this.validityPeriod = other.validityPeriod;
     this.issuedTime = other.issuedTime;
+    this.isContentAware = other.isContentAware;
+    if (other.isSetApiTier()) {
+      this.apiTier = other.apiTier;
+    }
   }
 
   public APIKeyValidationInfoDTO deepCopy() {
@@ -317,6 +336,9 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     this.validityPeriod = 0;
     setIssuedTimeIsSet(false);
     this.issuedTime = 0;
+    setIsContentAwareIsSet(false);
+    this.isContentAware = false;
+    this.apiTier = null;
   }
 
   public boolean isAuthorized() {
@@ -753,6 +775,53 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     __isset_bit_vector.set(__ISSUEDTIME_ISSET_ID, value);
   }
 
+  public boolean isIsContentAware() {
+    return this.isContentAware;
+  }
+
+  public APIKeyValidationInfoDTO setIsContentAware(boolean isContentAware) {
+    this.isContentAware = isContentAware;
+    setIsContentAwareIsSet(true);
+    return this;
+  }
+
+  public void unsetIsContentAware() {
+    __isset_bit_vector.clear(__ISCONTENTAWARE_ISSET_ID);
+  }
+
+  /** Returns true if field isContentAware is set (has been assigned a value) and false otherwise */
+  public boolean isSetIsContentAware() {
+    return __isset_bit_vector.get(__ISCONTENTAWARE_ISSET_ID);
+  }
+
+  public void setIsContentAwareIsSet(boolean value) {
+    __isset_bit_vector.set(__ISCONTENTAWARE_ISSET_ID, value);
+  }
+
+  public String getApiTier() {
+    return this.apiTier;
+  }
+
+  public APIKeyValidationInfoDTO setApiTier(String apiTier) {
+    this.apiTier = apiTier;
+    return this;
+  }
+
+  public void unsetApiTier() {
+    this.apiTier = null;
+  }
+
+  /** Returns true if field apiTier is set (has been assigned a value) and false otherwise */
+  public boolean isSetApiTier() {
+    return this.apiTier != null;
+  }
+
+  public void setApiTierIsSet(boolean value) {
+    if (!value) {
+      this.apiTier = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case AUTHORIZED:
@@ -891,6 +960,22 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       break;
 
+    case IS_CONTENT_AWARE:
+      if (value == null) {
+        unsetIsContentAware();
+      } else {
+        setIsContentAware((Boolean)value);
+      }
+      break;
+
+    case API_TIER:
+      if (value == null) {
+        unsetApiTier();
+      } else {
+        setApiTier((String)value);
+      }
+      break;
+
     }
   }
 
@@ -947,6 +1032,12 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     case ISSUED_TIME:
       return Long.valueOf(getIssuedTime());
 
+    case IS_CONTENT_AWARE:
+      return Boolean.valueOf(isIsContentAware());
+
+    case API_TIER:
+      return getApiTier();
+
     }
     throw new IllegalStateException();
   }
@@ -992,6 +1083,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       return isSetValidityPeriod();
     case ISSUED_TIME:
       return isSetIssuedTime();
+    case IS_CONTENT_AWARE:
+      return isSetIsContentAware();
+    case API_TIER:
+      return isSetApiTier();
     }
     throw new IllegalStateException();
   }
@@ -1159,6 +1254,24 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!(this_present_issuedTime && that_present_issuedTime))
         return false;
       if (this.issuedTime != that.issuedTime)
+        return false;
+    }
+
+    boolean this_present_isContentAware = true && this.isSetIsContentAware();
+    boolean that_present_isContentAware = true && that.isSetIsContentAware();
+    if (this_present_isContentAware || that_present_isContentAware) {
+      if (!(this_present_isContentAware && that_present_isContentAware))
+        return false;
+      if (this.isContentAware != that.isContentAware)
+        return false;
+    }
+
+    boolean this_present_apiTier = true && this.isSetApiTier();
+    boolean that_present_apiTier = true && that.isSetApiTier();
+    if (this_present_apiTier || that_present_apiTier) {
+      if (!(this_present_apiTier && that_present_apiTier))
+        return false;
+      if (!this.apiTier.equals(that.apiTier))
         return false;
     }
 
@@ -1348,6 +1461,26 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetIsContentAware()).compareTo(typedOther.isSetIsContentAware());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetIsContentAware()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.isContentAware, typedOther.isContentAware);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetApiTier()).compareTo(typedOther.isSetApiTier());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetApiTier()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.apiTier, typedOther.apiTier);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1519,6 +1652,22 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!first) sb.append(", ");
       sb.append("issuedTime:");
       sb.append(this.issuedTime);
+      first = false;
+    }
+    if (isSetIsContentAware()) {
+      if (!first) sb.append(", ");
+      sb.append("isContentAware:");
+      sb.append(this.isContentAware);
+      first = false;
+    }
+    if (isSetApiTier()) {
+      if (!first) sb.append(", ");
+      sb.append("apiTier:");
+      if (this.apiTier == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.apiTier);
+      }
       first = false;
     }
     sb.append(")");
@@ -1721,6 +1870,22 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 18: // IS_CONTENT_AWARE
+            if (schemeField.type == org.apache.thrift.protocol.TType.BOOL) {
+              struct.isContentAware = iprot.readBool();
+              struct.setIsContentAwareIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 19: // API_TIER
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.apiTier = iprot.readString();
+              struct.setApiTierIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -1861,6 +2026,18 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         oprot.writeI64(struct.issuedTime);
         oprot.writeFieldEnd();
       }
+      if (struct.isSetIsContentAware()) {
+        oprot.writeFieldBegin(IS_CONTENT_AWARE_FIELD_DESC);
+        oprot.writeBool(struct.isContentAware);
+        oprot.writeFieldEnd();
+      }
+      if (struct.apiTier != null) {
+        if (struct.isSetApiTier()) {
+          oprot.writeFieldBegin(API_TIER_FIELD_DESC);
+          oprot.writeString(struct.apiTier);
+          oprot.writeFieldEnd();
+        }
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1930,7 +2107,13 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetIssuedTime()) {
         optionals.set(16);
       }
-      oprot.writeBitSet(optionals, 17);
+      if (struct.isSetIsContentAware()) {
+        optionals.set(17);
+      }
+      if (struct.isSetApiTier()) {
+        optionals.set(18);
+      }
+      oprot.writeBitSet(optionals, 19);
       if (struct.isSetAuthorized()) {
         oprot.writeBool(struct.authorized);
       }
@@ -1994,12 +2177,18 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetIssuedTime()) {
         oprot.writeI64(struct.issuedTime);
       }
+      if (struct.isSetIsContentAware()) {
+        oprot.writeBool(struct.isContentAware);
+      }
+      if (struct.isSetApiTier()) {
+        oprot.writeString(struct.apiTier);
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, APIKeyValidationInfoDTO struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(17);
+      BitSet incoming = iprot.readBitSet(19);
       if (incoming.get(0)) {
         struct.authorized = iprot.readBool();
         struct.setAuthorizedIsSet(true);
@@ -2085,6 +2274,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (incoming.get(16)) {
         struct.issuedTime = iprot.readI64();
         struct.setIssuedTimeIsSet(true);
+      }
+      if (incoming.get(17)) {
+        struct.isContentAware = iprot.readBool();
+        struct.setIsContentAwareIsSet(true);
+      }
+      if (incoming.get(18)) {
+        struct.apiTier = iprot.readString();
+        struct.setApiTierIsSet(true);
       }
     }
   }
