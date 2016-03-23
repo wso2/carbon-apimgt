@@ -6,28 +6,34 @@ if(outputs.isCreatePermitted){
          <div id="corsConfigs">
             
             <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfiguration"/>        
-            <div class="form-group form-inline">
+            <div class="form-group">
                             <label class="control-label col-sm-3" for="corsConfiguration"><%=i18n.localize("corsConfiguration")%></label>
                             <div class="controls col-sm-8">
-                            <label class="checkbox">
-                                <input type="checkbox" id="toggleCors" name="cors_check" id="cors_check"
-                            <%
-                            if(corsJson != null && corsJson.corsConfigurationEnabled){
-                             %>
-                            checked="checked"<%}%>><%=i18n.localize("corsMsg")%>
-                            </label>
-                            <table class="table table-bordered table-striped" id="corsTable"
+                            	<label class="checkbox">
+							    	<input type="checkbox" id="toggleCors" name="cors_check"
+			                            <%
+			                            if(corsJson != null && corsJson.corsConfigurationEnabled){
+			                             %>
+			                            checked="checked"<%}%>>
+							                                            <span class="helper"><%=i18n.localize("corsMsg")%></span>
+							     </label>							
+                            </div>
+               </div>
+               <div class="form-group form-inline">
+               	<div class="col-sm-3"></div>
+               	<div class="col-sm-9">
+               			<table class="table table-bordered table-striped" id="corsTable" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
                                     <tr>
                                         <td>
                                             <%=i18n.localize("accessControlOrigin")%>
                                         </td>
                                         <td>
                                         <div id="allOriginContainer">
-                                        <input type="checkbox" id="toggleallOrigin" name="toggleallOrigin" id="toggleallOrigin"
-                                        <%
-                                        if(corsJson.accessControlAllowOrigins =="*"){
-                                         %>
-                                        checked="checked"<%}%>><%=i18n.localize("allOrigins")%>
+                                        
+                                        <label class="checkbox">
+							                	<input type="checkbox" id="toggleallOrigin" name="toggleallOrigin" id="toggleallOrigin"   <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+							                    <span class="helper"><%=i18n.localize("allOrigins")%></span>
+							                </label>
                                         </div>
                                         <%
                                         var accessOrigin ="";
@@ -82,20 +88,21 @@ if(outputs.isCreatePermitted){
                                             <%=i18n.localize("accessControlCredentials")%>
                                         </td>
                                         <td>
-                                         <div class="control credentialContailner">
-                                            <input type="checkbox" id="allowCredentials" name="allowCredentials" placeholder="Access Control Allow Credentials"     
-                                             <%
-                            if(corsJson != null && corsJson.accessControlAllowCredentials){ %>
-                            checked="checked"<%}%>>
+                                         <div class="controls credentialContailner">
+                                         
+                                         	<label class="checkbox">
+							                	<input type="checkbox" id="allowCredentials" name="allowCredentials" placeholder="Access Control Allow Credentials"   
+                                             <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+							                    <span class="helper">Check to send True</span>
+							                </label>
                             </div>
                                         </td>
                                     </tr>
                                 </table>
-                            </div>
-                        </div>
+               	</div>
+               </div>
 
                </div>
-                   </fieldset>
                     <script>
                     $('input').on('change', function() {
                          if (validate_AllowCredentials()) {

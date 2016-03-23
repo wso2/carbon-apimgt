@@ -35,7 +35,9 @@ var query=request.getParameter("query");
 	      </div>
    </form>
   </div>
-  <div class="col-md-2 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#searchAPIHelp"><i class="fa fa-question-circle"></i> Search Options</a></div>
+  <div class="col-md-4 api-search ">
+  	<a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom">
+  		<i class="fa fa-question-circle"></i> Search Options</a></div>
 </div>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
         <a class="close" data-dismiss="alert">x</a>

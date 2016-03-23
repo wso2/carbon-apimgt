@@ -3,6 +3,10 @@
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
 <% var transports = api.transports.split(",");
  var tenantDomain=request_tenant;
+ if(tenantDomain == null || tenantDomain == "") {
+     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+     tenantDomain = MultitenantUtils.getTenantDomain(api.provider);
+ }
  var urlPrefix = jagg.getTenantURLPrefix();%>
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>

@@ -1,9 +1,8 @@
 <% jagg.template("api/api-listing-all", function(inputs, outputs, jagg) { %>
 
 <%
-          var urlPrefix;
-          var tenant=request_tenant;
-          urlPrefix = jagg.getTenantURLPrefix("&");
+          var tenant=request_tenant;          
+          var urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
           <div class="alert alert-info">
             <strong><%=outputs.message%></strong>
@@ -156,6 +155,18 @@ var reqUrl = request.getRequestURI();
                 </div>
                 <%} else {%>
                 <li>
+                <div class="version-provider-wrapper">
+                <%if(outputs.isMonetizationEnabled) {%>
+                    <div class="ribbon-wrapper">
+                    <%if (api.monetizationCategory.equalsIgnoreCase("Freemium")) { %>
+                        <div class="ribbon-yellow">FREEMIUM</div>
+                    <%} else if (api.monetizationCategory.equalsIgnoreCase("Free")) { %>
+                        <div class="ribbon-green">FREE</div>
+                    <%} else { %>
+                        <div class="ribbon-blue">PAID</div>
+                    <%}%>
+                    </div>
+                <%}%>
                     <div class="thumbnail">
                         <a href="<%=path%>">
                             <% if(thumbURL == null) { %>
@@ -314,6 +325,18 @@ var reqUrl = request.getRequestURI();
         </div>
     </div>
 </div>
+<style>
+    .api-count-display{
+        color:#747474;
+        font-size:15px;
+        padding:10px 20px 5px;
+    }
+
+    .api-count-display span{
+        font-size:16px;
+        font-weight:bold;
+    }
+</style>
         <%
         }
 
