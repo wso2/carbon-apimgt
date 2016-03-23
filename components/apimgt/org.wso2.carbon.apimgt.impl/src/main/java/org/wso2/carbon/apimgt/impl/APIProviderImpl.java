@@ -3713,7 +3713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String policyFile = null;
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
-            APIPolicy policy = null;/////// TODO load from database
+            APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
 
             if (PolicyConstants.ACROSS_ALL.equals(policy.getUserLevel())) {
                 policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_all_";
@@ -3734,12 +3734,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
             policyFileNames.add(policyFile);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-
+        	policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
+            policyFileNames.add(policyFile);
         }
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        //remove from the gateway managers
-
+      
         try {
             //undeploy from gateway
             manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
