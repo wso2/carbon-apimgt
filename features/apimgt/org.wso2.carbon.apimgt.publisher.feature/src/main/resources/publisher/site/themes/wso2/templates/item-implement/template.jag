@@ -123,7 +123,7 @@
 							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
 							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
 							                            </label>
-							                                <div class="col-sm-4">
+							                                <div class="col-sm-3">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
 							                                        <option value="http"  selected="selected">HTTP Endpoint</option>
 							                                        <option value="address">Address Endpoint</option>

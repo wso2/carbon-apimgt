@@ -196,7 +196,9 @@ jsonform.fieldTemplate = function(inner) {
     '<%= (node.disabled ? " jsonform-disabled" : "") %>' +
     '">' +
     '<% if (node.title && !elt.notitle) { %>' +
-      '<label class="col-sm-3 control-label" for="<%= node.id %>"><%= node.title %></label>' +
+      '<label class="col-sm-3 control-label" for="<%= node.id %>"><%= node.title %>' + 
+      '<a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <i class="fa fa-question-circle" data-original-title="" title=""></i></a>'+
+      '</label>' +
     '<% } %>' +
     '<div class="col-sm-9">' +
       '<% if (node.prepend || node.append) { %>' +
@@ -346,7 +348,6 @@ jsonform.elementTypes = {
       '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " required=\'required\'" : "") %>' +
       'placeholder="E.g.: http://appserver/resource"' +
       ' />'+
-      '<a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <i class="fa fa-question-circle" data-original-title="" title=""></i></a>'+
       '<div class="btn-group"><button class="btn btn-default advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
       '<button class="btn btn-default check_url_valid" type="button" providerName="<%= apiProvider%>" apiName="<%= apiName%>" apiVersion="<%= apiVersion %>" >Test</button></div>'+
       '<div id="test_help" class="hide"><p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p></div>' +
