@@ -17,6 +17,14 @@
             break;
         }
     }
+
+    var subscriptionLevelPolicies;
+    var apiLevelPolicies;
+    if(mod.isGlobalCEPThrottlingEnabled()){
+        subscriptionLevelPolicies = mod.getSubsriptionLevelPolicies().policies;    
+        apiLevelPolicies = mod.getAPILevelPolicies().policies;
+    }
+
     var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
 
@@ -154,27 +162,80 @@
                      <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
             </div>
 
-                <div class="form-group">
-                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span>
-                        	<a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
-                        	<p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+             <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+                  <div class="form-group">
+                        <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span>
+                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                         </label>
 
                     <div class="controls col-sm-8 tierSelect">
-                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-                        <%
-                        for (var i = 0; i < tiers.length; i++) {
-                            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                            %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+                        <select id="apiPolicy" name="apiPolicy"  class="select required form-control">
+                        <%               
+                        for (var i = 0; i < apiLevelPolicies.length; i++) {
+                            var isSelected = false;
+                            if(apiLevelPolicies[i].getPolicyName() == api.apiLevelPolicy){
+                                isSelected = true;
+                            }                          
+                            %><option value="<%= apiLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= apiLevelPolicies[i].getPolicyName() %></option>%%><%
                         }
                         %>
                         </select>
                         <script type="text/javascript">
 
                         </script>
-                        
+                        <a class=" help_popup" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
                 </div>
+
+                 <div class="form-group">
+                        <label class="control-label col-sm-3" for="subPolicysubPolicy"><%=i18n.localize("subPolicy")%>:<span class="requiredAstrix">*</span>
+                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        </label>
+
+                    <div class="controls col-sm-8 tierSelect">
+                        <select id="subPolicy" name="subPolicy"  class="form-control multiselect selected required" multiple="multiple">
+                        <%
+                         for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
+
+                            var isSelected = api.availableSubscriptionPolicy.indexOf(subscriptionLevelPolicies[i].getPolicyName()) > -1;                       
+                            %><option value="<%= subscriptionLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= subscriptionLevelPolicies[i].getPolicyName() %></option>%%><%
+                        }
+                        %>
+                        </select>
+                        <script type="text/javascript">
+
+                        </script>
+                        <a class=" help_popup" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                    </div>
+
+                 <% } else {%>
+                     <div class="form-group">
+                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span>
+                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        </label>
+
+                        <div class="controls col-sm-8 tierSelect">
+                            <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
+                            <%
+                            for (var i = 0; i < tiers.length; i++) {
+                                var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                                %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+                            }
+                            %>
+                            </select>
+                            <script type="text/javascript">
+
+                            </script>
+                            
+                        </div>
+                    </div>
+                  <% }%>
+
 
                 <div class="form-group transport-styles">
                 <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
