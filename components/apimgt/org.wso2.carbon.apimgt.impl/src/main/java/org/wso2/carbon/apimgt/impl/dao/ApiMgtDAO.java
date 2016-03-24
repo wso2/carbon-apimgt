@@ -8445,7 +8445,7 @@ public class ApiMgtDAO {
      * @param tenantId    used to get the tenant id
      * @throws APIManagementException
      */
-    public void removeThrottlingPolicy(String policyLevel, String policyName, int tenantId)
+    public void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement deleteStatement = null;
