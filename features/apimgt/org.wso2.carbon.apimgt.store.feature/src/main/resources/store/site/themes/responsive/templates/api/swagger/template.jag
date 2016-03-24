@@ -95,12 +95,13 @@ var show_environments = function(){
     var type = $("#key_type").val();
     $("#environment_name").children('option').hide();
     $("#environment_name").children("option[class='" + type + "']").show();
+	$("#environment_name").children("option[class='hybrid']").show();
     var options = $("#environment_name").children("option[class='"+ type + "']");
       if (options.length <= 1) {
         $("#environment_name").hide();
          $("#OnEnvironment").hide();
       }
-    if(options.length > 0){
+    if(options.length > 1){
      $("#OnEnvironment").show(); 
      $("#environment_name").show();
     	options[0].selected=true;
@@ -116,9 +117,13 @@ var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
     if (window.swaggerUi.api.url.indexOf("?")!=-1) {
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});    
+      if (window.swaggerUi.api.url.indexOf("envName")!=-1) {
+            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("envName")[0] + "envName="+name});    
+      }else{
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});            
+      }
     }else{
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "? envName="+name});
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
     }
     change_token();
           };

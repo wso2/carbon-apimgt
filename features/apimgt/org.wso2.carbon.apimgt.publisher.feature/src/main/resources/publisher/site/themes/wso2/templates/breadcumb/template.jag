@@ -40,14 +40,22 @@
                 
                 var inlineEditorUrl = jagg.getAbsoluteUrl("/site/pages/inline-editor.jag") + urlPrefix;
                 var inlineEditorMappedUrl = jagg.getMappedUrl("/site/pages/inline-editor.jag") + urlPrefix;
-            %>
-	    <div class="breadcrumb-wrapper">
-            <ol class="breadcrumb">
-                <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
+                var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
+
+    %>
+<div class="breadcrumb-wrapper">
+    <ol class="breadcrumb">
+        <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
                     <li class="active">
                     	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
                     </li>
                 <% } %>
+
+                <!-- TODO use correct permission when throttle policy management implement -->
+                            <%if(true){%>
+			                    <li class="nav-header"><%=i18n.localize("throttlePolicies")%></li>
+			                    <li <% if(reqUrl.indexOf(throttlePolicyUrl)>=0||reqUrl.indexOf(throttlePolicyUrl)>=0){%>class="active"<% } %>><a href="<%=throttlePolicyUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=throttlePolicyUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("throttlePolicies")%></a></li>
+		                        <%}%>
                 <% if(reqUrl.indexOf(infoUrl)>=0||reqUrl.indexOf(infoMappedUrl)>=0){%>
 	                <li>
 	                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
@@ -177,7 +185,7 @@
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
 	                <li class="active">
-	                    <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
+	                    <a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
 	                </li>
                 <% } %>
 

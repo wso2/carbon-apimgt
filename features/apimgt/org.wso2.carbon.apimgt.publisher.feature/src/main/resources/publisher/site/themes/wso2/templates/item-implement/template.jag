@@ -68,9 +68,9 @@
 </center>-->
 
 	<div class="page-header">
-		<h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
+		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
         <% if(api){ %>
-               <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
+               <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %></h2>
 	</div>
     <div class="content-section shadow-up">
@@ -80,12 +80,11 @@
     </div>
 <%
     if(api != null && api.subs > 0){%>
-    <div class="alert alert-block alert-warning" id="editAPIWarn" style="display:block">
-        <span id="editWarnSpan"><b>Warning!</b><br/>
-        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-        active subscriptions.
-        </span>
-    </div>
+   			<div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
   <%  }%>
 
 	<div class="container">
@@ -101,10 +100,10 @@
                         <div class="wiz-content">
 							    <div class="row">
 							        <div class="col-sm-12">
-							
-							        <div class="panel panel-default" id="accordion">
-							          <div class="panel-heading" style="height:100px;">
-							              <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#managed-api" value="#managed-api">
+									<div id="accordion1" class="panel-group" role="tablist">
+							        <div class="panel panel-default">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1" style="height:100px;">
+							              <div class="api-implement-type">
 							                 <div class="col-sm-1">
 							                     <i class="icon-implement fa fa-cogs fa-3x"></i>
 							                 </div>
@@ -115,13 +114,15 @@
 							              </div>
 							        </div>
 							
-							        <div class="panel-collapse collapse slideContainer" role="tabpanel" id="managed-api">
+							        <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
 							
-							                        <div class="form-group form-inline">
-							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            </label>
 							                                <div class="col-sm-3">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
 							                                        <option value="http"  selected="selected">HTTP Endpoint</option>
@@ -130,20 +131,17 @@
 							                                        <option value="load_balance">Load balanced Endpoint</option>
 							                                        <option value="default">Default Endpoint</option>
 							                                    </select>
-							                                </div>
-							
-							                                <a class="glyphicon glyphicon-question-sign help_popup" help_data="endpoint_help"></a>
-							
+							                                </div>							
 							                        </div>
 							
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 							
 							                        <div id="endpoint_help" class="hide">
-							                         <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
-							                         <strong>Address Endpoint</strong><p>The direct URL of the service</p>
-							                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
-							                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
-							                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
+								                         <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
+								                         <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+								                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
 							                        </div>
 							
 							                        <div id="endpoint_form" class="endpoint_dives" >
@@ -157,48 +155,50 @@
 							                        <div id="more-options-endpoints"  style="display:none">
 							
 							
-							                        <div class="form-group form-inline">
-							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6">
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span>
+							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointType" name="endpointType" >
 							                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
 							                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
 							                            </select>
-							                            <a class="glyphicon glyphicon-question-sign help_popup" help_data="endpointSec_help"></a>
-							                            <p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
 							                            </div>
 							                        </div>
 							
-							                        <div class="form-group form-inline" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6">
+							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointAuthType" name="endpointAuthType" >
 							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
 							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
-							                            </select>
-							                            <a class="glyphicon glyphicon-question-sign help_popup" help_data="endpointAuth_help"></a>
-							                            <p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            </select>							                            
 							                            </div>
 							                        </div>
 							
-							                        <div class="form-group form-inline" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-8">
+							                            <div class="col-sm-6 form-inline">
 							                                <input type="text" class="col-sm-2 form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
-							                                <input type="password" class="col-sm-2 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
+							                                <input type="password" class="col-sm-4 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
 							                            </div>
 							                        </div>
 							
 							                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
 							                        <!--Southboud statistics -->
-							                        <div class="form-group form-inline">
+							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
-							                              <div class="col-sm-3">
+							                              <div class="col-sm-4">
 							                               <select class="select required form-control" id="destinationStats" name="destinationStats">
 							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
 							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
 							                                </select>
-							                                <a class="glyphicon glyphicon-question-sign help_popup" help_data="stats_help"></a>
+							                                <a class="help_popup" help_data="stats_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 							                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
 							                             </div>
 							                        </div>
@@ -210,15 +210,22 @@
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
 							                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
-							                            <div class="form-group form-inline">
+							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
+  
 							                                    <label class="checkbox">
-							                                        <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
+							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
-							                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>><%=i18n.localize("sequenceMsg")%>
-							                                    </label>
-							                                    <table class="table table-bordered table-striped" id="seqTable"
+							                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>>
+							                                            <span class="helper"><%=i18n.localize("sequenceMsg")%></span>
+							                                    </label>							                                    
+							                                </div>
+							                            </div>
+							                            <div class="form-group form-inline">
+							                            	<div class="col-sm-3"></div>
+							                            	<div class="col-sm-9">
+							                            		<table class="table table-bordered table-striped" id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 							                                            <thead>
 							                                                <tr>
@@ -256,7 +263,7 @@
 														    <input type="text" id="inSeqFileValue" class="form-control" readonly>
 														    <input type="file" id="inSeqFile" name="inSeqFile" class="form-control">
 														    <div class="input-group-btn">
-															<button class="btn btn-default btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+															<button class="btn btn-secondary btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
 															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
 															</button>
 														    </div>
@@ -275,7 +282,7 @@
 														    <input type="file" id="outSeqFile"  name="outSeqFile" class="form-control">
 														    <div class="input-group-btn"></div>
 														    <div class="input-group-btn">
-															<button class="btn btn-default btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+															<button class="btn btn-secondary btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
 															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
 															</button>
 														    </div>
@@ -283,7 +290,7 @@
 							                                                </td>
 							                                            </tr>
 							                                    </table>
-							                                </div>
+							                            	</div>
 							                            </div>
 							                        <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
 							                        <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                          
@@ -298,7 +305,7 @@
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 							                    <input type="hidden" value="endpoint" name="implementation_methods" >
 							                    <div class="form-actions" id="saveButtons">
-							                        <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
+							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" >Save</button>
 							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
 							                    </div>
 							                    </form>
@@ -306,9 +313,9 @@
 							            </div>
 							            </div>
 							
-							            <div class="panel panel-default" id="accordion">
-							              <div class="panel-heading" style ="height:100px;">
-							                  <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#prototype" value="#prototype">
+							            <div class="panel panel-default">
+							              <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-controls="accordion1-collapse2" style="height:100px;">
+							                  <div class="api-implement-type">
 							                  	 
 							                     <div class="col-sm-1">
 							                         <i class="icon-implement fa fa-cog fa-3x"></i>
@@ -320,7 +327,7 @@
 							                  </div>
 							              </div>
 							
-							            <div id="prototype" class="panel-collapse collapse slideContainer" role="tabpanel" >
+							            <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
 							            <div class="panel-body">
 							
 							            <div class="">
@@ -364,20 +371,17 @@
 							                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
 							                        <div class="col-sm-8">
 							                            <div class="input-group">
-							                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control"/>
+							                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
 							                                <span class="input-group-btn">
-							                                    <button type="button" id="prototype_test" class="btn btn-default check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
+							                                    <button type="button" id="prototype_test" class="btn btn-secondary check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
 							                                        <span>Test</span>
 							                                    </button>
 							                                </span>
 							                            </div>
-							                            <a style="margin-left:3px" class="glyphicon glyphicon-question-sign help_popup" help_data="endpoint_test_help"></a>
+							                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
 							                            <div id="endpoint_test_help" class="hide">
 							                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
 							                            </div>
-							
-							
-							                        <p class="help-block">E.g.: http://appserver/resource</p>
 							                        </div>
 							                        <span style="display:none;" class="help-block jsonform-errortext"></span>
 							                    </div>
@@ -392,7 +396,7 @@
 							                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
 							                    <input type="hidden" name="action" value="implement" />
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
-							                    <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+							                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
 							                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 							                </div>
 							                            </form>
@@ -420,10 +424,11 @@
 							                </div>
 							                <div class="modal-footer">
 							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
-							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default" >Go to API Store</a>
-							                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" >Go to API Store</a>
+							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
 							                </div>
 							                </div>
+							            </div>
 							            </div>
 							            </div>
 							            </div>

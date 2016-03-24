@@ -19,10 +19,10 @@ $(document).ready(function(){
         $('#toggleThrottle').parent().next().hide();
     }
    if( $("#toggleCors").attr('checked') ) {
-        $('#toggleCors').parent().next().show();
+        $('#corsTable').show();
        } 
       else {
-        $('#toggleCors').parent().next().hide();
+        $('#corsTable').hide();
       }
    if($('#toggleallOrigin').attr('checked')) {
        $('#allowCredentials').attr("checked",false);
@@ -419,12 +419,12 @@ function loadFaultSequences() {
 
 $("#toggleSequence").change(function(e){
     if($(this).is(":checked")){
-        $(this).parent().next().show();
+        $('#seqTable').show();
         loadInSequences();
         loadOutSequences();
         loadFaultSequences();
     }else{
-        $(this).parent().next().hide();
+    	$('#seqTable').hide();
         $('#faultSequence').val('');
         $('#inSequence').val('') ;
         $('#outSequence').val('');
@@ -432,8 +432,18 @@ $("#toggleSequence").change(function(e){
 });
 $("#toggleCors").change(function(e){
     if($(this).is(":checked")){
-        $(this).parent().next().show();
+    	console.log("XXXXXXXX");
+        $(this).parent().parent().parent().next().children().next().children().show();
     }else{
-        $(this).parent().next().hide();
+    	$(this).parent().parent().parent().next().children().next().children().hide();
+    }
+});
+
+$("#toggleCors1").change(function(e){
+    if($(this).is(":checked")){
+    	console.log("XXXXXXXX");
+        $(this).parent().parent().parent().next().children().next().children().show();
+    }else{
+    	$(this).parent().parent().parent().next().children().next().children().hide();
     }
 });

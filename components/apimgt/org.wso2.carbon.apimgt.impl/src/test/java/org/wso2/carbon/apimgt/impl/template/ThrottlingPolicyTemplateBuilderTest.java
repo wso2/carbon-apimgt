@@ -239,30 +239,15 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     }
     
     private GlobalPolicy getPolicyGlobalLevel(){
-        GlobalPolicy policy = new GlobalPolicy("1");
-        
-        //policy.setUserLevel(PolicyConstants.ACROSS_ALL);
+        GlobalPolicy policy = new GlobalPolicy("1");        
+
         policy.setDescription("Description");    
-       // policy.setPolicyLevel("global");
-       
-        List<Pipeline> pipelines = new ArrayList<Pipeline>();
-        Pipeline p = new Pipeline();
-
-        List<Condition> condition;
-       
-       
-        
-
-        condition =  new ArrayList<Condition>();   
-        IPCondition ipcond = new IPCondition();
-        ipcond.setSpecificIP("192.168.1.2");
-        condition.add(ipcond);
-            
-      
-        p.setConditions(condition);
-        pipelines.add(p);
-        
-      //  policy.setPipelines(pipelines);
+        String siddhiQuery = 
+                "FROM RequestStream\n"
+                + "SELECT 'global_1' AS rule, messageID, true AS isEligible, (cast(map:get(propertiesMap,’ip’),’string’) == 3232235778) as isLocallyThrottled,"
+                + " 'global_1_key' AS throttle_key\n"
+                + "INSERT INTO EligibilityStream;";
+        policy.setSiddhiQuery(siddhiQuery); 
       
         return policy;
     }

@@ -16,13 +16,15 @@ var themes = [
         var mod = jagg.module("manager");
         var httpsUrl= mod.getHTTPsURL();
 		var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
+		var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
     var log = new Log();
 
         var currentURL = request.getRequestURI();
         if(request.getQueryString()){
             currentURL += "?" + request.getQueryString();
         }
-
+        var tenant=request_tenant;
+        var urlPrefix = jagg.getTenantURLPrefix();
         
         if (jagg.getUser() != null) {
         	isSuperTenant = jagg.getUser().isSuperTenant;
