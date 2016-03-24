@@ -567,8 +567,11 @@ div.image-container {
 
 
 #throttle-policies-pipeline-content{
-    margin-top:20px;
+    margin:20px 0px;
 }
 #pipeline-content{
     margin-top:20px;
+}
+#pipeline-content .panel-group{
+    margin:0px;
 }

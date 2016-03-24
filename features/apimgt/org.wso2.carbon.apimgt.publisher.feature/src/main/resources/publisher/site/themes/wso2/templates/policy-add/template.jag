@@ -112,7 +112,12 @@
         <div id="pipeline-content"></div>
     </div>
     <div id="add-policy-button">
-        <button type="button" id="addNewAPIButton" name="addNeWThrottleButton" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner"><%=i18n.localize("addThrottlePolicy")%></button>
+        <button type="button" id="addNewAPIButton" name="addNeWThrottleButton" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner">
+            <span class="icon fw-stack">
+                <i class="fw fw-add fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>&nbsp;<%=i18n.localize("addThrottlePolicy")%>
+        </button>
     </div>
 </div>
 
@@ -738,6 +743,63 @@
 
                         </div>
                     </div>
+
+
+                    <div class="no-gutter">
+                        <div class="page-header">
+                            <h2></h2>
+                            <p class="lead">Execution Policy</p>
+                        </div>
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-sm-3" for="policy-type">Policy Type:
+                                    <a class="help_popup" help_data="execution-policy-level-help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="execution-policy-level-help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-9">
+                                    <select class="form-control select required valid" id="execution-policy-level-{{executionFlow.id}}" name="execution-policy-level-{{executionFlow.id}}" onchange="onExecutionFlowTypeChange('{{executionFlow.id}}', this);">
+                                        <option value="requestCount" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}selected{{/if_eq}}{{/if_eq}}>Request Count</option>
+                                        <option value="bandwidthVolume" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}selected{{/if_eq}}>Bandwidth</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}style="display:block"{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}style="display:block"{{else}}style="display:none"{{/if_eq}}{{/if_eq}} id="execution-flow-request-count-block-{{executionFlow.id}}">
+                                <label class="control-label col-sm-3" for="execution-flow-request-count-{{executionFlow.id}}">Request Count:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="execution-flow-name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "seconds"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>Seconds</option>
+                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "minutes"}}selected{{/if_eq}}>Minutes</option>
+                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hours"}}selected{{/if_eq}}>Hours</option>
+                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "days"}}selected{{/if_eq}}>Days</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}style="display:block"{{else}}style="display:none"{{/if_eq}} id="execution-flow-bandwidth-block-{{executionFlow.id}}">
+                                <label class="control-label col-sm-3" for="request-count">Bandwidth:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control required noSpace" id="execution-flow-bandwidth-{{executionFlow.id}}" name="execution-flow-bandwidth-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.dataAmount}}">
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
+                                        <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kbps"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>kbps</option>
+                                        <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "Mbps"}}selected{{/if_eq}}>Mbps</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -747,62 +809,6 @@
 
 
 
-
-<div class="row no-gutter">
-        <div class="page-header">
-            <p class="lead">Execution Policy</p>
-        </div>
-        <div class="form-horizontal">
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="policy-type">Policy Type:
-                    <a class="help_popup" help_data="execution-policy-level-help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                    <p id="execution-policy-level-help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
-                </label>
-                <div class="col-sm-9">
-                    <select class="form-control select required valid" id="execution-policy-level-{{executionFlow.id}}" name="execution-policy-level-{{executionFlow.id}}" onchange="onExecutionFlowTypeChange('{{executionFlow.id}}', this);">
-                        <option value="requestCount" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}selected{{/if_eq}}{{/if_eq}}>Request Count</option>
-                        <option value="bandwidthVolume" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}selected{{/if_eq}}>Bandwidth</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-
-        <label class="control-label" for="level">Policy Type:</label>
-            <div class="controls">
-
-            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="level_help" data-original-title="" title=""></a>
-
-            </div>
-
-                <div class="control-group" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}style="display:block"{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}style="display:block"{{else}}style="display:none"{{/if_eq}}{{/if_eq}} id="execution-flow-request-count-block-{{executionFlow.id}}">
-                    <label class="control-label" for="execution-flow-request-count-{{executionFlow.id}}">Request Count:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
-                        <select class="select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                            <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "seconds"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>Seconds</option>
-                            <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "minutes"}}selected{{/if_eq}}>Minutes</option>
-                            <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hours"}}selected{{/if_eq}}>Hours</option>
-                            <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "days"}}selected{{/if_eq}}>Days</option>
-                        </select>
-
-                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
-                        <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide">Number of requests allowed.</p>
-                    </div>
-                </div>
-                    <div class="control-group" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}style="display:block"{{else}}style="display:none"{{/if_eq}} id="execution-flow-bandwidth-block-{{executionFlow.id}}">
-                        <label class="control-label" for="request-count">Bandwidth:<span class="requiredAstrix">*</span></label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge required noSpace" id="execution-flow-bandwidth-{{executionFlow.id}}" name="execution-flow-bandwidth-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.dataAmount}}">
-                                <select class="select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
-                                    <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kbps"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>kbps</option>
-                                    <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "Mbps"}}selected{{/if_eq}}>Mbps</option>
-                                </select>
-                            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
-                            <p id="name_help-{{executionFlow.id}}" class="hide">Bandwidth Allowed.</p>
-                        </div>
-                    </div>
-</div>
 
 </script>
 
