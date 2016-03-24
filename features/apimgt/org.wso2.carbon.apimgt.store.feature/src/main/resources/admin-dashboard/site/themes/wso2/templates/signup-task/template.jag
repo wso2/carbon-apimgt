@@ -37,40 +37,21 @@ if (tasks != null && tasks!='null'){
     to=0;
     }
 if(tasks.length==0){%>
- <div class="alert alert-info" role="alert">
-     <i class="icon fw fw-warning"></i><strong>Info!</strong>
-        <b><%=i18n.localize("noTasksMsg")%></b>
-     <button type="button" class="close" aria-label="close" data-dismiss="alert">
-       <span aria-hidden="true">
-         <i class="fw fw-cancel"></i>
-       </span>
-    </button>
-</div>  
+<div class="message message-info">
+	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noTasksMsg")%></h4>
+</div>
 <%}
 else{
 %>
 
-            <table id="ajax-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0">
-                <thead>
-                <tr>
-                   <th>ID</th>
-                   <th>Description</th>
-                   <th>Status</th>
-                   <th class="date-time-col">Created On</th>
-                   <th class="manage-col">Action</th>
-                </tr>
-                </thead>
-            </table>
-
-            <br class="spacer">
-            <table class="table table-bordered table-striped">
+            <table id="signup-tasks" class="table table-responsive table-striped">
                 <thead>
                 <tr>
                      <th>ID</th>
                      <th>Description</th>
                      <th>Status</th>
                      <th class="date-time-col">Created On</th>
-                     <th class="manage-col">Action</th>
+                     <th class="manage-col"></th>
                  </tr>
                 </thead>
                 <tbody>
@@ -78,34 +59,51 @@ else{
                 <tr>
                     <td><%=tasks[i].id%></td>
 
-                        <div>
 <td id="desc<%=String(i)%>"><%=tasks[i].presentationSubject%></td>
 <td id="status<%=String(i)%>"><%=tasks[i].status%></td>
 <td><%=tasks[i].createdTime%></td>
- <td>                        <%if((tasks[i].status=="RESERVED")){%>
-                             <button class="btn js_startBtn" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
-                             <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
-                              <option value="APPROVED">Approve</option>
-                              <option value="REJECTED">Reject</option>
-                             </select>
-                             <button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
-                             </td>
+ 			<td class="col-sm-3">                        
+ 				<div class="form-group form-inline">
+ 			<%if((tasks[i].status=="RESERVED")){%>
+ 							 <div class="col-sm-2">
+                             	<button class="btn js_startBtn" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
+                             </div>
+                             <div class="col-sm-6" style="display: none" >
+	                             <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left">
+	                              <option value="APPROVED">Approve</option>
+	                              <option value="REJECTED">Reject</option>
+	                             </select>
+	                         </div>
+	                         <div class="col-sm-4">
+                             	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
+                             </div>
                              <%}else if (tasks[i].status=='COMPLETED'){%>
                              <label>Completed</label>
                              <%}else if(tasks[i].status=='IN_PROGRESS'){%>
-                              <select id="js_stateDropDown<%=String(i)%>" class="js_stateDropDown pull-left" style="margin-right: 6px;">
-                               <option value="APPROVED">Approve</option>
-                               <option value="REJECTED">Reject</option>
-                              </select>
-                              <button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
+                             <div class="col-sm-6">
+	                              <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left">
+	                               <option value="APPROVED">Approve</option>
+	                               <option value="REJECTED">Reject</option>
+	                              </select>
+	                          </div>
+	                          <div class="col-sm-4">
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
+                              </div>
+                              <div class="col-sm-2"></div>
                               <%}else if (tasks[i].status=='READY'){%>
-                              <button class="btn js_assignBtn pull-left" id="js_assignBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Assign To Me</button>
-                              <button class="btn js_startBtn pull-left" id="js_startBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
-                              <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="js_stateDropDown pull-left" style="margin-right: 6px;">
-                              <option value="APPROVED">Approve</option>
-                              <option value="REJECTED">Reject</option>
-                              </select>
-                              <button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
+                              <div class="col-sm-2">
+                              	<button class="btn js_assignBtn pull-left" id="js_assignBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Assign To Me</button>
+                              	<button class="btn js_startBtn pull-left" id="js_startBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Start</button>
+                              	</div>
+                              <div class="col-sm-6">
+	                              <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="form-control js_stateDropDown pull-left" style="margin-right: 6px;">
+		                              <option value="APPROVED">Approve</option>
+		                              <option value="REJECTED">Reject</option>
+	                              </select>
+	                          </div>
+	                          <div class="col-sm-4">
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>">Complete</button>
+                              </div>
                               <%}%>
 </div>
                     </td>
@@ -113,15 +111,9 @@ else{
                 </tbody>
             </table>
             <%}}else{%>
- <div class="alert alert-info" role="alert">
-     <i class="icon fw fw-warning"></i><strong>Info!</strong>
-        <b><%=i18n.localize("noTasksMsg")%></b>
-     <button type="button" class="close" aria-label="close" data-dismiss="alert">
-       <span aria-hidden="true">
-         <i class="fw fw-cancel"></i>
-       </span>
-    </button>
-</div>  
+            	<div class="message message-info">
+					<h4><i class="icon fw fw-info"></i><%=i18n.localize("noTasksMsg")%></h4>
+				</div> 
             <%}%>
             <!--START Pagination links-->
                            <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages,taskType:"signup"}); %>
