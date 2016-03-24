@@ -26,6 +26,8 @@ public class AuthenticationContext {
     private String username;
     private String applicationTier;
     private String tier;
+    private String apiTier;
+    private boolean isContentAware;
     private String apiKey;
     private String keyType;
     private String callerToken;
@@ -34,6 +36,22 @@ public class AuthenticationContext {
     private String consumerKey;
     private String subscriber;
 
+
+    public boolean isContentAware() {
+        return isContentAware;
+    }
+
+    public void setIsContentAware(boolean isContentAware) {
+        this.isContentAware = isContentAware;
+    }
+
+    public String getApiTier() {
+        return apiTier;
+    }
+
+    public void setApiTier(String apiTier) {
+        this.apiTier = apiTier;
+    }
 
     public String getSubscriber() {
         return subscriber;
