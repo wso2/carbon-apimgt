@@ -35,12 +35,11 @@ include("/jagg/jagg.jag");
 	    var appPolicyArray = result.appPolicies;
 
 	    var appPolicyList = [];
-	    for(j = 0; j < appPolicyArray.length; j++) {
-			var appPolicyObj = {};
+	    for(var j = 0; j < appPolicyArray.length; j++) {
 			var appPolicy = appPolicyArray[j];
 		    var policyName = appPolicy.getName();
-            appPolicy.policyName=policyName
-            appPolicyList.push(appPolicyObj);
+            appPolicy.policyName = policyName;
+            appPolicyList.push(appPolicy);
 		}
             if (result.error) {
                 obj = {
