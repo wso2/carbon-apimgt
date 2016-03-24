@@ -3,16 +3,13 @@
 var log = new Log();
 // adding apiPolicy
 var addApiPolicy = function (policy) {
-    var policy = jsonToObject(policy);
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-
-        var apiPolicy = jsonToObject(policy);
-
+        var apiPolicy = jsonToObject(JSON.parse(policy));
+        log.info(JSON.parse(policy));
         apiProvider.addPolicy(apiPolicy);
-        log.info(apiPolicy.toString());
         return {
             error: false
         };
@@ -79,32 +76,33 @@ var jsonToObject = function (policy) {
 
     try {
 
-        var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.APIPolicy;
-        var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.IPCondition;
-        var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.IPRangeCondition;
-        var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.DateCondition;
-        var DateRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.DateRangeCondition;
-        var HeaderCondition = Packages.org.wso2.carbon.apimgt.api.model.HeaderCondition;
-        var HTTPVerbCondition = Packages.org.wso2.carbon.apimgt.api.model.HTTPVerbCondition;
-        var JWTClaimsCondition = Packages.org.wso2.carbon.apimgt.api.model.JWTClaimsCondition;
-        var QueryParameterCondition = Packages.org.wso2.carbon.apimgt.api.model.QueryParameterCondition;
-        var Limit = Packages.org.wso2.carbon.apimgt.api.model.Limit;
-        var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.RequestCountLimit;
-        var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.BandwidthLimit;
-        var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.Pipeline;
-        var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.QuotaPolicy;
-
+        var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+        var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+        var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
+        var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.DateCondition;
+        var DateRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.DateRangeCondition;
+        var HeaderCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+        var HTTPVerbCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
+        var JWTClaimsCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
+        var QueryParameterCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
+        var Limit = Packages.org.wso2.carbon.apimgt.api.model.policy.Limit;
+        var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+        var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+        var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+        var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+        var ArrayList = Packages.java.util.ArrayList;
         // Extracting basic policy info
         var policyName = policy.policyName;
         var policyLevel = policy.policyLevel;
         var policyDescription = policy.policyDescription;
         var i = 0;    //to iterate through execution flows
         var pipeline = policy.executionFlows;
-
         var apiPolicyobj = new APIPolicy(policyName);
+        apiPolicyobj.setUserLevel(policyLevel);
         apiPolicyobj.setDescription(policyDescription);
         //exract pipeline info
         while (pipeline[i]) {
+
             var pipe = new Pipeline();
             var quotaPolicy = new QuotaPolicy();
             var limit = new Limit();
@@ -112,27 +110,32 @@ var jsonToObject = function (policy) {
             var bandwidthLimit = new BandwidthLimit();
             var enabled = pipeline[i].enabled;
             var quotaPolicyType = pipeline[i].quotaPolicy.type;
+
             var requestCount = pipeline[i].quotaPolicy.limit.requestCount;
             var timeUnit = pipeline[i].quotaPolicy.limit.timeUnit;
             var dataAmount = pipeline[i].quotaPolicy.limit.dataAmount;
             var dataUnit = pipeline[i].quotaPolicy.limit.dataUnit;
+
             var id = pipeline[i].id;
+
             var conditionsList = new ArrayList();
+
             pipe.setEnabled(enabled);
+
             quotaPolicy.setType(quotaPolicyType);
-            if (quotaPolicyType == "RequestCount") {
+
+            if (quotaPolicyType == "requestCount") {
                 requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount);
                 requestCountLimit.setTimeUnit(timeUnit);
-                requestCountLimit.setUnitTime();
                 quotaPolicy.setLimit(requestCountLimit);
-            } else if (quotaPolicyType == "Bandwidth") {
+            } else if (quotaPolicyType == "bandwidthVolume") {
                 bandwidthLimit = new BandwidthLimit();
                 bandwidthLimit.setDataAmount(dataAmount);
                 bandwidthLimit.setDataUnit(dataUnit);
                 quotaPolicy.setLimit(bandwidthLimit);
             }
-
+            pipe.setQuotaPolicy(quotaPolicy);
             var j = 0;   //to iterate through conditions
             var condition = pipeline[i].conditions;
             var pipeLines = new ArrayList();
@@ -149,9 +152,11 @@ var jsonToObject = function (policy) {
                     var specificIP = condition[j].specificIP;
                     //check if the IP is specific
                     if (ipType == "specific") {
+
                         var ipSpecific = new IPCondition();
                         ipSpecific.setSpecificIP(specificIP);
                         ipSpecific.setInvertCondition(invertCondition);
+
                         ipSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipSpecific);
                     } else {  //if IP range is given
@@ -162,7 +167,6 @@ var jsonToObject = function (policy) {
                         ipRange.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipRange);
                     }
-
                 } else if (type == "Date") {
                     var dateType = condition[j].dateType;
                     var startingDate = condition[j].startingDate;
@@ -183,23 +187,26 @@ var jsonToObject = function (policy) {
                         dateRange.setConditionEnabled(conditionEnabled);
                         conditionsList.add(dateRange);
                     }
-
                 }
                 else if (type == "JWTClaims") {
                     var jwtClaimsObj = new JWTClaimsCondition();
                     var hasValues = condition[j].hasValues;
                     jwtClaimsObj.setInvertCondition(invertCondition);
-                    jwtClaimsObj.setEnabled(enabled);
+                    jwtClaimsObj.setConditionEnabled(enabled);
                     conditionsList.add(jwtClaimsObj);
-
                 } else if (type == "Header") {
                     var headerObj = new HeaderCondition();
-                    var headerName = condition[j].headerKeyValPairs.headerName;
-                    var headerVal = condition[j].headerKeyValPairs.headerVal;
-                    headerObj.setHeaderName(headerName);
+                    if (condition[j].keyValPairs.name) {
+                        var headerName = condition[j].keyValPairs.name;
+                    }
+                    if (condition[j].keyValPairs.headerVal) {
+                        var headerVal = condition[j].keyValPairs.value;
+                    }
+                    headerObj.setHeader(headerName);
                     headerObj.setValue(headerVal);
                     headerObj.setInvertCondition(invertCondition);
-                    headerObj.setEnabled(enabled);
+                    headerObj.setConditionEnabled(enabled);
+
                     conditionsList.add(headerObj);
 
                 } else if (type == "HTTPVerb") {
@@ -207,29 +214,15 @@ var jsonToObject = function (policy) {
                     var httpVerb = condition[j].httpVerb;
                     httpVerbObj.setHttpVerb(httpVerb);
                     httpVerbObj.setInvertCondition(invertCondition);
-                    httpVerbObj.setEnabled(enabled);
+                    httpVerbObj.setConditionEnabled(enabled);
                     conditionsList.add(httpVerbObj);
-
-                } else if (type == "Context") {
-                    var contextObj = new ContextCondition();
-                    var contextName = condition[j].contextName;
-                    contextObj.setInvertCondition(invertCondition);   //yet to be added to object model
-                    contextObj.setEnabled(enabled);
-                    conditionsList.add(contextObj);
-
                 } else if (type == "QueryParam") {
                     var queryParamObj = new QueryParameterCondition();
                     var hasValues = condition[j].hasValues;
                     queryParamObj.setInvertCondition(invertCondition);
-                    queryParamObj.setEnabled(enabled);
+                    queryParamObj.setConditionEnabled(enabled);
                     conditionsList.add(queryParamObj);
 
-                } else if (type == "Payload") {
-                    var payloadObj = new Payload();
-                    var maxSize = condition[j].maxSize;
-                    payloadObj.setInvertCondition(invertCondition);
-                    payloadObj.setEnabled(enabled);
-                    conditionsList.add(payloadObj);
                 }
                 j++;
             }
@@ -251,14 +244,13 @@ var jsonToObject = function (policy) {
         var defaultTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
         var defaultDataAmount = policy.defaultQuotaPolicy.limit.dataAmount;
         var defaultDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
-        defaultQuotaPolicy.setType(quotaPolicyType);
-        if (defaultQuotaPolicyType == "RequestCount") {
+        defaultQuotaPolicy.setType(defaultQuotaPolicyType);
+        if (defaultQuotaPolicyType == "requestCount") {
             requestCountLimit = new RequestCountLimit();
             requestCountLimit.setRequestCount(defaultRequestCount);
             requestCountLimit.setTimeUnit(defaultTimeUnit);
-            requestCountLimit.setUnitTime();
             defaultQuotaPolicy.setLimit(requestCountLimit);
-        } else if (defaultQuotaPolicyType == "Bandwidth") {
+        } else if (defaultQuotaPolicyType == "bandwidthVolume") {
             bandwidthLimit = new BandwidthLimit();
             bandwidthLimit.setDataAmount(defaultDataAmount);
             bandwidthLimit.setDataUnit(defaultDataUnit);

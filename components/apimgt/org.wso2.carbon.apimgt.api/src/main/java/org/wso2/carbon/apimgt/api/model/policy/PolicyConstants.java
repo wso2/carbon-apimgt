@@ -36,9 +36,9 @@ public class PolicyConstants {
 
     public static final String QUERY_PARAMETER_TYPE = "QueryParameterType";
 
-    public static final String BANDWIDTH_TYPE = "Bandwidth";
+    public static final String BANDWIDTH_TYPE = "bandwidthVolume";
 
-    public static final String REQUEST_COUNT_TYPE = "RequestCount";
+    public static final String REQUEST_COUNT_TYPE = "requestCount";
 
     public static final String DATE_QUERY = "date";
 
