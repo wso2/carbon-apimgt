@@ -50,16 +50,18 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
-var user = jagg.getUser()
+var user = jagg.getUser();
 %>
-<body>
+<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
+<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>>
 
 	
 <!-- header -->
 <header class="header header-default">
 	<div class="container-fluid">
 		<div class="pull-left brand float-remove-xs text-center-xs">
-			<a href="#"> <img
+			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
 				alt="wso2" title="wso2" class="logo">
 				<h1><%=i18n.localize("apiPublisher")%></h1>
