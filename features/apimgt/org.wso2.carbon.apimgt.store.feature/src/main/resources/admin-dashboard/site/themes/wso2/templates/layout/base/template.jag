@@ -9,12 +9,9 @@
     
     var reqUrl = request.getRequestURI();
     
-    var tierManageUrl = jagg.getAbsoluteUrl("/site/pages/tier-manage.jag");
-    var log = new Log();
-    
+    var tierManageUrl = jagg.getAbsoluteUrl("/site/pages/tier-manage.jag");   
     var tierManageMappedUrl = jagg.getMappedUrl("/site/pages/tier-manage.jag");
-    log.info(reqUrl + "----------------" + tierManageMappedUrl);
-    log.info(reqUrl.indexOf(tierManageMappedUrl)>=0);
+
 %>
 
    <!-- #page-content-wrapper -->

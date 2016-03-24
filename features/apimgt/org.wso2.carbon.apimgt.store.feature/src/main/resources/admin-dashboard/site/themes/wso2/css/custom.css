@@ -288,8 +288,8 @@ div.image-container {
 }
 
 .btn,a.btn{
-    background-color: #0E75DC;
-    color: #fff;
+    /*background-color: #0E75DC;
+    color: #fff;*/
 }
 .btn .disabled,a.btn .disabled{
     background-color: #0E75DC;
