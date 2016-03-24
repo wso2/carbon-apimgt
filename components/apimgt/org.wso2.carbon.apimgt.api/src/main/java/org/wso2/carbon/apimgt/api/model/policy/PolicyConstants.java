@@ -50,7 +50,7 @@ public class PolicyConstants {
 
     public static final String CLOSE_BRACKET = ")";
 
-    public static final String INVERT_CONDITION = "!";
+    public static final String INVERT_CONDITION = "NOT";
 
     public static final String EQUAL = "==";
 
@@ -62,9 +62,9 @@ public class PolicyConstants {
     
     public static final String QUOTE = "'";
 
-    public static final String START_QUERY = "cast(map:get(properties,’";
+    public static final String START_QUERY = "cast(map:get(propertiesMap,'";
 
-    public static final String END_QUERY = "’),’string’)";
+    public static final String END_QUERY = "'),'string')";
 
     public static final String PER_USER =  "per user";
 

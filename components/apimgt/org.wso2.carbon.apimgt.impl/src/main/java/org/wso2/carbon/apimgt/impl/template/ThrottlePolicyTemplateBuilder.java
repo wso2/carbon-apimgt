@@ -352,7 +352,7 @@ public class ThrottlePolicyTemplateBuilder {
             i++;
         }
 
-        conditionString = "!(" + conditionString + ")";
+        conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
         return conditionString;
     }
     
