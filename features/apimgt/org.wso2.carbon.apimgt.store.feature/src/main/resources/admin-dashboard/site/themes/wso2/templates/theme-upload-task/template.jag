@@ -10,15 +10,10 @@
     <div class="content-section shadow-up">
         <div class="content-data">
         <% if(outputs.error != false){ %>
-            <div class="alert alert-danger" role="alert">
-                <i class="icon fw fw-error"></i><strong>Error!</strong>
-               <%= outputs.error %>
-                <button type="button" class="close" aria-label="close" data-dismiss="alert">
-                    <span aria-hidden="true">
-                        <i class="fw fw-cancel"></i>
-                    </span>
-                </button>
-            </div> 
+        	 <div class="message message-danger">
+                    <h4><i class="icon fw fw-error"></i>Error!</h4>
+                    <p><%= outputs.error %></p>
+             </div>
         <% } %>
         <% if(outputs.success != false){ %>
            <div class="alert alert-success" role="alert">
@@ -31,15 +26,10 @@
                 </button>
             </div>
        <% }else{ %>
-          <div class="alert alert-info" role="alert">
-             <i class="icon fw fw-warning"></i><strong>Info!</strong>
-               The theme should be a zip file containing css and images which is complient to API Manager theme format
-             <button type="button" class="close" aria-label="close" data-dismiss="alert">
-               <span aria-hidden="true">
-                <i class="fw fw-cancel"></i>
-               </span>
-             </button>
-          </div>  
+       	  <div class="message message-info">
+                    <h4><i class="icon fw fw-success"></i>Info</h4>
+                    <p>The theme should be a zip file containing css and images which is complient to API Manager theme format</p>
+           </div> 
         <% } %>
 
           <form action="#" enctype="multipart/form-data" method="post" class="form-horizontal">          
