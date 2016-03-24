@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
-jagg.block("policy/global", {
+jagg.block("policy/global/edit", {
     initializer:function (data) {},
 
     getInputs:function () {

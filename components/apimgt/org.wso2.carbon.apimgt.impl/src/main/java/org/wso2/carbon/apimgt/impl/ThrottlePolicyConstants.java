@@ -83,4 +83,6 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_HEADER_FIELD_NAME = "HEADER_FIELD_NAME";
 
     public static final String COLUMN_HEADER_FIELD_VALUE = "HEADER_FIELD_VALUE";
+
+    public static final String COLUMN_SIDDHI_QUERY = "SIDDHI_QUERY";
 }

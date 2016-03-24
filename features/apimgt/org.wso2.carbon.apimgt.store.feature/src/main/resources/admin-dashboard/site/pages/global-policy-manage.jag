@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Add Global Level Policy",
+            "title":"Global Level Policy Management",
             "header":{
                 "name":"menu/primary"
             },
@@ -26,7 +26,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"policy/global/edit"
+                            "name":"policy/global/manage"
                         }
                     }
                 }
@@ -38,5 +38,6 @@ i18n.init(request,localeResourcesBasePath);
         }
     });
 }());
+
 
 %>
