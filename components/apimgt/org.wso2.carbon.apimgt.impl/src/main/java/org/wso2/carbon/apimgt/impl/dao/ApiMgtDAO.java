@@ -9222,11 +9222,12 @@ public class ApiMgtDAO {
         policyStatement.setString(3, policy.getDescription());
         policyStatement.setString(4, policy.getDefaultQuotaPolicy().getType());
 
-        if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+        //TOFO use requestCount in same format in all places
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(5, limit.getRequestCount());
             policyStatement.setString(6, null);
-        } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(5, limit.getDataAmount());
             policyStatement.setString(6, limit.getDataUnit());
