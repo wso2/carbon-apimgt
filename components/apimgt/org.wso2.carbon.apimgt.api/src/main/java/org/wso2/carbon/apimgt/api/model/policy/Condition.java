@@ -25,6 +25,15 @@ public abstract class Condition implements Serializable {
     private String type;       //type of each condition: eg:IP, DATE, DATE RANGE etc.
     protected String queryAttributeName;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')
     private boolean invertCondition;     //To check if the condition to be included or excluded
+    private String conditionEnabled;
+
+    public String getConditionEnabled() {
+        return conditionEnabled;
+    }
+
+    public void setConditionEnabled(String conditionEnabled) {
+        this.conditionEnabled = conditionEnabled;
+    }
 
     public String getQueryAttributeName() {
         return queryAttributeName;
