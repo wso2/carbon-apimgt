@@ -3655,7 +3655,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         try {
             for (String policyString : policies) {
-                manager.deployPolicyToGlobalCEP(policyString);
+                if (!(policy instanceof GlobalPolicy)) {    //exclude global level policies deploying to GlobalCEP
+                    manager.deployPolicyToGlobalCEP(policyString);
+                }
                 manager.deployPolicyToGatewayManager(policyString);
             }
         } catch (APIManagementException e) {
@@ -3744,7 +3746,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //undeploy from gateway
             manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
             //undeploy from global cep
-            manager.undeployPolicyFromGlobalCEP(policyFileNames);
+            if (!PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) { //exclude global level policies
+                manager.undeployPolicyFromGlobalCEP(policyFileNames);
+            }
         } catch (Exception e) {
             String msg = "Error while undeploying policy: ";
             log.error(msg, e);
