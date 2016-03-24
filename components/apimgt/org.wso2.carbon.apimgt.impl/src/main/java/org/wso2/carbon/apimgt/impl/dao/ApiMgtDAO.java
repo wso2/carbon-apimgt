@@ -9113,6 +9113,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_APPLICATION_POLICY_SQL);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
@@ -9132,7 +9133,17 @@ public class ApiMgtDAO {
             updateStatement.setString(7, policy.getPolicyName());
             updateStatement.setInt(8, policy.getTenantId());
             updateStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Application Policy: " + policy.toString(), ex);
+                }
+            }
             handleException(
                     "Failed to update application policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
         } finally {
@@ -9159,6 +9170,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
@@ -9180,7 +9192,17 @@ public class ApiMgtDAO {
             updateStatement.setString(9, policy.getPolicyName());
             updateStatement.setInt(10, policy.getTenantId());
             updateStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Subscription Policy: " + policy.toString(), ex);
+                }
+            }
             handleException(
                     "Failed to update subscription policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
         } finally {
