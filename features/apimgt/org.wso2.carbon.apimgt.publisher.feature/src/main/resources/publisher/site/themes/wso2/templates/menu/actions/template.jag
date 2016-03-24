@@ -56,13 +56,16 @@
 						aria-controls="navbar2"> <span class="icon fw-stack"> <i
 							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i>
 					</span>
-					</a> <a class="navbar-menu-toggle collapsed active"
-						data-toggle="sidebar" data-target="#left-sidebar"
-						data-container=".page-content-wrapper" data-container-divide="true"
-						aria-expanded="true" rel="sub-nav"> <span class="icon fw-stack">
-							<i class="fw fw-menu fw-stack-1x toggle-icon-left"></i>
-					</span>
-					</a>
+					
+					</a> 
+					
+<a class="navbar-menu-toggle active" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="true" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+                        </span>
+                        </a>
+					
+					
 				</div>
 				<!-- Actions Bar -->
 				<div id="navbar" class="collapse navbar-collapse">
