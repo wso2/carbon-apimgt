@@ -178,7 +178,7 @@ var jsonToObject = function (policy) {
                         dateSpecific.setInvertCondition(invertCondition);
                         dateSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(dateSpecific);
-                    } else if (dateType == "date range" && conditionEnabled) { //id date range is given
+                    } else if (dateType == "range" && conditionEnabled) { //id date range is given
                         var dateRange = new DateRangeCondition();
                         dateRange.setStartingDate(startingDate);
                         dateRange.setEndingDate(endingDate);
@@ -227,6 +227,8 @@ var jsonToObject = function (policy) {
                         param = condition[j].keyValPairs[k].name;
                         value = condition[j].keyValPairs[k].value;
                         var queryParamObj = new QueryParameterCondition();
+                        queryParamObj.setParameter(param);
+                        queryParamObj.setValue(value);
                         queryParamObj.setInvertCondition(invertCondition);
                         queryParamObj.setConditionEnabled(enabled);
                         conditionsList.add(queryParamObj);
