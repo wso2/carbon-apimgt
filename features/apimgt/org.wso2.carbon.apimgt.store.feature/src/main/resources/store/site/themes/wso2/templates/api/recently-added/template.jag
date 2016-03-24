@@ -1,5 +1,4 @@
 <% jagg.template("api/recently-added", function(inputs, outputs, jagg) { %>
-<% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
 <% 
 
    var theme = jagg.getUserTheme().base;
@@ -10,26 +9,6 @@
 <div id="recently-added" class="panel panel-default">
   <div class="panel-heading"><%=i18n.localize("recentlyAdded")%></div>
   <div class="panel-body">
-         <%
-        var tenant=request_tenant;
-        var urlPrefix = jagg.getTenantURLPrefix("&");
-        var i, api, path, thumbURL, thumbURL1 , apis = outputs.apis, length = 0;
-        if(length>8){length=8;}
-        for(i = 0; i < length; i++) {
-            api = apis[i];
-            thumbURL = api.thumbnailurl;
-            if(thumbURL && thumbURL.indexOf("images/") == 0) {
-                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
-            }else{
-                thumbURL = jagg.getRegistryPath(thumbURL);
-            }
-            var apiProvider = api.provider;
-            if(api.isAdvertiseOnly != null && api.isAdvertiseOnly){
-            	apiProvider = api.owner;
-            }
-            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ urlPrefix;
-
-        %>
   Loading ....
   </div>
   <script id="recently-added-template" type="text/x-handlebars-template">

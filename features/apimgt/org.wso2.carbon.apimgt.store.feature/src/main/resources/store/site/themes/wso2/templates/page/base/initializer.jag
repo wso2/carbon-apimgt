@@ -11,9 +11,7 @@ jagg.initializer("page/base", {
             jaggi.tenant = jagg.getTenantDomain();
         }
 
-         jagg.addHeaderCSS("page/base", "bootstrap3", "libs/bootstrap_3.3.5/css/bootstrap.min.css");
-        jagg.addHeaderCSS("page/base", "wso2-theme", "libs/theme-wso2_1.0/css/theme-wso2.css");
-        	jagg.addHeaderCSS("page/base", "wso2-fonts", "libs/font-wso2_1.0.0/css/font-wso2.min.css");
+        jagg.addHeaderCSS("page/base", "bootstrap3", "lib/bootstrap/css/bootstrap.min.css");
         jagg.addHeaderCSS("page/base", "font-awesome", "lib/font-awesome/css/font-awesome.min.css");
         jagg.addHeaderCSS("page/base", "bootstrap-select-css", "lib/bootstrap-select/css/bootstrap-select.min.css");
         jagg.addHeaderCSS("page/base", "localstyles", "css/localstyles.css");
@@ -32,11 +30,9 @@ jagg.initializer("page/base", {
         jagg.addHeaderJS("page/base", "base", "templates/page/base/js/base.js");
         jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
         jagg.addHeaderJSCode("page/base", "jagg.loggedIn", 'jagg.loggedIn = ' + Boolean(jagg.getUser()) + ';');
-        jagg.addHeaderJS("page/base", "handlebars", "templates/api/swagger/swagger/lib/handlebars-2.0.0.js");
 
         jagg.addFooterJS("page/base", "handlebars", "lib/main.js");
-          jagg.addFooterJS("page/base", "bootstrap3js", "libs/bootstrap_3.3.5/js/bootstrap.min.js");
-  	jagg.addFooterJS("page/base", "wso2js", "libs/theme-wso2_1.0/js/theme-wso2.js");
+        jagg.addFooterJS("page/base", "bootstrap3js", "lib/bootstrap/js/bootstrap.min.js");
         jagg.addFooterJS("page/base", "bootstrap-selectjs", "lib/bootstrap-select/js/bootstrap-select.min.js");
         jagg.addFooterJS("page/base", "jquery.validator", "js/lib/jquery.validate.min.js");
         jagg.addFooterJS("page/base", "jquery.validate.password", "js/lib/jquery.validate.password.js");

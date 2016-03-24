@@ -36,24 +36,7 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/favicon-store.png"))%>">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="bootstrap/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="bootstrap/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]><script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/html5/html5.js"))%>"></script><![endif]-->
-    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/jquery.min.js"))%>"></script>
-    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/i18n/i18next-1.5.9.js"))%>"></script>
-    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/jquery-csrf.js"))%>"></script>
-
-
-    <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/bootstrap/css/bootstrap.css"))%>" />
-    <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/lib/bootstrap/css/bootstrap-responsive.css"))%>" />
-    <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/styles-layout.css"))%>" media="all"/>
-    <link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/styles-application.css"))%>" media="all"/>
-    <!--[if IE 7]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/style-ie7.css"))%>" media="all"/><![endif]-->
-	<!--[if lt IE 9]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/style-ie7-8.css"))%>" media="all"/><![endif]-->
     <%
     var data = jagg.data();
     if(data.header) {
@@ -67,94 +50,17 @@
     </script>
 </head>
 <body>
-<!-- header -->
-    <header class="header header-default">
-        <div class="container-fluid">
-           <div class="pull-left brand float-remove-xs text-center-xs">
-                <a class="logo" href="<%=jagg.urlTenanted("/site/pages/index.jag")%>">API Store</a>
-           </div>
-           <% jagg.includeBlock("user/login", null); %>
 
+<% jagg.includeBlock("menu/primary", {"pagePath":outputs.pagePath,"tenant":tenant}); %>
 
-           <div class="pull-right auth float-remove-xs text-center-xs">
-             <a href="#" class="dropdown" data-toggle="dropdown">
-               <span class="hidden-xs add-padding-left-3x">administrator <span class="caret"></span></span>
-               <span class="icon fw-stack fw-lg">
-                   <i class="fw fw-user fw-stack-1x"></i>
-               </span>
-             </a>
-             <ul class="dropdown-menu float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
-               <li class="dropdown-header visible-xs">administrator <span class="caret"></span></li>
-               <li class="divider visible-xs"></li>
-               <li><a href="#">Sign out</a></li>
-             </ul>
-           </div>
-        </div>
-    </header>
+<% jagg.includeBlocks(outputs.body); %>
 
-    <!-- breadcrumb-->
-    <div class="breadcrumb-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="index.html"><i class="icon fw fw-home"></i> My Apps</a></li>
-        </ol>
-    </div>
-     <!-- #page-content-wrapper -->
-        <div class="page-content-wrapper">
+<% jagg.includeBlock("ui/dialogs", {}); %>
 
-            <!-- media-->
-            <div class="media">
-
-            <!-- media left-->
-            <div class="media-left">
-             <% jagg.includeBlock("menu/primary", {"pagePath":outputs.pagePath,"tenant":tenant}); %>
-
-             <!--need to include tags -->
-             <!-- media body-->
-                     <div class="media-body">
-                         <!-- navbar -->
-                         <div class="navbar-wrapper">
-                             <nav class="navbar navbar-default" data-spy="affix" data-offset-top="85" data-offset-bottom="40">
-                                 <!-- Search-->
-                                 <div class="form-group">
-                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
-                                         <div class="input-group input-wrap search-wrap">
-                                             <div class="input-group-btn">
-                                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Search by <span class="caret"></span></button>
-                                                 <ul class="dropdown-menu">
-                                                   <li><a href="#">Name</a></li>
-                                                   <li><a href="#">Version</a></li>
-                                                   <li><a href="#">Developer</a></li>
-                                                 </ul>
-                                             </div><!-- /btn-group -->
-                                             <input type="text" class="form-control" placeholder="Search for...">
-
-                                             <div class="input-group-btn">
-                                                 <button class="btn btn-default wrap-input-right" type="button" title="Search">
-                                                     <i class="fw fw-search" aria-hidden="true"></i>
-                                                 </button>
-                                             </div>
-                                         </div><!-- /input-group -->
-                                     </div>
-                                 </div>
-                             </nav>
-                         </div>
-
-                         <!-- page content -->
-                         <div class="container-fluid body-wrapper">
-
-
-                         <% jagg.includeBlocks(outputs.body); %>
-
-                         <% jagg.includeBlock("ui/dialogs", {}); %>
-        </div>
-    </div>
-    </div><!-- /#page-content-wrapper -->
-
-        <footer class="footer">
-            <div class="container-fluid">
-                <p>WSO2 API Manager v2.0.0 | &copy; <script>document.write(new Date().getFullYear());</script> <a href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.</p>
-            </div>
-        </footer>
+<footer class="page-footer text-center">                                   
+  &copy; WSO2  2015 All Rights Reserved. | 
+  <a href="http://wso2.com/products/api-manager" target="_blank">API Manager</a>
+</footer>
 
 <%
 if(data.footer) {

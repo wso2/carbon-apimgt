@@ -1,19 +1,18 @@
 <% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
-<% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
 <%  
     var owner="";
     if(outputs.apiBizOwner != null){ owner = outputs.apiBizOwner }
     else if(outputs.apiOwner != null){ owner =outputs.apiOwner }
 
 %>
-<%if(outputs.apiOwner!=null || outputs.apiBizOwner != null){%>
+<%if(outputs.apiOwner!=null){%>
 <div id="recently-added" class="panel panel-default">
   <div class="panel-heading"><%=i18n.localize("moreAPI")%>  '<%= owner %>'</div>
   <div class="panel-body">
     <%
     var urlPrefix;
     var tenant=request_tenant;
-    var urlPrefix = jagg.getTenantURLPrefix("&");
+    urlPrefix = jagg.getTenantURLPrefix("&");
 
     var i, api, path,apis = outputs.apis, thumbURL;
     if(apis!=null && apis.length > 0){

@@ -4,6 +4,8 @@
 
     var i, classes, path, callbackUrl, description, app, apps = outputs.applications;
 
+    var tenant = request_tenant;
+
     var errors = outputs.error;
     if(errors == true){
     %>
@@ -22,7 +24,8 @@
     var itemsPerPage = 20; //reduce this number to preview the pagination
     var page = 1;
     var numberOfPages = parseInt(length / itemsPerPage);
-    var urlPrefix ="";
+
+    var urlPrefix = jagg.getTenantURLPrefix();
 
 
     if (length % itemsPerPage != 0) {
@@ -86,14 +89,15 @@
                 else if(i + 1 == length) classes = "last";
             %>
             <tr class="<%=classes%>" data-value="<%= encode.forHtmlAttribute(app.name)%>" tier-value="<%= encode.forHtml(app.tier)%>" callback-value="<%=  encode.forHtmlAttribute(callbackUrl)%>" description-value="<%=  encode.forHtmlAttribute(description)%>" api-count="<%= encode.forHtml(app.apiCount)%>" >
-                <td class="app_name_cell wrap-text"><%= encode.forHtml(app.name)%></td>
-                 <%
-                    if(app.groupId !="" && app.groupId !=null) {
-                 %>
-                        (Shared)
-                 <%
-                    }
-                 %>
+                <td class="app_name_cell wrap-text"><%= encode.forHtml(app.name)%>
+						<%
+				            if(app.groupId !="" && app.groupId !=null) {
+				        %>
+				                (Shared)
+				        <%
+				            }
+				        %>
+				</td>
                 <td class="app_name_cell">
                     <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" class="applicationTierSelect form-control" disabled="disabled">
                         <%for(j=0; j<tiers.length; j++){%>

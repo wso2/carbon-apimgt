@@ -5,12 +5,11 @@ var version= encode.forUriComponent(request.getParameter("version"));
 var reqUrl = request.getRequestURI();
 var docUrl=jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag");
 var docMappedUrl=jagg.getMappedUrl("/site/pages/doc-viewer.jag");
-var urlPrefix;
-var tenantDomain=jagg.getTenantDomain();
+var tenantDomain = jagg.getTenantDomain();
 if(tenantDomain === null){
     tenantDomain = "carbon.super";
 }
-urlPrefix = jagg.getTenantURLPrefix("&");
+var urlPrefix = jagg.getTenantURLPrefix("&");
 %>
 <div class="api-documentation">
     <%
@@ -46,9 +45,9 @@ urlPrefix = jagg.getTenantURLPrefix("&");
                     <%}%>
                     <%if(doc.sourceUrl&& doc.sourceUrl!=""){
                         %>
-                    <p><a href="<%=doc.sourceUrl%>" class="doc-content" target="_blank">
+                    <p><a href="<%= encode.forHtmlAttribute(doc.sourceUrl)%>" class="doc-content" target="_blank">
                     <% if(doc.sourceType=="URL"){%>
-                     <%=encode.forHtml(doc.sourceUrl)%></a></p>
+                     <%=  encode.forHtml(doc.sourceUrl) %></a></p>
                     <%}else{%>
                     <%=i18n.localize("viewDoc")%></a></p>
                     <%}}else if(doc.filePath && doc.filePath!=""){%>
