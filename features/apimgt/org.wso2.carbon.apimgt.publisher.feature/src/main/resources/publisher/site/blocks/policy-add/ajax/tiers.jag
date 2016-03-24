@@ -41,7 +41,7 @@ if (jagg.isCSRFTokenValid())
             } // adding api policy
             else if (action == "addApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");
-                var apiPolicy = request.getJsonObj();
+                var apiPolicy = request.getParameter("apiPolicy");
                 result = mod.addApiPolicy(apiPolicy);
                 if (result.error) {
                     obj = {
