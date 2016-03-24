@@ -8477,6 +8477,30 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Removes global level throttle policy from the database
+     *
+     * @param name name of the global policy
+     * @param tenantId Id of the tenant to which the policy is applied
+     * @throws APIManagementException
+     */
+    public void removeGlobalThrolttlePolicy(String name, int tenantId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteStatement = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_POLICY_SQL);
+            deleteStatement.setString(1, name);
+            deleteStatement.setInt(2, tenantId);
+            deleteStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to remove global policy " + name + "-" + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
+        }
+    }
+
+    /**
      * Get API level policies. Result only contains basic details of the policy,
      * it doesn't contain pipeline information.
      *
@@ -9159,6 +9183,47 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException(
                     "Failed to update subscription policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+    }
+
+    /**
+     * Updates global throttle policy in database
+     *
+     * @param policy updated policy obejct
+     * @throws APIManagementException
+     */
+    public void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        InputStream siddhiQueryInputStream;
+
+        try {
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
+
+            updateStatement.setString(1, policy.getDescription());
+            updateStatement.setBinaryStream(2, siddhiQueryInputStream);
+            updateStatement.setString(3, policy.getPolicyName());
+            updateStatement.setInt(4, policy.getTenantId());
+            updateStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to update global policy: " + policy.getPolicyName() + "-" + policy.getTenantId(),
+                    e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
