@@ -76,7 +76,7 @@ public class ThrottlingPolicyTest extends TestCase {
         Pipeline p = new Pipeline();
 
         QuotaPolicy quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setType("RequestCount");
+        quotaPolicy.setType("requestCount");
         RequestCountLimit requestCountLimit = new RequestCountLimit();
         requestCountLimit.setTimeUnit("min");
         requestCountLimit.setUnitTime(50);
@@ -215,7 +215,7 @@ public class ThrottlingPolicyTest extends TestCase {
         p = new Pipeline();
 
         quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setType("RequestCount");
+        quotaPolicy.setType("requestCount");
         requestCountLimit = new RequestCountLimit();
         requestCountLimit.setTimeUnit("min");
         requestCountLimit.setUnitTime(50);

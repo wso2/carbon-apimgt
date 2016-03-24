@@ -9184,7 +9184,7 @@ public class ApiMgtDAO {
             policyStatement.setString(6, limit.getDataUnit());
         }
 
-        policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        policyStatement.setLong(7, '1');
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
     }
 
