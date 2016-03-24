@@ -20,14 +20,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.context.CarbonContext;
@@ -61,7 +54,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(requestPublisherDTO);
         try {
 
-            String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+","
+            String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
                              +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
             //Publish Request Data
             dataPublisher.publish( streamID ,
@@ -76,8 +69,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(ResponsePublisherDTO responsePublisherDTO) {
         DataBridgeResponsePublisherDTO dataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(responsePublisherDTO);
         try {
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ","
-                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName() + ":"
+                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
             dataBridgeResponsePublisherDTO.createPayload();
             //Publish Response Data
             dataPublisher.publish(streamID,
@@ -93,8 +86,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
         try {
 
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ","
-                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
+                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
             //Publish Fault Data
             dataPublisher.publish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
@@ -110,8 +103,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                 DataBridgeThrottlePublisherDTO(throttPublisherDTO);
 
         try {
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + "," +
-                              DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
+                              DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
             //Publish Throttle data
             dataPublisher.publish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
@@ -126,13 +119,12 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataBridgeExecutionTimePublisherDTO dataBridgeExecutionTimePublisherDTO = new
                 DataBridgeExecutionTimePublisherDTO(executionTimePublisherDTO);
         try {
-            //Publish Throttle data
-            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName(),
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion(),
-                    System.currentTimeMillis(), new Object[]{"external"}, null,
-                    (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + ":" +
+                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion();
 
-        } catch (AgentException e) {
+            dataPublisher.publish(streamID,System.currentTimeMillis(), new Object[]{"external"}, null,
+                    (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
+        } catch (Exception e) {
             log.error("Error while publishing Execution time events", e);
         }
     }

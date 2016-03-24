@@ -203,7 +203,9 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-
+            APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
+                    .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
+                    .SUPER_TENANT_ID);
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
         } catch (APIManagementException e) {
