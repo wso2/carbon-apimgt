@@ -30,6 +30,7 @@ import org.wso2.carbon.event.throttle.core.ThrottlerService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class is implemented to handle
@@ -130,6 +131,18 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             propertiesMap.put("remoteIp",remoteIP);
             propertiesMap.put("roleID", roleID);
 
+            //this parameter will be used to capture message size and pass it to calculation logic
+            int messageSizeInBytes = 0;
+            if (authContext.isContentAware()) {
+                //this request can match with with bandwidth policy. So we need to get message size.
+                String httpVerb = verbInfoDTO.getHttpVerb();
+                Object obj = ((TreeMap) ((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty("TRANSPORT_HEADERS")).get("Content-Length");
+                if (obj != null) {
+                    messageSizeInBytes = Integer.parseInt(obj.toString());
+                }
+
+            }
+            
             Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
             isThrottled = throttler.isThrottled(objects);
         }
