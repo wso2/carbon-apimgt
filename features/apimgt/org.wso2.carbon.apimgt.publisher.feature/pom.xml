@@ -85,6 +85,21 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>1.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>1.0.17.wso2v1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -133,6 +148,7 @@
                                 <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
+                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-parser:1.0.17.wso2v1</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
