@@ -151,15 +151,14 @@ var jsonToObject = function (policy) {
                     var endingIP = condition[j].endingIP;
                     var specificIP = condition[j].specificIP;
                     //check if the IP is specific
-                    if (ipType == "specific") {
+                    if (ipType == "specific" && conditionEnabled) {
 
                         var ipSpecific = new IPCondition();
                         ipSpecific.setSpecificIP(specificIP);
                         ipSpecific.setInvertCondition(invertCondition);
-
                         ipSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipSpecific);
-                    } else {  //if IP range is given
+                    } else if (ipType = "range" && conditionEnabled) {  //if IP range is given
                         var ipRange = new IPRangeCondition();
                         ipRange.setStartingIP(startingIP);
                         ipRange.setEndingIP(endingIP);
@@ -167,19 +166,19 @@ var jsonToObject = function (policy) {
                         ipRange.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipRange);
                     }
-                } else if (type == "Date") {
+                } else if (type == "Date" & conditionEnabled) {
                     var dateType = condition[j].dateType;
                     var startingDate = condition[j].startingDate;
                     var endingDate = condition[j].endingDate;
                     var specificDate = condition[j].specificDate;
                     //if the date is specific
-                    if (dateType == "specific") {
+                    if (dateType == "specific" && conditionEnabled) {
                         var dateSpecific = new DateCondition();
                         dateSpecific.setSpecificDate(specificDate);
                         dateSpecific.setInvertCondition(invertCondition);
                         dateSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(dateSpecific);
-                    } else { //id date range is given
+                    } else if (dateType == "range" && conditionEnabled) { //id date range is given
                         var dateRange = new DateRangeCondition();
                         dateRange.setStartingDate(startingDate);
                         dateRange.setEndingDate(endingDate);
@@ -188,40 +187,53 @@ var jsonToObject = function (policy) {
                         conditionsList.add(dateRange);
                     }
                 }
-                else if (type == "JWTClaims") {
-                    var jwtClaimsObj = new JWTClaimsCondition();
+                else if (type == "JWTClaims" && conditionEnabled) {
                     var hasValues = condition[j].hasValues;
+                    var jwtClaimsObj = new JWTClaimsCondition();
                     jwtClaimsObj.setInvertCondition(invertCondition);
                     jwtClaimsObj.setConditionEnabled(enabled);
                     conditionsList.add(jwtClaimsObj);
-                } else if (type == "Header") {
-                    var headerObj = new HeaderCondition();
-                    if (condition[j].keyValPairs.name) {
-                        var headerName = condition[j].keyValPairs.name;
+                } else if (type == "Header" && conditionEnabled) {
+                    var headerName;
+                    var headerVal;
+                    var k = 0;
+                    while (condition[j].keyValPairs[k]) {
+                        headerName = condition[j].keyValPairs[k].name;
+                        headerVal = condition[j].keyValPairs[k].value;
+                        var headerObj = new HeaderCondition();
+                        headerObj.setHeader(headerName);
+                        headerObj.setValue(headerVal);
+                        headerObj.setInvertCondition(invertCondition);
+                        headerObj.setConditionEnabled(enabled);
+                        conditionsList.add(headerObj);
+                        k++;
                     }
-                    if (condition[j].keyValPairs.headerVal) {
-                        var headerVal = condition[j].keyValPairs.value;
-                    }
-                    headerObj.setHeader(headerName);
-                    headerObj.setValue(headerVal);
-                    headerObj.setInvertCondition(invertCondition);
-                    headerObj.setConditionEnabled(enabled);
 
-                    conditionsList.add(headerObj);
 
-                } else if (type == "HTTPVerb") {
-                    var httpVerbObj = new HTTPVerbCondition();
+                } else if (type == "HTTPVerb" && conditionEnabled) {
                     var httpVerb = condition[j].httpVerb;
+
+                    var httpVerbObj = new HTTPVerbCondition();
                     httpVerbObj.setHttpVerb(httpVerb);
                     httpVerbObj.setInvertCondition(invertCondition);
                     httpVerbObj.setConditionEnabled(enabled);
                     conditionsList.add(httpVerbObj);
-                } else if (type == "QueryParam") {
-                    var queryParamObj = new QueryParameterCondition();
-                    var hasValues = condition[j].hasValues;
-                    queryParamObj.setInvertCondition(invertCondition);
-                    queryParamObj.setConditionEnabled(enabled);
-                    conditionsList.add(queryParamObj);
+
+                } else if (type == "QueryParam" && conditionEnabled) {
+                    var param;
+                    var value;
+                    var k = 0;
+                    while (condition[j].keyValPairs[k]) {
+                        param = condition[j].keyValPairs[k].name;
+                        value = condition[j].keyValPairs[k].value;
+                        var queryParamObj = new QueryParameterCondition();
+                        queryParamObj.setParameter(param);
+                        queryParamObj.setValue(value);
+                        queryParamObj.setInvertCondition(invertCondition);
+                        queryParamObj.setConditionEnabled(enabled);
+                        conditionsList.add(queryParamObj);
+                        k++;
+                    }
 
                 }
                 j++;
