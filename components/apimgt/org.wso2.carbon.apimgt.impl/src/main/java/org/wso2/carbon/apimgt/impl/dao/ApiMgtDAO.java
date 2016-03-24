@@ -9255,14 +9255,14 @@ public class ApiMgtDAO {
 
         quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
         if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                .equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
             RequestCountLimit reqLimit = new RequestCountLimit();
             reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
             reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
             quotaPolicy.setLimit(reqLimit);
         } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                .equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
             BandwidthLimit bandLimit = new BandwidthLimit();
             bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
             bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
