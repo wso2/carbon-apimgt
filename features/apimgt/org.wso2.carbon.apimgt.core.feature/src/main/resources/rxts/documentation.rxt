@@ -50,7 +50,7 @@
             	       <value>Shared</value>
                   </values>
              </field>
-            <field type="text" required="true" readonly="true">
+            <field type="text" readonly="true">
                 <name>Source URL</name>
             </field>
 	    <field type="text" readonly="true">

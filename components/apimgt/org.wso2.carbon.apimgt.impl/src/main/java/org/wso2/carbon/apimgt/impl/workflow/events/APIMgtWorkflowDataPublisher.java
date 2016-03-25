@@ -26,16 +26,14 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.agent.thrift.lb.DataPublisherHolder;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverGroup;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,8 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class APIMgtWorkflowDataPublisher {
 
     private static final Log log = LogFactory.getLog(APIMgtWorkflowDataPublisher.class);
-    private LoadBalancingDataPublisher dataPublisher;
-    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
+    private DataPublisher dataPublisher;
+    private static Map<String, DataPublisher> dataPublisherMap;
     static APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
             getAPIManagerConfigurationService().
             getAPIManagerConfiguration();
@@ -60,119 +58,60 @@ public class APIMgtWorkflowDataPublisher {
     private static String wfStreamVersion;
 
     public APIMgtWorkflowDataPublisher() {
-        try {
-            if (!enabled) {
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Initializing APIMgtUsageDataBridgeDataPublisher");
-            }
-            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
-            this.dataPublisher = getDataPublisher();
-            wfStreamName =
-                    config.getFirstProperty(APIConstants.API_WF_STREAM_NAME);
-            wfStreamVersion =
-                    config.getFirstProperty(APIConstants.API_WF_STREAM_VERSION);
-            if (wfStreamName == null || wfStreamVersion == null) {
-                log.error("Workflow stream name or version is null. Check api-manager.xml");
-            }
-
-            //If Workflow Stream Definition does not exist.
-            if (!dataPublisher.isStreamDefinitionAdded(wfStreamName,
-                                                       wfStreamVersion)) {
-
-                //Get Workflow Stream Definition
-                String wfStreamDefinition = getStreamDefinition();
-
-                //Add Workflow Stream Definition;
-                dataPublisher.addStreamDefinition(wfStreamDefinition,
-                                                  wfStreamName,
-                                                  wfStreamVersion);
-            }
-        } catch (MalformedURLException e) {
-            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        }catch ( AgentException e) {
-            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        }catch ( AuthenticationException e) {
-            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        }catch ( TransportException  e) {
-            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
+        if (!enabled) {
+            return;
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing APIMgtUsageDataBridgeDataPublisher");
+        }
+
+        wfStreamName = config.getFirstProperty(APIConstants.API_WF_STREAM_NAME);
+        wfStreamVersion = config.getFirstProperty(APIConstants.API_WF_STREAM_VERSION);
+        if (wfStreamName == null || wfStreamVersion == null) {
+            log.error("Workflow stream name or version is null. Check api-manager.xml");
+        }
+
+        dataPublisherMap = new ConcurrentHashMap<String, DataPublisher>();
+        this.dataPublisher = getDataPublisher();
     }
 
-    private static LoadBalancingDataPublisher getDataPublisher()
-            throws AgentException, MalformedURLException, AuthenticationException,
-                   TransportException {
+    private static DataPublisher getDataPublisher() {
 
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
-        //Get LoadBalancingDataPublisher which has been registered for the tenant.
-        LoadBalancingDataPublisher loadBalancingDataPublisher = getDataPublisher(tenantDomain);
+        //Get DataPublisher which has been registered for the tenant.
+        DataPublisher dataPublisher = getDataPublisher(tenantDomain);
         String bamServerURL = analyticsConfig.getBamServerUrlGroups();
         String bamServerUser = analyticsConfig.getBamServerUser();
         String bamServerPassword = analyticsConfig.getBamServerPassword();
 
-        //If a LoadBalancingDataPublisher had not been registered for the tenant.
-        if (loadBalancingDataPublisher == null) {
+        //If a DataPublisher had not been registered for the tenant.
+        if (dataPublisher == null) {
 
-            List<String> receiverGroups = org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil.
-                    getReceiverGroups(bamServerURL);
-
-            List<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
-
-            for (String receiverGroupString : receiverGroups) {
-                String[] serverURLs = receiverGroupString.split(",");
-                List<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
-
-                for (String serverURL : serverURLs) {
-                    DataPublisherHolder dataPublisherHolder =
-                            new DataPublisherHolder(null, serverURL, bamServerUser, bamServerPassword);
-                    dataPublisherHolders.add(dataPublisherHolder);
-                }
-
-                ReceiverGroup receiverGroup = new ReceiverGroup((ArrayList) dataPublisherHolders);
-                allReceiverGroups.add(receiverGroup);
-            }
-
-            //Create new LoadBalancingDataPublisher for the tenant.
-            loadBalancingDataPublisher = new LoadBalancingDataPublisher((ArrayList) allReceiverGroups);
             try {
-                //Add created LoadBalancingDataPublisher.
-                addDataPublisher(tenantDomain, loadBalancingDataPublisher);
+                dataPublisher = new DataPublisher(null,bamServerURL,null,bamServerUser,bamServerPassword);
+
+                //Add created DataPublisher.
+                addDataPublisher(tenantDomain, dataPublisher);
             } catch (DataPublisherAlreadyExistsException e) {
                 log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
                          " when one already exists. Returning existing data publisher");
                 return getDataPublisher(tenantDomain);
+            } catch (DataEndpointConfigurationException e) {
+                log.error("Error while creating data publisher",e);
+            } catch (DataEndpointException e) {
+                log.error("Error while creating data publisher",e);
+            } catch (DataEndpointAgentConfigurationException e) {
+                log.error("Error while creating data publisher",e);
+            } catch (TransportException e) {
+                log.error("Error while creating data publisher",e);
+            } catch (DataEndpointAuthenticationException e) {
+                log.error("Error while creating data publisher",e);
             }
         }
 
-        return loadBalancingDataPublisher;
+        return dataPublisher;
     }
-
-    public static String getStreamDefinition() {
-
-        return "{" +
-               "  'name':'" + getWFStreamName() +
-               "'," +
-               "  'version':'" + getWFStreamVersion() +
-               "'," +
-               "  'nickName': 'API Manager Workflow Data'," +
-               "  'description': 'Workflow Data'," +
-               "  'metaData':[" +
-               "          {'name':'clientType','type':'STRING'}" +
-               "  ]," +
-               "  'payloadData':[" +
-               "          {'name':'workflowReference','type':'STRING'}," +
-               "          {'name':'workflowStatus','type':'STRING'}," +
-               "          {'name':'tenantDomain','type':'STRING'}," +
-               "          {'name':'workflowType','type':'STRING'}," +
-               "          {'name':'createdTime','type':'LONG'}," +
-               "          {'name':'updatedTime','type':'LONG'}" +
-               "  ]" +
-
-               "}";
-    }
-
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {
         try {
@@ -182,13 +121,10 @@ public class APIMgtWorkflowDataPublisher {
 
             if (workflowDTO != null) {
                 try {
-                    //Publish Workflow data
-                    dataPublisher.publish(getWFStreamName(),
-                                          getWFStreamVersion(),
-                                          System.currentTimeMillis(), new Object[]{"external"},
-                                          null,
-                                          (Object[]) createPayload(workflowDTO));
-                } catch (AgentException e) {
+
+                    dataPublisher.publish(getStreamID(), System.currentTimeMillis(), new Object[]{"external"},
+                            null, (Object[]) createPayload(workflowDTO));
+                } catch (Exception e) {
                     log.error("Error while publishing workflow event" +
                               workflowDTO.getWorkflowReference(), e);
                 }
@@ -210,6 +146,10 @@ public class APIMgtWorkflowDataPublisher {
         return wfStreamName;
     }
 
+    public static String getStreamID() {
+        return getWFStreamName() + ":"+ getWFStreamVersion();
+    }
+
     public static String getWFStreamVersion() {
         return wfStreamVersion;
     }
@@ -218,9 +158,9 @@ public class APIMgtWorkflowDataPublisher {
      * Fetch the data publisher which has been registered under the tenant domain.
      *
      * @param tenantDomain - The tenant domain under which the data publisher is registered
-     * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
+     * @return - Instance of the DataPublisher which was registered. Null if not registered.
      */
-    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain) {
+    public static DataPublisher getDataPublisher(String tenantDomain) {
         if (dataPublisherMap.containsKey(tenantDomain)) {
             return dataPublisherMap.get(tenantDomain);
         }
@@ -228,16 +168,16 @@ public class APIMgtWorkflowDataPublisher {
     }
 
     /**
-     * Adds a LoadBalancingDataPublisher to the data publisher map.
+     * Adds a DataPublisher to the data publisher map.
      *
      * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
-     * @param dataPublisher - Instance of the LoadBalancingDataPublisher
+     * @param dataPublisher - Instance of the DataPublisher
      * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
      *          - If a data publisher has already been registered under the
      *          tenant domain
      */
     public static void addDataPublisher(String tenantDomain,
-                                        LoadBalancingDataPublisher dataPublisher)
+                                        DataPublisher dataPublisher)
             throws DataPublisherAlreadyExistsException {
         if (dataPublisherMap.containsKey(tenantDomain)) {
             throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
