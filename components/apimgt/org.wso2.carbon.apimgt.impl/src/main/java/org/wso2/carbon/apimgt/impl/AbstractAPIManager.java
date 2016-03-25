@@ -1103,36 +1103,57 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public Set<Tier> getAllTiers() throws APIManagementException {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
         Map<String, Tier> tierMap;
+
         if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getAllTiers();
         } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getAllTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
+            boolean isTenantFlowStarted = false;
+            try {
+                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                }
+                tierMap = APIUtil.getAllTiers(tenantId);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
         }
-        tiers.addAll(tierMap.values());
 
+        tiers.addAll(tierMap.values());
         return tiers;
     }
 
     @Override
     public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
         Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getAllTiers();
-        } else {
-            tierMap = APIUtil.getAllTiers(requestedTenantId);
+        boolean isTenantFlowStarted = false;
+
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                    || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                tierMap = APIUtil.getAllTiers();
+            } else {
+                tierMap = APIUtil.getAllTiers(requestedTenantId);
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
+
         tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
         return tiers;
     }
 
@@ -1170,7 +1191,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Map<String, Tier> tierMap;
         int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+        if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getTiers();
         } else {
             tierMap = APIUtil.getTiers(requestedTenantId);
