@@ -39,6 +39,9 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.Notification.EmailNotifier;
+import org.wso2.carbon.apimgt.impl.Notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.Notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1844,6 +1847,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
+            }
+
+            try {
+                String isNotificationEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                        ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFICATION_ENABLED);
+
+                if ("true".equalsIgnoreCase(isNotificationEnabled)) {
+                    String notificationClass = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                            ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFIER_CLASS);
+
+                    EmailNotifier email = (EmailNotifier) APIUtil.getClassForName(notificationClass).newInstance();
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, api.getId());
+                    prop.put(NotifierConstants.NEW_API_KEY, newAPI.getId());
+                    email.sendNotifications(new NotificationDTO(prop, NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION));
+                }
+            } catch (APIManagementException e) {
+                log.error(e.getMessage(), e);
             }
 
         } catch (ParseException e) {
