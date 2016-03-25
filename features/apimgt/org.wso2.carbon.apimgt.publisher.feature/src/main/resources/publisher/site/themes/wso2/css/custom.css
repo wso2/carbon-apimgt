@@ -193,6 +193,17 @@ div.image-container {
     text-align: left;
 } 
 
+.default-popover{
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -o-border-radius: 0px;
+    border-radius: 0px;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+
 /* ========================================================================
  * Wizard Component
  * ======================================================================== */
