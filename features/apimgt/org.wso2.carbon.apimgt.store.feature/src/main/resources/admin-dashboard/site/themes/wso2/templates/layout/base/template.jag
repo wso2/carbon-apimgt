@@ -6,10 +6,66 @@
     } else if(!outputs.left || !outputs.right) {
         mw = 10;
     }
+    
+    var reqUrl = request.getRequestURI();
+    
+    var tierManageUrl = jagg.getAbsoluteUrl("/site/pages/tier-manage.jag");   
+    var tierManageMappedUrl = jagg.getMappedUrl("/site/pages/tier-manage.jag");
+
 %>
 
    <!-- #page-content-wrapper -->
     <div class="page-content-wrapper" style="<% if(outputs.left) { %> padding-left: 300px;<%}%>">
+    
+    <%if(jagg.getUser()) { %>
+    	<!-- navbar -->
+	<div class="navbar-wrapper">
+		<nav class="navbar navbar-default" data-spy="affix"
+			data-offset-top="85" data-offset-bottom="40">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-menu-toggle collapsed hidden"
+						data-toggle="collapse" data-target="#navbar2"
+						aria-expanded="false" aria-controls="navbar2"> <span
+						class="icon fw-stack"> <i
+							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i></span>
+
+					</a> <a class="navbar-menu-toggle active" data-toggle="sidebar"
+						data-target="#left-sidebar" data-container=".page-content-wrapper"
+						data-container-divide="true" aria-expanded="true"
+						rel="leftmenu-sidebar"> <span class="icon fw-stack"> <i
+							class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+					</span>
+					</a>
+				</div>
+				<!-- Actions Bar -->
+				<div id="navbar" class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<% if(reqUrl.indexOf(tierManageUrl)>=0 ||reqUrl.indexOf(tierManageMappedUrl)>=0){ %>                        	
+	                      <li>
+	                            <a href="<%= jagg.url('/tier-edit')%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                Add New Tier
+	                            </a>
+	                        </li>
+                        <%} %>
+					</ul>
+				</div>
+			</div>
+
+		</nav>
+	</div>
+	<%} %>
     
     <% if(outputs.left) { %>        
             <% jagg.includeBlocks(outputs.left); %>
@@ -18,12 +74,13 @@
 
 	<!-- page content -->
 	<div class="container-fluid">
-
-		<% jagg.includeBlocks(outputs.top); %>
-		<% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2>
-		<% } %>
-		<% jagg.includeBlocks(outputs.middle); %>
-		<% jagg.includeBlocks(outputs.bottom); %>
+		<div class="body-wrapper">
+			<% jagg.includeBlocks(outputs.top); %>
+			<% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2>
+			<% } %>
+			<% jagg.includeBlocks(outputs.middle); %>
+			<% jagg.includeBlocks(outputs.bottom); %>
+		</div>
 	</div>
 </div>
 <% }); %>

@@ -30,21 +30,18 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.agent.thrift.lb.DataPublisherHolder;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverGroup;
-import org.wso2.carbon.databridge.commons.exception.*;
-
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
+import org.wso2.carbon.databridge.commons.exception.TransportException;
 
 public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
 
     private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
-    private LoadBalancingDataPublisher dataPublisher;
+    private DataPublisher dataPublisher;
 
     public void init(){
         try {
@@ -53,65 +50,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             }
 
             this.dataPublisher = getDataPublisher();
-            
-            if (dataPublisher != null) {
-                //If Request Stream Definition does not exist.
-                if(!dataPublisher.isStreamDefinitionAdded(DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                                getRequestStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                        getRequestStreamVersion())){
-    
-                    //Get Request Stream Definition
-                    String requestStreamDefinition =  DataBridgeRequestPublisherDTO.getStreamDefinition();
-    
-                    //Add Request Stream Definition.
-                    dataPublisher.addStreamDefinition(requestStreamDefinition,
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName(),
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion());
-                }
-    
-                //If Response Stream Definition does not exist.
-                if(!dataPublisher.isStreamDefinitionAdded(DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                                getResponseStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration()
-                        .getResponseStreamVersion())){
-    
-                    //Get Response Stream Definition.
-                    String responseStreamDefinition = DataBridgeResponsePublisherDTO.getStreamDefinition();
-    
-                    //Add Response Stream Definition.
-                    dataPublisher.addStreamDefinition(responseStreamDefinition,
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName(),
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion());
-    
-                }
-    
-                //If Fault Stream Definition does not exist.
-                if(!dataPublisher.isStreamDefinitionAdded(DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                        getFaultStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                        getFaultStreamVersion())){
-    
-                    //Get Fault Stream Definition
-                    String faultStreamDefinition = DataBridgeFaultPublisherDTO.getStreamDefinition();
-    
-                    //Add Fault Stream Definition;
-                    dataPublisher.addStreamDefinition(faultStreamDefinition,
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName(),
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion());
-                }
-    
-                //If Throttle Stream Definition does not exist.
-                if(!dataPublisher.isStreamDefinitionAdded(DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                        getThrottleStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                        getThrottleStreamVersion())){
-    
-                    //Get Throttle Stream Definition
-                    String throttleStreamDefinition = DataBridgeThrottlePublisherDTO.getStreamDefinition();
-    
-                    //Add Throttle Stream Definition;
-                    dataPublisher.addStreamDefinition(throttleStreamDefinition,
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName(),
-                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion());
-                }
-            }
+
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
         }
@@ -120,29 +59,31 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(RequestPublisherDTO requestPublisherDTO) {
         DataBridgeRequestPublisherDTO dataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(requestPublisherDTO);
         try {
+
+            String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
+                             +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
             //Publish Request Data
-            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName(),
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion() ,
+            dataPublisher.publish( streamID ,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeRequestPublisherDTO.createPayload());
-        } catch(AgentException e){
+        } catch(Exception e){
             log.error("Error while publishing Request event", e);
         }
+
     }
 
     public void publishEvent(ResponsePublisherDTO responsePublisherDTO) {
         DataBridgeResponsePublisherDTO dataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(responsePublisherDTO);
         try {
-            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName();
-            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName() + ":"
+                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
             dataBridgeResponsePublisherDTO.createPayload();
             //Publish Response Data
-            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamName(),
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion() ,
-                    System.currentTimeMillis(), new Object[]{"external"}, null,
-                    (Object[]) dataBridgeResponsePublisherDTO.createPayload());
+            dataPublisher.publish(streamID,
+                                  System.currentTimeMillis(), new Object[]{"external"}, null,
+                                  (Object[]) dataBridgeResponsePublisherDTO.createPayload());
 
-        } catch (AgentException e) {
+        } catch (Exception e) {
             log.error("Error while publishing Response event", e);
         }
     }
@@ -150,13 +91,15 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(FaultPublisherDTO faultPublisherDTO) {
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
         try {
-            //Publish Fault Data
-            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName(),
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion() ,
-                    System.currentTimeMillis(), new Object[]{"external"}, null,
-                    (Object[]) dataBridgeFaultPublisherDTO.createPayload());
 
-        } catch (AgentException e) {
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
+                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
+            //Publish Fault Data
+            dataPublisher.publish(streamID,
+                                  System.currentTimeMillis(), new Object[]{"external"}, null,
+                                  (Object[]) dataBridgeFaultPublisherDTO.createPayload());
+
+        } catch (Exception e) {
             log.error("Error while publishing Fault event", e);
         }
     }
@@ -164,65 +107,58 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(ThrottlePublisherDTO throttPublisherDTO) {
         DataBridgeThrottlePublisherDTO dataBridgeThrottlePublisherDTO = new
                 DataBridgeThrottlePublisherDTO(throttPublisherDTO);
+
         try {
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
+                              DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
             //Publish Throttle data
-            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName(),
-                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion(),
+            dataPublisher.publish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
 
-        } catch (AgentException e) {
+        } catch (Exception e) {
             log.error("Error while publishing Throttle exceed event", e);
         }
     }
 
-    private static LoadBalancingDataPublisher getDataPublisher()
-            throws AgentException, MalformedURLException, AuthenticationException,
-                   TransportException {
+    private static DataPublisher getDataPublisher() {
 
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
-        //Get LoadBalancingDataPublisher which has been registered for the tenant.
-        LoadBalancingDataPublisher loadBalancingDataPublisher = UsageComponent.getDataPublisher(tenantDomain);
+        //Get DataPublisher which has been registered for the tenant.
+        DataPublisher dataPublisher = UsageComponent.getDataPublisher(tenantDomain);
 
-        //If a LoadBalancingDataPublisher had not been registered for the tenant.
-        if(loadBalancingDataPublisher == null && 
-                DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups() != null){
-
-            List<String> receiverGroups = org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil.
-                    getReceiverGroups(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups());
+        //If a DataPublisher had not been registered for the tenant.
+        if (dataPublisher == null &&
+            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups() != null) {
 
             String serverUser = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUser();
             String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerPassword();
-            List<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
+            String serverURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups();
 
-            for(String receiverGroupString : receiverGroups){
-                String[] serverURLs = receiverGroupString.split(",");
-                List<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
-
-                for(int i=0; i<serverURLs.length; i++){
-                    String serverURL = serverURLs[i];
-                    DataPublisherHolder dataPublisherHolder =
-                            new DataPublisherHolder(null, serverURL, serverUser, serverPassword);
-                    dataPublisherHolders.add(dataPublisherHolder);
-                }
-
-                ReceiverGroup receiverGroup = new ReceiverGroup((ArrayList)dataPublisherHolders);
-                allReceiverGroups.add(receiverGroup);
-            }
-
-            //Create new LoadBalancingDataPublisher for the tenant.
-            loadBalancingDataPublisher = new LoadBalancingDataPublisher((ArrayList)allReceiverGroups);
             try {
-                //Add created LoadBalancingDataPublisher.
-                UsageComponent.addDataPublisher(tenantDomain, loadBalancingDataPublisher);
+                //Create new DataPublisher for the tenant.
+                dataPublisher = new DataPublisher(null, serverURL, null, serverUser, serverPassword);
+
+                //Add created DataPublisher.
+                UsageComponent.addDataPublisher(tenantDomain, dataPublisher);
             } catch (DataPublisherAlreadyExistsException e) {
                 log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
-                        " when one already exists. Returning existing data publisher");
+                         " when one already exists. Returning existing data publisher");
                 return UsageComponent.getDataPublisher(tenantDomain);
+            } catch (DataEndpointConfigurationException e) {
+                log.error("Error while creating data publisher", e);
+            } catch (DataEndpointException e) {
+                log.error("Error while creating data publisher", e);
+            } catch (DataEndpointAgentConfigurationException e) {
+                log.error("Error while creating data publisher", e);
+            } catch (TransportException e) {
+                log.error("Error while creating data publisher", e);
+            } catch (DataEndpointAuthenticationException e) {
+                log.error("Error while creating data publisher", e);
             }
         }
 
-        return loadBalancingDataPublisher;
+        return dataPublisher;
     }
 }

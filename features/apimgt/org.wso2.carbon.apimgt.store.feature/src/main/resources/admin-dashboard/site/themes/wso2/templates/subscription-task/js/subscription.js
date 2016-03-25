@@ -7,9 +7,9 @@ $(document).ready(function(){
         jagg.post("/site/blocks/task-manager/ajax/task.jag", { action:"startTask",taskId:taskId,taskType:"subscription" },
             function (json) {
                 if (!json.error) {
-                    btn.next().show();
+                	btn.parent().next().show();
                     $('#js_completeBtn'+iteration).show();
-                    btn.hide();
+                    btn.parent().remove();
                     $('#status'+iteration).text("IN_PROGRESS");
                 } else {
                 jagg.showLogin();
@@ -49,13 +49,32 @@ $(document).ready(function(){
                 if (!json.error) {
                     btn.next().show();
                     $('#js_startBtn'+iteration).show();
-                    btn.hide();
+                    btn.remove();
                     $('#status'+iteration).text("RESERVED");
                 } else {
                     jagg.showLogin();
                 }
             }, "json");
     }).removeAttr("disabled","disabled");
+    
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#subscription-tasks').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#subscription-tasks_length option:selected" ).val()
+	     || $("#subscription-tasks option:selected" ).val()==-1)
+	       $('#subscription-tasks_paginate').hide();
+	       else $('#subscription-tasks_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         null,
+         { "bSortable": false }
+         ]
+	});
 
 
 });

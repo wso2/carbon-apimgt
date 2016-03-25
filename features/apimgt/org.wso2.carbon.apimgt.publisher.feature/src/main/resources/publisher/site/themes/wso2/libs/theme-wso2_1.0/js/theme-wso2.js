@@ -839,3 +839,25 @@ $(function() {
     }
 
 });
+
+$('.sidebar-wrapper[data-fixed-offset-top]').on('affix.bs.affix', function() {
+    $(this).css('top', $(this).data('fixed-offset-top'));
+});
+
+$(window).resize(function() {
+    $('.sidebar-wrapper').each(function(){
+        $(this).height($(window).height() - ($(this).offset().top - $(window).scrollTop()));
+    });       
+});
+
+$(window).load(function() {
+    $('.sidebar-wrapper').each(function(){
+        $(this).height($(window).height() - ($(this).offset().top - $(window).scrollTop()));
+    });       
+});
+
+$(window).scroll(function () {
+    $('.sidebar-wrapper').each(function(){
+        $(this).height($(window).height() - ($(this).offset().top - $(window).scrollTop()));
+    }); 
+});
