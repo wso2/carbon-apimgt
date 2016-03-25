@@ -49,7 +49,7 @@ if(tasks!=null && tasks!='null'){
           }
 else{
 %>
-            <table class="table table-responsive table-striped">
+            <table id="appreg-tasks" class="table table-responsive table-striped">
                 <thead>
                  <tr>
                     <th>ID</th>

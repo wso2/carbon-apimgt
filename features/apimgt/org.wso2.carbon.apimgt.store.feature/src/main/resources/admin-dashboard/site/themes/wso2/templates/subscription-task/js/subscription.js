@@ -60,12 +60,12 @@ $(document).ready(function(){
     /***********************************************************
      *  data-tables config
      ***********************************************************/
-	$('#appreg-tasks').datatables_extended({
+	$('#subscription-tasks').datatables_extended({
 	     "fnDrawCallback": function(){
-	       if(this.fnSettings().fnRecordsDisplay()<=$("#appreg-tasks_length option:selected" ).val()
-	     || $("#appreg-tasks option:selected" ).val()==-1)
-	       $('#appreg-tasks_paginate').hide();
-	       else $('#appreg-tasks_paginate').show();
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#subscription-tasks_length option:selected" ).val()
+	     || $("#subscription-tasks option:selected" ).val()==-1)
+	       $('#subscription-tasks_paginate').hide();
+	       else $('#subscription-tasks_paginate').show();
 	     } ,
          "aoColumns": [
          null,

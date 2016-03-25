@@ -45,7 +45,7 @@ if(length==0){%>
 <%}
 else{
 %>
-            <table class="table table-responsive table-striped">
+            <table id="subscription-tasks" class="table table-responsive table-striped">
                 <thead>
                 <tr>
                     <th>ID</th>
