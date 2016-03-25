@@ -53,7 +53,7 @@ var editUrl="info";
 var user = jagg.getUser();
 %>
 <body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
-<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>>
+<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
 
 	
 <!-- header -->
