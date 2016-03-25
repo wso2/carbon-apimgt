@@ -56,6 +56,25 @@ $(document).ready(function(){
                 }
             }, "json");
     }).removeAttr("disabled","disabled");
+    
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#subscription-tasks').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#subscription-tasks_length option:selected" ).val()
+	     || $("#subscription-tasks option:selected" ).val()==-1)
+	       $('#subscription-tasks_paginate').hide();
+	       else $('#subscription-tasks_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         null,
+         { "bSortable": false }
+         ]
+	});
 
 
 });
