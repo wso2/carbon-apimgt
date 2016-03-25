@@ -2405,7 +2405,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             APIMgtUsageQueryServiceClientException {
         StringBuilder query = new StringBuilder("api:" + apiName);
         int aggregateLevel = 0;
-        if (version != null) {
+        if (version != null && !"ALL".equals(version)) {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
         }
         if (tenantDomain != null) {

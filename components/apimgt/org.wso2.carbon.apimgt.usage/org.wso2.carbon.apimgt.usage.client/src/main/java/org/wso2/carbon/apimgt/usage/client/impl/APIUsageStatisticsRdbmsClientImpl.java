@@ -2480,7 +2480,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+            throw new APIMgtUsageQueryServiceClientException("DAS data source hasn't been initialized. Ensure "
                     + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
         List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
@@ -2494,7 +2494,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String tableName = "API_REQUEST_GEO_LOCATION_SUMMARY";
             query.append(tableName).append(" WHERE ");
             query.append("api='" + apiName).append("'");
-            if (version != null) {
+            if (version != null && !"ALL".equals(version)) {
                 query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
                         .append("'");
             }

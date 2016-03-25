@@ -144,7 +144,18 @@
 								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 								<i class="icon fw fw-bar-chart"></i>
 								<%=i18n.localize("faultyInvocations")%></a></li>
-
+							<li <% if(page == "api-latencytime"){ %> class="active" 
+							    <% } %>><a class="substats" 
+							    href="<%=statsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>" 
+							    onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+								<i class="icon fw fw-bar-chart"></i>
+							    <%=i18n.localize("apiLatencyTime")%></a></li>
+                             <li <% if(page == "api-geolocation-usage"){ %>
+                              class="active" <% } %>><a class="substats" 
+                              href="<%=statsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>" 
+                              onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="icon fw fw-bar-chart"></i>
+                              <%=i18n.localize("apiGeoLocationUsage")%></a></li>
 						</ul>
 
 </li>

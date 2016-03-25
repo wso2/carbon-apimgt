@@ -70,24 +70,22 @@ $( document ).ready(function() {
          $(this).removeClass('active');
          }); 
                    //date picker
-        $('#date-range').dateRangePicker(
-          {
-            startOfWeek: 'monday',
-            separator: ' <b>to</b> ',
-            format: 'YYYY-MM-DD',
-            autoClose: false,
-            time: {
-                enabled: true
-                  },
-            shortcuts: 'hide',
-             endDate: currentDay
-          })
-           .bind('datepicker-apply', function (event, obj) {
-                 btnActiveToggle(this);
-                 from = convertDate(obj.date1);
-                 to = convertDate(obj.date2);
-                 renderGraph(from, to);
-                        });
+        $('#date-range').daterangepicker({
+                        timePicker: true,
+                        timePickerIncrement: 30,
+                        format: 'YYYY-MM-DD h:mm',
+                        opens: 'left'
+                    });
+        $('#date-range').on('apply.daterangepicker', function (ev, picker) {
+                        btnActiveToggle(this);
+                        from = convertDate(picker.startDate);
+                        to = convertDate(picker.endDate);
+                        var fromStr = from.split(" ");
+                        var toStr = to.split(" ");
+                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                        $("#date-range span").html(dateStr);
+                        renderGraph(from, to);
+                         });
 });
 var populateAPIList = function(){
            jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
@@ -95,32 +93,40 @@ var populateAPIList = function(){
         if (!json.error) {
               apiNameVersionMap = json.apiNameVersionMap;
                 var i=0;
-                $('#apiSelect').empty();
+               var apis = '';
                 for (var name in apiNameVersionMap) {
                     if (i==0) {
-                    $('#apiSelect').append('<option selected="selected" value'+name+'>' + name + '</option>');
+                    apis += '<option selected="selected" value'+name+'>' + name + '</option>';
                 }else{
-                    $('#apiSelect').append('<option value='+name+'>' + name+ '</option>');
+                    apis+= '<option value='+name+'>' + name+ '</option>';
                 }
                 i++;
             }
-            $('#apiSelect').trigger('change');
-            }
+        $('#apiSelect')
+                    .empty()
+                    .append(apis)
+                    .selectpicker('refresh')                    
+                    .trigger('change');
+                        }
         });
 };
 var populateVersionList = function(apiName,compare){
         var i=0;
-       $('#versionSelect').empty();
+       var selectVersion = '';
         for (var version in apiNameVersionMap[apiName]) {
             var tempVersion = apiNameVersionMap[apiName][version];
                     if (i==0) {
-                    $('#versionSelect').append('<option selected="selected" value'+tempVersion+'>' + tempVersion + '</option>');
+                    selectVersion += '<option selected="selected" value='+tempVersion+'>' + tempVersion + '</option>';
                 }else{
-                    $('#versionSelect').append('<option value='+tempVersion+'>' + tempVersion+ '</option>');
+                    selectVersion +='<option value='+tempVersion+'>' + tempVersion+ '</option>';
                 }
                 i++;
 }
-          $('#versionSelect').trigger('change');
+        $('#versionSelect')
+                    .empty()
+                    .append(selectVersion)
+                    .selectpicker('refresh')                    
+                    .trigger('change');
         };
 
 function isDataPublishingEnabled(){
