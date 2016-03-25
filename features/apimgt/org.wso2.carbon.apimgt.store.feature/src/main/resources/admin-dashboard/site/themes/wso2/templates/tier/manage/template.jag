@@ -5,14 +5,14 @@
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
-    <table class="table table-bordered">
+    <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
                 <th class="userSpecialCell"><%=i18n.localize("tierName")%></th>
                 <th class="appSpecialCell"><%=i18n.localize("requestCount")%></th>
                 <th class="appSpecialCell"><%=i18n.localize("unitTime")%></th>
                 <th class="userSpecialCell"><%=i18n.localize("stopOnQuotaReach")%></th>
-                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
+                <th class="userSpecialCell"></th>
             </tr>
         </thead>
 
@@ -47,15 +47,21 @@
                     <td><%=requestCount%></td>
                     <td><%=unitTime%></td>
                     <td><%=displayStatus%></td>
-                    <td>
-                        <a id="editButton'<%=count%>'" onClick="editTier('<%=tierName%>')">
-                            <i class="icon-edit"></i> 
-                                Edit 
-                        </a>
-                        <a id="deleteButton'<%=count%>'" onclick="deleteTier('<%=tierName%>')">
-                            <i class="icon-trash"></i>
-                            Delete
-                        </a>
+                    <td class="text-right">
+                    	<a href="#" id="editButton'<%=count%>'" onClick="editTier('<%=tierName%>')" class="btn padding-reduce-on-grid-view">
+                                <span class="fw-stack">
+                                    <i class="fw fw-ring fw-stack-2x"></i>
+                                    <i class="fw fw-edit fw-stack-1x"></i>
+                                </span>
+                                <span class="hidden-xs">Edit</span>
+                            </a>                           
+                            <a href="#" id="deleteButton'<%=count%>'" onclick="deleteTier('<%=tierName%>')" class="btn padding-reduce-on-grid-view">
+                                <span class="fw-stack">
+                                    <i class="fw fw-ring fw-stack-2x"></i>
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                </span>
+                                <span class="hidden-xs">Delete</span>
+                            </a>
                     </td>
 
                 </tr>
@@ -65,9 +71,6 @@
     </table>
     </div>
 
-    </div>
-    <div class='form-actions'>
-        <input id="add-tier-btn" type='button' class='btn btn-primary' value='Add New Tier' />
     </div>
 </div>
 

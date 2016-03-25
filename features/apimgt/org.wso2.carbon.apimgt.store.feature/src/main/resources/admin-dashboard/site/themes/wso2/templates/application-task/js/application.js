@@ -7,9 +7,9 @@ $(document).ready(function(){
         jagg.post("/site/blocks/task-manager/ajax/task.jag", { action:"startTask",taskId:taskId,taskType:"application" },
             function (json) {
                 if (!json.error) {
-                    btn.next().show();
+                	btn.parent().next().show();
                     $('#js_completeBtn'+iteration).show();
-                    btn.hide();
+                    btn.parent().remove();
                     $('#status'+iteration).text("IN_PROGRESS");
                 } else {
                     jagg.showLogin();
@@ -49,7 +49,7 @@ $(document).ready(function(){
                 if (!json.error) {
                     btn.next().show();
                     $('#js_startBtn'+iteration).show();
-                    btn.hide();
+                    btn.remove();
                     $('#status'+iteration).text("RESERVED");
                 } else {
                     jagg.showLogin();

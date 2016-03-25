@@ -41,7 +41,6 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
     $(".modal-body").addClass("loadingButton");
     $(".modal-body").css({"margin-left": 25});
     $(".modal-body").html("Sample API is Deploying");
-    $(".modal").css({width: 550});
 
     var _this = this;
     //add the sample api
