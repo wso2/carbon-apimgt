@@ -26,6 +26,7 @@
     var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
     var tierPermissionsUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag");
     var tierPermissionsMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag");
+    var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
 
 	var page = request.getParameter("page");
     	if(page == null ) {
@@ -156,6 +157,11 @@
 						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
 					
 					<%}%>
+
+                                <!-- TODO use correct permission when throttle policy management implement -->
+                            <%if(true){%>
+			                    <li <% if(reqUrl.indexOf(throttlePolicyUrl)>=0||reqUrl.indexOf(throttlePolicyUrl)>=0){%>class="active"<% } %>><a href="<%=throttlePolicyUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=throttlePolicyUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("throttlePolicies")%></a></li>
+		                        <%}%>
 				</ul>
 			</div>
 		</div>

@@ -15,8 +15,10 @@ jagg.module("policy", {
     },
     updateApiPolicy: function () {
         return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").updateApiPolicy.apply(this, arguments);
+    },
+    getAllAPIPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").getAllAPIPolicies.apply(this, arguments);
     }
-
 });
 
 %>
