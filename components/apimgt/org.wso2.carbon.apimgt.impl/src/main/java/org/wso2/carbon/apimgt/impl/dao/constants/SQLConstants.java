@@ -2245,6 +2245,13 @@ public class SQLConstants {
                     "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
+    public static final String UPDATE_GLOBAL_POLICY_SQL =
+            "UPDATE AM_POLICY_GLOBAL " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "SIDDHI_QUERY = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
     public static final String DELETE_API_POLICY_SQL =
             "DELETE FROM AM_POLICY_API WHERE TENANT_ID = ? AND NAME = ?";
 
@@ -2255,5 +2262,5 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
-            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
+            "DELETE FROM AM_POLICY_GLOBAL WHERE NAME = ? AND TENANT_ID = ?";
 }
