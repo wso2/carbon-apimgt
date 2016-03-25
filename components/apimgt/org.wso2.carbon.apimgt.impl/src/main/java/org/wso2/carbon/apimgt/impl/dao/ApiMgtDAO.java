@@ -8209,6 +8209,8 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
+            //When design API policy, unit time is always 1
+            policyStatement.setLong(7, 1);
             policyStatement.setString(9, policy.getUserLevel());
 
             if (policyId != -1) {
@@ -9233,7 +9235,7 @@ public class ApiMgtDAO {
             policyStatement.setString(6, limit.getDataUnit());
         }
 
-        policyStatement.setLong(7, '1');
+        policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
     }
 
