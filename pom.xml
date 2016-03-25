@@ -886,6 +886,12 @@
                 <version>${orbit.version.pdfbox}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>${swagger.codegen.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -980,6 +986,7 @@
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
+        <swagger.codegen.version>2.1.5</swagger.codegen.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
