@@ -93,17 +93,23 @@ function APIDesigner(){
     $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
         $('a.help_popup').popover({
             html : true,
+            container: 'body',
             content: function() {
-                return $('#'+$(this).attr('help_data')).html();
-            }
+              var msg = $('#'+$(this).attr('help_data')).html();
+              return msg;
+            },
+            template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
         });
     });
 
     $('a.help_popup i').popover({
         html : true,
+        container: 'body',
         content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
+          var msg = $('#'+$(this).attr('help_data')).html();
+          return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
     });
 
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
