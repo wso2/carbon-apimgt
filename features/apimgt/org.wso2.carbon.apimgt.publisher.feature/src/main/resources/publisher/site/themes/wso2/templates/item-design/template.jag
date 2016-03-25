@@ -536,7 +536,7 @@
                 <button class="btn btn-secondary" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                 	</span></i>&nbsp;Add</button>
+	                 	</span>&nbsp;Add</button>
             </div>
         </div>        
     </div>
