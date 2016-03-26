@@ -1,4 +1,5 @@
 <% jagg.template("api/listing", function(inputs, outputs, jagg) { %>
+<% jagg.includeBlock("search/api-search"); %>  
 <%
     var tagWiseMode = site.tagWiseMode;
     var tag = request.getParameter("tag");

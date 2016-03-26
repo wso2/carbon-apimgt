@@ -14,14 +14,15 @@
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
-<div class="title-section">
-           <h2><%=i18n.localize("applications")%></h2>
-</div>
-<div class="content-section shadow-up">
-<div class="content-data">
-An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
-        
+
 <br />
+<div class="page-header" id="Message">
+    <h1><%=i18n.localize("applications")%></h1>
+</div>
+<div class="content-section">
+<div class="content-data">
+<p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
+        
 <div class="alert alert-success" id="appAddMessage" style="display:none">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>

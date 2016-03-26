@@ -1,49 +1,3 @@
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.page-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  z-index: 1010;
-  padding-top: 10px;
-  display: none;
-}
-
-.inside-footer{
-  display: block;
-}
-
-
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
-
-body > .container {
-  padding: 60px 15px 0;
-}
-.container .text-muted {
-  margin: 20px 0;
-}
-
-.page-footer > .container {
-  padding-right: 15px;
-  padding-left: 15px;
-}
-
-code {
-  font-size: 80%;
-}
-
 
 /*!
  * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
@@ -189,22 +143,6 @@ code {
         position: relative;
         margin-right: 0;
     }
-}
-
-
-/** Bootstrap overides **/
-.breadcrumb{
-  margin: 0px;
-  padding: 0px;
-  background: #FFF;
-}
-
-.page-header{
-  margin-top: 20px;
-}
-
-.page-header h2{
-  margin-bottom: 0px;
 }
 
 

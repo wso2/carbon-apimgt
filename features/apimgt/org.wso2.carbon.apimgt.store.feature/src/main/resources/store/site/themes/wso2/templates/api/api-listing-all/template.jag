@@ -4,7 +4,7 @@
           var tenant=request_tenant;          
           var urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
-          <div class="alert alert-info">
+          <div class="message message-info">
             <strong><%=outputs.message%></strong>
           </div>
 <% }else{
@@ -308,12 +308,12 @@ var reqUrl = request.getRequestURI();
             <% if(totalLength == 0) {
                          if (request.getParameter("query") == null) {
                     %>
-            <div class="alert alert-info">
+            <div class="message message-info">
                 <strong><%=i18n.localize("noAPIMsg")%></strong>
             </div>
             <%   } else {
                     %>
-            <div class="alert alert-info">
+            <div class="message message-info">
                 <strong><%=i18n.localize("noSearchResultMsg")%></strong>
             </div>
             <%
