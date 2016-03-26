@@ -250,7 +250,8 @@ function btnActiveToggle(button){
 function renderGraph(fromDate,toDate,drillDown){
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
+    if (statsEnabled) {
+        jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
         function (json) {
             if (!json.error) {
             var data1 = {};
@@ -275,10 +276,10 @@ function renderGraph(fromDate,toDate,drillDown){
 
                 }
                 else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkDASConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
-                }
+                  $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                  }
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -288,6 +289,11 @@ function renderGraph(fromDate,toDate,drillDown){
                 }
             }
         }, "json");
+    }else{
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+    }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
    var to = convertTimeString(toDate);

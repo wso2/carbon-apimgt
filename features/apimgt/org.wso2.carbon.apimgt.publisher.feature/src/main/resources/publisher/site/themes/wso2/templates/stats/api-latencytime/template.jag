@@ -1,6 +1,7 @@
 <% jagg.template("stats/api-latencytime", function(inputs, outputs, jagg) { %>
+<div id="api-latencytime-stat-page" class="stat-page">
 
-<div class="title-section"> <h2><%=i18n.localize("apiLatencyTimeTitle")%></h2> </div>
+<div class="page-header"> <h2><%=i18n.localize("apiLatencyTimeTitle")%></h2> </div>
 
 <div class="content-section shadow-up">
 <div class="content-data">

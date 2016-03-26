@@ -1,5 +1,6 @@
 <% jagg.template("stats/api-geolocation-usage", function(inputs, outputs, jagg) { %>
-<div class="title-section"> <h2><%=i18n.localize("apiGeoLocationUsageTitle")%></h2> </div>
+<div id="api-geolocation-usage-stat-page" class="stat-page">
+<div class="page-header"> <h2><%=i18n.localize("apiGeoLocationUsageTitle")%></h2> </div>
 <input id="countryInfo" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/countryInfo.json"))%>">
 <input id="world" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/world.json"))%>">
 <input id="usainfo" type="hidden" value ="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-geolocation-usage/jsonMapFiles/usaInfo.json"))%>">

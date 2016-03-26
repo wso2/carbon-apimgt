@@ -179,6 +179,7 @@ function btnActiveToggle(button){
     $(button).addClass('active');
 }
 function renderGraph(fromDate,toDate){
+  if (statsEnabled) {
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
     var data = [];
@@ -207,10 +208,10 @@ function renderGraph(fromDate,toDate){
 
                 }
                 else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkDASConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
-                }
+                         $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+           }
             }
             else {
                 if (json.message == "AuthenticateError") {
@@ -219,7 +220,12 @@ function renderGraph(fromDate,toDate){
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-        }, "json");
+        }, "json");    
+  }else{
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+  }
 }
 
 function drawGraphInArea(rdata){
