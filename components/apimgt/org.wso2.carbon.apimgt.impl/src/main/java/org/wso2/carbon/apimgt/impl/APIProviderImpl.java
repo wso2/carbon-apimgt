@@ -3755,6 +3755,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
         //remove from database
-        apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
+        apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
     }
 }
