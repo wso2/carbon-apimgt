@@ -171,6 +171,7 @@
 
                     <div class="controls col-sm-8 tierSelect">
                         <select id="apiPolicy" name="apiPolicy"  class="select required form-control">
+                        <option value="none" <%if(api.apiLevelPolicy == null){%> selected="selected" <%}%>><%=i18n.localize("apiPolicyNone")%></option>
                         <%               
                         for (var i = 0; i < apiLevelPolicies.length; i++) {
                             var isSelected = false;

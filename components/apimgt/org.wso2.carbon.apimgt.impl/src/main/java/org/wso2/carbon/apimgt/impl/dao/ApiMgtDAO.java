@@ -842,6 +842,10 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
+                infoDTO.setApiTier(rs.getString("API_POLICY"));
+                
+                //TODO set content aware policy
+ 
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -5792,9 +5796,10 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(6, api.getId().getApiName());
-                prepStmt.setString(7, api.getId().getVersion());
+                prepStmt.setString(5, api.getApiLevelPolicy());
+                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(7, api.getId().getApiName());
+                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
             }
 
