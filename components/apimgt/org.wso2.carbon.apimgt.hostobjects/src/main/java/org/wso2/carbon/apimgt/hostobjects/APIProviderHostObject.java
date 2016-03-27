@@ -466,10 +466,12 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
         }
         
-        if (apiLevelPolicy != null){
-            //TODO change this to single element
-            String[] policyNames = apiLevelPolicy.split(",");
-            api.setApiLevelPolicy(policyNames[0]);
+        if (apiLevelPolicy != null){          
+            if("none".equals(apiLevelPolicy)){
+                api.setApiLevelPolicy(null);
+            } else {
+                api.setApiLevelPolicy(apiLevelPolicy);
+            }
         }
         
         api.setLastUpdated(new Date());
@@ -1877,10 +1879,12 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
         }
         
-        if (apiLevelPolicy != null){
-            //TODO change this to single element
-            String[] policyNames = apiLevelPolicy.split(",");
-            api.setApiLevelPolicy(policyNames[0]);
+        if (apiLevelPolicy != null){          
+            if("none".equals(apiLevelPolicy)){
+                api.setApiLevelPolicy(null);
+            } else {
+                api.setApiLevelPolicy(apiLevelPolicy);
+            }
         }
         
         
