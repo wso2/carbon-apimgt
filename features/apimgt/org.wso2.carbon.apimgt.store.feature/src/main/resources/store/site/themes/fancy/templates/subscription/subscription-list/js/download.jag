@@ -1,0 +1,14 @@
+<%
+    var fileName =request.getParameter("fileName");
+    var process = require('process');
+    var path = process.getProperty('carbon.home');
+    var filePath = "file://"+path+"/resources/swaggerCodegen/"+fileName;
+    new Log().info(filePath+"***************************");
+    var file = new File(filePath);
+    new Log().info(file.isExists());
+    file.open("r");
+    response.contentType = "application/force-download";
+    response.addHeader("Content-Disposition","attachment; filename = \""+fileName+"\"");
+    print(file.getStream());
+
+%>

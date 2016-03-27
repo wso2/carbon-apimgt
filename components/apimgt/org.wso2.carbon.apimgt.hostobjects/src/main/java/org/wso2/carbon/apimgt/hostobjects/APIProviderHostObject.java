@@ -4805,7 +4805,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         for (Map.Entry<String, Path> entry : paths.entrySet()) {
             operation = paths.get(entry.getKey()).getGet();
-            if (operation!= null && operation.getSecurity()== null){
+            if (operation!= null){
                 paths.get(entry.getKey()).getGet().addSecurity(securityName,scopeNames);
             }
 
