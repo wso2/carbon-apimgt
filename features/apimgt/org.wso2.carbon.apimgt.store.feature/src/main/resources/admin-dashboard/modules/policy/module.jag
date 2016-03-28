@@ -5,8 +5,8 @@ jagg.module("policy", {
         return jagg.require(jagg.getModulesDir() + "policy/app-policy-edit.jag").saveAppPolicy.apply(this, arguments);
     },
 
-    addSubscriptionPolicy:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").addSubscriptionPolicy.apply(this, arguments);
+    saveSubscriptionPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").saveSubscriptionPolicy.apply(this, arguments);
     },
 
     deleteAppPolicy:function () {
