@@ -8,8 +8,11 @@ $(document).ready(function() {
 
     $('a.help_popup').popover({
         html : true,
+        container: 'body',
         content: function() {
-          return $('#'+$(this).attr('help_data')).html();
-        }
+          var msg = $('#'+$(this).attr('help_data')).html();
+          return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
     });
 });

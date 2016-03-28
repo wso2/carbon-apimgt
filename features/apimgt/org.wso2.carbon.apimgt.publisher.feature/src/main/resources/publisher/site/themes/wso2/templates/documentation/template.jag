@@ -142,19 +142,22 @@
                                  <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
 		                    </label>
 		                    <div id="fileNameDiv" style="display:none;"></div>
-                            <a onclick="javascript:$('#sourceFile').toggle('slow')" id="toggleFileDoc" style="display:none;">
-                                    Change File
-                                </a>
-                                    <div id="sourceFile" class="controls" style="display:none;">
-                                     <span class="requiredAstrix">*</span> <input type="file" class="required" style="width:98%" name="docLocation" id="docLocation">
-                                     <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
-                            </div>
-                            
+		                    	<button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">Change File</button>
+								<div id="sourceFile" style="display:none;">
+									<div  class="input-group input-wrap file-upload-control">
+										<div class="input-group-btn">
+											<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">
+												<i class="fw fw-file-browse" aria-hidden="true"></i>
+												<span class="hidden-xs">Browse</span>
+											</button>
+										</div>
+										<input type="text" name="docName" id="docName" class="form-control" readonly>
+										<input type="file" name="docLocation" id="docLocation" class="form-control">
+									</div>
+	                                <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
+                                </div>                         
 		                    </li>
 		                    </ul>
-						
-                            
-
 		            </div>
 		        </div>
 		    </div>

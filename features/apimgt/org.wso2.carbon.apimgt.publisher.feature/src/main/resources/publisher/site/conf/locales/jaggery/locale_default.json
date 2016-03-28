@@ -379,5 +379,6 @@
     "demote to prototyped" : "Demote to Prototyped",
     "deprecate" : "Deprecate",
     "re-publish" : "Re-Publish",
-    "retire" : "Retire"
+    "retire" : "Retire",
+    "goToOverView": "Go to Overview"
 }

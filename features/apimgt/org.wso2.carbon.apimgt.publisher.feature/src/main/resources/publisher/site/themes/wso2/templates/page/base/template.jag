@@ -53,7 +53,7 @@ var editUrl="info";
 var user = jagg.getUser();
 %>
 <body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
-<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>>
+<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
 
 	
 <!-- header -->
@@ -68,20 +68,19 @@ var user = jagg.getUser();
 			</a>
 		</div>
 		<%if(user) { %>
-			<div class="pull-right auth float-remove-xs text-center-xs">
+			<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<li class="visible-inline-block">
 				<a href="#" class="dropdown" data-toggle="dropdown"> 
-				<span class="icon fw-stack fw-lg">
-                   <i class="fw fw-circle fw-stack-2x"></i>
-                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-                </span>
-				<span class="hidden-xs">
-						<%if(user!=null){%><%=user.username%>
-						<%}%> <span class="caret"></span>
-				</span> 
+					<span class="icon fw-stack fw-lg">
+	                   <i class="fw fw-circle fw-stack-2x"></i>
+	                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                </span>
+					<span class="hidden-xs">
+							<%if(user!=null){%><%=user.username%>
+							<%}%> <span class="caret"></span>
+					</span> 
 				</a>
-				<ul
-					class="dropdown-menu float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown"
-					role="menu">
+				<ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
 					<li class="dropdown-header visible-xs">
 						<%if(user!=null){%><%=user.username%>
 						<%}%> <span class="caret"></span>
@@ -89,8 +88,9 @@ var user = jagg.getUser();
 					<li class="divider visible-xs"></li>
 					<li><a
 						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
-				</ul>
-			</div>
+				 </ul>
+			</li>
+			</ul>
 		<%} %>
 	</div>
 </header>

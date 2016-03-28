@@ -147,7 +147,7 @@ public class APIMgtWorkflowDataPublisher {
     }
 
     public static String getStreamID() {
-        return getWFStreamName() + ","+ getWFStreamVersion();
+        return getWFStreamName() + ":"+ getWFStreamVersion();
     }
 
     public static String getWFStreamVersion() {

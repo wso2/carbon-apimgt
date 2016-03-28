@@ -182,12 +182,11 @@ public interface APIConsumer extends APIManager {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
-     *@param allowedDomainArray @return
+     * @return
      * @throws APIManagementException
      */
     Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                     String applicationName, String keyType,
-                                                     String[] allowedDomainArray) throws APIManagementException;
+                                                     String applicationName, String keyType) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -473,23 +472,6 @@ public interface APIConsumer extends APIManager {
      */
     boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
-    /**
-     * Add allowed domains for given application which is identified by OAuth consumer key
-     * This will directly add allowed domains in to API Manager database
-     * @param oAuthConsumerKey OAuth consumer key
-     * @return
-     * @throws APIManagementException
-     */
-    void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws APIManagementException;
-
-    /**
-     * Update exiting access allowing domain list
-     * @param accessToken
-     * @param accessAllowDomains
-     * @throws APIManagementException
-     */
-    void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains) throws APIManagementException;
-    
     /**
      * Returns a list of Tiers denied for the current user
      *

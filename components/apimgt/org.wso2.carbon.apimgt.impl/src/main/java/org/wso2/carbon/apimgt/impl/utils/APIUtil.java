@@ -1636,9 +1636,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {           
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1658,9 +1655,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1695,9 +1689,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -1841,16 +1832,22 @@ public final class APIUtil {
      * @param registry     registry to access tiers config
      * @param tierLocation registry location of tiers config
      * @return map containing available tiers
-     * @throws RegistryException      when registry action fails
-     * @throws XMLStreamException     when xml parsing fails
      * @throws APIManagementException when fails to retrieve tier attributes
      */
-    private static Map<String, Tier> getTiers(Registry registry, String tierLocation)
-            throws RegistryException, XMLStreamException, APIManagementException {
-        Map<String, Tier> tiers = getAllTiers(registry, tierLocation);
+    private static Map<String, Tier> getTiers(Registry registry, String tierLocation) throws APIManagementException {
+        Map<String, Tier> tiers = null;
         try {
+            tiers = getAllTiers(registry, tierLocation);
             tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (RegistryException e) {
+            handleException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {
+            handleException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+        } catch (APIManagementException e) {
+            handleException("Unable to get tier attributes", e);
         } catch (Exception e) {
+
+            // generic exception is caught to catch exceptions thrown from map remove method
             handleException("Unable to remove Unauthenticated tier from tiers list", e);
         }
         return tiers;
@@ -2231,24 +2228,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
-    }
-
-
-    /**
-     * Gets the List of Authorized Domains by consumer key.
-     *
-     * @param consumerKey
-     * @return
-     * @throws APIManagementException
-     */
-    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
-            throws APIManagementException {
-        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
-        if (list != null && !list.isEmpty()) {
-            return Arrays.asList(list.split(","));
-        }
-
-        return null;
     }
 
     public static boolean checkAccessTokenPartitioningEnabled() {
@@ -4222,22 +4201,6 @@ public final class APIUtil {
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
         }
-    }
-
-    public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIManagementException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
-        )) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
     }
 
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
