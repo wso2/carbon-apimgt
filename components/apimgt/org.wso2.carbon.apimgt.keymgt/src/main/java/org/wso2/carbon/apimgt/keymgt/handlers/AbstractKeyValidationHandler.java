@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -79,12 +78,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
             state = dao.validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
                     dto.getConsumerKey(), dto);
-            if (state) {
-
-                dto.setAuthorizedDomains(APIUtil
-                        .getListOfAuthorizedDomainsByConsumerKey(validationContext.getTokenInfo().getConsumerKey()));
-                checkClientDomainAuthorized(dto, validationContext.getClientDomain());
-            }
+//            if (state) {
+//                dto.setAuthorizedDomains(APIUtil
+//                        .getListOfAuthorizedDomainsByConsumerKey(validationContext.getTokenInfo().getConsumerKey()));
+//            }
 
 
             if (log.isDebugEnabled()) {
@@ -99,20 +96,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         return state;
     }
 
-    protected void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIKeyMgtException {
-        try {
-            APIUtil.checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
-        } catch (APIManagementException e) {
-            log.error("Error while validating client domain", e);
-        }
-
-    }
-
     /**
      * Determines whether the provided token is an ApplicationToken.
      *
-     * @param tokenInfo
+     * @param tokenInfo - Access Token Information
      */
     protected void setTokenType(AccessTokenInfo tokenInfo) {
 

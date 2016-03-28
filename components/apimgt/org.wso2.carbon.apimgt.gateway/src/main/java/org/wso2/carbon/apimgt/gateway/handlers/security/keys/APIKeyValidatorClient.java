@@ -127,7 +127,7 @@ public class APIKeyValidatorClient {
         dto.setApplicationName(generatedDto.getApplicationName());
         dto.setEndUserName(generatedDto.getEndUserName());
         dto.setConsumerKey(generatedDto.getConsumerKey());
-        dto.setAuthorizedDomains(Arrays.asList(generatedDto.getAuthorizedDomains()));
+        //dto.setAuthorizedDomains(Arrays.asList(generatedDto.getAuthorizedDomains()));
         dto.setValidationStatus(generatedDto.getValidationStatus());
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
