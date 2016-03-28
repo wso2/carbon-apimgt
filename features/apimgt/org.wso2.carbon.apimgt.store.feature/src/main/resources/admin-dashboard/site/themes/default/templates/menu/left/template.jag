@@ -33,7 +33,7 @@
     <li class="nav-header"><%=i18n.localize("settings")%></li>        
         <li <%if (reqUrl.match("themeupload")){%>class="active"<% } %>><a href="<%= jagg.url("/themeupload") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("themeUpload") %></a></li>
-        <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/tier-manage") %>"
+        <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= partWithContext %>/tier-manage"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("tierManagement") %></a></li>
      </ul>
 </div>

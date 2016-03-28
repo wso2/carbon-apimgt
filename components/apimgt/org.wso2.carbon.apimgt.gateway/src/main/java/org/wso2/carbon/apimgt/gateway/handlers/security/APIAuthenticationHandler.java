@@ -16,13 +16,13 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -45,13 +45,13 @@ import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -67,7 +67,6 @@ import java.util.regex.Pattern;
  * information to the request and let it through to the next handler in the chain.
  */
 public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
-
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     private volatile Authenticator authenticator;
@@ -119,13 +118,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
-
+        long executionStartTime = System.currentTimeMillis();
         long startTime = System.nanoTime();
         long endTime;
         long difference;
 
         try {
-            if (APIUtil.isStatsEnabled()) {
+            if (APIUtil.isAnalyticsEnabled()) {
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
@@ -165,16 +164,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
             handleAuthFailure(messageContext, e);
         } finally {
+            publishExecutionTime(messageContext, executionStartTime,"Authentication");
             context.stop();
+
         }
+
         return false;
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        if (APIUtil.isStatsEnabled()) {
-            long currentTime = System.currentTimeMillis();
-            messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
-        }
         return true;
     }
 
@@ -326,6 +324,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
 
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         if (apiPublisher == null) {
             apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);
         }

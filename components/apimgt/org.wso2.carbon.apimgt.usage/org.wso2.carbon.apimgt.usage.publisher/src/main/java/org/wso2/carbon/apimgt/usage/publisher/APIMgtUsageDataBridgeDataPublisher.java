@@ -19,14 +19,8 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.context.CarbonContext;
@@ -120,7 +114,20 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             log.error("Error while publishing Throttle exceed event", e);
         }
     }
+    @Override
+    public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO) {
+        DataBridgeExecutionTimePublisherDTO dataBridgeExecutionTimePublisherDTO = new
+                DataBridgeExecutionTimePublisherDTO(executionTimePublisherDTO);
+        try {
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + ":" +
+                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion();
 
+            dataPublisher.publish(streamID,System.currentTimeMillis(), new Object[]{"external"}, null,
+                    (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
+        } catch (Exception e) {
+            log.error("Error while publishing Execution time events", e);
+        }
+    }
     private static DataPublisher getDataPublisher() {
 
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();

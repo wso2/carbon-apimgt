@@ -1,0 +1,22 @@
+<%
+jagg.initializer("stats/api-geolocation-usage", {
+
+    preInitialize:function () {
+    	jagg.addHeaderJS("stats", "stats", "templates/stats/api-geolocation-usage/js/stats.js");
+    	jagg.addFooterJS("stats", "moment", "lib/datepicker/js/moment.js");
+    	jagg.addHeaderCSS("stats", "datepicker","lib/datepicker/css/daterangepicker-bs3.css");
+        jagg.addFooterJS("stats", "datepicker", "lib/datepicker/js/daterangepicker.js");  
+        jagg.addHeaderJS("stats", "d3min", "templates/utils/maps/d3.min.js");
+    	jagg.addHeaderJS("stats", "topojson", "templates/utils/maps/topojson.js");
+    	jagg.addHeaderJS("stats", "vega", "templates/utils/maps/vega.js");
+    	jagg.addHeaderJS("stats", "VizGrammar", "templates/utils/maps/VizGrammar.min.js");
+     }
+});
+%>
+
+
+
+
+
+
+

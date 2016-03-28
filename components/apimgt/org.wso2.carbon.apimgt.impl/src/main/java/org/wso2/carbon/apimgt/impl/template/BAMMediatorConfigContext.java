@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class BAMMediatorConfigContext extends ConfigContextDecorator {
 
@@ -17,11 +18,7 @@ public class BAMMediatorConfigContext extends ConfigContextDecorator {
 
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
-        APIManagerAnalyticsConfiguration analyticsConfiguration =
-                ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService()
-                        .getAPIAnalyticsConfiguration();
-        boolean enabledStats = analyticsConfiguration.isAnalyticsEnabled();
+        boolean enabledStats = APIUtil.isAnalyticsEnabled();
         if (enabledStats) {
             context.put("statsEnabled", Boolean.TRUE);
         } else {

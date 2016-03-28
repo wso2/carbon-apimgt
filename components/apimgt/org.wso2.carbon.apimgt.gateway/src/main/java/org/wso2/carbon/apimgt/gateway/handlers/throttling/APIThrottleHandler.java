@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;
 import org.apache.axis2.context.ConfigurationContext;
@@ -30,10 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.neethi.PolicyEngine;
-import org.apache.synapse.Mediator;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.SynapseException;
+import org.apache.synapse.*;
 import org.apache.synapse.commons.throttle.core.AccessInformation;
 import org.apache.synapse.commons.throttle.core.AccessRateController;
 import org.apache.synapse.commons.throttle.core.ConcurrentAccessController;
@@ -71,6 +67,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
 
 /**
  * This API handler is responsible for evaluating authenticated user requests against their
@@ -160,9 +158,11 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
+        long executionStartTime = System.currentTimeMillis();
         try {
             return doThrottle(messageContext);
         } finally {
+            publishExecutionTime(messageContext,executionStartTime,"Throttling");
             context.stop();
         }
     }
