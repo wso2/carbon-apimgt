@@ -2230,24 +2230,6 @@ public final class APIUtil {
         return api;
     }
 
-
-    /**
-     * Gets the List of Authorized Domains by consumer key.
-     *
-     * @param consumerKey
-     * @return
-     * @throws APIManagementException
-     */
-    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
-            throws APIManagementException {
-        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
-        if (list != null && !list.isEmpty()) {
-            return Arrays.asList(list.split(","));
-        }
-
-        return null;
-    }
-
     public static boolean checkAccessTokenPartitioningEnabled() {
         return OAuthServerConfiguration.getInstance().isAccessTokenPartitioningEnabled();
     }
@@ -4219,22 +4201,6 @@ public final class APIUtil {
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
         }
-    }
-
-    public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIManagementException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
-        )) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
     }
 
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {

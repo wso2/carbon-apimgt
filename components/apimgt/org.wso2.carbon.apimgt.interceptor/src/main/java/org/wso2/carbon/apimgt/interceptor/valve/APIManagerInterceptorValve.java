@@ -112,7 +112,6 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 				}
                 
             	String apiVersion = APIManagetInterceptorUtils.getAPIVersion(request);
-			   	String domain = request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader());
 				String authLevel = authenticator.getResourceAuthenticationScheme(context,
                                                                apiVersion,
                                                                request.getRequestURI(),
@@ -124,7 +123,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 					return;
 				}
 				else{
-					interceptorOps.doAuthenticate(context, apiVersion, accessToken, authLevel, domain);
+					interceptorOps.doAuthenticate(context, apiVersion, accessToken, authLevel);
 				}
             } catch (APIManagementException e) {
                     //ignore
