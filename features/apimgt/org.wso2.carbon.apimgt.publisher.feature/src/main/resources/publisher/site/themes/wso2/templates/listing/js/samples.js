@@ -27,7 +27,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
     var addAPIData = {action: 'sampleDesign', name: 'CalculatorAPI', provider: username,
         version: '1.0', description: 'Simple calculator API to perform addition, subtraction, ' +
         'multiplication and division.', tags: 'calculator', visibility: 'public', context: 'calc',
-        swagger: this.sample_swagger, apiThumb: '/site/themes/default/images/calculatorAPI.png'};
+        swagger: this.sample_swagger, apiThumb: '/site/themes/wso2/images/calculatorAPI.png'};
 
     jagg.message({
         content:"" ,

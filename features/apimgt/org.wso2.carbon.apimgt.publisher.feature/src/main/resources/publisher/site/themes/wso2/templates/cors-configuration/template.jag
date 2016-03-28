@@ -106,7 +106,6 @@ if(outputs.isCreatePermitted){
                     <script>
                     $('input').on('change', function() {
                          if (validate_AllowCredentials()) {
-                               console.log("adding *");
                                 $(".credentialContailner").hide();
                                 $("#allowCredentials").attr("checked",false);
                              }else{
@@ -167,7 +166,6 @@ if(outputs.isCreatePermitted){
                         var status;
                         for (var origin in origins) {
                             if (origins[origin] == "*") {
-                             console.log("in validate *");
                             return true;
                               break;
                             }

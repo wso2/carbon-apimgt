@@ -14,7 +14,7 @@
     <div class="col-sm-12">
 
         <div id="spinner" class="center-wrapper">
-          <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+          <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
         </div>
 
         <div id="pie-chart">
