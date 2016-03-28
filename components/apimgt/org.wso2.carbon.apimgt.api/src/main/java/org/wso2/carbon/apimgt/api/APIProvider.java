@@ -136,6 +136,19 @@ public interface APIProvider extends APIManager {
 
     void addPolicy(Policy policy) throws APIManagementException;
 
+    /**
+     * Updates throttle policy in global CEP, gateway and database.
+     * <p>
+     * Database transactions and deployements are not rolledback on failiure.
+     * A flag will be inserted into the database whether the operation was
+     * successfull or not.
+     * </p>
+     *
+     * @param policy updated {@link Policy} object
+     * @throws APIManagementException
+     */
+    void updatePolicy(Policy policy) throws APIManagementException;
+
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
