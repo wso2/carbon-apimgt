@@ -793,6 +793,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setApiHeaderChanged(true);
                 }
 
+                if ((oldApi.getApiLevelPolicy() == null && api.getApiLevelPolicy() != null)
+                        || (oldApi.getApiLevelPolicy() != null
+                                && !oldApi.getApiLevelPolicy().equals(api.getApiLevelPolicy()))) {
+                    api.setApiHeaderChanged(true);
+                }
+              
                 int tenantId;
                 String tenantDomain = MultitenantUtils
                         .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -3755,6 +3761,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
         //remove from database
-        apiMgtDAO.removeThrottlingPolicy(policyLevel, policyName, tenantID);
+        apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
     }
 }

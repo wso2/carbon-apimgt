@@ -842,6 +842,14 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
+                infoDTO.setApiTier(rs.getString("API_POLICY"));
+                
+                //TODO set content aware policy
+                //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
+                        rs.getString("API_POLICY"), rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+   
+                infoDTO.setIsContentAware(isContentAware);
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -853,6 +861,58 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
+            String subPolicy) throws APIManagementException {
+        boolean isAnyContentAware = false;
+        
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean isGlobalThrottlingEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        //only check if using CEP based throttling. 
+        if(isGlobalThrottlingEnabled){                 
+          
+            ResultSet resultSet = null;
+            PreparedStatement ps = null;
+            String sqlQuery;
+            if(apiPolicy == null){
+                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
+            } else {
+                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+            }
+            
+            try {
+          
+                ps = conn.prepareStatement(sqlQuery);
+               
+                ps.setInt(1, APIUtil.getTenantId(userName));             
+                ps.setString(2, appPolicy);
+                ps.setString(3, subPolicy);
+                
+                if(apiPolicy != null) {
+                    ps.setString(4, apiPolicy);
+                }
+
+                resultSet = ps.executeQuery();
+                // We only expect one result if all are not content aware.
+                if (resultSet.next()) {
+                    isAnyContentAware = false;
+                } else {
+                    isAnyContentAware = true;
+                }
+            } catch (SQLException e) {
+                handleException("Failed to get content awareness of the policies ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            }
+            
+        }        
+
+        return isAnyContentAware;
+    }
+
+   
 
     private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
             throws APIManagementException {
@@ -5792,9 +5852,10 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(6, api.getId().getApiName());
-                prepStmt.setString(7, api.getId().getVersion());
+                prepStmt.setString(5, api.getApiLevelPolicy());
+                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(7, api.getId().getApiName());
+                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -8129,8 +8190,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(9, policy.getRateLimitCount());
-            policyStatement.setString(10, policy.getRateLimitTimeUnit());
+            policyStatement.setInt(10, policy.getRateLimitCount());
+            policyStatement.setString(11, policy.getRateLimitTimeUnit());
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8211,10 +8272,10 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             //When design API policy, unit time is always 1
             policyStatement.setLong(7, 1);
-            policyStatement.setString(9, policy.getUserLevel());
+            policyStatement.setString(10, policy.getUserLevel());
 
             if (policyId != -1) {
-                policyStatement.setInt(10, policyId);
+                policyStatement.setInt(11, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8447,7 +8508,7 @@ public class ApiMgtDAO {
      * @param tenantId    used to get the tenant id
      * @throws APIManagementException
      */
-    public void removeThrottlingPolicy(String policyLevel, String policyName, int tenantId)
+    public void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement deleteStatement = null;
@@ -8473,6 +8534,30 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to remove policy " + policyName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
+        }
+    }
+
+    /**
+     * Removes global level throttle policy from the database
+     *
+     * @param name name of the global policy
+     * @param tenantId Id of the tenant to which the policy is applied
+     * @throws APIManagementException
+     */
+    public void removeGlobalThrolttlePolicy(String name, int tenantId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteStatement = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_POLICY_SQL);
+            deleteStatement.setString(1, name);
+            deleteStatement.setInt(2, tenantId);
+            deleteStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to remove global policy " + name + "-" + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
@@ -9091,6 +9176,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_APPLICATION_POLICY_SQL);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
@@ -9104,13 +9190,23 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-
+            updateStatement.setBoolean(7, APIUtil.isContentAwarePolicy(policy));
             updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setString(7, policy.getPolicyName());
-            updateStatement.setInt(8, policy.getTenantId());
+            updateStatement.setString(8, policy.getPolicyName());
+            updateStatement.setInt(9, policy.getTenantId());
             updateStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Application Policy: " + policy.toString(), ex);
+                }
+            }
             handleException(
                     "Failed to update application policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
         } finally {
@@ -9137,6 +9233,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
@@ -9150,17 +9247,68 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-
-            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(7, policy.getRateLimitCount());
-            updateStatement.setString(8, policy.getRateLimitTimeUnit());
-            updateStatement.setString(9, policy.getPolicyName());
-            updateStatement.setInt(10, policy.getTenantId());
+            updateStatement.setBoolean(5, APIUtil.isContentAwarePolicy(policy));
+            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(8, policy.getRateLimitCount());
+            updateStatement.setString(9, policy.getRateLimitTimeUnit());
+            updateStatement.setString(10, policy.getPolicyName());
+            updateStatement.setInt(11, policy.getTenantId());
             updateStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Subscription Policy: " + policy.toString(), ex);
+                }
+            }
             handleException(
                     "Failed to update subscription policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+    }
+
+    /**
+     * Updates global throttle policy in database
+     *
+     * @param policy updated policy obejct
+     * @throws APIManagementException
+     */
+    public void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        InputStream siddhiQueryInputStream;
+
+        try {
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
+
+            updateStatement.setString(1, policy.getDescription());
+            updateStatement.setBinaryStream(2, siddhiQueryInputStream);
+            updateStatement.setString(3, policy.getPolicyName());
+            updateStatement.setInt(4, policy.getTenantId());
+            updateStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to update global policy: " + policy.getPolicyName() + "-" + policy.getTenantId(),
+                    e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -9234,8 +9382,8 @@ public class ApiMgtDAO {
             policyStatement.setLong(5, limit.getDataAmount());
             policyStatement.setString(6, limit.getDataUnit());
         }
-
         policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
     }
 

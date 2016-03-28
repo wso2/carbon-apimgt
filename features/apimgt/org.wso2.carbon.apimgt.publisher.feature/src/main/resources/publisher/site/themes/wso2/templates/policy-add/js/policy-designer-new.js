@@ -296,7 +296,7 @@ var addPolicyToBackend = function () {
         executionFlow = apiPolicyNew.executionFlows[i].enabled = true;
         for (var j = 0; j < apiPolicyNew.executionFlows[i].conditions.length; j++) {
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "IP") {
-                checked = $('#ip-condition-checkbox-' + executionFlowId).attr('checked');
+                checked = $('#ip-condition-checkbox-' + executionFlowId).is(':checked')
                 //Ip condition related properties
                 if (checked) {
                     var ipConditionType = $("#ip-condition-type-" + executionFlowId + " option:selected").val();
@@ -323,7 +323,7 @@ var addPolicyToBackend = function () {
 
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "Header") {
                 //Header condition related properties
-                checked = $('#header-condition-checkbox-' + executionFlowId).attr('checked');
+                checked = $('#header-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                     var headerName, headerVal;
@@ -347,7 +347,7 @@ var addPolicyToBackend = function () {
 
             //Date Condition related properties
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "Date") {
-                checked = $('#date-condition-checkbox-' + executionFlowId).attr('checked');
+                checked = $('#date-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     var dateConditionType = $("#date-condition-type-" + executionFlowId + " option:selected").val();
                     if (dateConditionType == 'specificDate') {
@@ -371,7 +371,7 @@ var addPolicyToBackend = function () {
 
             //Query param condition related properties
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "QueryParam") {
-                checked = $('#query-param-condition-checkbox-' + executionFlowId).attr('checked');
+                checked = $('#query-param-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                     var queryParamName, queryParamVal;
@@ -437,7 +437,7 @@ var addPolicyToBackend = function () {
 
                 //Jwt claim condition related properties
                 if (apiPolicyNew.executionFlows[i].conditions[j].type == "JWTClaim") {
-                    checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).attr('checked');
+                    checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).is(':checked');
                     if (checked) {
                         var claimName, claimVal;
                         var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
@@ -469,5 +469,9 @@ var addPolicyToBackend = function () {
             }
         }
         console.log(JSON.stringify(apiPolicyNew));
+        jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+            action: "addApiPolicy",
+            apiPolicy :JSON.stringify(apiPolicyNew),
+        },"json");
     }
 };

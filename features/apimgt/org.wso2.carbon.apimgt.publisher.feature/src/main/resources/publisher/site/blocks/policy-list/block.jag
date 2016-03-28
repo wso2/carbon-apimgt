@@ -5,18 +5,14 @@ jagg.block("policy-list", {
     initializer:function (data) {
 
     },
-    
-    getOutputs:function () {
-        var result, tiers, tierPermissions, mod = jagg.module("tiers");
-        result = mod.getTiers();
-        tiers = result.tiers;
-        
-        result = mod.getTierPermissions();
-        tierPermissions =  result.tierPermissions;
-        
+
+    getOutputs:function (inputs) {
+        var appPolicies, result;
+        result = jagg.module("policy").getAllAPIPolicies();
+        apiPolicies = result.apiPolicies;
+
         return {
-            "tiers":tiers,
-            "tierPermissions":tierPermissions
+            "apiPolicies":apiPolicies
         };
     }
     

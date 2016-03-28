@@ -123,7 +123,7 @@ public class ThrottlingPolicyTest extends TestCase {
     }
 
     public void testDeletePolicy() throws APIManagementException {
-        apiMgtDAO.removeThrottlingPolicy("app", "Bronze", -1234);
+        apiMgtDAO.removeThrottlePolicy("app", "Bronze", -1234);
     }
 
     public void testGetApplicationPolicies() throws APIManagementException {
