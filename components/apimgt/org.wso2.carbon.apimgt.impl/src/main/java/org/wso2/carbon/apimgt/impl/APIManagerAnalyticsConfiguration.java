@@ -61,43 +61,46 @@ public class APIManagerAnalyticsConfiguration {
     }
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
-        String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
-        skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
-                (skipEventReceiverConnStr);
-        publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-        requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
-        requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
-        if (requestStreamName == null || requestStreamVersion == null) {
-            log.error("Request stream name or version is null. Check api-manager.xml");
-        }
-        responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
-        responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
-        if (responseStreamName == null || responseStreamVersion == null) {
-            log.error("Response stream name or version is null. Check api-manager.xml");
-        }
-        faultStreamName = config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
-        faultStreamVersion = config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
-        if (faultStreamName == null || faultStreamVersion == null) {
-            log.error("Fault stream name or version is null. Check api-manager.xml");
-        }
-        throttleStreamName = config.getFirstProperty(APIConstants.API_THROTTLE_STREAM_NAME);
-        throttleStreamVersion = config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
-        if (throttleStreamName == null || throttleStreamVersion == null) {
-            log.error("Throttle stream name or version is null. Check api-manager.xml");
-        }
-
-        bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-        bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-        bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-
-        dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
-        dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
-        dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
         String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
         analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
+        if (analyticsEnabled){
+            String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
+            skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
+                    (skipEventReceiverConnStr);
+            publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
+            requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
+            requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
+            if (requestStreamName == null || requestStreamVersion == null) {
+                log.error("Request stream name or version is null. Check api-manager.xml");
+            }
+            responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
+            responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
+            if (responseStreamName == null || responseStreamVersion == null) {
+                log.error("Response stream name or version is null. Check api-manager.xml");
+            }
+            faultStreamName = config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
+            faultStreamVersion = config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
+            if (faultStreamName == null || faultStreamVersion == null) {
+                log.error("Fault stream name or version is null. Check api-manager.xml");
+            }
+            throttleStreamName = config.getFirstProperty(APIConstants.API_THROTTLE_STREAM_NAME);
+            throttleStreamVersion = config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
+            if (throttleStreamName == null || throttleStreamVersion == null) {
+                log.error("Throttle stream name or version is null. Check api-manager.xml");
+            }
 
-        String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
-        buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
+            bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+            bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+            bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+
+            dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
+            dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
+            dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
+
+
+            String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
+            buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
+        }
     }
 
     public String getBamServerPassword() {
