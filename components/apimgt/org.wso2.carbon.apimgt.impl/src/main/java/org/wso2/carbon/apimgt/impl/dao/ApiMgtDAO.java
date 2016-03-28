@@ -8531,31 +8531,7 @@ public class ApiMgtDAO {
             deleteStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to remove policy " + policyName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
-        }
-    }
-
-    /**
-     * Removes global level throttle policy from the database
-     *
-     * @param name name of the global policy
-     * @param tenantId Id of the tenant to which the policy is applied
-     * @throws APIManagementException
-     */
-    public void removeGlobalThrolttlePolicy(String name, int tenantId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement deleteStatement = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_POLICY_SQL);
-            deleteStatement.setString(1, name);
-            deleteStatement.setInt(2, tenantId);
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to remove global policy " + name + "-" + tenantId, e);
+            handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
