@@ -111,7 +111,6 @@ import java.util.List;
  * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
  * cardinality="1..1" policy="dynamic"  bind="setOutputEventAdapterService"
  * unbind="unsetOutputEventAdapterService"
- * bind="setIndexLoader" unbind="unsetIndexLoader"
  * @scr.reference name="throttle.event.core.service"
  * interface="org.wso2.carbon.event.throttle.core.ThrottlerService" cardinality="1..1"
  * policy="dynamic" bind="setThrottlerService" unbind="unsetThrottlerService"
