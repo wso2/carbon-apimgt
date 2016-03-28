@@ -842,12 +842,10 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
-                infoDTO.setApiTier(rs.getString("API_POLICY"));
-                
-                //TODO set content aware policy
+
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                 boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
-                        rs.getString("API_POLICY"), rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                        null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
    
                 infoDTO.setIsContentAware(isContentAware);
                 return true;
@@ -5852,10 +5850,9 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, api.getApiLevelPolicy());
-                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(7, api.getId().getApiName());
-                prepStmt.setString(8, api.getId().getVersion());
+                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(6, api.getId().getApiName());
+                prepStmt.setString(7, api.getId().getVersion());
                 prepStmt.execute();
             }
 
