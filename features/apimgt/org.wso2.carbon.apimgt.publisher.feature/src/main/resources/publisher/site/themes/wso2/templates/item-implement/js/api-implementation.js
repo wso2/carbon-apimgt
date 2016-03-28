@@ -18,20 +18,20 @@ $(document).ready(function(){
     } else {
         $('#toggleThrottle').parent().next().hide();
     }
-   if( $("#toggleCors").attr('checked') ) {
-        $('#corsTable').show();
+   if( $("#toggleCorsManaged").attr('checked') ) {
+        $('#corsTableManaged').show();
        } 
       else {
-        $('#corsTable').hide();
+        $('#corsTableManaged').hide();
       }
-   if($('#toggleallOrigin').attr('checked')) {
-       $('#allowCredentials').attr("checked",false);
-       $('#allowCredentials').hide();
-       $('.originContainer').hide();
+   if($('#toggleallOriginManaged').attr('checked')) {
+       $('#allowCredentialsManaged').attr("checked",false);
+       $('#allowCredentialsManaged').hide();
+       $('.originContainerManaged').hide();
       } else {
-        $('#allowCredentials').show();
-        $('#allOriginContainer').hide();
-        $('.originContainer').show();
+        $('#allowCredentialsManaged').show();
+        $('#allOriginContainerManaged').hide();
+        $('.originContainerManaged').show();
         } 
  
      $('#endpointType').on('change',function() {
@@ -430,7 +430,7 @@ $("#toggleSequence").change(function(e){
         $('#outSequence').val('');
     }
 });
-$("#toggleCors").change(function(e){
+$("#toggleCorsManaged").change(function(e){
     if($(this).is(":checked")){
     	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
