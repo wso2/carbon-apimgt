@@ -14,14 +14,13 @@ include("/jagg/jagg.jag");
             message:'timeout'
         });
     } else if (request.getMethod() == 'POST') {
-        if (action == "addGlobalPolicy" ) {
+        if (action == "add" || action == "update") {
             var policyName =  request.getParameter("policyName", "UTF-8");
             var description =  request.getParameter("description", "UTF-8");
             var siddhiQuery =  request.getParameter("siddhiQuery", "UTF-8");
 
             mod = jagg.module("policy");
-
-            result = mod.addGlobalPolicy(policyName, description, siddhiQuery);
+            result = mod.saveGlobalPolicy(action, policyName, description, siddhiQuery);
             if (result.error) {
                 obj = {
                     error:true,

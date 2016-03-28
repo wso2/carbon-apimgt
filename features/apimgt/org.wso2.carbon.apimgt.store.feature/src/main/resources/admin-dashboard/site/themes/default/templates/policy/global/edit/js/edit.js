@@ -1,10 +1,11 @@
-var addGlobalPolicy = function () {
+var saveGlobalPolicy = function () {
     if(!validateInputs()){
         return;
     }
 
+    var action = isNewPolicy ? "add" : "update";
     jagg.post("/site/blocks/policy/global/edit/ajax/global-policy-edit.jag", {
-            action:"addGlobalPolicy",
+            action: action,
             policyName:$('#policyName').val(),
             description:$('#description').val().trim(),
             siddhiQuery:$('#siddhiQuery').val()

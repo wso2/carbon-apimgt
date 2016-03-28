@@ -2267,7 +2267,7 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
-            "DELETE FROM AM_POLICY_GLOBAL WHERE NAME = ? AND TENANT_ID = ?";
+            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = 
             "SELECT APIPOLICY.TENANT_ID " +
