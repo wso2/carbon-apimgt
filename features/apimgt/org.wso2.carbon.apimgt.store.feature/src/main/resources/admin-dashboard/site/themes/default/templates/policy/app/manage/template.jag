@@ -28,7 +28,7 @@
         if (defaultQuotaPolicy == "RequestCount"){
             var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
             var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+appPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
 
