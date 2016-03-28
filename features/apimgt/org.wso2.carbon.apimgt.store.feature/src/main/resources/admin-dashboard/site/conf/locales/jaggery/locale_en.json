@@ -12,6 +12,8 @@
     "appCreation": "Application Creation",
     "appRegistration": "Application Registration",
     "themeupload":"Upload Tenant Theme",
+    "manageTier": "Manage Tiers",
+    "addTier": "Add New Tier",
 
     "username": "Username",
     "password": "Password",

@@ -137,6 +137,17 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+
+        <repository>
+            <id>wso2-staging</id>
+            <name>WSO2 staging Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/orgwso2carbonmediation-401/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -177,6 +188,13 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
@@ -839,6 +857,18 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.um.ws.api.stub</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.uri.template</groupId>
                 <artifactId>wso2-uri-templates</artifactId>
                 <version>${wso2-uri-templates.version}</version>
@@ -856,6 +886,12 @@
                 <version>${orbit.version.pdfbox}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>${swagger.codegen.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -866,16 +902,17 @@
         <carbon.apimgt.version>6.0.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
+        <carbon.analytics.common.version>5.0.9</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.3</carbon.kernel.version>
+        <carbon.kernel.version>4.4.4</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.4.8</carbon.commons.version>
-        <carbon.registry.version>4.4.8</carbon.registry.version>
-        <carbon.mediation.version>4.6.1-ALPHA</carbon.mediation.version>
-        <carbon.identity.version>5.0.7</carbon.identity.version>
-        <carbon.governance.version>4.5.8</carbon.governance.version>
-        <carbon.multitenancy.version>4.5.0</carbon.multitenancy.version>
+        <carbon.commons.version>4.5.2</carbon.commons.version>
+        <carbon.registry.version>4.5.3-SNAPSHOT</carbon.registry.version>
+        <carbon.mediation.version>4.6.1-BETA</carbon.mediation.version>
+        <carbon.identity.version>5.0.8</carbon.identity.version>
+        <carbon.governance.version>4.6.2-SNAPSHOT</carbon.governance.version>
+        <carbon.multitenancy.version>4.5.1</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
 
@@ -884,8 +921,8 @@
         <carbon.identity.imp.pkg.version>[5.0.0, 6.0.0)</carbon.identity.imp.pkg.version>
         <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.5.8, 4.6.0)</carbon.governance.imp.pkg.version>
+        <carbon.registry.package.import.version.range>[4.4.0, 4.6.0)</carbon.registry.package.import.version.range>
         <carbon.databridge.imp.pkg.version>[4.4.1, 4.5.0)</carbon.databridge.imp.pkg.version>
-        <carbon.registry.package.import.version.range>[4.4.0, 4.5.0)</carbon.registry.package.import.version.range>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.import.version.range>[4.4.1, 4.5.0)</carbon.platform.package.import.version.range>
@@ -899,16 +936,16 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v14</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v17</axis2.wso2.version>
         <orbit.version.axis2>1.6.1.wso2v14</orbit.version.axis2>
         <axis2.osgi.version.range>[1.6.1.wso2v11, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
-        <orbit.version.axiom>1.2.11.wso2v6</orbit.version.axiom>
-        <axiom.wso2.version>1.2.11.wso2v6</axiom.wso2.version>
-        <exp.pkg.version.axiom>1.2.11.wso2v6</exp.pkg.version.axiom>
-        <imp.pkg.version.axiom>[1.2.11.wso2v6, 1.3.0)</imp.pkg.version.axiom>
-        <axiom.osgi.version.range>[1.2.11.wso2v6, 1.3.0)</axiom.osgi.version.range>
+        <orbit.version.axiom>1.2.11.wso2v10</orbit.version.axiom>
+        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
+        <exp.pkg.version.axiom>1.2.11.wso2v10</exp.pkg.version.axiom>
+        <imp.pkg.version.axiom>[1.2.11.wso2v10, 1.3.0)</imp.pkg.version.axiom>
+        <axiom.osgi.version.range>[1.2.11, 1.3.0)</axiom.osgi.version.range>
 
 
         <!-- Servlet API -->
@@ -917,7 +954,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.12.0</jaggery.version>
+        <jaggery.version>0.12.3</jaggery.version>
 
         <!-- Misc Versions -->
         <synapse.version>2.1.7-wso2v1</synapse.version>
@@ -950,6 +987,7 @@
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
+        <swagger.codegen.version>2.1.5</swagger.codegen.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>

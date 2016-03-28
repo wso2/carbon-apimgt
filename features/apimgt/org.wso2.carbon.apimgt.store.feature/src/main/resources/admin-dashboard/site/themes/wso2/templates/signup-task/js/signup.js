@@ -7,9 +7,9 @@ $(document).ready(function(){
         jagg.post("/site/blocks/task-manager/ajax/task.jag", { action:"startTask",taskId:taskId,taskType:"signup" },
             function (json) {
                 if (!json.error) {
-                    btn.next().show();
+                    btn.parent().next().show();
                     $('#js_completeBtn'+iteration).show();
-                    btn.hide();
+                    btn.parent().remove();
                     $('#status'+iteration).text("IN_PROGRESS");
                 } else {
                     jagg.showLogin();
@@ -48,28 +48,32 @@ $(document).ready(function(){
                 if (!json.error) {
                     btn.next().show();
                     $('#js_startBtn'+iteration).show();
-                    btn.hide();
+                    btn.remove();
                     $('#status'+iteration).text("RESERVED");
                 } else {
                     jagg.showLogin();
                 }
             }, "json");
     }).removeAttr("disabled","disabled");
-
-});
-
-$(function(){
-
+    
     /***********************************************************
      *  data-tables config
      ***********************************************************/
-    $('#ajax-table').datatables_extended({
-       columns: [
-            { "data": "id" },
-            { "data": "presentationSubject" },
-            { "data": "status" },
-            { "data": "createdTime" }
-       ],
-        responsive: true
-    });
+	$('#signup-tasks').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#signup-tasks_length option:selected" ).val()
+	     || $("#signup-tasks option:selected" ).val()==-1)
+	       $('#signup-tasks_paginate').hide();
+	       else $('#signup-tasks_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         null,
+         { "bSortable": false }
+         ]
+	});
+
 });
+

@@ -30,10 +30,13 @@
                 
                 var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
                 var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
-                
-                var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+                                
                 var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag") + urlPrefix;
                 var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag") + urlPrefix;
+                
+                var addDesignUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+                var addImplementUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
+                var addManageUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
                 
                 isCreatePermitted = jagg.getCreatePermitted().permitted;
                 isPublishPermitted = jagg.getPublishPermitted().permitted;
@@ -56,13 +59,16 @@
 						aria-controls="navbar2"> <span class="icon fw-stack"> <i
 							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i>
 					</span>
-					</a> <a class="navbar-menu-toggle collapsed active"
-						data-toggle="sidebar" data-target="#left-sidebar"
-						data-container=".page-content-wrapper" data-container-divide="true"
-						aria-expanded="true" rel="sub-nav"> <span class="icon fw-stack">
-							<i class="fw fw-menu fw-stack-1x toggle-icon-left"></i>
-					</span>
-					</a>
+					
+					</a> 
+					
+<a class="navbar-menu-toggle active" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="true" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+                        </span>
+                        </a>
+					
+					
 				</div>
 				<!-- Actions Bar -->
 				<div id="navbar" class="collapse navbar-collapse">
@@ -123,6 +129,17 @@
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
 	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                        <% if(reqUrl.indexOf(addDesignUrl) >= 0 || reqUrl.indexOf(addImplementUrl) >= 0 || reqUrl.indexOf(addManageUrl) >= 0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-list fw-stack-1x"></i>
+	                                </span>
+	                                <%=i18n.localize("goToOverView")%>
 	                            </a>
 	                        </li>
                         <%} %>

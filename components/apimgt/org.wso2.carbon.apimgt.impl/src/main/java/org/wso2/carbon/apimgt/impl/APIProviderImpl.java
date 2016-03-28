@@ -60,6 +60,9 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.Notification.EmailNotifier;
+import org.wso2.carbon.apimgt.impl.Notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.Notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1446,7 +1449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else  {
-            api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);
+            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
         }
     }
 
@@ -1545,13 +1548,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                            Collections.<String,String>emptyMap());
-            
+
             Map<String, String> properties = new HashMap<String, String>();
-            
+
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-            
+
             if(isGlobalThrottlingEnabled){
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.CEPBasedThrottleHandler",
                         Collections.<String, String> emptyMap());
@@ -1571,7 +1574,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
             }
-    
+
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler", Collections.<String,String>emptyMap());
 
             properties = new HashMap<String, String>();
@@ -1898,6 +1901,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
+            }
+
+            try {
+                String isNotificationEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                        ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFICATION_ENABLED);
+
+                if ("true".equalsIgnoreCase(isNotificationEnabled)) {
+                    String notificationClass = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                            ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFIER_CLASS);
+
+                    EmailNotifier email = (EmailNotifier) APIUtil.getClassForName(notificationClass).newInstance();
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, api.getId());
+                    prop.put(NotifierConstants.NEW_API_KEY, newAPI.getId());
+                    email.sendNotifications(new NotificationDTO(prop, NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION));
+                }
+            } catch (APIManagementException e) {
+                log.error(e.getMessage(), e);
             }
 
         } catch (ParseException e) {
@@ -3610,7 +3631,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Deploy policy to global CEP and persist the policy object
      * @param policy policy object
      */
-    
+
     public void addPolicy(Policy policy) throws APIManagementException {
 
         // generate policy
@@ -3639,7 +3660,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policies.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
             }
-         
+
         } catch (APITemplateException e) {
             String msg = "Error while generating policy: ";
             log.error(msg, e);
@@ -3741,7 +3762,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-      
+
         try {
             //undeploy from gateway
             manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));

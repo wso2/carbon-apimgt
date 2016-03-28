@@ -1092,21 +1092,22 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier. Providing and managing
-     * the conn object is a responsibility of the third party that uses this method.
+     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
      *
      * @param identifier    APIIdentifier
      * @param applicationId ID of the application which has the subscription
-     * @param conn          Connection object to use for database operations.
      * @throws APIManagementException
      */
-    public void removeSubscription(APIIdentifier identifier, int applicationId, Connection conn)
+    public void removeSubscription(APIIdentifier identifier, int applicationId)
             throws APIManagementException {
+        Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         int apiId = -1;
         String uuid;
         try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
             apiId = getAPIID(identifier, conn);
 
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
@@ -1124,36 +1125,19 @@ public class ApiMgtDAO {
                 throw new APIManagementException("UUID does not exist for the given apiId:" + apiId + " and " +
                                                  "application id:" + applicationId);
             }
+
+            conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback the add subscription ", ex);
+                }
+            }
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-        }
-    }
-
-    /**
-     * Removes a subscription specified by SubscribedAPI object
-     *
-     * @param subscription SubscribedAPI object
-     * @throws APIManagementException
-     */
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            removeSubscription(subscription, conn);
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Failed to add subscriber data ", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error("Couldn't close database connection for removing subscription", e);
-            }
         }
     }
 
@@ -4502,24 +4486,11 @@ public class ApiMgtDAO {
     /**
      * Deletes an Application along with subscriptions, keys and registration data
      *
-     * @param application Application object to be deleted from the database which consists of Id
+     * @param application Application object to be deleted from the database which has the application Id
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
-        Connection con = null;
-        try {
-            con = APIMgtDBUtil.getConnection();
-            con.setAutoCommit(false);
-            deleteApplication(application, con);
-            con.commit();
-        } catch (SQLException e) {
-            handleException("Error while removing application details from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, con, null);
-        }
-    }
-
-    public void deleteApplication(Application application, Connection connection) throws APIManagementException {
+        Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
@@ -4542,6 +4513,8 @@ public class ApiMgtDAO {
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL;
 
         try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -4624,6 +4597,8 @@ public class ApiMgtDAO {
                 log.debug("Application " + application.getName() + " is deleted successfully.");
             }
 
+            connection.commit();
+
             for (String consumerKey : consumerKeys) {
                 //delete on oAuthorization server.
                 KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
@@ -4631,7 +4606,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
             APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
