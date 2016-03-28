@@ -45,14 +45,14 @@ if(length==0){%>
 <%}
 else{
 %>
-            <table class="table table-bordered table-striped">
+            <table id="subscription-tasks" class="table table-responsive table-striped">
                 <thead>
                 <tr>
                     <th>ID</th>
                     <th>Description</th>
                     <th>Status</th>
                     <th class="date-time-col">Created On</th>
-                    <th class="manage-col">Action</th>
+                    <th class="manage-col"></th>
                 </tr>
                 </thead>
                 <tbody>
