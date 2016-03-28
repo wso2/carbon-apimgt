@@ -3646,7 +3646,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while generating policy");
         }
 
-
         // deploy in global cep and gateway manager
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         try {
@@ -3660,9 +3659,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // TODO rollback db if deployment failed
             handleException("Error while deploying policy");
-
-            throw new APIManagementException(msg);
-
+        }
+    }
     public void updatePolicy(Policy policy) throws APIManagementException {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> policies = new ArrayList<String>();
