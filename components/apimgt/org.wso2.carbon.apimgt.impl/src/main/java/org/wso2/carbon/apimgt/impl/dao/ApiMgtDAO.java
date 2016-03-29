@@ -847,7 +847,7 @@ public class ApiMgtDAO {
                 boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
                         null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
    
-                infoDTO.setIsContentAware(isContentAware);
+                infoDTO.setContentAware(isContentAware);
                 return true;
             }
             infoDTO.setAuthorized(false);
