@@ -3,7 +3,7 @@ include("/jagg/jagg.jag");
 
 (function () {
     response.contentType = "application/json; charset=UTF-8";
-    var mod, result, obj,
+    var mod, result, obj, permissionResult,
     action = request.getParameter("action"),
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag");
@@ -26,11 +26,29 @@ include("/jagg/jagg.jag");
             mod = jagg.module("tier");
 
             result = mod.addTier(tierName, requestCount, unitTime, description, stopOnQuotaReach, tierPlan, attributes);
+
+            //add permissions            
+            var tierPermission = {};
+        	tierPermission.tierName = tierName;
+        	tierPermission.permissiontype = request.getParameter("permissionType");
+        	tierPermission.roles = request.getParameter("roles");
+            
+        	permissionResult = mod.updateTierPermissions(tierPermission);
+        	
+        	session.remove("tierPermissions");
+        	
+        	var log = new Log(); log.info(permissionResult);
+        	
             if (result.error) {
                 obj = {
                     error:true,
                     message:msg.error.backendError(action)
                 };
+            } else if (permissionResult.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                   };                
             } else {
                 obj = {
                     error:false,

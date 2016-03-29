@@ -64,6 +64,11 @@
     "cancelTier":"Cancel",
     "errorMsgRequired":"Required",
     "errorMessageInvalid":"Invalid",
-    "errorMessageIllegalChar" : "Name contains one or more illegal characters ( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] )."
+    "errorMessageIllegalChar" : "Name contains one or more illegal characters ( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).",
+    "tierPermissions":"Tier Permissions",
+    "tiers":"Tier",
+    "permissions":"Permissions",
+    "allow":"Allow",
+    "deny":"Deny"
 
 }
