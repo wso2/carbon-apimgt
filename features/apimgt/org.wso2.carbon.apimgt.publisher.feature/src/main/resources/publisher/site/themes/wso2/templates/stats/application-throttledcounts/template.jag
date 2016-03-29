@@ -27,7 +27,7 @@
 	               <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
 	               <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
 	               <button id="date-range" type="button" class="btn btn-default date-range last-child" >
-	                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+	                 <i class="fw fw-calendar"></i>
 	                 <span></span> <b class="caret"></b>
 	               </button>
 	           </div>

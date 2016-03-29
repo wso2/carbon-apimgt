@@ -13,6 +13,8 @@ var addTier = function () {
         description:$('#description').val(),
         stopOnQuotaReach:$('#stopOnQuotaReach').is( ":checked" ),
         tierPlan:$('#tierPlan').val(),
+        permissionType:$('#permissionTypes input:radio:checked').val(),
+        roles:$('#roles').val(),
         attributes:JSON.stringify(attributes)
         }, function (result) {
             if (result.error == false) {

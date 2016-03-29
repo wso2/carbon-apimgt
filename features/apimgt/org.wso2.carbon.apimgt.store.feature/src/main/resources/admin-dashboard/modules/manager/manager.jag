@@ -35,6 +35,18 @@ var getAPIStoreObj = function() {
     }
 };
 
+var getAPIProviderObj = function() {
+    var user = jagg.getUser();
+    var store;
+    if (user == null) {
+        store = require('apipublisher');
+        return new store.APIProvider();
+    } else {
+        store = require('apipublisher');
+        return new store.APIProvider(user.username);
+    }
+};
+
 var loadTenantRegistry = function (tenantDomain) {
     try {
         if (tenantDomain != null && tenantDomain != "") {
