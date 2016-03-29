@@ -18,21 +18,29 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+import io.swagger.models.Model;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.codegen.ClientOptInput;
 import io.swagger.codegen.DefaultGenerator;
@@ -47,84 +55,137 @@ public class APIClientGenerationManager {
         String swagger;
         Set<SubscribedAPI> apiSet;
         String resourcePath = null;
-        APIConsumerImpl consumer =  (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
+        APIConsumerImpl consumer = (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         currentSubscriber = apiMgtDAO.getSubscriber(userName);
-        apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName , groupId);
-        if (apiSet.isEmpty()){
+        apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName, groupId);
+        if (apiSet.isEmpty()) {
             return null;
         }
         File spec = null;
-        String apiName;
-        String apiVersion;
+        boolean isFirstApi = true;
         String specLocation = "resources/swaggerCodegen/swagger.json";
         String clientOutPutDir;
         String sourceToZip;
         String zipName;
         ZIPUtils zipUtils = new ZIPUtils();
         File tempFolder = new File("resources/swaggerCodegen");
-        if(!tempFolder.exists()){
+        if (!tempFolder.exists()) {
             tempFolder.mkdir();
-        }else{
+        } else {
             FileUtils.deleteDirectory(tempFolder);
             tempFolder.mkdir();
         }
+
+        Swagger initial = null;
+        Map<String, Path> paths = null;
+        Map<String, Path> tempPaths = null;
+        Map<String, Model> definitions = null;
+        Map<String, Model> tempDefinitions = null;
+        Map<String, SecuritySchemeDefinition> securityDefinitions = null;
+        Map<String, SecuritySchemeDefinition> tempSecurityDefinitions = null;
+        Swagger temp;
 
         for (Iterator<SubscribedAPI> apiIterator = apiSet.iterator(); apiIterator.hasNext(); ) {
             SubscribedAPI subscribedAPI = apiIterator.next();
             resourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPI.getApiId().getApiName(),
                     subscribedAPI.getApiId().getVersion(), subscribedAPI.getApiId().getProviderName());
-            if (consumer.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
-                swagger = consumer.definitionFromSwagger20.getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
-                spec = new File(specLocation);
-                if (!spec.exists()) {
-                    spec.createNewFile();
-                }
-                FileWriter fileWriter = new FileWriter(spec.getAbsoluteFile());
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write(swagger);
-                bufferedWriter.close();
-                apiName = subscribedAPI.getApiId().getApiName();
-                apiVersion = subscribedAPI.getApiId().getVersion();
-                clientOutPutDir = "resources/swaggerCodegen/"+appName+"/"+apiName+"/"+apiVersion;
-                generateClient(apiName,apiVersion,specLocation,sdkLanguage,clientOutPutDir);
+            if (isFirstApi && consumer.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+                swagger = consumer.definitionFromSwagger20
+                        .getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
+                initial = new SwaggerParser().parse(swagger);
+                paths = initial.getPaths();
+                definitions = initial.getDefinitions();
+                securityDefinitions = initial.getSecurityDefinitions();
+                isFirstApi = false;
             }
 
+            if (!isFirstApi && consumer.registry
+                    .resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+                swagger = consumer.definitionFromSwagger20
+                        .getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
+                temp = new SwaggerParser().parse(swagger);
+
+                tempPaths = temp.getPaths();
+                if (paths == null && tempPaths != null) {
+                    paths = tempPaths;
+                } else if (tempPaths != null) {
+                    for (Map.Entry<String, Path> entryPath : tempPaths.entrySet()) {
+                        paths.put(entryPath.getKey(), entryPath.getValue());
+                    }
+                }
+
+                tempDefinitions = temp.getDefinitions();
+                if (definitions == null && tempDefinitions != null) {
+                    definitions = tempDefinitions;
+                } else if (tempDefinitions != null) {
+                    for (Map.Entry<String, Model> entryDef : tempDefinitions.entrySet()) {
+                        definitions.put(entryDef.getKey(), entryDef.getValue());
+                    }
+                }
+
+                tempSecurityDefinitions = temp.getSecurityDefinitions();
+                if (securityDefinitions == null && tempSecurityDefinitions != null) {
+                    securityDefinitions = tempSecurityDefinitions;
+                } else if (tempSecurityDefinitions != null) {
+                    for (Map.Entry<String, SecuritySchemeDefinition> entrySecurityDef : tempSecurityDefinitions
+                            .entrySet()) {
+                        securityDefinitions.put(entrySecurityDef.getKey(), entrySecurityDef.getValue());
+                    }
+                }
+
+            }
+
+            initial.setPaths(paths);
+            initial.setDefinitions(definitions);
+            initial.setSecurityDefinitions(securityDefinitions);
+
+            swagger = Json.pretty(initial);
+            spec = new File(specLocation);
+            if (!spec.exists()) {
+                spec.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(spec.getAbsoluteFile());
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(swagger);
+            bufferedWriter.close();
 
         }
-        sourceToZip = "resources/swaggerCodegen/"+appName;
-        zipName = "resources/swaggerCodegen/"+appName+".zip";
+        clientOutPutDir = "resources/swaggerCodegen/" + appName;
+        generateClient(appName, specLocation, sdkLanguage, clientOutPutDir);
+        sourceToZip = "resources/swaggerCodegen/" + appName;
+        zipName = "resources/swaggerCodegen/" + appName + ".zip";
         try {
-            zipUtils.zipDir(sourceToZip,zipName);
+            zipUtils.zipDir(sourceToZip, zipName);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return appName;
     }
 
-    private void generateClient(String apiName, String apiVersion,String spec,String lang,String outPutDir){
+    private void generateClient(String appName, String spec, String lang, String outPutDir) {
         String configClass;
-        if (lang.equals("java")){
+        if (lang.equals("java")) {
             configClass = "io.swagger.codegen.languages.JavaClientCodegen";
-        }else if (lang.equals("android")){
+        } else if (lang.equals("android")) {
             configClass = "io.swagger.codegen.languages.AndroidClientCodegen";
-        }else{
+        } else {
             configClass = null;
         }
 
         try {
             CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
             codegenConfigurator.setGroupId("org.wso2");
-            codegenConfigurator.setArtifactId("org.wso2.client."+apiName+"."+apiVersion.replace(".",""));
-            codegenConfigurator.setModelPackage("org.wso2.client.model."+apiName+"."+apiVersion.replace(".",""));
-            codegenConfigurator.setApiPackage("org.wso2.client.api."+apiName+"."+apiVersion.replace(".",""));
+            codegenConfigurator.setArtifactId("org.wso2.client." + appName);
+            codegenConfigurator.setModelPackage("org.wso2.client.model." + appName);
+            codegenConfigurator.setApiPackage("org.wso2.client.api." + appName);
             codegenConfigurator.setInputSpec(spec);
             codegenConfigurator.setLang(configClass);
             codegenConfigurator.setOutputDir(outPutDir);
             final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
             new DefaultGenerator().opts(clientOptInput).generate();
         } catch (Throwable e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
     }
 }

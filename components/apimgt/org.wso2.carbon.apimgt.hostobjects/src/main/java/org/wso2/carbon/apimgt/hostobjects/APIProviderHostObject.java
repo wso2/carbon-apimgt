@@ -4784,7 +4784,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
 
-    public static String addSecurityDef(String spec,Set<Scope> scopes){
+    private static String addSecurityDef(String spec,Set<Scope> scopes){
 
 
         List<String> scopeNames = new ArrayList<String>();
