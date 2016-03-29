@@ -27,11 +27,13 @@ public abstract class PublisherDTO {
 
     private String context;
 
-    private String api_version;
+    private String apiVersion;
 
     private String api;
 
     private String resourcePath;
+
+    private String resourceTemplate;
 
     private String method;
 
@@ -47,7 +49,15 @@ public abstract class PublisherDTO {
 
     private String protocol;
 
+    private String clientIp;
 
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
+    }
 
     public String getHostName() {
         return hostName;
@@ -89,12 +99,20 @@ public abstract class PublisherDTO {
         this.context = context;
     }
 
-    public String getApi_version() {
-        return api_version;
+    public String getResourceTemplate() {
+        return resourceTemplate;
     }
 
-    public void setApi_version(String api_version) {
-        this.api_version = api_version;
+    public void setResourceTemplate(String resourceTemplate) {
+        this.resourceTemplate = resourceTemplate;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 
     public void setApi(String api) {

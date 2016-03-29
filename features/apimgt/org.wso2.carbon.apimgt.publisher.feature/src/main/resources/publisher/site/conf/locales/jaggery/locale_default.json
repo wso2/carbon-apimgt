@@ -160,7 +160,7 @@
     "validPeriod": "Valid Period",
     "revoke": "Revoke",
     "revokeTitle": "Revoke Access Token",
-
+    "apiLatencyTime" : "API Latency Time",
     "apiSubscriptons" : "API Subscriptions",
     "apiUsage" : "API Usage",
     "apiResponseTimes" : "API Response Times",
@@ -186,6 +186,7 @@
     "faultyInvocationsTitle": "Faulty Invocations",
     "faultyAnalyzeTitle": "Faulty Invocations",
     "apiThrottledCountsTitle" : "API Throttled Out Requests",
+    "apiLatencyTimeTitle" : "API Latency BreakDown",
     "applicationThrottledCountsTitle" : "Application Throttled Out Requests",
     "apiUsageByVersionTitle": "API Usage by Versions",
     "apiSubscriptionsByVersionTitle": "API Subscriptions by Versions",

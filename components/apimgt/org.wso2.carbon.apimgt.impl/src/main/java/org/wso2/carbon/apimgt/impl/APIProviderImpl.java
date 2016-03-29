@@ -1502,6 +1502,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
+                .<String, String>emptyMap());
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
 

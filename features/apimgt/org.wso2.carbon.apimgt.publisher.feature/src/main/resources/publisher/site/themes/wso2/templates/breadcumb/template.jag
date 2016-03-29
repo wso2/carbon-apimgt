@@ -41,15 +41,15 @@
                 var inlineEditorUrl = jagg.getAbsoluteUrl("/site/pages/inline-editor.jag") + urlPrefix;
                 var inlineEditorMappedUrl = jagg.getMappedUrl("/site/pages/inline-editor.jag") + urlPrefix;
 
-    %>
-<div class="breadcrumb-wrapper">
-    <ol class="breadcrumb">
-        <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
+                var page = request.getParameter("page");
+            %>
+	    <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb">
+                <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
                     <li class="active">
                     	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
                     </li>
                 <% } %>
-
                 <% if(reqUrl.indexOf(infoUrl)>=0||reqUrl.indexOf(infoMappedUrl)>=0){%>
 	                <li>
 	                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
@@ -178,9 +178,50 @@
                 <%} %>
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
-	                <li class="active">
+	                <li>
 	                    <a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
 	                </li>
+	                <% if(page == "api-subscriptions") { %>
+		                <li class="active">
+		                    <a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiSubscriptons")%></a>
+		                </li>
+	                <% } else if(page == "api-usage-user") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiUsage")%></a>
+	                	</li>
+	                <% } else if(page == "api-response-times") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiResponseTimes")%></a>
+	                	</li>
+	                <% } else if(page == "api-last-access-times") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiLastAccessTimes")%></a>
+	                	</li>
+	                <% } else if(page == "api-usage-resource-path") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiUsageResourcePath")%></a>
+	                	</li>
+	                <% } else if(page == "api-usage-destination") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiUsageFromDestination")%></a>
+	                	</li>
+	                <% } else if(page == "api-usage") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiUsageComparison")%></a>
+	                	</li>
+	                <% } else if(page == "api-throttledcounts") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("apiThrottledCounts")%></a>
+	                	</li>
+	                <% } else if(page == "application-throttledcounts") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("applicationThrottledCounts")%></a>
+	                	</li>
+	                <% } else if(page == "faulty-invocations") { %>
+	                	<li class="active">
+	                    	<a href="#" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("faultyInvocations")%></a>
+	                	</li>
+	                <% } %>
                 <% } %>
 
                 <% if(reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>

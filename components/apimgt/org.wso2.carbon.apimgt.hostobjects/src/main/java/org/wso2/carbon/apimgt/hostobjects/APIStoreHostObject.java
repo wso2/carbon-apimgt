@@ -542,8 +542,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 String keyType = (String) apiData.get("keytype", apiData);
 
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,
-                                                               keyType, new String[]{"ALL"});
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -2548,7 +2547,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("prodJsonString", appObj, jsonString);
 
 
-                            appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
+                            //appObj.put("prodAuthorizedDomains", appObj, prodKey.getAuthorizedDomains());
 
                             if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
                                 appObj.put("prodValidityTime", appObj, -1);
@@ -2628,7 +2627,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             appObj.put("sandboxKeyState", appObj, sandboxKey.getState());
                             appObj.put("sandboxJsonString", appObj, jsonString);
 
-                            appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
+                            //appObj.put("sandboxAuthorizedDomains", appObj, sandboxKey.getAuthorizedDomains());
                             if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                                 appObj.put("sandValidityTime", appObj, -1);
                                 sandEnableRegenarateOption = false;
@@ -2746,7 +2745,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 apiObj.put("prodKey", apiObj, prodKey.getAccessToken());
                 apiObj.put("prodConsumerKey", apiObj, prodKey.getConsumerKey());
                 apiObj.put("prodConsumerSecret", apiObj, prodKey.getConsumerSecret());
-                apiObj.put("prodAuthorizedDomains", apiObj, prodKey.getAuthorizedDomains());
+                //apiObj.put("prodAuthorizedDomains", apiObj, prodKey.getAuthorizedDomains());
                 if (isApplicationAccessTokenNeverExpire(prodKey.getValidityPeriod())) {
                     apiObj.put("prodValidityTime", apiObj, -1);
                 } else {
@@ -2771,7 +2770,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 apiObj.put("sandboxKey", apiObj, sandboxKey.getAccessToken());
                 apiObj.put("sandboxConsumerKey", apiObj, sandboxKey.getConsumerKey());
                 apiObj.put("sandboxConsumerSecret", apiObj, sandboxKey.getConsumerSecret());
-                apiObj.put("sandAuthorizedDomains", apiObj, sandboxKey.getAuthorizedDomains());
+                //apiObj.put("sandAuthorizedDomains", apiObj, sandboxKey.getAuthorizedDomains());
                 if (isApplicationAccessTokenNeverExpire(sandboxKey.getValidityPeriod())) {
                     apiObj.put("sandValidityTime", apiObj, -1);
                 } else {
@@ -3806,12 +3805,12 @@ public class APIStoreHostObject extends ScriptableObject {
             int index = (Integer) domain;
             accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
         }
-        try {
-            APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            apiConsumer.addAccessAllowDomains(oAuthConsumerKey, accessAllowDomainsArray);
-        } catch (APIManagementException e) {
-            handleException("Error while adding allowed domains for oauth consumer: " + oAuthConsumerKey, e);
-        }
+//        try {
+//            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+//            apiConsumer.addAccessAllowDomains(oAuthConsumerKey, accessAllowDomainsArray);
+//        } catch (APIManagementException e) {
+//            handleException("Error while adding allowed domains for oauth consumer: " + oAuthConsumerKey, e);
+//        }
     }
 
     public static void jsFunction_updateAccessAllowDomains(Context cx, Scriptable thisObj,
@@ -3824,12 +3823,12 @@ public class APIStoreHostObject extends ScriptableObject {
             int index = (Integer) domain;
             accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
         }
-        try {
-            APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            apiConsumer.updateAccessAllowDomains(accessToken, accessAllowDomainsArray);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
+//        try {
+//            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+//            apiConsumer.updateAccessAllowDomains(accessToken, accessAllowDomainsArray);
+//        } catch (Exception e) {
+//            handleException(e.getMessage(), e);
+//        }
     }
 
     /**
