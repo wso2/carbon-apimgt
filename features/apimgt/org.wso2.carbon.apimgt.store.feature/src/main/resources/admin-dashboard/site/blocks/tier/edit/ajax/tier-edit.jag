@@ -37,8 +37,6 @@ include("/jagg/jagg.jag");
         	
         	session.remove("tierPermissions");
         	
-        	var log = new Log(); log.info(permissionResult);
-        	
             if (result.error) {
                 obj = {
                     error:true,

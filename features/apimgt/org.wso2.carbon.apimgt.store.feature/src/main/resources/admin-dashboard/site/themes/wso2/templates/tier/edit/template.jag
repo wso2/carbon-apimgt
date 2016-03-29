@@ -34,7 +34,7 @@
 						roleList = roleList + "," + roleArray[a];
 					}
                 }
-            }
+            }            
 
             var tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
             var description = tier.getDescription() == null ? "" : tier.getDescription();
@@ -54,6 +54,10 @@
                     customAttributeList[attributeName] = attributeValue;
                 }
             }
+        }
+        
+        if (roleList == "") {
+            roleList = "Internal/everyone";
         }
 	%>
 
