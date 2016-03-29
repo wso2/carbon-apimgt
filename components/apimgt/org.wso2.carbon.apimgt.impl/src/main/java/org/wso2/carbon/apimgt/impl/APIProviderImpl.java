@@ -56,7 +56,6 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -1450,7 +1449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         } else  {
-            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+            api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);
         }
     }
 
@@ -1551,13 +1550,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                            Collections.<String,String>emptyMap());
-
+            
             Map<String, String> properties = new HashMap<String, String>();
-
+            
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-
+            
             if(isGlobalThrottlingEnabled){
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.CEPBasedThrottleHandler",
                         Collections.<String, String> emptyMap());
@@ -1577,7 +1576,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
             }
-
+    
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler", Collections.<String,String>emptyMap());
 
             properties = new HashMap<String, String>();
@@ -3634,13 +3633,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Deploy policy to global CEP and persist the policy object
      * @param policy policy object
      */
-
+    
     public void addPolicy(Policy policy) throws APIManagementException {
-
-        // generate policy
-
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> policies = new ArrayList<String>();
+        int policyId = 0;
 
         try {
             if (policy instanceof APIPolicy) {
@@ -3665,15 +3662,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
         } catch (APITemplateException e) {
-            String msg = "Error while generating policy: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
-        } catch (Exception e) {
-            String msg = "Error while saving policy to database: ";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
+            handleException("Error while generating policy");
         }
-
 
         // deploy in global cep and gateway manager
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
@@ -3685,14 +3675,58 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 manager.deployPolicyToGatewayManager(policyString);
             }
         } catch (APIManagementException e) {
-            String msg = "Error while deploying policy: ";
-            log.error(msg, e);
 
             // TODO rollback db if deployment failed
+            handleException("Error while deploying policy");
+        }
+    }
+    public void updatePolicy(Policy policy) throws APIManagementException {
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        List<String> policies = new ArrayList<String>();
 
-            throw new APIManagementException(msg);
+        try {
+            if (policy instanceof APIPolicy) {
+                APIPolicy apiPolicy = (APIPolicy) policy;
+                policies = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
+                apiMgtDAO.updateAPIPolicy(apiPolicy);
+            } else if (policy instanceof ApplicationPolicy) {
+                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
+                policies.add(policyString);
+                apiMgtDAO.updateApplicationPolicy(appPolicy);
+            } else if (policy instanceof SubscriptionPolicy) {
+                SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
+                policies.add(policyString);
+                apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+            } else if (policy instanceof GlobalPolicy) {
+                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+                policies.add(policyString);
+                apiMgtDAO.updateGlobalPolicy(globalPolicy);
+            }
+        } catch (APITemplateException e) {
+            handleException("Error while generating policy for update");
         }
 
+        // Deploy in global cep and gateway manager
+        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
+        try {
+
+            /* If single pipeline fails to deploy then whole deployment should fail.
+             * Therefore for loop is wrapped inside a try catch block
+             */
+            for (String policyString : policies) {
+                if (!(policy instanceof GlobalPolicy)) { // Exclude global level policies from deploying to GlobalCEP
+                    deploymentManager.deployPolicyToGlobalCEP(policyString);
+                }
+                deploymentManager.deployPolicyToGatewayManager(policyString);
+            }
+
+            // TODO implement deployed flag
+        } catch (APIManagementException e) {
+            handleException("Error while deploying policy to gateway");
+        }
     }
 
     /**

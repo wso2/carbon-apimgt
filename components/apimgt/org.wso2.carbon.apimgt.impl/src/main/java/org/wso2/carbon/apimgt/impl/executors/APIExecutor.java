@@ -132,7 +132,7 @@ public class APIExecutor implements Execution {
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
                         if(isGlobalThrottlingEnabled){
-                            if(subPolicies == null || subPolicies.isEmpty() || apiLevelPolicy == null){
+                            if(subPolicies == null || subPolicies.isEmpty()){
                                 throw new APIManagementException("Failed to publish service to API store while executing " +
                                         "APIExecutor. No policy selected");
                             } 

@@ -251,7 +251,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER " +
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -277,7 +277,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER" +
+            "   API.API_PROVIDER" +      
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -1496,7 +1496,7 @@ public class SQLConstants {
             "   CONTEXT = ?, " +
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ? " +
+            "   UPDATED_TIME = ? " +    
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
@@ -2016,24 +2016,24 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT) \n" +
-            "VALUES (?,?,?,?,?,?,?,?)";
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_SQL =
             "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
-                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, USER_LEVEL) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?)";
+                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, IS_CONTENT_AWARE, USER_LEVEL) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_WITH_ID_SQL =
             "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
                     "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n" +
-                    "USER_LEVEL, POLICY_ID) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    "IS_CONTENT_AWARE, USER_LEVEL, POLICY_ID) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_CONDITION_SQL =
             "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE, \n" +
@@ -2229,7 +2229,8 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "IS_CONTENT_AWARE = ?" +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
@@ -2239,6 +2240,7 @@ public class SQLConstants {
                     "QUOTA_POLICY_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "IS_CONTENT_AWARE = ?," +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2262,5 +2264,24 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
-            "DELETE FROM AM_POLICY_GLOBAL WHERE NAME = ? AND TENANT_ID = ?";
+            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
+
+    public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = 
+            "SELECT APIPOLICY.TENANT_ID " +
+            "FROM AM_POLICY_API APIPOLICY, " +
+                 "AM_POLICY_APPLICATION APPPOLICY, " +
+                 "AM_POLICY_SUBSCRIPTION SUBPOLICY "+
+            "WHERE APIPOLICY.TENANT_ID =? AND " +
+                  "APPPOLICY.NAME =? AND " +
+                  "SUBPOLICY.NAME=? AND " +
+                  "APIPOLICY.NAME =? AND " +
+                  "APIPOLICY.IS_CONTENT_AWARE=0 AND APPPOLICY.IS_CONTENT_AWARE=0 AND SUBPOLICY.IS_CONTENT_AWARE=0";
+    public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = 
+            "SELECT APPPOLICY.TENANT_ID " +
+            "FROM AM_POLICY_APPLICATION APPPOLICY," +                  
+                  "AM_POLICY_SUBSCRIPTION SUBPOLICY "+
+            "WHERE APPPOLICY.TENANT_ID =? AND " +
+                   "APPPOLICY.NAME =? AND " +
+                   "SUBPOLICY.NAME=? AND " +                   
+                   "APPPOLICY.IS_CONTENT_AWARE=0 AND SUBPOLICY.IS_CONTENT_AWARE=0";       
 }

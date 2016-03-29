@@ -78,8 +78,13 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -5264,5 +5269,44 @@ public final class APIUtil {
             api = api.substring(index + 2);
         }
         return api;
+    }
+    
+    /**
+     * check whether policy is content aware
+     * @param policy
+     * @return
+     */
+    public static boolean isContentAwarePolicy(Policy policy){
+        boolean status = false;
+        if (policy instanceof APIPolicy) {
+            APIPolicy apiPolicy = (APIPolicy) policy;
+            status = isDefaultQuotaPolicyContentAware(apiPolicy);
+            if(!status){
+                //only go and check the pipelines if default quota is not content aware
+                //check if atleast one pipeline is content aware
+                for (Pipeline pipeline : apiPolicy.getPipelines()) { // add each pipeline data to AM_CONDITION table
+                    if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+                        status = true;
+                        break;
+                    }
+                }
+            }
+        } else if (policy instanceof ApplicationPolicy) {
+            ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+            status = isDefaultQuotaPolicyContentAware(appPolicy);
+        } else if (policy instanceof SubscriptionPolicy) {
+            SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+            status = isDefaultQuotaPolicyContentAware(subPolicy);
+        } else if (policy instanceof GlobalPolicy) {
+            status = false;          
+        }
+        return status;
+    }
+    
+    private static boolean isDefaultQuotaPolicyContentAware(Policy policy){
+        if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            return true;
+        }
+        return false;  
     }
 }

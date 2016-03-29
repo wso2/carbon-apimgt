@@ -842,6 +842,12 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
+
+                //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
+                        null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+   
+                infoDTO.setIsContentAware(isContentAware);
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -853,6 +859,58 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
+            String subPolicy) throws APIManagementException {
+        boolean isAnyContentAware = false;
+        
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean isGlobalThrottlingEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        //only check if using CEP based throttling. 
+        if(isGlobalThrottlingEnabled){                 
+          
+            ResultSet resultSet = null;
+            PreparedStatement ps = null;
+            String sqlQuery;
+            if(apiPolicy == null){
+                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
+            } else {
+                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+            }
+            
+            try {
+          
+                ps = conn.prepareStatement(sqlQuery);
+               
+                ps.setInt(1, APIUtil.getTenantId(userName));             
+                ps.setString(2, appPolicy);
+                ps.setString(3, subPolicy);
+                
+                if(apiPolicy != null) {
+                    ps.setString(4, apiPolicy);
+                }
+
+                resultSet = ps.executeQuery();
+                // We only expect one result if all are not content aware.
+                if (resultSet.next()) {
+                    isAnyContentAware = false;
+                } else {
+                    isAnyContentAware = true;
+                }
+            } catch (SQLException e) {
+                handleException("Failed to get content awareness of the policies ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            }
+            
+        }        
+
+        return isAnyContentAware;
+    }
+
+   
 
     private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
             throws APIManagementException {
@@ -7902,8 +7960,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(9, policy.getRateLimitCount());
-            policyStatement.setString(10, policy.getRateLimitTimeUnit());
+            policyStatement.setInt(10, policy.getRateLimitCount());
+            policyStatement.setString(11, policy.getRateLimitTimeUnit());
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -7982,10 +8040,10 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setString(9, policy.getUserLevel());
+            policyStatement.setString(10, policy.getUserLevel());
 
             if (policyId != -1) {
-                policyStatement.setInt(10, policyId);
+                policyStatement.setInt(11, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8243,31 +8301,7 @@ public class ApiMgtDAO {
             deleteStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to remove policy " + policyName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
-        }
-    }
-
-    /**
-     * Removes global level throttle policy from the database
-     *
-     * @param name name of the global policy
-     * @param tenantId Id of the tenant to which the policy is applied
-     * @throws APIManagementException
-     */
-    public void removeGlobalThrolttlePolicy(String name, int tenantId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement deleteStatement = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_POLICY_SQL);
-            deleteStatement.setString(1, name);
-            deleteStatement.setInt(2, tenantId);
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to remove global policy " + name + "-" + tenantId, e);
+            handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }
@@ -8900,11 +8934,11 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-
+            updateStatement.setBoolean(7, APIUtil.isContentAwarePolicy(policy));
             updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setString(7, policy.getPolicyName());
-            updateStatement.setInt(8, policy.getTenantId());
+            updateStatement.setString(8, policy.getPolicyName());
+            updateStatement.setInt(9, policy.getTenantId());
             updateStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -8957,13 +8991,13 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-
-            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(7, policy.getRateLimitCount());
-            updateStatement.setString(8, policy.getRateLimitTimeUnit());
-            updateStatement.setString(9, policy.getPolicyName());
-            updateStatement.setInt(10, policy.getTenantId());
+            updateStatement.setBoolean(5, APIUtil.isContentAwarePolicy(policy));
+            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(8, policy.getRateLimitCount());
+            updateStatement.setString(9, policy.getRateLimitTimeUnit());
+            updateStatement.setString(10, policy.getPolicyName());
+            updateStatement.setInt(11, policy.getTenantId());
             updateStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -9092,7 +9126,7 @@ public class ApiMgtDAO {
             policyStatement.setLong(5, limit.getDataAmount());
             policyStatement.setString(6, limit.getDataUnit());
         }
-
+        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
         policyStatement.setLong(7, '1');
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
     }
