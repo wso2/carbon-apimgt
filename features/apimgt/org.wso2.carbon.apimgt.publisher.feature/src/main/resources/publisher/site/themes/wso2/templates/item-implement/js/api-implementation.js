@@ -435,7 +435,6 @@ $("#toggleSequence").change(function(e){
 });
 $("#toggleCors").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();
@@ -444,7 +443,6 @@ $("#toggleCors").change(function(e){
 
 $("#toggleCors1").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();

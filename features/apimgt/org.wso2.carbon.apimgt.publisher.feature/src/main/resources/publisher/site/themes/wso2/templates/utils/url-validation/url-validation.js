@@ -49,7 +49,7 @@ $(document).ready(function(){
                           } else {
                               if (result.response.isConnectionError) {
                                 if (result.response.response == null) {
-                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + i18n.t('validationMsgs.errorInConnection') + '</span>');
+                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + i18n.t('validationMsgs.errorInConnection') + '</span>');
                                 } else { //When an exception is thrown from jsFunction_isURLValid
                                     $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '</span>');
                                 }

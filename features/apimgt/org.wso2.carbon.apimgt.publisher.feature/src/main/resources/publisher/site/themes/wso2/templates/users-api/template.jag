@@ -1,8 +1,8 @@
 <% jagg.template("users-api", function(inputs, outputs, jagg) { %>
 
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/css/nv.d3.css"))%>"/>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/css/nv.d3.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/js/nv.d3.js"))%>"></script>
 
 <% var api=outputs.api;
    var subs = jagg.module("subscription");
@@ -103,7 +103,7 @@
 		</div>
 
     <div id="usageByCurrentSubscribersSpinner" class="center-wrapper">
-        <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+        <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
     </div>
 
     <div class="row">
@@ -132,7 +132,7 @@
 
 
     <div id="usageByCurrentSubscribersAcrossAllSpinner" class="center-wrapper">
-            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+            <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
     </div>
 
     <div class="row">

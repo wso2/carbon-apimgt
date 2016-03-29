@@ -5,17 +5,17 @@ module.exports = function(grunt) {
             command: [
                 'bower install',
                 'mkdir -p lib',
-               'cp -r bower_components/bootstrap/dist/ lib/bootstrap',
-               'cp -r bower_components/bootstrap-rating/ lib/bootstrap-rating',
-               'cp -r bower_components/bootstrap-select/dist/ lib/bootstrap-select',
-               'cp -r bower_components/jquery/dist/jquery.min.js lib/jquery.min.js',
+               'cp -r bower_components/bootstrap/dist/ libs/bootstrap_3.3.5',
+               'cp -r bower_components/bootstrap-rating/ libs/bootstrap-rating',
+               'cp -r bower_components/bootstrap-select/dist/ libs/bootstrap-select',
+               'cp -r bower_components/jquery/dist/jquery.min.js libs/jquery.min.js',
                'mkdir -p lib/font-awesome/',
                'cp -r bower_components/font-awesome/css lib/font-awesome/css',
                'cp -r bower_components/font-awesome/fonts lib/font-awesome/fonts',
-               'cp -r bower_components/handlebars/handlebars.min.js lib/handlebars.min.js',
-               'cp -r bower_components/jasny-bootstrap/dist/ lib/jasny-bootstrap',
-               'cp -r bower_components/jquery-validation/dist/ lib/jquery-validation/',
-               'cp -r bower_components/zeroclipboard/dist/ lib/zeroclipboard'
+               'cp -r bower_components/handlebars/handlebars.min.js libs/handlebars.min.js',
+               'cp -r bower_components/jasny-bootstrap/dist/ libs/jasny-bootstrap',
+               'cp -r bower_components/jquery-validation/dist/ libs/jquery-validation/',
+               'cp -r bower_components/zeroclipboard/dist/ libs/zeroclipboard'
             ].join('&&')
         }
     },

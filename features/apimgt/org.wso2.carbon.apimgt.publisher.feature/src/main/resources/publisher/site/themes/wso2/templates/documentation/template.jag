@@ -217,7 +217,7 @@
                         <% }else if (doc.sourceType == "URL"){%>
                          	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=jagg.url("/site/themes/responsive/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check"></i>
+			 <a href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check"></i>
 			  <%=i18n.localize("open")%>
 			  </a>
 			<%}%>
