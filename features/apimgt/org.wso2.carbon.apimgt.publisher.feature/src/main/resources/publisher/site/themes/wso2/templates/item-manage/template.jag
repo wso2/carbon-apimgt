@@ -30,11 +30,11 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
-%>
-<script language="javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
-    var AUTH_TYPES = [
-      { "value": "None", "text":"<%=i18n.localize("none")%>"} ,
+    %>
+    <script language="javascript">
+        var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
+        var AUTH_TYPES = [
+          { "value": "None", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "Application", "text":"<%=i18n.localize("application")%>"},
       { "value": "Application User", "text":"<%=i18n.localize("applicationUser")%>"},
       { "value": "Application & Application User", "text":"<%=i18n.localize("application&applicationUser")%>"}
@@ -60,10 +60,10 @@
 <%
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
-    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
-%>
-<!-- <center>
-<%if(createPermitted){%>
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);
+    %>
+    <!-- <center>
+    <%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
         <a href="<%= design_w_link %>" class="wizard-done">
@@ -88,14 +88,11 @@
 
 </center>-->
 	<div class="page-header">
- 		<h2> <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
-        <% if(api){ %>
-           <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
-        <% } %>
+ 		<h2> <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>
         </h2>
- 	</div>     
+ 	</div>
     <div class="content-section shadow-up">
-    <div class="content-data">   
+    <div class="content-data">
 	    <div class="alert alert-danger" id="addAPIError" style="display:none">
 	        <span id="addErrorSpan"></span>
 	    </div>
@@ -106,8 +103,8 @@
 	        active subscriptions.</p>
             </div>
 		  <%  }%>
-		  
-		  
+
+
 		  <div class="container">
                 <div class="row">
                     <div class="wizard">
@@ -121,46 +118,49 @@
 	                        <%} %>
                         </div>
                         <div class="wiz-content">
-                        
+
                         		   <div class="row">
         <div class="col-sm-12">
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
 
-<div id="accordion1" role="tablist" aria-multiselectable="true">
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne">
-    	<h4 class="panel-title">
-			<div>
-	        	<div class="heading">Configurations</div>
-			</div>
-	        <div class="clearfix"></div>										        
-		</h4>
-	</div>
-    <div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
-      <div class="panel-body">
+              	<div class="form-heading">
+					<h4 class="panel-title">
+						<div>
+                   			<div class="heading">Configurations</div>
+						</div>
+                    	<div class="clearfix"></div>
+					</h4>
+				</div>
 
-            <div class="form-group">
-                        <label class = "col-sm-3 control-label">Make this the Default Version:
-                        <a class="help_popup" help_data="default_api_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
-                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
-                         </label>
-                     	<div class="col-sm-8">
-                     	  <label class="checkbox">
-                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
-                            <span class="helper"></span>
-                    	</label>                         
+	            <div class="form-group">
+	                        <label class = "col-sm-3 control-label">Make this the Default Version:
+	                        <a class="help_popup" help_data="default_api_help" data-trigger="hover" data-placement="bottom">
+	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
+									<i class="fw fw-circle fw-stack-2x"></i>
+									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+								</span>
+	                        </a>
+	                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+	                         </label>
+	                     	<div class="col-sm-8">
+	                     	  <label class="checkbox">
+	                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
+	                            <span class="helper"></span>
+	                    	</label>
 
-                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
-                             <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
-                         <%}else{%>
-                             <p class="help-block">No default version defined for the current API</p>
-                         <%}}%>
+	                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+	                             <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+	                         <%}else{%>
+	                             <p class="help-block">No default version defined for the current API</p>
+	                         <%}}%>
 
-                     </div>
-                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
-            </div>
+	                     </div>
+	                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+	            </div>
+
+
 
              <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
                   <!--<div class="form-group">
@@ -173,21 +173,21 @@
                         <select id="apiPolicy" name="apiPolicy"  class="select required form-control">
                         <option value="none" <%if(api.apiLevelPolicy == null){%> selected="selected" <%}%>><%=i18n.localize("apiPolicyNone")%></option>
                         <%
-                        <%
+    <%
                         for (var i = 0; i < apiLevelPolicies.length; i++) {
                             var isSelected = false;
                             if(apiLevelPolicies[i].getPolicyName() == api.apiLevelPolicy){
                                 isSelected = true;
                             }
                             %><option value="<%= apiLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= apiLevelPolicies[i].getPolicyName() %></option>%%><%
-                        }
-                        %>
-                        </select>
-                        <script type="text/javascript">
+    }
+    %>
+    </select>
+    <script type="text/javascript">
 
-                        </script>
-                        <a class=" help_popup" help_data="tier_help"></a>
-                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+    </script>
+    <a class=" help_popup" help_data="tier_help"></a>
+    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
                 </div> -->
 
@@ -200,18 +200,18 @@
                     <div class="controls col-sm-8 tierSelect">
                         <select id="subPolicy" name="subPolicy"  class="form-control multiselect selected required" multiple="multiple">
                         <%
-                         for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
+    for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
 
-                            var isSelected = api.availableSubscriptionPolicy.indexOf(subscriptionLevelPolicies[i].getPolicyName()) > -1;                       
-                            %><option value="<%= subscriptionLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= subscriptionLevelPolicies[i].getPolicyName() %></option>%%><%
-                        }
-                        %>
-                        </select>
-                        <script type="text/javascript">
+        var isSelected = api.availableSubscriptionPolicy.indexOf(subscriptionLevelPolicies[i].getPolicyName()) > -1;
+        %><option value="<%= subscriptionLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= subscriptionLevelPolicies[i].getPolicyName() %></option>%%><%
+    }
+    %>
+    </select>
+    <script type="text/javascript">
 
-                        </script>
-                        <a class=" help_popup" help_data="tier_help"></a>
-                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+    </script>
+    <a class=" help_popup" help_data="tier_help"></a>
+    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
 
                  <% } else {%>
@@ -224,24 +224,29 @@
                         <div class="controls col-sm-8 tierSelect">
                             <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
                             <%
-                            for (var i = 0; i < tiers.length; i++) {
-                                var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                                %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
-                            }
-                            %>
-                            </select>
-                            <script type="text/javascript">
+    for (var i = 0; i < tiers.length; i++) {
+        var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+    }
+    %>
+    </select>
+    <script type="text/javascript">
 
-                            </script>
-                            
-                        </div>
-                    </div>
-                  <% }%>
+    </script>
+
+</div>
+</div>
+<% }%>
 
 
                 <div class="form-group transport-styles">
                 <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
-                	<a class="help_popup" help_data="http_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+                	<a class="help_popup" help_data="http_help" data-trigger="hover" data-placement="bottom">
+                		<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x"></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+						</span>
+                	</a>
                 	<p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                 </label>
                 <div class="controls col-sm-8">
@@ -252,7 +257,7 @@
                     <label class="checkbox">
                             <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
                             <span class="helper"><%=i18n.localize("httpsTransport")%></span>
-                    </label>                    
+                    </label>
                 </div>
              </div>
 
@@ -263,10 +268,10 @@
                             <div class="col-sm-8">
                             <label class="checkbox">
 	                            <input type="checkbox" name="throttle_check"   id="toggleThrottle"                         <%
-                            		if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+    if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
                             		checked="checked"<%}%>>
 	                            <span class="helper"><%=i18n.localize("throttleMsg")%></span>
-                    		</label>                            
+                    		</label>
                             </div>
                         </div>
               <div class="form-group">
@@ -305,14 +310,19 @@
             <!--Response Caching -->
                 <div class="form-group">
                     <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
-                    	<a class="help_popup" help_data="cache_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+                    	<a class="help_popup" help_data="cache_help" data-trigger="hover" data-placement="bottom">
+                    		<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x"></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+                    	</a>
                         <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
                     </label>
                       <div class="col-sm-4 responseCacheSelect">
                        <select class="select required form-control" id="responseCache" name="responseCache">
                             <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
                             <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>                        
+                        </select>
                      </div>
                 </div>
                 <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
@@ -323,14 +333,19 @@
                 </div>
             <!--Response Caching End -->
 
-                
+
                 <% mod = jagg.module("api");
-            		result = mod.isMultipleTenantsAvailable();
-                	var isMultipleTenantsAvailable = result.status;
-            		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+result = mod.isMultipleTenantsAvailable();
+var isMultipleTenantsAvailable = result.status;
+if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
             			<div class="form-group">
 	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:
-	                        	<a class="help_popup" help_data="subscriptions_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>	
+	                        	<a class="help_popup" help_data="subscriptions_help" data-trigger="hover" data-placement="bottom">
+	                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
+										<i class="fw fw-circle fw-stack-2x"></i>
+										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+									</span>
+	                        	</a>
 	                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
 	                        </label>
 	                        <div class="col-sm-4">
@@ -346,7 +361,7 @@
 	                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
 	                                    <% } %>
 	                                </select>
-	                            <%}%>                            	
+	                            <%}%>
 	                       </div>
                            </div>
                                <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
@@ -361,21 +376,26 @@
 
                                </div>
                         <% } %>
-                </div>
-      </div>
-    </div>
-  </div><!-- End of configuration panel -->
-  <div class="panel panel-default" id="accordion1">
-    <div class="panel-heading" role="tab" id="headingTwo">
-    	<h4 class="panel-title">
-			<div class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-	        	<div class="heading">Gateway Environments</div>
-			</div>
-	        <div class="clearfix"></div>										        
-		</h4>
+
+<!-- End of configuration panel -->
+<div id="accordion1" class="panel-group" role="tablist" aria-multiselectable="true">
+	<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
+			<h4 class="panel-title">
+				<label class="radio">
+				</label>
+				<div>
+					<div class="heading">Gateway Environments</div>
+					<div class="description truncate" title=""></div>
+					<div class="status">
+						<i class="fw fw-down"></i>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</h4>
 
     </div>
-    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+    <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
         <table class="table table-striped table-hover table-bordered display data-table">
              <thead>
              <tr>
@@ -388,29 +408,50 @@
              <tbody>
 
              <%
-             var environmentsJson=api.environments;
-             if(environmentsJson=="none"){
-                    for(i=0 ;i<environmentsList.length;i++){
-             %>
-                <tr data-type="selectable">
-                    <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
+var environmentsJson=api.environments;
+if(environmentsJson=="none"){
+    for(i=0 ;i<environmentsList.length;i++){
+        %>
+           <tr data-type="selectable">
+               <td>
+                   <div class="environments_checkbox">
+                       <label class="checkbox">
+                           <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
+	                            <span class="helper"></span>
+                    		</label>
+                    	</div>
+                   	</td>
                     <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                     <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
                     <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
                 </tr>
              <%}}
-             else{
-                 for(i=0 ;i<environmentsList.length;i++){
-                        if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+else{
+    for(i=0 ;i<environmentsList.length;i++){
+        if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
                             <tr data-type="selectable">
-                                 <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env"></div></td>
+                                 <td>
+                                 	<div class="environments_checkbox">
+                                 		<label class="checkbox">
+				                            <input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env">
+				                            <span class="helper"></span>
+			                    		</label>
+                                 	</div>
+                                 </td>
                                  <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
                             </tr>
                       <%}else{%>
                             <tr data-type="selectable">
-                                 <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
+                                 <td>
+                                 	<div class="environments_checkbox">
+                                 		<label class="checkbox">
+				                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
+				                            <span class="helper"></span>
+			                    		</label>
+                                 	</div>
+                                 </td>
                                  <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
@@ -429,20 +470,27 @@
                     }
                         $('#environments').val(values.toString());
                     });
-                    </script>                       
+                    </script>
     </div>
   </div><!-- Gateway environments -->
 
-  <div class="panel panel-default" id="accordion1">
-    <div class="panel-heading" role="tab" id="headingThree">
-    	<h4 class="panel-title">
-			<div class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-	        	<div class="heading"><%=i18n.localize("businessInformationTitle")%></div>
-			</div>
-	        <div class="clearfix"></div>										        
-		</h4>
+  <div class="panel panel-default">
+  	<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-controls="accordion1-collapse2">
+			<h4 class="panel-title">
+				<label class="radio">
+				</label>
+				<div>
+					<div class="heading"><%=i18n.localize("businessInformationTitle")%></div>
+					<div class="description truncate" title=""></div>
+					<div class="status">
+						<i class="fw fw-down"></i>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</h4>
+
     </div>
-    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+    <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
       <div class="panel-body">
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
@@ -471,26 +519,23 @@
       </div>
     </div>
   </div><!-- Business Information -->
-
-  <div class="panel panel-default" id="accordion1">
-    <div class="panel-heading" role="tab" id="headingFour">
-      <h4 class="panel-title">
+  </div>
+<!-- Resources Information -->
+	<div class="form-heading">
+		<h4 class="panel-title">
 			<div>
-	        	<div class="heading">Resources</div>
-			</div>
-	        <div class="clearfix"></div>										        
+				<div class="heading">Resources</div>
+				</div>
+                <div class="clearfix"></div>
 		</h4>
-    </div>
-    <div id="collapseThree" class="panel-collapse " role="tabpanel" aria-labelledby="headingFour">
-      <div class="panel-body">
-                <div id="api_designer">
+	</div>
+
+	<div id="api_designer">
                     <div id ="apidoc_details"></div>
                     <div id="scopes_view"></div>
                     <div id ="resource_details"></div>
-                </div>      
-      </div>
     </div>
-  </div><!-- Resources Information -->  
+<!-- Resources Information -->
 
 
 
