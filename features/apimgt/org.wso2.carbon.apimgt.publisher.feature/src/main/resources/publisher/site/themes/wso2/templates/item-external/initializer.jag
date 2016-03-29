@@ -5,7 +5,7 @@ jagg.initializer("item-external", {
         jagg.addHeaderJS("custom-validate", "jagg", "templates/utils/custom-validation/custom-validation.js");
         jagg.addHeaderJS("url-validate", "jagg", "templates/utils/url-validation/url-validation.js");
         
-        jagg.addFooterJS("item-edit", "edit", "templates/item-edit/js/edit.js");
+        jagg.addFooterJS("item-edit", "edit", "templates/item-external/js/external.js");
     }
 });
 %>
