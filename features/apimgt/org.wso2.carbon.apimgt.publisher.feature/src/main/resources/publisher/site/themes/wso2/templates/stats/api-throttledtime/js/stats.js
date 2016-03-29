@@ -126,13 +126,13 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/wso2/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
+                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
