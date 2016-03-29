@@ -192,6 +192,53 @@ public class DASRestClient {
     }
 
     /**
+     * Make post requests to DAS REST api and get the result as a json.
+     * @param request Request Search Bean for the request
+     * @return the json of the response
+     * @throws JsonSyntaxException
+     * @throws IOException
+     */
+    public String doPost(RequestSearchBean request) throws JsonSyntaxException, IOException {
+        //get the json string of the request object
+        String json = gson.toJson(request);
+
+        //doing a post request on the Search REST API
+        CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_REST_API_URL);
+        BufferedReader reader = null;
+        String result = null;
+        try {
+            // convert the response to a string
+            reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            StringBuilder builder = new StringBuilder();
+            String aux;
+            while ((aux = reader.readLine()) != null) {
+                builder.append(aux);
+            }
+            result = builder.toString();
+        } finally {
+            if (reader != null) {
+                try {
+                    //close the buffered reader
+                    reader.close();
+                } catch (IOException e) {
+                    //this is logged and the process is continued because parsing is done
+                    log.error("Error occurred while closing the buffers reader.", e);
+                }
+            }
+            if (response != null) {
+                try {
+                    //close the response reader
+                    response.close();
+                } catch (IOException e) {
+                    //this is logged and the process is continued because parsing is done
+                    log.error("Error occurred while closing the response.", e);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * use to check provided Table is present in the DAS Data access layer
      *
      * @param name Table name

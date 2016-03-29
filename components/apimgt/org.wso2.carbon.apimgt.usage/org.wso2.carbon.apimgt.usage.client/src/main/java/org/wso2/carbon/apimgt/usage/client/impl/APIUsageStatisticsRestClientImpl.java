@@ -2358,4 +2358,39 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public String getClientType() {
         return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
+
+    /**
+     * Search a DAS indexed table and get the json response.
+     * @param tableName name of the table
+     * @param query lucene query
+     * @param start start index of the result list
+     * @param count number of results required
+     * @return json string of the response
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    private String searchTable(String tableName, String query, int start, int count) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        //create the bean
+        RequestSearchBean request = new RequestSearchBean(query, start, count, tableName);
+        String result = null;
+        //do post and get the results
+        try {
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        //todo REMOVE THIS
+        log.error("\n\n\n\n\n\n\n\n\n");
+        log.error("RESULT OF THE LUCENE QUERY:");
+        log.error(result);
+        log.error("\n\n\n\n\n\n\n\n\n");
+        return result;
+    }
 }
