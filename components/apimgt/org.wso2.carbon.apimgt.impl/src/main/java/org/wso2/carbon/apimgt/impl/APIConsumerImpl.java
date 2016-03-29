@@ -620,15 +620,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] accessAllowDomainsArray,String
-            requestedScopes[], String jsonInput) throws APIManagementException {
+                                            String validityTime, String
+                                                    requestedScopes[], String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
