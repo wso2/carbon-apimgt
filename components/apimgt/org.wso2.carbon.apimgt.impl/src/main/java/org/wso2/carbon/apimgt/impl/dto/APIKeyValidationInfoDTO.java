@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,6 +52,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long validityPeriod;
     private long issuedTime;
     private List<String> authorizedDomains;
+
+    public List<String> getThrottlingDataList() {
+        return throttlingDataList;
+    }
+
+    public void setThrottlingDataList(List<String> throttlingDataList) {
+        this.throttlingDataList = throttlingDataList;
+    }
+
+    private  List<String> throttlingDataList;
 
     public String getApiTier() {
         return apiTier;
