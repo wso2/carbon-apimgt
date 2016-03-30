@@ -36,7 +36,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //isContentAware property is here to notify if there is at least one content based tier associated with request
     //If this property is true then throttle handler should build message or get content length and pass it to
     //throttle server.
-    private boolean isContentAware;
+    private boolean contentAware;
     //Form API Manager 2.0 onward API specific tiers can define and this property is here to pass it.
     private String apiTier;
     //JWT or SAML token containing details of API invoker
@@ -61,11 +61,11 @@ public class APIKeyValidationInfoDTO implements Serializable {
     }
 
     public boolean isContentAware() {
-        return isContentAware;
+        return contentAware;
     }
 
-    public void setIsContentAware(boolean isContentAware) {
-        this.isContentAware = isContentAware;
+    public void setContentAware(boolean contentAware) {
+        this.contentAware = contentAware;
     }
 
     private Set<String> scopes;
