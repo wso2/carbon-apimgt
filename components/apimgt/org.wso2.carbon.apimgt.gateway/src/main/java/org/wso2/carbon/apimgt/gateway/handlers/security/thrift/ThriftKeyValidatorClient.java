@@ -151,6 +151,7 @@ public class ThriftKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions(dto.getThrottlingConditions());
         return template;
     }
 

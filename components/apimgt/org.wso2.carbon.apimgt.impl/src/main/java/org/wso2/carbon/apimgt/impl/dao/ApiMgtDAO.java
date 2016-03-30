@@ -846,8 +846,12 @@ public class ApiMgtDAO {
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                 boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
                         null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+
    
                 infoDTO.setContentAware(isContentAware);
+                //We also need to set throttling data list associated with given API. This need to have policy id and
+                // condition id list for all throttling tiers associated with this API.
+                //infoDTO.setThrottlingDataList(null);
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -5809,6 +5813,11 @@ public class ApiMgtDAO {
                 uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                 uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                 uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                List<String> list =  new ArrayList<String>();
+                //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
+                //level.
+                list.add("default");
+                uriTemplate.setThrottlingConditions(list);
                 InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                 if (mediationScriptBlob != null) {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);

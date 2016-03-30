@@ -79,6 +79,10 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         String authorizedUser;
         String roleID;
         if (authContext != null) {
+            //To get throttling tier and conditions use following method.
+            //VerbInfoDTO verbInfoDTO = (VerbInfoDTO)synCtx.getProperty(APIConstants.VERB_INFO_DTO);
+            //verbInfoDTO.getThrottlingConditions();
+            
             //Although the method says getApiKey, what is actually returned is the Bearer header (accessToken)
             accessToken = authContext.getApiKey();
             consumerKey = authContext.getConsumerKey();
