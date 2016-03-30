@@ -181,7 +181,6 @@ if(jagg.isCSRFTokenValid())
             apiData.outSeqFile = request.getFile("outSeqFile");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
 
-
             result = mod.updateAPIImplementation(apiData);
             if (result.error==true) {
                 obj = {

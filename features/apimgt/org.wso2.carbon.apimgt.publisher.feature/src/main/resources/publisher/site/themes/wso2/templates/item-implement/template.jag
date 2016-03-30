@@ -12,6 +12,8 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+
+	var corsJson = JSON.parse(api.corsConfiguration);
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
@@ -315,8 +317,108 @@
 							                                    </table>
 							                            	</div>
 							                            </div>
-							                        <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
-							                        <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                          
+
+														<% if(outputs.isCreatePermitted){
+														 %>
+
+														<div id="corsConfigsManaged">
+														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsManaged" name="cors_check"
+																			<%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															   <div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlOrigin")%>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerManaged">
+																				<label class="checkbox">
+																					<input type="checkbox" id="toggleallOriginManaged" name="toggleallOriginManaged"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																				</label>
+																				</div>
+																						<%
+																				var accessOriginManaged ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginManaged += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginManaged != ""){
+																					accessOriginManaged=accessOriginManaged.substr(0,(accessOriginManaged.length-1));
+																				}
+																				var accessHeadersManaged ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersManaged += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersManaged != ""){
+																					accessHeadersManaged=accessHeadersManaged.substr(0,(accessHeadersManaged.length-1));
+																				}
+																				var accessMethodsManaged="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsManaged += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsManaged != ""){
+																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
+																				}
+																				%>
+																				<div class="originContainerManaged">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlHeaders")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlMethods")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlCredentials")%>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerManaged">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsManaged" name="allowCredentialsManaged" placeholder="Access Control Allow Credentials"
+																						<% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																						<span class="helper">Check to send True</span>
+																					</label>
+																				</div>
+																			</td>
+																		</tr>
+																</table>
+															</div>
+														</div>
+
+													</div>
+												<% }; %>
 							                        <%}%>
 							                    </fieldset>
 												<hr />
@@ -415,12 +517,114 @@
 								                        </div>
 								                        <span style="display:none;" class="help-block jsonform-errortext"></span>
 								                    </div>
-								                    <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
-								                    <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                             
+								                    </fieldset>
+								                    <fieldset>
+
+												<% if(outputs.isCreatePermitted){
+														%>
+
+														<div id="corsConfigsPrototyped">
+															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationPrototyped"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsPrototyped" name="cors_check"
+																						 <%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																			<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															<div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlOrigin")%>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerPrototyped">
+																					<label class="checkbox">
+																						<input type="checkbox" id="toggleallOriginPrototyped" name="toggleallOriginPrototyped"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																					</label>
+																				</div>
+																						<%
+																				var accessOriginPrototyped ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginPrototyped += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginPrototyped != ""){
+																					accessOriginPrototyped=accessOriginPrototyped.substr(0,(accessOriginPrototyped.length-1));
+																				}
+																				var accessHeadersPrototyped ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersPrototyped += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersPrototyped != ""){
+																					accessHeadersPrototyped=accessHeadersPrototyped.substr(0,(accessHeadersPrototyped.length-1));
+																				}
+																				var accessMethodsPrototyped="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsPrototyped += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsPrototyped != ""){
+																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
+																				}
+																				%>
+																				<div class="originContainerPrototyped">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
+																									</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlHeaders")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlMethods")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlCredentials")%>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerPrototyped">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsPrototyped" name="allowCredentialsPrototyped" placeholder="Access Control Allow Credentials"
+																							 <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																								<span class="helper">Check to send True</span>
+																							</label>
+																				</div>
+																			</td>
+																		</tr>
+																	</table>
+																</div>
+															</div>
+
+														</div>
+												<% }; %>
 								                </fieldset>
 								                <hr />
 								                <div class="form-actions" id="saveButtons">
-								
+
 								                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
 								                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
 								                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
@@ -431,7 +635,7 @@
 								                </div>
 								                            </form>
 								                </div>
-								            </div>							
+								            </div>
 							
 							            </div>
 							
@@ -489,6 +693,150 @@
     </div>
     </div>
 </div>
+
+                    <script>
+                    $('input').on('change', function() {
+                         if (validate_AllowCredentialsManaged()) {
+                               console.log("adding *");
+                                $(".credentialContainerManaged").hide();
+                                $("#allowCredentialsManaged").attr("checked",false);
+                             }else{
+                              $(".credentialContainerManaged").show();
+                            }
+                      var corsenableManaged;
+                      var accessControlAllowMethodsManaged;
+                      var enableAllowCredentialsManaged;
+                      var allowOriginsManaged = $('#accessOriginManaged').val();
+                      var allowHeadersValuesManaged = $('#allowHeadersManaged').val();
+                      var allowMethodsValuesManaged = $('#allowMethodsManaged').val();
+
+                      if(document.getElementById('toggleallOriginManaged').checked) {
+                        allowOriginsManaged = "*";
+                        enableAllowCredentialsManaged = false;
+                        $('#allowCredentialsManaged').attr("checked",false);
+                        $('#allowCredentialsManaged').hide();
+                        $('.originContainerManaged').hide();
+                      } else {
+                        $('#allowCredentialsManaged').show();
+                        $('#allOriginContainerManaged').hide();
+                        $('.originContainerManaged').show();
+                        }
+                      if(document.getElementById('toggleCorsManaged').checked) {
+                        corsenableManaged = true;
+                      } else {
+                        corsenableManaged = false;
+                      }
+                      if($('#allowCredentialsManaged').attr('checked')) {
+                        enableAllowCredentialsManaged = true;
+                      } else {
+                      	 enableAllowCredentialsManaged = false;
+                      }
+                      if(allowOriginsManaged!=""){
+                          allowOriginsManaged = allowOriginsManaged.replace(/,/g,"','");
+                          allowOriginsManaged= "['"+allowOriginsManaged+"']";
+                      }else{
+                         allowOriginsManaged = "[]";
+                      }
+                      if(allowHeadersValuesManaged!=""){
+                          allowHeadersValuesManaged = allowHeadersValuesManaged.replace(/,/g,"','");
+                          allowHeadersValuesManaged= "['"+allowHeadersValuesManaged+"']";
+                      }else{
+                           allowHeadersValuesManaged = "[]";
+                      }
+                      if(allowMethodsValuesManaged != ""){
+                          allowMethodsValuesManaged = allowMethodsValuesManaged.replace(/,/g,"','");
+                          allowMethodsValuesManaged = "['" + allowMethodsValuesManaged + "']";
+                      }else{
+                          allowMethodsValuesManaged = "[]";
+                      }
+                    var corsJsonStringManaged = "{'corsConfigurationEnabled':"+corsenableManaged+",'accessControlAllowOrigins':"+allowOriginsManaged+",'accessControlAllowCredentials':"+enableAllowCredentialsManaged+
+                    ",'accessControlAllowHeaders':"+allowHeadersValuesManaged+",'accessControlAllowMethods':"+allowMethodsValuesManaged+"}";
+                    $('#corsConfigurationManaged').val(corsJsonStringManaged);
+                    });
+                    function validate_AllowCredentialsManaged(){
+                        var origins = $('#accessOriginManaged').val().split(",");
+                        var status;
+                        for (var origin in origins) {
+                            if (origins[origin] == "*") {
+                             console.log("in validate *");
+                            return true;
+                              break;
+                            }
+                          }
+                        }
+                    </script>
+
+                     <script>
+                    $('input').on('change', function() {
+                         if (validate_AllowCredentialsPrototyped()) {
+                               console.log("adding *");
+                                $(".credentialContainerPrototyped").hide();
+                                $("#allowCredentialsPrototyped").attr("checked",false);
+                             }else{
+                              $(".credentialContainerPrototyped").show();
+                            }
+                      var corsenablePrototyped;
+                      var accessControlAllowMethodsPrototyped;
+                      var enableAllowCredentialsPrototyped;
+                      var allowOriginsPrototyped = $('#accessOriginPrototyped').val();
+                      var allowHeadersValuesPrototyped = $('#allowHeadersPrototyped').val();
+                      var allowMethodsValuesPrototyped = $('#allowMethodsPrototyped').val();
+
+                      if(document.getElementById('toggleallOriginPrototyped').checked) {
+                        allowOriginsPrototyped = "*";
+                        enableAllowCredentialsPrototyped = false;
+                        $('#allowCredentialsPrototyped').attr("checked",false);
+                        $('#allowCredentialsPrototyped').hide();
+                        $('.originContainerPrototyped').hide();
+                      } else {
+                        $('#allowCredentialsPrototyped').show();
+                        $('#allOriginContainerPrototyped').hide();
+                        $('.originContainerPrototyped').show();
+                        }
+                      if(document.getElementById('toggleCorsPrototyped').checked) {
+                        corsenablePrototyped = true;
+                      } else {
+                        corsenablePrototyped = false;
+                      }
+                      if($('#allowCredentialsPrototyped').attr('checked')) {
+                        enableAllowCredentialsPrototyped = true;
+                      } else {
+                      	 enableAllowCredentialsPrototyped = false;
+                      }
+                      if(allowOriginsPrototyped!=""){
+                          allowOriginsPrototyped = allowOriginsPrototyped.replace(/,/g,"','");
+                          allowOriginsPrototyped= "['"+allowOriginsPrototyped+"']";
+                      }else{
+                         allowOriginsPrototyped = "[]";
+                      }
+                      if(allowHeadersValuesPrototyped!=""){
+                          allowHeadersValuesPrototyped = allowHeadersValuesPrototyped.replace(/,/g,"','");
+                          allowHeadersValuesPrototyped= "['"+allowHeadersValuesPrototyped+"']";
+                      }else{
+                           allowHeadersValuesPrototyped = "[]";
+                      }
+                      if(allowMethodsValuesPrototyped != ""){
+                          allowMethodsValuesPrototyped = allowMethodsValuesPrototyped.replace(/,/g,"','");
+                          allowMethodsValuesPrototyped = "['" + allowMethodsValuesPrototyped + "']";
+                      }else{
+                          allowMethodsValuesPrototyped = "[]";
+                      }
+                    var corsJsonStringPrototyped = "{'corsConfigurationEnabled':"+corsenablePrototyped+",'accessControlAllowOrigins':"+allowOriginsPrototyped+",'accessControlAllowCredentials':"+enableAllowCredentialsPrototyped+
+                    ",'accessControlAllowHeaders':"+allowHeadersValuesPrototyped+",'accessControlAllowMethods':"+allowMethodsValuesPrototyped+"}";
+                    $('#corsConfigurationPrototyped').val(corsJsonStringPrototyped);
+                    });
+                    function validate_AllowCredentialsPrototyped(){
+                        var origins = $('#accessOriginPrototyped').val().split(",");
+                        var status;
+                        for (var origin in origins) {
+                            if (origins[origin] == "*") {
+                             console.log("in validate *");
+                            return true;
+                              break;
+                            }
+                          }
+                        }
+                    </script>
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
