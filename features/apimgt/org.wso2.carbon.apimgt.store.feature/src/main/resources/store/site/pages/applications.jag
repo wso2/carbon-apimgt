@@ -38,7 +38,7 @@ var tenantDomain = jagg.getTenantDomain();
                         ],
                         "middle":[
                             {
-                                "name":"application/application-add",
+                                "name":"application/application-list",
                                 "inputs":{
                                     "apis":apis,
                                     "user":user

@@ -15,9 +15,8 @@
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
 
-<br />
 <div class="page-header" id="Message">
-    <h1><%=i18n.localize("applications")%></h1>
+    <h1>Add Application</h1>
 </div>
 <div class="content-section">
 <div class="content-data">
@@ -34,7 +33,7 @@
 <br />
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><strong><%=i18n.localize("addApp")%></strong></h3>
+    <h3 class="panel-title"><strong>Application Details</strong></h3>
   </div>
   <div class="panel-body">
 <form class="form-horizontal" id="appAddForm">
@@ -101,10 +100,6 @@
   </div>
 </div>
 
-
-
-
-    <% jagg.includeBlock("application/application-list", {user:inputs.user}); %>
 </div>
 </div>
 <% }); %>

@@ -20,10 +20,6 @@ var tenantDomain = jagg.getTenantDomain();
                         "title":"Applications",
                         "top":[
                             {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
-                            {
                                 "name":"search/api-search",
                                 "inputs":null
                             }

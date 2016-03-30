@@ -52,9 +52,6 @@
         var siteContext = '<%=jagg.getSiteContext()%>';
     </script>
 
-
-
-
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/favicon-store.png"))%>">
 
@@ -71,8 +68,7 @@
     </script>
 </head>
 <body>
-
-<% jagg.includeBlock("menu/primary", {"pagePath":outputs.pagePath,"tenant":tenant}); %>
+<% jagg.includeBlock("menu/header", {"pagePath":outputs.pagePath,"tenant":tenant}); %>
 
 <% jagg.includeBlocks(outputs.body); %>
 
@@ -84,7 +80,6 @@
         <p>WSO2 API Manager 2.0.0 | &copy; <script>document.write(new Date().getFullYear());</script> <a href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.</p>
       </div>
     </footer>
-
 <%
 if(data.footer) {
     jagg.printData(data.footer.js);

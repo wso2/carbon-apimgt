@@ -1,4 +1,9 @@
 <% jagg.template("application/application-list", function(inputs, outputs, jagg) { %>
+<div class="page-header" id="Message">
+    <h1><%=i18n.localize("applications")%></h1>
+</div>
+<p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
+<% jagg.log(inputs); %>
 <div id="application-list">
     <%
 
@@ -67,8 +72,7 @@
                 <th value="Name" class="col-md-2"><%=i18n.localize("name")%></th>
                 <th value="Tier" class="col-md-2"><%=i18n.localize("throttlingTier")%></th>
                 <th value="Status" class="col-md-1"><%=i18n.localize("status")%></th>
-                <th value="callbackUrl" class="col-md-2"><%=i18n.localize("callbackUrl")%></th>
-                <th value="callbackUrl" class="col-md-2">Description</th>
+                <th value="APIs Subscribed" class="col-md-1">Subscriptions</th>
                 <th value="Actions" colspan="2" class="col-md-3"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>
@@ -124,20 +128,32 @@
                 }
                 %>
                 <td class="app_name_cell"><%= encode.forHtml(statusVal)%></td>
-				<td class="app_name_cell wrap-text"><%= encode.forHtml(callbackUrl)%></td>
-				<td class="app_name_cell"><%= encode.forHtml(description)%></td>
-                <td>
+                <td class=""><%= encode.forHtml(app.apiCount)%></td>
+                <td class="text-right">
+                    <a href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag?name=" + encode.forHtmlAttribute(app.name) )%>" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
+                        <span class="fw-stack">
+                            <i class="fw fw-ring fw-stack-2x"></i>
+                            <i class="fw fw-view fw-stack-1x"></i>
+                        </span>
+                        <span class="hidden-xs">View</span>
+                    </a>
                     <%if(!disableUpdate){%>
-                        <a onclick="changeAppNameMode(this)"><span class="glyphicon glyphicon-edit"></span> <%=i18n.localize("edit")%></a>
+                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
+                        <span class="fw-stack">
+                            <i class="fw fw-ring fw-stack-2x"></i>
+                            <i class="fw fw-edit fw-stack-1x"></i>
+                        </span>
+                        <span class="hidden-xs">Edit</span>
+                    </a>
                     <%}%>
-                    <div style="display: none;">
-                        <button class="btn btn-primary" onclick="updateApplication(this)">Save</button>
-                        <button class="btn" onclick="updateApplication_reset(this)">Cancel</button>
-                    </div>
-                </td>
-                <td>
-                    <a onclick="deleteApp(this)"><span class="glyphicon glyphicon-trash"></span> Delete</a>
-                </td>
+                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view"  onclick="deleteApp(this)">
+                        <span class="fw-stack">
+                            <i class="fw fw-ring fw-stack-2x"></i>
+                            <i class="fw fw-delete fw-stack-1x"></i>
+                        </span>
+                        <span class="hidden-xs">Delete</span>
+                    </a>
+                </td>                
             </tr>
             <% } %>
         </tbody>

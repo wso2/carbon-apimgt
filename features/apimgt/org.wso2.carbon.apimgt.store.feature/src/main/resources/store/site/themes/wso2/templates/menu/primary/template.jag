@@ -1,5 +1,76 @@
 <% jagg.template("menu/primary", function(inputs, outputs, jagg) { 
   var tenant = jagg.getTenantDomain();
+  var user = jagg.getUser();
+%>
+            <nav class="navigation">
+                <ul>
+                    <li class="purple active">
+                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item hidden-xs hidden-sm">APIs</span></a>
+                        <ul class="sublevel-menu">
+                            <li><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="name hidden-xs hidden-sm">Sub menu</span></a></li>
+                            <li><a href="<%= jagg.urlTenanted()%>"><i class="fw fw-api icon"></i><span class="name hidden-xs hidden-sm">Sub menu</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-web-app icon"></i><span class="left-menu-item hidden-xs hidden-sm">Applications</span></a></li>                    
+                    <li class="orange"><a href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item hidden-xs hidden-sm">Forum</span></a></li>
+                    <li class="yellow"><a href="<%= jagg.urlTenanted("")%>"><i class="fw fw-subscribe icon"></i><span class="left-menu-item hidden-xs hidden-sm">Statistics</span></a></li>                    
+                </ul>
+            </nav>
+
+            <!--
+   <div class="sidebar-wrapper sidebar-nav" id="left-sidebar"
+    data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="50" style="width: 300px; left: 0px;">
+    <div class="nano">
+      <div class="nano-content">
+        <ul class="nav nav-pills  nav-stacked pages">
+        <% var i, link, links = outputs.links, length = links.length;
+           for(i = 0; i < length; i++) {
+           link = links[i];
+              if(link.title=='Forum' && (outputs.tenantDomains && outputs.tenantDomains.indexOf(tenant) > -1 && tenant !="carbon.super" ) ){ }else{
+        %>
+               <li <%=(link.active ? 'class="active"' : '')%>>
+               <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>>
+               <i class="<%=link.classIcon%>"></i>
+               <%=link.title%>
+               </a>
+               </li>
+        <%    } 
+           }
+        %>         
+          <li><a href="#" id="left-bar-menu-toggle" data-toggle="collapse" data-target="#secondaryMenu"
+                               aria-expanded="false"><i class="fw fw-statistics fw-2x"></i> Statistics
+                               <i class="icon fw fw-down fw-1x secondary-nav-toggle" title="Statistics"></i>
+                               </a>
+          <ul class="nav nav-pills secondary-nav collapse " id="secondaryMenu" role="menu" aria-labelledby="btn-1" >
+              <li ><a class="substats"
+                href="/publisher/site/pages/all-statistics.jag?page=api-subscriptions&stat=all-stat"
+                onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-subscriptions&stat=all-stat',e:event,ssoEnabled:false})">
+                <i class="icon fw fw-pie-chart"></i>
+                API Subscriptions</a></li>
+              <li ><a class="substats"
+                href="/publisher/site/pages/all-statistics.jag?page=api-usage-user&stat=all-stat"
+                onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-usage-user&stat=all-stat',e:event,ssoEnabled:false})">
+                <i class="icon fw fw-bar-chart"></i>
+                API Usage</a></li>
+              <li ><a class="substats"
+                href="/publisher/site/pages/all-statistics.jag?page=api-response-times&stat=all-stat"
+                onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-response-times&stat=all-stat',e:event,ssoEnabled:false})">
+                <i class="icon fw fw-bar-chart"></i>
+                API Response Times</a></li>
+              <li ><a class="substats"
+                href="/publisher/site/pages/all-statistics.jag?page=api-last-access-times&stat=all-stat"
+                onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-last-access-times&stat=all-stat',e:event,ssoEnabled:false})">
+                <i class="icon fw fw-table"></i>
+                API Last Access Times</a></li>
+            </ul>
+
+</li>
+        </ul>
+      </div>
+    </div>
+</div> -->
+<%
+  /*
 %>
 
 <!-- Fixed navbar -->
@@ -75,9 +146,8 @@
           </li>
         </ul>
       </li>      
-    </ul>    
-    <% jagg.includeBlock("user/login", null); %>
+    </ul>        
   <%}%>         
   </div><!--/.nav-collapse -->
 </nav>
-<% }); %>
+<% */ }); %>

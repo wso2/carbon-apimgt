@@ -36,8 +36,8 @@
 
 					var reqUrl = request.getRequestURI();
  %>
-<div class="title-section">
-    <h2><%=i18n.localize("viewprototypedapis")%></h2>
+<div class="page-header" id="Prototype">
+    <h1><%=i18n.localize("viewprototypedapis")%></h1>
 </div>
 
 <div class="clear"></div>

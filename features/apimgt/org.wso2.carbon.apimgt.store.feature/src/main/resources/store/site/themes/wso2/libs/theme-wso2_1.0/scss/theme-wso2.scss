@@ -143,13 +143,13 @@
 $font-folder-path: '../fonts';
 @include font( 'Roboto', 400, 'normal', 'Roboto Regular', 'Roboto-Regular', $font-folder-path);
 $font-default: 'Roboto', Arial, Helvetica, sans-serif;
-$font-default-weight: 300;
+$font-default-weight: normal;
 $font-icons: 'font-wso2';
 $screen-sizes: (
-    xs:'(max-width:767px)',
-    sm:'(min-width:768px) and (max-width:991px)',
-    md:'(min-width:992px) and (max-width:1199px)',
-    lg:'(min-width:1200px)'
+        xs:'(max-width:767px)',
+        sm:'(min-width:768px) and (max-width:991px)',
+        md:'(min-width:992px) and (max-width:1199px)',
+        lg:'(min-width:1200px)'
 );
 $sides: top, bottom, left, right;
 $message-status: info, success, warning, danger;
@@ -163,11 +163,11 @@ $base-info-color: #009DA7;
 $base-warning-color: #f0ad4e;
 $base-danger-color: #d9534f;
 
-$primary-color: #715C4C;
+$primary-color: #1a78d8;
 $secondary-color: #e4e4e4;
-$optional-color: #DA762B;
+$optional-color: #215080;
 
-$header-background-color: #463A31;
+$header-background-color: #1A78D8;
 $header-height: 50px;
 $header-link-hover-background-color: darken($header-background-color, 10%);
 
@@ -176,7 +176,7 @@ $breadcrumb-color: $base-light-color;
 $breadcrumb-height: 30px;
 $breadcrumb-padding: 5px 15px;
 
-$navbar-height: 50px;
+$navbar-height: 40px;
 $navbar-padding: 0 15px;
 $navbar-color1: #4D5461;
 $navbar-background-color: $primary-color;
@@ -315,6 +315,7 @@ body {
     font-weight: $font-default-weight;
     width: 100%;
     overflow-x: hidden;
+    background-color:#EFEFEF ;
 }
 
 body > .page-content-wrapper > .container,
@@ -391,6 +392,40 @@ body.inverse .fade-edge {
 .visible-inline-block {
     display: inline-block !important;
 }
+
+/* generating padding and margin classes */
+//.generate-gaps($sizes-length);
+//.generate-gaps($n, $i: 1) when ($i =< $n) {
+//
+//    // padding
+//    .add-padding-${i}x {
+//        padding: ($i * $default-gap)!important;
+//    }
+//    .add-padding-side($iterator: 1) when($iterator <= length($sides)) {
+//        $side: extract(extract($sides, $iterator), 1);
+//        .add-padding-${side}-${i}x {
+//            padding-${side}: ($i * $default-gap)!important;
+//        }
+//        .add-padding-side(($iterator + 1));
+//    }
+//    .add-padding-side();
+//
+//    // margin
+//    .add-margin-${i}x {
+//        margin: ($i * $default-gap)!important;
+//    }
+//    .add-margin-side($iterator: 1) when($iterator <= length($sides)) {
+//        $side: extract(extract($sides, $iterator), 1);
+//        .add-margin-${side}-${i}x {
+//            margin-${side}: ($i * $default-gap)!important;
+//        }
+//        .add-margin-side(($iterator + 1));
+//    }
+//    .add-margin-side();
+//
+//    // generate gaps
+//    .generate-gaps($n, ($i + 1));
+//}
 
 @for $i from 1 through $sizes-length {
 
@@ -637,7 +672,7 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
  * ======================================================================== */
 
 .navbar-wrapper {
-    min-height: 50px;
+    min-height: 40px;
 }
 
 .navbar.affix, .navbar.affix-bottom {
@@ -660,6 +695,7 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
     background: $navbar-background-color;
     border: none;
     margin-bottom: 0;
+    min-height: 40px;
     @include border-radius;
 }
 
@@ -708,9 +744,6 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
     }
     &[aria-expanded=true] {
         background: darken($optional-color, 8%);
-    }
-    & .icon {
-        line-height: $navbar-height;
     }
 }
 
@@ -1074,6 +1107,7 @@ ul.sidebar-messages > li {
     margin: 0;
     overflow: hidden;
     text-transform: uppercase;
+    font-size: 12px;
     background: $breadcrumb-background-color;
     color: $breadcrumb-color;
     min-height: $breadcrumb-height;

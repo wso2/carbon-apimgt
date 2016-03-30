@@ -1,23 +1,41 @@
 <% jagg.template("layout/base", function(inputs, outputs, jagg) { %>
-    <div id="wrapper" >
+<!-- #page-content-wrapper -->
+<div class="page-content-wrapper">
+    <!-- media-->
+    <div class="media">
+        <!-- media left-->
+        <div class="media-left">
         <!-- Sidebar -->
-        <% if(outputs.left) { %>
-        <div id="sidebar-wrapper">
-            <% jagg.includeBlocks(outputs.left); %>
+            <% jagg.includeBlock("menu/primary", {"pagePath":"","tenant":""}); %>
+            
+        <% if(outputs.left) { %>            
+            <% //jagg.includeBlocks(outputs.left); %>
             <% jagg.includeBlocks(outputs.right); %>
-        </div>
         <% } %>                 
-
-        <!-- /#sidebar-wrapper -->
+        </div><!-- media left-->
 
         <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <div class="container-fluid">                         
-                <% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2><% } %>            
+        <% var l = new Log(); %>
+        <% l.info(inputs.actions); %>
+        <% l.info(outputs.middle); %>
+        
+            <%
+                var section = null;
+                if(outputs.middle instanceof Array){ 
+                    section = outputs.middle[0].name;
+                }else{
+                    section = outputs.middle.name;
+                }
+            %>
+        
+        <!-- media body-->
+        <div class="media-body">
+            <% jagg.includeBlock("menu/actions", { page : section }); %>
+
+            <div class="container-fluid body-wrapper">                          
                 <% jagg.includeBlocks(outputs.middle); %>            
-            </div>         
-        </div>
-        <!-- /#page-content-wrapper -->       
-    </div>
-    <!-- /#wrapper -->
+            </div> 
+        </div><!-- /#media body-->               
+    </div><!-- /#media-->
+</div><!-- /#page-content-wrapper -->
 <% }); %>

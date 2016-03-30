@@ -44,7 +44,7 @@ to=0;
 
 var reqUrl = request.getRequestURI();
  %>
-<div class="title-section">
+<div class="page-header" id="Prototype">
      <%
 
              var tagDisplayName = "";
@@ -56,7 +56,7 @@ var reqUrl = request.getRequestURI();
              	if( tag.split(site.tagGroupKey).length == 2 ){
                  	tagDisplayName = tag.split(site.tagGroupKey)[0];
       %>
-             		<h2>APIs - <%= encode.forHtml(tagDisplayName)%></h2>
+             		<h1>APIs - <%= encode.forHtml(tagDisplayName)%></h1>
 		             <ul class="breadcrumb">
 		                 <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
 		                 <li class="active"><%= encode.forHtml(tagDisplayName)%></li>
@@ -64,12 +64,12 @@ var reqUrl = request.getRequestURI();
        <%
             	}else{
 	               %>
-	               <h2>APIs - ( <%= encode.forHtml(tag) %> )</h2>
+	               <h1>APIs - ( <%= encode.forHtml(tag) %> )</h1>
 	               <%
             	}
              } else{
          %>
-    			<h2>APIs</h2>
+    			<h1>APIs</h1>
    			 <% } %>
 </div>
 
@@ -337,7 +337,8 @@ var reqUrl = request.getRequestURI();
         font-weight:bold;
     }
 </style>
-        <%
-        }
 
-        }); %>
+<%
+}
+
+}); %>

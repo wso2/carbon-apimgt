@@ -1,0 +1,14 @@
+<% jagg.template("menu/header", function(inputs, outputs, jagg) { %>
+<!-- header -->
+<header class="header header-default">
+    <div class="container-fluid">
+       <div class="pull-left brand float-remove-xs text-center-xs">
+          <a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%>" alt="API Store" title="API Store">
+              <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>" class="logo"/>
+              <h1 class="display-block-xs">API Store</h1>
+          </a>
+       </div>
+       <% jagg.includeBlock("user/login", null); %>
+    </div>
+</header>
+<% }); %>
