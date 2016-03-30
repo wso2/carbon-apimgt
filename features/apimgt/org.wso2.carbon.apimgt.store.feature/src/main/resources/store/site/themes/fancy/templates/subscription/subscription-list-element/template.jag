@@ -638,7 +638,6 @@
             <% } %>
             <div id="menu1" class="tab-pane fade">
               </select>
-        <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("js/generateSdk.js"))%>"></script>
          <button onclick="generateAndroidSdk('<%=app.name%>','android')" type="button">Android</button>
           <button onclick="generateAndroidSdk('<%=app.name%>','java')" type="button">Java</button>
           <a class="icon-question-sign help_popup_cli_gen"></a>

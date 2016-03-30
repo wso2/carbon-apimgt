@@ -8,8 +8,7 @@ function generateAndroidSdk(app,lang) {
     }, function (result) {
         $("#cssload-contain").fadeOut();
         if (!result.error) {
-            window.location.href = "../themes/fancy/templates/subscription/subscription-list/js/download.jag?fileName="+result.appName+".zip";
-//            location.reload();
+     window.location.href = "../themes/fancy/templates/subscription/subscription-list-element/download.jag?fileName="+result.appName+".zip";
         } else {
             jagg.message({content:result.message,type:"error"});
         }

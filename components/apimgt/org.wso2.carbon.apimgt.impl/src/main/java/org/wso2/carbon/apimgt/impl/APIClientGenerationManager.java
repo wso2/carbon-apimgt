@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.common.io.Files;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.Model;
@@ -26,16 +27,15 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
+import java.util.*;
 import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -64,12 +64,12 @@ public class APIClientGenerationManager {
         }
         File spec = null;
         boolean isFirstApi = true;
-        String specLocation = "resources/swaggerCodegen/swagger.json";
+        String specLocation = "tmp"+File.separator+"swaggerCodegen"+File.separator+userName+".json";
         String clientOutPutDir;
         String sourceToZip;
         String zipName;
         ZIPUtils zipUtils = new ZIPUtils();
-        File tempFolder = new File("resources/swaggerCodegen");
+        File tempFolder = new File("tmp"+File.separator+"swaggerCodegen");
         if (!tempFolder.exists()) {
             tempFolder.mkdir();
         } else {
@@ -132,6 +132,7 @@ public class APIClientGenerationManager {
                             .entrySet()) {
                         securityDefinitions.put(entrySecurityDef.getKey(), entrySecurityDef.getValue());
                     }
+
                 }
 
             }
@@ -151,19 +152,24 @@ public class APIClientGenerationManager {
             bufferedWriter.close();
 
         }
-        clientOutPutDir = "resources/swaggerCodegen/" + appName;
+        clientOutPutDir = "tmp"+File.separator+"swaggerCodegen"+File.separator+ appName;
         generateClient(appName, specLocation, sdkLanguage, clientOutPutDir);
-        sourceToZip = "resources/swaggerCodegen/" + appName;
-        zipName = "resources/swaggerCodegen/" + appName + ".zip";
+        sourceToZip = "tmp"+File.separator+"swaggerCodegen"+File.separator + appName;
+        zipName = "tmp"+File.separator+"swaggerCodegen"+File.separator + appName+"_"+sdkLanguage+ ".zip";
         try {
             zipUtils.zipDir(sourceToZip, zipName);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return appName;
+
+        File deleteProject = new File(clientOutPutDir);
+        FileUtils.deleteDirectory(deleteProject);
+        spec.delete();
+        return appName+"_"+sdkLanguage;
     }
 
     private void generateClient(String appName, String spec, String lang, String outPutDir) {
+
         String configClass;
         if (lang.equals("java")) {
             configClass = "io.swagger.codegen.languages.JavaClientCodegen";
@@ -172,7 +178,6 @@ public class APIClientGenerationManager {
         } else {
             configClass = null;
         }
-
         try {
             CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
             codegenConfigurator.setGroupId("org.wso2");

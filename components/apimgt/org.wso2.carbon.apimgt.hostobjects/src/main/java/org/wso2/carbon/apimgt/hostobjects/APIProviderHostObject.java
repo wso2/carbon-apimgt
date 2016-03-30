@@ -81,6 +81,8 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -4791,10 +4793,19 @@ public class APIProviderHostObject extends ScriptableObject {
         Swagger swagger = new SwaggerParser().parse(spec);
         Map<String,Path> paths = swagger.getPaths();
         Operation operation;
+        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+        String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
+
+        OAuthAdminService oAuthAdminService = new OAuthAdminService();
+        String[] allowedGrantTypesArr = oAuthAdminService.getAllowedGrantTypes();
+        String allowedGrantTypes = StringUtils.join(allowedGrantTypesArr,",");
+
         APISecuritySchemeDefinition apiSecuritySchemeDefinition = new APISecuritySchemeDefinition();
         apiSecuritySchemeDefinition.setType("oauth2");
-        apiSecuritySchemeDefinition.setAuthorizationUrl(getAuthorizationUrl());
-        apiSecuritySchemeDefinition.setFlow("implicit");
+        apiSecuritySchemeDefinition.setAuthorizationUrl(tokenUrl);
+
+        apiSecuritySchemeDefinition.setFlow(allowedGrantTypes);
 
         for (Scope s : scopes) {
             scopeNames.add(s.getName());
@@ -4806,36 +4817,43 @@ public class APIProviderHostObject extends ScriptableObject {
         for (Map.Entry<String, Path> entry : paths.entrySet()) {
             operation = paths.get(entry.getKey()).getGet();
             if (operation!= null){
+                paths.get(entry.getKey()).getGet().setSecurity(null);
                 paths.get(entry.getKey()).getGet().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getPatch();
             if (operation!= null){
+                paths.get(entry.getKey()).getPatch().setSecurity(null);
                 paths.get(entry.getKey()).getPatch().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getDelete();
             if (operation!= null){
+                paths.get(entry.getKey()).getDelete().setSecurity(null);
                 paths.get(entry.getKey()).getDelete().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getHead();
             if (operation!= null){
+                paths.get(entry.getKey()).getHead().setSecurity(null);
                 paths.get(entry.getKey()).getHead().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getPost();
             if (operation!= null){
+                paths.get(entry.getKey()).getPost().setSecurity(null);
                 paths.get(entry.getKey()).getPost().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getPut();
             if (operation!= null){
+                paths.get(entry.getKey()).getPut().setSecurity(null);
                 paths.get(entry.getKey()).getPut().addSecurity(securityName,scopeNames);
             }
 
             operation = paths.get(entry.getKey()).getOptions();
             if (operation!= null){
+                paths.get(entry.getKey()).getOptions().setSecurity(null);
                 paths.get(entry.getKey()).getOptions().addSecurity(securityName,scopeNames);
             }
 
@@ -4851,27 +4869,4 @@ public class APIProviderHostObject extends ScriptableObject {
         return Json.pretty(swagger);
     }
 
-    private static String getAuthorizationUrl(){
-
-        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
-
-        for (Environment environment : environments.values()) {
-            String apiGatewayEndpoints = environment.getApiGatewayEndpoint();
-            if(environment.isShowInConsole()){
-                List<String> urlsList = new ArrayList<String>();
-                urlsList.addAll(Arrays.asList(apiGatewayEndpoints.split(",")));
-                ListIterator<String> it = urlsList.listIterator();
-
-                while (it.hasNext()) {
-                    String url = it.next();
-                    if (url != null && url.startsWith("https:")) {
-                        return url+"/token";
-                    }
-                }
-            }
-
-        }
-        return null;
-    }
 }

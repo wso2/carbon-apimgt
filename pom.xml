@@ -860,7 +860,16 @@
                 <artifactId>fontbox</artifactId>
                 <version>${orbit.version.pdfbox}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>1.5.8</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>1.0.17.wso2v1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
