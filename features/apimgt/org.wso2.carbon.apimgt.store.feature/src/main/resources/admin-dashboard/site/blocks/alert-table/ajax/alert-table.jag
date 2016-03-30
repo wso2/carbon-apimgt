@@ -1,0 +1,50 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag")
+    allProviders = "__all_providers__";
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else {
+        if (action === "getDataFromAlertTable") {
+            mod = jagg.module("alerts");
+            var provider = jagg.getUser().username;
+            //var tableName = request.getParameter("tableName");
+            //var start = request.getParameter("start");
+            //var count = request.getParameter("count");
+
+            var tableName = "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM";
+            var start = 0;
+            var count = 10;
+            
+            result = mod.getDataFromAlertTable(tableName, start, count);
+            log.info(result);
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    values: JSON.parse(result)
+                }
+            }
+            print(obj);
+        } else {
+            print({
+                error: true,
+                message: msg.error.invalidAction(action)
+            });
+        }
+    }
+}());
+%>

@@ -1,0 +1,14 @@
+<%
+log = new Log(),
+//apiProvider = jagg.module("manager").getAPIProviderObj(),
+usageClient = jagg.module("manager").getUsageClient(),
+user = jagg.getUser();
+var gson = com.google.gson.Gson();
+
+
+var getDataFromAlertTable = function(tableName,start,count) {
+  return usageClient.searchTable(tableName,"*:*",start,count);
+};
+
+
+%>

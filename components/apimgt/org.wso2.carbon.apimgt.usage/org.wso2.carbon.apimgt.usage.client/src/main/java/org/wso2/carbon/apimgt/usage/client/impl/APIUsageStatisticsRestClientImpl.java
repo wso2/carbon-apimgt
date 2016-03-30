@@ -2368,7 +2368,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return json string of the response
      * @throws APIMgtUsageQueryServiceClientException
      */
-    private String searchTable(String tableName, String query, int start, int count) throws APIMgtUsageQueryServiceClientException {
+    public String searchTable(String tableName, String query, int start, int count) throws APIMgtUsageQueryServiceClientException {
         if (query == null) {
             query = "*:*";
         }
@@ -2380,17 +2380,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String result = null;
         //do post and get the results
         try {
+            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
+            if(restClient == null){
+                initializeDataSource();
+            }
             result = restClient.doPost(request);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
-        //todo REMOVE THIS
-        log.error("\n\n\n\n\n\n\n\n\n");
-        log.error("RESULT OF THE LUCENE QUERY:");
-        log.error(result);
-        log.error("\n\n\n\n\n\n\n\n\n");
         return result;
     }
 }
