@@ -31,10 +31,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
+import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchCountBean;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
 import org.wso2.carbon.apimgt.usage.client.bean.TableExistResponseBean;
@@ -205,7 +205,35 @@ public class DASRestClient {
         //doing a post request on the Search REST API
         CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_REST_API_URL);
         BufferedReader reader = null;
-        String result = null;
+        return getResponseString(response, reader);
+    }
+
+    /**
+     * Returns the count of an indexed table in DAS.
+     * @param searchCountBean search count request bean
+     * @return the count of the table for the request bean
+     * @throws JsonSyntaxException
+     * @throws IOException
+     */
+    public String doPost(RequestSearchCountBean searchCountBean) throws JsonSyntaxException, IOException {
+        //get the json string of the request object
+        String json = gson.toJson(searchCountBean);
+
+        //doing a post request on the Search REST API for the count
+        CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_COUNT_REST_API_URL);
+        BufferedReader reader = null;
+        return getResponseString(response, reader);
+    }
+
+    /**
+     * Returns the response as a string.
+     * @param response CloseableHttpResponse response
+     * @param reader Buffered Reader
+     * @return the response as a string
+     * @throws IOException
+     */
+    private String getResponseString(CloseableHttpResponse response, BufferedReader reader) throws IOException {
+        String result;
         try {
             // convert the response to a string
             reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));

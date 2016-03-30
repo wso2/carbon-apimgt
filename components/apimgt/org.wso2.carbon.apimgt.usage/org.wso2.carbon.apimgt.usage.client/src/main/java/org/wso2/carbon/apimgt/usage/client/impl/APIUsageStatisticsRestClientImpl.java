@@ -2392,4 +2392,33 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         return result;
     }
+
+    /**
+     * Provides the count for the search result.
+     * @param tableName name of the table
+     * @param query search query
+     * @return count of the search results
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchCount(String tableName, String query) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        //create the bean
+        RequestSearchCountBean request = new RequestSearchCountBean(tableName, query);
+        String result = null;
+        //do post and get the results
+        try {
+            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
+            if(restClient == null){
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
 }
