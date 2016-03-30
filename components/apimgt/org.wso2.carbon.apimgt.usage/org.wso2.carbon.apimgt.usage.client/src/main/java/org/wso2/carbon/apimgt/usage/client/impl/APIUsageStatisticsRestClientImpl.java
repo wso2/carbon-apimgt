@@ -2382,7 +2382,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Map<String, String> sortBy = new HashedMap();
         if (sortField != null) {
             sortBy.put("field", sortField);
-            sortBy.put("sortType", String.valueOf(ascending));
+            String sortType = (ascending) ? "ASC" : "DESC";
+            sortBy.put("sortType", sortType);
         }
         //create the bean
         RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
