@@ -200,6 +200,22 @@ $(document).ready(function(){
 	return false;                         
     });
 
+    if( $("#toggleCorsPrototyped").attr('checked') ) {
+        $('#corsTablePrototyped').show();
+    }
+    else {
+        $('#corsTablePrototyped').hide();
+    }
+    if($('#toggleallOriginPrototyped').attr('checked')) {
+        $('#allowCredentialsPrototyped').attr("checked",false);
+        $('#allowCredentialsPrototyped').hide();
+        $('.originContainerPrototyped').hide();
+    } else {
+        $('#allowCredentialsPrototyped').show();
+        $('#allOriginContainerPrototyped').hide();
+        $('.originContainerPrototyped').show();
+    }
+
     // last saved implementation state
    if ($('#endpoint_config').val() != "") {
 	    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
@@ -442,7 +458,7 @@ $("#toggleCorsManaged").change(function(e){
     }
 });
 
-$("#toggleCors1").change(function(e){
+$("#toggleCorsPrototyped").change(function(e){
     if($(this).is(":checked")){
     	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
