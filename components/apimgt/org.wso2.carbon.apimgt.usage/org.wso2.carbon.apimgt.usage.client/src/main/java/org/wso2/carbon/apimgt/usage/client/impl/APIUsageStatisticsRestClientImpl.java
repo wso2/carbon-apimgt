@@ -26,6 +26,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -2365,18 +2366,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @param query lucene query
      * @param start start index of the result list
      * @param count number of results required
+     * @param sortField from which field the sorting should happen, null if you don't want it sorted
+     * @param ascending sorting ascending or not
      * @return json string of the response
      * @throws APIMgtUsageQueryServiceClientException
      */
-    public String searchTable(String tableName, String query, int start, int count) throws APIMgtUsageQueryServiceClientException {
+    public String searchTable(String tableName, String query, int start, int count, String sortField, boolean ascending)
+            throws APIMgtUsageQueryServiceClientException {
         if (query == null) {
             query = "*:*";
         }
         if (start < 0) {
             start = 0;
         }
+        Map<String, String> sortBy = new HashedMap();
+        if (sortField != null) {
+            sortBy.put("field", sortField);
+            sortBy.put("sortType", String.valueOf(ascending));
+        }
         //create the bean
-        RequestSearchBean request = new RequestSearchBean(query, start, count, tableName);
+        RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
         String result = null;
         //do post and get the results
         try {

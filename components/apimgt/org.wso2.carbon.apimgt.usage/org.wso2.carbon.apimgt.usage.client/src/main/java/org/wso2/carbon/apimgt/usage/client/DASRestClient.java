@@ -33,11 +33,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
-import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchCountBean;
-import org.wso2.carbon.apimgt.usage.client.bean.Result;
-import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
-import org.wso2.carbon.apimgt.usage.client.bean.TableExistResponseBean;
+import org.wso2.carbon.apimgt.usage.client.bean.*;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 
 import java.io.BufferedReader;
@@ -198,7 +194,7 @@ public class DASRestClient {
      * @throws JsonSyntaxException
      * @throws IOException
      */
-    public String doPost(RequestSearchBean request) throws JsonSyntaxException, IOException {
+    public String doPost(RequestSortBean request) throws JsonSyntaxException, IOException {
         //get the json string of the request object
         String json = gson.toJson(request);
 
