@@ -31,9 +31,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -43,37 +41,38 @@ import java.util.regex.Pattern;
 public class APIMgtUsageHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(APIMgtUsageHandler.class);
+    public static final Pattern resourcePattern = Pattern.compile("^/.+?/.+?([/?].+)$");
 
     private volatile APIMgtUsageDataPublisher publisher;
 
     public boolean handleRequest(MessageContext mc) {
 
-        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        boolean enabled = APIUtil.isAnalyticsEnabled();
+        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+
+        if (!enabled || skipEventReceiverConnection) {
+            return true;
+        }
 
         /*setting global analytic enabled status. Which use at by the by bam mediator in
         synapse to enable or disable destination based stat publishing*/
         mc.setProperty("isStatEnabled", Boolean.toString(enabled));
 
-        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
-
-        String publisherClass = UsageComponent.getAmConfigService().
-                getAPIAnalyticsConfiguration().getPublisherClass();
+        String publisherClass = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
-
-            if (!enabled || skipEventReceiverConnection) {
-                return true;
-            }
-
             if (publisher == null) {
                 // The publisher initializes in the first request only
                 synchronized (this) {
                     if (publisher == null) {
                         try {
                             log.debug("Instantiating Data Publisher");
-                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                            publisher.init();
+
+                            APIMgtUsageDataPublisher tempPublisher =
+                                    (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
+                            tempPublisher.init();
+                            publisher = tempPublisher;
                         } catch (ClassNotFoundException e) {
                             log.error("Class not found " + publisherClass, e);
                         } catch (InstantiationException e) {
@@ -99,56 +98,46 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 tier = authContext.getTier();
             }
             String hostName = DataPublisherUtil.getHostAddress();
-            org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) mc).getAxis2MessageContext();
-            Map headers = (Map) (axis2MsgContext).
-                    getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            org.apache.axis2.context.MessageContext axis2MsgContext =
+                    ((Axis2MessageContext) mc).getAxis2MessageContext();
+            Map headers =
+                    (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             String userAgent = (String) headers.get(APIConstants.USER_AGENT);
             String context = (String) mc.getProperty(RESTConstants.REST_API_CONTEXT);
-            String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
+            String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-            String tenantDomain = MultitenantUtils.getTenantDomain(fullRequestPath);
 
+            String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
             if (apiPublisher == null) {
-                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(api_version,tenantDomain);
+                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
 
-            int index = api_version.indexOf("--");
-
-            if (index != -1) {
-                api_version = api_version.substring(index + 2);
-            }
-
-            String api = api_version.split(":")[0];
-            index = api.indexOf("--");
-            if (index != -1) {
-                api = api.substring(index + 2);
-            }
+            String api = APIUtil.getAPINamefromRESTAPI(apiVersion);
             String version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
             String resource = extractResource(mc);
-            String method = (String) (axis2MsgContext.getProperty(
-                    Constants.Configuration.HTTP_METHOD));
-            String userTenantDomain = MultitenantUtils.getTenantDomain(username);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(userTenantDomain);
+            String resourceTemplate = (String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+            String method = (String) (axis2MsgContext.getProperty(Constants.Configuration.HTTP_METHOD));
 
             Object throttleOutProperty = mc.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY);
             boolean throttleOutHappened = false;
             if (throttleOutProperty instanceof Boolean) {
                 throttleOutHappened = (Boolean) throttleOutProperty;
             }
-
+            String clientIp = DataPublisherUtil.getClientIp(axis2MsgContext);
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
             requestPublisherDTO.setContext(context);
-            requestPublisherDTO.setApi_version(api_version);
+            requestPublisherDTO.setApiVersion(apiVersion);
             requestPublisherDTO.setApi(api);
             requestPublisherDTO.setVersion(version);
             requestPublisherDTO.setResourcePath(resource);
+            requestPublisherDTO.setResourceTemplate(resourceTemplate);
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
-            requestPublisherDTO.setTenantDomain((MultitenantUtils.getTenantDomain(apiPublisher)));
+            requestPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
@@ -156,27 +145,8 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setUserAgent(userAgent);
             requestPublisherDTO.setTier(tier);
             requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
-
+            requestPublisherDTO.setClientIp(clientIp);
             publisher.publishEvent(requestPublisherDTO);
-
-            //Metering related publishing is no longer used.
-            /*//We check if usage metering is enabled for billing purpose
-            if (DataPublisherUtil.isEnabledMetering()) {
-                //If usage metering enabled create new usage stat object and publish to bam
-                APIManagerRequestStats stats = new APIManagerRequestStats();
-                stats.setRequestCount(1);
-                stats.setTenantId(tenantId);
-                try {
-                    //Publish stat to bam
-                    PublisherUtils.publish(stats, tenantId);
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(e);
-                    }
-                    log.error("Error occurred while publishing request statistics. Full stacktrace available in debug logs. " + e.getMessage());
-                }
-            }*/
-
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
@@ -192,8 +162,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     private String extractResource(MessageContext mc) {
         String resource = "/";
-        Pattern pattern = Pattern.compile("^/.+?/.+?([/?].+)$");
-        Matcher matcher = pattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
+        Matcher matcher = resourcePattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
         if (matcher.find()) {
             resource = matcher.group(1);
         }

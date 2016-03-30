@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
@@ -53,7 +54,7 @@ public class APIMgtWorkflowDataPublisher {
     static APIManagerAnalyticsConfiguration analyticsConfig = ServiceReferenceHolder.getInstance().
             getAPIManagerConfigurationService().
             getAPIAnalyticsConfiguration();
-    boolean enabled = analyticsConfig.isAnalyticsEnabled();
+    boolean enabled = APIUtil.isAnalyticsEnabled();
     private static String wfStreamName;
     private static String wfStreamVersion;
 

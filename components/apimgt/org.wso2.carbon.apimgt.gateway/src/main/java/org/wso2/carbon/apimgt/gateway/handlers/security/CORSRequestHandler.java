@@ -91,7 +91,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
-        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+
+		long executionStartTime = System.currentTimeMillis();
+		Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
 

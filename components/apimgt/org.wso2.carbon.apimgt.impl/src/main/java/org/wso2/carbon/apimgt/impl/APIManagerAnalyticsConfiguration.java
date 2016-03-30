@@ -20,15 +20,13 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Map;
 
 public class APIManagerAnalyticsConfiguration {
-
-    private static APIManagerAnalyticsConfiguration instance;
-
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String bamServerUrlGroups;
     private String bamServerUser;
@@ -49,15 +47,18 @@ public class APIManagerAnalyticsConfiguration {
     private String faultStreamVersion;
     private String throttleStreamName;
     private String throttleStreamVersion;
+    private String executionTimeStreamName;
+    private String executionTimeStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
     }
+    private static class APIManagerAnalyticsConfigurationHolder {
+        private static final APIManagerAnalyticsConfiguration INSTANCE = new APIManagerAnalyticsConfiguration();
 
+        private APIManagerAnalyticsConfigurationHolder(){}
+    }
     public static synchronized APIManagerAnalyticsConfiguration getInstance() {
-        if (instance == null) {
-            instance = new APIManagerAnalyticsConfiguration();
-        }
-        return instance;
+        return APIManagerAnalyticsConfigurationHolder.INSTANCE;
     }
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
@@ -88,7 +89,11 @@ public class APIManagerAnalyticsConfiguration {
             if (throttleStreamName == null || throttleStreamVersion == null) {
                 log.error("Throttle stream name or version is null. Check api-manager.xml");
             }
-
+            executionTimeStreamName = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_NAME);
+            executionTimeStreamVersion = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_VERSION);
+            if (executionTimeStreamName == null || executionTimeStreamVersion == null) {
+                log.error("Execution Time stream name or version is null. Check api-manager.xml");
+            }
             bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
             bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
             bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
@@ -96,8 +101,6 @@ public class APIManagerAnalyticsConfiguration {
             dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
             dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
             dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
-
-
             String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
             buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
         }
@@ -201,5 +204,13 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setDasServerPassword(String dasServerPassword) {
         this.dasServerPassword = dasServerPassword;
+    }
+
+    public String getExecutionTimeStreamVersion() {
+        return executionTimeStreamVersion;
+    }
+
+    public String getExecutionTimeStreamName() {
+        return executionTimeStreamName;
     }
 }

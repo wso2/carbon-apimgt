@@ -451,7 +451,6 @@ $("#toggleSequence").change(function(e){
 });
 $("#toggleCorsManaged").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();
@@ -460,7 +459,6 @@ $("#toggleCorsManaged").change(function(e){
 
 $("#toggleCorsPrototyped").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();
