@@ -23,9 +23,9 @@ import java.util.List;
 /**
  * This class is used as a bean for represent API usage statistics result from the DAS REST API
  */
-public class PerGeoLocationUsageCount {
+public class UserAgentUsageCount {
     private int count;
-    private List<String> key_country_city_facet;
+    private List<String> key_os_browser_facet;
 
     public int getCount_sum() {
         return count;
@@ -36,16 +36,16 @@ public class PerGeoLocationUsageCount {
     }
 
     public List<String> getColumnNames() {
-        return key_country_city_facet;
+        return key_os_browser_facet;
     }
 
     public void setColumnNames(List<String> ColumnNames) {
-        this.key_country_city_facet = ColumnNames;
+        this.key_os_browser_facet = ColumnNames;
     }
 
-    public PerGeoLocationUsageCount(int count_sum, List<String> ColumnNames) {
+    public UserAgentUsageCount(int count_sum, List<String> ColumnNames) {
         super();
         this.count = count_sum;
-        this.key_country_city_facet = ColumnNames;
+        this.key_os_browser_facet = ColumnNames;
     }
 }
