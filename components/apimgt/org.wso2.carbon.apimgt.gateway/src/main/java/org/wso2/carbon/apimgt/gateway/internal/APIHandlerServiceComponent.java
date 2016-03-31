@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidato
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -40,6 +41,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="synapse.configuration.service"
+ * interface="org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setSynapseConfigurationService" unbind="unsetSynapseConfigurationService"
  */
 public class APIHandlerServiceComponent {
     
@@ -72,9 +76,6 @@ public class APIHandlerServiceComponent {
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}
-
-
-
     }
 
     protected void deactivate(ComponentContext context) {
@@ -111,5 +112,16 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    protected void setSynapseConfigurationService(SynapseConfigurationService synConfService) {
+        //do nothing
+        /*Here we have this service dependency only to make this component wait until SynapseConfigurationService
+        service is available. We actually needs this because we should not register TenantServiceCreator listener
+        before TenantServiceBusInitializer listener of carbon-mediation. */
+    }
+
+    protected void unsetSynapseConfigurationService(SynapseConfigurationService synConfService) {
+        //do nothing
     }
 }
