@@ -17,14 +17,15 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
 // @todo Publisher link
 %>
 <% if(user){ %>
-       <div class="pull-right auth float-remove-xs text-center-xs">
-         <a href="#" class="dropdown" data-toggle="dropdown">
-            <span class="icon fw-stack fw-lg">
-               <i class="fw fw-circle fw-stack-2x"></i>
-               <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-            </span>
-            <span class="hidden-xs"> &nbsp; <%=user.username%><span class="caret"></span></span>
-         </a>
+       <ul class="nav navbar-right float-remove-xs text-center-xs">
+       <li class="visible-inline-block">       		
+	         <a href="#" class="dropdown" data-toggle="dropdown">
+	            <span class="icon fw-stack fw-lg">
+	               <i class="fw fw-circle fw-stack-2x"></i>
+	               <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	            </span>
+	            <span class="hidden-xs"> &nbsp; <%=user.username%><span class="caret"></span></span>
+	         </a>
          <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
            <li class="dropdown-header visible-xs">&nbsp; <%=user.username%> <span class="caret"></span></li>
            <% if(isSelfSignupEnabled) { %>
@@ -33,20 +34,31 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
            <li class="divider visible-xs"></li>
            <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Log out</a></li>
          </ul>
-       </div>
+         </li>
+       </ul>
 <% } else { %>
-       <div class="pull-right auth float-remove-xs text-center-xs" style="min-height:50px">
-         <%if(isSelfSignupEnabled){%>
-         <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
-            <i class="fw fw-register"></i> &nbsp;
-            <%=i18n.localize("signup")%>
-         </a>&nbsp;&nbsp;
-         <% } %>        
-         <a id="login-link">
-            <i class="fw fw-sign-in fw-stack-1x fw-inverse"></i>
-            <%=i18n.localize("login")%>
-         </a>         
-       </div>       
+		<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<%if(isSelfSignupEnabled){%>
+	            <li class="visible-inline-block">
+	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
+	                  <span class="icon fw-stack fw-lg">
+	                  <i class="fw fw-circle fw-stack-2x"></i>
+	                  <i class="fw fw-document fw-stack-1x fw-inverse"></i>
+	                  </span>
+	                    <span class="hidden-xs"> <%=i18n.localize("signup")%></span>
+	                </a>
+	            </li>
+	          <% } %>       
+	            <li class="visible-inline-block">
+	                <a id="login-link">
+	                  <span class="icon fw-stack fw-lg">
+	                  <i class="fw fw-circle fw-stack-2x"></i>
+	                  <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                  </span>
+	                    <span class="hidden-xs"><%=i18n.localize("login")%></span>
+	                </a>
+	            </li>
+        </ul>      
 <% } %>
 
 
