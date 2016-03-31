@@ -30,7 +30,7 @@
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="home">...</div>
     <div role="tabpanel" class="tab-pane" id="profile">
-    <% //jagg.includeBlock("subscription/subscription-list", { "user" :"admin" }); %>
+    <% //jagg.includeBlock("subscription/subscription-authapp-main", { "user" :"admin" }); %>
     </div>
     <div role="tabpanel" class="tab-pane" id="messages">
     <% //jagg.includeBlock("subscription/subscription-list-element", { "user" :"admin" }); %>

@@ -15,7 +15,7 @@ var tenant = jagg.getTenantDomain();
   </div>
 </div>
 
-<div class="row">
+<!-- div class="row">
   <div class="col-md-6 api-search">
     <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
         <div class="input-group">
@@ -24,8 +24,7 @@ var tenant = jagg.getTenantDomain();
           <span class="input-group-btn">
             <button class="btn btn-primary search_apis" type="submit"><i class="fa fa-search"></i>Search</button>
           </span>
-        </div> 
-        <!-- /input-group -->
+        </div>         
         <div id="apiSearchHelp" class="hide help-popover-content" >
             <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
@@ -44,5 +43,5 @@ var tenant = jagg.getTenantDomain();
   </div>
   <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> Search Options</a>
 </div>
-</div>
+</div -->
 <% }); %>
