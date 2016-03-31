@@ -103,14 +103,7 @@
 				        %>
 				</td>
                 <td class="app_name_cell">
-                    <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" class="applicationTierSelect form-control" disabled="disabled">
-                        <%for(j=0; j<tiers.length; j++){%>
-                            <option value="<%=tiers[j].tierName%>"
-                                <%if(app.tier == tiers[j].tierName){print("selected=\"selected\"")}%>>
-                                <%=tiers[j].tierDisplayName%>
-                            </option>
-                        <%}%>
-                    </select>
+                    <%=tiers[j].tierDisplayName%>
                 </td>
 				<%
                 var status=app.status;

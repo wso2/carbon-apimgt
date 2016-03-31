@@ -2,6 +2,19 @@
 var query=request.getParameter("query");
 var tenant = jagg.getTenantDomain();
 %>
+<div class="form-group">
+  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+    <div class="input-group input-wrap search-wrap">
+      <input type="text" class="form-control appm-content-search" placeholder="Search...">
+      <div class="input-group-btn">
+        <button class="btn btn-default wrap-input-right" type="button" title="Search">
+          <i class="fw fw-search" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div><!-- /input-group -->
+  </div>
+</div>
+
 <div class="row">
   <div class="col-md-6 api-search">
     <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
