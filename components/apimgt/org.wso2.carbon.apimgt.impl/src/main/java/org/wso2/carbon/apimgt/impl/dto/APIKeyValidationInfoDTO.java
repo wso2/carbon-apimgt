@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //isContentAware property is here to notify if there is at least one content based tier associated with request
     //If this property is true then throttle handler should build message or get content length and pass it to
     //throttle server.
-    private boolean isContentAware;
+    private boolean contentAware;
     //Form API Manager 2.0 onward API specific tiers can define and this property is here to pass it.
     private String apiTier;
     //JWT or SAML token containing details of API invoker
@@ -52,6 +53,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long issuedTime;
     private List<String> authorizedDomains;
 
+    public List<String> getThrottlingDataList() {
+        return throttlingDataList;
+    }
+
+    public void setThrottlingDataList(List<String> throttlingDataList) {
+        this.throttlingDataList = throttlingDataList;
+    }
+
+    private  List<String> throttlingDataList;
+
     public String getApiTier() {
         return apiTier;
     }
@@ -61,11 +72,11 @@ public class APIKeyValidationInfoDTO implements Serializable {
     }
 
     public boolean isContentAware() {
-        return isContentAware;
+        return contentAware;
     }
 
-    public void setIsContentAware(boolean isContentAware) {
-        this.isContentAware = isContentAware;
+    public void setContentAware(boolean contentAware) {
+        this.contentAware = contentAware;
     }
 
     private Set<String> scopes;

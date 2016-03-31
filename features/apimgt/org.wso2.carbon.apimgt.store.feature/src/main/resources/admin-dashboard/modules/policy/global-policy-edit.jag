@@ -1,7 +1,7 @@
 <%
 var log = new Log();
 
-var addGlobalPolicy = function (policyName, description, siddhiQuery) {
+var saveGlobalPolicy = function (action, policyName, description, siddhiQuery) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
@@ -9,7 +9,11 @@ var addGlobalPolicy = function (policyName, description, siddhiQuery) {
 
         var policy = constructPolicyObject(provider, policyName, description, siddhiQuery);
 
-        apiProvider.addPolicy(policy);
+        if (action == "add") {
+            apiProvider.addPolicy(policy);
+        } else if (action == "update") {
+            apiProvider.updatePolicy(policy);
+        }
         log.info(policy.toString());
         return {
             error: false

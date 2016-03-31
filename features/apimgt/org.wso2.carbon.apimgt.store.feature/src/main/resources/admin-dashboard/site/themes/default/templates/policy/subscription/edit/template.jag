@@ -162,7 +162,7 @@
                     </fieldset>
 
                     <div class="form-actions">
-                        <input id="add-tier-btn" onclick="addSubscriptionPolicy()" name="save-tier-btn" type="button"
+                        <input id="add-tier-btn" onclick="saveSubscriptionPolicy()" name="save-tier-btn" type="button"
                             class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
                         <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
                     </div>
@@ -173,11 +173,11 @@
 </div>
 
 <script>
+    var isNewPolicy = true;
     $(document).ready(function(){
         $('#cancel-tier-btn').on('click',function(){
              location.reload(true);
         });
-        var isNewPolicy = true;
         if('<%=policyName%>' != 'null'){
             isNewPolicy = false;
         }

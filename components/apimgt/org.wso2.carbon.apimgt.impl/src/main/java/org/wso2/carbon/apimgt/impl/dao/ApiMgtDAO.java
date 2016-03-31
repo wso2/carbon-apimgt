@@ -842,14 +842,16 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
-                infoDTO.setApiTier(rs.getString("API_POLICY"));
-                
-                //TODO set content aware policy
+
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                 boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
-                        rs.getString("API_POLICY"), rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                        null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+
    
-                infoDTO.setIsContentAware(isContentAware);
+                infoDTO.setContentAware(isContentAware);
+                //We also need to set throttling data list associated with given API. This need to have policy id and
+                // condition id list for all throttling tiers associated with this API.
+                //infoDTO.setThrottlingDataList(null);
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -5811,6 +5813,11 @@ public class ApiMgtDAO {
                 uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                 uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                 uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                List<String> list =  new ArrayList<String>();
+                //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
+                //level.
+                list.add("default");
+                uriTemplate.setThrottlingConditions(list);
                 InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                 if (mediationScriptBlob != null) {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
@@ -5852,10 +5859,9 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, api.getApiLevelPolicy());
-                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(7, api.getId().getApiName());
-                prepStmt.setString(8, api.getId().getVersion());
+                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(6, api.getId().getApiName());
+                prepStmt.setString(7, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -8533,31 +8539,7 @@ public class ApiMgtDAO {
             deleteStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to remove policy " + policyName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
-        }
-    }
-
-    /**
-     * Removes global level throttle policy from the database
-     *
-     * @param name name of the global policy
-     * @param tenantId Id of the tenant to which the policy is applied
-     * @throws APIManagementException
-     */
-    public void removeGlobalThrolttlePolicy(String name, int tenantId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement deleteStatement = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_POLICY_SQL);
-            deleteStatement.setString(1, name);
-            deleteStatement.setInt(2, tenantId);
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to remove global policy " + name + "-" + tenantId, e);
+            handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
         }

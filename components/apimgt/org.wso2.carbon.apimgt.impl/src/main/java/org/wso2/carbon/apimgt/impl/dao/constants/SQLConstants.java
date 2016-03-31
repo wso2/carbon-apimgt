@@ -251,8 +251,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER," +
-            "   API.API_POLICY" +
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -278,8 +277,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER," +
-            "   API.API_POLICY" +
+            "   API.API_PROVIDER" +      
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -1498,8 +1496,7 @@ public class SQLConstants {
             "   CONTEXT = ?, " +
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ?, " +
-            "   API_POLICY = ? " +
+            "   UPDATED_TIME = ? " +    
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
@@ -2267,7 +2264,7 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
-            "DELETE FROM AM_POLICY_GLOBAL WHERE NAME = ? AND TENANT_ID = ?";
+            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = 
             "SELECT APIPOLICY.TENANT_ID " +

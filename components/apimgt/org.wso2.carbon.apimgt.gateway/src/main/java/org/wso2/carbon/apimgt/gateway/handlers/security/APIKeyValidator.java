@@ -484,7 +484,9 @@ public class APIKeyValidator {
             verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
             verbInfoDTO.setAuthType(uriTemplate.getAuthType());
             verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
+            verbInfoDTO.setThrottlingConditions(uriTemplate.getThrottlingConditions());
             resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
+
         }
 
         return apiInfoDTO;

@@ -37,6 +37,7 @@ struct URITemplate {
     4: optional string httpVerb;
     5: optional string authType;
     6: optional string throttlingTier;
+    7: optional list<string>  throttlingConditions;
 }
 
 

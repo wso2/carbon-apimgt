@@ -136,6 +136,7 @@ public class APIKeyValidatorClient {
         dto.setValidityPeriod(generatedDto.getValidityPeriod());
         dto.setIssuedTime(generatedDto.getIssuedTime());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
+        dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
         return dto;
     }
 
@@ -172,6 +173,7 @@ public class APIKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions((Arrays.asList(dto.getThrottlingConditions())));
         return template;
     }
 }

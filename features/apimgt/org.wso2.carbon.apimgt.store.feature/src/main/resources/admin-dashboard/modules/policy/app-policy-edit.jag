@@ -1,7 +1,7 @@
 <%
 var log = new Log();
 
-var addAppPolicy = function (policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
+var saveAppPolicy = function (action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
                              defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
     try {
         var provider = jagg.getUser().username;
@@ -11,7 +11,11 @@ var addAppPolicy = function (policyName, description, defaultQuotaPolicy, defaul
         var policy = constructPolicyObject(provider, policyName, description, defaultQuotaPolicy, defaultRequestCount,
                 defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit);
 
-        apiProvider.addPolicy(policy);
+        if (action == "add") {
+            apiProvider.addPolicy(policy);
+        } else if (action == "update") {
+            apiProvider.updatePolicy(policy);
+        }
         log.info(policy.toString());
         return {
             error: false
