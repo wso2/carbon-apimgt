@@ -927,6 +927,9 @@
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.import.version.range>[4.4.1, 4.5.0)</carbon.platform.package.import.version.range>
 
+        <!--lib thrift version range-->
+        <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
+
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 

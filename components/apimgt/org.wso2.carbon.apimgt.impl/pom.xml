@@ -296,7 +296,7 @@
                             org.wso2.carbon.registry.indexing.*; version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${orbit.version.pdfbox}",
                             org.apache.poi.*,
-                            org.apache.thrift.*,
+                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,
