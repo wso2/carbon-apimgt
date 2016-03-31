@@ -66,11 +66,9 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-
         try {
             String action = WorkflowConstants.CREATE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest " +
                     "         xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "         <wor:apiName>$1</wor:apiName>\n" +
@@ -98,7 +96,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
             payload = payload.replace("$9", callBackURL != null ? callBackURL : "?");
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
-
             super.execute(workflowDTO);
         } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
@@ -112,7 +109,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
         log.info("Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO
@@ -147,7 +143,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         try {
             String action = WorkflowConstants.DELETE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
                     "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "           <wor:workflowExtRef>" + workflowExtRef + "</wor:workflowExtRef>\n" +

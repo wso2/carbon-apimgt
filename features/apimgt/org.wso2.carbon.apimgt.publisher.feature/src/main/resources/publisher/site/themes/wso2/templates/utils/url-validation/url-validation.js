@@ -25,12 +25,13 @@ $(document).ready(function(){
             apiName = "";
             apiVersion = "";
         }
-        $(btn).parent().parent().find('.url_validate_label').remove();
+
+        $(btn).parent().parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
         $(btn).val(i18n.t('validationMsgs.validating'));
 
         if (url == '') {
-            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-exclamation-sign icon-white"></i>'+ i18n.t('validationMsgs.missingUrl')+'</span>');
+        	$(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-exclamation-sign icon-white"></i>'+ i18n.t('validationMsgs.missingUrl')+'</span>');
             var toFade = $(btn).parent().parent().parent().find('.url_validate_label');
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('validationMsgs.testUri'));
@@ -55,12 +56,12 @@ $(document).ready(function(){
                                 }
                               } else {
                                     if (result.response.statusCode == null) { //When an exception is thrown from sendHttpHEADRequest method
-                                        $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.response + '</span>');
+                                        $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') +  result.response.response + '</span>');
                                     } else {
                                         if (result.response.isContainUriTemplatesOnly) {
                                             $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.provideCompleteUrl') + '</span>');
                                         } else {
-                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="glyphicon glyphicon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
                                         }
                                     }
                               }

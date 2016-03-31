@@ -3736,30 +3736,23 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length != 0) {
             //String tokenType = (String) args[2];
             //Token type would be default with new scopes implementation introduced in 1.7.0
-            String requestedScopes = (String)args[8];
+            String requestedScopes = (String)args[7];
             String oldAccessToken = (String) args[3];
-            NativeArray accessAllowDomainsArr = (NativeArray) args[4];
-            String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
-            String clientId = (String) args[5];
-            String clientSecret = (String) args[6];
-            String validityTime = (String) args[7];
+            String clientId = (String) args[4];
+            String clientSecret = (String) args[5];
+            String validityTime = (String) args[6];
             String[] requestedScopeArray = new String[]{requestedScopes};
 
             //TODO:should take JSON input as an argument.
             String jsonInput = null;
 
-            for (Object domain : accessAllowDomainsArr.getIds()) {
-                int index = (Integer) domain;
-                accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
-            }
 
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             //Check whether old access token is already available
             AccessTokenInfo response = null;
             try {
                 response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
-                                                        validityTime,
-                                                        accessAllowDomainsArray, requestedScopeArray, jsonInput);
+                                                        validityTime, requestedScopeArray, jsonInput);
                 row.put("accessToken", row, response.getAccessToken());
                 row.put("consumerKey", row, response.getConsumerKey());
                 row.put("consumerSecret", row, response.getConsumerKey());

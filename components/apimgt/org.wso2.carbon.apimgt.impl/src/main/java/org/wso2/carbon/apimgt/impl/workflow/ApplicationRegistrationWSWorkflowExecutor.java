@@ -58,7 +58,6 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
         try {
             String action = WorkflowConstants.CREATE_REGISTRATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload =
                     "<wor:ApplicationRegistrationWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
                             + "        <wor:applicationName>$1</wor:applicationName>\n"
@@ -140,11 +139,11 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
         try {
             String action = WorkflowConstants.DELETE_REGISTRATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
                     "   xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
                     "   	<p:workflowRef>" + workflowExtRef + "</p:workflowRef>\n" +
                     "   </p:CancelApplicationRegistrationWorkflowProcessRequest>";
+
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
         } catch (AxisFault axisFault) {
             errorMsg = "Error sending out cancel pending registration approval process message. Cause: " + axisFault

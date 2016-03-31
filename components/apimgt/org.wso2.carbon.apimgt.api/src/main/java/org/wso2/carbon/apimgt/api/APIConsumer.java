@@ -538,13 +538,12 @@ public interface APIConsumer extends APIManager {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Details of the newly generated Access Token.
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] accessAllowDomainsArray,String[] requestedScopes, String jsonInput) throws
+                                     String[] requestedScopes, String jsonInput) throws
             APIManagementException;
 
 	/**

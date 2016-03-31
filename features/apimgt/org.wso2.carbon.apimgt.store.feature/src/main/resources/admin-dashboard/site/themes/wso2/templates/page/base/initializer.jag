@@ -21,6 +21,7 @@ jagg.initializer("page/base", {
 
         jagg.addHeaderJS("page/base", "jagg", "templates/page/base/js/jagg.js");
         jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
+        jagg.addHeaderJS("page/base", "validator", "libs/jquery-validation/jquery.validate.min.js");
 
 
         jagg.addFooterJS("page/base", "bootstrap3js", "libs/bootstrap_3.3.5/js/bootstrap.min.js");
@@ -32,6 +33,7 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "datatables-js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
         jagg.addFooterJS("page/base", "common-js", "templates/utils/common/common.js");
         jagg.addFooterJS("page/base","select-2-js", "libs/select2_4.0.0/js/select2.full.min.js");
+        jagg.addFooterJS("page/base","custom-url", "templates/utils/custom-validation/custom-validation.js");
     }
 });
 %>
