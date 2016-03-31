@@ -70,6 +70,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.sort;
+
 /**
  * Usage statistics clas implementation for the APIUsageStatisticsClient.
  * Use the DAS REST API to query and fetch the data for getting usage Statistics
@@ -95,7 +97,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
 
-            if (!apiManagerAnalyticsConfiguration.isAnalyticsEnabled()) {
+            if (!APIUtil.isAnalyticsEnabled()) {
                 throw new APIMgtUsageQueryServiceClientException("Analytics not enabled");
             }
 
@@ -2014,7 +2016,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of PerUserAPIUsageDTO
      */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
+        sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
             public int compare(PerUserAPIUsageDTO o1, PerUserAPIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2043,7 +2045,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageDTO
      */
     private List<APIUsageDTO> getAPIUsageTopEntries(List<APIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIUsageDTO>() {
+        sort(usageData, new Comparator<APIUsageDTO>() {
             public int compare(APIUsageDTO o1, APIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2265,18 +2267,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Use to handle exception of common type in single step
-     *
-     * @param msg custom message
-     * @param e   throwable object of the exception
-     * @throws APIMgtUsageQueryServiceClientException
-     */
-    private static void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
-        log.error(msg, e);
-        throw new APIMgtUsageQueryServiceClientException(msg, e);
-    }
-
-    /**
      * sort the last access time data by last access time
      *
      * @param usageData list of data to sort
@@ -2285,7 +2275,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
             int limit) {
-        Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
+        sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2308,7 +2298,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
+        sort(usageData, new Comparator<APIResponseTimeDTO>() {
             public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2331,7 +2321,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<Result<ThrottleDataOfAPIAndApplicationValue>> getThrottleDataOfAPIAndApplicationSortedData(
             List<Result<ThrottleDataOfAPIAndApplicationValue>> usageData) {
-        Collections.sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
+        sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
             public int compare(Result<ThrottleDataOfAPIAndApplicationValue> o1, Result<ThrottleDataOfAPIAndApplicationValue> o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2349,5 +2339,120 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public String getClientType() {
         return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                        String tenantDomain, String fromDate,
+                                                                        String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
+        return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
+
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
+            APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        if (version != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TIME).append(": [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (mediationType != null && !"ALL".equals(mediationType)) {
+            mediationType = mediationType.trim().replaceAll(" ","+");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":'").append
+                    (mediationType).append("'");
+        }
+        RequestSearchBean request;
+        String tableName = getExecutionTimeTableByView(drillDown);
+        request = new RequestSearchBean(query.toString(), 0, 500, tableName);
+        Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
+        }.getType();
+
+        List<Result<ExecutionTimeOfAPIValues>> obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+        try {
+            obj = restClient.doPost(request, type);
+            if (obj.isEmpty()) {
+                obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+            }
+            insertZeroElementsAndSort(obj, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse the date", e);
+        }
+        return obj;
+    }
+
+    @Override
+    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        int aggregateLevel = 0;
+        if (version != null && !"ALL".equals(version)) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND requestTime : [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (drillDown != null) {
+            if (!"ALL".equals(drillDown)) {
+                aggregateLevel = 1;
+                drillDown = drillDown.trim().replaceAll(" ", "+");
+                query.append(" AND country :").append(drillDown);
+            } else {
+                aggregateLevel = 0;
+            }
+        }
+        SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
+                APIUsageStatisticsClientConstants
+                        .COUNTRY_CITY_FACET, APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
+        fields.add(f);
+        request.setAggregateFields(fields);
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<PerGeoLocationUsageCount>>>() {
+        }.getType();
+
+        List<Result<PerGeoLocationUsageCount>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        if (obj == null) {
+            obj = Collections.emptyList();
+        }
+        return obj;
     }
 }

@@ -360,6 +360,10 @@ div.image-container {
 .sidebar-wrapper .nav i{
     margin: 0px 10px 2px 10px;
 }
+.sidebar-wrapper .nav>li>a:focus, .sidebar-wrapper .nav>li>a:hover, .secondary-nav-active{
+    text-decoration: none;
+    background-color: #242932;
+}
 .secondary-nav li {
     padding-left: 20px;
     float: none;

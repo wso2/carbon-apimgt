@@ -22,6 +22,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.UsageClient;
 
@@ -44,7 +45,7 @@ public class APIUsageClientServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API usage client component activated");
         }
-        if (analyticsConfiguration.isAnalyticsEnabled()){
+        if (APIUtil.isAnalyticsEnabled()){
             UsageClient.initializeDataSource();
         }
     }

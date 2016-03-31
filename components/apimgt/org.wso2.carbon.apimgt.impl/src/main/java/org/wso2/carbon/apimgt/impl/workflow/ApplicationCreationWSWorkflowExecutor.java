@@ -66,7 +66,6 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         try {
             String action = WorkflowConstants.CREATE_APPLICATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload =
                     "<wor:ApplicationApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt" +
                             ".carbon.wso2.org\">\n"

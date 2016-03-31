@@ -1,0 +1,17 @@
+<%
+jagg.initializer("stats/api-latencytime", {
+
+    preInitialize:function () {
+        jagg.addHeaderJS("stats", "stats", "templates/stats/api-latencytime/js/stats.js");
+        jagg.addHeaderCSS("bootstrap-editable.css", "jagg", "templates/item-design/css/bootstrap-editable.css");        
+        jagg.addFooterJS("multiselect", "jagg", "lib/bootstrap-multiselect.js");                         
+     }
+});
+%>
+
+
+
+
+
+
+

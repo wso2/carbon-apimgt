@@ -195,8 +195,6 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             setupImagePermissions();
-//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
@@ -210,12 +208,13 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
-                    .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
-                    .SUPER_TENANT_ID);
+            if (analyticsConfiguration.isAnalyticsEnabled()){
+                APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
+                        .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
+                        .SUPER_TENANT_ID);
+            }
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
-            
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }

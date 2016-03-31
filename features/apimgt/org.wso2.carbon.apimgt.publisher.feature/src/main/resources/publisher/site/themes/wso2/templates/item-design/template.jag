@@ -298,7 +298,7 @@
 										                    session.put( "wsdl", null );
 										                %>
 										                <div id="api_designer" class="col-sm-9">                    
-										                    <div class="form-group api_wsdl">
+										                    <div class="form-group form-inline api_wsdl">
 										                        <label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:
 										                        		<a class="help_popup" help_data="wsdldesc_help" data-trigger="hover" data-placement="left">
 										                        			<span class="icon fw-stack fw-lg" style="font-size:6px">
@@ -310,11 +310,11 @@
 										                       	</label>
 										                        <div class="col-sm-6">
 										                        	<div class="input-append">
-										                        		<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />										                        		
+										                        		<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
+										                        		<div class="btn-group">
+										                        			<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
+										                        		</div>										                        		
 										                    		</div>             
-										                		</div>
-										                		<div class="col-sm-3">
-										                			<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
 										                		</div>
 										                </div>
 										    </div>
@@ -380,7 +380,7 @@
         <% } %>
     });
 </script>
-<div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/default/lib/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
+<div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">
     <button class="btn btn-primary" id="update_swagger">Save</button>                    
     <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
