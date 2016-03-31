@@ -119,7 +119,7 @@
 				                            <div class="clearfix"></div>
 										</h4>
 									</div>
-							        <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+							        <div id="accordion1-collapse1" class="panel-collapse collapse <% if( apiStatus=="PUBLISHED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingOne">
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
@@ -455,7 +455,7 @@
 						                            <div class="clearfix"></div>
 												</h4>
 											</div>							
-							            <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+							            <div id="accordion1-collapse2" class="panel-collapse collapse <% if( apiStatus=="PROTOTYPED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingTwo">
 								            <div class="panel-body">								
 								            <div class="">
 								            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
