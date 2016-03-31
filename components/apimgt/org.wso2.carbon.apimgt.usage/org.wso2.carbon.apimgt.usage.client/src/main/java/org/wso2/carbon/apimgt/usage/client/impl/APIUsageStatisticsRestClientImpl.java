@@ -2372,9 +2372,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
         }
         if (mediationType != null && !"ALL".equals(mediationType)) {
-            mediationType = mediationType.trim().replaceAll(" ","+");
-            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":'").append
-                    (mediationType).append("'");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":\"").append
+                    (mediationType).append("\"");
         }
         RequestSearchBean request;
         String tableName = getExecutionTimeTableByView(drillDown);
@@ -2424,8 +2423,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (drillDown != null) {
             if (!"ALL".equals(drillDown)) {
                 aggregateLevel = 1;
-                drillDown = drillDown.trim().replaceAll(" ", "+");
-                query.append(" AND country :").append(drillDown);
+                query.append(" AND _country :\"").append(drillDown).append("\"");
             } else {
                 aggregateLevel = 0;
             }
@@ -2443,6 +2441,61 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }.getType();
 
         List<Result<PerGeoLocationUsageCount>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        if (obj == null) {
+            obj = Collections.emptyList();
+        }
+        return obj;
+    }
+
+    @Override
+    public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        int aggregateLevel = 0;
+        if (version != null && !"ALL".equals(version)) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND requestTime : [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (drillDown != null) {
+            if (!"ALL".equals(drillDown)) {
+                aggregateLevel = 1;
+                query.append(" AND _os :\"").append(drillDown).append("\"");
+            } else {
+                aggregateLevel = 0;
+            }
+        }
+        SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
+                APIUsageStatisticsClientConstants
+                        .OS_BROWSER_FACET, APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
+        fields.add(f);
+        request.setAggregateFields(fields);
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<UserAgentUsageCount>>>() {
+        }.getType();
+
+        List<Result<UserAgentUsageCount>> obj = null;
 
         //do post and get the results
         try {

@@ -200,7 +200,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
 }
 
 function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+    jagg.post("/site/blocks/stats/ajax/stats.jag", { action: "isDataPublishingEnabled"},
         function (json) {
             if (!json.error) {
                 statsEnabled = json.usage;
