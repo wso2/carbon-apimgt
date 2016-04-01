@@ -8259,7 +8259,7 @@ public class ApiMgtDAO {
      * @param policy policy object defining the throttle policy
      * @throws SQLException
      */
-    public void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
+    private void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
         ResultSet resultSet = null;
         PreparedStatement policyStatement = null;
         String addQuery;
