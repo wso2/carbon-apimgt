@@ -2016,24 +2016,26 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?)";
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_POLICY_TYPE, QUOTA, \n" +
-                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_CONTENT_AWARE, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    "RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_SQL =
             "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
-                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, IS_CONTENT_AWARE, USER_LEVEL) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, IS_CONTENT_AWARE, \n" +
+                    "IS_DEPLOYED, USER_LEVEL) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_API_POLICY_WITH_ID_SQL =
             "INSERT INTO AM_POLICY_API (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_POLICY_TYPE, \n" +
                     "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n" +
-                    "IS_CONTENT_AWARE, USER_LEVEL, POLICY_ID) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    "IS_CONTENT_AWARE, IS_DEPLOYED, USER_LEVEL, POLICY_ID) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_CONDITION_SQL =
             "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE, \n" +
@@ -2053,8 +2055,8 @@ public class SQLConstants {
             "VALUES (?,?,?)";
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
-            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,SIDDHI_QUERY) \n" +
-            "VALUES (?,?,?,?)";
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID ,DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?)";
 
     public static final String UPDATE_POLICY_SQL =
             "UPDATE AM_POLICY " +
@@ -2230,7 +2232,7 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
-                    "IS_CONTENT_AWARE = ?" +
+                    "IS_CONTENT_AWARE = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
@@ -2240,7 +2242,7 @@ public class SQLConstants {
                     "QUOTA_POLICY_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
-                    "IS_CONTENT_AWARE = ?," +
+                    "IS_CONTENT_AWARE = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2253,6 +2255,18 @@ public class SQLConstants {
                     "DESCRIPTION = ?, " +
                     "SIDDHI_QUERY = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_API_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_API SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_GLOBAL_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_GLOBAL SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String DELETE_API_POLICY_SQL =
             "DELETE FROM AM_POLICY_API WHERE TENANT_ID = ? AND NAME = ?";
