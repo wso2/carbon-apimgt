@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -3660,10 +3661,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
+            String msg = "Error while deploying policy";
 
             // Add deployment fail flag to database and throw the exception
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
-            handleException("Error while deploying policy", e);
+            throw new PolicyDeploymentFailureException(msg, e);
         }
 
     }
@@ -3722,10 +3724,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
+            String msg = "Error while deploying policy to gateway";
 
             // Add deployment fail flag to database and throw the exception
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
-            handleException("Error while deploying policy to gateway");
+            throw new PolicyDeploymentFailureException(msg, e);
         }
     }
 
