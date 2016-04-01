@@ -59,7 +59,7 @@
 								<importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.apimgt.gateway:${carbon.apimgt.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.apimgt.core:${carbon.apimgt.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.databridge.datapublisher:4.2.3</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.databridge.datapublisher:${carbon.analytics.common.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.datasource.server:4.2.1</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.deployment.synchronizer:${carbon.deployment.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.ec2-client:${carbon.kernel.version}</importFeatureDef>

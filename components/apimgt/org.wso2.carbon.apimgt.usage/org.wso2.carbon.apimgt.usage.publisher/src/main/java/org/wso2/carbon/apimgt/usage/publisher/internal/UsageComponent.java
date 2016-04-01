@@ -23,7 +23,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
+import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.Map;
@@ -44,14 +44,14 @@ public class UsageComponent {
 
     private static APIManagerConfigurationService amConfigService;
 
-    private static Map<String, LoadBalancingDataPublisher> dataPublisherMap;
+    private static Map<String, DataPublisher> dataPublisherMap;
 
     protected void activate(ComponentContext ctx) {
         try {
             DataPublisherUtil.setEnabledMetering(
                     Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
 
-            dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
+            dataPublisherMap = new ConcurrentHashMap<String, DataPublisher>();
 
             log.debug("API Management Usage Publisher bundle is activated ");
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class UsageComponent {
      * @param tenantDomain - The tenant domain under which the data publisher is registered
      * @return - Instance of the LoadBalancingDataPublisher which was registered. Null if not registered.
      */
-    public static LoadBalancingDataPublisher getDataPublisher(String tenantDomain){
+    public static DataPublisher getDataPublisher(String tenantDomain){
         if(dataPublisherMap.containsKey(tenantDomain)){
             return dataPublisherMap.get(tenantDomain);
         }
@@ -99,7 +99,7 @@ public class UsageComponent {
      * @throws org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException - If a data publisher has already been registered under the
      * tenant domain
      */
-    public static void addDataPublisher(String tenantDomain, LoadBalancingDataPublisher dataPublisher)
+    public static void addDataPublisher(String tenantDomain, DataPublisher dataPublisher)
             throws DataPublisherAlreadyExistsException {
         if(dataPublisherMap.containsKey(tenantDomain)){
             throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +

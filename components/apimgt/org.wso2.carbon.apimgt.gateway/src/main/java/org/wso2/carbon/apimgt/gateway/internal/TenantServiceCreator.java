@@ -82,7 +82,8 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         /*String tenantDomain =
                 PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
         int tenantId =  PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();*/
-    	String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        log.info("Initializing APIM TenantServiceCreator for the tenant domain : " + tenantDomain);
         try {
 
             // first check which configuration should be active
@@ -148,20 +149,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
     private void createTenantSynapseConfigHierarchy(File synapseConfigDir, String tenantDomain) {
 
-        //The directory could be created before hand. Hence check if the directory exists before proceeding to copying the
-        //sequences.
-           if(!synapseConfigDir.exists()) {
-               if (synapseConfigDir.mkdir()) {
-                   File sequencesDir = new File(
-                           synapseConfigDir, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
-
-                   if (!sequencesDir.mkdir()) {
-                       log.warn("Could not create " + sequencesDir);
-                   }
-               } else {
-                   log.warn("Could not create " + synapseConfigDir);
-               }
-           }else {
+           if(synapseConfigDir.exists()) {
                SynapseConfiguration initialSynCfg = SynapseConfigurationBuilder.getDefaultConfiguration();
 
                //SequenceMediator mainSequence = (SequenceMediator) initialSynCfg.getMainSequence();

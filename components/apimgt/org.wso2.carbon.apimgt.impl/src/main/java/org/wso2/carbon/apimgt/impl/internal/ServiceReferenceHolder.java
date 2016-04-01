@@ -23,6 +23,7 @@ import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class ServiceReferenceHolder {
 
@@ -34,6 +35,7 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
     private ThrottlerService throttler;
+    private OutputEventAdapterService outputEventAdapterService;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -45,7 +47,6 @@ public class ServiceReferenceHolder {
 
     private static ConfigurationContextService contextService;
     private ServiceReferenceHolder() {
-
     }
 
     public static ServiceReferenceHolder getInstance() {
@@ -89,6 +90,14 @@ public class ServiceReferenceHolder {
 
     public TenantIndexingLoader getIndexLoaderService(){
         return indexLoader;
+    }
+
+    public OutputEventAdapterService getOutputEventAdapterService() {
+        return outputEventAdapterService;
+    }
+
+    public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        this.outputEventAdapterService = outputEventAdapterService;
     }
 
     public ThrottlerService getThrottler() {

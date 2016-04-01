@@ -59,6 +59,8 @@
 		<%
         var i, api,path,mode=outputs.mode,apis = outputs.apis,length;
         var reqUrl = request.getRequestURI();
+        var docViewMappedUrl = jagg.getMappedUrl("site/pages/doc-viewer.jag") + urlPrefix;
+        
         length = outputs.totalLength;
         var itemsPerPage = 10; //reduce this number to preview the pagination
         var currentPage = 1;
@@ -101,48 +103,73 @@
                     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider) + urlPostfix;
 
         %>        
-        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%>         
-                <div id="doc-search" style="padding-top:30px">       
-	                <li style="height:150px">
-	                	
-	                	<div class="left-menu-back01 doc-search-result">
-		                	<p class="doc-search-result-content"><%= encode.forHtml(api.docName)%></p>
-		                                       
-		                    <% if(api.docSummary && api.docSummary != ""){ %>
-		                    	<h6><%=i18n.localize("docSum")%>:</h6><p><%=  encode.forHtml(api.docSummary)%></p>
-		                    <% } %>
-		                    <%if(api.docSourceURL&& api.docSourceURL!="") { %>
-		                    	<p><a href="<%=api.docSourceURL%>" target="_blank" class="doc-search-result-text"><%=i18n.localize("viewDoc")%></a></p>
-		                    <%}else if(api.docFilePath && api.docFilePath!=""){%>
-		                    	<p><a href="<%=api.docFilePath%>" target="_blank" class="doc-search-result-text"><%=i18n.localize("download")%></a></p>
-		                    <%} else{%>
-			                    <div>
-				                     <%if(reqUrl.indexOf(".jag")>=0){%>
-				                     	<a href="doc-viewer.jag?docName=<%= encode.forUriComponent(api.docName)%>&name=<%= encode.forUriComponent(api.name) %>&version=<%= encode.forUriComponent(api.version)%>&provider=<%= encode.forUriComponent(api.provider)%>&<%=urlPrefix%>"  target="_blank" class="doc-search-result-text"><%=i18n.localize("viewDoc")%></a>
-				                     <%}else{%>
-				                     	<a href="site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(api.docName)%>&name=<%= encode.forUriComponent(api.name) %>&version=<%= encode.forUriComponent(api.version)%>&provider=<%= encode.forUriComponent(api.provider)%>&<%=urlPrefix%>"  target="_blank" class="doc-search-result-text"><%=i18n.localize("viewDoc")%></a>
-				                     <%}%>
-			                    </div>
-		                     <%}%>
-	                    </div>
-	                    <div class="doc-search-api-result">
-			                <a href="<%=path%>">
-			                    <% if(api.thumb == null) { %>
-			                    <img class="thumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
-			                    <% } else{ %>
-			                    <img class="thumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
-			                    <% } %>
-			                </a>
-			                <h5>
-			                    <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="label label-info" title="<%=api.name%>-<%=api.version%>">
-			                        <%=nameSubstring%> - <span class="versionTxt"><%=api.version%></span>
-			                    </a>
-			                    <div>(<%=api.provider%>)</div>
-			                </h5>
-	                		<p class="status"><%=api.status%></p>
-            			</div>
-	                 </li>
-                </div>
+        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%> 
+        	<div class="col-sm-12">
+        		<div class="col-sm-5">
+        			 <div class="add-padding-2x app-data ">
+                                    <h4><a href="#"><%= encode.forHtml(api.docName)%></a></h4>
+                                    <% if(api.docSummary && api.docSummary != ""){ %>
+                                    	<h5><a href="#"><%=i18n.localize("docSum")%>:<%=  encode.forHtml(api.docSummary)%></a></h5>
+                                    <%} %>
+                                    <%if (api.docSourceURL&& api.docSourceURL!="") { %>
+                                    	<p><a href="<%=api.docSourceURL%>" target="_blank"><%=i18n.localize("viewDoc")%></a></p>
+                                    <%} else if(api.docFilePath && api.docFilePath!="") { %>
+                                    	<p><a href="<%=api.docFilePath%>" target="_blank"><%=i18n.localize("download")%></a></p>
+                                    <% } else { %>
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + "&provider=" + encode.forUriComponent(api.provider) + urlPostfix; %>
+                                    	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank"><%=i18n.localize("viewDoc")%></a></p>
+                                    <% } %>
+                                </div>
+        		</div>
+        		<div class="col-sm-4">
+        			<div class="col-sm-6">
+                            <div class="api-wrapper add-margin-bottom-4x">
+                                <div class="image-container">                                    
+                                    <% if(api.thumb == null) { %>
+                                    	<div class="setbgcolor">
+											<div class="api-name-icon apiThumb" onclick="location.href='<%=path%>'"></div>
+											<div style="display: none">
+												<a href="" class="api-name"><%=api.name%></a>
+											</div>
+								</div> 
+                                    <% } else { %>
+                                    	<a href="<%=path%>">
+                                    		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="">
+                                    	</a>
+                                    <% } %>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
+                                    <h5><a href="#"><%=api.version%></a></h5>
+                                    <p><%=api.provider%></p>
+                                    <p>
+                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" >
+			                                <span id="noOfUsers">
+			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("users")%><% } %>
+			                                </span>
+			                            </a>
+                                    </p>
+                                    <h5><a><%=api.status%></a></h5>
+		                            <%if(outputs.isCreatePermitted){ %>
+			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>">
+				                            <span class="fw-stack">
+				                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+				                                <i class="fw fw-edit fw-stack-1x"></i>
+				                            </span>
+			                            </a>
+			                            <a onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;">
+				                            <span class="fw-stack">
+				                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+				                                <i class="fw fw-delete fw-stack-1x"></i>
+				                            </span>
+			                            </a>
+			                       <%} %>
+                                </div>
+                            </div>
+                        </div>  
+        		
+        		</div>        
+           </div>
                 <%} else {%> 
                 
                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">

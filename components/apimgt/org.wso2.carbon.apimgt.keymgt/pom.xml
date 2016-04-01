@@ -92,6 +92,7 @@
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
 							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
+							org.apache.thrift.*; version="${libthrift.import.version.range}",
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>

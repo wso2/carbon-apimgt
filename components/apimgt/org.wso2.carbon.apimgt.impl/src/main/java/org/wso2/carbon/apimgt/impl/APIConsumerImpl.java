@@ -205,8 +205,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
                 isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
             }
 
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
@@ -620,15 +620,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] accessAllowDomainsArray,String
-            requestedScopes[], String jsonInput) throws APIManagementException {
+                                            String validityTime, String
+                                                    requestedScopes[], String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -1701,10 +1700,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
         apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
-        if(consumerKey != null){
-            apiMgtDAO.deleteAccessAllowDomains(consumerKey);
-        }
-
     }
 
     /**
@@ -1714,13 +1709,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
-     *@param allowedDomainArray @return
+     * @return
      * @throws APIManagementException
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName, String keyType,
-                                                      String[] allowedDomainArray) throws APIManagementException {
+                                                      String applicationName, String keyType)
+                                                                        throws APIManagementException {
 
         String callBackURL = null;
 
@@ -1743,7 +1738,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -1954,7 +1948,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
-
         boolean isTenantFlowStarted = false;
 
         String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
@@ -1981,6 +1974,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO = new SubscriptionWorkflowDTO();
             } else {
                 workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
+
                 // set tiername to the workflowDTO only when workflows are enabled
                 SubscribedAPI subscription = apiMgtDAO
                         .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
@@ -1999,8 +1993,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
-                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+                try {
+                    createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+                } catch (WorkflowException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn("Failed to clean pending subscription approval task");
+                }
             }
+
             // update attributes of the new remove workflow to be created
             workflowDTO.setStatus(WorkflowStatus.CREATED);
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
@@ -2270,15 +2271,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
-
         try {
             String workflowExtRef;
             ApplicationWorkflowDTO workflowDTO;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
             WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
             WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -2311,8 +2312,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // clean up pending subscription tasks
             Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
             for (int subscription : pendingSubscriptions) {
-                workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
-                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+                try {
+                    workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
+                    createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+                } catch (APIManagementException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to get external workflow reference for subscription " + subscription);
+                } catch (WorkflowException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to clean pending subscription approval task: " + subscription);
+                }
             }
 
             // cleanup pending application registration tasks
@@ -2321,17 +2332,47 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String sandboxKeyStatus = apiMgtDAO
                     .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
             if (WorkflowStatus.CREATED.toString().equals(productionKeyStatus)) {
-                workflowExtRef = apiMgtDAO
-                        .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-                createProductionRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                try {
+                    workflowExtRef = apiMgtDAO
+                            .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+                    createProductionRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                } catch (APIManagementException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to get external workflow reference for production key of application "
+                            + applicationId);
+                } catch (WorkflowException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to clean pending production key approval task of " + applicationId);
+                }
             }
             if (WorkflowStatus.CREATED.toString().equals(sandboxKeyStatus)) {
-                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-                createSandboxRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                try {
+                    workflowExtRef = apiMgtDAO
+                            .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+                    createSandboxRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                } catch (APIManagementException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to get external workflow reference for sandbox key of application "
+                            + applicationId);
+                } catch (WorkflowException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to clean pending sandbox key approval task of " + applicationId);
+                }
             }
             if (workflowExtRef != null) {
-                createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                try {
+                    createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
+                } catch (WorkflowException ex) {
+
+                    // failed cleanup processes are ignored to prevent failing the application removal process
+                    log.warn("Failed to clean pending application approval task of " + applicationId);
+                }
             }
+
             // update attributes of the new remove workflow to be created
             workflowDTO.setStatus(WorkflowStatus.CREATED);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
@@ -2665,18 +2706,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPISet;
     }
 
-    @Override
-    public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
-    }
-
-    @Override
-    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.updateAccessAllowDomains(accessToken, accessAllowDomains);
-    }
-
     /**
      * Returns a list of tiers denied
      *
@@ -2877,7 +2906,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationId != null && tokenType != null) {
                 apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
                 apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
-                apiMgtDAO.deleteAccessAllowDomains(consumerKey);
             }
         }
     }

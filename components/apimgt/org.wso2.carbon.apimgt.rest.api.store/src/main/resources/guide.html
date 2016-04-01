@@ -1,0 +1,106 @@
+<!--
+  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-content">
+    <h2>Getting Started</h2>
+
+    <p>WSO2 API Manager is a complete solution for publishing APIs, creating and managing a developer community, and
+        for scalably routing API traffic. It leverages proven, production-ready, integration, security and
+        governance components from WSO2 Enterprise Service Bus, WSO2 Identity Server, and WSO2 Governance Registry.
+        Moreover, it is powered by WSO2 Business Activity Monitor, thereby making WSO2 API Manager ready for any
+        large-scale deployments right away.
+    </p>
+
+    <p>
+        As part of its latest release, the REST API was developed as a CXF REST web application running on WSO2 API
+        Manager. This API comes with a pluggable security mechanism. Since API security is implemented as a CXF
+        handler, if you need to plug a custom security mechanism, you can write your own handler and add it to the
+        web service. This REST API is implemented based on REST best practices and specifications. API development
+        is started with a swagger specification for Store and Publisher operations.
+    </p>
+
+    <p>
+        Before invoking the API with the access token, obtain the consumer key/secret key pair by calling the
+        dynamic client registration endpoint. You can request an access token with the preferred grant type. An
+        example is shown below,
+    </p>
+
+    <div class="pre"><code class="bash">curl -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -d @payload.json http://localhost:9763/client-registration/v0.9/register</code></div>
+    <br/>
+
+    <p>
+        Sample request:
+    </p>
+
+    <div class="pre"><code class="json">{
+    "callbackUrl": "www.google.lk",
+    "clientName": "rest_api_store",
+    "tokenScope": "Production",
+    "owner": "admin",
+    "grantType": "password refresh_token",
+    "saasApp": true
+}</code></div>
+    <br/>
+
+    <p>
+        Sample response:
+    </p>
+
+    <div class="pre"><code class="json">{
+    "callBackURL": "www.google.lk",
+    "jsonString":
+    "{
+    \"username\":\"admin\",
+    \"redirect_uris\":\"www.google.lk\",
+    \"tokenScope\":[Ljava.lang.String;@3a73796a,
+    \"client_name\":\"admin_rest_api_store\",
+    \"grant_types\":\"authorization_code password refresh_token iwa:ntlm
+    urn:ietf:params:oauth:grant-type:saml2-bearer client_credentialsimplicit\"
+    }",
+    "clientName": null,
+    "clientId": "HfEl1jJPdg5tbtrxhAwybN05QGoa",
+    "clientSecret": "l6c0aoLcWR3fwezHhc7XoGOht5Aa"
+}</code></div>
+    <br/>
+
+    <p>
+        During the API invocation process request, click the CXF handler first, which calls an introspection API to
+        validate the token. Generate the access token using the already created OAuth application. A sample call to
+        generate the access token is shown below.
+    </p>
+
+    <div class="pre"><code class="bash">curl -k -d "grant_type=password&username=admin&password=admin&scope=apim:subscribe" -H "Authorization: Basic SGZFbDFqSlBkZzV0YnRyeGhBd3liTjA1UUdvYTpsNmMwYW9MY1dSM2Z3ZXpIaGM3WG9HT2h0NUFh" https://127.0.0.1:8243/token</code></div>
+    <br/>
+
+    <p>
+        Token response:
+    </p>
+
+    <div class="pre"><code class="json">{
+    "scope":"apim:subscribe",
+    "token_type":"Bearer",
+    "expires_in":3600,
+    "refresh_token":"33c3be152ebf0030b3fb76f2c1f80bf8",
+    "access_token":"292ff0fd256814536baca0926f483c8d"
+}</code></div>
+    <br/>
+
+    <p>
+        Now you have a valid access token, which you can use to invoke an API. Navigate through the API descriptions
+        to find the required API, obtain an access token as described above and invoke the API with the
+        authentication header. If you use a different authentication mechanism, this process may change.
+    </p>
+</div>

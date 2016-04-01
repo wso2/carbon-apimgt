@@ -59,6 +59,9 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.Notification.EmailNotifier;
+import org.wso2.carbon.apimgt.impl.Notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.Notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -125,6 +128,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
@@ -1497,6 +1501,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
+                .<String, String>emptyMap());
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
 
@@ -1897,6 +1903,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
+            }
+
+            try {
+                String isNotificationEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                        ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFICATION_ENABLED);
+
+                if ("true".equalsIgnoreCase(isNotificationEnabled)) {
+                    String notificationClass = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
+                            ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFIER_CLASS);
+
+                    EmailNotifier email = (EmailNotifier) APIUtil.getClassForName(notificationClass).newInstance();
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, api.getId());
+                    prop.put(NotifierConstants.NEW_API_KEY, newAPI.getId());
+                    email.sendNotifications(new NotificationDTO(prop, NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION));
+                }
+            } catch (APIManagementException e) {
+                log.error(e.getMessage(), e);
             }
 
         } catch (ParseException e) {
@@ -3636,6 +3660,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policies.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
             }
+
         } catch (APITemplateException e) {
             handleException("Error while generating policy");
         }
@@ -3774,7 +3799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-      
+
         try {
             //undeploy from gateway
             manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));

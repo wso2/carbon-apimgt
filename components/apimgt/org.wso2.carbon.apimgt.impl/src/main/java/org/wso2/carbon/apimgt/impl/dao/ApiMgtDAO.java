@@ -625,7 +625,7 @@ public class ApiMgtDAO {
                 keyValidationInfoDTO.setValidityPeriod(validityPeriod);
                 keyValidationInfoDTO.setSubscriber(subscriberName);
 
-                keyValidationInfoDTO.setAuthorizedDomains(getAuthorizedDomainList(accessToken));
+                //keyValidationInfoDTO.setAuthorizedDomains(getAuthorizedDomainList(accessToken));
                 keyValidationInfoDTO.setConsumerKey(consumerKey);
                 Set<String> scopes = new HashSet<String>();
 
@@ -927,12 +927,6 @@ public class ApiMgtDAO {
         return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
     }
 
-
-    //This returns the authorized client domains into a List
-    public List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
-        return Arrays.asList(getAuthorizedDomains(apiKey).split(","));
-    }
-
     private void updateTokenState(String accessToken, Connection conn, PreparedStatement ps)
             throws SQLException, APIManagementException, CryptoException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -1154,21 +1148,22 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier. Providing and managing
-     * the conn object is a responsibility of the third party that uses this method.
+     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
      *
      * @param identifier    APIIdentifier
      * @param applicationId ID of the application which has the subscription
-     * @param conn          Connection object to use for database operations.
      * @throws APIManagementException
      */
-    public void removeSubscription(APIIdentifier identifier, int applicationId, Connection conn)
+    public void removeSubscription(APIIdentifier identifier, int applicationId)
             throws APIManagementException {
+        Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         int apiId = -1;
         String uuid;
         try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
             apiId = getAPIID(identifier, conn);
 
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
@@ -1186,36 +1181,19 @@ public class ApiMgtDAO {
                 throw new APIManagementException("UUID does not exist for the given apiId:" + apiId + " and " +
                                                  "application id:" + applicationId);
             }
+
+            conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback the add subscription ", ex);
+                }
+            }
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-        }
-    }
-
-    /**
-     * Removes a subscription specified by SubscribedAPI object
-     *
-     * @param subscription SubscribedAPI object
-     * @throws APIManagementException
-     */
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            removeSubscription(subscription, conn);
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Failed to add subscriber data ", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error("Couldn't close database connection for removing subscription", e);
-            }
         }
     }
 
@@ -2524,9 +2502,9 @@ public class ApiMgtDAO {
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
 
-                authorizedDomains = getAuthorizedDomains(accessToken);
+                //authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
-                apiKey.setAuthorizedDomains(authorizedDomains);
+                //apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
 
@@ -2602,9 +2580,7 @@ public class ApiMgtDAO {
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
-                apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
 
                 // Load all the rows to in memory and build the scope string
@@ -3168,122 +3144,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
-    }
-
-    /**
-     * This method will delete allow domains record by given consumer key
-     *
-     * @param consumerKey
-     */
-    public void deleteAccessAllowDomains(String consumerKey) throws APIManagementException {
-        String sqlDeleteAccessAllowDomains = SQLConstants.DELETE_ACCSS_ALLOWED_DOMAINS_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while deleting allowed domains for application identified " +
-                            "by consumer key :" + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    public void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains)
-            throws APIManagementException {
-        String sqlAddAccessAllowDomains = SQLConstants.ADD_ACCESS_ALLOWED_DOMAINS_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            if (accessAllowDomains != null && !"".equals(accessAllowDomains[0].trim())) {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                for (String domain : accessAllowDomains) {
-                    prepStmt.setString(1, oAuthConsumerKey);
-                    prepStmt.setString(2, domain.trim());
-                    prepStmt.addBatch();
-                }
-                try {
-                    prepStmt.executeBatch();
-                } finally {
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, oAuthConsumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while adding allowed domains for application identified " +
-                            "by consumer key :" + oAuthConsumerKey, e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e1);
-                }
-            }
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
-            throws APIManagementException {
-        String consumerKey = findConsumerKeyFromAccessToken(accessToken);
-        String sqlDeleteAccessAllowDomains = SQLConstants.DELETE_ACCESS_ALLOWED_DOMAIN_SQL;
-        String sqlAddAccessAllowDomains = SQLConstants.ADD_ACCESS_ALLOWED_DAMOIN_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            //first delete the existing domain list for access token
-            prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
-            //add the new domain list for access token
-            if (accessAllowDomains != null && !accessAllowDomains[0].trim().isEmpty()) {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                for (String domain : accessAllowDomains) {
-                    prepStmt.setString(1, consumerKey);
-                    prepStmt.setString(2, domain.trim());
-                    prepStmt.addBatch();
-                }
-                try {
-                    prepStmt.executeBatch();
-                } finally {
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, consumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Failed to update the access allow domains.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
     }
 
     public String getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
@@ -4564,24 +4424,11 @@ public class ApiMgtDAO {
     /**
      * Deletes an Application along with subscriptions, keys and registration data
      *
-     * @param application Application object to be deleted from the database which consists of Id
+     * @param application Application object to be deleted from the database which has the application Id
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
-        Connection con = null;
-        try {
-            con = APIMgtDBUtil.getConnection();
-            con.setAutoCommit(false);
-            deleteApplication(application, con);
-            con.commit();
-        } catch (SQLException e) {
-            handleException("Error while removing application details from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, con, null);
-        }
-    }
-
-    public void deleteApplication(Application application, Connection connection) throws APIManagementException {
+        Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
@@ -4604,6 +4451,8 @@ public class ApiMgtDAO {
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL;
 
         try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -4686,6 +4535,8 @@ public class ApiMgtDAO {
                 log.debug("Application " + application.getName() + " is deleted successfully.");
             }
 
+            connection.commit();
+
             for (String consumerKey : consumerKeys) {
                 //delete on oAuthorization server.
                 KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
@@ -4693,7 +4544,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
             APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
@@ -6240,60 +6091,13 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public boolean isDomainRestricted(String apiKey, String clientDomain) throws APIManagementException {
-        boolean restricted = true;
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = Arrays.asList(getAuthorizedDomains(apiKey).split(","));
-        if (authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)) {
-            restricted = false;
-        }
-        return restricted;
-    }
-
-    public String getAuthorizedDomains(String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-        StringBuilder authorizedDomains = new StringBuilder();
-        String accessAllowDomainsSql = SQLConstants.GET_AUTHORIZED_DOMAINS_PREFIX +
-                                       accessTokenStoreTable + SQLConstants.GET_AUTHORIZED_DOMAINS_SUFFIX;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-            rs = prepStmt.executeQuery();
-            boolean first = true;
-            while (rs.next()) {  //if(rs.next==true) -> domain != null
-                String domain = rs.getString(1);
-                if (first) {
-                    authorizedDomains.append(domain);
-                    first = false;
-                } else {
-                    authorizedDomains.append(',').append(domain);
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } catch (CryptoException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return authorizedDomains.toString();
-    }
-
     // This should be only used only when Token Partitioning is enabled.
     public String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
             String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
             StringBuilder authorizedDomains = new StringBuilder();
-            String accessAllowDomainsSql = "SELECT CONSUMER_KEY " +
+            String getCKFromTokenSQL = "SELECT CONSUMER_KEY " +
                                            " FROM " + accessTokenStoreTable +
                                            " WHERE ACCESS_TOKEN = ? ";
 
@@ -6302,7 +6106,7 @@ public class ApiMgtDAO {
             ResultSet rs = null;
             try {
                 connection = APIMgtDBUtil.getConnection();
-                prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+                prepStmt = connection.prepareStatement(getCKFromTokenSQL);
                 prepStmt.setString(1, APIUtil.encryptToken(accessToken));
                 rs = prepStmt.executeQuery();
                 boolean first = true;
@@ -6325,37 +6129,6 @@ public class ApiMgtDAO {
             return authorizedDomains.toString();
         }
         return null;
-    }
-
-    public String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
-
-        StringBuilder authorizedDomains = new StringBuilder();
-        String accessAllowDomainsSql = SQLConstants.GET_AUTHORIZED_DOMAINS_BY_ACCESS_KEY_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, consumerKey);
-            rs = prepStmt.executeQuery();
-            boolean first = true;
-            while (rs.next()) {
-                String domain = rs.getString(1);
-                if (first) {
-                    authorizedDomains.append(domain);
-                    first = false;
-                } else {
-                    authorizedDomains.append(',').append(domain);
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return authorizedDomains.toString();
     }
 
     public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {

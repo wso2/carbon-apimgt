@@ -77,8 +77,7 @@ public class UsageClient {
      * @return return boolean value indicating whether analytics enable
      */
     public static boolean isDataPublishingEnabled() {
-        APIManagerAnalyticsConfiguration con = APIManagerAnalyticsConfiguration.getInstance();
-        return con.isAnalyticsEnabled();
+        return APIUtil.isAnalyticsEnabled();
     }
 
     /**

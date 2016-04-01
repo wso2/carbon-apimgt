@@ -41,15 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
-
     private static final Log log = LogFactory.getLog(SubscriptionCreationWSWorkflowExecutor.class);
-
     private String serviceEndpoint;
-
     private String username;
-
-    private String password;
-
+    private char[] password;
     private String contentType;
 
     @Override
@@ -71,11 +66,9 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-
         try {
             String action = WorkflowConstants.CREATE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest " +
                     "         xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "         <wor:apiName>$1</wor:apiName>\n" +
@@ -103,7 +96,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
             payload = payload.replace("$9", callBackURL != null ? callBackURL : "?");
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
-
             super.execute(workflowDTO);
         } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
@@ -117,7 +109,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
         log.info("Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO
@@ -152,7 +143,6 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         try {
             String action = WorkflowConstants.DELETE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
                     "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "           <wor:workflowExtRef>" + workflowExtRef + "</wor:workflowExtRef>\n" +
@@ -192,9 +182,9 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
         // Assumes authentication is required if username and password is given
-        if (username != null && password != null) {
+        if (username != null && !username.isEmpty() && password != null && password.length != 0) {
             auth.setUsername(username);
-            auth.setPassword(password);
+            auth.setPassword(String.valueOf(password));
             auth.setPreemptiveAuthentication(true);
             List<String> authSchemes = new ArrayList<String>();
             authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
@@ -227,11 +217,11 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         this.username = username;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

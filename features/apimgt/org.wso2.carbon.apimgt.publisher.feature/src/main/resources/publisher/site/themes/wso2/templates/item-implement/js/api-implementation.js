@@ -2,9 +2,12 @@ $(document).ready(function(){
 
     $('a.help_popup').popover({
         html : true,
+        container: 'body',
         content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
+          var msg = $('#'+$(this).attr('help_data')).html();
+          return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
     });
 
     $(".implementation_methods").change(function(event){
@@ -18,20 +21,20 @@ $(document).ready(function(){
     } else {
         $('#toggleThrottle').parent().next().hide();
     }
-   if( $("#toggleCors").attr('checked') ) {
-        $('#corsTable').show();
+   if( $("#toggleCorsManaged").attr('checked') ) {
+        $('#corsTableManaged').show();
        } 
       else {
-        $('#corsTable').hide();
+        $('#corsTableManaged').hide();
       }
-   if($('#toggleallOrigin').attr('checked')) {
-       $('#allowCredentials').attr("checked",false);
-       $('#allowCredentials').hide();
-       $('.originContainer').hide();
+   if($('#toggleallOriginManaged').attr('checked')) {
+       $('#allowCredentialsManaged').attr("checked",false);
+       $('#allowCredentialsManaged').hide();
+       $('.originContainerManaged').hide();
       } else {
-        $('#allowCredentials').show();
-        $('#allOriginContainer').hide();
-        $('.originContainer').show();
+        $('#allowCredentialsManaged').show();
+        $('#allOriginContainerManaged').hide();
+        $('.originContainerManaged').show();
         } 
  
      $('#endpointType').on('change',function() {
@@ -196,6 +199,22 @@ $(document).ready(function(){
         $("#prototype_form").submit();
 	return false;                         
     });
+
+    if( $("#toggleCorsPrototyped").attr('checked') ) {
+        $('#corsTablePrototyped').show();
+    }
+    else {
+        $('#corsTablePrototyped').hide();
+    }
+    if($('#toggleallOriginPrototyped').attr('checked')) {
+        $('#allowCredentialsPrototyped').attr("checked",false);
+        $('#allowCredentialsPrototyped').hide();
+        $('.originContainerPrototyped').hide();
+    } else {
+        $('#allowCredentialsPrototyped').show();
+        $('#allOriginContainerPrototyped').hide();
+        $('.originContainerPrototyped').show();
+    }
 
     // last saved implementation state
    if ($('#endpoint_config').val() != "") {
@@ -430,18 +449,16 @@ $("#toggleSequence").change(function(e){
         $('#outSequence').val('');
     }
 });
-$("#toggleCors").change(function(e){
+$("#toggleCorsManaged").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();
     }
 });
 
-$("#toggleCors1").change(function(e){
+$("#toggleCorsPrototyped").change(function(e){
     if($(this).is(":checked")){
-    	console.log("XXXXXXXX");
         $(this).parent().parent().parent().next().children().next().children().show();
     }else{
     	$(this).parent().parent().parent().next().children().next().children().hide();

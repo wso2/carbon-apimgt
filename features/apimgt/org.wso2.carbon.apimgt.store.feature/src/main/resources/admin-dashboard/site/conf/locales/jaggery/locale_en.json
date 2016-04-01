@@ -12,6 +12,8 @@
     "appCreation": "Application Creation",
     "appRegistration": "Application Registration",
     "themeupload":"Upload Tenant Theme",
+    "manageTier": "Manage Tiers",
+    "addTier": "Add New Tier",
 
     "username": "Username",
     "password": "Password",
@@ -62,6 +64,11 @@
     "cancelTier":"Cancel",
     "errorMsgRequired":"Required",
     "errorMessageInvalid":"Invalid",
-    "errorMessageIllegalChar" : "Name contains one or more illegal characters ( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] )."
+    "errorMessageIllegalChar" : "Name contains one or more illegal characters ( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).",
+    "tierPermissions":"Tier Permissions",
+    "tiers":"Tier",
+    "permissions":"Permissions",
+    "allow":"Allow",
+    "deny":"Deny"
 
 }

@@ -56,7 +56,7 @@
 
 	<div class="page-header">
 		<% if(api){ %>
-            <h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-secondary pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>    
@@ -105,7 +105,12 @@
 										<% if(!api){ %>    
 										    <div class="form-group">
 										        <label class="col-sm-3 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span> 
-										        	<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        	<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom">
+														<span class="icon fw-stack fw-lg" style="font-size:6px">
+										                   <i class="fw fw-circle fw-stack-2x"></i>
+										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+										                </span>
+										        	</a>
 										        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>   </label>
 										        <div class="col-sm-4">
 										            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>        
@@ -114,7 +119,12 @@
 										
 										    <div class="form-group">
 										        <label class="col-sm-3 control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span>
-										        <a class="help_popup" help_data="context_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        <a class="help_popup" help_data="context_help" data-trigger="hover" data-placement="bottom">
+										        	<span class="icon fw-stack fw-lg" style="font-size:6px">
+										                   <i class="fw fw-circle fw-stack-2x"></i>
+										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+										             </span>
+										        </a>
 										        <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>  
 										        </label>
 										        <div class="col-sm-4">
@@ -137,7 +147,12 @@
 										
 										    <div class="form-group">
 										        <label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("visibility")%>:
-										        <a class="help_popup" help_data="role_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										        <a class="help_popup" help_data="role_help" data-trigger="hover" data-placement="bottom">
+										        	<span class="icon fw-stack fw-lg" style="font-size:6px">
+										                   <i class="fw fw-circle fw-stack-2x"></i>
+										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+										            </span>
+										        </a>
 										        <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p></label>
 										        <div class="col-sm-4">
 										        	<select class="select required form-control" id="visibility" name="visibility">
@@ -222,7 +237,12 @@
 										
 										                <div class="form-group">
 										                    <label class="col-sm-3 control-label" for="tags"><%=i18n.localize("tags")%>:
-										                    <a class="help_popup" help_data="tag_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+										                    <a class="help_popup" help_data="tag_help" data-trigger="hover" data-placement="bottom">
+										                    	<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+										                    </a>
 										                        <p id="tag_help" class="hide" style="font-size:9px"><%=i18n.localize("tagsHelpMsg")%></p></label>
 										                    <div class="col-sm-4 tagContainer">
 										                        <input type="text" placeholder="Add tags" class="form-control validInput validRegistryName" id="tags" name="tags" value="<%= _tags %>" data-role="tagsinput"
@@ -278,25 +298,30 @@
 										                    session.put( "wsdl", null );
 										                %>
 										                <div id="api_designer" class="col-sm-9">                    
-										                    <div class="form-group api_wsdl">
+										                    <div class="form-group form-inline api_wsdl">
 										                        <label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("wsdl")%>:
-										                        		<a class="help_popup" help_data="wsdldesc_help" data-trigger="hover" data-placement="left"><i class="fa fa-question-circle"></i></a>
+										                        		<a class="help_popup" help_data="wsdldesc_help" data-trigger="hover" data-placement="left">
+										                        			<span class="icon fw-stack fw-lg" style="font-size:6px">
+															                   <i class="fw fw-circle fw-stack-2x"></i>
+															                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+															                </span>
+										                        		</a>
 										                        		<p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
 										                       	</label>
 										                        <div class="col-sm-6">
 										                        	<div class="input-append">
-										                        		<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />										                        		
+										                        		<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
+										                        		<div class="btn-group">
+										                        			<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
+										                        		</div>										                        		
 										                    		</div>             
-										                		</div>
-										                		<div class="col-sm-3">
-										                			<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
 										                		</div>
 										                </div>
 										    </div>
 										                <% }else{ %>
 										                <div id="api_designer">		
-										                	<a  href="#swaggerUpload" role="button" class="btn btn-secondary pull-right" data-toggle="modal" ><i class="fa fa-download" ></i> Import </a>
-										                    	<a  href="#" id="swaggerEditor" class="btn btn-secondary pull-right" style="margin:0 10px" ><i class="fa fa-edit" ></i> Edit Source</a>    								                                
+										                	<a  href="#swaggerUpload" role="button" class="btn btn-secondary pull-right" data-toggle="modal" ><i class="fw fw-download"></i> Import </a>
+										                    	<a  href="#" id="swaggerEditor" class="btn btn-secondary pull-right" style="margin:0 10px" ><i class="fw fw-edit"></i> Edit Source</a>    								                                
 										                    <div id ="resource_details">										                    
 										                    </div>										                   
 										                </div>      
@@ -355,7 +380,7 @@
         <% } %>
     });
 </script>
-<div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/default/lib/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
+<div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">
     <button class="btn btn-primary" id="update_swagger">Save</button>                    
     <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
@@ -468,7 +493,7 @@
         <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type">{{ type }}</a></td>
         <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}"></a></td>
         <td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter">
-		<span class="fw-stack">
+		<span class="fw-stack" style="font-size:10px">
                                 <i class="fw fw-delete fw-stack-1x"></i>
                                 <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>
@@ -478,7 +503,11 @@
     {{/if}}
     </table>
     <input type="text" style="width:200px;margin-right:5px;" class="parameter_name form-control input-sm pull-left" name="parameter_name" placeholder="Parameter Name"/>
-    <a class="btn btn-small btn-secondary add_parameter btn-sm" type="button" ><i class="fa fa-plus"></i>&nbsp;Add Parameter</a>
+    <a class="btn btn-small btn-secondary add_parameter btn-sm" type="button" >
+				<span class="icon fw-stack fw-lg" style="font-size:10px">
+					<i class="fw fw-add fw-stack-1x"></i>
+					<i class="fw fw-circle-outline fw-stack-2x"></i>
+				</span>&nbsp;Add Parameter</a>
 </div>  
 </script>
 
@@ -511,7 +540,12 @@
 						<label class="checkbox">
                             <input type="checkbox" value="options" class="http_verb_select">
                             <span class="helper"> OPTIONS</span>
-                        &nbsp;<a class="help_popup" help_data="options_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
+                        &nbsp;<a class="help_popup" help_data="options_help" data-trigger="hover">
+								<span class="icon fw-stack fw-lg" style="font-size:6px">
+										                   <i class="fw fw-circle fw-stack-2x"></i>
+										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+										                </span>	
+							</a>
                         <p id="options_help" class="hide"><%=i18n.localize("optionsHelpMsg")%></p>
                     </label>  
 
@@ -533,10 +567,10 @@
         <div class="form-group">
             <label class="col-sm-3 control-label"></label>
             <div class="col-sm-9">
-                <button class="btn btn-secondary" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><span class="icon fw-stack">
+                <button class="btn btn-secondary" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><span class="icon fw-stack" style="font-size:10px">
 	                                    <i class="fw fw-add fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                 	</span></i>&nbsp;Add</button>
+	                 	</span>&nbsp;Add</button>
             </div>
         </div>        
     </div>
@@ -553,7 +587,7 @@
             <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}">
-		<span class="fw-stack">
+		<span class="fw-stack" style="font-size:10px">
                                 <i class="fw fw-delete fw-stack-1x"></i>
                                 <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>

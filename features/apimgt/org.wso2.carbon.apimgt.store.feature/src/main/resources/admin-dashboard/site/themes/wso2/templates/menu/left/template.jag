@@ -49,26 +49,55 @@
 });
 
    </script>
-   <div class="sidebar-wrapper sidebar-nav" id="left-sidebar"
-		data-side="left" data-width="300" style="width: 300px; left: 0px;">
+   <div class="sidebar-wrapper sidebar-nav hidden-xs" id="left-sidebar" data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="80" style="width: 300px; left: 0px;">
 		<div class="nano">
 			<div class="nano-content">
-				<ul class="nav navbar-stacked">
-    <li class="sidebar-brand"><%=i18n.localize("tasks")%></li>
-<li <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && (task == null || task == "null" ||
-            task=="signup")){%>class="active"<% } %>><a href="<%=subsMappedUrl%>?task=signup" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=signup',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("userCreation")%></a></li>
-             <li <% if (reqUrl.match("tasks") && task == "application"){%>class="active"<% } %>><a href="<%=subsMappedUrl%>?task=application"
-             onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=application',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("appCreation")%></a></li>
-        <li <%if (reqUrl.match("tasks") && task =="subscription"){%>class="active"<% } %>><a href="<%=listMappedUrl%>?task=subscription"
-        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=subscription',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("subscriptionCreation")%></a></li>
-        <li <%if(reqUrl.match("tasks") && task =="appRegistration"){%>class="active"<% } %>><a href="<%=listMappedUrl%>?task=appRegistration"
-        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})"><%="Application Registration"%></a></li>
-    <li class="nav-header"><%=i18n.localize("settings")%></li>        
-        <li <%if (reqUrl.match("themeupload")){%>class="active"<% } %>><a href="<%= jagg.url("/themeupload") %>"
-        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("themeUpload") %></a></li>
-        <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/tier-manage") %>"
-        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("tierManagement") %></a></li>
-     </ul>
+			<ul class="nav nav-pills  nav-stacked pages"">
+				<li class="sidebar-brand"><a href="#"><i class="fw fw-task fw-2x"></i><%=i18n.localize("tasks")%></a>
+					<ul class="nav nav-pills secondary-nav collapse in">
+						<li
+					<% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && (task == null || task == "null" ||
+            task=="signup")){%>
+					class="active" <% } %>><a
+					href="<%=subsMappedUrl%>?task=signup"
+					onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=signup',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					<i class="fw fw-task"></i>
+					<%=i18n.localize("userCreation")%></a></li>
+				<li <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task == "application"){%>
+					class="active" <% } %>><a
+					href="<%=subsMappedUrl%>?task=application"
+					onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=application',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					<i class="fw fw-task"></i>
+					<%=i18n.localize("appCreation")%></a></li>
+				<li <%if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="subscription"){%>
+					class="active" <% } %>><a
+					href="<%=listMappedUrl%>?task=subscription"
+					onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=subscription',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					<i class="fw fw-task"></i>
+					<%=i18n.localize("subscriptionCreation")%></a></li>
+				<li <%if((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="appRegistration"){%>
+					class="active" <% } %>><a
+					href="<%=listMappedUrl%>?task=appRegistration"
+					onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					<i class="fw fw-task"></i>
+					<%="Application Registration"%></a></li>
+					</ul>				
+				</li>				
+				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("settings")%></a>
+					<ul class="nav nav-pills secondary-nav collapse in">
+						<li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/themeupload") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-html"></i>
+							<%= i18n.localize("themeUpload") %></a></li>
+						<li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/tier-manage") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("tierManagement") %></a></li>
+					</ul>				
+				</li>
+			</ul>
 		</div>
 		</div>
 </div>

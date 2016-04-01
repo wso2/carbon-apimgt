@@ -11,6 +11,8 @@
     "userCreation": "User Creation",
     "appCreation": "Application Creation",
     "themeupload": "Theme Upload",
+    "manageTier": "Manage Tiers",
+    "addTier": "Add New Tier",
     "appRegistration": "Application Registration",
     "themeupload":"Upload Tenant Theme",
 
@@ -41,5 +43,10 @@
     "apiMgrGuide":"WSO2 Practical Guide to API Management",
     "useCase1":"WSO2 Use Case: API Facade Pattern",
     "more":"More >>",
-    "analytics":"Configure Analytics"
+    "analytics":"Configure Analytics",
+    "tierPermissions":"Tier Permissions",
+    "tiers":"Tier",
+    "permissions":"Permissions",
+    "allow":"Allow",
+    "deny":"Deny"
 }

@@ -167,15 +167,13 @@ var cleanUpApplicationRegistration = function (applicationName , keyType ,groupI
 
 
 
-var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains ,
-		clientId, clientSecret, validityTime,tokenScope) {
+var refreshToken = function (username,application, keyType ,oldAccessToken,clientId, clientSecret, validityTime,tokenScope) {
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        key = store.refreshToken(username,application, keyType,oldAccessToken, accessAllowDomains, 
-        		clientId, clientSecret,validityTime,tokenScope);
+        key = store.refreshToken(username,application, keyType,oldAccessToken,clientId, clientSecret,validityTime,tokenScope);
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
         }

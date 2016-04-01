@@ -1,5 +1,0 @@
-<% jagg.template("menu/login", function(inputs, outputs, jagg) { %>
-
-
-
-<%});%>

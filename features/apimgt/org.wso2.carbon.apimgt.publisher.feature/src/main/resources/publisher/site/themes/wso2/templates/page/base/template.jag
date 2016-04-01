@@ -50,36 +50,37 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
-var user = jagg.getUser()
+var user = jagg.getUser();
 %>
-<body>
+<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
+<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
 
 	
 <!-- header -->
 <header class="header header-default">
 	<div class="container-fluid">
 		<div class="pull-left brand float-remove-xs text-center-xs">
-			<a href="#"> <img
+			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
 				alt="wso2" title="wso2" class="logo">
 				<h1><%=i18n.localize("apiPublisher")%></h1>
 			</a>
 		</div>
 		<%if(user) { %>
-			<div class="pull-right auth float-remove-xs text-center-xs">
+			<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<li class="visible-inline-block">
 				<a href="#" class="dropdown" data-toggle="dropdown"> 
-				<span class="icon fw-stack fw-lg">
-                   <i class="fw fw-circle fw-stack-2x"></i>
-                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-                </span>
-				<span class="hidden-xs">
-						<%if(user!=null){%><%=user.username%>
-						<%}%> <span class="caret"></span>
-				</span> 
+					<span class="icon fw-stack fw-lg">
+	                   <i class="fw fw-circle fw-stack-2x"></i>
+	                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                </span>
+					<span class="hidden-xs">
+							<%if(user!=null){%><%=user.username%>
+							<%}%> <span class="caret"></span>
+					</span> 
 				</a>
-				<ul
-					class="dropdown-menu float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown"
-					role="menu">
+				<ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
 					<li class="dropdown-header visible-xs">
 						<%if(user!=null){%><%=user.username%>
 						<%}%> <span class="caret"></span>
@@ -87,8 +88,9 @@ var user = jagg.getUser()
 					<li class="divider visible-xs"></li>
 					<li><a
 						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
-				</ul>
-			</div>
+				 </ul>
+			</li>
+			</ul>
 		<%} %>
 	</div>
 </header>
@@ -110,8 +112,8 @@ var user = jagg.getUser()
     </script>
 
 
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.cookie.js"))%>"></script>
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.form.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/jquery.cookie.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/jquery.form.js"))%>"></script>
 
 
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>

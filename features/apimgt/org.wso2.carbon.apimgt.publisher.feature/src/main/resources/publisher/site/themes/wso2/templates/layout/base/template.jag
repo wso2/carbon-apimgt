@@ -29,10 +29,12 @@ if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
 	<!-- page content -->
 	<div class="container-fluid">
+		<div class="body-wrapper">
 		<% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2>
 		<% } %>
 		<% jagg.includeBlocks(outputs.middle); %>
 		<% jagg.includeBlocks(outputs.bottom); %>
+		</div>
 	</div>
 </div>
     <!-- /#wrapper -->

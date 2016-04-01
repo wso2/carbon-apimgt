@@ -46,15 +46,10 @@ import java.util.List;
  * Application creation process
  */
 public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
-
     private String serviceEndpoint;
-
     private String username;
-
-    private String password;
-
+    private char[] password;
     private String contentType;
-
     private static final Log log = LogFactory.getLog(ApplicationCreationWSWorkflowExecutor.class);
 
     @Override
@@ -64,15 +59,13 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow.");
+            log.debug("Executing Application creation Workflow.");
         }
         super.execute(workflowDTO);
         try {
             String action = WorkflowConstants.CREATE_APPLICATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload =
                     "<wor:ApplicationApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt" +
                             ".carbon.wso2.org\">\n"
@@ -100,7 +93,6 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
             payload = payload.replace("$8", callBackURL != null ? callBackURL : "?");
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
-
         } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
             throw new WorkflowException("Error sending out message", axisFault);
@@ -161,7 +153,8 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
-        // TODO Auto-generated method stub
+
+        // implemetation is not provided in this version
         return null;
     }
 
@@ -214,9 +207,9 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
         // Assumes authentication is required if username and password is given
-        if (username != null && password != null) {
+        if (username != null && !username.isEmpty() && password != null && password.length != 0) {
             auth.setUsername(username);
-            auth.setPassword(password);
+            auth.setPassword(String.valueOf(password));
             auth.setPreemptiveAuthentication(true);
             List<String> authSchemes = new ArrayList<String>();
             authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
@@ -249,11 +242,11 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         this.username = username;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

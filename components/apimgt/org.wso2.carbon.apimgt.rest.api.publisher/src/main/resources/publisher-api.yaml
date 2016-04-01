@@ -4,7 +4,7 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager - Publisher"
+  title: "WSO2 API Manager - Publisher API"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
 
@@ -14,7 +14,7 @@ info:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
     email: "architecture@wso2.com"
-  license: 
+  license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
@@ -23,7 +23,7 @@ info:
 ######################################################
 
 # The schemes supported by the API
-schemes: 
+schemes:
   - https
 
 # The domain of the API.
@@ -39,17 +39,17 @@ basePath: /api/am/publisher/v0.9
 # The actual media type must be specified in the Content-Type header field of the request.
 # The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
-consumes: 
+consumes:
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
-# of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type header field 
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
-produces: 
+produces:
   - application/json
 
 
@@ -92,12 +92,14 @@ paths:
   /apis:
 
 #-----------------------------------------------------
-# Retrieving the list of all APIs qualifying under a given search condition  
+# Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
-        Retrieving APIs
+        Get all APIs
       description: |
         Get a list of available APIs qualifying under a given search condition.
       parameters:
@@ -121,12 +123,11 @@ paths:
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API Collection
-        - Retrieve
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             List of qualifying APIs is returned.
           schema:
             $ref: '#/definitions/APIList'
@@ -140,20 +141,24 @@ paths:
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Create a new API 
+# Create a new API
 #-----------------------------------------------------
     post:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer 40e486e50ce43407181fb4c570d2cac7\" -H \"Content-Type: application/json\" -X POST -d @data.json http://127.0.0.1:9763/api/am/publisher/v0.9/apis"
+      x-wso2-request: "{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": true,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"1.0.0\",\n   \"description\": \"Verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\"\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b\nContent-Type: application/json\n\n{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": true,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"1.0.0\",\n   \"description\": \"Verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\",\n   \"id\": \"890a4f4d-09eb-4877-a323-57f6ce2ed79b\",\n   \"status\": \"CREATED\"\n}"
+      summary: Create a new API
       description: |
         Create a new API
       parameters:
@@ -166,13 +171,12 @@ paths:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - API Collection
-        - Create
+        - APIs
       responses:
         201:
           description: |
-            Created. 
-            Successful response with the newly created object as entity in the body. 
+            Created.
+            Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/API'
@@ -191,13 +195,13 @@ paths:
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         415:
           description: |
-            Unsupported Media Type. 
+            Unsupported Media Type.
             The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
@@ -212,6 +216,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b"
+      x-wso2-response: "HTTP/1.1 200 OK\nDate: Mon, 22 Feb 2016 13:27:08 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nServer: WSO2 Carbon Server\n\n{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": false,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"1.0.0\",\n   \"description\": \"Verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\",\n   \"id\": \"890a4f4d-09eb-4877-a323-57f6ce2ed79b\",\n   \"status\": \"PUBLISHED\"\n}"
+      summary: Get API details
       description: |
         Get details of an API
       parameters:
@@ -220,12 +227,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Requested API is returned
           headers:
             Content-Type:
@@ -238,24 +244,24 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
           schema:
             $ref: '#/definitions/API'
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -265,6 +271,10 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json http://127.0.0.1:9763/api/am/publisher/v0.9/apis/6fb74674-4ab8-4b52-9886-f9a376985060"
+      x-wso2-request: "{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": false,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"verification\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"2.0.0\",\n   \"description\": \"Use this API to verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\",\n   \"id\": \"6fb74674-4ab8-4b52-9886-f9a376985060\",\n   \"status\": \"CREATED\"\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nDate: Mon, 22 Feb 2016 13:31:35 GMT\nContent-Type: application/json\nTransfer-Encoding: chunked\nServer: WSO2 Carbon Server\n\n{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": false,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"verification\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"2.0.0\",\n   \"description\": \"Use this API to verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\",\n   \"id\": \"6fb74674-4ab8-4b52-9886-f9a376985060\",\n   \"status\": \"CREATED\"\n}"
+      summary: Update an existing API
       description: |
         Update an existing API
       parameters:
@@ -280,12 +290,11 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Update
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Successful response with updated API object
           schema:
             $ref: '#/definitions/API'
@@ -304,30 +313,30 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         403:
           description: |
-            Forbidden. 
+            Forbidden.
             The request must be conditional but no condition has been specified.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -337,35 +346,37 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:api_create
-      description: | 
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X DELETE http://127.0.0.1:9763/api/am/publisher/v0.9/apis/6fb74674-4ab8-4b52-9886-f9a376985060"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete API
+      description: |
         Delete an existing API
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Delete
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Resource successfully deleted.
         403:
           description: |
-            Forbidden. 
+            Forbidden.
             The request must be conditional but no condition has been specified.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             Resource to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -376,6 +387,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get API Definition
       description: |
         Get the swagger of an API
       parameters:
@@ -384,12 +398,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Requested swagger document of the API is returned
           headers:
             Content-Type:
@@ -402,22 +415,22 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -426,9 +439,13 @@ paths:
 # Update the API swagger definition
 #-----------------------------------------------------
     put:
-      consumes: 
+      consumes:
         - multipart/form-data
       x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger\""
+      x-wso2-request: "{\n    \"paths\": {\n        \"\\/*\": {\n            \"get\": {\n                \"x-auth-type\": \"Application\",\n                \"x-throttling-tier\": \"Unlimited\",\n                \"responses\": {\n                    \"200\": {\n                        \"description\": \"OK\"\n                    }\n                }\n            }\n        }\n    },\n    \"x-wso2-security\": {\n        \"apim\": {\n            \"x-wso2-scopes\": []\n        }\n    },\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"title\": \"PhoneVerification\",\n        \"description\": \"Verify a phone number\",\n        \"contact\": {\n            \"email\": \"xx@ee.com\",\n            \"name\": \"xx\"\n        },\n        \"version\": \"1.0.0\"\n    }\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Update API Definition
       description: |
         Update an existing swagger definition of an API
       parameters:
@@ -442,12 +459,11 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Update
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Successful response with updated Swagger definition
           headers:
             Location:
@@ -464,30 +480,30 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         403:
           description: |
-            Forbidden. 
+            Forbidden.
             The request must be conditional but no condition has been specified.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -502,6 +518,9 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\""
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/6fb74674-4ab8-4b52-9886-f9a376985060\nContent-Type: application/json\n\n{\n   \"sequences\": [],\n   \"tiers\":    [\n      \"Bronze\",\n      \"Gold\"\n   ],\n   \"thumbnailUrl\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"cacheTimeout\": 300,\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\" http://ws.cdyne.com/phoneverify/phoneverify.asmx\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http \\\"}\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"destinationStatsEnabled\": \"Disabled\",\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\n   \"responseCaching\": \"Disabled\",\n   \"isDefaultVersion\": true,\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"businessInformation\":    {\n      \"technicalOwner\": \"xx\",\n      \"technicalOwnerEmail\": \"ggg@ww.com\",\n      \"businessOwner\": \"xx\",\n      \"businessOwnerEmail\": \"xx@ee.com\"\n   },\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\":    [\n      \"phone\",\n      \"multimedia\",\n      \"mobile\"\n   ],\n   \"provider\": \"admin\",\n   \"version\": \"2.0.0\",\n   \"description\": \"Verify a phone number\",\n   \"name\": \"PhoneVerification\",\n   \"context\": \"/phoneverify\",\n   \"id\": \"6fb74674-4ab8-4b52-9886-f9a376985060\",\n   \"status\": \"CREATED\"\n}"
+      summary: Copy API
       description: |
         Create a new API by copying an existing API
       parameters:
@@ -512,12 +531,11 @@ paths:
           required: true
         - $ref: '#/parameters/apiId-Q'
       tags:
-        - API (individual)
-        - Copy
+        - APIs
       responses:
         201:
           description: |
-            Created. 
+            Created.
             Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
           headers:
             Location:
@@ -526,13 +544,13 @@ paths:
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             API to copy does not exist.
           schema:
             $ref: '#/definitions/Error'
@@ -547,6 +565,9 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:api_publish
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\""
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Change API Status
       description: |
         Change the lifecycle of an API
       parameters:
@@ -573,7 +594,7 @@ paths:
 
             You can specify additional checklist items by using an **"attribute:"** modifier.
 
-            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to 
+            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to
             Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false"
             format.
 
@@ -587,12 +608,11 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Change Lifecycle
+        - APIs
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Lifecycle changed successfully.
           headers:
             ETag:
@@ -601,24 +621,24 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the API lifecycle has been modified the last time. 
+                Date and time the API lifecycle has been modified the last time.
                 Used by caches, or in conditional requests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -633,6 +653,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n         \"summary\": \"This is a sample documentation for v1.0.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"4145df31-04f1-440c-8d08-68952874622c\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
+      summary: Get API Documents
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -642,12 +665,11 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (individual)
-        - Retrieve Documents
+        - API Document
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Document list is returned.
           schema:
             $ref: '#/definitions/DocumentList'
@@ -662,17 +684,17 @@ paths:
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -682,6 +704,10 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer cdcc8cf6016ed10620edf3a1d3c5ef2b\" -H \"Content-Type: application/json\" -X POST -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\""
+      x-wso2-request: "{\n    \"visibility\": \"API_LEVEL\",\n    \"sourceType\": \"INLINE\",\n    \"sourceUrl\": null,\n    \"otherTypeName\": null,\n    \"summary\": \"This is a sample documentation\",\n    \"name\": \"Introduction to PhoneVerification API\",\n    \"type\": \"HOWTO\"\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"Introduction to PhoneVerification API\",\n   \"type\": \"HOWTO\"\n}"
+      summary: Add a new document
       description: |
         Add a new document to an API
       parameters:
@@ -695,13 +721,12 @@ paths:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - API (individual)
-        - Add Document
+        - API Document
       responses:
         201:
           description: |
-            Created. 
-            Successful response with the newly created Document object as entity in the body. 
+            Created.
+            Successful response with the newly created Document object as entity in the body.
             Location header contains URL of newly added document.
           schema:
             $ref: '#/definitions/Document'
@@ -716,18 +741,18 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. 
+                Entity Tag of the response resource.
                 Used by caches, or in conditional request.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         415:
           description: |
-            Unsupported media type. 
+            Unsupported media type.
             The entity of the request was in a not supported format.
 
 ######################################################
@@ -740,6 +765,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
+      summary: Get an API Document
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -749,12 +777,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve Document
+        - API Document
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Document returned.
           schema:
             $ref: '#/definitions/Document'
@@ -770,22 +797,22 @@ paths:
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested Document does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -795,6 +822,10 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\""
+      x-wso2-request: "{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
+      summary: Update an API Document
       description: |
         Update document details.
       parameters:
@@ -811,12 +842,11 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Update Document
+        - API Document
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Document updated
           schema:
             $ref: '#/definitions/Document'
@@ -831,29 +861,29 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. 
+                Entity Tag of the response resource.
                 Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -863,6 +893,9 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X DELETE http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete an API Document
       description: |
         Delete a document of an API
       parameters:
@@ -871,22 +904,21 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
-        - Delete Document
+        - API Document
       responses:
         200:
-          description: | 
-            OK. 
+          description: |
+            OK.
             Resource successfully deleted.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Resource to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -902,6 +934,9 @@ paths:
   #-------------------------------------------------------------------------------------------------
       get:
         x-scope: apim:api_view
+        x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
+        x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
+        summary: Get document content
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -911,12 +946,11 @@ paths:
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
         tags:
-          - API (individual)
-          - Retrieve Document
+          - API Document
         responses:
           200:
             description: |
-              OK. 
+              OK.
               File or inline content returned.
             headers:
               Content-Type:
@@ -930,7 +964,7 @@ paths:
                 type: string
               Last-Modified:
                 description: |
-                  Date and time the resource has been modifed the last time. 
+                  Date and time the resource has been modifed the last time.
                   Used by caches, or in conditional reuquests.
                 type: string
           303:
@@ -944,28 +978,31 @@ paths:
                 type: string
           304:
             description: |
-              Not Modified. 
+              Not Modified.
               Empty body because the client has already the latest version of the requested resource.
           404:
             description: |
-              Not Found. 
+              Not Found.
               Requested Document does not exist.
             schema:
               $ref: '#/definitions/Error'
           406:
             description: |
-              Not Acceptable. 
+              Not Acceptable.
               The requested media type is not supported
             schema:
               $ref: '#/definitions/Error'
 
   #----------------------------------------------------------------------------
-  # Upload a file or add inline content to a document of a certain API 
+  # Upload a file or add inline content to a document of a certain API
   #----------------------------------------------------------------------------
       post:
-        consumes: 
+        consumes:
           - multipart/form-data
         x-scope: apim:api_create
+        x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -F file=@\"sample.pdf\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
+        x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}"
+        summary: Update API document content.
         description: |
           Upload a file to a document or add inline content to the document.
 
@@ -990,12 +1027,11 @@ paths:
           - $ref: '#/parameters/If-Match'
           - $ref: '#/parameters/If-Unmodified-Since'
         tags:
-          - API (individual)
-          - Update Document
+          - API Document
         responses:
           200:
             description: |
-              OK. 
+              OK.
               Document updated
             schema:
               $ref: '#/definitions/Document'
@@ -1010,29 +1046,29 @@ paths:
                 type: string
               ETag:
                 description: |
-                  Entity Tag of the response resource. 
+                  Entity Tag of the response resource.
                   Used by caches, or in conditional request.
                 type: string
               Last-Modified:
                 description: |
-                  Date and time the resource has been modifed the last time. 
+                  Date and time the resource has been modifed the last time.
                   Used by caches, or in conditional reuquests.
                 type: string
           400:
             description: |
-              Bad Request. 
+              Bad Request.
               Invalid request or validation error.
             schema:
               $ref: '#/definitions/Error'
           404:
             description: |
-              Not Found. 
+              Not Found.
               The resource to be updated does not exist.
             schema:
               $ref: '#/definitions/Error'
           412:
             description: |
-              Precondition Failed. 
+              Precondition Failed.
               The request has not been performed because one of the preconditions is not met.
             schema:
               $ref: '#/definitions/Error'
@@ -1047,6 +1083,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_create
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"name\": \"DefaultApplication\"\n}"
+      summary: Get Application
       description: |
         Get application details
       parameters:
@@ -1055,12 +1094,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application (individual)
-        - Retrieve
+        - Application
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Application returned.
           schema:
             $ref: '#/definitions/Application'
@@ -1070,17 +1108,17 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
@@ -1090,7 +1128,7 @@ paths:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -1105,6 +1143,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscription_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n         \"tier\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"status\": \"UNBLOCKED\"\n      },\n            {\n         \"subscriptionId\": \"7ac22c34-8745-4cfe-91e0-262c50b2f2e3\",\n         \"tier\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"status\": \"UNBLOCKED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
+      summary: Get All Subscriptions
       description: |
         Get subscription list.
         The API Identifier and corresponding Application Identifier
@@ -1116,12 +1157,11 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Subscription Collection
-        - Retrieve
+        - Subscriptions
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription list returned.
           schema:
             $ref: '#/definitions/SubscriptionList'
@@ -1131,13 +1171,13 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
@@ -1155,6 +1195,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:subscription_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"tier\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"status\": \"UNBLOCKED\"\n}"
+      summary: Get a Subscription
       description: |
         Get subscription details
       parameters:
@@ -1163,12 +1206,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Subscription (individual)
-        - Retrieve
+        - Subscriptions
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription returned
           schema:
             $ref: '#/definitions/Subscription'
@@ -1184,11 +1226,11 @@ paths:
               type: string
         '304':
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         '404':
           description: |
-            Not Found. 
+            Not Found.
             Requested Subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
@@ -1203,6 +1245,9 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:subscription_block
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"tier\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"status\": \"PROD_ONLY_BLOCKED\"\n}"
+      summary: Block a subscription
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - name: blockState
@@ -1219,39 +1264,38 @@ paths:
       description: |
         Block a subscription.
       tags:
-        - Subscription (individual)
-        - Block
+        - Subscriptions
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription was blocked successfully.
           headers:
             ETag:
-              description: | 
-                Entity Tag of the blocked subscription. 
+              description: |
+                Entity Tag of the blocked subscription.
                 Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the subscription has been blocked. 
+                Date and time the subscription has been blocked.
                 Used by caches, or in conditional requests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -1266,6 +1310,9 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:subscription_block
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"tier\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"status\": \"UNBLOCKED\"\n} "
+      summary: Unblock a Subscription
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1273,39 +1320,38 @@ paths:
       description: |
         Unblock a subscription.
       tags:
-        - Subscription (individual)
-        - Unblock Subscription
+        - Subscriptions
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription was unblocked successfully.
           headers:
             ETag:
-              description: | 
-                Entity Tag of the unblocked subscription. 
+              description: |
+                Entity Tag of the unblocked subscription.
                 Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the subscription has been unblocked. 
+                Date and time the subscription has been unblocked.
                 Used by caches, or in conditional requests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -1320,6 +1366,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 4\n}"
+      summary: List Tiers
       description: |
         Get available tiers
       parameters:
@@ -1329,12 +1378,11 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Tier Collection
-        - Retrieve
+        - Tiers
       responses:
         200:
           description: |
-            OK. 
+            OK.
             List of tiers returned.
           schema:
             $ref: '#/definitions/TierList'
@@ -1343,17 +1391,17 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
@@ -1363,6 +1411,10 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X POST -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api\""
+      x-wso2-request: "{\n    \"unitTime\": 60000,\n    \"tierPlan\": \"FREE\",\n    \"tierLevel\": \"api\",\n    \"stopOnQuotaReach\": true,\n    \"requestCount\": 5,\n    \"description\": \"Allows 5 request(s) per minute.\",\n    \"name\": \"Low\",\n    \"attributes\": {\n            \"a\":10,\n            \"b\":30\n        }\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: http://localhost:9763/api/am/publisher/v0.9/tiers/Low\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 5,\n   \"description\": \"Allows 5 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"30\",\n      \"a\": \"10\"\n   }\n}"
+      summary: Add a new Tier
       description: |
         Add a new tier
       parameters:
@@ -1376,13 +1428,12 @@ paths:
         - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - Tier (individual)
-        - Create
+        - Tiers
       responses:
         201:
           description: |
-            Created. 
-            Successful response with the newly created object as entity in the body. 
+            Created.
+            Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Tier'
@@ -1396,19 +1447,19 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional request'
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         415:
           description: |
-            Unsupported media type. 
+            Unsupported media type.
             The entity of the request was in a not supported format.
 
 ######################################################
@@ -1421,6 +1472,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Get a Tier
       description: |
         Get tier details
       parameters:
@@ -1430,12 +1484,11 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Tier (individual)
-        - Retrieve
+        - Tiers
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Tier returned
           schema:
             $ref: '#/definitions/Tier'
@@ -1445,28 +1498,28 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested Tier does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
           description: |
-            Not Acceptable. 
+            Not Acceptable.
             The requested media type is not supported.
           schema:
             $ref: '#/definitions/Error'
@@ -1476,6 +1529,10 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
+      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
+      summary: Update a Tier
       description: |
         Update tier details
       parameters:
@@ -1492,12 +1549,11 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Tier (individual)
-        - Update
+        - Tiers
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Subscription updated.
           schema:
             $ref: '#/definitions/Tier'
@@ -1511,30 +1567,30 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time. 
+                Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional reuquests.
               type: string
         400:
           description: |
-            Bad Request. 
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -1544,6 +1600,9 @@ paths:
 #-----------------------------------------------------
     delete:
       x-scope: apim:tier_manage
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete a Tier
       description: |
         Remove a tier
       parameters:
@@ -1552,22 +1611,21 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Tier (individual)
-        - Delete
+        - Tiers
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Resource successfully deleted.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Resource to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -1582,6 +1640,10 @@ paths:
 #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X POST -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/update-permission?tierName=Bronze&tierLevel=api\""
+      x-wso2-request: "{\n    \"permissionType\":\"deny\",\n    \"roles\": [\"Internal/everyone\",\"admin\"]\n}"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Update Tier Permission
       description: |
         Update tier permission
       parameters:
@@ -1596,12 +1658,11 @@ paths:
       description: |
         Update tier permission
       tags:
-        - Tier (individual)
-        - Update Permission
+        - Tiers
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Successfully updated tier permissions
           schema:
             type: array
@@ -1609,36 +1670,36 @@ paths:
               $ref: '#/definitions/Tier'
           headers:
             ETag:
-              description: | 
+              description: |
                 Entity Tag of the modified tier.
                  Used by caches, or in conditional request.
               type: string
             Last-Modified:
               description: |
-                Date and time the tier has been modified. 
+                Date and time the tier has been modified.
                 Used by caches, or in conditional requests.
               type: string
         400:
-          description: | 
-            Bad Request. 
+          description: |
+            Bad Request.
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         403:
           description: |
-            Forbidden. 
+            Forbidden.
             The request must be conditional but no condition has been specified.
           schema:
             $ref: '#/definitions/Error'
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested tier does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
           description: |
-            Precondition Failed. 
+            Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
@@ -1654,6 +1715,9 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/environments\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
+      summary: Get gateway environments
       description: |
         Get a list of gateway environments configured previously.
       parameters:
@@ -1663,12 +1727,11 @@ paths:
             Will return environment list for the provided API.
           type: string
       tags:
-        - Environment Collection
-        - Retrieve
+        - Environments
       responses:
         200:
           description: |
-            OK. 
+            OK.
             Environment list is returned.
           schema:
             $ref: '#/definitions/EnvironmentList'
@@ -1678,17 +1741,17 @@ paths:
                 The content type of the body.
               type: string
             ETag:
-              description: | 
-                Entity Tag of the response resource. 
+              description: |
+                Entity Tag of the response resource.
                 Used by caches, or in conditional requests.
               type: string
         304:
           description: |
-            Not Modified. 
+            Not Modified.
             Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
-            Not Found. 
+            Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
@@ -1703,7 +1766,7 @@ parameters:
     name: apiId
     in: path
     description: |
-      **API ID** consisting of the **UUID** of the API. 
+      **API ID** consisting of the **UUID** of the API.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1715,7 +1778,7 @@ parameters:
     name: apiId
     in: query
     description: |
-      **API ID** consisting of the **UUID** of the API. 
+      **API ID** consisting of the **UUID** of the API.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1781,7 +1844,7 @@ parameters:
       Name of the tier
     required: true
     type: string
-    
+
 # Tier Type
 # Specified as part of the path expression
   tierLevel:
@@ -1827,7 +1890,7 @@ parameters:
     name: offset
     in: query
     description: |
-      Starting point within the complete list of items qualified.  
+      Starting point within the complete list of items qualified.
     default: 0
     type: integer
 
@@ -1866,7 +1929,7 @@ parameters:
     name: If-Modified-Since
     in: header
     description: |
-      Validator for conditional requests; based on Last Modified header of the 
+      Validator for conditional requests; based on Last Modified header of the
       formerly retrieved variant of the resource.
     type: string
 
@@ -1903,16 +1966,19 @@ definitions:
         type: integer
         description: |
           Number of APIs returned.
+        example: 1
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
+        example: "/apis?limit=1&offset=2&query="
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+        example: "/apis?limit=1&offset=0&query="
       list:
         type: array
         items:
@@ -1926,20 +1992,27 @@ definitions:
     properties:
       id:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        example: CalculatorAPI
       description:
         type: string
+        example: A calculator API that supports basic operations
       context:
         type: string
+        example: CalculatorAPI
       version:
         type: string
+        example: 1.0.0
       provider:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
+        example: admin
       status:
         type: string
+        example: CREATED
 
 #-----------------------------------------------------
 # The API resource
@@ -1961,48 +2034,64 @@ definitions:
         type: string
         description: |
           UUID of the api registry artifact
+        example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        example: CalculatorAPI
       description:
         type: string
+        example: A calculator API that supports basic operations
       context:
         type: string
+        example: CalculatorAPI
       version:
         type: string
+        example: 1.0.0
       provider:
         description: |
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
+        example: admin
       apiDefinition:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
+        example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
       status:
         type: string
+        example: CREATED
       responseCaching:
         type: string
+        example: Disabled
       cacheTimeout:
         type: integer
+        example: 300
       destinationStatsEnabled:
         type: string
+        example: Disabled
       isDefaultVersion:
         type: boolean
+        example: false
       transport:
         description: |
           Supported transports for the API (http and/or https).
         type: array
         items:
           type: string
+        example: ["http","https"]
       tags:
         type: array
         items:
           type: string
+        example: ["substract","add"]
       tiers:
         type: array
         items:
           type: string
+        example: ["Unlimited"]
       thumbnailUrl:
         type: string
+        example: ""
       visibility:
         type: string
         enum:
@@ -2010,44 +2099,56 @@ definitions:
           - PRIVATE
           - RESTRICTED
           - CONTROLLED
+        example: PUBLIC
       visibleRoles:
         type: array
         items:
           type: string
+        example: []
       visibleTenants:
         type: array
         items:
           type: string
+        example: []
       endpointConfig:
         type: string
+        example: "{\"production_endpoints\":{\"url\":\"http://localhost:9763/am/sample/calculator/v1/api\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}"
       gatewayEnvironments:
         description: |
           Comma separated list of gateway environments.
         type: string
+        example: Production and Sandbox
       sequences:
         type: array
         items:
           $ref: '#/definitions/Sequence'
+        example: []
       subscriptionAvailability:
         type: string
         enum:
           - current_tenant
           - all_tenants
           - specific_tenants
+        example: current_tenant
       subscriptionAvailableTenants:
         type: array
         items:
           type: string
+        example: []
       businessInformation:
         properties:
           businessOwner:
             type: string
+            example: businessowner
           businessOwnerEmail:
             type: string
+            example: businessowner@wso2.com
           technicalOwner:
             type: string
+            example: technicalowner
           technicalOwnerEmail:
             type: string
+            example: technicalowner@wso2.com
       corsConfiguration:
         description: |
           CORS configuration for the API
@@ -2071,7 +2172,6 @@ definitions:
             items:
               type: string
 
-
 #-----------------------------------------------------
 # The Application resource
 #-----------------------------------------------------
@@ -2083,16 +2183,22 @@ definitions:
     properties:
       applicationId:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        example: CalculatorApp
       subscriber:
         type: string
+        example: admin
       throttlingTier:
         type: string
+        example: Unlimited
       description:
         type: string
+        example: Sample calculator application
       groupId:
         type: string
+        example: ""
 
 #-----------------------------------------------------
 # The Document List resource
@@ -2104,16 +2210,19 @@ definitions:
         type: integer
         description: |
           Number of Documents returned.
+        example: 1
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
+        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
       list:
         type: array
         items:
@@ -2132,8 +2241,10 @@ definitions:
     properties:
       documentId:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        example: CalculatorDoc
       type:
         type: string
         enum:
@@ -2144,24 +2255,30 @@ definitions:
           - API_MESSAGE_FORMAT
           - SWAGGER_DOC
           - OTHER
+        example: HOWTO
       summary:
         type: string
+        example: "Summary of Calculator Documentation"
       sourceType:
         type: string
         enum:
           - INLINE
           - URL
           - FILE
+        example: INLINE
       sourceUrl:
         type: string
+        example: ""
       otherTypeName:
         type: string
+        example: ""
       visibility:
         type: string
         enum:
           - OWNER_ONLY
           - PRIVATE
           - API_LEVEL
+        example: API_LEVEL
 
 #-----------------------------------------------------
 # The Tier List resource
@@ -2173,16 +2290,19 @@ definitions:
         type: integer
         description: |
           Number of Tiers returned.
+        example: 1
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
+        example: "/tiers/api?limit=1&offset=2"
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+        example: "/tiers/api?limit=1&offset=0"
       list:
         type: array
         items:
@@ -2202,40 +2322,48 @@ definitions:
     properties:
       name:
         type: string
+        example: Platinum
       description:
         type: string
+        example: "Allows 50 request(s) per minute."
       tierLevel:
         type: string
         enum:
           - api
           - application
           - resource
+        example: api
       attributes:
         description: |
           Custom attributes added to the tier policy
         type: object
         additionalProperties:
           type: string
+        example: {}
       requestCount:
         description: |
           Maximum number of requests which can be sent within a provided unit time
         type: integer
         format: int64
+        example: 50
       unitTime:
         type: integer
         format: int64
+        example: 60000
       tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-        enum: 
+        enum:
           - FREE
           - COMMERCIAL
+        example: FREE
       stopOnQuotaReach:
         description: |
-          By making this attribute to false, you are capabale of sending requests 
+          By making this attribute to false, you are capabale of sending requests
           even if the request count exceeded within a unit time
         type: boolean
+        example: true
 
 #-----------------------------------------------------
 # The Tier Permission resource
@@ -2251,10 +2379,12 @@ definitions:
         enum:
           - allow
           - deny
+        example: deny
       roles:
         type: array
         items:
           type: string
+        example: ["Internal/everyone"]
 
 #-----------------------------------------------------
 # The Subscription List resource
@@ -2266,16 +2396,19 @@ definitions:
         type: integer
         description: |
           Number of Subscriptions returned.
+        example: 1
       next:
         type: string
         description: |
-          Link to the next subset of resources qualified. 
+          Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
+        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
       previous:
         type: string
         description: |
-          Link to the previous subset of resources qualified. 
+          Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
       list:
         type: array
         items:
@@ -2293,12 +2426,16 @@ definitions:
     properties:
       subscriptionId:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       applicationId:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       apiIdentifier:
         type: string
+        example: 01234567-0123-0123-0123-012345678901
       tier:
         type: string
+        example: Unlimited
       status:
         type: string
         enum:
@@ -2307,6 +2444,7 @@ definitions:
           - UNBLOCKED
           - ON_HOLD
           - REJECTED
+        example: UNBLOCKED
 
 #-----------------------------------------------------
 # The Sequence resource
@@ -2318,10 +2456,13 @@ definitions:
     properties:
       name:
         type: string
+        example: log_in_message
       config:
         type: string
+        example: ""
       type:
         type: string
+        example: in
 
 #-----------------------------------------------------
 # The Error resource
@@ -2348,8 +2489,8 @@ definitions:
           Preferably an url with more details about the error.
       error:
         type: array
-        description: | 
-          If there are more than one error list them out. 
+        description: |
+          If there are more than one error list them out.
           For example, list out validation errors by each field.
         items:
           $ref: '#/definitions/ErrorListItem'
@@ -2384,12 +2525,16 @@ definitions:
     properties:
       name:
         type: string
+        example: Production and Sandbox
       type:
         type: string
+        example: hybrid
       serverUrl:
         type: string
+        example: "https://localhost:9443//services/"
       showInApiConsole:
         type: boolean
+        example: true
       endpoints:
         $ref: '#/definitions/EnvironmentEndpoints'
 
@@ -2403,6 +2548,7 @@ definitions:
         type: integer
         description: |
           Number of Environments returned.
+        example: 1
       list:
         type: array
         items:
@@ -2418,10 +2564,11 @@ definitions:
       http:
         type: string
         description: HTTP environment URL
+        example: "http://localhost:8280"
       https:
         type: string
         description: HTTPS environment URL
-
+        example: "https://localhost:8244"
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

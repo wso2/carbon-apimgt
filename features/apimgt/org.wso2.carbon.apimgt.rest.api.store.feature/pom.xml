@@ -96,6 +96,44 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-doc-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
+                                    <includes>
+                                        <include>assets/</include>
+                                        <include>fonts/</include>
+                                        <include>js/</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-doc-guide</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/</directory>
+                                    <includes>
+                                        <include>guide.html</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -124,6 +162,23 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}</bundleDef>
                             </bundles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml</inputSpec>
+                            <language>dynamic-html</language>
+                            <templateDirectory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
+                            <output>src/main/resources/api-docs</output>
                         </configuration>
                     </execution>
                 </executions>
