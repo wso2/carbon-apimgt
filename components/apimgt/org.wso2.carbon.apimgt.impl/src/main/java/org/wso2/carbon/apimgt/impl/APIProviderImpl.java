@@ -37,6 +37,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -3639,6 +3640,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
+            } else {
+                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+                log.error(msg);
+                throw new UnsupportedPolicyTypeException(msg);
             }
         } catch (APITemplateException e) {
             handleException("Error while generating policy", e);
@@ -3692,6 +3697,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.add(policyString);
                 apiMgtDAO.updateGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
+            } else {
+                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+                log.error(msg);
+                throw new UnsupportedPolicyTypeException(msg);
             }
         } catch (APITemplateException e) {
             handleException("Error while generating policy for update");
