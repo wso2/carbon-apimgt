@@ -1,0 +1,35 @@
+<%
+jagg.block("subscription/subscribed-apis", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+        }
+    },
+
+    getOutputs:function (inputs) {
+        jagg.log("============WW==");
+        var user = jagg.getUser();
+        jagg.log(user);
+        var start = 1;
+        var end = 1;
+        if(user != null ){        
+            var module_sub = jagg.module("subscription");
+            response = module_sub.getAllSubscriptionsOfApplication(user.username, inputs.application.name , start, end);
+            jagg.log(response);
+        }
+        
+		return {
+		};
+     },
+
+    getStaticBlocks:function() {
+        return [
+        ];
+    }
+
+
+});
+%>

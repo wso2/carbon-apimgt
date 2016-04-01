@@ -1,0 +1,9 @@
+<% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { %>
+
+
+	<div class="message message-info">
+        <h4><i class="icon fw fw-info"></i>No Subscriptions</h4>
+        <p>This application has not yet subscribed to an API. To subscribe, select an API from  <a href="<%=jagg.urlTenanted("/")%>" >API listing page</a> and subscribe to it with an app.</p>
+	</div>
+
+<% }); %>
