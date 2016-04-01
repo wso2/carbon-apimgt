@@ -8267,7 +8267,7 @@ public class ApiMgtDAO {
 
         try {
 
-            // Valid policyId is available means policy should be inserted with 'policyId'
+            // Valid policyId is available means policy should be inserted with 'policyId'. (Policy update request)
             if (policyId == -1) {
                 addQuery = SQLConstants.INSERT_API_POLICY_SQL;
             } else {
@@ -8485,10 +8485,10 @@ public class ApiMgtDAO {
             policyStatement.setString(3, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
-            siddhiQueryInputStream = new ByteArrayInputStream(policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
             policyStatement.setBinaryStream(4, siddhiQueryInputStream);
             policyStatement.setBoolean(5, false);
-            System.out.println(policyStatement);
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
@@ -8506,7 +8506,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
     }
-
 
     /**
      * Removes a throttling policy from the database
@@ -8659,7 +8658,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     *Get all Global level policeis belongs to specific tenant
+     * Get all Global level policeis belongs to specific tenant
+     *
      * @param tenantID
      * @return
      * @throws APIManagementException
@@ -8736,11 +8736,11 @@ public class ApiMgtDAO {
                 policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_USER_LEVEL));
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get api policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get api policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -8772,17 +8772,17 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policyName);
             selectStatement.setInt(2, tenantId);
 
-            // Should return only single result
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get application policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -8814,7 +8814,7 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policyName);
             selectStatement.setInt(2, tenantId);
 
-            // Should return only single result
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 policy = new SubscriptionPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -8822,11 +8822,11 @@ public class ApiMgtDAO {
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get subscription policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -9110,7 +9110,7 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policy.getPolicyName());
             selectStatement.setInt(2, policy.getTenantId());
 
-            // Should return only single value
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 oldPolicyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
@@ -9134,7 +9134,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to update api policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+            handleException("Failed to update api policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
@@ -9165,11 +9165,11 @@ public class ApiMgtDAO {
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
-            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getRequestCount());
                 updateStatement.setString(4, null);
-            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
@@ -9192,7 +9192,7 @@ public class ApiMgtDAO {
                 }
             }
             handleException(
-                    "Failed to update application policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -9222,11 +9222,11 @@ public class ApiMgtDAO {
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
-            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getRequestCount());
                 updateStatement.setString(4, null);
-            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
@@ -9251,7 +9251,7 @@ public class ApiMgtDAO {
                 }
             }
             handleException(
-                    "Failed to update subscription policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -9291,7 +9291,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to update global policy: " + policy.getPolicyName() + "-" + policy.getTenantId(),
+            handleException("Failed to update global policy: " + policy.getPolicyName() + '-' + policy.getTenantId(),
                     e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
@@ -9407,7 +9407,7 @@ public class ApiMgtDAO {
         policyStatement.setString(3, policy.getDescription());
         policyStatement.setString(4, policy.getDefaultQuotaPolicy().getType());
 
-        //TOFO use requestCount in same format in all places
+        //TODO use requestCount in same format in all places
         if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(5, limit.getRequestCount());
@@ -9428,7 +9428,7 @@ public class ApiMgtDAO {
      * Populated common attributes of policy type objects to <code>policy</code>
      * from <code>resultSet</code>
      *
-     * @param policy initiallized {@link Policy} object to populate
+     * @param policy    initiallized {@link Policy} object to populate
      * @param resultSet {@link ResultSet} with data to populate <code>policy</code>
      * @throws SQLException
      */
@@ -9436,7 +9436,7 @@ public class ApiMgtDAO {
         QuotaPolicy quotaPolicy = new QuotaPolicy();
         String prefix = "";
 
-        if(policy instanceof APIPolicy) {
+        if (policy instanceof APIPolicy) {
             prefix = "DEFAULT_";
         }
 
