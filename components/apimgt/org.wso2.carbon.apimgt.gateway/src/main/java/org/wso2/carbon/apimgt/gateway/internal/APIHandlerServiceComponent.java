@@ -25,6 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -72,6 +73,11 @@ public class APIHandlerServiceComponent {
 			  TenantServiceCreator listener = new TenantServiceCreator();
 			  bundleContext.registerService(
 			          Axis2ConfigurationContextObserver.class.getName(), listener, null);
+                //While initializing component we need to create throttle data holder and set it to
+                //service reference holder.
+                ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+                throttleDataHolder.init();
+                ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
 			}
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
