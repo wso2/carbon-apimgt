@@ -739,4 +739,32 @@ function getGeolocationUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,d
         };
     }
 }
+function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>

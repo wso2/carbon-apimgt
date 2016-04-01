@@ -211,29 +211,6 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
     , "json");
 }
 
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
 
 function getDateTime(currentDay,fromDay){  
     var to = convertTimeString(currentDay);
@@ -245,28 +222,4 @@ function getDateTime(currentDay,fromDay){
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
     drawThrottledTimeGraph(from,to);
-}
-
-function convertDateToLong(date){
-    var allSegments=date.split(" ");
-    var dateSegments=allSegments[0].split("-");
-    var timeSegments=allSegments[1].split(":");
-    var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
-    return newDate.getTime();
-}
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
 }
