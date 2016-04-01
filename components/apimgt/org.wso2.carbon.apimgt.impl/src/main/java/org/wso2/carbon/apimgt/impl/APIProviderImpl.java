@@ -3613,28 +3613,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addPolicy(Policy policy) throws APIManagementException {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> policies = new ArrayList<String>();
-        int policyId = 0;
+        String policyLevel = null;
 
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 policies = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 apiMgtDAO.addAPIPolicy(apiPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 policies.add(policyString);
                 apiMgtDAO.addApplicationPolicy(appPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 policies.add(policyString);
                 apiMgtDAO.addSubscriptionPolicy(subPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policies.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
             }
         } catch (APITemplateException e) {
             handleException("Error while generating policy");
@@ -3649,36 +3653,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 manager.deployPolicyToGatewayManager(policyString);
             }
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
 
-            // TODO rollback db if deployment failed
-            handleException("Error while deploying policy");
+            // Add deployment fail flag to database and throw the exception
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
+            handleException("Error while deploying policy", e);
         }
+
     }
+
     public void updatePolicy(Policy policy) throws APIManagementException {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> policies = new ArrayList<String>();
+        String policyLevel = null;
 
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 policies = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 apiMgtDAO.updateAPIPolicy(apiPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 policies.add(policyString);
                 apiMgtDAO.updateApplicationPolicy(appPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 policies.add(policyString);
                 apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policies.add(policyString);
                 apiMgtDAO.updateGlobalPolicy(globalPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
             }
         } catch (APITemplateException e) {
             handleException("Error while generating policy for update");
@@ -3698,8 +3711,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 deploymentManager.deployPolicyToGatewayManager(policyString);
             }
 
-            // TODO implement deployed flag
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
+
+            // Add deployment fail flag to database and throw the exception
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
             handleException("Error while deploying policy to gateway");
         }
     }

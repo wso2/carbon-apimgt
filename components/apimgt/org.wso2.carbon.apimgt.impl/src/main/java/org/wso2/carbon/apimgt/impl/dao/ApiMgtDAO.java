@@ -8196,8 +8196,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(10, policy.getRateLimitCount());
-            policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setInt(11, policy.getRateLimitCount());
+            policyStatement.setString(12, policy.getRateLimitTimeUnit());
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8276,10 +8276,13 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setString(10, policy.getUserLevel());
+            policyStatement.setString(11, policy.getUserLevel());
 
             if (policyId != -1) {
-                policyStatement.setInt(11, policyId);
+
+                // Assume policy is deployed if update request is recieved
+                policyStatement.setBoolean(10, true);
+                policyStatement.setInt(12, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8484,6 +8487,7 @@ public class ApiMgtDAO {
             InputStream siddhiQueryInputStream;
             siddhiQueryInputStream = new ByteArrayInputStream(policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
             policyStatement.setBinaryStream(4, siddhiQueryInputStream);
+            policyStatement.setBoolean(5, false);
             System.out.println(policyStatement);
             policyStatement.executeUpdate();
             conn.commit();
@@ -9340,6 +9344,57 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Sets deployment status vaule of a policy in database.
+     *
+     * @param policyLevel policy level
+     * @param policyName  name of the policy
+     * @param tenantId    tenant id of the policy
+     * @param isDeployed  deployment status. <code>true</code> if deployment successful, <code>false</code> if not
+     * @throws APIManagementException
+     */
+    public void setPolicyDeploymentStatus(String policyLevel, String policyName, int tenantId, boolean isDeployed)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement statusStatement = null;
+        String query = null;
+
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_APPLICATION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_API_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_GLOBAL_POLICY_STATUS_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            statusStatement = connection.prepareStatement(query);
+            statusStatement.setBoolean(1, isDeployed);
+            statusStatement.setString(2, policyName);
+            statusStatement.setInt(3, tenantId);
+            statusStatement.executeUpdate();
+
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback setting isDeployed flag: " + policyName + '-' + tenantId, ex);
+                }
+            }
+            handleException("Failed to set deployment status to the policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(statusStatement, connection, null);
+        }
+    }
+
+    /**
      * Populates common attribute data of the <code>policy</code> to <code>policyStatement</code>
      *
      * @param policyStatement prepared statement initialized of policy operation
@@ -9362,9 +9417,11 @@ public class ApiMgtDAO {
             policyStatement.setLong(5, limit.getDataAmount());
             policyStatement.setString(6, limit.getDataUnit());
         }
-        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
-        policyStatement.setLong(7, '1');
+
+        policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
+        policyStatement.setBoolean(10, false);
     }
 
     /**
@@ -9405,5 +9462,6 @@ public class ApiMgtDAO {
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
         policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
         policy.setDefaultQuotaPolicy(quotaPolicy);
+        policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
 }
