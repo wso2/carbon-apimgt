@@ -66,6 +66,7 @@
         var foo='<%= encode.forJavaScript(apps) %>';
 
     </script>
+    <div class="white-wrapper">
     <table cellspacing="0" cellpadding="0" width="100%" class="table table-bordered table-striped table-responsive" id="applicationTable">
         <thead>
             <tr class="alt first last">
@@ -151,6 +152,7 @@
             <% } %>
         </tbody>
     </table>
+    </div>
     <% if(numberOfPages > 1) { %>
     <div class="pagination">
         <ul>

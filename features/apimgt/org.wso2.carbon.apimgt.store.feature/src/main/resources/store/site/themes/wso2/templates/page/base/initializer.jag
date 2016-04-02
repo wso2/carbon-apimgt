@@ -43,6 +43,15 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "jquery.validator", "js/lib/jquery.validate.min.js");
         jagg.addFooterJS("page/base", "jquery.validate.password", "js/lib/jquery.validate.password.js");
         jagg.addFooterJS("page/base", "jquery.cookie", "js/lib/jquery.cookie.js");
+
+        jagg.addFooterJS("page/base", "theme-wso2.js", "libs/theme-wso2_1.0/js/theme-wso2.js");
+        
+
+        jagg.addHeaderCSS("page/base", "dataTables.bootstrap", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
+        jagg.addHeaderCSS("page/base", "dataTables.responsive", "libs/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css");
+        jagg.addFooterJS("page/base", "dataTables", "libs/data-tables_1.10.7/media/js/jquery.dataTables.min.js");
+        jagg.addFooterJS("page/base", "dataTables.bootstrap.js", "libs/data-tables_1.10.7/extensions/Bootstrap/js/dataTables.bootstrap.js");
+        jagg.addFooterJS("page/base", "dataTables.responsive.js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
     }
 });
 %>
