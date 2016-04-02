@@ -30,15 +30,12 @@
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="home">...</div>
     <div role="tabpanel" class="tab-pane" id="profile">
-    <% //jagg.includeBlock("subscription/subscription-authapp-main", { "user" :"admin" });
+    <% jagg.includeBlock("application/application-keys", { "application": application });
      %>
     </div>
     <div role="tabpanel" class="tab-pane" id="messages">
     <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
     </div>
-  </div>
-
-  <div id="subscriptions">
   </div>
 
 </div>

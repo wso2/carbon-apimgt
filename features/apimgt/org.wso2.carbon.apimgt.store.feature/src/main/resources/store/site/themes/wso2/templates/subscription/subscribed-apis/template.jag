@@ -1,4 +1,7 @@
-<% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { %>
+<% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { 
+// api should have image and provider
+//
+%>
 
 
 	<div  id="subscription-table-nodata" class="hide message message-info">
@@ -11,7 +14,7 @@
       	<thead>
 	        <tr>
 	            <th>API Name</th>            
-	            <th>Tier</th>      
+	            <th>Subscription Tier</th>      
 	            <th>Status</th>      
 	        </tr>
     	</thead>    
