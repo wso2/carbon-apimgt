@@ -6,12 +6,15 @@ var addApiPolicy = function (policy) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var Gson = Packages.com.google.gson.Gson;
+        var gson = new Gson();
         var apiProvider = new APIProviderImpl(provider);
         var apiPolicy = jsonToObject(JSON.parse(policy));
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantId = APIUtil.getTenantId(provider);
         apiPolicy.setTenantId(tenantId);
         log.info(JSON.parse(policy));
+        log.info(gson.toJson(apiPolicy));
         apiProvider.addPolicy(apiPolicy);
         return {
             error: false
@@ -47,7 +50,29 @@ var getAllAPIPolicies = function () {
         };
     }
 };
-
+//get api policy with policyName
+var getAPIPolicy = function (policyName) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+        var Gson = Packages.com.google.gson.Gson;
+        var gson = new Gson();    
+        var apiPolicy = apiProvider.getAPIPolicy(policyName, provider);
+        var apiPolicyJson = gson.toJson(apiPolicy);
+        return {
+            error: false,
+            apiPolicy: apiPolicyJson
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting all api policies (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
 //removing api policy
 var removeApiPolicy = function (policyName, userName, policyLevel) {
 
@@ -94,8 +119,8 @@ var updateApiPolicy = function (policy) {
             message: errorMessage
         };
     }
-
 }
+
 // inserting json file data to ApiPolicy Object
 var jsonToObject = function (policy) {
 
