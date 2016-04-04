@@ -28,22 +28,53 @@ div.image-container {
 .api-name-icon {
 	color: #fff;
 	width: 100%;
-	font-size: 6.5em;
+	font-size: 8em;
 	text-align: center;
 	font-weight: 200;
 	text-transform: capitalize;
 }
-
-/* api Thumbnail image */
-.apiThumb {
-	min-width: 150px;
-	min-height: 150px;
-	max-height: 150px;
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	cursor: pointer;
+.body-wrapper a:hover {
+    text-decoration: none;
 }
+
+.thumbnail.icon {
+    position: relative;
+}
+.thumbnail.icon .after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    color: #FFF;
+}
+.thumbnail.icon:hover .after {
+    display: block;
+    background: rgba(0, 0, 0, .6);
+    cursor: pointer;
+}
+.thumbnail.icon>.after>a>span.fw-stack.fw-lg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    font-size: 26px;
+}
+
+.thumbnail.icon .square-element img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
 
 
 .tab-content {

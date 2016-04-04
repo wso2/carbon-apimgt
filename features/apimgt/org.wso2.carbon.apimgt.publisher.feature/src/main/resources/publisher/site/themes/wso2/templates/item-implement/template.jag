@@ -373,7 +373,7 @@
 																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
 																				}
 																				%>
-																				<div class="originContainerManaged">
+																				<div class="originContainerManaged tagContainer">
 																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -383,7 +383,7 @@
 																				<%=i18n.localize("accessControlHeaders")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -393,7 +393,7 @@
 																				<%=i18n.localize("accessControlMethods")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -575,7 +575,7 @@
 																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
 																				}
 																				%>
-																				<div class="originContainerPrototyped">
+																				<div class="originContainerPrototyped tagContainer">
 																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
 																									</div>
 																			</td>
@@ -585,7 +585,7 @@
 																				<%=i18n.localize("accessControlHeaders")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -595,7 +595,7 @@
 																				<%=i18n.localize("accessControlMethods")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
