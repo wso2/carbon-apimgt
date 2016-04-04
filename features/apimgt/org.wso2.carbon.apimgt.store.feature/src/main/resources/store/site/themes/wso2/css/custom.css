@@ -433,51 +433,6 @@ nav.navigation .second_level > .left-menu-item {
 .search-wrap .dropdown-toggle:hover{
     border-color: #215080;
 }
-/*a.btn .icon-caret, .btn .icon-caret {
-    margin-left: 49px;
-    border: none;
-}
-.btn{
-    background-color: #0E75DC;
-    color: #fff;
-}
-.disabled{
-    background-color: #bbbbbb;
-    color: #fff;
-}
-.btn:hover {
-    background-color: #005ABA;
-    color: #fff;
-}
-.btn-default{
-    background-color: #064973;
-    color: #fff;
-    border: none;
-}
-.btn-default:hover{
-    background-color: #085b8f;
-    color: #fff;
-    border: none;
-}
-.btn-primary{
-    background-color: #064973;
-    color: #fff;
-    border: none;
-}
-.btn-primary:hover{
-    background-color: #085b8f;
-    color: #fff;
-    border: none;
-}
-.btn-secondary{
-    background-color: #444;
-    color: #fff;
-}
-.btn-secondary:hover{
-    background-color: #686868;
-    color: #fff;
-}*/
-
 
 a.btn .icon-caret, .btn .icon-caret {
     margin-left: 49px;
@@ -523,6 +478,8 @@ a.btn .icon-caret, .btn .icon-caret {
     background-color: #686868;
     color: #fff;
 }
+
+
 .product-tags{
     float: left;
     padding-top: 22px;

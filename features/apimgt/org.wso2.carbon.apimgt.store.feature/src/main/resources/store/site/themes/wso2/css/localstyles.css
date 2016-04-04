@@ -203,11 +203,12 @@
 input#access_token {margin-right: 20px}
 .average-rating {
     background: transparent url("../images/bigstar.png") no-repeat scroll 0 0;
-    font-size: 18px;
+    background-size : 40px 40px;
+    font-size: 12px;
     font-weight: bold;
     height: 64px;
-    line-height: 70px;
-    padding-left: 20px;
+    line-height: 45px;
+    padding-left: 11px;
     width: 70px;
 }
 
