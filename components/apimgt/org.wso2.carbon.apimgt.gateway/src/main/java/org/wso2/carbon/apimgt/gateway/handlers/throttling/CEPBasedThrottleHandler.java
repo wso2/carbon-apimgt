@@ -149,6 +149,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             }
             
             Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
+            //TODO pass proper key
             isThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(null, objects);
             //isThrottled = throttler.isThrottled(objects);
         }
