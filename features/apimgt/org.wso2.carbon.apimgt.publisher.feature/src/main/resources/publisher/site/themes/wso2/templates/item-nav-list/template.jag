@@ -10,19 +10,22 @@
   	var storeUrl = jagg.module("manager").getAPIStoreURL().url;
   
   %>
-  <% if(api.thumb==null){%>
-	<li>
-		<div class="setbgcolor">
-			<div class="api-name-icon apiThumb">
+  	<li>
+  	<div class="thumbnail icon"> 
+  <% if(api.thumb==null) { %>
+			<div class="square-element setbgcolor">
+				<div class="api-name-icon"></div>
+				<div style="display: none">
+					<a href="" class="api-name"><%=api.name%></a>
+				</div>
 			</div>
-			<div style="display:none">
-				<a href="" class="api-name"><%=api.name%></a>
+			<%} else { %>
+			<div class="square-element">
+				<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="">
 			</div>
-		</div>
-		
-	</li>
-	<%}else{%> <li><img class="apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="" /></li>
-  <%}%>
+		  <%}%>
+  </div>
+  </li>
   <li><a href="#" onclick="showTab('usersLink')"><i class="icon-user"></i>
       <span class="userCount"><i class="fw fw-user"></i>
           <% if (api.subs == "1"){%>
