@@ -80,7 +80,7 @@ public class APIHandlerServiceComponent {
                 //While initializing component we need to create throttle data holder and set it to
                 //service reference holder.
                 ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-                throttleDataHolder.init();
+                throttleDataHolder.startThrottler();
                 ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
 			}
 		} catch (APIManagementException e) {

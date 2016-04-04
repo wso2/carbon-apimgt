@@ -45,12 +45,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * When throttle data holder initialize it should read complete throttle decision table from global policy engine
  * via web service calls. In addition to that it should subscribe to topic and listen throttle updates.
  */
-public class ThrottleDataHolder {
+public class ThrottleDataHolder implements Runnable{
     private static final Log log = LogFactory.getLog(JMSMessageListener.class);
     private DataPublisher dataPublisher = null;
     private String streamID;
 
-    public void init() {
+    public void start() {
         //First do web service call and update map.
         //Then init JMS listner to listen que and update it.
         //Following method will initialize JMS listnet and listen all updates and keep throttle data map up to date
@@ -196,5 +196,11 @@ public class ThrottleDataHolder {
         }
     }
 
+    public void run() {
+        start();
+    }
 
+    public void startThrottler() {
+        new Thread(this).start();
+    }
 }
