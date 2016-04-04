@@ -90,7 +90,7 @@ $( document ).ready(function() {
                         });
 });
 var populateAPIList = function(){
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
+           jagg.post("/site/blocks/stats/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
         function (json) {
         if (!json.error) {
               apiNameVersionMap = json.apiNameVersionMap;
@@ -124,7 +124,7 @@ var populateVersionList = function(apiName,compare){
         };
 
 function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+    jagg.post("/site/blocks/stats/ajax/stats.jag", { action: "isDataPublishingEnabled"},
         function (json) {
             if (!json.error) {
                 statsEnabled = json.usage;

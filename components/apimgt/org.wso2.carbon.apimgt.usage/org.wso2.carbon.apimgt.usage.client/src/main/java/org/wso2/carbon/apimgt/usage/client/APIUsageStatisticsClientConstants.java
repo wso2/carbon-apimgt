@@ -186,4 +186,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String EXECUTION_TIME = "executionTime";
     public static final String COUNTRY_CITY_FACET = "key_country_city_facet";
     public static final String API_REQUEST_GEO_LOCATION_SUMMARY = "API_REQUEST_GEO_LOCATION_SUMMARY";
+    public static final String API_REQUEST_USER_BROWSER_SUMMARY = "API_REQUEST_USER_BROWSER_SUMMARY";
+    public static String OS_BROWSER_FACET = "key_os_browser_facet";
 }

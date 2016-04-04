@@ -64,25 +64,7 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-        } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-
+        } 
         else {
             print({
                 error: true,
