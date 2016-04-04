@@ -995,3 +995,12 @@ div.image-container {
 .rating.half > .icon > :first-child:hover ~ :last-child {
     opacity: 1;
 }
+
+.api-name-icon {
+	color: #fff;
+	width: 100%;
+	font-size: 9em;
+	text-align: center;
+	font-weight: 200;
+	text-transform: capitalize;
+}

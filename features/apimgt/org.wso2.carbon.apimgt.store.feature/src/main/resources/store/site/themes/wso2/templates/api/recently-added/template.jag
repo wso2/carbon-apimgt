@@ -6,33 +6,52 @@
    var registryPath = jagg.getRegistryPath("");
 %>
 
-<div id="recently-added" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("recentlyAdded")%></div>
-  <div class="panel-body">
-  Loading ....
-  </div>
-  <script id="recently-added-template" type="text/x-handlebars-template">
+<div class="page-header">
+	<div class="page-title">
+		<h2><%=i18n.localize("recentlyAdded")%></h2>
+	</div>
+</div>
+
+<div  class="page-content">
+    <div id="recently-added" class="row">
+    <script id="recently-added-template" type="text/x-handlebars-template">
     {{#each apis}}
-    {{#if @index}}<hr />{{/if}}
-    <div class="row">
-      <div class="col-md-4">
-        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >
-          <img src="{{ thumbnailurl }}" width="70px" height="70px"/>
-        </a>
-      </div>
-      <div class="col-md-8">
-        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >      
-        <strong class="fade-out">{{ name }}-{{ version }}</strong>
-        </a>
-        <div>{{ displayOwner }}</div>
-        <input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
-      </div>
-    </div>
-    {{else}}      
-          <div class="text-muted" style="padding:15px">No APIs to display.</div>  
+
+<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                            <div class="white-wrapper add-margin-bottom-4x">
+                                <div class="image-container">
+									{{#if thumbnailurl}}
+										<img class="img-responsive" src="{{ thumbnailurl }}" alt="">                                		
+									{{else}}     
+                                    	<div class="setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a href="" class="api-name">{{ name }}</a>
+											</div>
+										</div> 
+									{{/if}}
+                                    <div class="after">
+                                        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
+                                    <span class="fw-stack fw-lg">
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    <i class="fw fw-view fw-stack-1x"></i>
+                                    </span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">{{ name }}-{{ version }}</a></h4>
+                                    <h5>{{ displayOwner }}</h5>
+									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
+                                </div>
+                            </div>
+                        </div>
     {{/each}}   
   </script>  
+    </div>
 </div>
+
+
 
 <script type="text/javascript">
   $(function(){
@@ -46,7 +65,7 @@
          if (result.error == false) {
           for(var i = 0; i < result.apis.length;i++){
             if(/^images\//.test(result.apis[i].thumbnailurl)){
-              result.apis[i].thumbnailurl = "<%= themePath %>"+result.apis[i].thumbnailurl;
+              result.apis[i].thumbnailurl = null;
             }
             else{
               result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;  
@@ -63,12 +82,24 @@
           } 
           var source   = $("#recently-added-template").html();
           var template = Handlebars.compile(source);
-          $("#recently-added .panel-body").html(template(result));
+          $("#recently-added").html(template(result));
           $(".recent_rating").rating();
+          $(".setbgcolor").generateBgcolor({
+              definite:true
+          });
+
+          $(".api-name-icon").each(function() {
+              var elem = $(this).next().children(".api-name");
+              $(this).nametoChar({
+                  nameElement: elem
+              });
+          });
+
          } else {
              jagg.message({content:result.message,type:"error"});
          }
     }, "json");
   });
+
 </script>
 <% }); %>

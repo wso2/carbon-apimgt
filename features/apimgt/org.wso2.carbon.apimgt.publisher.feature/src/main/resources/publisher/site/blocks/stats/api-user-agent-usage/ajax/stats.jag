@@ -10,7 +10,6 @@ var log = new Log();
     fromDate = request.getParameter("fromDate"),
     toDate = request.getParameter("toDate"),
     drilldown = request.getParameter("drilldown"),
-    country = request.getParameter("country");
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag")
 
@@ -25,11 +24,11 @@ var log = new Log();
             var tenantDomain = MultitenantUtils.getTenantDomain(provider);
             var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
             var usageStatClient;
-               if (action === "getGeolocationUsageByAPI") {
+               if (action === "getUserAgentUsageByAPI") {
 
                 mod = jagg.module("statistics");
                 var data = {};
-                result = mod.getGeolocationUsageByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
+                result = mod.getUserAgentUsageByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
                 if (result.error == "true") {
                     obj = {
                         error: result.error,

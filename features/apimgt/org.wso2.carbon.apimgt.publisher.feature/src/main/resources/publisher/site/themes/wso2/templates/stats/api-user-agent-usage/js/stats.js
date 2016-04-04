@@ -31,10 +31,11 @@ $( document ).ready(function() {
        apiName = this.value;
        populateVersionList(apiName,false);
     });
-      $("#apiFilter").change(function (e) {
+   $("#apiFilter").change(function (e) {
       currentLocation = this.value;
       populateAPIList();
     });
+
      $('#select-version').on('click', function () {
         enableVersion = true;
          populateVersionList(apiName,false);
@@ -62,16 +63,19 @@ $( document ).ready(function() {
       from = currentDay - 86400000;
       to = currentDay;
       renderGraph(from,to);
+      btnActiveToggle(this);
     });
        $('#week-btn').on('click', function () {
         from = currentDay - 604800000;
         to = currentDay;
         renderGraph(from,to);         
+       btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
         from = currentDay - (604800000 * 4);
         to = currentDay;
         renderGraph(from,to);        
+        btnActiveToggle(this);
         });
         $('#date-range').click(function () {
          $(this).removeClass('active');
@@ -135,37 +139,37 @@ var populateVersionList = function(apiName,compare){
                     .selectpicker('refresh')                    
                     .trigger('change');
         };
+
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
-        getDateTime(to,from);
+    getDateTime(to,from);
     var data = [];
-           jagg.post("/site/blocks/stats/api-geolocation-usage/ajax/stats.jag", { action : "getGeolocationUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drilldown},
+           jagg.post("/site/blocks/stats/api-user-agent-usage/ajax/stats.jag", { action : "getUserAgentUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drilldown},
         function (json) {
             if (!json.error) {
                 if (json.usage && json.usage.length > 0) {
                   for(var usage1 in json.usage ){
                   var values = json.usage[usage1].values;
                   var count = values.count;
-                  var country;
+                  var agent;
                   if (drilldown != "ALL") {
-                   country = values.key_country_city_facet[1];
+                   agent = values.key_os_browser_facet[1];
                   }else{
-                   country = values.key_country_city_facet[0];
+                   agent = values.key_os_browser_facet[0];
                   }
-                  data.push([country,count]);
+                  data.push([count,agent]);
                   }
                     drawGraphInArea(data);
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#temploadinglatencytTime').html('');
-                    $('#noData').empty();
+                          $('#noData').empty();
                     $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
                     $('#chartContainer').hide();
-
                 }
                 else {
+                          $('#noData').empty();
                          $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
                         +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Smiley face"></div>'));
@@ -180,6 +184,7 @@ function renderGraph(fromDate,toDate){
             }
         }, "json");    
   }else{
+                          $('#noData').empty();
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
                         +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
@@ -187,69 +192,48 @@ function renderGraph(fromDate,toDate){
 }
 
 function drawGraphInArea(rdata){
-      $('#chartContainer').show();
-      $('#chartContainer').empty();
       $('#noData').empty();
-      $('#temploadinglatencytTime').empty();
+      $('#chartContainer').show();
+      $('#chartContainer').empty()
+      var pieChart ;
   var data =  [
         {
             "metadata" : {
-                "names" : ["Country","Count"],
-                "types" : ["ordinal", "linear"]
+                "names" : ["count","agent"],
+                "types" : ["linear", "ordinal"]
             },
             "data": rdata
         }
     ];
-    var configWorld = {
-        type: "map",
-        x : "Country",
-        renderer : "canvas",
-        charts : [{type: "map",  y : "Count", mapType : "world"}],
-        width: width,
-        height: height,
-        colorScale:["#99ccff","#193366"],
-        color:["#f7f7f7"],
-        padding: {"top": padding_top, "left": padding_horizontal, "bottom": padding_horizontal, "right": padding_horizontal}
-    };
-      var configUsa = {
-        type: "map",
-        x : "Country",
-        renderer : "canvas",
-        charts : [{type: "map",  y : "Count", mapType : "usa"}],
-        width: width,
-        height: height,
-        colorScale:["#99ccff","#193366"],
-        color:["#f7f7f7"],
-        padding: {"top":padding_top, "left": padding_horizontal, "bottom": padding_horizontal, "right": padding_horizontal}
-    };
+        var configOs = {
+            charts : [{type: "arc",  x : "count", color : "agent", mode: "pie"}],
+            width: 400,
+            height: 300
+        }
+        var configAgent = {
+            charts : [{type: "arc",  x : "count", color : "agent", mode: "pie"}],
+            width: 400,
+            height: 300
+        }
+
     var callbackmethod = function(event, item) { 
 
         if (item != null) {
-          var country = item.datum.zipped.unitName;
-          if (country =="United States") {
-            drilldown = "United States";
+           var tempItem = item.datum.agent;
+            if (drilldown == "ALL") {
+              drilldown = tempItem;
+            }else{
+              drilldown = "ALL";
+            }
             renderGraph(from, to);
-          }else{
-            drilldown = "ALL";
-            renderGraph(from, to);
           }
           }
-          }
-    var worlHelperInfoJsonUrl = $("#countryInfo").val();
-    var worldGeoCodesUrl = $("#world").val();
-    var usahelperJson = $("#usainfo").val();
-    var usaGeocodeJson = $("#usa").val();
-    var worldChart;
     if (drilldown == "ALL") {
-        configWorld.helperUrl = worlHelperInfoJsonUrl;
-        configWorld.geoCodesUrl = worldGeoCodesUrl;
-        worldChart = new vizg(data, configWorld);
+        pieChart = new vizg(data, configOs);
     }else{
-        configUsa.helperUrl = usahelperJson;
-        configUsa.geoCodesUrl = usaGeocodeJson;
-        worldChart = new vizg(data, configUsa);
+        pieChart = new vizg(data, configAgent);
     }
-    worldChart.draw("#chartContainer", [{type:"click", callback:callbackmethod}]);
+    pieChart.draw("#chartContainer", [{type:"click", callback:callbackmethod}]);
     $('#chartContainer').show();
         };
 function getDateTime(currentDay,fromDay){
