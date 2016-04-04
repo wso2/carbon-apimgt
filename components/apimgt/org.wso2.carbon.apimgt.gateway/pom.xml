@@ -36,6 +36,10 @@
             <version>2.0.13-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>
         </dependency>
