@@ -8032,7 +8032,7 @@ public class ApiMgtDAO {
      * @param policy policy object defining the throttle policy
      * @throws SQLException
      */
-    public void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
+    private void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
         ResultSet resultSet = null;
         PreparedStatement policyStatement = null;
         String addQuery;
@@ -8060,7 +8060,8 @@ public class ApiMgtDAO {
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
 
-            while (resultSet.next()) {
+            // Returns only single row
+            if (resultSet.next()) {
 
                 /* H2 doesn't return generated keys when key is provided (not generated).
                    Therefore policyId should be policy parameter's policyId when it is provided.
@@ -8149,7 +8150,7 @@ public class ApiMgtDAO {
             rs = conditionStatement.getGeneratedKeys();
 
             // Add Throttling parameters which have multiple entries
-            while (rs.next()) {
+            if (rs.next()) {
                 int pipelineId = rs.getInt(1); // Get the inserted CONDITION_ID (auto incremented value)
                 for (Condition condition : conditionList) {
                     String type = condition.getType();
@@ -8870,8 +8871,9 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         int oldPolicyId = 0;
 
-        if (policy.getTenantId() == -1 || policy.getPolicyName() == null || "".equals(policy.getPolicyName())) {
-            String errorMsg = "Policy object doesn't contain mandatory parameters";
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg);
         }
@@ -8925,8 +8927,9 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement updateStatement = null;
 
-        if (policy.getTenantId() == -1 || policy.getPolicyName() == null || "".equals(policy.getPolicyName())) {
-            String errorMsg = "Policy object doesn't contain mandatory parameters";
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg);
         }
@@ -8982,8 +8985,9 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement updateStatement = null;
 
-        if (policy.getTenantId() == -1 || policy.getPolicyName() == null || "".equals(policy.getPolicyName())) {
-            String errorMsg = "Policy object doesn't contain mandatory parameters";
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg);
         }
