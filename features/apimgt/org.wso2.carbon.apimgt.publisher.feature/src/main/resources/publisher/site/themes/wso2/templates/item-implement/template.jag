@@ -754,7 +754,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
                 <input type="hidden" id="retryType"/>
         </div>
         <div class="modal-footer">
-        <div id="res"  style="color:red;float:left"></div>
+        <div id="res" class="hide" style="color:red;float:left"></div>
         <a class="btn btn-primary" id="retry" onClick="doGatewayAction()">OK</a>
                                    <script type="text/javascript">
                             function doGatewayAction() {
