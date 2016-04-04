@@ -157,6 +157,8 @@
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "usageResourcePath" : "Usage by Resource Path",
+    "apiLatencyTime" : "API Latency Time",
+    "apiGeoLocationUsage" : "API Usage Across Geo Locations",
     "apiUsageFromDestination" : "API Usage by Destination",
     "usageFromDestination" : "Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
@@ -167,6 +169,8 @@
     "applicationThrottledRequests" : "App Throttled Requests",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
+    "apiLatencyTimeTitle" : "API Latency BreakDown",
+    "apiGeoLocationUsageTitle" : "API Usage Across Geo Locations",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",
     "overallAPIResponseTimesTitle": "API Response Times (Across All Versions)",
     "overallAPILastAccessTimesTitle": "API Last Access Times (Across All Versions)",
@@ -364,5 +368,6 @@
     "demote to prototyped" : "Demote to Prototyped",
     "deprecate" : "Deprecate",
     "re-publish" : "Re-Publish",
-    "retire" : "Retire"
+    "retire" : "Retire",
+    "goToOverView": "Go to Overview"
 }

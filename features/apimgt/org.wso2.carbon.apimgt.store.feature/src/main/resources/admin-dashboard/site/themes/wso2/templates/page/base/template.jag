@@ -31,8 +31,6 @@ var partWithContext = request.getRequestURL().split(request.getRequestURI())[0]+
     <meta name="description" content=""/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/css/bootstrap-responsive.css"))%>" rel="stylesheet">
-
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/favicon.png"))%>">
 
@@ -54,10 +52,53 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
+var user = jagg.getUser();
 %>
 <body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
+
+
+
+
+<!-- header -->
+<header class="header header-default">
+	<div class="container-fluid">
+		<div class="pull-left brand float-remove-xs text-center-xs">
+			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>"
+			onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})"> <img
+				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
+				alt="wso2" title="wso2" class="logo">
+				<h1>Admin Dashboard</h1>
+			</a>
+		</div>
+		<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<li class="visible-inline-block">
+				<a href="#" class="dropdown" data-toggle="dropdown"> 
+					<span class="icon fw-stack fw-lg">
+	                   <i class="fw fw-circle fw-stack-2x"></i>
+	                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                </span>
+					<span class="hidden-xs">
+							<%if(user!=null){%><%=user.username%>
+							<%}%> <span class="caret"></span>
+					</span> 
+				</a>
+				<ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+					<li class="dropdown-header visible-xs">
+						<%if(user!=null){%><%=user.username%>
+						<%}%> <span class="caret"></span>
+					</li>
+					<li class="divider visible-xs"></li>
+					<li><a
+						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
+				 </ul>
+			</li>
+			</ul>
+	</div>
+</header>
+<!-- End header -->
+
 
     <% jagg.includeBlocks(outputs.header); %>
     <% jagg.includeBlocks(outputs.body); %>
@@ -73,15 +114,6 @@ var editUrl="info";
     <script>
         var siteRoot = '<%=jagg.getAbsoluteUrl("/site/themes/"+jagg.getUserTheme().base)%>';
     </script>
-
-
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.cookie.js"))%>"></script>
-
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery.form.js"))%>"></script>
-
-
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>
-
 
 </body>
 </html>

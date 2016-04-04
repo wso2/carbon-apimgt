@@ -24,6 +24,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -88,6 +89,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1753,9 +1755,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {           
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1775,9 +1774,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1812,9 +1808,6 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -1958,16 +1951,22 @@ public final class APIUtil {
      * @param registry     registry to access tiers config
      * @param tierLocation registry location of tiers config
      * @return map containing available tiers
-     * @throws RegistryException      when registry action fails
-     * @throws XMLStreamException     when xml parsing fails
      * @throws APIManagementException when fails to retrieve tier attributes
      */
-    private static Map<String, Tier> getTiers(Registry registry, String tierLocation)
-            throws RegistryException, XMLStreamException, APIManagementException {
-        Map<String, Tier> tiers = getAllTiers(registry, tierLocation);
+    private static Map<String, Tier> getTiers(Registry registry, String tierLocation) throws APIManagementException {
+        Map<String, Tier> tiers = null;
         try {
+            tiers = getAllTiers(registry, tierLocation);
             tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (RegistryException e) {
+            handleException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {
+            handleException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+        } catch (APIManagementException e) {
+            handleException("Unable to get tier attributes", e);
         } catch (Exception e) {
+
+            // generic exception is caught to catch exceptions thrown from map remove method
             handleException("Unable to remove Unauthenticated tier from tiers list", e);
         }
         return tiers;
@@ -2378,24 +2377,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
-    }
-
-
-    /**
-     * Gets the List of Authorized Domains by consumer key.
-     *
-     * @param consumerKey
-     * @return
-     * @throws APIManagementException
-     */
-    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
-            throws APIManagementException {
-        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
-        if (list != null && !list.isEmpty()) {
-            return Arrays.asList(list.split(","));
-        }
-
-        return null;
     }
 
     public static boolean checkAccessTokenPartitioningEnabled() {
@@ -4371,22 +4352,6 @@ public final class APIUtil {
         }
     }
 
-    public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIManagementException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
-        )) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
-    }
-
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
 
         //From 1.0.7 version of this component onwards remove the OAuth authorization header from
@@ -5118,6 +5083,69 @@ public final class APIUtil {
         return false;
     }
 
+    public static String getServerURL() throws APIManagementException{
+        String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
+
+        try {
+            if (hostName == null) {
+                hostName = NetworkUtils.getLocalHostname();
+            }
+        } catch (SocketException e) {
+            throw new APIManagementException("Error while trying to read hostname.", e);
+        }
+
+        String mgtTransport = CarbonUtils.getManagementTransport();
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        if (mgtTransportPort <= 0) {
+            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+        }
+        String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
+        // If it's well known HTTPS port, skip adding port
+        if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
+            serverUrl += ":" + mgtTransportPort;
+        }
+        // If ProxyContextPath is defined then append it
+        String proxyContextPath = ServerConfiguration.getInstance().getFirstProperty(APIConstants.PROXY_CONTEXT_PATH);
+        if (proxyContextPath != null && !proxyContextPath.trim().isEmpty()) {
+            if (proxyContextPath.charAt(0) == '/') {
+                serverUrl += proxyContextPath;
+            } else {
+                serverUrl += "/" + proxyContextPath;
+            }
+        }
+
+        return serverUrl;
+    }
+
+    /**
+     * Extract the provider of the API from name
+     *
+     * @param apiVersion - API Name with version
+     * @param tenantDomain - tenant domain of the API
+     * @return API publisher name
+     */
+    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
+        int index = apiVersion.indexOf("--");
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        String apiProvider;
+        if (index != -1) {
+            apiProvider = apiVersion.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            if (!apiProvider.endsWith(tenantDomain)) {
+                apiProvider = apiProvider + '@' + tenantDomain;
+            }
+            return apiProvider;
+        }
+        return null;
+    }
+
     /**
      * Used to generate CORS Configuration object from CORS Configuration Json
      *
@@ -5185,16 +5213,6 @@ public final class APIUtil {
     }
 
     /**
-     * Used to return analytic enabled from the configuration
-     *
-     * @return true if analytics enabled in analytic configuration
-     */
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
-    }
-
-    /**
      * Used to get access control allowed origins define in api-manager.xml
      *
      * @return allow origins list defined in api-manager.xml
@@ -5234,64 +5252,23 @@ public final class APIUtil {
         return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
     }
 
-    public static String getServerURL() throws APIManagementException{
-        String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
-
-        try {
-            if (hostName == null) {
-                hostName = NetworkUtils.getLocalHostname();
-            }
-        } catch (SocketException e) {
-            throw new APIManagementException("Error while trying to read hostname.", e);
-        }
-
-        String mgtTransport = CarbonUtils.getManagementTransport();
-        AxisConfiguration axisConfiguration = ServiceReferenceHolder
-                .getContextService().getServerConfigContext().getAxisConfiguration();
-        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
-        if (mgtTransportPort <= 0) {
-            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
-        }
-        String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
-        // If it's well known HTTPS port, skip adding port
-        if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
-            serverUrl += ":" + mgtTransportPort;
-        }
-        // If ProxyContextPath is defined then append it
-        String proxyContextPath = ServerConfiguration.getInstance().getFirstProperty(APIConstants.PROXY_CONTEXT_PATH);
-        if (proxyContextPath != null && !proxyContextPath.trim().isEmpty()) {
-            if (proxyContextPath.charAt(0) == '/') {
-                serverUrl += proxyContextPath;
-            } else {
-                serverUrl += "/" + proxyContextPath;
-            }
-        }
-
-        return serverUrl;
-    }
-
     /**
-     * Extract the provider of the API from name
-     *
-     * @param apiVersion - API Name with version
-     * @param tenantDomain - tenant domain of the API
-     * @return API publisher name
+     * Used to get API name from synapse API Name
+     * @param api_version API name from synapse configuration
+     * @return api name according to the tenant
      */
-    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
-        int index = apiVersion.indexOf("--");
-        String apiProvider;
+    public static String getAPINamefromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        String api;
         if (index != -1) {
-            apiProvider = apiVersion.substring(0, index);
-            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-            if (!apiProvider.endsWith(tenantDomain)) {
-                apiProvider = apiProvider + '@' + tenantDomain;
-            }
-            return apiProvider;
+            api_version = api_version.substring(index + 2);
         }
-        return null;
+        api = api_version.split(":")[0];
+        index = api.indexOf("--");
+        if (index != -1) {
+            api = api.substring(index + 2);
+        }
+        return api;
     }
     
     /**

@@ -49,9 +49,9 @@ if (jagg.isCSRFTokenValid())
                         message: result.message
                     }
                 } else {
-                    obj = {
+                    print({
                         error: false
-                    }
+                    });
                 }
             }//remove api policy
             else if (action == "removeApiPolicy" && request.getMethod() == 'POST') {

@@ -12,6 +12,8 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+
+	var corsJson = JSON.parse(api.corsConfiguration);
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
@@ -78,9 +80,7 @@
 
 	<div class="page-header">
 		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
-        <% if(api){ %>
-               <button type="button" class="btn btn-secondary pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
-        <% } %></h2>
+		</h2>
 	</div>
     <div class="content-section shadow-up">
     <div class="content-data">   
@@ -110,19 +110,24 @@
 							    <div class="row">
 							        <div class="col-sm-12">
 									<div id="accordion1" class="panel-group" role="tablist">
-							        <div class="panel panel-default">
-							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1" style="height:100px;">
-							              <div class="api-implement-type">
-							                 <div class="col-sm-1">
-							                     <i class="icon-implement fa fa-cogs fa-3x"></i>
-							                 </div>
-							                 <div class="col-sm-11">
-							                     <h3>Managed API</h3>
-							                     <h5>Provide the production and sandbox endpoints of the API to be managed.</h5>
-							                 </div>
-							              </div>
-							        </div>
-							
+									<div class="panel panel-default">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+										<h4 class="panel-title">
+											<label class="radio">
+						                            <span class="fw-stack fw-lg">
+					                                    <i class="fw fw-settings fw-stack-2x"></i>
+					                                </span>
+						                    </label>
+						                    <div>
+				                                <div class="heading">Managed API</div>
+				                                <div class="description truncate">Provide the production and sandbox endpoints of the API to be managed.</div>
+				                                <div class="status">
+				                                    <i class="fw fw-down"></i>
+				                                </div>
+				                            </div>
+				                            <div class="clearfix"></div>
+										</h4>
+									</div>
 							        <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
@@ -130,7 +135,12 @@
 							
 							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom">
+							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                            	</a>
 							                            </label>
 							                                <div class="col-sm-3">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
@@ -166,7 +176,12 @@
 							
 							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span>
-							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom">
+							                      				<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>							                      				
+							                      			</a>
 							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
 							                            </label>
 							                            <div class="col-sm-4">
@@ -179,7 +194,12 @@
 							
 							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" data-placement="bottom">
+							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                            	</a>
 							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
 							                            </label>
 							                            <div class="col-sm-4">
@@ -207,7 +227,12 @@
 							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
 							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
 							                                </select>
-							                                <a class="help_popup" help_data="stats_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
+							                                <a class="help_popup" help_data="stats_help" data-trigger="hover">
+							                                	<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                                </a>
 							                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
 							                             </div>
 							                        </div>
@@ -301,8 +326,108 @@
 							                                    </table>
 							                            	</div>
 							                            </div>
-							                        <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
-							                        <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                          
+
+														<% if(outputs.isCreatePermitted){
+														 %>
+
+														<div id="corsConfigsManaged">
+														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsManaged" name="cors_check"
+																			<%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															   <div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlOrigin")%>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerManaged">
+																				<label class="checkbox">
+																					<input type="checkbox" id="toggleallOriginManaged" name="toggleallOriginManaged"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																				</label>
+																				</div>
+																						<%
+																				var accessOriginManaged ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginManaged += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginManaged != ""){
+																					accessOriginManaged=accessOriginManaged.substr(0,(accessOriginManaged.length-1));
+																				}
+																				var accessHeadersManaged ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersManaged += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersManaged != ""){
+																					accessHeadersManaged=accessHeadersManaged.substr(0,(accessHeadersManaged.length-1));
+																				}
+																				var accessMethodsManaged="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsManaged += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsManaged != ""){
+																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
+																				}
+																				%>
+																				<div class="originContainerManaged">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlHeaders")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlMethods")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlCredentials")%>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerManaged">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsManaged" name="allowCredentialsManaged" placeholder="Access Control Allow Credentials"
+																						<% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																						<span class="helper">Check to send True</span>
+																					</label>
+																				</div>
+																			</td>
+																		</tr>
+																</table>
+															</div>
+														</div>
+
+													</div>
+												<% }; %>
 							                        <%}%>
 							                    </fieldset>
 												<hr />
@@ -320,98 +445,206 @@
 							                    </form>
 							                </div>
 							            </div>
-							            </div>
-							
+							            </div>							
 							            <div class="panel panel-default">
-							              <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-controls="accordion1-collapse2" style="height:100px;">
-							                  <div class="api-implement-type">
-							                  	 
-							                     <div class="col-sm-1">
-							                         <i class="icon-implement fa fa-cog fa-3x"></i>
-							                     </div>
-							                     <div class="col-sm-11">
-							                         <h3 >Prototyped API</h3>
-							                         <h5>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</h5>
-							                     </div>
-							                  </div>
-							              </div>
-							
-							            <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-							            <div class="panel-body">
-							
-							            <div class="">
-							            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
-							                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-							                <fieldset>
-							                <div class="form-group">
-							                    <label class="control-label col-sm-3" for="context">Implementation Method</label>
-							                    <div class="col-sm-8">
-							                        <%if(api.implementation && api.implementation == "INLINE"){
-							                                var inline_impl = "checked='checked'";
-							                                var hide_endpoint="hide";
-							                            }else{
-							                                var endpoint_impl = "checked='checked'";
-							                                var hide_impl="hide";
-							                            } %>
-							
-							                            <label class="radio-inline">
-							                            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
-							                            </label>
-							
-							                            <label class="radio-inline">
-							                            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
-							                            </label>
-							
-							                    </div>
-							                </div>
-							                </fieldset>
-							
-							                <div id="api_designer">
-							                    <div id ="apidoc_details"></div>
-							                    <div id ="resource_details"></div>
-							                </div>
-							
-							                <div class="clear"></div>
-							
-							
-							                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
-							                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
-							                    <div class="form-group form-inline">
-							                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
-							                        <div class="col-sm-8">
-							                            <div class="input-group">
-							                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
-							                                <span class="input-group-btn">
-							                                    <button type="button" id="prototype_test" class="btn btn-secondary check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
-							                                        <span>Test</span>
-							                                    </button>
+							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+												<h4 class="panel-title">
+													<label class="radio">
+								                            <span class="fw-stack fw-lg">
+							                                    <i class="fw fw-settings fw-stack-2x"></i>
 							                                </span>
-							                            </div>
-							                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover"><i class="fa fa-question-circle"></i></a>
-							                            <div id="endpoint_test_help" class="hide">
-							                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
-							                            </div>
-							                        </div>
-							                        <span style="display:none;" class="help-block jsonform-errortext"></span>
-							                    </div>
-							                    <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
-							                    <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                             
-							                </fieldset>
-							                <hr />
-							                <div class="form-actions" id="saveButtons">
-							
-							                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
-							                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
-							                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
-							                    <input type="hidden" name="action" value="implement" />
-							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
-							                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
-							                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
-							                </div>
-							                            </form>
-							                </div>
-							            </div>
-							
+								                    </label>
+								                    <div>
+						                                <div class="heading">Prototyped API</div>
+						                                <div class="description truncate" title="Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs">Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</div>
+						                                <div class="status">
+						                                    <i class="fw fw-down"></i>
+						                                </div>
+						                            </div>
+						                            <div class="clearfix"></div>
+												</h4>
+											</div>							
+							            <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+								            <div class="panel-body">								
+								            <div class="">
+								            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
+								                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
+								                <fieldset>
+								                <div class="form-group">
+								                    <label class="control-label col-sm-3" for="context">Implementation Method</label>
+								                    <div class="col-sm-8">
+								                        <%if(api.implementation && api.implementation == "INLINE"){
+								                                var inline_impl = "checked='checked'";
+								                                var hide_endpoint="hide";
+								                            }else{
+								                                var endpoint_impl = "checked='checked'";
+								                                var hide_impl="hide";
+								                            } %>
+								
+								                            <label class="radio-inline">
+								                            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
+								                            </label>
+								
+								                            <label class="radio-inline">
+								                            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
+								                            </label>
+								
+								                    </div>
+								                </div>
+								                </fieldset>
+								
+								                <div id="api_designer">
+								                    <div id ="apidoc_details"></div>
+								                    <div id ="resource_details"></div>
+								                </div>
+								
+								                <div class="clear"></div>
+								
+								
+								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
+								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
+								                    <div class="form-group form-inline">
+								                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
+								                        <div class="col-sm-8">
+								                            <div class="input-group">
+								                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
+								                                <span class="input-group-btn">
+								                                    <button type="button" id="prototype_test" class="btn btn-secondary check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
+								                                        <span>Test</span>
+								                                    </button>
+								                                </span>
+								                            </div>
+								                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover">
+								                            	<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													            </span>
+								                            </a>
+								                            <div id="endpoint_test_help" class="hide">
+								                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+								                            </div>
+								                        </div>
+								                        <span style="display:none;" class="help-block jsonform-errortext"></span>
+								                    </div>
+								                    </fieldset>
+								                    <fieldset>
+
+												<% if(outputs.isCreatePermitted){
+														%>
+
+														<div id="corsConfigsPrototyped">
+															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationPrototyped"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsPrototyped" name="cors_check"
+																						 <%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																			<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															<div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlOrigin")%>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerPrototyped">
+																					<label class="checkbox">
+																						<input type="checkbox" id="toggleallOriginPrototyped" name="toggleallOriginPrototyped"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																					</label>
+																				</div>
+																						<%
+																				var accessOriginPrototyped ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginPrototyped += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginPrototyped != ""){
+																					accessOriginPrototyped=accessOriginPrototyped.substr(0,(accessOriginPrototyped.length-1));
+																				}
+																				var accessHeadersPrototyped ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersPrototyped += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersPrototyped != ""){
+																					accessHeadersPrototyped=accessHeadersPrototyped.substr(0,(accessHeadersPrototyped.length-1));
+																				}
+																				var accessMethodsPrototyped="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsPrototyped += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsPrototyped != ""){
+																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
+																				}
+																				%>
+																				<div class="originContainerPrototyped">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
+																									</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlHeaders")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlMethods")%>
+																			</td>
+																			<td>
+																				<div class="headerContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<%=i18n.localize("accessControlCredentials")%>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerPrototyped">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsPrototyped" name="allowCredentialsPrototyped" placeholder="Access Control Allow Credentials"
+																							 <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																								<span class="helper">Check to send True</span>
+																							</label>
+																				</div>
+																			</td>
+																		</tr>
+																	</table>
+																</div>
+															</div>
+
+														</div>
+												<% }; %>
+								                </fieldset>
+								                <hr />
+								                <div class="form-actions" id="saveButtons">
+
+								                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+								                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+								                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+								                    <input type="hidden" name="action" value="implement" />
+								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
+								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                </div>
+								                            </form>
+								                </div>
+								            </div>
 							
 							            </div>
 							
@@ -469,6 +702,150 @@
     </div>
     </div>
 </div>
+
+                    <script>
+                    $('input').on('change', function() {
+                         if (validate_AllowCredentialsManaged()) {
+                               console.log("adding *");
+                                $(".credentialContainerManaged").hide();
+                                $("#allowCredentialsManaged").attr("checked",false);
+                             }else{
+                              $(".credentialContainerManaged").show();
+                            }
+                      var corsenableManaged;
+                      var accessControlAllowMethodsManaged;
+                      var enableAllowCredentialsManaged;
+                      var allowOriginsManaged = $('#accessOriginManaged').val();
+                      var allowHeadersValuesManaged = $('#allowHeadersManaged').val();
+                      var allowMethodsValuesManaged = $('#allowMethodsManaged').val();
+
+                      if(document.getElementById('toggleallOriginManaged').checked) {
+                        allowOriginsManaged = "*";
+                        enableAllowCredentialsManaged = false;
+                        $('#allowCredentialsManaged').attr("checked",false);
+                        $('#allowCredentialsManaged').hide();
+                        $('.originContainerManaged').hide();
+                      } else {
+                        $('#allowCredentialsManaged').show();
+                        $('#allOriginContainerManaged').hide();
+                        $('.originContainerManaged').show();
+                        }
+                      if(document.getElementById('toggleCorsManaged').checked) {
+                        corsenableManaged = true;
+                      } else {
+                        corsenableManaged = false;
+                      }
+                      if($('#allowCredentialsManaged').attr('checked')) {
+                        enableAllowCredentialsManaged = true;
+                      } else {
+                      	 enableAllowCredentialsManaged = false;
+                      }
+                      if(allowOriginsManaged!=""){
+                          allowOriginsManaged = allowOriginsManaged.replace(/,/g,"','");
+                          allowOriginsManaged= "['"+allowOriginsManaged+"']";
+                      }else{
+                         allowOriginsManaged = "[]";
+                      }
+                      if(allowHeadersValuesManaged!=""){
+                          allowHeadersValuesManaged = allowHeadersValuesManaged.replace(/,/g,"','");
+                          allowHeadersValuesManaged= "['"+allowHeadersValuesManaged+"']";
+                      }else{
+                           allowHeadersValuesManaged = "[]";
+                      }
+                      if(allowMethodsValuesManaged != ""){
+                          allowMethodsValuesManaged = allowMethodsValuesManaged.replace(/,/g,"','");
+                          allowMethodsValuesManaged = "['" + allowMethodsValuesManaged + "']";
+                      }else{
+                          allowMethodsValuesManaged = "[]";
+                      }
+                    var corsJsonStringManaged = "{'corsConfigurationEnabled':"+corsenableManaged+",'accessControlAllowOrigins':"+allowOriginsManaged+",'accessControlAllowCredentials':"+enableAllowCredentialsManaged+
+                    ",'accessControlAllowHeaders':"+allowHeadersValuesManaged+",'accessControlAllowMethods':"+allowMethodsValuesManaged+"}";
+                    $('#corsConfigurationManaged').val(corsJsonStringManaged);
+                    });
+                    function validate_AllowCredentialsManaged(){
+                        var origins = $('#accessOriginManaged').val().split(",");
+                        var status;
+                        for (var origin in origins) {
+                            if (origins[origin] == "*") {
+                             console.log("in validate *");
+                            return true;
+                              break;
+                            }
+                          }
+                        }
+                    </script>
+
+                     <script>
+                    $('input').on('change', function() {
+                         if (validate_AllowCredentialsPrototyped()) {
+                               console.log("adding *");
+                                $(".credentialContainerPrototyped").hide();
+                                $("#allowCredentialsPrototyped").attr("checked",false);
+                             }else{
+                              $(".credentialContainerPrototyped").show();
+                            }
+                      var corsenablePrototyped;
+                      var accessControlAllowMethodsPrototyped;
+                      var enableAllowCredentialsPrototyped;
+                      var allowOriginsPrototyped = $('#accessOriginPrototyped').val();
+                      var allowHeadersValuesPrototyped = $('#allowHeadersPrototyped').val();
+                      var allowMethodsValuesPrototyped = $('#allowMethodsPrototyped').val();
+
+                      if(document.getElementById('toggleallOriginPrototyped').checked) {
+                        allowOriginsPrototyped = "*";
+                        enableAllowCredentialsPrototyped = false;
+                        $('#allowCredentialsPrototyped').attr("checked",false);
+                        $('#allowCredentialsPrototyped').hide();
+                        $('.originContainerPrototyped').hide();
+                      } else {
+                        $('#allowCredentialsPrototyped').show();
+                        $('#allOriginContainerPrototyped').hide();
+                        $('.originContainerPrototyped').show();
+                        }
+                      if(document.getElementById('toggleCorsPrototyped').checked) {
+                        corsenablePrototyped = true;
+                      } else {
+                        corsenablePrototyped = false;
+                      }
+                      if($('#allowCredentialsPrototyped').attr('checked')) {
+                        enableAllowCredentialsPrototyped = true;
+                      } else {
+                      	 enableAllowCredentialsPrototyped = false;
+                      }
+                      if(allowOriginsPrototyped!=""){
+                          allowOriginsPrototyped = allowOriginsPrototyped.replace(/,/g,"','");
+                          allowOriginsPrototyped= "['"+allowOriginsPrototyped+"']";
+                      }else{
+                         allowOriginsPrototyped = "[]";
+                      }
+                      if(allowHeadersValuesPrototyped!=""){
+                          allowHeadersValuesPrototyped = allowHeadersValuesPrototyped.replace(/,/g,"','");
+                          allowHeadersValuesPrototyped= "['"+allowHeadersValuesPrototyped+"']";
+                      }else{
+                           allowHeadersValuesPrototyped = "[]";
+                      }
+                      if(allowMethodsValuesPrototyped != ""){
+                          allowMethodsValuesPrototyped = allowMethodsValuesPrototyped.replace(/,/g,"','");
+                          allowMethodsValuesPrototyped = "['" + allowMethodsValuesPrototyped + "']";
+                      }else{
+                          allowMethodsValuesPrototyped = "[]";
+                      }
+                    var corsJsonStringPrototyped = "{'corsConfigurationEnabled':"+corsenablePrototyped+",'accessControlAllowOrigins':"+allowOriginsPrototyped+",'accessControlAllowCredentials':"+enableAllowCredentialsPrototyped+
+                    ",'accessControlAllowHeaders':"+allowHeadersValuesPrototyped+",'accessControlAllowMethods':"+allowMethodsValuesPrototyped+"}";
+                    $('#corsConfigurationPrototyped').val(corsJsonStringPrototyped);
+                    });
+                    function validate_AllowCredentialsPrototyped(){
+                        var origins = $('#accessOriginPrototyped').val().split(",");
+                        var status;
+                        for (var origin in origins) {
+                            if (origins[origin] == "*") {
+                             console.log("in validate *");
+                            return true;
+                              break;
+                            }
+                          }
+                        }
+                    </script>
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>

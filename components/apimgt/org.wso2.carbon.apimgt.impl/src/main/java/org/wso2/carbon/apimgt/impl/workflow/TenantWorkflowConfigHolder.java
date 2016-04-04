@@ -67,13 +67,10 @@ public class TenantWorkflowConfigHolder implements Serializable {
     }
 
     public void load() throws WorkflowException, RegistryException {
-
         workflowExecutorMap = new ConcurrentHashMap<String, WorkflowExecutor>();
-
         InputStream in = null;
 
         try {
-
             Registry registry = ServiceReferenceHolder.getInstance().
                     getRegistryService().getGovernanceSystemRegistry(tenantId);
             Resource resource = registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION);
@@ -89,7 +86,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             OMElement workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.APPLICATION_CREATION));
-            String executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            String executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             Class clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             WorkflowExecutor workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
@@ -97,7 +94,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.PRODUCTION_APPLICATION_REGISTRATION));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
@@ -105,7 +102,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.SANDBOX_APPLICATION_REGISTRATION));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
@@ -113,7 +110,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.USER_SIGN_UP));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
@@ -121,7 +118,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.SUBSCRIPTION_CREATION));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
@@ -129,17 +126,17 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.SUBSCRIPTION_DELETION));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-            workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
 
             workflowElem = workflowExtensionsElem.getFirstChildWithName(
                     new QName(WorkflowConstants.APPLICATION_DELETION));
-            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
             clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-            workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
+            workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);
 
@@ -244,6 +241,9 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         } else if (boolean.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, boolean.class);
                             method.invoke(obj, new Boolean[]{Boolean.valueOf(value)});
+                        } else if(Class.forName("[C").equals(params[0])) {
+                            method = obj.getClass().getMethod(mName, Class.forName("[C"));
+                            method.invoke(obj, value.toCharArray());
                         } else {
                             continue;
                         }

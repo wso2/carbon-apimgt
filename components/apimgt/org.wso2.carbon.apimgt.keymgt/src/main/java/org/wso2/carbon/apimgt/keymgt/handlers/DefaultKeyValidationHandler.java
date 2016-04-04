@@ -53,7 +53,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
 
             // TODO: This should only happen in GW
-            checkClientDomainAuthorized(infoDTO, validationContext.getClientDomain());
             boolean tokenExpired = APIUtil.isAccessTokenExpired(infoDTO);
             if (tokenExpired) {
                 infoDTO.setAuthorized(false);
@@ -65,7 +64,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        AccessTokenInfo tokenInfo = null;
+        AccessTokenInfo tokenInfo;
 
         try {
 
@@ -137,7 +136,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             if (log.isDebugEnabled() && scopes != null) {
                 StringBuilder scopeList = new StringBuilder();
                 for (String scope : scopes) {
-                    scopeList.append(scope + ",");
+                    scopeList.append(scope);
+                    scopeList.append(",");
                 }
                 scopeList.deleteCharAt(scopeList.length() - 1);
                 log.debug("Scopes allowed for token : " + validationContext.getAccessToken() + " : "

@@ -625,7 +625,7 @@ public class ApiMgtDAO {
                 keyValidationInfoDTO.setValidityPeriod(validityPeriod);
                 keyValidationInfoDTO.setSubscriber(subscriberName);
 
-                keyValidationInfoDTO.setAuthorizedDomains(getAuthorizedDomainList(accessToken));
+                //keyValidationInfoDTO.setAuthorizedDomains(getAuthorizedDomainList(accessToken));
                 keyValidationInfoDTO.setConsumerKey(consumerKey);
                 Set<String> scopes = new HashSet<String>();
 
@@ -927,12 +927,6 @@ public class ApiMgtDAO {
         return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
     }
 
-
-    //This returns the authorized client domains into a List
-    public List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
-        return Arrays.asList(getAuthorizedDomains(apiKey).split(","));
-    }
-
     private void updateTokenState(String accessToken, Connection conn, PreparedStatement ps)
             throws SQLException, APIManagementException, CryptoException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -1154,21 +1148,22 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier. Providing and managing
-     * the conn object is a responsibility of the third party that uses this method.
+     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
      *
      * @param identifier    APIIdentifier
      * @param applicationId ID of the application which has the subscription
-     * @param conn          Connection object to use for database operations.
      * @throws APIManagementException
      */
-    public void removeSubscription(APIIdentifier identifier, int applicationId, Connection conn)
+    public void removeSubscription(APIIdentifier identifier, int applicationId)
             throws APIManagementException {
+        Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         int apiId = -1;
         String uuid;
         try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
             apiId = getAPIID(identifier, conn);
 
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
@@ -1186,36 +1181,19 @@ public class ApiMgtDAO {
                 throw new APIManagementException("UUID does not exist for the given apiId:" + apiId + " and " +
                                                  "application id:" + applicationId);
             }
+
+            conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback the add subscription ", ex);
+                }
+            }
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-        }
-    }
-
-    /**
-     * Removes a subscription specified by SubscribedAPI object
-     *
-     * @param subscription SubscribedAPI object
-     * @throws APIManagementException
-     */
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            removeSubscription(subscription, conn);
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Failed to add subscriber data ", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error("Couldn't close database connection for removing subscription", e);
-            }
         }
     }
 
@@ -2524,9 +2502,9 @@ public class ApiMgtDAO {
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
 
-                authorizedDomains = getAuthorizedDomains(accessToken);
+                //authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
-                apiKey.setAuthorizedDomains(authorizedDomains);
+                //apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
 
@@ -2602,9 +2580,7 @@ public class ApiMgtDAO {
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
-                apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
 
                 // Load all the rows to in memory and build the scope string
@@ -3168,122 +3144,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
-    }
-
-    /**
-     * This method will delete allow domains record by given consumer key
-     *
-     * @param consumerKey
-     */
-    public void deleteAccessAllowDomains(String consumerKey) throws APIManagementException {
-        String sqlDeleteAccessAllowDomains = SQLConstants.DELETE_ACCSS_ALLOWED_DOMAINS_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while deleting allowed domains for application identified " +
-                            "by consumer key :" + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    public void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains)
-            throws APIManagementException {
-        String sqlAddAccessAllowDomains = SQLConstants.ADD_ACCESS_ALLOWED_DOMAINS_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            if (accessAllowDomains != null && !"".equals(accessAllowDomains[0].trim())) {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                for (String domain : accessAllowDomains) {
-                    prepStmt.setString(1, oAuthConsumerKey);
-                    prepStmt.setString(2, domain.trim());
-                    prepStmt.addBatch();
-                }
-                try {
-                    prepStmt.executeBatch();
-                } finally {
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, oAuthConsumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while adding allowed domains for application identified " +
-                            "by consumer key :" + oAuthConsumerKey, e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e1);
-                }
-            }
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-    }
-
-    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
-            throws APIManagementException {
-        String consumerKey = findConsumerKeyFromAccessToken(accessToken);
-        String sqlDeleteAccessAllowDomains = SQLConstants.DELETE_ACCESS_ALLOWED_DOMAIN_SQL;
-        String sqlAddAccessAllowDomains = SQLConstants.ADD_ACCESS_ALLOWED_DAMOIN_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            //first delete the existing domain list for access token
-            prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
-            prepStmt.setString(1, consumerKey);
-            prepStmt.execute();
-            prepStmt.close();
-            //add the new domain list for access token
-            if (accessAllowDomains != null && !accessAllowDomains[0].trim().isEmpty()) {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                for (String domain : accessAllowDomains) {
-                    prepStmt.setString(1, consumerKey);
-                    prepStmt.setString(2, domain.trim());
-                    prepStmt.addBatch();
-                }
-                try {
-                    prepStmt.executeBatch();
-                } finally {
-                    prepStmt.close();
-                }
-            } else {
-                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, consumerKey);
-                prepStmt.setString(2, "ALL");
-                prepStmt.execute();
-                prepStmt.close();
-            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Failed to update the access allow domains.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
     }
 
     public String getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
@@ -4564,24 +4424,11 @@ public class ApiMgtDAO {
     /**
      * Deletes an Application along with subscriptions, keys and registration data
      *
-     * @param application Application object to be deleted from the database which consists of Id
+     * @param application Application object to be deleted from the database which has the application Id
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
-        Connection con = null;
-        try {
-            con = APIMgtDBUtil.getConnection();
-            con.setAutoCommit(false);
-            deleteApplication(application, con);
-            con.commit();
-        } catch (SQLException e) {
-            handleException("Error while removing application details from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, con, null);
-        }
-    }
-
-    public void deleteApplication(Application application, Connection connection) throws APIManagementException {
+        Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
@@ -4604,6 +4451,8 @@ public class ApiMgtDAO {
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL;
 
         try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -4686,6 +4535,8 @@ public class ApiMgtDAO {
                 log.debug("Application " + application.getName() + " is deleted successfully.");
             }
 
+            connection.commit();
+
             for (String consumerKey : consumerKeys) {
                 //delete on oAuthorization server.
                 KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
@@ -4693,7 +4544,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetConsumerKey, connection, rs);
             APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
@@ -6240,60 +6091,13 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public boolean isDomainRestricted(String apiKey, String clientDomain) throws APIManagementException {
-        boolean restricted = true;
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = Arrays.asList(getAuthorizedDomains(apiKey).split(","));
-        if (authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)) {
-            restricted = false;
-        }
-        return restricted;
-    }
-
-    public String getAuthorizedDomains(String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-        StringBuilder authorizedDomains = new StringBuilder();
-        String accessAllowDomainsSql = SQLConstants.GET_AUTHORIZED_DOMAINS_PREFIX +
-                                       accessTokenStoreTable + SQLConstants.GET_AUTHORIZED_DOMAINS_SUFFIX;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-            rs = prepStmt.executeQuery();
-            boolean first = true;
-            while (rs.next()) {  //if(rs.next==true) -> domain != null
-                String domain = rs.getString(1);
-                if (first) {
-                    authorizedDomains.append(domain);
-                    first = false;
-                } else {
-                    authorizedDomains.append(',').append(domain);
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } catch (CryptoException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return authorizedDomains.toString();
-    }
-
     // This should be only used only when Token Partitioning is enabled.
     public String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
             String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
             StringBuilder authorizedDomains = new StringBuilder();
-            String accessAllowDomainsSql = "SELECT CONSUMER_KEY " +
+            String getCKFromTokenSQL = "SELECT CONSUMER_KEY " +
                                            " FROM " + accessTokenStoreTable +
                                            " WHERE ACCESS_TOKEN = ? ";
 
@@ -6302,7 +6106,7 @@ public class ApiMgtDAO {
             ResultSet rs = null;
             try {
                 connection = APIMgtDBUtil.getConnection();
-                prepStmt = connection.prepareStatement(accessAllowDomainsSql);
+                prepStmt = connection.prepareStatement(getCKFromTokenSQL);
                 prepStmt.setString(1, APIUtil.encryptToken(accessToken));
                 rs = prepStmt.executeQuery();
                 boolean first = true;
@@ -6325,37 +6129,6 @@ public class ApiMgtDAO {
             return authorizedDomains.toString();
         }
         return null;
-    }
-
-    public String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
-
-        StringBuilder authorizedDomains = new StringBuilder();
-        String accessAllowDomainsSql = SQLConstants.GET_AUTHORIZED_DOMAINS_BY_ACCESS_KEY_SQL;
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, consumerKey);
-            rs = prepStmt.executeQuery();
-            boolean first = true;
-            while (rs.next()) {
-                String domain = rs.getString(1);
-                if (first) {
-                    authorizedDomains.append(domain);
-                    first = false;
-                } else {
-                    authorizedDomains.append(',').append(domain);
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error in retrieving access allowing domain list from table.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return authorizedDomains.toString();
     }
 
     public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
@@ -8196,8 +7969,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(10, policy.getRateLimitCount());
-            policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setInt(11, policy.getRateLimitCount());
+            policyStatement.setString(12, policy.getRateLimitTimeUnit());
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8267,7 +8040,7 @@ public class ApiMgtDAO {
 
         try {
 
-            // Valid policyId is available means policy should be inserted with 'policyId'
+            // Valid policyId is available means policy should be inserted with 'policyId'. (Policy update request)
             if (policyId == -1) {
                 addQuery = SQLConstants.INSERT_API_POLICY_SQL;
             } else {
@@ -8278,10 +8051,12 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             //When design API policy, unit time is always 1
             policyStatement.setLong(7, 1);
-            policyStatement.setString(10, policy.getUserLevel());
-
+            policyStatement.setString(11, policy.getUserLevel());
             if (policyId != -1) {
-                policyStatement.setInt(11, policyId);
+
+                // Assume policy is deployed if update request is recieved
+                policyStatement.setBoolean(10, true);
+                policyStatement.setInt(12, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8484,9 +8259,10 @@ public class ApiMgtDAO {
             policyStatement.setString(3, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
-            siddhiQueryInputStream = new ByteArrayInputStream(policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
             policyStatement.setBinaryStream(4, siddhiQueryInputStream);
-            System.out.println(policyStatement);
+            policyStatement.setBoolean(5, false);
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
@@ -8504,7 +8280,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
     }
-
 
     /**
      * Removes a throttling policy from the database
@@ -8657,7 +8432,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     *Get all Global level policeis belongs to specific tenant
+     * Get all Global level policeis belongs to specific tenant
+     *
      * @param tenantID
      * @return
      * @throws APIManagementException
@@ -8734,11 +8510,11 @@ public class ApiMgtDAO {
                 policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_USER_LEVEL));
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get api policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get api policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -8770,17 +8546,17 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policyName);
             selectStatement.setInt(2, tenantId);
 
-            // Should return only single result
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get application policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -8812,7 +8588,7 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policyName);
             selectStatement.setInt(2, tenantId);
 
-            // Should return only single result
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 policy = new SubscriptionPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
@@ -8820,11 +8596,11 @@ public class ApiMgtDAO {
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
             } else {
-                handleException("Policy:" + policyName + "-" + tenantId + " was not found.",
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
             }
         } catch (SQLException e) {
-            handleException("Failed to get subscription policy: " + policyName + "-" + tenantId, e);
+            handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -9108,7 +8884,7 @@ public class ApiMgtDAO {
             selectStatement.setString(1, policy.getPolicyName());
             selectStatement.setInt(2, policy.getTenantId());
 
-            // Should return only single value
+            // Should return only single row
             resultSet = selectStatement.executeQuery();
             if (resultSet.next()) {
                 oldPolicyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
@@ -9132,7 +8908,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to update api policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+            handleException("Failed to update api policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
@@ -9163,11 +8939,11 @@ public class ApiMgtDAO {
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
-            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getRequestCount());
                 updateStatement.setString(4, null);
-            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
@@ -9190,7 +8966,7 @@ public class ApiMgtDAO {
                 }
             }
             handleException(
-                    "Failed to update application policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -9220,11 +8996,11 @@ public class ApiMgtDAO {
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
-            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getRequestCount());
                 updateStatement.setString(4, null);
-            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
@@ -9249,7 +9025,7 @@ public class ApiMgtDAO {
                 }
             }
             handleException(
-                    "Failed to update subscription policy: " + policy.getPolicyName() + "-" + policy.getTenantId(), e);
+                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
         }
@@ -9289,7 +9065,7 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to update global policy: " + policy.getPolicyName() + "-" + policy.getTenantId(),
+            handleException("Failed to update global policy: " + policy.getPolicyName() + '-' + policy.getTenantId(),
                     e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
@@ -9342,6 +9118,57 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Sets deployment status vaule of a policy in database.
+     *
+     * @param policyLevel policy level
+     * @param policyName  name of the policy
+     * @param tenantId    tenant id of the policy
+     * @param isDeployed  deployment status. <code>true</code> if deployment successful, <code>false</code> if not
+     * @throws APIManagementException
+     */
+    public void setPolicyDeploymentStatus(String policyLevel, String policyName, int tenantId, boolean isDeployed)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement statusStatement = null;
+        String query = null;
+
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_APPLICATION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_API_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_GLOBAL_POLICY_STATUS_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            statusStatement = connection.prepareStatement(query);
+            statusStatement.setBoolean(1, isDeployed);
+            statusStatement.setString(2, policyName);
+            statusStatement.setInt(3, tenantId);
+            statusStatement.executeUpdate();
+
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback setting isDeployed flag: " + policyName + '-' + tenantId, ex);
+                }
+            }
+            handleException("Failed to set deployment status to the policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(statusStatement, connection, null);
+        }
+    }
+
+    /**
      * Populates common attribute data of the <code>policy</code> to <code>policyStatement</code>
      *
      * @param policyStatement prepared statement initialized of policy operation
@@ -9354,7 +9181,7 @@ public class ApiMgtDAO {
         policyStatement.setString(3, policy.getDescription());
         policyStatement.setString(4, policy.getDefaultQuotaPolicy().getType());
 
-        //TOFO use requestCount in same format in all places
+        //TODO use requestCount in same format in all places
         if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(5, limit.getRequestCount());
@@ -9364,16 +9191,18 @@ public class ApiMgtDAO {
             policyStatement.setLong(5, limit.getDataAmount());
             policyStatement.setString(6, limit.getDataUnit());
         }
+
         policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
+        policyStatement.setBoolean(10, false);
     }
 
     /**
      * Populated common attributes of policy type objects to <code>policy</code>
      * from <code>resultSet</code>
      *
-     * @param policy initiallized {@link Policy} object to populate
+     * @param policy    initiallized {@link Policy} object to populate
      * @param resultSet {@link ResultSet} with data to populate <code>policy</code>
      * @throws SQLException
      */
@@ -9381,7 +9210,7 @@ public class ApiMgtDAO {
         QuotaPolicy quotaPolicy = new QuotaPolicy();
         String prefix = "";
 
-        if(policy instanceof APIPolicy) {
+        if (policy instanceof APIPolicy) {
             prefix = "DEFAULT_";
         }
 
@@ -9407,5 +9236,6 @@ public class ApiMgtDAO {
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
         policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
         policy.setDefaultQuotaPolicy(quotaPolicy);
+        policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
 }

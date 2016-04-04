@@ -25,11 +25,13 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -184,9 +186,7 @@ public class HostObjectUtils {
     * @return boolean
      */
     protected static boolean checkDataPublishingEnabled() {
-        APIManagerAnalyticsConfiguration analyticsConfiguration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-        return analyticsConfiguration.isAnalyticsEnabled();
+        return APIUtil.isAnalyticsEnabled();
     }
 
     /**
@@ -228,7 +228,6 @@ public class HostObjectUtils {
     }
 
     protected static boolean isStatPublishingEnabled() {
-            return ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+            return APIUtil.isAnalyticsEnabled();
     }
 }

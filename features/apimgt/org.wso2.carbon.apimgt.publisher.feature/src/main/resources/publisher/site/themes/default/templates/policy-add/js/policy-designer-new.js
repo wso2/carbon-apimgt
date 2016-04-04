@@ -472,6 +472,8 @@ var addPolicyToBackend = function () {
         jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
             action: "addApiPolicy",
             apiPolicy :JSON.stringify(apiPolicyNew),
-        },"json");
+        },"json", function (result) {
+            location.href= '/site/pages/policy-add.jag';
+        });
     }
 };

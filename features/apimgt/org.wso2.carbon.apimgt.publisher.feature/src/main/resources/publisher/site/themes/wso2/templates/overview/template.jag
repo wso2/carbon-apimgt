@@ -102,7 +102,7 @@
             <%if(api.wsdl!=''){%>
             <tr>
                 <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a href="/publisher/site/themes/responsive/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
+                <td id="wsdl"><a href="site/themes/wso2/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
             </tr>
             <%}
             if(api.wadl!=''){%>

@@ -28,25 +28,30 @@ var faultSequencesLoaded = false;
 
             <%if(api.apiStores!=null){%>
             <input type="hidden" id="externalAPIStores" name="externalAPIStores" value="<%for(var j=0;j<api.apiStores.length;j++){ if(api.apiStores[j].published){%><%=api.apiStores[j].name%>::<%}}%>" />
-            <div class="control-group">
-                <label class="control-label"><%=i18n.localize("publishToExternalAPIStores")%>:</label>
-                <div class="controls">
-                    <div class="checkbox">
-                        <%for(var i=0;i<api.apiStores.length;i++){%>
-                        <label>
-                            <input type="checkbox"  id="store<%=i%>" name="store<%=i%>" class="storeCheck" value="<%=api.apiStores[i].name%>" <%if(api.apiStores[i].published){%>checked<%}%><%if(api.status!='PUBLISHED'){%>disabled<%}%> />
-                            <%=api.apiStores[i].displayName%>
-                        </label>
-                        <%}%>
-                    </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label"><%=i18n.localize("publishToExternalAPIStores")%>:</label>
+				<div class="col-sm-4">
+					<ul class="nav">
+						<%for(var i=0;i<api.apiStores.length;i++){%>
+						<li><label class="checkbox"> <input type="checkbox"
+								id="store<%=i%>" name="store<%=i%>" class="storeCheck"
+								value="<%=api.apiStores[i].name%>"
+								<%if(api.apiStores[i].published){%> checked <%}%>
+								<%if(api.status!='PUBLISHED'){%> disabled <%}%>> <span
+								class="helper"><%=api.apiStores[i].displayName%></span>
+						</label></li>
+						<%}%>
+					</ul>
+				</div>
 
-                </div>
-            </div>
+			</div>
             <%}%>
 
+			<br class="spacer">
             <div class="form-actions" style="display:none" id="saveMessageExt">
                     <div class="btn loadingButton">Saving API. Please wait..</div>
             </div>
+            <br class="spacer"/>
             <div class="form-actions" id="saveButtons">
                 <input type="submit" id="updateButtonExt" class="btn btn-primary" value="<%=i18n.localize("save")%>"/>
                 <input type="reset" id="cancelEditExt" class="btn" value="<%=i18n.localize("cancel")%>">

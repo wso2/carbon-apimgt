@@ -3,11 +3,14 @@
         var tierName = request.getParameter("tierName");
         var pageTitle = i18n.localize("tierAddTitle");
         var nameFieldDisableStatus = "";
+        var permissionsDefined = false, denied = false, roleList = "", roleArray,tierPermissions,tiers;
 
         if(tierName != null){
             pageTitle = i18n.localize("tierEditTitle");
             nameFieldDisableStatus = "readonly";
             var tiers = session.get("tiers");
+            var tierPermissions = session.get("tierPermissions");
+
             var tier;
             // tiers contains a Set<Tier> that was returned. Hence we need to get the correct tier and proceed
             var tierArray = tiers.toArray();
@@ -17,6 +20,21 @@
                     break;
                 }
             }
+            
+            for (i = 0; i < tierPermissions.length; i++) {
+                if(tierName.equalsIgnoreCase(tierPermissions[i].tierName)) {
+                    if (tierPermissions[i].permissionType == 'deny') {
+						denied = true;
+					}
+                    roleArray = tierPermissions[i].roles;
+					if (roleArray.length > 0) {
+						roleList = roleArray[0];
+					}
+					for (var a = 1; a < roleArray.length; a ++) {
+						roleList = roleList + "," + roleArray[a];
+					}
+                }
+            }            
 
             var tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
             var description = tier.getDescription() == null ? "" : tier.getDescription();
@@ -37,13 +55,20 @@
                 }
             }
         }
+        
+        if (roleList == "") {
+            roleList = "Internal/everyone";
+        }
 	%>
 
 <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
-    <div class="title-section">
-        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
-    </div>
+	<div class="page-header">
+                <div class="page-title">
+                    <h1><%=pageTitle%></h1>
+                 </div>
+         </div>
+
 
     <div class="content-section shadow-up">
         <div class="content-data">
@@ -54,52 +79,56 @@
                 <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
                 value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
             <div class="row-fluid">
-                <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                     action="/admin-dashboard/site/blocks/tier/edit/ajax/tier-edit.jag">
-                    <fieldset>
                         <legend>General Details</legend>
 
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("tierName")%>
-                                <span class="requiredAstrix">*</span></label>
-                            <div class="controls cnls">
-                                <input type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("tierName")%>
+                                <span class="requiredAstrix">*</span>
+                             </label>
+                             <div class="col-sm-3">
+                             	<input class="form-control" type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
+                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("requestCount")%>
+                                <span class="requiredAstrix">*</span>
+                             </label>
+                            <div class="col-sm-2">
+                                <input class="form-control" type="text" id="requestCount" name="requestCount" />
                             </div>
                         </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("requestCount")%>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("unitTime")%>
                                 <span class="requiredAstrix">*</span></label>
-                            <div class="controls cnls">
-                                <input type="text" id="requestCount" name="requestCount" />
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" id="unitTime" name="unitTime" />
                             </div>
                         </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("unitTime")%>
-                                <span class="requiredAstrix">*</span></label>
-                            <div class="controls cnls">
-                                <input type="text" id="unitTime" name="unitTime" />
-                            </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
-                            <div class="controls cnls">
-                                <textarea id="description" class="text" cols="40" rows ="4" name="description">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("description")%></label>
+                            <div class="col-sm-6">
+                                <textarea id="description" class="class="form-control"" cols="40" rows ="4" name="description">
                                 </textarea>
                             </div>
                         </div>
 
                         <legend>Policy Flags (WSO2 Specific Attributes)</legend>
 
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("stopOnQuotaReach")%></label>
-                            <div class="controls cnls">
-                                <input type="checkbox" id="stopOnQuotaReach" name="stopOnQuotaReach"/>
-                            </div>
+                        <div class="form-group">                        	
+                            <label class="col-sm-3 control-label"><%=i18n.localize("stopOnQuotaReach")%></label>
+                            <div class="col-sm-6">
+								<label class="checkbox">
+	                            	<input type="checkbox" id="stopOnQuotaReach" name="stopOnQuotaReach">
+	                            	<span class="helper"></span>
+	                    		</label>
+                    		</div>
                         </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("tierPlan")%></label>
-                            <div class="controls cnls">
-                                <select class="select required" id="tierPlan" name="tierPlan" style="width:15%">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("tierPlan")%></label>
+                            <div class="col-sm-2">
+                                <select class="form-control select required" id="tierPlan" name="tierPlan">
                                     <option value="FREE" selected="true">Free</option>
                                     <option value="COMMERCIAL">Commercial</option>
                                 </select>
@@ -108,18 +137,49 @@
 
                         <legend>Custom Attributes</legend>
 
-                        <div class="control-group cnl-group">
+                        <div class="form-group">
+                        	<div class="col-sm-3">
                             <button id="add-attribute-btn" name="add-attribute-btn" type="button" class="btn"
                                 value="<%=i18n.localize('customAttributes')%>" >
-                                <i class="icon-plus-sign"></i>
+                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                 			</span>
                                     Add Custom Attribute
                             </button>
-                            <table id="custom-attribute-table">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                        	<div class="col-sm-6">
+                        	<table id="custom-attribute-table">
                                 <tbody id="custom-attribute-tbody" name="custom-attribute-tbody"/>
                             </table>
+                        	</div>
                         </div>
-                    </fieldset>
-
+                        
+                        <legend>Permissions</legend>
+                        
+                        <div class="form-group">					            
+                                <label class="col-sm-3 control-label">Roles<span class="requiredAstrix">*</span></label>
+                                <div class="col-sm-3">
+                                	<input class="form-control" type="text" id="roles" name="roles" value="<%=roleList%>"/>
+                                </div>
+					    </div>
+					    <div class="form-group">
+					    	<div class="col-sm-3"></div>
+						    <div class="col-sm-3" id="permissionTypes">
+		                                <label class="radio">
+		                                    <input type="radio" name="permissionAction" value="allow" <%if(!denied) { %>checked<%} %>> 
+		                                    <span class="helper"><%=i18n.localize("allow")%></span>
+		                                </label>
+		                                <label class="radio">
+		                                    <input type="radio" name="permissionAction" value="deny" <%if(denied) { %>checked<%} %>>
+		                                    <span class="helper"><%=i18n.localize("deny")%></span>
+		                                </label>
+	                        </div>
+	                    </div>
+                        
+					<br class="spacer">
                     <div class="form-actions">
                         <input id="add-tier-btn" onclick="addTier()" name="save-tier-btn" type="button"
                             class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>

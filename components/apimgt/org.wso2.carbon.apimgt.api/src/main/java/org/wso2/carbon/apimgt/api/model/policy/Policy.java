@@ -28,11 +28,13 @@ public class Policy implements Serializable {
     private String description;
     private QuotaPolicy defaultQuotaPolicy;
     private int tenantId;
+    private boolean isDeployed;
 
     public Policy(String name){
         this.policyName = name;
         this.policyId = -1;
         this.tenantId = -1;
+        this.isDeployed = false;
     }
 
     public int getTenantId() {
@@ -74,6 +76,15 @@ public class Policy implements Serializable {
     public void setPolicyId(int policyId) {
         this.policyId = policyId;
     }
+
+    public boolean isDeployed() {
+        return isDeployed;
+    }
+
+    public void setDeployed(boolean deployed) {
+        isDeployed = deployed;
+    }
+
 
     @Override
     public String toString() {

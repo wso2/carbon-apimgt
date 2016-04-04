@@ -655,4 +655,88 @@ function getThrottleDataOfAPIAndApplication(apiName, providerName, appName, from
         };
     }
 }
+function getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByAPI for : " + providerName);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+function getExecutionTimeByMediationType(apiName,version,tenantDomain,fromDate,toDate,drilldown,mediationType) {
+    var usage;
+    try {
+              usage = usageClient.getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown,mediationType);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+function getGeolocationUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getGeoLocationsByApi(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>
