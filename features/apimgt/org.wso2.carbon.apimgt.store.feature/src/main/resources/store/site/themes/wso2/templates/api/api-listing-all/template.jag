@@ -46,7 +46,7 @@ var reqUrl = request.getRequestURI();
  %>
  
  <!-- Recently Added APIs -->
- <% if (request.getParameter('tag') == null && request.getParameter('query') == null && totalLength > 10) { %>
+ <% if (request.getParameter('tag') == null && request.getParameter('query') == null && totalLength > 10 && request.getParameter('page') == null) { %>
 	<%jagg.includeBlock("api/recently-added",null);%>
  <%} %>
   <!-- Recently Added APIs -->
@@ -173,16 +173,18 @@ var reqUrl = request.getRequestURI();
 				                    <%}%>
 				                    </div>
 				                <%}%>-->
-                                <div class="image-container">
+                                <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
-                                		<div class="setbgcolor">
+                                		<div class="square-element setbgcolor">
 											<div class="api-name-icon"></div>
 											<div style="display: none">
 												<a href="" class="api-name"><%=api.name%></a>
 											</div>
 										</div> 
                                     <% } else { %>
-                                    	<img class="img-responsive" src="<%=thumbURL%>" alt="">
+                                    	<div class="square-element">
+                                    		<img class="" src="<%=thumbURL%>" alt="">
+                                    	</div>
                                     <% } %>
                                     <div class="after">
                                         <a href="<%=path%>">
