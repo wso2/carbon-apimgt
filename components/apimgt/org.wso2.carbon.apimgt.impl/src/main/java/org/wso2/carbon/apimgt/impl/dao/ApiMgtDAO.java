@@ -8049,8 +8049,9 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
+            //When design API policy, unit time is always 1
+            policyStatement.setLong(7, 1);
             policyStatement.setString(11, policy.getUserLevel());
-
             if (policyId != -1) {
 
                 // Assume policy is deployed if update request is recieved

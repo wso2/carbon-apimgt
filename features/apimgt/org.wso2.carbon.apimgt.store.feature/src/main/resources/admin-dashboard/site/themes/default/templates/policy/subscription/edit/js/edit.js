@@ -199,7 +199,7 @@ function showHideDefaultQuotaPolicy(){
         $('#defaultBandwidthBasedDiv').show();
     }
 
-    if (quotaPolicy == "Bandwidth"){
+    if (quotaPolicy == "bandwidthVolume"){
         $('#defaultRequestCountBasedDiv').hide();
     } else{
         $('#defaultRequestCountBasedDiv').show();
@@ -239,7 +239,7 @@ function validateInputs() {
             return false;
         }
     }
-    if (defaultQuotaPolicy == "Bandwidth") {
+    if (defaultQuotaPolicy == "bandwidthVolume") {
         if (!validateNumbersInput(defaultBandwidthTxt, defaultBandwidth, requiredMsg, invalidErrorMsg)) {
             return false;
         }

@@ -21,7 +21,7 @@
         if (defaultQuotaPolicy == "RequestCount"){
            var  defaultRequestCount = appPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
            var defaultBandwidth = appPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount();
            var defaultBandwidthUnit = appPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
@@ -72,7 +72,7 @@
                                 Request Count
                             </label>
                             <label class="checkbox-inline radio">
-                                <input type="radio" name="select-quota-type" value="Bandwidth" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
+                                <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
                                 Request Bandwidth
                             </label>
 		                </div>
@@ -174,7 +174,7 @@
             $('#requestCountType').prop('checked',true);
             $('#defaultRequestCount').val("<%=defaultRequestCount%>");
           }
-          else if("<%=defaultQuotaPolicy%>" == ("Bandwidth")){
+          else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             $('#bandwidthType').prop('checked',true);
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
             $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");

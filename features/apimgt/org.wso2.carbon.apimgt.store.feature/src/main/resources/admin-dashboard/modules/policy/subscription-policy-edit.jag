@@ -56,7 +56,7 @@ var constructPolicyObject = function (userName, policyName, description, default
         default_quotaPolicy.setType(defaultQuotaPolicy);
         default_quotaPolicy.setLimit(requestCountLimit);
     }
-    else if (defaultQuotaPolicy == "Bandwidth") {
+    else if (defaultQuotaPolicy == "bandwidthVolume") {
         var bandwidthLimit = new BandwidthLimit();
         bandwidthLimit.setDataAmount(defaultBandwidth);
         bandwidthLimit.setDataUnit(defaultBandwidthUnit);
