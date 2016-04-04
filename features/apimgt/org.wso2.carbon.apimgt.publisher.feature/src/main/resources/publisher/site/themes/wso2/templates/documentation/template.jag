@@ -49,9 +49,9 @@
 		        </div>
 
 		        <div class="control-group">
-		            <label class="control-label" for="textarea"><%=i18n.localize("summary")%></label>
-		            <div class="controls">
-		                <textarea  id="summary" class="form-control" rows="3" style="width:100%"></textarea>
+		            <label class="control-label" for="textarea"><%=i18n.localize("summary")%><span class="requiredAstrix">*</span></label>
+		            <div class="form-group">
+		                <textarea  id="summary" class="form-control required" rows="3" style="width:100%"></textarea>
 		            </div>
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
