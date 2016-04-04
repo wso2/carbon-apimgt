@@ -134,7 +134,7 @@
 								</div> 
                                     <% } else { %>
                                     	<a href="<%=path%>">
-                                    		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="">
+                                    		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="<%=i18n.localize("apiThumb")%>">
                                     	</a>
                                     <% } %>
                                 </div>
@@ -184,7 +184,7 @@
 								</div> 
                                     <% } else { %>
                                     	<a href="<%=path%>">
-                                    		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="">
+                                    		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="<%=i18n.localize("apiThumb")%>">
                                     	</a>
                                     <% } %>
                                 </div>

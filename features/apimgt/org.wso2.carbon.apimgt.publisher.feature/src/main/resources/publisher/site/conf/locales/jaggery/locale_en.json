@@ -1,8 +1,11 @@
 {
 	"apiPublisher":"API Publisher",
+    "apiPublisherHomePage":"WSO2 API Publisher Home",
     "api":"API",
     "name" : "Name" ,
     "context" : "Context" ,
+    "apiThumb": "API Thumbnail",
+    "defaultAPIThumb": "Default API Thumbnail",
     "version" : "Version" ,
     "description" : "Description" ,
     "visibility" : "Visibility" ,
@@ -45,6 +48,7 @@
     "endpointTitle" : "Endpoints",
     "storeURLTitle" : "Store URL",
     "redirectUrl" : "Store URL",
+    "goToStore":"Go to APIStore",
     "apiOwner" : "API Owner",
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
@@ -74,6 +78,8 @@
     "manageAPI":"Manage API",
     "viewInStore":"View in Store",
     "allStats":"All Statistics",
+    "enableStats":"Image for Stats Enabled",
+    "statsNotEnabledImage":"Image for stats not enabled",
     "myAPIs":"My APIs",
     "user":"User",
     "subscriptions":"Subscriptions",
@@ -146,6 +152,8 @@
     "filterTokens": "Filter Access Tokens",
     "authorizedUser": "Authorized User",
     "tokenScope": "Token Scope",
+    "deleteScope":"Remove Scope",
+    "addScopes":"Add Scopes",
     "createdTime": "Created Time",
     "validPeriod": "Valid Period",
     "revoke": "Revoke",
@@ -228,6 +236,9 @@
     "usageByCurrentSubscribers": "Usage by Current Subscribers",
     "usageByCurrentSubscribersAcrossAll": "Usage by Current Subscribers (Across All Versions)",
     "addNewResource": "Add Resource",
+    "deleteResource": "Delete Resource",
+    "moveup_resource":"Move Up Resource",
+    "movedown_resource":"Move Down Resource",
     "changeIcon": "Change Icon",
     "lifecycleHistory": "Lifecycle History",
     "testURI": "Test URI",
@@ -371,5 +382,16 @@
     "deprecate" : "Deprecate",
     "re-publish" : "Re-Publish",
     "retire" : "Retire",
-    "goToOverView": "Go to Overview"
+    "goToOverView": "Go to Overview",
+
+    "errorMsgThumb":"Error Message Thumbnail",
+    "infoMsgThumb":"Info Message Thumbnail" ,
+    "jsonFilePreview":"JSON File Preview" ,
+    "deleteButton":"Delete Button",
+    "swaggerImport":"Import Swagger",
+    "editSwaggerSource":"Edit Swagger Source",
+    "addParameter":"Add Parameter"
+
+
+
 }

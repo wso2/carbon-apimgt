@@ -98,7 +98,7 @@ var jagg = jagg || {};
             });
             return;
         }
-        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
+        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" alt="<%=i18n.localize("errorMsgThumb")%>" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
         var type = "";
         if (params.title == undefined) {
             if (params.type == "info") {

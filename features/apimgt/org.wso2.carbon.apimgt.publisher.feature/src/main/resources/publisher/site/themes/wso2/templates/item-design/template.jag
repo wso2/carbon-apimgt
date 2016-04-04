@@ -213,7 +213,7 @@
 										         <table>
 										             <tbody>
 										                 <tr>
-										                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10"></td>
+										                     <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("errorMsgThumb")%>"></td>
 										                     <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
 										             </tbody>
 										         </table>
@@ -262,9 +262,9 @@
 										                <div class="fileinput fileinput-new" data-provides="fileinput">
 										                  <div class="fileinput-new thumbnail" style="width: 150px; height: 150px;">
 										                    <% if(api && api.thumb!=null){ %>
-										                        <img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>" style="width: 150px; height: 150px;"/>                         
+										                        <img id="apiEditThumb" alt="<%=i18n.localize("apiThumb")%>" src="<%=jagg.getRegistryPath(api.thumb)%>" style="width: 150px; height: 150px;"/>
 										                    <% }else{ %>
-										                        <img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
+										                        <img id="apiEditThumb" alt="<%=i18n.localize("defaultAPIThumb")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" style="width: 150px; height: 150px;"/>
 										                    <%}%>
 										                  </div>
 										                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
