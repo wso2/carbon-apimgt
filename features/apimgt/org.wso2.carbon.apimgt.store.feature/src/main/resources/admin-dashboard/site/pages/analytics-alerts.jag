@@ -41,8 +41,3 @@ i18n.init(request,localeResourcesBasePath);
 
 
 %>
-%>
-
-<body>
-	<div id="placeholder"></div>
-</body>

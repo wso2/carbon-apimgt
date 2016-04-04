@@ -20,9 +20,6 @@
 <div class="content-data">
 <div class="well">
 <div class="row-fluid">
-      
-  
-
 
         <div id="alertSelected">
         <label>Alert Table 
@@ -39,19 +36,18 @@
         </select>
         </label>
         </div>
-        <label id="search_field">Search :<input type="search" class="" placeholder="" aria-controls="resourcePathUsageTable"></label>
-   
-
-
+        <label id="search_field_label">Search :<input id="search_field" type="search" class="input-large" placeholder="" aria-controls="resourcePathUsageTable"></label>
         
       
         <div id="tableContainer"><div id="resourcePathUsageTable_wrapper" class="dataTables_wrapper no-footer">
-        <label>Show <select name="resourcePathUsageTable_length" aria-controls="resourcePathUsageTable" class="" style="width: 60px;"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label>
+        <label>Show <select id="entriesPerPage" name="resourcePathUsageTable_length" aria-controls="resourcePathUsageTable" class="" style="width: 60px;"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label>
         
         
+        <div id="table_div">
         <table id="alertsHistory" class="table table-bordered">
                 
         </table>
+        </div>
         <!--START Pagination links-->
         </div>
 
@@ -59,11 +55,18 @@
 </div>
 
 </div>
+
+<script>
+
+</script>
  <!--END Pagination links-->
  <% 
-         var currentPage = 1;
-         var numberOfPages = 9;
-         jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
+        // var currentPage = 1;
+         mod = jagg.module("alerts");
+         var rowCount = mod.getCountFromAlertTable("ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM",null);
+         var numberOfPagesTemp = JSON.parse(rowCount);
+         var numberOfPages = 5;
+         jagg.includeBlock("paginator", {numberOfPages:numberOfPages}); %>
    <!--END Pagination links-->
 </div>
        

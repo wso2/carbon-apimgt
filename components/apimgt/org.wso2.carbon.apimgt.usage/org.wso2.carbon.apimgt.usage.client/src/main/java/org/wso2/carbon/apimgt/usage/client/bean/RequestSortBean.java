@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,15 +57,15 @@ public class RequestSortBean {
         this.tableName = tableName;
     }
 
-    public Map<String, String> getSortBy() {
+    public List<Map<String, String>> getSortBy() {
         return sortBy;
     }
 
-    public void setSortBy(Map<String, String> sortBy) {
+    public void setSortBy(List<Map<String, String>> sortBy) {
         this.sortBy = sortBy;
     }
 
-    public RequestSortBean(String query, int start, int count, String tableName, Map<String, String> sortBy) {
+    public RequestSortBean(String query, int start, int count, String tableName, List<Map<String, String>> sortBy) {
         super();
         this.query = query;
         this.start = start;
@@ -77,5 +78,5 @@ public class RequestSortBean {
     private int start;
     private int count;
     private String tableName;
-    private Map<String,String> sortBy;
+    private List<Map<String,String>> sortBy;
 }

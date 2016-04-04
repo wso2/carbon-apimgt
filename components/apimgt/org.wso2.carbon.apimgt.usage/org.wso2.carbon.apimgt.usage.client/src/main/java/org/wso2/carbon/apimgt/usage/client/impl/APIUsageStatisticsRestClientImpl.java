@@ -2379,18 +2379,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (start < 0) {
             start = 0;
         }
-        Map<String, String> sortBy = new HashedMap();
+        List<Map<String, String>> sortBy = new ArrayList();
         if (sortField != null) {
-            sortBy.put("field", sortField);
+            Map<String, String> sortFieldMap = new HashedMap();
+            sortFieldMap.put("field", sortField);
             String sortType = (ascending) ? "ASC" : "DESC";
-            sortBy.put("sortType", sortType);
+            sortFieldMap.put("sortType", sortType);
+            sortBy.add(sortFieldMap);
         }
         //create the bean
         RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
         String result = null;
         //do post and get the results
         try {
-            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
             if(restClient == null){
                 initializeDataSource();
             }

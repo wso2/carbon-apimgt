@@ -1,14 +1,25 @@
 <%
 log = new Log(),
-//apiProvider = jagg.module("manager").getAPIProviderObj(),
 usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
 var gson = com.google.gson.Gson();
 
 
-var getDataFromAlertTable = function(tableName,start,count) {
-  return usageClient.searchTable(tableName,"*:*",start,count);
+var getDataFromAlertTable = function(tableName, searchEntry, startIndex,count) {
+	
+	if(searchEntry == "null"){
+		var log = new Log();
+  		return usageClient.searchTable(tableName,"*:*",startIndex,count,"alertTimestamp",false);
+  	} else{
+  		return usageClient.searchTable(tableName, searchEntry ,startIndex,count,"alertTimestamp",false);
+  	}
 };
 
+var getCountFromAlertTable = function(tableName, searchEntry){
+	if(searchEntry == "null"){
+		searchEntry = null;
+	}
+	return usageClient.searchCount(tableName,searchEntry);
+};
 
 %>

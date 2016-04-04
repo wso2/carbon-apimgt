@@ -1,3 +1,8 @@
-#alertSelected{display:inline-block;  margin-top:20px;}
+#alertSelected{display:inline-block;  margin-top:15px;margin-right:200px;}
 
-#search_field{display:inline-block;margin-left:200px;} 
+#search_field_label{display:inline-block; } 
+
+#table_div {
+    height:800px;
+    overflow: scroll;
+}

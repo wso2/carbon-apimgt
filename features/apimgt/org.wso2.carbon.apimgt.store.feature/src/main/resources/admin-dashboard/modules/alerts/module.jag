@@ -4,6 +4,10 @@ jagg.module("alerts", {
     getDataFromAlertTable:function () {
         return jagg.require(jagg.getModulesDir() + "alerts/alerts.jag").getDataFromAlertTable.apply(this, arguments);
      },
+
+     getCountFromAlertTable:function () {
+        return jagg.require(jagg.getModulesDir() + "alerts/alerts.jag").getCountFromAlertTable.apply(this, arguments);
+     }
     
  });
  %>
