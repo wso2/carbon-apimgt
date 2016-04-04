@@ -32,8 +32,10 @@
         <div class="media-body">
             <% jagg.includeBlock("menu/actions", { page : section }); %>
 
-            <div class="container-fluid body-wrapper">                          
-                <% jagg.includeBlocks(outputs.middle); %>            
+            <div class="container-fluid">      
+            	<div class="body-wrapper">                    
+                	<% jagg.includeBlocks(outputs.middle); %>
+                </div>            
             </div> 
         </div><!-- /#media body-->               
     </div><!-- /#media-->
