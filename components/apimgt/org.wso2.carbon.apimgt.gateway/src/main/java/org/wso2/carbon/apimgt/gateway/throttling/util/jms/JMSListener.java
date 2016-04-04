@@ -61,7 +61,12 @@ public class JMSListener implements Runnable {
      * Listen for JMS messages on behalf of the given service
      */
     private void start() {
-
+        try {
+            //initial startup delay of 5 seconds to avoid starting jms listener before server startup
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         JMSTaskManager stm = jmsTaskManager;
         boolean connected = false;
 

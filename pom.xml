@@ -1009,6 +1009,8 @@
         <!-- apache pdfbox version -->
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
+        <org.wso2.carbon.databridge.agent.version>5.0.12-SNAPSHOT</org.wso2.carbon.databridge.agent.version>
+
     </properties>
 </project>
 

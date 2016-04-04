@@ -60,14 +60,8 @@ public class JMSMessageListener implements MessageListener {
                     String throttleState = map.get("isThrottled").toString();
                     if (throttleState.equals("true")) {
                         this.throttleDataHolder.getThrottleDataMap().put(throttleKey, throttleState);
-                      //  syncTableHandler.addToBloomFilters(throttleKey);
-                        //StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-                        //streamEvent.setOutputData(new Object[]{throttleKey});
-                        //syncEventTable.addToInMemoryEventMap(throttleKey, streamEvent);
                     } else {
                         this.throttleDataHolder.getThrottleDataMap().remove(throttleKey);
-                        //syncTableHandler.removeFromBloomFilters(throttleKey);
-                        //syncEventTable.removeFromMemoryEventMap(throttleKey);
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type");

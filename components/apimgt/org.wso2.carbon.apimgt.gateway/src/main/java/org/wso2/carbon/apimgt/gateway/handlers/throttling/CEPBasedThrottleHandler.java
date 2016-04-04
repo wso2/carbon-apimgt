@@ -59,7 +59,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
      */
     private long version;
 
-    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
+    //private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     public CEPBasedThrottleHandler() {
         this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
@@ -149,7 +149,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             }
             
             Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
-            isThrottled = throttler.isThrottled(objects);
+            isThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(null, objects);
+            //isThrottled = throttler.isThrottled(objects);
         }
         return isThrottled;
     }
