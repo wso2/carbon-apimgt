@@ -119,7 +119,7 @@
 				                            <div class="clearfix"></div>
 										</h4>
 									</div>
-							        <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+							        <div id="accordion1-collapse1" class="panel-collapse collapse <% if( apiStatus=="PUBLISHED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingOne">
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
@@ -373,7 +373,7 @@
 																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
 																				}
 																				%>
-																				<div class="originContainerManaged">
+																				<div class="originContainerManaged tagContainer">
 																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -383,7 +383,7 @@
 																				<%=i18n.localize("accessControlHeaders")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -393,7 +393,7 @@
 																				<%=i18n.localize("accessControlMethods")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -455,7 +455,7 @@
 						                            <div class="clearfix"></div>
 												</h4>
 											</div>							
-							            <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+							            <div id="accordion1-collapse2" class="panel-collapse collapse <% if( apiStatus=="PROTOTYPED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingTwo">
 								            <div class="panel-body">								
 								            <div class="">
 								            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
@@ -575,7 +575,7 @@
 																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
 																				}
 																				%>
-																				<div class="originContainerPrototyped">
+																				<div class="originContainerPrototyped tagContainer">
 																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
 																									</div>
 																			</td>
@@ -585,7 +585,7 @@
 																				<%=i18n.localize("accessControlHeaders")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -595,7 +595,7 @@
 																				<%=i18n.localize("accessControlMethods")%>
 																			</td>
 																			<td>
-																				<div class="headerContainer">
+																				<div class="headerContainer tagContainer">
 																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
 																				</div>
 																			</td>
@@ -693,150 +693,6 @@
     </div>
     </div>
 </div>
-
-                    <script>
-                    $('input').on('change', function() {
-                         if (validate_AllowCredentialsManaged()) {
-                               console.log("adding *");
-                                $(".credentialContainerManaged").hide();
-                                $("#allowCredentialsManaged").attr("checked",false);
-                             }else{
-                              $(".credentialContainerManaged").show();
-                            }
-                      var corsenableManaged;
-                      var accessControlAllowMethodsManaged;
-                      var enableAllowCredentialsManaged;
-                      var allowOriginsManaged = $('#accessOriginManaged').val();
-                      var allowHeadersValuesManaged = $('#allowHeadersManaged').val();
-                      var allowMethodsValuesManaged = $('#allowMethodsManaged').val();
-
-                      if(document.getElementById('toggleallOriginManaged').checked) {
-                        allowOriginsManaged = "*";
-                        enableAllowCredentialsManaged = false;
-                        $('#allowCredentialsManaged').attr("checked",false);
-                        $('#allowCredentialsManaged').hide();
-                        $('.originContainerManaged').hide();
-                      } else {
-                        $('#allowCredentialsManaged').show();
-                        $('#allOriginContainerManaged').hide();
-                        $('.originContainerManaged').show();
-                        }
-                      if(document.getElementById('toggleCorsManaged').checked) {
-                        corsenableManaged = true;
-                      } else {
-                        corsenableManaged = false;
-                      }
-                      if($('#allowCredentialsManaged').attr('checked')) {
-                        enableAllowCredentialsManaged = true;
-                      } else {
-                      	 enableAllowCredentialsManaged = false;
-                      }
-                      if(allowOriginsManaged!=""){
-                          allowOriginsManaged = allowOriginsManaged.replace(/,/g,"','");
-                          allowOriginsManaged= "['"+allowOriginsManaged+"']";
-                      }else{
-                         allowOriginsManaged = "[]";
-                      }
-                      if(allowHeadersValuesManaged!=""){
-                          allowHeadersValuesManaged = allowHeadersValuesManaged.replace(/,/g,"','");
-                          allowHeadersValuesManaged= "['"+allowHeadersValuesManaged+"']";
-                      }else{
-                           allowHeadersValuesManaged = "[]";
-                      }
-                      if(allowMethodsValuesManaged != ""){
-                          allowMethodsValuesManaged = allowMethodsValuesManaged.replace(/,/g,"','");
-                          allowMethodsValuesManaged = "['" + allowMethodsValuesManaged + "']";
-                      }else{
-                          allowMethodsValuesManaged = "[]";
-                      }
-                    var corsJsonStringManaged = "{'corsConfigurationEnabled':"+corsenableManaged+",'accessControlAllowOrigins':"+allowOriginsManaged+",'accessControlAllowCredentials':"+enableAllowCredentialsManaged+
-                    ",'accessControlAllowHeaders':"+allowHeadersValuesManaged+",'accessControlAllowMethods':"+allowMethodsValuesManaged+"}";
-                    $('#corsConfigurationManaged').val(corsJsonStringManaged);
-                    });
-                    function validate_AllowCredentialsManaged(){
-                        var origins = $('#accessOriginManaged').val().split(",");
-                        var status;
-                        for (var origin in origins) {
-                            if (origins[origin] == "*") {
-                             console.log("in validate *");
-                            return true;
-                              break;
-                            }
-                          }
-                        }
-                    </script>
-
-                     <script>
-                    $('input').on('change', function() {
-                         if (validate_AllowCredentialsPrototyped()) {
-                               console.log("adding *");
-                                $(".credentialContainerPrototyped").hide();
-                                $("#allowCredentialsPrototyped").attr("checked",false);
-                             }else{
-                              $(".credentialContainerPrototyped").show();
-                            }
-                      var corsenablePrototyped;
-                      var accessControlAllowMethodsPrototyped;
-                      var enableAllowCredentialsPrototyped;
-                      var allowOriginsPrototyped = $('#accessOriginPrototyped').val();
-                      var allowHeadersValuesPrototyped = $('#allowHeadersPrototyped').val();
-                      var allowMethodsValuesPrototyped = $('#allowMethodsPrototyped').val();
-
-                      if(document.getElementById('toggleallOriginPrototyped').checked) {
-                        allowOriginsPrototyped = "*";
-                        enableAllowCredentialsPrototyped = false;
-                        $('#allowCredentialsPrototyped').attr("checked",false);
-                        $('#allowCredentialsPrototyped').hide();
-                        $('.originContainerPrototyped').hide();
-                      } else {
-                        $('#allowCredentialsPrototyped').show();
-                        $('#allOriginContainerPrototyped').hide();
-                        $('.originContainerPrototyped').show();
-                        }
-                      if(document.getElementById('toggleCorsPrototyped').checked) {
-                        corsenablePrototyped = true;
-                      } else {
-                        corsenablePrototyped = false;
-                      }
-                      if($('#allowCredentialsPrototyped').attr('checked')) {
-                        enableAllowCredentialsPrototyped = true;
-                      } else {
-                      	 enableAllowCredentialsPrototyped = false;
-                      }
-                      if(allowOriginsPrototyped!=""){
-                          allowOriginsPrototyped = allowOriginsPrototyped.replace(/,/g,"','");
-                          allowOriginsPrototyped= "['"+allowOriginsPrototyped+"']";
-                      }else{
-                         allowOriginsPrototyped = "[]";
-                      }
-                      if(allowHeadersValuesPrototyped!=""){
-                          allowHeadersValuesPrototyped = allowHeadersValuesPrototyped.replace(/,/g,"','");
-                          allowHeadersValuesPrototyped= "['"+allowHeadersValuesPrototyped+"']";
-                      }else{
-                           allowHeadersValuesPrototyped = "[]";
-                      }
-                      if(allowMethodsValuesPrototyped != ""){
-                          allowMethodsValuesPrototyped = allowMethodsValuesPrototyped.replace(/,/g,"','");
-                          allowMethodsValuesPrototyped = "['" + allowMethodsValuesPrototyped + "']";
-                      }else{
-                          allowMethodsValuesPrototyped = "[]";
-                      }
-                    var corsJsonStringPrototyped = "{'corsConfigurationEnabled':"+corsenablePrototyped+",'accessControlAllowOrigins':"+allowOriginsPrototyped+",'accessControlAllowCredentials':"+enableAllowCredentialsPrototyped+
-                    ",'accessControlAllowHeaders':"+allowHeadersValuesPrototyped+",'accessControlAllowMethods':"+allowMethodsValuesPrototyped+"}";
-                    $('#corsConfigurationPrototyped').val(corsJsonStringPrototyped);
-                    });
-                    function validate_AllowCredentialsPrototyped(){
-                        var origins = $('#accessOriginPrototyped').val().split(",");
-                        var status;
-                        for (var origin in origins) {
-                            if (origins[origin] == "*") {
-                             console.log("in validate *");
-                            return true;
-                              break;
-                            }
-                          }
-                        }
-                    </script>
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
