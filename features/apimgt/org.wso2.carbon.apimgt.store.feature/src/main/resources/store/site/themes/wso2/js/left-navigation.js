@@ -3,7 +3,7 @@ $(window).load(function(){
     var animating = false;
     var menu = 'navigation';
 
-    $(".navigation ul li").click(function(e){
+    $(".navigation ul li").not('.navigation ul li ul li').click(function(e){
         e.preventDefault();
 
         if(animating){
@@ -68,6 +68,8 @@ $(window).load(function(){
 
             });
         }
+    }).children('.sublevel-menu').find('li').click(function(e){
+        e.stopImmediatePropagation();
     });
     
 });

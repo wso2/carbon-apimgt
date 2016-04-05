@@ -5,15 +5,21 @@
             <nav class="navigation">
                 <ul>
                     <li class="purple active">
-                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item hidden-xs hidden-sm">APIs</span></a>
+                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a>
                         <ul class="sublevel-menu">
-                            <li><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="name hidden-xs hidden-sm">Sub menu</span></a></li>
-                            <li><a href="<%= jagg.urlTenanted()%>"><i class="fw fw-api icon"></i><span class="name hidden-xs hidden-sm">Sub menu</span></a></li>
+                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-api icon"></i><span class="name">Prototyped APIs</span></a></li>
                         </ul>
                     </li>
-                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-web-app icon"></i><span class="left-menu-item hidden-xs hidden-sm">Applications</span></a></li>                    
+                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item hidden-xs hidden-sm">Applications</span></a></li>                    
                     <li class="orange"><a href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item hidden-xs hidden-sm">Forum</span></a></li>
-                    <li class="yellow"><a href="<%= jagg.urlTenanted("")%>"><i class="fw fw-subscribe icon"></i><span class="left-menu-item hidden-xs hidden-sm">Statistics</span></a></li>                    
+                    <li class="yellow"><a href="<%= jagg.urlTenanted("")%>"><i class="fw fw-statistics icon"></i><span class="left-menu-item hidden-xs hidden-sm">Statistics</span></a>
+                    	<ul class="sublevel-menu">
+                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=perAppAPICount")%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("apiUsage")%></span></a></li>
+                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=topUsers")%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("topUsersDropDown")%></span></a></li>
+                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=apiCallType")%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("callType")%></span></a></li>
+                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=faultCount")%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("faultyInvocationTitle")%></span></a></li>
+                        </ul>
+                    </li>                    
                 </ul>
             </nav>
 
