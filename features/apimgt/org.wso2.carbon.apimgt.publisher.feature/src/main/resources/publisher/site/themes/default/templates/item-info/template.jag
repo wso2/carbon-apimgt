@@ -13,7 +13,7 @@ if(api != null) {
 <div id="item-info">
     <div class="title-section">
      <h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;<a class="api_design_edit"  <%if(isCreatePermitted){%> href="<%= jagg.url("/design")%>?<%= apiUrlId %>"><i class="icon-edit" <%} else if(permitted && api.endpointConfig){%> href="<%= jagg.url("/manage")%>?<%= apiUrlId %>"><i class="icon-edit" <%}else{%> style="display:none;"<%}%> ></i> <%if(isCreatePermitted){%>Edit<%} else{%>Manage<%}%></a>
-     <div class="pull-right"><a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>' target="_blank" id="goToStore">Go to API Store</a></div></h2>
+     <div class="pull-right"><a href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>' target="_blank" id="goToStore" title="goToStore">Go to API Store</a></div></h2>
     </div>
     <div class="content-section shadow-up">
         <div class="content-data">

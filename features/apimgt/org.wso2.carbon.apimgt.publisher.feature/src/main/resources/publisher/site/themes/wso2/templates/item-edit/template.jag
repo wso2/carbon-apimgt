@@ -190,8 +190,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
                 <div class="controls">
                     <div class="pull-left">
-                         <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
-                        <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
+                         <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="<%=i18n.localize("defaultAPIThumb")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
+                        <div><img id="apiEditThumb" alt="<%=i18n.localize("apiThumb")%>" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
                         <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
                             <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
                         </a>

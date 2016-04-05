@@ -650,7 +650,7 @@
 							                <table>
 							                    <tbody>
 							                        <tr>
-							                            <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/info.png"))%>" align="center" hspace="10"></td>
+							                            <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/info.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("infoMsgThumb")%>"></td>
 							                            <td><span class="messageText">API deployed as a Prototype.</span></td>
 							                    </tbody>
 							                </table>
