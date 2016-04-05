@@ -1,40 +1,31 @@
 <% jagg.template("application/application-view", function(inputs, outputs, jagg) {
- var apiPath = "";
- var goBack = "";
- jagg.log(inputs);
  var application = outputs.application;
- if(session.get('apiPath') != null){
-        apiPath = session.get('apiPath');
- }
- if(request.getParameter('goBack') != null){
-        goBack = request.getParameter('goBack');
- }
- var mod = jagg.module("manager");
- var httpsUrl= mod.getHTTPsURL();
- var i=0, tiers = outputs.tiers;
- %>
+%>
 <div class="page-header" id="Message">
-    <h1><%= encode.forHtml(application.name) %></h1>
+    <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
     <p class="lead">Status : <%= encode.forHtml(application.status) %></p>
 </div>
 <div>
-
+  
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Details</a></li>
-    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Keys</a></li>
-    <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Subscriptions</a></li>
-  </ul>
+  <div class="white-wrapper">
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Details</a></li>
+      <li role="presentation"><a href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
+      <li role="presentation"><a href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>      
+      <li role="presentation"><a href="#subscription" aria-controls="messages" role="tab" data-toggle="tab">Subscriptions</a></li>
+    </ul>
 
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="home">...</div>
-    <div role="tabpanel" class="tab-pane" id="profile">
-    <% jagg.includeBlock("application/application-keys", { "application": application });
-     %>
-    </div>
-    <div role="tabpanel" class="tab-pane" id="messages">
-    <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="home">...</div>
+      <div role="tabpanel" class="tab-pane" id="production">
+      <% jagg.includeBlock("application/application-keys", outputs );
+       %>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="subscription">
+      <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
+      </div>
     </div>
   </div>
 

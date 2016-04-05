@@ -20,4 +20,15 @@
     	</thead>    
     </table>
     </div>
+
+<script id="subscription-actions" type="text/x-handlebars-template">
+  <a href="#" data-id="{{ name }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-delete fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs">Delete</span>
+  </a>
+</script>
+
 <% }); %>
