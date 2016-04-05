@@ -18,12 +18,12 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="home">...</div>
-      <div role="tabpanel" class="tab-pane" id="production">
+      <div role="tabpanel" class="tab-pane active fade" id="home">...</div>
+      <div role="tabpanel" class="tab-pane fade" id="production">
       <% jagg.includeBlock("application/application-keys", outputs );
        %>
       </div>
-      <div role="tabpanel" class="tab-pane" id="subscription">
+      <div role="tabpanel" class="tab-pane fade" id="subscription">
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
     </div>

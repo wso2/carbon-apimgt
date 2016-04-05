@@ -22,12 +22,16 @@ var app = outputs.oauthapp;
 	<div class="row">
 	  <div class="col-md-6">
 	  	<form>
-	  	  <fieldset disabled>
+	  	  <fieldset>
 		  <div class="form-group">
 		    <label class="" for="prodConsumerKey"><%=i18n.localize("consumerKey")%></label>
 		    <div class="input-group">
 		      <input type="text" class="form-control" id="prodConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" value="<%=app.prodConsumerKey%>">
-		      <div class="input-group-addon"><i class="fw fw-copy"></i></div>
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="<%=app.prodConsumerKey%>"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
 		    </div>
 		  </div>
 		  <div class="form-group">
