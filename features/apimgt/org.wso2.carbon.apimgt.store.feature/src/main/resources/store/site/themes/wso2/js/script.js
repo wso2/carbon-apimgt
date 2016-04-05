@@ -48,4 +48,13 @@ $(window).load(function(){
         $('.rating.half .icon').children().on('clicked.rate.half', function(e, data){
             console.log(data);
         });
+        
+        /**
+        * Affix spacer when media left is affixed
+        */
+        $('.sidebar-wrapper').on('affix.bs.affix',function(){
+        $('.media').prepend('<div class="affix-spacer hidden-xs" style="width:'+ $(this).width() +'px;float:left;height: 100vh"></div>')
+        }).on('affixed-top.bs.affix',function(){
+        $('.affix-spacer').remove();
+        });
 });

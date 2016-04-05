@@ -267,9 +267,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                             </div>
         </div>
         <% jagg.includeBlock("ui/tab", outputs.tabs); %>
-        <hr/>
-        <%jagg.includeBlock("api/provider-apis",{providerId:api.provider,apiOwner:api.apiOwner,currentApi:api.name,currentApiVersion:api.version,apiBizOwner:api.bizOwner});%>
-        
+               
         <div class="api-info">
             <div class="row-fluid">
                 <div class="span12">                        
@@ -290,6 +288,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                 </div>
             </div>
         </div>
+        
         <%} else { %>
         	<div style="padding-bottom:10px">
             	<div class="alert alert-info">
@@ -301,7 +300,10 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
         	</div>  
         <% } %>
         </div>
-        
+        <%if(api != null) {%>
+        	<hr/>
+        	<%jagg.includeBlock("api/provider-apis",{providerId:api.provider,apiOwner:api.apiOwner,currentApi:api.name,currentApiVersion:api.version,apiBizOwner:api.bizOwner});%>
+        <% } %>
         
         
 <script>
