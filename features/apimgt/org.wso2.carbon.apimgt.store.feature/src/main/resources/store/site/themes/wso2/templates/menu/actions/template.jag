@@ -3,7 +3,7 @@
     <% l.info(inputs); %>
     <!-- navbar -->
     <div class="navbar-wrapper">
-        <nav class="navbar navbar-default" data-spy="affix" data-offset-top="80" data-offset-bottom="40">
+        <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">

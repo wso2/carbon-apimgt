@@ -772,6 +772,15 @@ ul.product-tags {
     background:#21262c;
 
 }
+.navbar-wrapper,.navbar{
+  min-height: 40px;
+}
+.navbar-default .navbar-nav > li > a{
+    line-height:40px;
+}
+.navbar .container-fluid > .navbar-collapse .icon, .navbar .container-fluid > .navbar-header .icon, .navbar .container > .navbar-collapse .icon, .navbar .container > .navbar-header .icon{
+    margin-bottom:2px;
+}
 .navbar > .container .navbar-brand a, .navbar > .container-fluid .navbar-brand a {
     font-size: 13px;
 }
