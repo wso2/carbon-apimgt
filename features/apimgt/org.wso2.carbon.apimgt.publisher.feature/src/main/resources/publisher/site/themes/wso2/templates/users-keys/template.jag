@@ -115,7 +115,7 @@
 									<td><i class="icon-user" title="user"></i><%=subscriber.username%></td>
 	                                <td><%=subscriber.application%></td>
 	                                <td>
-		                                <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})">
+		                                <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})" title="<%=api.name%>-<%=api.version%>">
 		                                    <%=apiName%>-<%=version%>
 		                                </a>
 		                            </td>

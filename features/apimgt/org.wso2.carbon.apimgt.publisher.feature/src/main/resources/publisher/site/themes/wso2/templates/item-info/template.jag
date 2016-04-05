@@ -21,15 +21,15 @@ if(api != null) {
             <input type="hidden" id="infoAPIName" value="<%=api.name%>"/>
             <span id="spanProvider" style="display:none;"><%=api.provider%></span>
             <ul id="tab" class="nav nav-tabs tabs">
-                <li class="active"><a href="#view" data-toggle="tab" id="viewLink"><i class=" glyphicon glyphicon-list-alt"></i> <%=i18n.localize("overview")%></a></li>
-                <li><a href="#lifecycles" data-toggle="tab" id="lifecyclesLink"  <%if(!permitted){%> style="display:none;"<%}%>>
-                	<i class="fw fw-lifecycle"></i> <%=i18n.localize("lifeCycle")%></a></li>
-                <li><a href="#versions" data-toggle="tab" id="versionsLink"><i class="glyphicon glyphicon-th-list"></i> <%=i18n.localize("versions")%></a></li>
-                <li><a href="#docs" data-toggle="tab" id="docsLink"><i class="glyphicon glyphicon-file"></i> <%=i18n.localize("docs")%></a></li>
-                <li><a href="#users" data-toggle="tab" id="usersLink"><i class="glyphicon glyphicon-user"></i> <%=i18n.localize("users")%> </a></li>
+                <li class="active"><a href="#view" title="<%=i18n.localize("overview")%>" data-toggle="tab" id="viewLink"><i class=" glyphicon glyphicon-list-alt" title="<%=i18n.localize("overview")%>"></i> <%=i18n.localize("overview")%></a></li>
+                <li><a href="#lifecycles" data-toggle="tab" id="lifecyclesLink" title="<%=i18n.localize("lifeCycle")%>"  <%if(!permitted){%> style="display:none;"<%}%>>
+                	<i class="fw fw-lifecycle" title="<%=i18n.localize("lifeCycle")%>"></i> <%=i18n.localize("lifeCycle")%></a></li>
+                <li><a href="#versions" data-toggle="tab" id="versionsLink" title="<%=i18n.localize("versions")%>"><i class="glyphicon glyphicon-th-list" title="<%=i18n.localize("versions")%>"></i> <%=i18n.localize("versions")%></a></li>
+                <li><a href="#docs" data-toggle="tab" id="docsLink" title="<%=i18n.localize("docs")%>"><i class="glyphicon glyphicon-file" title="<%=i18n.localize("docs")%>"></i> <%=i18n.localize("docs")%></a></li>
+                <li><a href="#users" data-toggle="tab" id="usersLink" title="<%=i18n.localize("users")%>"><i class="glyphicon glyphicon-user" title="<%=i18n.localize("users")%>"></i> <%=i18n.localize("users")%> </a></li>
                 <% if (api.status != "PROTOTYPED") {%>
                 <%if(api.apiStores!=null){%>
-                <li id="externalAPIStoresTab"><a href="#external" data-toggle="tab" id="usersLink"><i class="icon-share-alt"></i><%=i18n.localize("externalAPIStores")%> </a></li>                
+                <li id="externalAPIStoresTab"><a href="#external" data-toggle="tab" id="usersLink" title="<%=i18n.localize("externalAPIStores")%>"><i class="icon-share-alt" title="<%=i18n.localize("externalAPIStores")%>"></i><%=i18n.localize("externalAPIStores")%> </a></li>
                 <%}%>
                 <%}%>
             </ul>
