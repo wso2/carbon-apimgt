@@ -6,17 +6,13 @@ jagg.block("policy-add", {
 
     },
     
-    getOutputs:function () {
-        var result, tiers, tierPermissions, mod = jagg.module("tiers");
-        result = mod.getTiers();
-        tiers = result.tiers;
-        
-        result = mod.getTierPermissions();
-        tierPermissions =  result.tierPermissions;
-        
+    getOutputs:function (inputs) {
+        var apiPolicies, result;
+        result = jagg.module("policy").getAllAPIPolicies();
+        apiPolicies = result.apiPolicies;
+	    session.put("apiPolicies",apiPolicies);
         return {
-            "tiers":tiers,
-            "tierPermissions":tierPermissions
+            "apiPolicies":apiPolicies
         };
     }
     
