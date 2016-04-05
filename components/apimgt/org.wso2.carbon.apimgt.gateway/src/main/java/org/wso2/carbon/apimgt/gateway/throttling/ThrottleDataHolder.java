@@ -25,6 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.throttling.util.jms.*;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
@@ -46,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * via web service calls. In addition to that it should subscribe to topic and listen throttle updates.
  */
 public class ThrottleDataHolder implements Runnable{
-    private static final Log log = LogFactory.getLog(JMSMessageListener.class);
+    private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
     private DataPublisher dataPublisher = null;
     private String streamID;
 
@@ -57,9 +58,7 @@ public class ThrottleDataHolder implements Runnable{
         //loadThrottleDecisionsFromWebService();
         subscribeForJmsEvents();
         initDataPublisher();
-
     }
-
 
     public Map<String, String> getThrottleDataMap() {
         return throttleDataMap;
@@ -162,7 +161,7 @@ public class ThrottleDataHolder implements Runnable{
             String url = "http://localhost:9763/throttle/data/v1/throttleAsString";
 
             HttpGet method = new HttpGet(url);
-            HttpClient httpClient = new DefaultHttpClient();
+            HttpClient httpClient = HttpClientBuilder.create().build();
             HttpResponse httpResponse = httpClient.execute(method);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
