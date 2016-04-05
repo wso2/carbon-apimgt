@@ -585,4 +585,12 @@
     <!-- For APIM implemented Statistic client for RDBMS -->
     <!--StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatisticClientProvider-->
 
+    <SwaggerCodegen>
+        <ClientGeneration>
+            <GroupId>org.wso2</GroupId>
+            <ArtifactId>org.wso2.client.</ArtifactId>
+            <ModelPackage>org.wso2.client.model.</ModelPackage>
+            <ApiPackage>org.wso2.client.api.</ApiPackage>
+        </ClientGeneration>
+    </SwaggerCodegen>
 </APIManager>

@@ -87,6 +87,11 @@
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>1.5.8</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
             <version>1.0.17</version>
         </dependency>
@@ -127,6 +132,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
+                                <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>

@@ -23,6 +23,7 @@ import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.parser.SwaggerParser;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -677,7 +678,6 @@ public class APIProviderHostObject extends ScriptableObject {
             String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
             api.setInSequence(inSeqFileName);
         }
-
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
             ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
@@ -4796,6 +4796,7 @@ public class APIProviderHostObject extends ScriptableObject {
         APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
         String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
+        tokenUrl = tokenUrl != null ? tokenUrl.replace("'", "") : null;
 
         OAuthAdminService oAuthAdminService = new OAuthAdminService();
         String[] allowedGrantTypesArr = oAuthAdminService.getAllowedGrantTypes();

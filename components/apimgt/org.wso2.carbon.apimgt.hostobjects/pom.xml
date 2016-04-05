@@ -87,6 +87,18 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,6 +127,8 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
+                            io.swagger.parser.*;version="[1.0.17,1.0.18)",
+                            org.wso2.carbon.apimgt.impl.*;version="[6.0.0,7.0.0)",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>

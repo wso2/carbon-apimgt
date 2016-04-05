@@ -1042,4 +1042,10 @@ public final class APIConstants {
     public static final int DEFAULT_HTTPS_PORT = 443;
     public static final String PROXY_CONTEXT_PATH = "ProxyContextPath";
 
+    //Constants for swagger-codegen client generation
+    public static final String CLIENT_CODEGEN_GROUPID = "SwaggerCodegen.ClientGeneration.GroupId";
+    public static final String CLIENT_CODEGEN_ARTIFACTID = "SwaggerCodegen.ClientGeneration.ArtifactId";
+    public static final String CLIENT_CODEGEN_MODAL_PACKAGE = "SwaggerCodegen.ClientGeneration.ModelPackage";
+    public static final String CLIENT_CODEGEN_API_PACKAGE = "SwaggerCodegen.ClientGeneration.ApiPackage";
+
 }
