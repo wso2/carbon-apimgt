@@ -17,7 +17,8 @@ $(window).load(function(){
             distance = el.offset().top  - $(".navigation").offset().top,
             isLastElClicked = el.next().length > 0 ? false : true,
             hasSubMenu = el.find('.sublevel-menu').length == 1 ? true : false,
-            isActiveItem = el.hasClass('active');
+            isActiveItem = el.hasClass('active')
+            url = el.find('a').attr('href');
 
         if($('.sublevel-menu').is(':visible')){
             $('.sublevel-menu').slideUp();
@@ -63,7 +64,7 @@ $(window).load(function(){
                 }
 
                 setTimeout(function(){
-                    //location.replace(el.attr('href'));
+                    location.replace(url);
                 },500)
 
             });
