@@ -80,9 +80,9 @@
                     <div class="wizard">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
-                                <li class="wiz-step current"><a href="<%= design_w_link %>"><span>1</span><span class="hidden-xs">Design</span></a></li>
-                                <li class="wiz-step <%= implement_wlabel%>"><a href="<%= implement_w_link %>"><span>2</span><span class="hidden-xs">Implement</span></a></li>
-                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>"><span>3</span><span class="hidden-xs">Manage</span></a></li>
+                                <li class="wiz-step current"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
+                                <li class="wiz-step <%= implement_wlabel%>"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span>2</span><span class="hidden-xs"><%=i18n.localize("implement")%></span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span>3</span><span class="hidden-xs"><%=i18n.localize("manage")%></span></a></li>
                             </ol>
                         </div>
                         <div class="wiz-content">
@@ -270,7 +270,7 @@
 										                  <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 150px; max-height: 150px;"></div>
 										                  <div>
 										                    <span class="btn btn-secondary btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span><input type="file" class="validateImageFile" id="apiThumb"  name="apiThumb"></span>
-										                    <a href="#" class="btn btn-secondary fileinput-exists" data-dismiss="fileinput">Remove</a>
+										                    <a href="#" class="btn btn-secondary fileinput-exists" data-dismiss="fileinput" title="removeDoc">Remove</a>
 										                  </div>
 										                </div>
 										                <p class="help-block" id="rolesHelp"><%=i18n.localize("imgHelpMsg2")%></p>
@@ -469,9 +469,9 @@
     <br/>
     <table>
     <tr>
-    <td><h5>Produces : <a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces">{{ produces }}</a></h5></td>
+    <td><h5>Produces : <a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces" title="Produces">{{ produces }}</a></h5></td>
     <td width="100px">
-    <td><h5>Consumes : <a href="#" data-path="{{resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes">{{ consumes }}</a></h5></td>
+    <td><h5>Consumes : <a href="#" data-path="{{resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes" title="Consumes">{{ consumes }}</a></h5></td>
     </tr>
     </table>
     <h5>Parameters :</h5>

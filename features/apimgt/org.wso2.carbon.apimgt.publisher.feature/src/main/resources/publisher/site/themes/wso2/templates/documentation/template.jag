@@ -213,18 +213,18 @@
                     <%if(createPermitted){%>
                     <td id="buttonTd">
 			<% if(doc.sourceType == "INLINE") {%>
- 			 	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="glyphicon glyphicon-edit"></i> <%=i18n.localize("editContent")%></a>
+ 			 	<a title="<%=i18n.localize("editContent")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="glyphicon glyphicon-edit" title="<%=i18n.localize("editContent")%>"></i> <%=i18n.localize("editContent")%></a>
                         <% }else if (doc.sourceType == "URL"){%>
-                         	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check"></i> <%=i18n.localize("view")%></a>
+                         	<a title="<%=i18n.localize("view")%>" href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check" title="<%=i18n.localize("view")%>"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check"></i>
+			 <a title="<%=i18n.localize("download")%>" href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check" title="<%=i18n.localize("download")%>"></i>
 			  <%=i18n.localize("open")%>
 			  </a>
 			<%}%>
 
-                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet"></i> <%=i18n.localize("update")%></a>
+                        | <a title="<%=i18n.localize("update")%>" href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet" title="<%=i18n.localize("update")%>"></i> <%=i18n.localize("update")%></a>
                          
-                        |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
+                        |<a title="<%=i18n.localize("deleteMethod")%>" href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash" title="<%=i18n.localize("deleteMethod")%>"></i> <%=i18n.localize("deleteMethod")%></a>
 			</td>
                     <%}%>
                 </tr>

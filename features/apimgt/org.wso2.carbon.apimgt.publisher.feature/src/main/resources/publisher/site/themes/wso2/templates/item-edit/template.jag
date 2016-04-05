@@ -137,7 +137,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
             <div class="control-group">
                 <div class="controls">
-                   <a href="#" class="more-options" ref="more-options-general"><%=i18n.localize("moreOptions")%></a>
+                   <a href="#" class="more-options" ref="more-options-general" title="<%=i18n.localize("moreOptions")%>"><%=i18n.localize("moreOptions")%></a>
                 </div>
             </div>
             <div id="more-options-general" style="display:none">
@@ -305,7 +305,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                <div class="control-group">
                  <div class="controls">
-                        <a href="#" class="more-options" ref="more-options-endpoints"><%=i18n.localize("moreOptions")%></a>
+                        <a href="#" class="more-options" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>"><%=i18n.localize("moreOptions")%></a>
                      </div>
                  </div>
                <div id="more-options-endpoints" style="display:none">
@@ -534,8 +534,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                          </div>
                          <div class="modal-footer">
                          <div id="res" class="hide" style="color:red;float:left"></div>
-                         <a href="#" class="btn" data-dismiss="modal">Close</a>
-                         <a href="#" class="btn btn-primary" id="advance_ep_submit">Save changes</a>
+                         <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
+                         <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>">Save changes</a>
                          </div>
                     </div>
 

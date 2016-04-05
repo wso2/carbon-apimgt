@@ -154,7 +154,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
         var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
         %>
         <tr>
-        <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>"><%=lc.username%></a>
+        <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
         <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
         <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
         <%}%>
