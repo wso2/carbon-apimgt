@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -15,6 +33,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
 import org.apache.synapse.commons.throttle.core.Throttle;
+import org.apache.synapse.commons.throttle.core.ThrottleConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -29,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.event.throttle.core.ThrottlerService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -45,7 +65,20 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     private volatile Throttle throttle;
 
     private RoleBasedAccessRateController applicationRoleBasedAccessController;
+    private String key;
+    /**
+     * The key for getting the throttling policy - key refers to a/an [registry] Api entry
+     */
 
+    /**
+     * The key for getting the throttling policy - key refers to a/an [registry] Application entry
+     */
+    private String policyKeyApplication = null;
+
+    /**
+     * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
+     */
+    private String policyKeyResource = null;
     /**
      * The key for getting the throttling policy - key refers to a/an [registry] entry
      */
@@ -66,92 +99,154 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
-        boolean isThrottled = true;
-        String appKey;
-        String apiKey;
-        String resourceKey;
-        String appTier;
-        String apiTier;
-        String resourceTier = null;
+
+        //Throttle Keys
+        String applicationLevelThrottleKey;
+        String subscriptionLevelThrottleKey;
+        String resourceLevelThrottleKey;
+
+        //Throttle Tiers
+        String applicationLevelTier;
+        String subscriptionLevelTier;
+        String resourceLevelTier;
+
+        //Other Relavant parameters
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
         String accessToken;
         String consumerKey;
         String authorizedUser;
-        String roleID;
-        if (authContext != null) {
-            //TODO implement this as pass key information to backend.
-            //To get throttling tier and conditions use following method.
-            //VerbInfoDTO verbInfoDTO = (VerbInfoDTO)synCtx.getProperty(APIConstants.VERB_INFO_DTO);
-            //verbInfoDTO.getThrottlingConditions();
+        String resourcePath;
+        String httpVerb;
 
-            //Although the method says getApiKey, what is actually returned is the Bearer header (accessToken)
+        //Throttled decisions
+        boolean isThrottled = true;
+        boolean isResourceLevelThrottled = false;
+        boolean isApplicationLevelThrottled = false;
+        boolean isSubscriptionLevelThrottled = false;
+
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        apiContext = apiContext != null ? apiContext : "";
+        apiVersion = apiVersion != null ? apiVersion : "";
+        List<String> resourceLevelThrottleConditions;
+        //If Authz context is not null only we can proceed with throttling
+        if (authContext != null) {
             accessToken = authContext.getApiKey();
             consumerKey = authContext.getConsumerKey();
             authorizedUser = authContext.getUsername();
-            roleID = authContext.getTier();
-            appTier = authContext.getApplicationTier();
-            appKey = authContext.getApplicationId();
-
+            applicationLevelTier = authContext.getApplicationTier();
+            subscriptionLevelTier = authContext.getTier();
             VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
-            String resourceLevelRoleId = null;
-            //no data related to verb information data
+            //If verbInfo is present then only we will do resource level throttling
             if (verbInfoDTO == null) {
                 log.warn("Error while getting throttling information for resource and http verb");
                 return false;
             } else {
-                String resourceAndHTTPVerbThrottlingTier = verbInfoDTO.getThrottling();
-                if (resourceAndHTTPVerbThrottlingTier == null) {
-                    log.warn("Unable to find throttling information for resource and http verb. Throttling will " +
-                            "not apply");
+                if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
+                    //If unlimited tier throttling will not apply at resource level and pass it
                 } else {
-                    resourceTier = resourceAndHTTPVerbThrottlingTier;
+                    //If tier is not unlimited only throttling will apply.
+                    resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
+                    if (resourceLevelThrottleConditions == null) {
+                        log.warn("Unable to find throttling information for resource and http verb. Throttling will " +
+                                "not apply");
+                    } else {
+                        //Then we will apply resource level throttling
+                        resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
+                        for (String conditionString : resourceLevelThrottleConditions) {
+                            resourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
+                            isThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                    isThrottled(resourceLevelThrottleKey);
+                            if (isThrottled) {
+                                isResourceLevelThrottled = true;
+                                break;
+                            }
+                        }
+                    }
                 }
-                resourceKey = verbInfoDTO.getRequestKey() + '-' + consumerKey + ':' +
-                        authorizedUser;
-            }
 
-            if (accessToken == null || roleID == null) {
-                log.warn("No consumer key or role information found on the request - " +
-                        "Throttling not applied");
-                return true;
             }
-            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            apiContext = apiContext != null ? apiContext : "";
-            apiVersion = apiVersion != null ? apiVersion : "";
-            apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
-            apiTier = authContext.getTier();
-            String remoteIP = "127.0.0.1";//(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
-            //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-            if (remoteIP != null) {
-                if (remoteIP.indexOf(",") > 0) {
-                    remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+            //Here check resource level throttled. If throttled then call handler throttled and pass.
+            //Else go for subscription level and application level throttling
+            //if resource level not throttled then move to subscription level
+            if (!isResourceLevelThrottled) {
+                //Subscription Level Throttling
+                subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
+                isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                        isThrottled(subscriptionLevelThrottleKey);
+
+                //if subscription level not throttled then move to application level
+                if (!isSubscriptionLevelThrottled) {
+                    //Application Level Throttling
+                    applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
+                    isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                            isThrottled(applicationLevelThrottleKey);
+
+                    //if application level not throttled means it does not throttled at any level.
+                    if (!isApplicationLevelThrottled) {
+                        //Did not throttled at any level. So let message go and publish event.
+                        //publish event to Global Policy Server
+                        String remoteIP = "127.0.0.1";
+                        //(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
+                        //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+                        if (remoteIP != null) {
+                            if (remoteIP.indexOf(",") > 0) {
+                                remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+                            }
+                        } else {
+                            remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+                        }
+
+                        //todo Added some dummy parameters
+                        Map propertiesMap = new HashMap<String, String>();
+                        propertiesMap.put("remoteIp", remoteIP);
+                        propertiesMap.put("roleID", subscriptionLevelTier);
+
+                        //this parameter will be used to capture message size and pass it to calculation logic
+                        /*int messageSizeInBytes = 0;
+                        if (authContext.isContentAware()) {
+                            //this request can match with with bandwidth policy. So we need to get message size.
+                            httpVerb = verbInfoDTO.getHttpVerb();
+                            Object obj = ((TreeMap) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                                    getProperty("TRANSPORT_HEADERS")).get("Content-Length");
+                            if (obj != null) {
+                                messageSizeInBytes = Integer.parseInt(obj.toString());
+                            }
+
+                        }*/
+
+                        Object[] objects = new Object[]{synCtx.getMessageID(), applicationLevelThrottleKey,
+                                subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
+                                authorizedUser, propertiesMap};
+                        //After publishing events return true
+                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().sendToGlobalThrottler(objects);
+                        return true;
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Request throttled at application level for throttle key" +
+                                    applicationLevelThrottleKey);
+                        }
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
+                        return false;
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Request throttled at subscription level for throttle key" +
+                                subscriptionLevelThrottleKey);
+                    }
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                            APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
+                    return false;
                 }
             } else {
-                remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-            }
-
-            //todo Added some dummy parameters
-            Map propertiesMap = new HashMap<String,String>();
-            propertiesMap.put("remoteIp",remoteIP);
-            propertiesMap.put("roleID", roleID);
-
-            //this parameter will be used to capture message size and pass it to calculation logic
-            int messageSizeInBytes = 0;
-            if (authContext.isContentAware()) {
-                //this request can match with with bandwidth policy. So we need to get message size.
-                String httpVerb = verbInfoDTO.getHttpVerb();
-                Object obj = ((TreeMap) ((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty("TRANSPORT_HEADERS")).get("Content-Length");
-                if (obj != null) {
-                    messageSizeInBytes = Integer.parseInt(obj.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Request throttled at resource level for throttle key" + verbInfoDTO.getRequestKey());
                 }
-
+                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                        APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
+                return false;
             }
-            
-            Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
-            //TODO pass proper key
-            isThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(null, objects);
-            //isThrottled = throttler.isThrottled(objects);
         }
         return isThrottled;
     }
@@ -166,6 +261,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doThrottle(MessageContext messageContext) {
+        long statt = System.currentTimeMillis();
         boolean isThrottled = false;
         if (!messageContext.isResponse()) {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -174,38 +270,13 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
         if (isThrottled) {
-            handleThrottleOut(messageContext);
-            return false;
+            // return false;
         }
+        long end = System.currentTimeMillis();
+        log.info("Time:" + (end - statt));
         return true;
     }
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setPolicyKey(String policyKey) {
-        this.policyKey = policyKey;
-    }
-
-    public String gePolicyKey() {
-        return policyKey;
-    }
-
-    private void handleException(String msg, Exception e) {
-        log.error(msg, e);
-        throw new SynapseException(msg, e);
-    }
-
-    private void handleException(String msg) {
-        log.error(msg);
-        throw new SynapseException(msg);
-    }
 
     private OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
@@ -266,7 +337,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         try {
             RelayUtils.consumeAndDiscardMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            //In case of an error it is logged and the process is continued because we're setting a fault message
+            // in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
 
@@ -277,5 +349,38 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         }
 
         Utils.sendFault(messageContext, httpErrorCode);
+    }
+
+    public void setId(String id) {
+        this.id = id;
+        this.key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + id + ThrottleConstants.CAC_SUFFIX;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setPolicyKey(String policyKey) {
+        this.policyKey = policyKey;
+    }
+
+    public String gePolicyKey() {
+        return policyKey;
+    }
+
+    public void setPolicyKeyApplication(String policyKeyApplication) {
+        this.policyKeyApplication = policyKeyApplication;
+    }
+
+    public String gePolicyKeyApplication() {
+        return policyKeyApplication;
+    }
+
+    public void setPolicyKeyResource(String policyKeyResource) {
+        this.policyKeyResource = policyKeyResource;
+    }
+
+    public String gePolicyKeyResource() {
+        return policyKeyResource;
     }
 }
