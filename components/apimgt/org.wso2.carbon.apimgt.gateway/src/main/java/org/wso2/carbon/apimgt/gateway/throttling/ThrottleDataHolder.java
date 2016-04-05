@@ -70,11 +70,10 @@ public class ThrottleDataHolder implements Runnable{
 
     Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
-    public boolean isThrottled(String key, Object[] objects) {
+    public boolean isThrottled(String key) {
         if (null != this.throttleDataMap.get(key)) {
             return true;
         } else {
-            sendToGlobalThrottler(objects);
             return false;
         }
     }
@@ -83,6 +82,10 @@ public class ThrottleDataHolder implements Runnable{
      * This method will used to subscribe JMS and update throttle data map.
      */
     public void subscribeForJmsEvents() {
+        for(int i=1; i<10000 ; i++){
+            String str = "test"+i;
+            this.throttleDataMap.put( str,"throttled");
+        }
         Properties properties = new Properties();
         try {
             ClassLoader classLoader = getClass().getClassLoader();
@@ -116,7 +119,7 @@ public class ThrottleDataHolder implements Runnable{
         }
     }
 
-    private void sendToGlobalThrottler(Object[] throttleRequest) {
+    public void sendToGlobalThrottler(Object[] throttleRequest) {
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, throttleRequest);
         dataPublisher.tryPublish(event);
