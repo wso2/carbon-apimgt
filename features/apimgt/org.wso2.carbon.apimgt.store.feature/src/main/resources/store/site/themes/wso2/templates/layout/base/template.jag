@@ -5,21 +5,7 @@
     <div class="media">
         <!-- media left-->
         <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="80" data-side="left" data-width="200">
-        <!-- Sidebar -->
-            <% jagg.includeBlock("menu/primary", {"pagePath":"","tenant":""}); %>
-            
-        <% if(outputs.left) { %>            
-            <% //jagg.includeBlocks(outputs.left); %>
-            <% jagg.includeBlocks(outputs.right); %>
-        <% } %>                 
-        </div><!-- media left-->
-
-        <!-- Page Content -->
-        <% var l = new Log(); %>
-        <% l.info(inputs.actions); %>
-        <% l.info(outputs.middle); %>
-        
-            <%
+         <%
                 var section = null;
                 if(outputs.middle instanceof Array){ 
                     section = outputs.middle[0].name;
@@ -27,6 +13,18 @@
                     section = outputs.middle.name;
                 }
             %>
+            
+        <!-- Sidebar -->
+            <% jagg.includeBlock("menu/primary", {"pagePath":section,"tenant":""}); %>
+            
+        <% if(outputs.left) { %>            
+            <% //jagg.includeBlocks(outputs.left); %>
+            <% jagg.includeBlocks(outputs.right); %>
+        <% } %>                 
+        </div><!-- media left-->
+
+        <!-- Page Content -->       
+           
         
         <!-- media body-->
         <div class="media-body">

@@ -6,9 +6,6 @@ var siteConf = require("/site/conf/site.json");
 var tenant=request_tenant;
 var urlSuffix = jagg.getTenantURLPrefix();
 
-var log = new Log();
-log.info('sss');
-log.info(inputs.page);
 %>
 
 <% 
