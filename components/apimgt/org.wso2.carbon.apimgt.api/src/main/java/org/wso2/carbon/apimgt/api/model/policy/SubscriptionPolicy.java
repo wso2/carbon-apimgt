@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class SubscriptionPolicy extends Policy {
     private int rateLimitCount;
     private String rateLimitTimeUnit;
+    private byte[] customAttributes;
 
     public SubscriptionPolicy(String name) {
         super(name);
@@ -41,8 +42,18 @@ public class SubscriptionPolicy extends Policy {
     public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
+    
+    
 
-    @Override
+    public byte[] getCustomAttributes() {
+		return customAttributes;
+	}
+
+	public void setCustomAttributes(byte[] customAttributes) {
+		this.customAttributes = customAttributes;
+	}
+
+	@Override
     public String toString() {
         return "SubscriptionPolicy [policyName=" + getPolicyName()
                 + ", description=" + getDescription() + ", defaultQuotaPolicy=" + getDefaultQuotaPolicy() +

@@ -44,9 +44,9 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
 
-    public static final String COLUMN_USER_LEVEL = "USER_LEVEL";
+    public static final String COLUMN_APPLICABLE_LEVEL = "APPLICABLE_LEVEL";
 
-    public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_POLICY_TYPE";
+    public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_TYPE";
 
     public static final String COLUMN_DEFAULT_UNIT_TIME = "DEFAULT_UNIT_TIME";
 
@@ -70,15 +70,15 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_HTTP_VERB = "HTTP_VERB";
 
-    public static final String COLUMN_CONDITION_ID = "CONDITION_ID";
+    public static final String COLUMN_CONDITION_ID = "CONDITION_GROUP_ID";
 
     public static final String COLUMN_PARAMETER_NAME = "PARAMETER_NAME";
 
     public static final String COLUMN_PARAMETER_VALUE = "PARAMETER_VALUE";
 
-    public static final String COLUMN_CLAIM_URL = "CLAIM_URL";
+    public static final String COLUMN_CLAIM_URI = "CLAIM_URI";
 
-    public static final String COLUMN_CLAIM_ATTRIBUTE = "CLAIM_ATTRIBUTE";
+    public static final String COLUMN_CLAIM_ATTRIBUTE = "CLAIM_ATTRIB";
 
     public static final String COLUMN_HEADER_FIELD_NAME = "HEADER_FIELD_NAME";
 
@@ -87,4 +87,12 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_SIDDHI_QUERY = "SIDDHI_QUERY";
 
     public static final String COLUMN_DEPLOYED = "IS_DEPLOYED";
+    
+    public static final String COLUMN_WITHIN_IP_RANGE = "WITHIN_IP_RANGE";
+    
+    public static final String COLUMN_IS_HEADER_FIELD_MAPPING = "IS_HEADER_FIELD_MAPPING";
+    
+    public static final String COLUMN_IS_CLAIM_MAPPING = "IS_CLAIM_MAPPING";
+    
+    public static final String COLUMN_IS_PARAM_MAPPING = "IS_PARAM_MAPPING";
 }
