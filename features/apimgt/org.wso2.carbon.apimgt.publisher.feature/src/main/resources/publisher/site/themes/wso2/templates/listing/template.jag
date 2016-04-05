@@ -148,7 +148,7 @@
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
-                                    <h5><a href="#"><%=api.version%></a></h5>
+                                    <h5><a href="#" title="<%=api.version%>"><%=api.version%></a></h5>
                                     <p><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("apiBrowse")%>" >
@@ -206,7 +206,7 @@
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
-                                    <h5><a href="#"><%=api.version%></a></h5>
+                                    <h5><a href="#" title="<%=api.version%>"><%=api.version%></a></h5>
                                     <p><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("users")%>">

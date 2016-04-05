@@ -81,9 +81,9 @@
 				<tr>
 					<td><i class="glyphicon glyphicon-user" title="user">&nbsp;</i><%=subscriber.username%></td>
 					<td class="dateFull"><%=subscriber.subscribedDate%></td>
-					<!--<td><i class="glyphicon glyphicon-edit" title="icon-stats"></i> <a href="#">Stats</a>
-        <i class="glyphicon glyphicon-trash"> title="revoke"</i> <a href="#">Revoke Access</a>
-        <i class="glyphicon glyphicon-ban-circle" title="block"></i> <a href="#">Block</a>-->
+					<!--<td><i class="glyphicon glyphicon-edit" title="stats"></i> <a href="#" title="stats">Stats</a>
+        <i class="glyphicon glyphicon-trash" title="revoke"> </i> <a href="#">Revoke Access</a>
+        <i class="glyphicon glyphicon-ban-circle" title="block"></i> <a href="#" title="block">Block</a>-->
 					</td>
 				</tr>
 				<%}%>

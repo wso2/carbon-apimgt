@@ -1,4 +1,5 @@
-{   "apiPublisher":"API Publisher",
+{
+    "apiPublisher":"API Publisher",
     "apiPublisherHomePage":"WSO2 API Publisher Home",
     "api":"API",
     "name" : "Name" ,
@@ -118,6 +119,7 @@
     "overview":"Overview",
     "edit":"Edit",
     "save":"Save",
+    "saveNpublish":"Save & Publish",
     "saveChanges":"Save Changes",
     "close":"Close",
     "goBack":"Go Back",

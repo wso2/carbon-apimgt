@@ -24,7 +24,7 @@
                 <input type="hidden" id="docAPIName" value="<%=api.name%>"/>
                 <%if(createPermitted){%>
                 <div id="addDoc">
-                <a onclick="newDocFormToggle()" href="#">
+                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>">
                     <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("addNewDoc")%>"></i> <%=i18n.localize("addNewDoc")%>
                 </a>
                 </div>
@@ -58,7 +58,7 @@
 		        <div class="control-group">
 		             <label class="control-label" for="textarea"><%=i18n.localize("visibility")%></label>
 		             <div class="controls">
-		             <a class="icon-question-sign help_popup" help_data="doc_help"></a>
+		             <a class="icon-question-sign help_popup" title="doc_help" help_data="doc_help"></a>
                      <p id="doc_help" class="hide"><%=i18n.localize("docRoleHelpMsg")%></p>
 		            <select id="docVisibility" style="width:100%">
 		              <option value="API_LEVEL" selected="true">Same as API visibility</option>
@@ -120,14 +120,14 @@
 <li>
 		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
-		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help"></a>
+		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
            				        <p id="inlineDoc_help" class="hide"><%=i18n.localize("inlineDocHelpMsg")%></p>
 		                      </label>
 		               </li>
 		               <li>      
 		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
-		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help"></a>
+		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
            				        <p id="urlDoc_help" class="hide"><%=i18n.localize("urlDocHelpMsg")%></p>
 		                      </label>
 		                  
@@ -138,7 +138,7 @@
 <li>
                             <label>
                                         <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
-                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help"></a>
+                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
                                  <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
 		                    </label>
 		                    <div id="fileNameDiv" style="display:none;"></div>

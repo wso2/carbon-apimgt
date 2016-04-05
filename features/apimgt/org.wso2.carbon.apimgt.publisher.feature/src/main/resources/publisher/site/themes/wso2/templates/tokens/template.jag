@@ -38,7 +38,7 @@
 
            </span></td>
         <td>
-            <i class="icon-trash" title="<%=i18n.localize("revoke")%>"></i><a href="#" onclick="revokeAccessToken(<%=String(i)%>)"><%=i18n.localize("revoke")%></a>
+            <i class="icon-trash" title="<%=i18n.localize("revoke")%>"></i><a href="#" onclick="revokeAccessToken(<%=String(i)%>)" title="><%=i18n.localize("revoke")%>"><%=i18n.localize("revoke")%></a>
         </td>
        </tr>
        <input type="hidden" id="consumerKey-<%=String(i)%>" value="<%=accessTokens[i].consumerKey%>"/>

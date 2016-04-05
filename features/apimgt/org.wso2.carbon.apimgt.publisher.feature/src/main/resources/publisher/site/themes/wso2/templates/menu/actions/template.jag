@@ -56,7 +56,7 @@
 					</button>
 					<a class="navbar-menu-toggle collapsed hidden"
 						data-toggle="collapse" data-target="#navbar2" aria-expanded="false"
-						aria-controls="navbar2"> <span class="icon fw-stack"> <i
+						aria-controls="navbar2" title="navigator bar"> <span class="icon fw-stack"> <i
 							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i>
 					</span>
 					

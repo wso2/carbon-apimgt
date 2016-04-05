@@ -160,7 +160,7 @@
 									        <%if(existingStatus == 'ON_HOLD'){
 	                            				var tip = i18n.localize("subsPendingApproval");
 	                       					%>
-	                       						<a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
+	                       						<a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%> title="updateSubscription"
 			                                    onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
 			                                            ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)" title="<%=tip%>">
 			                                    <span class="icon fw-stack">
@@ -173,7 +173,7 @@
 			                                    <span class="hidden-xs"><%=status%></span>
 			                                    </a>
 	                        				<%} else {%>
-			                                    <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
+			                                    <a title="updateSubscription" id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
 			                                    onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
 			                                            ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
 			                                            <span class="icon fw-stack">
