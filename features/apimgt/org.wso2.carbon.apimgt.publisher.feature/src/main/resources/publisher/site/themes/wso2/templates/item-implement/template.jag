@@ -656,9 +656,9 @@
 							                </table>
 							                </div>
 							                <div class="modal-footer">
-							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
-							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" >Go to API Store</a>
 							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" >Go to API Store</a>
+							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary">Go to Overview</a>
 							                </div>
 							                </div>
 							            </div>
