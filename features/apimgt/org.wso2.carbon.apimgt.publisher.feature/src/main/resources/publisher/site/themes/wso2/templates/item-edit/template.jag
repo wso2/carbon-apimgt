@@ -83,7 +83,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
                     <input type="text" class="input-xlarge required validRegistryName validateForwardSlashAtEnd validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
-                    <a class="icon-question-sign help_popup" help_data="context_help"></a>
+                    <a class="icon-question-sign help_popup" help_data="context_help" title="context_help"></a>
                     <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
                 </div>
             </div>
@@ -93,7 +93,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                      <div class="controls">
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
-                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+                        <a class="icon-question-sign help_popup" help_data="default_api_help" title="default_api_help"></a>
                         <p id="default_api_help" class="hide">Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.</p>
 
                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
@@ -112,7 +112,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div class="controls">
                         <select id="editTier" class="selected" name="editTier"  multiple="multiple">
                        </select>
-                       <a class="icon-question-sign help_popup" help_data="tier_help"></a>
+                       <a class="icon-question-sign help_popup" help_data="tier_help" title="tier_help"></a>
                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
             </div>
@@ -150,7 +150,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
 			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
 		                </select>                                
-                        <a class="icon-question-sign help_popup" help_data="cache_help"></a>
+                        <a class="icon-question-sign help_popup" help_data="cache_help" title="cache_help"></a>
                         <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
                      </div>
                 </div>
@@ -170,7 +170,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                        <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
                        <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
                    </select>
-                   <a class="icon-question-sign help_popup" help_data="role_help"></a>
+                   <a class="icon-question-sign help_popup" help_data="role_help" title="role_help"></a>
                    <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
                </div>
            </div>
@@ -192,7 +192,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div class="pull-left">
                          <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="<%=i18n.localize("defaultAPIThumb")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
                         <div><img id="apiEditThumb" alt="<%=i18n.localize("apiThumb")%>" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
-                        <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
+                        <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer" title="image url">
                             <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
                         </a>
                     </div>
@@ -283,7 +283,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                <option value="failover">Failover Endpoint</option>
                                <option value="load_balance">Load balanced Endpoint</option>
                            </select>
-                           <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                           <a class="icon-question-sign help_popup" help_data="endpoint_help" title="endpoint_help"></a>
                        </div>
                </div>
 
@@ -371,7 +371,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 			                <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
 			                <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
 		                </select>
-                        <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                        <a class="icon-question-sign help_popup" help_data="stats_help" title="stats_help"></a>
                         <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
                      </div>
                 </div>
@@ -422,7 +422,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
 			                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
 		                	</select>
-                            <a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                            <a class="icon-question-sign help_popup" help_data="subscriptions_help" title="subscriptions_help"></a>
                             <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
 	                	</div>
 					                
@@ -574,8 +574,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 </div>
                 <div class="modal-footer">
                 <div id="res" class="hide" style="color:red;float:left"></div>
-                <a class="btn" data-dismiss="modal">Close</a>
-                <a class="btn btn-primary" id="scope_submit">Add Scope</a>
+                <a class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
+                <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
                 </div>
            </div>
     </div>
@@ -635,13 +635,13 @@ $(document).ready(function() {
         <ul>
             {{#each scopes}}
             <li>
-                <h6><a data-index='{{idx}}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
+                <h6><a data-index='{{idx}}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>"><i class='icon-trash' title="<%=i18n.localize("deleteScope")%>"></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
                 <p>{{ description }}</p>
             </li>
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn" title="<%=i18n.localize("addScopes")%>"><i class="icon-plus-sign" title="<%=i18n.localize("addScopes")%>"></i>&nbsp;Add Scopes</a>
     </div>
 </script>
 
@@ -651,9 +651,9 @@ $(document).ready(function() {
                         <span style="color:#999">URL Pattern&nbsp;</span>
                         <span style="font-size:18px;font-weight:bold">/{{../context}}/{{../version}}/{{ url_pattern }}</span>
                             <blockquote class="pull-right">
-                            <a data-index='{{idx}}' class='delete_resource'><i class='icon-trash'></i></a>&nbsp;
-                            <a data-index='{{idx}}' class='moveup_resource'><i class='icon-arrow-up '></i></a>&nbsp;
-                            <a data-index='{{idx}}' class='movedown_resource'><i class='icon-arrow-down '></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='delete_resource' title="delete resource"><i class='icon-trash' title="delete resource"></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='moveup_resource' title="moveup resource"><i class='icon-arrow-up ' title="moveup resource"></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='movedown_resource' title="movedown resource"><i class='icon-arrow-down ' title="movedown resource"></i></a>&nbsp;
                             </blockquote>
                         <table style="margin-left:80px;" class="table-hover">
                             <tr>

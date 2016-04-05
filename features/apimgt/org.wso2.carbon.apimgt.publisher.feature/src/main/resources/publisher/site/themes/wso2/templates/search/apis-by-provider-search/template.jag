@@ -9,7 +9,7 @@ var uname=request.getParameter("uname");
     <input type="hidden" class="span5" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
     <%}%>
     <button class="btn btn-primary"><%=i18n.localize("search")%></button>
-    <a class="icon-plus tierHelp" onclick="javascript:$('#searchAPIHelp').toggle()"></a>
+    <a class="icon-plus tierHelp" title="search" onclick="javascript:$('#searchAPIHelp').toggle()"></a>
     <div id="searchAPIHelp" class="help-block" style="display:none;">
         <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
         <ol>
@@ -25,7 +25,7 @@ var uname=request.getParameter("uname");
     <input type="hidden" name="uname" value="<%= encode.forHtml(uname)%>" />
 </form>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
-        <a class="close" data-dismiss="alert">x</a>
+        <a class="close" title="default_api_help" data-dismiss="alert">x</a>
          <div id="searchMessage"></div>
       </div>
 <% }); %>

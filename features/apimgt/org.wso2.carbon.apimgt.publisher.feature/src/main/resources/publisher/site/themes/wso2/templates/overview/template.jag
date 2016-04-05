@@ -149,7 +149,7 @@
              <tr>
                 <td><%=i18n.localize("techOwner")%></td>
                 <td id="techOwnerData"><%=api.techOwner%><% if(api.techOwnerMail!=''){%>
-                [<a href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+                [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=api.techOwnerMail%></a>]
                 <%}%>
                 </td>
             </tr>
