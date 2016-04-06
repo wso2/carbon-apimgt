@@ -16,7 +16,8 @@ var login = login || {};
                      } else {
                          $('#loginErrorMsg').show();
                          $('#password').val('');
-                         $('#loginErrorMsg div.theMsg').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
+                         //$('#loginErrorMsg').html(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
+                         $('#loginErrorMsg').html('<i class="icon fw fw-error"></i><strong>Error!</strong>' + i18n.t("errorMsgs.login") + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
                      }
                  }, "json");
     };
@@ -49,7 +50,7 @@ $(document).ready(function () {
             }
         });
 
-        $('#loginBtn').off('click');
+        //$('#loginBtn').off('click');
          $('#loginBtn').click(
             function() {
                 var goto_url = $.cookie("goto_url");
@@ -58,34 +59,57 @@ $(document).ready(function () {
          );
     };
     var showLoginForm = function(event){
-	if((ssoEnabled && ssoEnabled == 'true') || (oidcEnabled && oidcEnabled == 'true')){
-		var targetLocation = $(this).attr('href');
-		if(targetLocation == undefined){
-		targetLocation = window.location.href;		
-		//targetLocation = currentLocation;
+		if((ssoEnabled && ssoEnabled == 'true') || (oidcEnabled && oidcEnabled == 'true')){
+			var targetLocation = $(this).attr('href');
+			if(targetLocation == undefined){
+			targetLocation = window.location.href;		
+			//targetLocation = currentLocation;
+			}
+			var redirectURL = siteContext + '/site/pages/sso-filter.jag?passiveAuthRequired=false&requestedPage='+encodeURIComponent(targetLocation);
+			window.location.href = redirectURL;	
+			return false;
 		}
-		var redirectURL = siteContext + '/site/pages/sso-filter.jag?passiveAuthRequired=false&requestedPage='+encodeURIComponent(targetLocation);
-		window.location.href = redirectURL;	
-	return false;
-	}
-        if(event != undefined){
-            event.preventDefault();
-        }
-        if(!isSecure){
-            $('#loginRedirectForm').submit();
-            return;
-        }
-
-        $('#messageModal').html($('#login-data').html());
-        $('#messageModal').modal('show');
-        $.cookie("goto_url",$(this).attr("href"));
-        $('#username').focus();
-
-         registerEventsForLogin();
+	        if(event != undefined){
+	            event.preventDefault();
+	        }
+	        if(!isSecure){
+	            $('#loginRedirectForm').submit();
+	            return;
+	        }
+	
+	        //$('#messageModal').html($('#login-data').html());
+	        //$('#messageModal').modal('show');
+	        if ($(this).attr("href")) {
+	        	$.cookie("goto_url",$(this).attr("href"));
+	        } else {
+	        	if ($('#tenant').val()) { 
+	        		$.cookie("goto_url",siteContext + '?tenant=' + $('#tenant').val());
+	        	} else {
+	        		$.cookie("goto_url",siteContext);
+	        	}
+	        }
+	        
+	        $('#username').focus();
+	
+	         registerEventsForLogin();
+	         
+	         var loginUrl = siteContext + '/site/pages/login.jag';
+	         
+	         if ($('#tenant').val()) {
+	        	 loginUrl = siteContext + '/site/pages/login.jag?tenant='+$('#tenant').val();
+	         }
+	         
+	         window.location.href = loginUrl;	
     };
+    
     login.loginbox.showLoginForm = showLoginForm;
 
 
+    $("#loginBtn").click(function () {
+        var goto_url = $.cookie("goto_url");
+        login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
+    });
+    
     $("#logout-link").click(function () {
         if (ssoEnabled=='true' || oidcEnabled=='true') {
             location.href = requestURL + '/site/pages/logout.jag';

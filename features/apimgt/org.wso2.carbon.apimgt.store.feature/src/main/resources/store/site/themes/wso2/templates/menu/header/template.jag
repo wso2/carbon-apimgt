@@ -1,4 +1,13 @@
 <% jagg.template("menu/header", function(inputs, outputs, jagg) { %>
+<% 
+var user = outputs.user; 
+var i18n = require("i18n");var publisherUrl;
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
+var mod = jagg.module("manager");
+var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
+%>
 <!-- header -->
 <header class="header header-default">
     <div class="container-fluid">
@@ -8,7 +17,116 @@
               <h1 class="display-block-xs">API Store</h1>
           </a>
        </div>
-       <% jagg.includeBlock("user/login", null); %>
+       <% if(user){ %>
+       <ul class="nav navbar-right float-remove-xs text-center-xs">
+       <li class="visible-inline-block">       		
+	         <a href="#" class="dropdown" data-toggle="dropdown">
+	            <span class="icon fw-stack fw-lg">
+	               <i class="fw fw-circle fw-stack-2x"></i>
+	               <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	            </span>
+	            <span class="hidden-xs"> &nbsp; <%=user.username%><span class="caret"></span></span>
+	         </a>
+         <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+           <li class="dropdown-header visible-xs">&nbsp; <%=user.username%> <span class="caret"></span></li>
+           <% if(isSelfSignupEnabled) { %>
+           <li><a href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><%=i18n.localize("privacy")%></a></li> 
+           <% } %>           
+           <li class="divider visible-xs"></li>
+           <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Log out</a></li>
+         </ul>
+         </li>
+       </ul>
+<% } else { %>
+		<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<%if(isSelfSignupEnabled){%>
+	            <li class="visible-inline-block">
+	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
+	                  <span class="icon fw-stack fw-lg">
+	                  <i class="fw fw-circle fw-stack-2x"></i>
+	                  <i class="fw fw-document fw-stack-1x fw-inverse"></i>
+	                  </span>
+	                    <span class="hidden-xs"> <%=i18n.localize("signup")%></span>
+	                </a>
+	            </li>
+	          <% } %>       
+	            <li class="visible-inline-block">
+	                <a id="login-link">
+	                  <span class="icon fw-stack fw-lg">
+	                  <i class="fw fw-circle fw-stack-2x"></i>
+	                  <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                  </span>
+	                    <span class="hidden-xs"><%=i18n.localize("login")%></span>
+	                </a>
+	            </li>
+        </ul>      
+<% } %>
+
+<!-- TODO: Check and include relevant -->
+<% /*
+        var isSuperTenant, tenantDomain;
+        var httpsUrl= mod.getHTTPsURL();
+		
+		var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
+    var log = new Log();
+
+        var currentURL = request.getRequestURI();
+        if(request.getQueryString()){
+            currentURL += "?" + request.getQueryString();
+        }
+        var tenant=request_tenant;
+        var urlPrefix = jagg.getTenantURLPrefix();
+        
+        if (jagg.getUser() != null) {
+        	isSuperTenant = jagg.getUser().isSuperTenant;
+		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    		tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        }
+        
+
+
+%>
+
+<ul class="nav navbar-nav navbar-right">
+<%if ((jagg.getTenantDomain() != null)&& site.showPublicStoreURL){%>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-external-link"></i> Go to <span class="caret"></span></a>
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="<%=jagg.getAbsoluteUrl("/")%>"><i class="fa fa-globe"></i> <%=i18n.localize("publicAPIStore")%></a></li>
+  </ul>
+</li>      
+<%}%>
+
+
+<%if(jagg.getUser().hasPublisherAccess){%>
+<%publisherUrl = jagg.module("manager").getAPIPublisherURL().url;
+<%}%>
+
+
+</ul>
+<% /*%>
+<!--Links to Access Tenant Store and Public Store-->
+<div class="tenant-position-setter">
+<%if(jagg.getUser()!=null){%>
+	<!--Links to Access Tenant Store and Public Store-->
+		<%if (jagg.getUser().hasPublisherAccess) {%>
+			Go to <a href="<%=publisherUrl%>" target="_blank" ><%=i18n.localize("apipublisher")%></a>
+           <%if(site.showPublicStoreURL){%>
+           |
+
+		<%}}%>
+	<%}%>
+
+		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
+				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
+		<%} else if ((tenant != null)&& site.showPublicStoreURL){%>
+			  Go to <a href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
+		<%}%>
+
+
+	</div>
+<% */%>
+<!--  -->
     </div>
 </header>
 <% }); %>

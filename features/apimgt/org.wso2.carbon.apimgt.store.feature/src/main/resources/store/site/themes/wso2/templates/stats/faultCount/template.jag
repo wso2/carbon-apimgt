@@ -19,7 +19,6 @@
            </div>
        </div>
     </div>
-    </div>
   
     <h3><%=i18n.localize("faultyInvocationTitle")%></h3>
         <div id="spinner" class="center-wrapper">
