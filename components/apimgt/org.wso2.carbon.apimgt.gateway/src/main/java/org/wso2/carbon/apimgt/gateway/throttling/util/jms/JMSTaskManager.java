@@ -22,6 +22,7 @@ import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
@@ -1121,12 +1122,12 @@ public class JMSTaskManager {
 
     private void handleException(String msg, Exception e) {
         log.error(msg, e);
-        //throw new SiddhiEventTableRunTimeException(msg, e);
+        throw new ThrottlingRunTimeException(msg, e);
     }
 
     private void handleException(String msg) {
         log.error(msg);
-        //throw new SiddhiEventTableRunTimeException(msg);
+        throw new ThrottlingRunTimeException(msg);
     }
 
     // -------------- getters and setters ------------------

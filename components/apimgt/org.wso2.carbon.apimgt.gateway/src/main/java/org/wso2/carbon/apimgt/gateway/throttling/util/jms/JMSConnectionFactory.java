@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
 
 import javax.jms.*;
 import javax.naming.Context;
@@ -91,11 +92,11 @@ public class JMSConnectionFactory {
             log.info("JMS ConnectionFactory : " + name + " initialized");
 
         } catch (NamingException e) {
-//            throw new SiddhiEventTableRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
-//                    + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
-//                    + " or default destination : "
-//                    + parameters.get(JMSConstants.PARAM_DESTINATION) +
-//                    " for JMS CF : " + name + " using : " + parameters, e);
+            throw new ThrottlingRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
+                    + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
+                    + " or default destination : "
+                    + parameters.get(JMSConstants.PARAM_DESTINATION) +
+                    " for JMS CF : " + name + " using : " + parameters, e);
         }
     }
 
@@ -116,7 +117,7 @@ public class JMSConnectionFactory {
         } else if ("producer".equals(val)) {
             this.cacheLevel = JMSConstants.CACHE_PRODUCER;
         } else if (val != null) {
-            //throw new SiddhiEventTableRunTimeException("Invalid cache level : " + val + " for JMS CF : " + name);
+            throw new ThrottlingRunTimeException("Invalid cache level : " + val + " for JMS CF : " + name);
         }
     }
 
@@ -226,7 +227,7 @@ public class JMSConnectionFactory {
 
     private void handleException(String msg, Exception e) {
         log.error(msg, e);
-       // throw new SiddhiEventTableRunTimeException(msg, e);
+        throw new ThrottlingRunTimeException(msg, e);
     }
 
     /**
@@ -256,9 +257,9 @@ public class JMSConnectionFactory {
             } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_CONFAC_TYPE))) {
                 return false;
             } else {
-//                throw new SiddhiEventTableRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
-//                        parameters.get(JMSConstants.PARAM_CONFAC_TYPE)
-//                        + " for JMS CF : " + name);
+               throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
+                        parameters.get(JMSConstants.PARAM_CONFAC_TYPE)
+                        + " for JMS CF : " + name);
             }
         } else {
             if ("queue".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
@@ -266,13 +267,13 @@ public class JMSConnectionFactory {
             } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
                 return false;
             } else {
-//                throw new SiddhiEventTableRunTimeException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
-//                        parameters.get(JMSConstants.PARAM_DEST_TYPE)
-//                        + " for JMS CF : " + name);
+                throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
+                        parameters.get(JMSConstants.PARAM_DEST_TYPE)
+                        + " for JMS CF : " + name);
             }
         }
         //TODO fix this
-        return false;
+        //return false;
     }
 
     /**
