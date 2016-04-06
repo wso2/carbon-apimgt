@@ -50,12 +50,13 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
+var loginUrl = "login";
 var user = jagg.getUser();
 %>
-<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
+<body <%if(reqUrl.indexOf(loginUrl)>=0) { %>class="login-bg"<%}%> <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
 
-	
+<% if(user) { %>
 <!-- header -->
 <header class="header header-default">
 	<div class="container-fluid">
@@ -94,6 +95,7 @@ var user = jagg.getUser();
 		<%} %>
 	</div>
 </header>
+<%} %>
 <!-- End header -->
 
     <% jagg.includeBlocks(outputs.header); %>
