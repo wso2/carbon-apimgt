@@ -1014,3 +1014,114 @@ div.image-container {
 .glyphicon-star-empty { color: #aaa;}
 a.remove_rating{ color: gray; cursor: pointer;}
 a.remove_rating:hover{ color: #C00}
+
+/* ============================================================================= 
+ * Login Page
+ * ============================================================================= */
+ 
+ .data-container{
+    border-left: 3px solid #E38E4A;
+    border-right: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+    border-top: 1px solid #E2E2E2;
+    background-color: white;
+    padding: 10px 35px;
+}
+.data-container form h3{
+    margin-top: 10px;
+}
+.data-container a, .login a{
+    color: #E38E4A;
+    font-weight: 600;
+    display: inline-block;
+}
+.data-container .btn-primary{
+    color: #ffffff;
+    background-color: #F27B21;
+    border: 1px solid #F27B21;
+}
+.data-container .btn-secondary{
+    color: #ffffff;
+    background-color: #595959;
+    border: 1px solid #595959;
+}
+.data-container .checkbox > input[type=checkbox]:checked + .helper:after{
+    background: #FFFFFF;
+    color: #000;
+}
+.data-container .checkbox > input[type=checkbox]:not(:disabled) + .helper:before{
+    border-width: 1px;
+}
+.brand-container{
+    padding-top: 26px;
+}
+.brand-container h2{
+    text-transform: uppercase;
+    margin: 10px 0px;
+    font-size: 28px;
+    font-weight: 400;
+}
+.social-container img{
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    margin: 0px 5px 0px 0px;
+}
+.social-container p{
+    font-size: 1.3em;
+}
+@media (max-width: 767px){
+    .data-container h3{
+        font-size: 1.2em;
+    }
+    .social-container p{
+        font-size: 1em;
+    }
+}
+@media (max-width: 991px) and (min-width: 768px){
+    .data-container h3{
+        font-size: 1.2em;
+    }
+    .social-container p{
+        font-size: 1.2em;
+    }
+}
+@media (min-width: 991px){
+    .login-form-wrapper{
+        padding-top: 10%;
+    }
+    .data-container a{
+        margin: 0px !important;
+    }
+    .data-container h3{
+        font-size: 1.5em;
+    }
+    .social-container{
+        text-align: right;
+    }
+    .social-container img{
+        margin: 0px 0px 0px 5px;
+    }
+}
+@media (max-width: 991px) {
+    .data-container {
+        border: 1px solid #E2E2E2;
+    }
+    .brand-container h2 {
+        margin-bottom: 10%;
+    }
+    .data-container a{
+        margin: inherit;
+    }
+    .data-container .btn-primary {
+        color: #ffffff;
+        background-color: #231F20;
+        border: 1px solid #231F20;
+        width: 100%;
+    }
+    .social-container {
+        background-color: #D9D9D9;
+        padding: 20px 35px;
+        text-align: left;
+    }
+}
