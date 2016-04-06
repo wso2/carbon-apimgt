@@ -2,10 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
-
-
      
-
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result,
             action = request.getParameter("action"),
@@ -24,24 +21,10 @@ include("/jagg/jagg.jag");
             var tableName = request.getParameter("tableName");
             var count = parseInt(request.getParameter("entriesPerPage"));
             var searchEntry = request.getParameter("searchQuery");
-            //var currentPage = request.getParameter("page");
             var startindex =  parseInt(request.getParameter("startIndex"));
 
-            //var start = 0;
-
-           
-
-            
-            //var count = request.getParameter("count");
-
-            //var tableName = "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM";
-            
-            //var count = 10;
-           
             result = mod.getDataFromAlertTable(tableName, searchEntry, startindex, count);
              
-//             log.info(start);
-  //          log.info(count);
             if (result.error == "true") {
                 obj = {
                     error: result.error,
@@ -55,21 +38,35 @@ include("/jagg/jagg.jag");
             }
             print(obj);
             
-            } else if(action === "getCountFromAlertTable"){
+        } else if(action === "getCountFromAlertTable"){
                 mod = jagg.module("alerts");
                 var provider = jagg.getUser().username;
                 var tableName = request.getParameter("tableName");
                 var searchEntry = request.getParameter("searchQuery");
 
                 result = mod.getCountFromAlertTable(tableName, searchEntry);
-                log.error(result);
 
-            } else {
+                if (result.error == "true") {
+                    obj = {
+                        error: result.error,
+                        message: msg.error.backendError(action)
+                    };
+                } else {
+                    obj = {
+                        error: false,
+                        values: JSON.parse(result)
+                    }
+
+                 }
+            print(obj);
+
+        }
+            else {
                 print({
                     error: true,
                     message: msg.error.invalidAction(action)
                 });
-        }
+            }
     }
 }());
 %>

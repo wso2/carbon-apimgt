@@ -1,17 +1,11 @@
 <% jagg.template("alert-table", function(inputs, outputs, jagg) {
 
-
   var lenI=0,apps = outputs.applications; if(apps!=null){lenI = apps.length;}
  %>
 <link rel="stylesheet" type="text/css" href="site/themes/default/templates/alert-table/css/custom.css">
-<!--datepicker-->
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
 
 <!--get loggedd in user -->
 <%  var username = jagg.getUser().username; %>
-
 
 <div class="title-section">
     <h2>Alert History</h2>
@@ -21,9 +15,9 @@
 <div class="well">
 <div class="row-fluid">
 
-        <div id="alertSelected">
+        <div id="alertTableLabel">
         <label>Alert Table 
-        <select  class="input-large" data-live-search="true">
+        <select  id="alertSelected" class="input-large" data-live-search="true">
             <option value="1">Request Pattern Change</option>
             <option value="2">Unusual IP Access</option>
             <option value="3">Abnormal Request Count</option>
@@ -36,38 +30,22 @@
         </select>
         </label>
         </div>
-        <label id="search_field_label">Search :<input id="search_field" type="search" class="input-large" placeholder="" aria-controls="resourcePathUsageTable"></label>
-        
+        <label id="search_field_label">Search :<input id="search_field" type="search" class="input-large" placeholder="" aria-controls="resourcePathUsageTable"></label>        
       
         <div id="tableContainer"><div id="resourcePathUsageTable_wrapper" class="dataTables_wrapper no-footer">
         <label>Show <select id="entriesPerPage" name="resourcePathUsageTable_length" aria-controls="resourcePathUsageTable" class="" style="width: 60px;"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label>
-        
-        
+              
         <div id="table_div">
         <table id="alertsHistory" class="table table-bordered">
                 
         </table>
-        </div>
-        <!--START Pagination links-->
-        </div>
 
 </div>
 </div>
-
 </div>
 
-<script>
+<div id="pagination-div"></div>
 
-</script>
- <!--END Pagination links-->
- <% 
-        // var currentPage = 1;
-         mod = jagg.module("alerts");
-         var rowCount = mod.getCountFromAlertTable("ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM",null);
-         var numberOfPagesTemp = JSON.parse(rowCount);
-         var numberOfPages = 5;
-         jagg.includeBlock("paginator", {numberOfPages:numberOfPages}); %>
-   <!--END Pagination links-->
 </div>
        
 <% }); %>
