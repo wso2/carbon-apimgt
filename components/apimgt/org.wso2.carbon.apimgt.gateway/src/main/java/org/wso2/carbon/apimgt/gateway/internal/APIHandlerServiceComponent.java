@@ -79,6 +79,8 @@ public class APIHandlerServiceComponent {
 			  TenantServiceCreator listener = new TenantServiceCreator();
 			  bundleContext.registerService(
 			          Axis2ConfigurationContextObserver.class.getName(), listener, null);
+
+                //TODO we need to do following only if CEP based throttling is enabled.
                 //While initializing component we need to create throttle data holder and set it to
                 //service reference holder.
                 ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
