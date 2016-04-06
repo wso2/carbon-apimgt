@@ -41,6 +41,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setTier(requestPublisherDTO.getTier());
         setContinuedOnThrottleOut(requestPublisherDTO.isContinuedOnThrottleOut());
         setClientIp(requestPublisherDTO.getClientIp());
+        setApplicationOwner(requestPublisherDTO.getApplicationOwner());
     }
 
     public static String getStreamDefinition() {
@@ -91,7 +92,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(), getResourcePath(),
                             getResourceTemplate(), getMethod(), getVersion(), getRequestCount(), getRequestTime(),
                             getUsername(), getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(),
-                            getApplicationId(), getUserAgent(), getTier(), isContinuedOnThrottleOut(), getClientIp()};
+                            getApplicationId(), getUserAgent(), getTier(), isContinuedOnThrottleOut(), getClientIp(),
+                getApplicationOwner()};
 
     }
 
