@@ -67,12 +67,11 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
    }
 %>
 <div class="page-header">
-	<div class="page-title">
 
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h2><%=api.name%> - <%=api.version%></h2>
+    <h1><%=api.name%> - <%=api.version%></h1>
     <%
             var tagDisplayName = "";
             var tag = "";
@@ -95,7 +94,6 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                 }
             }
         %>
-        </div>
 </div>
 <div class="page-content">       
         <div class="row">

@@ -10,28 +10,6 @@ header{
 ol.breadcrumb.navbar-brand {
     height: 40px;
 }
-.page-header {
-    height: auto;
-    padding: 20px 00px;
-    border-bottom: none;
-    margin: 0;
-}
-
-.page-header:after {
-    clear: both;
-    content: " ";
-    display: block;
-    height: 0;
-}
-
-.page-title {
-    width: auto;
-    float: left;
-    margin-right: 20px;
-}
-.page-title h3{
-    margin: 0px;
-}
 
 
 .media {
