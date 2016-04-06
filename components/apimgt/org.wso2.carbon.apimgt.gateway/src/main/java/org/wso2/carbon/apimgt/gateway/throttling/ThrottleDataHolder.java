@@ -25,6 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.throttling.util.jms.*;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
@@ -45,8 +46,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * When throttle data holder initialize it should read complete throttle decision table from global policy engine
  * via web service calls. In addition to that it should subscribe to topic and listen throttle updates.
  */
+<<<<<<< HEAD
 public class ThrottleDataHolder implements Runnable {
     private static final Log log = LogFactory.getLog(JMSMessageListener.class);
+=======
+public class ThrottleDataHolder implements Runnable{
+    private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
+>>>>>>> upstream/throttle_feature
     private DataPublisher dataPublisher = null;
     private String streamID;
     private Map<String, String> throttleDataMap = new ConcurrentHashMap();
@@ -72,9 +78,9 @@ public class ThrottleDataHolder implements Runnable {
         //loadThrottleDecisionsFromWebService();
         subscribeForJmsEvents();
         initDataPublisher();
-
     }
 
+<<<<<<< HEAD
 
     /**
      * This method will check given key in throttle data Map. Throttle data map need to be update from topic
@@ -85,6 +91,18 @@ public class ThrottleDataHolder implements Runnable {
      * @return Return true if event throttled(means key is available in throttle data map).
      * false if key is not there in throttle map(that means its not throttled).
      */
+=======
+    public Map<String, String> getThrottleDataMap() {
+        return throttleDataMap;
+    }
+
+    public void setThrottleDataMap(Map<String, String> throttleDataMap) {
+        this.throttleDataMap = throttleDataMap;
+    }
+
+    Map<String, String> throttleDataMap = new ConcurrentHashMap();
+
+>>>>>>> upstream/throttle_feature
     public boolean isThrottled(String key) {
         if (null != this.throttleDataMap.get(key)) {
             return true;
@@ -188,7 +206,7 @@ public class ThrottleDataHolder implements Runnable {
             String url = "http://localhost:9763/throttle/data/v1/throttleAsString";
 
             HttpGet method = new HttpGet(url);
-            HttpClient httpClient = new DefaultHttpClient();
+            HttpClient httpClient = HttpClientBuilder.create().build();
             HttpResponse httpResponse = httpClient.execute(method);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");

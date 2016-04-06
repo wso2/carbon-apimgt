@@ -37,7 +37,8 @@ public class APIPolicy extends Policy {
         super(name);
     }
 
-    public List<Pipeline> getPipelines() {
+
+	public List<Pipeline> getPipelines() {
         return pipelines;
     }
 
