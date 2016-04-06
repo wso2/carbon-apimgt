@@ -85,7 +85,7 @@
 </center>
     <div class="title-section">
         <% if(api){ %> 
-            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a></h2>
+            <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "goTo_api_overview" title="GoTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt" title="Go to api overview"></i> Go to Overview</a></h2>
         <% }else{ %>
             <h2>Design API</h2>
         <% } %>
@@ -298,8 +298,8 @@
                     <div>
                          <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
                         <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
-                        <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
-                            <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
+                        <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer" title="<%=i18n.localize("changeIcon")%>">
+                            <i class="icon-picture" title="<%=i18n.localize("changeIcon")%>"></i> <%=i18n.localize("changeIcon")%>
                         </a>
                     </div>
                     <div class="pull-left" id="imageUrl" style="display:none;">
@@ -379,8 +379,8 @@
                 </div>
                 <% }else{ %>
                 <div id="api_designer">
-                    <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> Import </a>
-                    <a  href="#" id="swaggerEditor" class="btn pull-right" style="margin:0 10px" ><i class="icon-edit" ></i> Edit Source</a>                
+                    <a  href="#swaggerUpload" role="button" class="btn pull-right" data-toggle="modal" title="<%=i18n.localize("swaggerImport")%>" ><i class="icon-download-alt" title="<%=i18n.localize("swaggerImport")%>" ></i> Import </a>
+                    <a  href="#" id="swaggerEditor" class="btn pull-right" style="margin:0 10px" title="<%=i18n.localize("editSwaggerSource")%>" ><i class="icon-edit" title="<%=i18n.localize("editSwaggerSource")%>" ></i> Edit Source</a>
                     <div id ="resource_details">
                     </div>
                 </div>      
@@ -456,7 +456,7 @@
     {{/if}}
     </table>
     <input type="text" class="parameter_name" name="parameter_name" placeholder="Parameter Name" style="padding:2px 4px"/>
-    <a class="btn btn-small add_parameter" type="button" ><i class="icon-plus-sign"></i>&nbsp;Add Parameter</a>
+    <a class="btn btn-small add_parameter" type="button" title="<%=i18n.localize("addParameter")%>" ><i class="icon-plus-sign" title="<%=i18n.localize("addParameter")%>"></i>&nbsp;Add Parameter</a>
 </div>  
 </script>
 
@@ -507,7 +507,7 @@
         <div class="control-group">
             <label class="control-label"></label>
             <div class="controls">
-                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign"></i>&nbsp;Add</button>
+                <button class="btn" type="button" id="add_resource" style="margin:10px 0 0px 0px;"><i class="icon-plus-sign" title="<%=i18n.localize("addNewResource")%>" ></i>&nbsp;Add</button>
             </div>
         </div>        
     </div>
@@ -520,7 +520,7 @@
             </td>
             <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
             <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}"><i class='icon-trash'></i></a></td>
+            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ @index }}" title="<%=i18n.localize("deleteResource")%>"><i class='icon-trash' title="<%=i18n.localize("deleteResource")%>"></i></a></td>
         </tr>
         <tr><td colspan="4" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}

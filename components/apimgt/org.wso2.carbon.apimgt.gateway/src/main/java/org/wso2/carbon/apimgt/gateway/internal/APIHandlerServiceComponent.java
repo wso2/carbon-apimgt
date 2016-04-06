@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import java.io.File;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -34,6 +32,8 @@ import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.io.File;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.handlers" immediate="true"

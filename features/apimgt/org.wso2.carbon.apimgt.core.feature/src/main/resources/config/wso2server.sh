@@ -293,6 +293,7 @@ do
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF8 \
     -DapplyPatches \
+    -Dorg.opensaml.httpclient.https.disableHostnameVerification=true \
     org.wso2.carbon.bootstrap.Bootstrap $*
     status=$?
 done
