@@ -30,7 +30,6 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
 import org.apache.synapse.commons.throttle.core.Throttle;
 import org.apache.synapse.commons.throttle.core.ThrottleConstants;
@@ -45,34 +44,21 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.event.throttle.core.ThrottlerService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * This class is implemented to handle
+ * This class is Handling new throttling check. This class will use inside each API as throttle handler.
+ * It will fetch some of data from incoming message and use them to take throttling decisions.
+ * To execute this handler requests must go through authentication handler and auth context should be present
+ * in message context.
  */
 public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(CEPBasedThrottleHandler.class);
 
-    /**
-     * The Throttle object - holds all runtime and configuration data
-     */
-    private volatile Throttle throttle;
-
-    private RoleBasedAccessRateController applicationRoleBasedAccessController;
-    private String key;
-    /**
-     * The key for getting the throttling policy - key refers to a/an [registry] Api entry
-     */
-
-    /**
-     * The key for getting the throttling policy - key refers to a/an [registry] Application entry
-     */
     private String policyKeyApplication = null;
 
     /**
@@ -90,12 +76,11 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     /**
      * Version number of the throttle policy
      */
-    private long version;
-
-    //private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     public CEPBasedThrottleHandler() {
-        this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
+        if(log.isDebugEnabled()){
+            log.debug("Throttle Handler intialized");
+        }
     }
 
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
@@ -110,16 +95,12 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         String subscriptionLevelTier;
         String resourceLevelTier;
 
-        //Other Relavant parameters
+        //Other Relevant parameters
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
-        String accessToken;
-        String consumerKey;
         String authorizedUser;
-        String resourcePath;
-        String httpVerb;
 
         //Throttled decisions
-        boolean isThrottled = true;
+        boolean isThrottled = false;
         boolean isResourceLevelThrottled = false;
         boolean isApplicationLevelThrottled = false;
         boolean isSubscriptionLevelThrottled = false;
@@ -131,8 +112,6 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         List<String> resourceLevelThrottleConditions;
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
-            accessToken = authContext.getApiKey();
-            consumerKey = authContext.getConsumerKey();
             authorizedUser = authContext.getUsername();
             applicationLevelTier = authContext.getApplicationTier();
             subscriptionLevelTier = authContext.getTier();
@@ -159,6 +138,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                                     isThrottled(resourceLevelThrottleKey);
                             if (isThrottled) {
                                 isResourceLevelThrottled = true;
+                                isThrottled = true;
                                 break;
                             }
                         }
@@ -189,7 +169,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                         String remoteIP = "127.0.0.1";
                         //(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
                         //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-                        if (remoteIP != null) {
+                        if (remoteIP != null && !remoteIP.isEmpty()) {
                             if (remoteIP.indexOf(",") > 0) {
                                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
                             }
@@ -220,7 +200,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                                 authorizedUser, propertiesMap};
                         //After publishing events return true
                         ServiceReferenceHolder.getInstance().getThrottleDataHolder().sendToGlobalThrottler(objects);
-                        return true;
+
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Request throttled at application level for throttle key" +
@@ -228,7 +208,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                         }
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                 APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
-                        return false;
+                        isApplicationLevelThrottled = true;
+                        isThrottled = true;
                     }
                 } else {
                     if (log.isDebugEnabled()) {
@@ -237,7 +218,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                     }
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                             APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
-                    return false;
+                    isSubscriptionLevelThrottled = true;
+                    isThrottled = true;
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -245,9 +227,9 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                 }
                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                         APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
-                return false;
             }
         }
+        //if we need to publish throttled level or some other information we can do it here. Just before return.
         return isThrottled;
     }
 
@@ -261,7 +243,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doThrottle(MessageContext messageContext) {
-        long statt = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         boolean isThrottled = false;
         if (!messageContext.isResponse()) {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -273,7 +255,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             // return false;
         }
         long end = System.currentTimeMillis();
-        log.info("Time:" + (end - statt));
+        log.info("Time:" + (end - start));
         return true;
     }
 
@@ -353,7 +335,6 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     public void setId(String id) {
         this.id = id;
-        this.key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + id + ThrottleConstants.CAC_SUFFIX;
     }
 
     public String getId() {
