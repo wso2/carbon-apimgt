@@ -38,16 +38,16 @@ public class JMSMessageListener implements MessageListener {
 
     public JMSMessageListener(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
-
     }
 
     public void onMessage(Message message) {
         try {
-
             if (message != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
-                } else if (message instanceof MapMessage) {
+                }
+
+                if (message instanceof MapMessage) {
                     MapMessage mapMessage = (MapMessage) message;
                     Map<String, Object> map = new HashMap<String, Object>();
                     Enumeration enumeration = mapMessage.getMapNames();
@@ -64,13 +64,13 @@ public class JMSMessageListener implements MessageListener {
                         this.throttleDataHolder.getThrottleDataMap().remove(throttleKey);
                     }
                 } else {
-                    log.warn("Event dropped due to unsupported message type");
+                    log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
         } catch (JMSException e) {
-            log.error(e);
+            log.error("JMSException occurred when processing the received message ", e);
         }
     }
 }

@@ -19,10 +19,14 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class IPCondition extends Condition {
+	
     private String specificIP;
+    private String startingIP;
+    private String endingIP;
 
-    public IPCondition() {
-        setType(PolicyConstants.IP_SPECIFIC_TYPE);
+    public IPCondition(String conditionType) {
+       /* setType(PolicyConstants.IP_SPECIFIC_TYPE);*/
+    	setType(conditionType);
         this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.IP_QUERY + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
     }
@@ -33,6 +37,22 @@ public class IPCondition extends Condition {
 
     public void setSpecificIP(String specificIP) {
         this.specificIP = specificIP;
+    }
+    
+    public String getStartingIP() {
+        return startingIP;
+    }
+
+    public void setStartingIP(String startingIP) {
+        this.startingIP = startingIP;
+    }
+
+    public String getEndingIP() {
+        return endingIP;
+    }
+
+    public void setEndingIP(String endingIP) {
+        this.endingIP = endingIP;
     }
 
     public long ipToLong(String ip) {
@@ -49,21 +69,49 @@ public class IPCondition extends Condition {
         }
         return ipAddressinLong;
     }
+    
 
     @Override
     public String getCondition() {
-        long ip = ipToLong(getSpecificIP());
-        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
-                + PolicyConstants.QUOTE + ip + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
-        if (isInvertCondition()) {
-            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
-        }
+    	String condition = null;
+    	if(PolicyConstants.IP_SPECIFIC_TYPE.equalsIgnoreCase(getType())){
+    		long ip = ipToLong(getSpecificIP());
+            condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                    + PolicyConstants.QUOTE + ip + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
+            if (isInvertCondition()) {
+                condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
+            }
+    	}
+    	
+    	if(PolicyConstants.IP_RANGE_TYPE.equalsIgnoreCase(getType())){
+    		 long ipStart = ipToLong(getStartingIP());
+    	        long ipEnd = ipToLong(getEndingIP());
+    	        condition = PolicyConstants.OPEN_BRACKET + PolicyConstants.QUOTE + ipStart + PolicyConstants.QUOTE
+    	                + PolicyConstants.LESS_THAN + getQueryAttributeName() + PolicyConstants.AND + PolicyConstants.QUOTE
+    	                + ipEnd + PolicyConstants.QUOTE + PolicyConstants.GREATER_THAN + getQueryAttributeName()
+    	                + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
+    	        if (isInvertCondition()) {
+    	            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
+    	        }
+    	}
+        
         return condition;
     }
+    
+   
 
     @Override
     public String toString() {
-        return "IPCondition [specificIP=" + specificIP + ", toString()=" + super.toString() + "]";
+        String msg = "";
+        if(PolicyConstants.IP_SPECIFIC_TYPE.equalsIgnoreCase(getType())){
+        	msg = "IPCondition [specificIP=" + specificIP + ", toString()=" + super.toString() + "]";
+        }
+        
+        if(PolicyConstants.IP_RANGE_TYPE.equalsIgnoreCase(getType())){
+        	msg = "IPRangeCondition [startingIP=" + startingIP + ", endingIP=" + endingIP + ", toString()="
+        	        + super.toString() + "]";
+        }
+        return msg;
     }
       
     

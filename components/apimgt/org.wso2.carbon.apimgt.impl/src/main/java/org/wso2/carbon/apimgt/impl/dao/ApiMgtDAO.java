@@ -864,7 +864,7 @@ public class ApiMgtDAO {
         return false;
     }
 
-    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
+    /*private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
             String subPolicy) throws APIManagementException {
         boolean isAnyContentAware = false;
         
@@ -903,6 +903,78 @@ public class ApiMgtDAO {
                 } else {
                     isAnyContentAware = true;
                 }
+            } catch (SQLException e) {
+                handleException("Failed to get content awareness of the policies ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            }
+            
+        }        
+
+        return isAnyContentAware;
+    }*/
+    
+    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
+            String subPolicy) throws APIManagementException {
+        boolean isAnyContentAware = false;
+        
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean isGlobalThrottlingEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        //only check if using CEP based throttling. 
+        if(isGlobalThrottlingEnabled){                 
+          
+            ResultSet resultSet = null;
+            PreparedStatement ps = null;
+            String sqlQuery;
+            if(apiPolicy == null){
+            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;	
+                
+            } else {
+            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+            }
+            
+            try {
+          
+                ps = conn.prepareStatement(sqlQuery);
+               
+                ps.setInt(1, APIUtil.getTenantId(userName));             
+                ps.setString(2, appPolicy);
+                ps.setString(3, subPolicy);
+                
+                if(apiPolicy != null) {
+                    ps.setString(4, apiPolicy);
+                }
+
+                resultSet = ps.executeQuery();
+                // We only expect one result if all are not content aware.
+                if(resultSet == null){
+                	throw new APIManagementException(" Result set Null");
+                }
+                
+                String quotaType = null;
+                
+                if (resultSet.next()) {
+                	if(apiPolicy == null){
+                		quotaType = resultSet.getString("QUOTA_TYPE");
+                	}else{
+                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");                		
+                	}
+                }
+                
+                if(quotaType == null || StringUtils.isEmpty(quotaType)){
+                	throw new APIManagementException(" Quata Type can not be null ");
+                }
+                
+                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
+                	isAnyContentAware = true;
+                }
+                
+                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_REQUESTCOUNT)){
+                	isAnyContentAware = false;
+                }
+                
             } catch (SQLException e) {
                 handleException("Failed to get content awareness of the policies ", e);
             } finally {
@@ -7969,8 +8041,9 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(11, policy.getRateLimitCount());
-            policyStatement.setString(12, policy.getRateLimitTimeUnit());
+            policyStatement.setInt(10, policy.getRateLimitCount());
+            policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8042,21 +8115,21 @@ public class ApiMgtDAO {
 
             // Valid policyId is available means policy should be inserted with 'policyId'. (Policy update request)
             if (policyId == -1) {
-                addQuery = SQLConstants.INSERT_API_POLICY_SQL;
+                addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_SQL;
             } else {
-                addQuery = SQLConstants.INSERT_API_POLICY_WITH_ID_SQL;
+                addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_WITH_ID_SQL;
             }
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
             //When design API policy, unit time is always 1
             policyStatement.setLong(7, 1);
-            policyStatement.setString(11, policy.getUserLevel());
+            policyStatement.setString(10, policy.getUserLevel());
             if (policyId != -1) {
 
                 // Assume policy is deployed if update request is recieved
-                policyStatement.setBoolean(10, true);
-                policyStatement.setInt(12, policyId);
+                policyStatement.setBoolean(9, true);
+                policyStatement.setInt(11, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8064,7 +8137,8 @@ public class ApiMgtDAO {
             // Returns only single row
             if (resultSet.next()) {
 
-                /* H2 doesn't return generated keys when key is provided (not generated).
+                /*Not sure about below comment :-) (Dhanuka)
+                 *  H2 doesn't return generated keys when key is provided (not generated).
                    Therefore policyId should be policy parameter's policyId when it is provided.
                  */
                 if (policyId == -1) {
@@ -8094,13 +8168,13 @@ public class ApiMgtDAO {
         String startingIP = null;
         String endingIP = null;
         String specificIP = null;
-        String httpVerb = null;
+        /*String httpVerb = null;
         Date startingDate = null;
         Date endingDate = null;
-        Date specificDate = null;
+        Date specificDate = null;*/
 
         try {
-            String sqlAddQuery = SQLConstants.INSERT_CONDITION_SQL;
+            String sqlAddQuery = SQLConstants.ThrottleSQLConstants.INSERT_CONDITION_SQL;
             List<Condition> conditionList = pipeline.getConditions();
 
             // Add data to the AM_CONDITION table
@@ -8108,31 +8182,35 @@ public class ApiMgtDAO {
 
             conditionStatement.setInt(1, policyID);
             if (conditionList != null) {
-                for (int i = 0; i < conditionList.size(); i++) {
-                    if (PolicyConstants.IP_RANGE_TYPE.equals(conditionList.get(i).getType())) {
-                        startingIP = ((IPRangeCondition) conditionList.get(i)).getStartingIP();
-                        endingIP = ((IPRangeCondition) conditionList.get(i)).getEndingIP();
-                    } else if (PolicyConstants.IP_SPECIFIC_TYPE.equals(conditionList.get(i).getType())) {
-                        specificIP = ((IPCondition) conditionList.get(i)).getSpecificIP();
-                    } else if (PolicyConstants.HTTP_VERB_TYPE.equals(conditionList.get(i).getType())) {
-                        httpVerb = ((HTTPVerbCondition) conditionList.get(i)).getHttpVerb();
-                    }
-                    if (PolicyConstants.DATE_RANGE_TYPE.equals(conditionList.get(i).getType())) {
-                        startingDate = Date.valueOf(((DateRangeCondition) conditionList.get(i)).getStartingDate());
-                        endingDate = Date.valueOf(((DateRangeCondition) conditionList.get(i)).getEndingDate());
-                    } else if (PolicyConstants.DATE_SPECIFIC_TYPE.equals(conditionList.get(i).getType())) {
-                        specificDate = Date.valueOf(((DateCondition) conditionList.get(i)).getSpecificDate());
-                    }
+                for (Condition condition : conditionList) {
+                	if(condition == null){
+                		continue;
+                	}
+                	
+                    if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
+                        startingIP = ((IPRangeCondition) condition).getStartingIP();
+                        endingIP = ((IPRangeCondition) condition).getEndingIP();
+                    } else if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
+                        specificIP = ((IPCondition) condition).getSpecificIP();
+                    } /*else if (PolicyConstants.HTTP_VERB_TYPE.equals(condition.getType())) {
+                        httpVerb = ((HTTPVerbCondition) condition).getHttpVerb();
+                    }*/
+                    /*if (PolicyConstants.DATE_RANGE_TYPE.equals(condition.getType())) {
+                        startingDate = Date.valueOf(((DateRangeCondition) condition).getStartingDate());
+                        endingDate = Date.valueOf(((DateRangeCondition) condition).getEndingDate());
+                    } else if (PolicyConstants.DATE_SPECIFIC_TYPE.equals(condition.getType())) {
+                        specificDate = Date.valueOf(((DateCondition) condition).getSpecificDate());
+                    }*/
                 }
             }
 
             conditionStatement.setString(2, startingIP);
             conditionStatement.setString(3, endingIP);
             conditionStatement.setString(4, specificIP);
-            conditionStatement.setString(5, httpVerb);
+            /*conditionStatement.setString(5, httpVerb);
             conditionStatement.setDate(6, startingDate);
             conditionStatement.setDate(7, endingDate);
-            conditionStatement.setDate(8, specificDate);
+            conditionStatement.setDate(8, specificDate);*/
             conditionStatement.setString(9, pipeline.getQuotaPolicy().getType());
 
             if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
@@ -8182,11 +8260,12 @@ public class ApiMgtDAO {
         PreparedStatement psHeaderCondition = null;
 
         try {
-            String sqlQuery = SQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
             psHeaderCondition = conn.prepareStatement(sqlQuery);
             psHeaderCondition.setInt(1, pipelineId);
             psHeaderCondition.setString(2, headerCondition.getHeaderName());
             psHeaderCondition.setString(3, headerCondition.getValue());
+            psHeaderCondition.setBoolean(4, headerCondition.isInvertCondition());
             psHeaderCondition.executeUpdate();
         } finally {
             APIMgtDBUtil.closeAllConnections(psHeaderCondition, null, null);
@@ -8206,11 +8285,12 @@ public class ApiMgtDAO {
         PreparedStatement psQueryParameterCondition = null;
 
         try {
-            String sqlQuery = SQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
             psQueryParameterCondition = conn.prepareStatement(sqlQuery);
             psQueryParameterCondition.setInt(1, pipelineId);
             psQueryParameterCondition.setString(2, queryParameterCondition.getParameter());
             psQueryParameterCondition.setString(3, queryParameterCondition.getValue());
+            psQueryParameterCondition.setBoolean(4, queryParameterCondition.isInvertCondition());
             psQueryParameterCondition.executeUpdate();
         } finally {
             APIMgtDBUtil.closeAllConnections(psQueryParameterCondition, null, null);
@@ -8230,11 +8310,12 @@ public class ApiMgtDAO {
         PreparedStatement psJWTClaimsCondition = null;
 
         try {
-            String sqlQuery = SQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
             psJWTClaimsCondition = conn.prepareStatement(sqlQuery);
             psJWTClaimsCondition.setInt(1, pipelineId);
             psJWTClaimsCondition.setString(2, jwtClaimsCondition.getClaimUrl());
             psJWTClaimsCondition.setString(3, jwtClaimsCondition.getAttribute());
+            psJWTClaimsCondition.setBoolean(4, jwtClaimsCondition.isInvertCondition());
             psJWTClaimsCondition.executeUpdate();
         } finally {
             APIMgtDBUtil.closeAllConnections(psJWTClaimsCondition, null, null);
@@ -8301,7 +8382,7 @@ public class ApiMgtDAO {
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-            query = SQLConstants.DELETE_API_POLICY_SQL;
+            query = SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             query = SQLConstants.DELETE_GLOBAL_POLICY_SQL;
         }
@@ -8334,10 +8415,10 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlQuery = SQLConstants.GET_API_POLICIES;
+        String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICIES;
 
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_API_POLICIES;
+            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICIES;
         }
 
         try {
@@ -8348,7 +8429,8 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(apiPolicy, rs);
-                apiPolicy.setUserLevel(rs.getString(ThrottlePolicyConstants.COLUMN_USER_LEVEL));
+                apiPolicy.setUserLevel(rs.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                
                 policies.add(apiPolicy);
             }
         } catch (SQLException e) {
@@ -8492,9 +8574,9 @@ public class ApiMgtDAO {
         PreparedStatement selectStatement = null;
         ResultSet resultSet = null;
 
-        String sqlQuery = SQLConstants.GET_API_POLICY_SQL;
+        String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_SQL;
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_API_POLICY_SQL;
+            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_SQL;
         }
 
         try {
@@ -8508,7 +8590,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new APIPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
-                policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_USER_LEVEL));
+                policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
             } else {
                 handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
@@ -8623,7 +8705,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            pipelinesStatement = connection.prepareStatement(SQLConstants.GET_PIPELINES_SQL);
+            pipelinesStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_PIPELINES_SQL);
             int unitTime = 0;
             int quota = 0;
             int pipelineId = -1;
@@ -8687,28 +8769,32 @@ public class ApiMgtDAO {
         String startingIP = null;
         String endingIP = null;
         String specificIP = null;
-        String httpVerb = null;
+        boolean withinRange = true;
+        /*String httpVerb = null;
         String startingDate = null;
         String endingDate = null;
-        String specificDate = null;
+        String specificDate = null;*/
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            conditionsStatement = connection.prepareStatement(SQLConstants.GET_POLICY_CONDITIONS_SQL);
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_IP_CONDITIONS_SQL);
             conditionsStatement.setInt(1, pipelineId);
             resultSet = conditionsStatement.executeQuery();
 
             while (resultSet.next()) {
-                startingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_DATE);
+                /*startingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_DATE);
                 endingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_DATE);
                 specificDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_DATE);
+                httpVerb = resultSet.getString(ThrottlePolicyConstants.COLUMN_HTTP_VERB);
+                */
                 startingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_IP);
                 endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
                 specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
-                httpVerb = resultSet.getString(ThrottlePolicyConstants.COLUMN_HTTP_VERB);
+                withinRange = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
+                
 
                 if (specificIP != null && !"".equals(specificIP)) {
-                    IPCondition ipCondition = new IPCondition();
+                    IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
                     ipCondition.setSpecificIP(specificIP);
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
@@ -8716,32 +8802,32 @@ public class ApiMgtDAO {
                     /* Assumes availability of starting ip means ip range is enforced.
                        Therefore availability of ending ip is not checked.
                     */
-                    IPRangeCondition ipRangeCondition = new IPRangeCondition();
+                	IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);
                     ipRangeCondition.setEndingIP(endingIP);
                     conditions.add(ipRangeCondition);
                 }
 
-                if (specificDate != null && !"".equals(specificDate)) {
+                /*if (specificDate != null && !"".equals(specificDate)) {
                     DateCondition dateCondition = new DateCondition();
                     dateCondition.setSpecificDate(specificDate);
                     conditions.add(dateCondition);
                 } else if (startingDate != null && !"".equals(specificDate)) {
 
-                    /* Assumes availability of starting date means date range is enforced.
+                     Assumes availability of starting date means date range is enforced.
                        Therefore availability of ending date is not checked.
-                    */
+                    
                     DateRangeCondition dateRangeCondition = new DateRangeCondition();
                     dateRangeCondition.setStartingDate(startingDate);
                     dateRangeCondition.setEndingDate(endingDate);
                     conditions.add(dateRangeCondition);
-                }
+                }*/
 
-                if (httpVerb != null && !"".equals(httpVerb)) {
+               /* if (httpVerb != null && !"".equals(httpVerb)) {
                     HTTPVerbCondition httpVerbCondition = new HTTPVerbCondition();
                     httpVerbCondition.setHttpVerb(httpVerb);
                     conditions.add(httpVerbCondition);
-                }
+                }*/
 
                 setHeaderConditions(pipelineId, conditions);
                 setQueryParameterConditions(pipelineId, conditions);
@@ -8770,7 +8856,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            conditionsStatement = connection.prepareStatement(SQLConstants.GET_HEADER_CONDITIONS_SQL);
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_HEADER_CONDITIONS_SQL);
             conditionsStatement.setInt(1, pipelineId);
             resultSet = conditionsStatement.executeQuery();
 
@@ -8778,6 +8864,7 @@ public class ApiMgtDAO {
                 HeaderCondition headerCondition = new HeaderCondition();
                 headerCondition.setHeader(resultSet.getString(ThrottlePolicyConstants.COLUMN_HEADER_FIELD_NAME));
                 headerCondition.setValue(resultSet.getString(ThrottlePolicyConstants.COLUMN_HEADER_FIELD_VALUE));
+                headerCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_HEADER_FIELD_MAPPING));
                 conditions.add(headerCondition);
             }
         } catch (SQLException e) {
@@ -8803,7 +8890,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            conditionsStatement = connection.prepareStatement(SQLConstants.GET_QUERY_PARAMETER_CONDITIONS_SQL);
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_QUERY_PARAMETER_CONDITIONS_SQL);
             conditionsStatement.setInt(1, pipelineId);
             resultSet = conditionsStatement.executeQuery();
 
@@ -8812,6 +8899,7 @@ public class ApiMgtDAO {
                 queryParameterCondition
                         .setParameter(resultSet.getString(ThrottlePolicyConstants.COLUMN_PARAMETER_NAME));
                 queryParameterCondition.setValue(resultSet.getString(ThrottlePolicyConstants.COLUMN_PARAMETER_VALUE));
+                queryParameterCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_PARAM_MAPPING));
                 conditions.add(queryParameterCondition);
             }
         } catch (SQLException e) {
@@ -8836,14 +8924,15 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            conditionsStatement = connection.prepareStatement(SQLConstants.GET_JWT_CLAIM_CONDITIONS_SQL);
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_JWT_CLAIM_CONDITIONS_SQL);
             conditionsStatement.setInt(1, pipelineId);
             resultSet = conditionsStatement.executeQuery();
 
             while (resultSet.next()) {
                 JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
-                jwtClaimsCondition.setClaimUrl(resultSet.getString(ThrottlePolicyConstants.COLUMN_CLAIM_URL));
+                jwtClaimsCondition.setClaimUrl(resultSet.getString(ThrottlePolicyConstants.COLUMN_CLAIM_URI));
                 jwtClaimsCondition.setAttribute(resultSet.getString(ThrottlePolicyConstants.COLUMN_CLAIM_ATTRIBUTE));
+                jwtClaimsCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_CLAIM_MAPPING));
                 conditions.add(jwtClaimsCondition);
             }
         } catch (SQLException e) {
@@ -8882,7 +8971,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            selectStatement = connection.prepareStatement(SQLConstants.GET_API_POLICY_ID_SQL);
+            selectStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
             selectStatement.setString(1, policy.getPolicyName());
             selectStatement.setInt(2, policy.getTenantId());
 
@@ -8892,7 +8981,7 @@ public class ApiMgtDAO {
                 oldPolicyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
             }
 
-            deleteStatement = connection.prepareStatement(SQLConstants.DELETE_API_POLICY_SQL);
+            deleteStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL);
             deleteStatement.setInt(1, policy.getTenantId());
             deleteStatement.setString(2, policy.getPolicyName());
             deleteStatement.executeUpdate();
@@ -9098,7 +9187,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                sqlQuery = SQLConstants.GET_API_POLICY_NAMES;
+                sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_NAMES;
             } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
                 sqlQuery = SQLConstants.GET_APP_POLICY_NAMES;
             } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
@@ -9141,7 +9230,7 @@ public class ApiMgtDAO {
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             query = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-            query = SQLConstants.UPDATE_API_POLICY_STATUS_SQL;
+            query = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_STATUS_SQL;
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             query = SQLConstants.UPDATE_GLOBAL_POLICY_STATUS_SQL;
         }
@@ -9198,8 +9287,9 @@ public class ApiMgtDAO {
 
         policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-        policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
-        policyStatement.setBoolean(10, false);
+        //policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
+        policyStatement.setBoolean(9, policy.isDeployed());
+ 
     }
 
     /**
