@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
-if (jagg.isCSRFTokenValid())
+
     (function () {
         response.contentType = "application/json; charset=UTF-8";
         var mod, obj, result, username,
@@ -17,29 +17,7 @@ if (jagg.isCSRFTokenValid())
 
         } else {
 
-            if (action === "updatePermissions" && request.getMethod() == 'POST') {
-
-                mod = jagg.module("tiers");
-                var tierPermission = {};
-                tierPermission.tierName = request.getParameter("tierName");
-                tierPermission.permissiontype = request.getParameter("permissiontype");
-                tierPermission.roles = request.getParameter("roles");
-
-                result = mod.updateTierPermissions(tierPermission);
-                if (result.error) {
-                    obj = {
-                        error: result.error,
-                        message: result.message
-                    };
-                } else {
-                    obj = {
-                        error: false
-                    }
-                }
-                print(obj);
-
-            } // adding api policy
-            else if (action == "addApiPolicy" && request.getMethod() == 'POST') {
+            if (action == "addApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");
                 var apiPolicy = request.getParameter("apiPolicy");
                 result = mod.addApiPolicy(apiPolicy);

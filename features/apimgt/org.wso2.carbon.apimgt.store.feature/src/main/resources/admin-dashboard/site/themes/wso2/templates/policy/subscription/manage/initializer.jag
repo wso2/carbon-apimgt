@@ -1,0 +1,7 @@
+<%
+jagg.initializer("policy/subscription/manage", {
+    preInitialize:function () {
+        jagg.addHeaderJS("policy/subscription/manage", "jagg", "templates/policy/subscription/manage/js/manage.js");
+    }
+});
+%>

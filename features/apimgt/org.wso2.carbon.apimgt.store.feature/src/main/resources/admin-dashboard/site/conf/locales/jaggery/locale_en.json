@@ -69,6 +69,11 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
-
+    "deny":"Deny",
+    
+    "tier" : "Tier Availability" ,
+    "addAPI":"API Level Policies",
+    "user":"User",
+    "subsPendingApproval":"Subscription is pending approval",
+    "tiers":"Tier"
 }

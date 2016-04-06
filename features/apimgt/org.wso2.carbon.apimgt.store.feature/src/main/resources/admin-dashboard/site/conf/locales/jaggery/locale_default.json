@@ -48,5 +48,19 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
+    "deny":"Deny",
+    
+    "tier" : "Tier Availability" ,
+    "apiPolicy" : "API level Policy" ,
+    "subPolicy" : "Subscription level Policy" ,
+
+    "addAPI":"API Level Policies",
+    "user":"User",
+    "subscriptions":"Subscriptions",
+    "throttlePolicies":"Throttle Policies",
+    "addThrottlePolicy":"Add Throttle Policy",
+    "executionFlow":"Execution Flow",
+    "addExecutionFlow":"Add Execution Flow",
+    "executionFlows":"Execution Flows",
+    "tiers":"Tier"
 }

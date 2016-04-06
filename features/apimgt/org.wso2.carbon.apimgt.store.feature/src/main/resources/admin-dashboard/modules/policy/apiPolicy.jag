@@ -527,7 +527,7 @@ var objectToJson = function (policy) {
         }
         apiPolicy.executionFlows.push(executionFlows);
     }
-    log.info("policy::::");
+
     log.info(apiPolicy);
     return apiPolicy;
 }

@@ -1,0 +1,14 @@
+<% jagg.template("policy-list", function (inputs, outputs, jagg) { %>
+    <div id="tiers">
+        <div class="title-section">
+                <h2><%=i18n.localize("throttlePolicies")%></h2>
+        </div>
+        <div class="content-section shadow-up">
+                    <div class="form-actions" id="saveButtons">
+                    	<button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="window.location='<%= jagg.url( "/site/pages/policy-add.jag")%>'" class="btn btn-primary has-spinner"><%=i18n.localize("addThrottlePolicy")%>
+                        </button>
+                    </div>
+                </div>
+        </div>
+        <%
+});%>

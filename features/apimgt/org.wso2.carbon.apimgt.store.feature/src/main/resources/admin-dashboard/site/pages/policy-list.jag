@@ -8,23 +8,16 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 (function () {
-    var isPermitted, user = jagg.getUser(), permit=jagg.getManageTierPermitted();
-    if(permit){
-    	isPermitted= permit.permitted;
-    }
+    var user = jagg.getUser();
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
-    return;
-    } else if (!isPermitted) {
-        response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/index.jag"));
         return;
     }
-    isTenantAllowed();
 
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Publisher - Policies",
+            "title":"Add API Policies",
              "header":{
                 "name":"menu/primary"
             },
