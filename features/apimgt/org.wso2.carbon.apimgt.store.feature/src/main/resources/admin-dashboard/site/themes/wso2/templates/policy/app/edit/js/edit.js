@@ -6,7 +6,7 @@ var addAppPolicy = function () {
     }
     var attributes =  getCustomAttributesArray();
     jagg.post("/site/blocks/policy/app/edit/ajax/app-policy-edit.jag", {
-        action:"addAppPolicy",
+        action:"add",
         policyName:$('#policyName').val(),
         description:$('#description').val(),
         defaultQuotaPolicy:$('input[name=select-quota-type]:checked').val(),

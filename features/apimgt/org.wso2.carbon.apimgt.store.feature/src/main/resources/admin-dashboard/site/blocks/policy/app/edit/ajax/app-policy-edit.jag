@@ -30,7 +30,7 @@ include("/jagg/jagg.jag");
 
             mod = jagg.module("policy");
 
-            result = mod.saveAppPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, stopOnQuotaReach, tierPlan, attributes);
+            result = mod.addAppPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, stopOnQuotaReach, tierPlan, attributes);
             if (result.error) {
                 obj = {
                     error:true,

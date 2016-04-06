@@ -8001,12 +8001,22 @@ public class ApiMgtDAO {
     public void addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         Connection conn = null;
         PreparedStatement policyStatement = null;
+        boolean hasCustomAttrib = false;
         try {
+        	 if(policy.getCustomAttributes() != null){
+        		 hasCustomAttrib = true;
+             }
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             String addQuery = SQLConstants.INSERT_APPLICATION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	addQuery = SQLConstants.INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
+            }
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
+            if(hasCustomAttrib){
+            	policyStatement.setBlob(10, new ByteArrayInputStream(policy.getCustomAttributes()));
+            }            
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8035,15 +8045,25 @@ public class ApiMgtDAO {
     public void addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection conn = null;
         PreparedStatement policyStatement = null;
+        boolean hasCustomAttrib = false;
+        
         try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
+            }
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setInt(10, policy.getRateLimitCount());
             policyStatement.setString(11, policy.getRateLimitTimeUnit());
-            policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            if(hasCustomAttrib){
+            	policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            } 
             policyStatement.executeUpdate();
 
             conn.commit();

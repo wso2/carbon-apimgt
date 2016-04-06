@@ -2036,12 +2036,23 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?)";
+    
+    public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
+            "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+    
+    public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
+            "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    " RATE_LIMIT_TIME_UNIT,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =

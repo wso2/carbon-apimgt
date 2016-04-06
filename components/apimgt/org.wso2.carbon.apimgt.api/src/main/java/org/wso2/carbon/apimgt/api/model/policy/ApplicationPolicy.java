@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 public class ApplicationPolicy extends Policy {
     private int applicationId;
+    
+    private byte[] customAttributes;
 
     public ApplicationPolicy(String name) {
         super(name);
@@ -32,6 +34,14 @@ public class ApplicationPolicy extends Policy {
     public void setApplicationId(int applicationId) {
         applicationId = applicationId;
     }
+    
+    public byte[] getCustomAttributes() {
+		return customAttributes;
+	}
+
+	public void setCustomAttributes(byte[] customAttributes) {
+		this.customAttributes = customAttributes;
+	}
 
     @Override
     public String toString() {

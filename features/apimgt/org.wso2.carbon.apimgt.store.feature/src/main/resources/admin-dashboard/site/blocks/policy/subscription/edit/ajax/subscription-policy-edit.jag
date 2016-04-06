@@ -32,7 +32,7 @@ include("/jagg/jagg.jag");
 
             mod = jagg.module("policy");
 
-            result = mod.saveSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
+            result = mod.addSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
             if (result.error) {
                 obj = {
                     error:true,
