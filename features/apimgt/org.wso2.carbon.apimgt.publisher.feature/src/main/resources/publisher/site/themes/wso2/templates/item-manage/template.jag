@@ -72,13 +72,13 @@
         </a>
     </li>
     <li>
-        <a href="<%= implement_w_link %>" class="wizard-done" <%=i18n.localize("implement")%>>
+        <a href="<%= implement_w_link %>" class="wizard-done" title="<%=i18n.localize("implement")%>">
             <div class="wizard-number">2</div>
             <span><%=i18n.localize("implement")%></span>
         </a>
     </li>
     <li>
-        <a href="<%= manage_w_link %>" class="wizard-active" title="<%=i18n.localize("manage)%>">
+        <a href="<%= manage_w_link %>" class="wizard-active" title="<%=i18n.localize("manage")%>">
             <div class="wizard-number">3</div>
             <span><%=i18n.localize("manage")%></span>
         </a>
