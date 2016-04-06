@@ -50,6 +50,7 @@ public abstract class PublisherDTO {
     private String protocol;
 
     private String clientIp;
+    private String applicationOwner;
 
     public String getClientIp() {
         return clientIp;
@@ -185,4 +186,11 @@ public abstract class PublisherDTO {
         this.protocol = protocol;
     }
 
+    public void setApplicationOwner(String applicationOwner) {
+        this.applicationOwner = applicationOwner;
+    }
+
+    public String getApplicationOwner() {
+        return applicationOwner;
+    }
 }
