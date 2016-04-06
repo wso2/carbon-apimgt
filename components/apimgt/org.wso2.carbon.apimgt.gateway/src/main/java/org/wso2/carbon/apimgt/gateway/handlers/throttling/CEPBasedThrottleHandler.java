@@ -30,9 +30,6 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
-import org.apache.synapse.commons.throttle.core.Throttle;
-import org.apache.synapse.commons.throttle.core.ThrottleConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -77,12 +74,23 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
      * Version number of the throttle policy
      */
 
+    /**
+     * Created throttle handler object.
+     */
     public CEPBasedThrottleHandler() {
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Throttle Handler intialized");
         }
     }
 
+    /**
+     * This method is responsible for throttle incoming messages. This method will perform Application, Subscription
+     * and Resource level throttling.
+     *
+     * @param synCtx Synapse message context that contains message details.
+     * @param cc     Configuration context which holds current configuration context.
+     * @return
+     */
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
 
         //Throttle Keys
@@ -234,14 +242,38 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
 
+    /**
+     * HAndle incoming requests and call throttling method to perform throttling.
+     *
+     * @param messageContext message context object which contains message details.
+     * @return return true if message flow need to continue and pass requests to next handler in chain. Else return
+     * false to notify error with handler
+     */
     public boolean handleRequest(MessageContext messageContext) {
         return doThrottle(messageContext);
     }
 
+    /**
+     * This method will handle responses. Usually we do not perform throttling for responses going back to clients.
+     * However if we consider bandwidth scenarios we may need to consider handle response and response patch as well
+     * because that also contribute data amount pass through server.
+     *
+     * @param messageContext message context holds message details.
+     * @return return true if message flow need to continue and pass requests to next handler in chain. Else return
+     * false to notify error with handler
+     */
     public boolean handleResponse(MessageContext messageContext) {
         return true;//return doThrottle(messageContext);
     }
 
+
+    /**
+     * Do Throttle method will initialize throttle flow.
+     *
+     * @param messageContext message context object which contains message details.
+     * @return return true if message flow need to continue(message not throttled) and pass requests to next
+     * handler in chain. Else return false to notify throttled message.
+     */
     private boolean doThrottle(MessageContext messageContext) {
         long start = System.currentTimeMillis();
         boolean isThrottled = false;
