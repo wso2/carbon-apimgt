@@ -7,6 +7,7 @@
     var listMappedUrl=jagg.url("/site/pages/index.jag");
     var subsUrl=jagg.url("/site/pages/index.jag");
     var subsMappedUrl=jagg.url("/site/pages/index.jag");
+    var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
 
     
     var partWithContext = request.getRequestURL().split(
@@ -16,7 +17,8 @@
     var encode = require('encode');
     encode = new encode.Encode();
     var task = encode.forJavaScript(request.getParameter("task"));   
-    
+    var mod = jagg.module("manager");
+
 %>
 
  <script type="text/javascript">
@@ -90,11 +92,38 @@
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-html"></i>
 							<%= i18n.localize("themeUpload") %></a></li>
+
+					    <%
+					    if(!mod.isGlobalCEPThrottlingEnabled()){
+					    %>
 						<li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/tier-manage") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-							<%= i18n.localize("tierManagement") %></a></li>
+					    <%}
+					    else if(mod.isGlobalCEPThrottlingEnabled()){
+					    %>
+					    	<li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/site/pages/policy-list.jag") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<%= i18n.localize("addAPI") %></a></li>
+
+					        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
+					        href="<%= jagg.url("/site/pages/app-policy-manage.jag") %>"
+					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					        <%= "App Level Policies" %></a></li>
+					        
+					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a 
+					        href="<%= jagg.url("/site/pages/subscription-policy-manage.jag") %>"
+					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					        <%= "Subscription Level Policies" %></a></li>
+					        
+					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a 
+					        href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
+					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+					        <%= "Global Level Policies" %></a></li>
+
+					     <%}%>
 					</ul>				
 				</li>
 			</ul>
