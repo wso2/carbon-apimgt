@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
+import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
 
 import javax.jms.Session;
 import java.util.HashMap;
@@ -179,7 +180,7 @@ public class JMSTaskManagerFactory {
             value = cfMap.get(key);
         }
         if (value == null) {
-            //throw new SiddhiEventTableRunTimeException("Service/connection factory property : " + key);
+            throw new ThrottlingRunTimeException("Service/connection factory property : " + key);
         }
         return value;
     }
@@ -237,7 +238,7 @@ public class JMSTaskManagerFactory {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
-                //throw new SiddhiEventTableRunTimeException("Invalid value : " + value + " for " + key);
+                throw new ThrottlingRunTimeException("Invalid value : " + value + " for " + key);
             }
         }
         return null;
@@ -260,7 +261,7 @@ public class JMSTaskManagerFactory {
             try {
                 return Double.parseDouble(value);
             } catch (NumberFormatException e) {
-                //throw new SiddhiEventTableRunTimeException("Invalid value : " + value + " for " + key);
+                throw new ThrottlingRunTimeException("Invalid value : " + value + " for " + key);
             }
         }
         return null;
@@ -288,9 +289,9 @@ public class JMSTaskManagerFactory {
             } else if (BaseConstants.STR_TRANSACTION_LOCAL.equalsIgnoreCase(val)) {
                 return BaseConstants.TRANSACTION_LOCAL;
             } else {
-                //throw new SiddhiEventTableRunTimeException("Invalid option : " + val + " for parameter : " +BaseConstants.STR_TRANSACTION_JTA);
+                throw new ThrottlingRunTimeException("Invalid option : " + val + " for parameter : " +BaseConstants.STR_TRANSACTION_JTA);
                 //TODO fix it
-                return 0;
+                //return 0;
             }
         }
     }
@@ -343,9 +344,9 @@ public class JMSTaskManagerFactory {
             try {
                 return Integer.parseInt(val);
             } catch (NumberFormatException ignore) {
-                //throw new SiddhiEventTableRunTimeException("Invalid session acknowledgement mode : " + val);
+                throw new ThrottlingRunTimeException("Invalid session acknowledgement mode : " + val);
                 //TODO remove this
-                return 0;
+                //return 0;
             }
         }
     }
@@ -374,7 +375,7 @@ public class JMSTaskManagerFactory {
         } else if ("consumer".equals(val)) {
             return JMSConstants.CACHE_CONSUMER;
         } else if (val != null) {
-            //throw new SiddhiEventTableRunTimeException("Invalid cache level : " + val);
+            throw new ThrottlingRunTimeException("Invalid cache level : " + val);
         }
         return JMSConstants.CACHE_AUTO;
     }
