@@ -38,8 +38,8 @@ var getApplicationTiers = function () {
         } else {
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer();
         }
-       
-        if(isGlobalCEPThrottlingEnabled) {
+
+        if(isGlobalCEPThrottlingEnabled()) {
             var tierList = store.getPolicies(username,org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_APP);
             //var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
 
