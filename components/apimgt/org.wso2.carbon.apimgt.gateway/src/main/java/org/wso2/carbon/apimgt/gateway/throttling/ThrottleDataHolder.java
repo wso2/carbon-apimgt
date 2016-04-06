@@ -46,11 +46,31 @@ import java.util.concurrent.ConcurrentHashMap;
  * When throttle data holder initialize it should read complete throttle decision table from global policy engine
  * via web service calls. In addition to that it should subscribe to topic and listen throttle updates.
  */
+<<<<<<< HEAD
+public class ThrottleDataHolder implements Runnable {
+    private static final Log log = LogFactory.getLog(JMSMessageListener.class);
+=======
 public class ThrottleDataHolder implements Runnable{
     private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
+>>>>>>> upstream/throttle_feature
     private DataPublisher dataPublisher = null;
     private String streamID;
+    private Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
+    public Map<String, String> getThrottleDataMap() {
+        return throttleDataMap;
+    }
+
+    public void setThrottleDataMap(Map<String, String> throttleDataMap) {
+        this.throttleDataMap = throttleDataMap;
+    }
+
+    /**
+     * This method will start throtle data holder.This need to perform following tasks
+     * 01. Call throttle data web service and get throttled events.
+     * 02. Subscribe to JMS events and keep on listner for new events come to topic
+     * 03. Initialize data publisher.
+     */
     public void start() {
         //First do web service call and update map.
         //Then init JMS listner to listen que and update it.
@@ -60,6 +80,18 @@ public class ThrottleDataHolder implements Runnable{
         initDataPublisher();
     }
 
+<<<<<<< HEAD
+
+    /**
+     * This method will check given key in throttle data Map. Throttle data map need to be update from topic
+     * subscriber with all latest updates from global policy engine. This method will perfoem only local map
+     * lookup and return results.
+     *
+     * @param key String unique key of throttle event.
+     * @return Return true if event throttled(means key is available in throttle data map).
+     * false if key is not there in throttle map(that means its not throttled).
+     */
+=======
     public Map<String, String> getThrottleDataMap() {
         return throttleDataMap;
     }
@@ -70,6 +102,7 @@ public class ThrottleDataHolder implements Runnable{
 
     Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
+>>>>>>> upstream/throttle_feature
     public boolean isThrottled(String key) {
         if (null != this.throttleDataMap.get(key)) {
             return true;
@@ -78,13 +111,15 @@ public class ThrottleDataHolder implements Runnable{
         }
     }
 
+
     /**
      * This method will used to subscribe JMS and update throttle data map.
+     * Then this will listen to topic updates and check all update and updare throttle data map accordingly.
      */
     public void subscribeForJmsEvents() {
-        for(int i=1; i<10000 ; i++){
-            String str = "test"+i;
-            this.throttleDataMap.put( str,"throttled");
+        for (int i = 1; i < 10000; i++) {
+            String str = "test" + i;
+            this.throttleDataMap.put(str, "throttled");
         }
         Properties properties = new Properties();
         try {
@@ -119,13 +154,19 @@ public class ThrottleDataHolder implements Runnable{
         }
     }
 
+
+    /**
+     * This method will used to push unthrottled data events to global policy engine.
+     *
+     * @param throttleRequest is objects map which contains certain information retrieved from incoming message
+     *                        need to add as much as data to this map and send events.
+     */
     public void sendToGlobalThrottler(Object[] throttleRequest) {
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, throttleRequest);
         dataPublisher.tryPublish(event);
     }
 
-    //todo exception handling
 
     /**
      * This method will initialize data publisher and this data publisher will be used to push events to central policy
@@ -156,6 +197,7 @@ public class ThrottleDataHolder implements Runnable{
 
     /**
      * This method will retrieve throttled events from service deployed in global policy server.
+     *
      * @return String object array which contains throttled keys.
      */
     private String[] retrieveThrottlingData() {
@@ -182,7 +224,7 @@ public class ThrottleDataHolder implements Runnable{
 
 
     /**
-     *This method will call throttle data web service deployed in central plocy engine at server loading time.
+     * This method will call throttle data web service deployed in central plocy engine at server loading time.
      * Then it will update local throttle data map with the results obtained. This need to be fine tuned as large
      * number of results can slow down web service call. However this need to be controlled from server side and
      * this client will add all recieved events to local map. Even if we missed few events from this call it will
