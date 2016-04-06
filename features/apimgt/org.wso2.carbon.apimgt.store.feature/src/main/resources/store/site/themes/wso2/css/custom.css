@@ -81,6 +81,14 @@ nav.navigation .left-menu-item {
     margin-left: 40px;
 }
 
+nav.navigation .left-menu-item i{
+    float: none;
+    position: relative;
+    left: 0px;
+    font-size: 10px;
+    display: table-cell;
+}
+
 ul.sublevel-menu {
     padding: 0px;
     list-style: none;
