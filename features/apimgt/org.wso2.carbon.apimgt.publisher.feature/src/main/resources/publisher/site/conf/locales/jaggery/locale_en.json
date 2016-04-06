@@ -1,5 +1,5 @@
 {
-	"apiPublisher":"API Publisher",
+    "apiPublisher":"API Publisher",
     "apiPublisherHomePage":"WSO2 API Publisher Home",
     "api":"API",
     "name" : "Name" ,
@@ -49,6 +49,7 @@
     "storeURLTitle" : "Store URL",
     "redirectUrl" : "Store URL",
     "goToStore":"Go to APIStore",
+    "keepEditingAPI":"Keep Editing API",
     "apiOwner" : "API Owner",
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
@@ -75,6 +76,9 @@
 
     "addAPI":"Add New API",
     "editAPI":"Edit API",
+    "design":"Design",
+    "implement":"Implement",
+    "manage":"Manage",
     "manageAPI":"Manage API",
     "viewInStore":"View in Store",
     "allStats":"All Statistics",
@@ -115,6 +119,9 @@
     "overview":"Overview",
     "edit":"Edit",
     "save":"Save",
+    "saveNpublish":"Save & Publish",
+    "saveChanges":"Save Changes",
+    "close":"Close",
     "goBack":"Go Back",
     "create":"Create",
     "versions":"Versions",
@@ -319,7 +326,7 @@
     "useCase1":"WSO2 Use Case: API Facade Pattern",
     "more":"More >>",
     "throttlingTier":"Throttling Tier",
-	"sequence": "Message Mediation Policies",
+    "sequence": "Message Mediation Policies",
     "enable.sequence":"Enable Message Mediation",
     "inFlow":"In Flow",
     "outFlow":"Out Flow",
@@ -350,30 +357,30 @@
     "download" : "Download",
     "defaultAPIHelpMsg" : "Marks one API version in a group as the default, so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default, the previous default, published API will still be used as the default until the new default API is published",
     "httpHelpMsg" : "HTTP is less secure than HTTPS and makes your API vulnerable to security threats.",
-	"transportHelpMsg" : "The transport protocol/s on which the API is exposed.",
-	"endpointSecHelpMsg" : "To connect to secured endpoints, you need to pass the credentials of the backend service.",
+    "transportHelpMsg" : "The transport protocol/s on which the API is exposed.",
+    "endpointSecHelpMsg" : "To connect to secured endpoints, you need to pass the credentials of the backend service.",
     "endpointAuthHelpMsg" : "Select the authentication scheme you require.",
     "versionCopyHelpMsg" : "Marks one API version in a group as the default one, so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ gets automatically routed to version 2.0. If you mark an unpublished API as the default while the previously default API was a published one, the users who invoke the default API will still be routed to the previous default version rather than the new one. This is because the new version is not published yet.",
     "lifecycleHelpMsg" : "<strong>CREATED:</strong> API metadata is saved, but it is not visible to subscribers yet, nor deployed to the API Gateway.<br><br><strong>PUBLISHED:</strong> API is visible in API Store, and eventually published if the Propagate Changes to the API Gateway option is selected at publishing time.<br><br><strong>DEPRECATED: </strong>API is still deployed into API Gateway (available at runtime to existing users), but not visible to subscribers. An API is automatically deprecated when a new version is published.<br><br><strong>RETIRED: </strong>API is unpublished from the API gateway and deleted from the store.<br><br><strong>BLOCKED:</strong> Access is temporarily blocked. Runtime calls are blocked and the API is not shown in the API store anymore.",
-	"fileDocHelpMsg" : "Upload a documentation file",
+    "fileDocHelpMsg" : "Upload a documentation file",
     "fileDocTypeHelpMsg" : "eg : pdf, xml, txt, wsdl, ms-word, ms-powerpoint, ms-excel",
-	"urlDocHelpMsg" : "Link to documentation managed by an external configuration management system",
-	"inlineDocHelpMsg" : "Documentation that is hosted in the system and can be edited directly from the UI",
-	"inlineEphelp" : "Specify the implementation of the API using in-line JavaScript",
-	"wsdlDescHelpMsg": "The content the WSDL is saved as a resource in /system/governance/apimgt/applicationdata/wsdls registry location. API artifacts have a dependency to this resource. Its original service address is reset to the API Gateway's address to prevent direct calls to the service endpoint. The registry permlink of the WSDL resource is shown in the API Store and users can download and create a service out of it.",
+    "urlDocHelpMsg" : "Link to documentation managed by an external configuration management system",
+    "inlineDocHelpMsg" : "Documentation that is hosted in the system and can be edited directly from the UI",
+    "inlineEphelp" : "Specify the implementation of the API using in-line JavaScript",
+    "wsdlDescHelpMsg": "The content the WSDL is saved as a resource in /system/governance/apimgt/applicationdata/wsdls registry location. API artifacts have a dependency to this resource. Its original service address is reset to the API Gateway's address to prevent direct calls to the service endpoint. The registry permlink of the WSDL resource is shown in the API Store and users can download and create a service out of it.",
 
-	"busiOwner" : "Business Owner",
-	"busiOwnerMail" : "Business Owner Email",
-	"businessInformationTitle" : "Business Information",
-	
-	"techOwner" : "Technical Owner" ,
-	"techOwnerMail" : "Technical Owner Email",
+    "busiOwner" : "Business Owner",
+    "busiOwnerMail" : "Business Owner Email",
+    "businessInformationTitle" : "Business Information",
+
+    "techOwner" : "Technical Owner" ,
+    "techOwnerMail" : "Technical Owner Email",
 
     "apiUnavailable" : "API does not exist",
     "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores.",
     "SampleAPI" : "Deploy Sample API",
     "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint.",
-    
+
     "publish" : "Publish",
     "deploy as a prototype" : "Deploy as a Prototype",
     "demote to created" : "Demote to Created",
@@ -390,7 +397,9 @@
     "deleteButton":"Delete Button",
     "swaggerImport":"Import Swagger",
     "editSwaggerSource":"Edit Swagger Source",
-    "addParameter":"Add Parameter"
+    "addParameter":"Add Parameter",
+    "apiListing":"API List",
+    "apiBrowse":"Browse API"
 
 
 

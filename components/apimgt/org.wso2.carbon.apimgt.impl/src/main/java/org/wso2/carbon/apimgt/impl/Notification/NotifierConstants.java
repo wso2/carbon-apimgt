@@ -1,7 +1,24 @@
-package org.wso2.carbon.apimgt.impl.Notification;
+/*
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.wso2.carbon.apimgt.impl.notification;
 
 /**
- * Contains the Constraints used by Notification feature
+ * Contains the Constraints used by notification feature
  */
 public class NotifierConstants {
 
@@ -16,6 +33,8 @@ public class NotifierConstants {
     public final static String EMAIL_TYPE_KEY = "email.type";
     public final static String API_KEY = "api";
     public final static String NEW_API_KEY = "new_api";
+    public final static String SUBSCRIBERS_PER_API = "subscriber_list";
+    public final static String SUBSCRIBERS_PER_PROVIDER = "subscriber_list_for_provider";
 
 
     public static final String API_TENANT_CONF = "tenant-conf.json";
@@ -25,12 +44,13 @@ public class NotifierConstants {
 
     public final static String TYPE_KEY = "Type";
     public final static String TITLE_KEY = "Title";
-    public final static String MESSAGE_KEY = "Message";
-    public final static String Notification_KEY = "Notification";
+    public final static String TEMPLATE_KEY = "Template";
+    public final static String CLASS_KEY = "Notifiers";
+    public final static String NOTIFIERS_KEY = "Notifiers";
+    public final static String Notification_KEY = "notification";
     public final static String Notifications_KEY = "Notifications";
 
-    public final static String NOTIFICATION_TYPE_NEW_VERSION = "new_version";
-    public final static String NOTIFIER_CLASS = "Notification.NotifcationClass";
-    public final static String NOTIFICATION_ENABLED = "Notification.Enabled";
+    public final static String NOTIFICATION_TYPE_NEW_VERSION = "new_api_version";
+    public final static String NOTIFICATION_ENABLED = "NotificationsEnabled";
 
 }
