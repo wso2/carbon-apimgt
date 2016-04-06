@@ -18,6 +18,8 @@ var parentId = siteConf.forum.resourceIdentifier;
 if(inputs.api){
 	parentId = inputs.api.provider + ":" + inputs.api.name + ":" + inputs.api.version;
 }
+var reqUrl = request.getRequestURI();
+
 %>
 
 <div id="forum_topics_list_page" class="forum-page">
@@ -27,11 +29,13 @@ if(inputs.api){
 
     <div class="row">
         <div class="form-inline form-search col-lg-7 col-md-12 col-sm-12">
-          <div class="form-group">
-            <a href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> ">
-                <%=i18n.localize( 'forum.createNewTopic')%>
-            </a>&nbsp;
-          </div>
+        <%if(reqUrl.indexOf("forum") <= 0) { %>
+	          <div class="form-group">
+	            <a href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> ">
+	                <%=i18n.localize( 'forum.createNewTopic')%>
+	            </a>&nbsp;
+	          </div>
+	     <%} %>
           <div class="form-group">
             <div class="input-group">
               <input type="text" class="form-control clearable search-input" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">

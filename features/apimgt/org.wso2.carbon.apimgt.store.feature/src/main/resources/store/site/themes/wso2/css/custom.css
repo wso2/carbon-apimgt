@@ -989,6 +989,8 @@ div.image-container {
     opacity: 1;
 }
 
+/*
+*/
 .api-name-icon {
 	color: #fff;
 	width: 100%;
@@ -997,3 +999,18 @@ div.image-container {
 	font-weight: 200;
 	text-transform: capitalize;
 }
+.average-rating {
+    background: transparent url("../images/bigstar.png") no-repeat scroll 0 0;
+    background-size : 40px 40px;
+    font-size: 12px;
+    font-weight: bold;
+    height: 64px;
+    line-height: 45px;
+    padding-left: 11px;
+    width: 70px;
+}
+/* Rating color */
+.rating-symbol { color: orange; cursor: pointer;}
+.glyphicon-star-empty { color: #aaa;}
+a.remove_rating{ color: gray; cursor: pointer;}
+a.remove_rating:hover{ color: #C00}
