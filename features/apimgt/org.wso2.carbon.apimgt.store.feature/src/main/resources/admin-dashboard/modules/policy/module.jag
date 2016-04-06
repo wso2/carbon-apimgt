@@ -25,7 +25,7 @@ jagg.module("policy", {
         return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-manage.jag").getAllSubscriptionPolicies.apply(this, arguments);
     },
     addGlobalPolicy:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/global-policy-edit.jag").addGlobalPolicy.apply(this, arguments);
+        return jagg.require(jagg.getModulesDir() + "policy/global-policy-edit.jag").saveGlobalPolicy.apply(this, arguments);
     },
     deleteGlobalPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/global-policy-manage.jag").deleteGlobalPolicy.apply(this, arguments);
