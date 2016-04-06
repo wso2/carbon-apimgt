@@ -41,6 +41,14 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
+import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
+import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,9 +60,11 @@ import java.util.Map;
  * To execute this handler requests must go through authentication handler and auth context should be present
  * in message context.
  */
-public class CEPBasedThrottleHandler extends AbstractHandler {
+public class ThrottleHandler extends AbstractHandler {
 
-    private static final Log log = LogFactory.getLog(CEPBasedThrottleHandler.class);
+    private static final Log log = LogFactory.getLog(ThrottleHandler.class);
+
+    private static volatile DataPublisher dataPublisher = null;
 
     private String policyKeyApplication = null;
 
@@ -77,9 +87,37 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     /**
      * Created throttle handler object.
      */
-    public CEPBasedThrottleHandler() {
+    //Throttle Handler rename
+    public ThrottleHandler() {
         if (log.isDebugEnabled()) {
-            log.debug("Throttle Handler intialized");
+            log.debug("Throttle Handler initialized");
+        }
+        /**
+         * This method will initialize data publisher and this data publisher will be used to push events to central policy
+         * server.
+         */
+        if (dataPublisher == null) {
+            // The publisher initializes in the first request only
+            synchronized (this) {
+                try {
+                    dataPublisher = new DataPublisher("Binary", "tcp://localhost:9611", "ssl://localhost:9711", "admin", "admin");
+                } catch (DataEndpointAgentConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointAuthenticationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (TransportException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -131,6 +169,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             } else {
                 if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
                     //If unlimited tier throttling will not apply at resource level and pass it
+                    //TODO add debug logs
                 } else {
                     //If tier is not unlimited only throttling will apply.
                     resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
@@ -164,6 +203,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                         isThrottled(subscriptionLevelThrottleKey);
 
                 //if subscription level not throttled then move to application level
+                //Stop on quata reach
                 if (!isSubscriptionLevelThrottled) {
                     //Application Level Throttling
                     applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
@@ -172,6 +212,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
                     //if application level not throttled means it does not throttled at any level.
                     if (!isApplicationLevelThrottled) {
+                        //Pass message context and continue to avaoid peformance issue.
                         //Did not throttled at any level. So let message go and publish event.
                         //publish event to Global Policy Server
                         String remoteIP = "127.0.0.1";
@@ -192,6 +233,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
                         //this parameter will be used to capture message size and pass it to calculation logic
                         /*int messageSizeInBytes = 0;
+                        //getThrottleData.isContentAware
                         if (authContext.isContentAware()) {
                             //this request can match with with bandwidth policy. So we need to get message size.
                             httpVerb = verbInfoDTO.getHttpVerb();
@@ -207,7 +249,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                                 subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
                                 authorizedUser, propertiesMap};
                         //After publishing events return true
-                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().sendToGlobalThrottler(objects);
+                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().sendToGlobalThrottler(objects,this.dataPublisher);
 
                     } else {
                         if (log.isDebugEnabled()) {
@@ -235,8 +277,10 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                 }
                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                         APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
+                //is throttled and resource level throttling
             }
         }
+
         //if we need to publish throttled level or some other information we can do it here. Just before return.
         return isThrottled;
     }
