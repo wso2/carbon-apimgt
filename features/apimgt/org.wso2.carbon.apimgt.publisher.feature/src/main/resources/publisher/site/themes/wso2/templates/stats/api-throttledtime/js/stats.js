@@ -126,13 +126,13 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else {
                     $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white" title="Stats-not-configured"></i>'
+                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             }
             else {

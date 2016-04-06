@@ -14,8 +14,8 @@ i18n.init(request,localeResourcesBasePath);%>
                      <p>One fine body&hellip;</p>
                    </div>
                    <div class="modal-footer">
-                         <a href="#" class="btn btn-primary">Save changes</a>
-                         <a href="#" class="btn btn-other" data-dismiss="modal">Close</a>
+                         <a href="#" class="btn btn-primary" title="<%=i18n.localize("save")%>">Save changes</a>
+                         <a href="#" class="btn btn-other" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
                    </div>
              </div>
            </div>
@@ -41,8 +41,8 @@ i18n.init(request,localeResourcesBasePath);%>
 
                 </div>
                 <div class="modal-footer">
-                    <a href="#" class="btn" data-dismiss="modal"><%=i18n.localize("cancel")%></a>
-                    <a href="#" class="btn btn-primary" id="loginBtn"><%=i18n.localize("login")%></a>
+                    <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("cancel")%>"><%=i18n.localize("cancel")%></a>
+                    <a href="#" class="btn btn-primary" id="loginBtn" title="<%=i18n.localize("login")%>"><%=i18n.localize("login")%></a>
                 </div>
             </form>
 

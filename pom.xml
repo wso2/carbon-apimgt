@@ -915,7 +915,7 @@
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.2</carbon.commons.version>
-        <carbon.registry.version>4.5.3-SNAPSHOT</carbon.registry.version>
+        <carbon.registry.version>4.5.3-beta</carbon.registry.version>
         <carbon.mediation.version>4.6.1-BETA</carbon.mediation.version>
         <carbon.identity.version>5.0.8</carbon.identity.version>
         <carbon.governance.version>4.6.2-SNAPSHOT</carbon.governance.version>
@@ -967,7 +967,7 @@
         <jaggery.version>0.12.3</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v1</synapse.version>
+        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
