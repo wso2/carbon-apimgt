@@ -39,6 +39,21 @@ var login = login || {};
 
 
 $(document).ready(function () {
+	
+	$('#username').focus();
+    $('#username').keydown(function(event) {
+        if (event.which == 13) {
+            event.preventDefault();
+            login();
+        }
+    });
+    $('#password').keydown(function(event) {
+        if (event.which == 13) {
+            event.preventDefault();
+            login();
+        }
+    });
+    
     var registerEventsForLogin = function(){
         $('#mainLoginForm input').off('keydown');
          $('#mainLoginForm input').keydown(function(event) {
@@ -105,9 +120,12 @@ $(document).ready(function () {
     login.loginbox.showLoginForm = showLoginForm;
 
 
-    $("#loginBtn").click(function () {
-        var goto_url = $.cookie("goto_url");
-        login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
+    $("#goBackBtn").click(function () {
+    	var loginUrl = siteContext;        
+        if ($('#tenant').val()) {
+        	loginUrl = siteContext + '?tenant='+$('#tenant').val();
+        }
+    	window.location.href = loginUrl;
     });
     
     $("#logout-link").click(function () {
@@ -138,6 +156,12 @@ function getAPIPublisherURL(){
                 jagg.message({content:result.message,type:"error"});
             }
         }, "json");
+}
+
+
+function login() {
+	var goto_url = $.cookie("goto_url");
+    login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
 }
 
 
