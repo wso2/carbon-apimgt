@@ -56,4 +56,5 @@ $(window).load(function(){
             $('.media').prepend('<div class="affix-spacer hidden-xs" style="width:'+ $(this).width() +'px;float:left;height: 100vh"></div>')
         }).on('affixed-top.bs.affix',function(){
             $('.affix-spacer').remove();
+        });
 });
