@@ -69,10 +69,10 @@ var editUrl="info";
 <header class="header header-default">
 	<div class="container-fluid">
 		<div class="pull-left brand float-remove-xs text-center-xs">
-			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>"
+			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>" title="<%=i18n.localize("apiPublisherHomePage")%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
-				alt="wso2" title="wso2" class="logo">
+				alt="<%=i18n.localize("apiPublisherHomePage")%>" class="logo">
 				<h1><%=i18n.localize("apiPublisher")%></h1>
 			</a>
 		</div>
@@ -92,10 +92,10 @@ var editUrl="info";
                 <%}%>
 			</li>
 			<li class="visible-inline-block">
-				<a href="#" class="dropdown" data-toggle="dropdown"> 
+				<a href="#" class="dropdown" data-toggle="dropdown" title="user">
 					<span class="icon fw-stack fw-lg">
-	                   <i class="fw fw-circle fw-stack-2x"></i>
-	                   <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                   <i class="fw fw-circle fw-stack-2x" title="user"></i>
+	                   <i class="fw fw-user fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
 					<span class="hidden-xs">
 							<%if(user!=null){%><%=user.username%>
@@ -108,7 +108,7 @@ var editUrl="info";
 						<%}%> <span class="caret"></span>
 					</li>
 					<li class="divider visible-xs"></li>
-					<li><a
+					<li><a title="<%=i18n.localize("logout")%>"
 						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
 				 </ul>
 			</li>
