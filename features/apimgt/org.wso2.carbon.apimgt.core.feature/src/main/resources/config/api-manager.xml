@@ -296,10 +296,7 @@
     </APIUsageTracking>
 
 
-    <Notifications>
-        <Enabled>False</Enabled>
-        <NotifcationClass>org.wso2.carbon.apimgt.impl.notification.EmailNotifier</NotifcationClass>
-    </Notifications>
+    <NotificationsEnabled>false</NotificationsEnabled>
 
     <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.

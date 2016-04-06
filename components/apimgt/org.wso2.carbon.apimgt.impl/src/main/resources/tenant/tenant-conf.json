@@ -42,8 +42,8 @@
     "Type":"new_api_version",
     "Notifiers" :[{
       "Class":"org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier",
-      "Title": "New version of $1 Released",
-      "Template":"registry location of the template $1  $2 $3"
+      "Title": "Version $2 of $1 Released",
+      "Template":"/apimgt/applicationdata/notificationTemplates/new-api-version-email.html"
     }]
   }
   ]

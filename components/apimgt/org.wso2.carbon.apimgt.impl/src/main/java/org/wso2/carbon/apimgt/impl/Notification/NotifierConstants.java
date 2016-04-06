@@ -34,7 +34,7 @@ public class NotifierConstants {
     public final static String API_KEY = "api";
     public final static String NEW_API_KEY = "new_api";
     public final static String SUBSCRIBERS_PER_API = "subscriber_list";
-    public final static String SUBSCRIBERS_PER_PROVIDER = "provider_subscriber_list";
+    public final static String SUBSCRIBERS_PER_PROVIDER = "subscriber_list_for_provider";
 
 
     public static final String API_TENANT_CONF = "tenant-conf.json";
@@ -44,14 +44,13 @@ public class NotifierConstants {
 
     public final static String TYPE_KEY = "Type";
     public final static String TITLE_KEY = "Title";
-    public final static String MESSAGE_KEY = "Template";
+    public final static String TEMPLATE_KEY = "Template";
     public final static String CLASS_KEY = "Notifiers";
     public final static String NOTIFIERS_KEY = "Notifiers";
     public final static String Notification_KEY = "notification";
     public final static String Notifications_KEY = "Notifications";
 
     public final static String NOTIFICATION_TYPE_NEW_VERSION = "new_api_version";
-    public final static String NOTIFIER_CLASS = "Notifications  .NotifcationClass";
-    public final static String NOTIFICATION_ENABLED = "Notifications.Enabled";
+    public final static String NOTIFICATION_ENABLED = "NotificationsEnabled";
 
 }

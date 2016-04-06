@@ -3589,10 +3589,4 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return true;
     }
 
-    public void sendNotifications(Properties properties) throws NotificationException {
-
-        NotificationDTO notificationDTO=new NotificationDTO(properties,NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
-        new NotificationExecutor().sendAsyncNotifications(notificationDTO);
-
-    }
 }

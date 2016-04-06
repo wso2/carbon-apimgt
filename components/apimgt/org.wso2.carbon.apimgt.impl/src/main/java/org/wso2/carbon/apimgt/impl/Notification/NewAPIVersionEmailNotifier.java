@@ -29,7 +29,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -191,7 +195,8 @@ public class NewAPIVersionEmailNotifier extends Notifier {
     }
 
     /**
-     * Retrieves the message configurations from tenant-config.json and sets the notification properties to NotificationDTO
+     * Retrieves the message configurations from tenant-config.json and sets the notification properties to
+     * NotificationDTO
      *
      * @param notificationDTO
      * @return NotificationDTO after setting meesage and title
@@ -200,24 +205,42 @@ public class NewAPIVersionEmailNotifier extends Notifier {
     public NotificationDTO loadMessageTemplate(NotificationDTO notificationDTO) throws NotificationException {
 
         APIIdentifier api = (APIIdentifier) notificationDTO.getProperties().get(NotifierConstants.API_KEY);
-        APIIdentifier  newApi = (APIIdentifier) notificationDTO.getProperties().get(NotifierConstants.NEW_API_KEY);
+        APIIdentifier newApi = (APIIdentifier) notificationDTO.getProperties().get(NotifierConstants.NEW_API_KEY);
 
         String title = (String) notificationDTO.getProperty(NotifierConstants.TITLE_KEY);
-        String message = (String) notificationDTO.getProperty(NotifierConstants.MESSAGE_KEY);
-
-        // String replacement
         title = title.replaceAll("\\$1", api.getApiName());
         title = title.replaceAll("\\$2", api.getVersion());
 
-        message = message.replaceAll("\\$1", newApi.getApiName());
-        message = message.replaceAll("\\$2", newApi.getVersion());
-        message = message.replaceAll("\\$3", newApi.getProviderName());
+        // Getting the message template from registry file
+        String content = "";
+        try {
+            String templateLocation = (String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY);
+            int tenantId = notificationDTO.getTenantID();
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
+                    (tenantId);
 
-        message = message.replaceAll("\\$4", api.getApiName());
-        message = message.replaceAll("\\$5", api.getVersion());
+            if (registry.resourceExists(templateLocation)) {
+                Resource resource = registry.get(templateLocation);
+                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            } else {
+                log.error("Cannot find the template in Registry. Inavlid location " + templateLocation);
+                return notificationDTO;
+            }
+
+        } catch (RegistryException e) {
+            throw new NotificationException("Error while getting registry service", e);
+        }
+
+        if (content != null && !content.isEmpty()) {
+            content = content.replaceAll("\\$1", newApi.getApiName());
+            content = content.replaceAll("\\$2", newApi.getVersion());
+            content = content.replaceAll("\\$3", newApi.getProviderName());
+            content = content.replaceAll("\\$4", api.getApiName());
+            content = content.replaceAll("\\$5", api.getVersion());
+        }
 
         notificationDTO.setTitle(title);
-        notificationDTO.setMessage(message);
+        notificationDTO.setMessage(content);
         return notificationDTO;
     }
 }
