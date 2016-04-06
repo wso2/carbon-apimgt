@@ -6,6 +6,8 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 var tenantDomain=encode.forUriComponent(request.getParameter("tenant"));
 var urlPrefix;
 var urlPostfix;
+var storeUrl;
+var user = jagg.getUser();
 if(tenantDomain!='null'){
    urlPrefix="?tenant="+ encode.forUriComponent(tenantDomain);
    urlPostfix="&tenant="+ encode.forUriComponent(tenantDomain);
@@ -15,6 +17,14 @@ if(tenantDomain!='null'){
 }
 i18n.init(request,localeResourcesBasePath);
 %>
+<%if(jagg.getShowStoreURL()){%>
+	<%storeUrl = jagg.module("manager").getAPIStoreURL().url;
+	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+	tenantDomain =MultitenantUtils.getTenantDomain(user.username);
+
+	if(tenantDomain==undefined){tenantDomain='carbon.super';}
+	storeUrl = storeUrl+"?tenant="+tenantDomain;%>
+<%}%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,7 +60,6 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
-var user = jagg.getUser();
 %>
 <body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
@@ -69,6 +78,19 @@ var user = jagg.getUser();
 		</div>
 		<%if(user) { %>
 			<ul class="nav navbar-right float-remove-xs text-center-xs">
+			<li class="visible-inline-block">
+				<%if(jagg.getShowStoreURL()){%>
+                     <!--Links to Access APIStore-->
+                     	<a href="<%=storeUrl%>"  target="_blank">
+                     		<span class="icon fw-stack fw-lg">
+							   <i class="fw fw-deploy"></i>
+	                		</span>
+							<span class="hidden-xs">
+							Go to <%=i18n.localize("apistore")%>
+							</span>
+                     	</a>
+                <%}%>
+			</li>
 			<li class="visible-inline-block">
 				<a href="#" class="dropdown" data-toggle="dropdown"> 
 					<span class="icon fw-stack fw-lg">
