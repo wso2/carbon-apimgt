@@ -26,7 +26,7 @@
                                     <img class="img-responsive brand-spacer" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
                                 </div>
                             </div>
-                            <h2 class="text-center-sm text-center-xs text-center-md text-right">Product Name</h2>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right">API Store</h2>
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
