@@ -129,7 +129,7 @@ var drawAPIResponseFaultCountTable = function(from,to){
                              }
                          }
                     }
-                    $('#PerAppAPIFaultCountTable').dataTable();
+                    $('#PerAppAPIFaultCountTable').datatables_extended();
                 }
                 else if(length == 0) {
                     $('#noData').removeClass('hide');
