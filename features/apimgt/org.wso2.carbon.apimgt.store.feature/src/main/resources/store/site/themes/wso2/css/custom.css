@@ -1115,3 +1115,6 @@ a.remove_rating:hover{ color: #C00}
         text-align: left;
     }
 }
+.extended-form{
+    display: none;
+}

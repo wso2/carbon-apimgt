@@ -57,4 +57,18 @@ $(window).load(function(){
         }).on('affixed-top.bs.affix',function(){
             $('.affix-spacer').remove();
         });
+        
+        $('.sign-up-additional').click(function(){
+            var el = $('.extended-form'),
+                triggerEl = $('.sign-up-additional');
+            if(el.is(':hidden')){
+                el.slideDown(function(){
+                    triggerEl.text('Hide Additional Details');
+                });
+            }else{
+                el.slideUp(function(){
+                    triggerEl.text('Show Additional Details');
+                })
+            }
+        })
 });
