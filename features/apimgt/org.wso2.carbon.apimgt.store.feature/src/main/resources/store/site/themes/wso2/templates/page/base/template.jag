@@ -68,10 +68,6 @@
     </script>
 </head>
 <body>
-<% if (outputs.pagePath != "/site/pages/login.jag") {
-    jagg.includeBlock("menu/header", {"pagePath":outputs.pagePath,"tenant":tenant});
-}
-%>
 
 <% jagg.includeBlocks(outputs.body); %>
 
