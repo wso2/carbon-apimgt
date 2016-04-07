@@ -47,6 +47,7 @@
     "endpointTitle" : "Endpoints",
     "storeURLTitle" : "Store URL",
     "redirectUrl" : "Store URL",
+    "goToOverview": "Go to Overview",
     "goToStore":"Go to APIStore",
     "keepEditingAPI":"Keep Editing API",
     "apiOwner" : "API Owner",
