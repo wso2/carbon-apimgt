@@ -139,6 +139,9 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
+import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
@@ -5123,4 +5126,109 @@ public final class APIUtil {
         }
         return api;
     }
+
+    /**
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * Return all alert types.
+     * @return Hashmap of alert types.
+     * @throws APIManagementException
+     */
+    public static HashMap<Integer, String> getAllAlertTypeByAgent(String agent) throws APIManagementException {
+        HashMap<Integer, String> map;
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByAgent(agent);
+        return map;
+    }
+
+    /**
+     *
+     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @return map of saved values of alert types.
+     * @throws APIManagementException
+     */
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws  APIManagementException{
+
+        List<Integer> list;
+        list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndAgent(userName,agent);
+        return  list;
+
+    }
+
+    public static List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException{
+
+        List<String> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,agent);
+
+        return list;
+    }
+
+//    /**
+//     *
+//     * @param userName
+//     * @param tenantDomain
+//     * @return
+//     */
+//    public  boolean isAdmin(String userName,String tenantDomain){
+//        boolean isAdmin = false;
+//
+//        try {
+//            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+//
+//                APIManagerConfiguration apiManagerConfiguration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+//                        .getInstance().getAPIManagerConfigurationService().
+//                                getAPIManagerConfiguration();
+//
+//                String serverURL = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+//
+//                UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
+//                String adminUsername = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
+//                String adminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
+//
+//                CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, true, userAdminStub._getServiceClient());
+//
+//                FlaggedName[] flaggedNames = userAdminStub
+//                        .getRolesOfUser(MultitenantUtils.getTenantAwareUsername(userName), "*", -1);
+//                List<String> roles = new ArrayList<String>();
+//                if (flaggedNames != null) {
+//                    for (FlaggedName flaggedName : flaggedNames) {
+//                        if (flaggedName.getSelected()) {
+//                            String userRole = flaggedName.getItemName();
+//                            if (userRole.equals("admin")) {
+//
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//
+//            } else {
+//                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+//                //UserRealm realm = realmService.getBootstrapRealm();
+//                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+//                        .getTenantId(tenantDomain);
+//                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+//                org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+//
+//                String[] userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(userName));
+//
+//                for (String userRole : userRoles) {
+//                    if (userRole.equals(realm.getRealmConfiguration().getAdminRoleName())) {
+//
+//                        break;
+//                    }
+//                }
+//
+//            }
+//        }catch (RemoteException e){
+//
+//        } catch (org.wso2.carbon.user.core.UserStoreException e) {
+//            e.printStackTrace();
+//        } catch (UserStoreException e) {
+//            e.printStackTrace();
+//        } catch (UserAdminUserAdminException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return isAdmin;
+//    }
 }

@@ -7850,4 +7850,184 @@ public class ApiMgtDAO {
         }
         return accessTokenStoreTable;
     }
+
+    /**
+     * This method will fetch all alerts type that is available in AM_ALERT_TYPES.
+     * @return List of alert types
+     * @throws APIManagementException
+     */
+    public HashMap<Integer,String> getAllAlertTypesByAgent(String agent) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        HashMap<Integer, String> map = new HashMap<Integer, String>();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery;
+            if(agent == "a"){
+                sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
+                ps = conn.prepareStatement(sqlQuery);
+            }else {
+                sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES;
+                ps = conn.prepareStatement(sqlQuery);
+                ps.setString(1, agent);
+            }
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put(resultSet.getInt(1),resultSet.getString(2));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve alert types ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return map;
+    }
+
+    /**
+     *
+     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @return map of saved values of alert types.
+     * @throws APIManagementException
+     */
+    public List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws APIManagementException{
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<Integer> list = new ArrayList<Integer>();
+
+        try {
+            String sqlQuery;
+            conn = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_SAVED_ALERT_TYPES_BY_USERNAME;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getInt(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve saved alert types by user name. ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
+    }
+
+    public List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<String> list = new ArrayList<String>();
+
+        try {
+            String sqlQuery;
+            conn = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_SAVED_ALERT_EMAILS;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve saved alert types by user name. ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
+
+    }
+
+    /**
+     *
+     * @param userName User name.
+     * @param emailList Comma seperated email list.
+     * @param alertTypesList Comma seperated alert types list.
+     * @param agent. if pram value = p we assume those changes from publisher if param value = s those data belongs to
+     * subscriber.
+     * @throws APIManagementException
+     * @throws SQLException
+     */
+    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String agent)
+            throws APIManagementException, SQLException {
+
+        Connection connection = null;
+
+        PreparedStatement preparedStatementForEmailDelete = null;
+        PreparedStatement preparedStatementForAlertTypeDelete = null;
+        PreparedStatement preparedStatementForAlertTypeInsert = null;
+        PreparedStatement preparedStatementForEmailInsert = null;
+        ResultSet rs = null;
+
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+
+        int applicationId = 0;
+        try {
+            connection.setAutoCommit(false);
+
+            String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
+
+            String deleteAlertTypesByUserNameAndAgentQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
+
+//            if (log.isDebugEnabled()) {
+//                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
+//                        applicationId + " and Token type" );
+//            }
+            preparedStatementForAlertTypeDelete = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
+            preparedStatementForAlertTypeDelete.setString(1, userName);
+            preparedStatementForAlertTypeDelete.setString(2, agent);
+            preparedStatementForAlertTypeDelete.executeUpdate();
+
+            if(alertTypesIDList != null){
+
+                List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
+
+                for (String alertTypeId : alertTypeIdList) {
+                    preparedStatementForAlertTypeInsert = connection.prepareStatement(alertTypesQuery);
+                    preparedStatementForAlertTypeInsert.setInt(1, Integer.parseInt(alertTypeId));
+                    preparedStatementForAlertTypeInsert.setString(2, userName);
+                    preparedStatementForAlertTypeInsert.setString(3, agent);
+                    preparedStatementForAlertTypeInsert.execute();
+                }
+
+            }
+
+            String deleteAlertTypesEmailListsByUserNameAndAgentQuery = SQLConstants.
+                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT;
+
+//            if (log.isDebugEnabled()) {
+//                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
+//                        applicationId + " and Token type" );
+//            }
+            preparedStatementForEmailDelete = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
+            preparedStatementForEmailDelete.setString(1, userName);
+            preparedStatementForEmailDelete.setString(2, agent);
+            preparedStatementForEmailDelete.executeUpdate();
+
+            //Email list save query
+            String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
+
+            preparedStatementForEmailInsert = connection.prepareStatement(emailListSaveQuery);
+            preparedStatementForEmailInsert.setString(1, userName);
+            preparedStatementForEmailInsert.setString(2, emailList);
+            preparedStatementForEmailInsert.setString(3, agent);
+            preparedStatementForEmailInsert.execute();
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Failed to add Application", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatementForEmailInsert, connection, rs);
+
+        }
+    }
 }
