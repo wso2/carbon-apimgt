@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -65,6 +66,8 @@ public class ThrottleHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
 
     private static volatile DataPublisher dataPublisher = null;
+
+    private static volatile ThrottleDataPublisher throttleDataPublisher = null;
 
     private String policyKeyApplication = null;
 
@@ -96,27 +99,10 @@ public class ThrottleHandler extends AbstractHandler {
          * This method will initialize data publisher and this data publisher will be used to push events to central policy
          * server.
          */
-        if (dataPublisher == null) {
+        if (throttleDataPublisher == null) {
             // The publisher initializes in the first request only
             synchronized (this) {
-                try {
-                    dataPublisher = new DataPublisher("Binary", "tcp://localhost:9611", "ssl://localhost:9711", "admin", "admin");
-                } catch (DataEndpointAgentConfigurationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointConfigurationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointAuthenticationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (TransportException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                }
+                throttleDataPublisher = new ThrottleDataPublisher();
             }
         }
     }
@@ -249,7 +235,12 @@ public class ThrottleHandler extends AbstractHandler {
                                 subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
                                 authorizedUser, propertiesMap};
                         //After publishing events return true
-                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().sendToGlobalThrottler(objects,this.dataPublisher);
+                        //long start = System.currentTimeMillis();
+                        //log.info("##########################################Publishing event");
+
+                        throttleDataPublisher.publishNonThrottledEvent(synCtx);
+                        //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
+
 
                     } else {
                         if (log.isDebugEnabled()) {

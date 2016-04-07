@@ -1,13 +1,5 @@
 var index = 0;
 
-Handlebars.registerHelper('if_eq', function (a, b, opts) {
-    if (a == b) {
-        return opts.fn(this);
-    } else {
-        return opts.inverse(this);
-    }
-});
-
 var apiPolicy =
 {
     "policyName": "",
@@ -261,6 +253,16 @@ var addJwtClaim = function (id) {
     $('#jwt-claim-name-' + id).val("");
     $('#jwt-claim-value-' + id).val("");
 };
+
+$(document).ready(function() {
+    Handlebars.registerHelper('if_eq', function (a, b, opts) {
+        if (a == b) {
+            return opts.fn(this);
+        } else {
+            return opts.inverse(this);
+        }
+    });
+});
 
 var addPolicyToBackend = function () {
     var apiPolicyString = JSON.stringify(apiPolicy);
