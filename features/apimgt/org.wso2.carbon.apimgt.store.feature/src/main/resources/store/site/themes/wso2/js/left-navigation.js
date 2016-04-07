@@ -11,14 +11,14 @@ $(window).load(function(){
         }
 
         var delay = 0,
-            el = $(this),
-            color = $(this).find('.left-menu-item').css('background-color'),
-            prev = $(".navigation ul li:first"),
-            distance = el.offset().top  - $(".navigation").offset().top,
-            isLastElClicked = el.next().length > 0 ? false : true,
-            hasSubMenu = el.find('.sublevel-menu').length == 1 ? true : false,
-            isActiveItem = el.hasClass('active'),
-            url = el.find('a').attr('href');
+	        el = $(this),
+	        color = $(this).find('.left-menu-item').css('background-color'),
+	        prev = $(".navigation ul li:first"),
+	        distance = el.offset().top  - $(".navigation").offset().top,
+	        isLastElClicked = el.next().length > 0 ? false : true,
+	        hasSubMenu = el.find('.sublevel-menu').length == 1 ? true : false,
+	        isActiveItem = el.hasClass('active'),
+	        url = el.find('a').attr('href');
 
         if($('.sublevel-menu').is(':visible')){
             $('.sublevel-menu').slideUp(function(){
@@ -38,7 +38,7 @@ $(window).load(function(){
                 });
             }
             return;
-        }
+        };
 
         if (el.prev().length > 0) {
             animating = true;
@@ -55,14 +55,15 @@ $(window).load(function(){
                     }
                 })
             ).done(function () {
+                $(".navigation ul li.active").removeClass('active');
                 el.insertBefore(prev).css('top','0px').addClass('active');
                 el.find('.left-menu-item').removeAttr('style');
-                if(isLastElClicked){
+                /*if(isLastElClicked){
                     prev.removeClass('active');
 
                 }else{
                     prev.removeClass('active');
-                }
+                }*/
                 animating = false;
 
                 if(hasSubMenu){
@@ -70,6 +71,8 @@ $(window).load(function(){
                         el.find('.left-menu-item i').removeClass('fw-down').addClass('fw-up');
                     });
                 }
+
+                el.is(':hidden') ? el.show():'';
 
                 setTimeout(function(){
                     location.replace(url);
@@ -80,5 +83,9 @@ $(window).load(function(){
     }).children('.sublevel-menu').find('li').click(function(e){
         e.stopImmediatePropagation();
     });
+
+    if(!$('.navigation ul li.active').is(':first-child')){
+        !$('.navigation ul li.active').trigger('click');
+    }
     
 });
