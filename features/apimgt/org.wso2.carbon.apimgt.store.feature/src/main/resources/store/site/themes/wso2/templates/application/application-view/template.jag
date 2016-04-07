@@ -55,9 +55,11 @@ for(var i=0;i < outputs.tiers.length; i++){
   </div>  
 </form>      
       </div>
-      <div role="tabpanel" class="tab-pane fade" id="production">
+      <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
         var prodapp = {
+            name: application.name,
+            callbackUrl:application.callbackUrl,
             ConsumerKey: oauthapp.prodConsumerKey,
             ConsumerSecret: oauthapp.prodConsumerSecret,
             Key: oauthapp.prodKey,
@@ -65,12 +67,12 @@ for(var i=0;i < outputs.tiers.length; i++){
             ValidityTime: oauthapp.prodValidityTime
         }
       %>
-      <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "prod" } );
-       %>
       </div>
       <%
         jagg.log(oauthapp)
         var sandapp = {
+            name: application.name,
+            callbackUrl:application.callbackUrl,            
             ConsumerKey: oauthapp.sandboxConsumerKey,
             ConsumerSecret: oauthapp.sandboxConsumerSecret,
             Key: oauthapp.sandboxKey,
@@ -78,13 +80,20 @@ for(var i=0;i < outputs.tiers.length; i++){
             ValidityTime: oauthapp.sandValidityTime
         }
       %>      
-      <div role="tabpanel" class="tab-pane fade" id="sandbox">
-      <% jagg.includeBlock("application/application-keys", { "app" : sandapp, "type": "sandbox" } );
-       %>
+      <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
       </div>      
       <div role="tabpanel" class="tab-pane fade" id="subscription">
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
     </div>
   </div>
+  <script language="javascript">
+    var prodapp = <%= stringify(prodapp)%>;
+    var sandapp = <%= stringify(sandapp)%>;
+    $(document).ready(function() {
+      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION"});
+      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX"});          
+    });
+  </script>
+  <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>
 <% }); %>

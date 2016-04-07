@@ -1,9 +1,9 @@
 <%
 jagg.initializer("application/application-view", {
 
-    preInitialize:function () {
-        jagg.addFooterJS("application/view", "applications", "js/applications.js");
+    preInitialize:function () {        
         jagg.addFooterJS("application/view", "ZeroClipboard", "js/lib/ZeroClipboard.min.js");
+        jagg.addFooterJS("application/view", "applications", "js/applications.js");
     }
 });
 %>

@@ -4,7 +4,7 @@
 //@todo if prodkey and consumer is null 
 //@todo place holder when generating keys ie generating.....
 //@todo check production keys with workflows
-//@todo need to add curl commands
+//@todo need to username and password to password grant curl
 //@todo check the ui with scope selection
 //@todo add help buttons
 	var type = outputs.type;
@@ -16,8 +16,8 @@
         gatewayurlendpoint = customURL;
     }
 %>
-
-  <% if(app.ConsumerKey != null){%>
+<script id="keys-template" type="text/x-handlebars-template">
+  {{#if ConsumerKey }}
 	<div class="row">
 	  <div class="col-md-6">
 	  	<form>
@@ -25,9 +25,9 @@
 		  <div class="form-group">
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("consumerKey")%></label>
 		    <div class="input-group">
-		      <input type="text" class="form-control" id="<%=type%>ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" value="<%=app.ConsumerKey%>">
+		      <input type="text" class="form-control" id="<%=type%>ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" value="{{ConsumerKey}}">
 		      <div class="input-group-btn">
-		      	<button class="btn btn-default copy-button" data-clipboard-text="<%=app.ConsumerKey%>"  type="button" title="Copy">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerKey}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
                 </button>		      
 		      </div>
@@ -36,9 +36,9 @@
 		  <div class="form-group">
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("consumerSecret")%></label>
 		    <div class="input-group">
-		      <input type="text" class="form-control" id="<%=type%>ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="<%=app.ConsumerSecret%>">
+		      <input type="text" class="form-control" id="<%=type%>ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="{{ConsumerSecret}}">
 		      <div class="input-group-btn">
-		      	<button class="btn btn-default copy-button" data-clipboard-text="<%=app.ConsumerSecret%>"  type="button" title="Copy">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
                 </button>		      
 		      </div>
@@ -47,9 +47,9 @@
 		  <div class="form-group">
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("accessToken")%></label>
 		    <div class="input-group">
-		      <input type="text" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="<%=app.Key%>">
+		      <input type="text" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
 		      <div class="input-group-btn">
-		      	<button class="btn btn-default copy-button" data-clipboard-text="<%=app.<%=type%>Key%>"  type="button" title="Copy">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
                 </button>		      
 		      </div>
@@ -68,7 +68,7 @@
 		    <span>Validity Time</span>
 		    <input type="text" value='<%=app.ValidityTime %>' class="form-control" id="validity_time" placeholder=""> Seconds
 		  </div>
- 		  <button class=" btn btn-primary"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>
+ 		  <button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>
 		</form>		  	
 	  </div>
 	</div>
@@ -79,29 +79,31 @@
 	  	<p>Following cURL command shows how to generate an access token using password grant type.</p>
 		<div class="highlight">
 <pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=password" \
-     -H "Authorization: Basic '+encodedString+'" \
+     -H "Authorization: Basic {{basickey}}" \
      <%= gatewayurlendpoint %>/token</code></pre>
         </div>
         <p>In a similar manner you can generate an access token using client credential grant type with the following cURL command.</p>	  	
 		<div class="highlight">
 <pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=client_credentials" \
-     -H "Authorization: Basic '+encodedString+'" \
+     -H "Authorization: Basic {{basickey}}" \
      <%= gatewayurlendpoint %>/token</code></pre>
         </div>        
 	  </div>
 	</div>	
 
-  <% }else{%>
+  {{else}}
     <div class="message message-info">
     	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
         <p><%=i18n.localize("sandboxKeyMsg")%></p>
     </div>
-							   <button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
-								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-									   data-application="<%=encode.forHtmlAttribute("app.name")%>"
-									   data-callbackUrl="<%=encode.forHtmlAttribute("app.callbackUrl")%>"
-									   data-keytype="SANDBOX"
-									   data-username="<%= "userName" %>"
-									   iteration="200">Generate keys</button>    
-  <% } %>
+    <button  class="app-key-generate-button btn btn-primary generatekeys" onclick="jagg
+	.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+		   data-application="<%=encode.forHtmlAttribute("app.name")%>"
+		   data-callbackUrl="<%=encode.forHtmlAttribute("app.callbackUrl")%>"
+		   data-keytype="SANDBOX"
+		   data-username="<%= "userName" %>"
+		   iteration="200">Generate keys</button>    
+  {{/if}}
+</script>
+
 <% }); %>
