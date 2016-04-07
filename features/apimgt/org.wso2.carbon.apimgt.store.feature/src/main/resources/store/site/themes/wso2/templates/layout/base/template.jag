@@ -1,4 +1,11 @@
 <% jagg.template("layout/base", function(inputs, outputs, jagg) { %>
+
+	<%
+	var tenant=request_tenant;
+	%>
+
+<%jagg.includeBlock("menu/header", {"pagePath":outputs.pagePath,"tenant":tenant});%>
+
 <!-- #page-content-wrapper -->
 <div class="page-content-wrapper">
     <!-- media-->
