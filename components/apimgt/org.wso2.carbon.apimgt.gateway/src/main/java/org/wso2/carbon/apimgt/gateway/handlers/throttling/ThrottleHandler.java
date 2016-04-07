@@ -235,11 +235,8 @@ public class ThrottleHandler extends AbstractHandler {
                                 subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
                                 authorizedUser, propertiesMap};
                         *///After publishing events return true
-                        long start = System.currentTimeMillis();
                         //log.info("##########################################Publishing event");
                         throttleDataPublisher.publishNonThrottledEvent(synCtx);
-                        log.info("##########################################Time Taken=:"+(System.currentTimeMillis() -start));
-
 
                     } else {
                         if (log.isDebugEnabled()) {
