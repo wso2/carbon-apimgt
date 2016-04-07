@@ -601,18 +601,6 @@ ul.product-tags {
     margin: auto;
     font-size: 26px;
 }
-.input-wrap>.form-control, .input-wrap .btn.wrap-input-right  {
-    background-color: #215080;
-    border: 0px;
-    color: #FFF;
-    height: 40px;
-    margin-top:-3px;
-}
-.input-wrap>.form-control::-webkit-input-placeholder {
-    color: #fff;
-    opacity: 0.9;
-    font-weight: 100;
-}
 .page-actions-right{float: right;}
 
 .nano > .nano-pane {
@@ -1055,6 +1043,10 @@ a.remove_rating:hover{ color: #C00}
 }
 .social-container p{
     font-size: 1.3em;
+}
+
+#mainLoginForm{
+    max-width:100%;
 }
 @media (max-width: 767px){
     .data-container h3{
