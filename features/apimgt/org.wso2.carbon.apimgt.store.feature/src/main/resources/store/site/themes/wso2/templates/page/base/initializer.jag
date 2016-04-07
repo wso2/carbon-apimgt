@@ -19,6 +19,8 @@ jagg.initializer("page/base", {
         //jagg.addHeaderCSS("page/base", "localstyles", "css/localstyles.css");
         jagg.addHeaderCSS("page/base", "custom", "css/custom.css");
         jagg.addHeaderCSS("page/base", "bootstrap-rating.css", "lib/bootstrap-rating/bootstrap-rating.css");
+        jagg.addHeaderCSS("page/base", "bootstrap-datatables", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
+        jagg.addHeaderCSS("page/base", "datatables-responsive", "libs/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css");
 
         //include jquery at the top
         jagg.addHeaderJS("page/base", "jquery1.11.0", "libs/jquery_1.11.0/jquery-1.11.3.min.js");   
@@ -43,6 +45,9 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "jquery.validator", "js/lib/jquery.validate.min.js");
         jagg.addFooterJS("page/base", "jquery.validate.password", "js/lib/jquery.validate.password.js");
         jagg.addFooterJS("page/base", "jquery.cookie", "js/lib/jquery.cookie.js");
+        jagg.addFooterJS("page/base", "jquery-dataTable","libs/data-tables_1.10.7/media/js/jquery.dataTables.min.js");
+        jagg.addFooterJS("page/base", "responsive-datatables-js", "libs/data-tables_1.10.7/extensions/Bootstrap/js/dataTables.bootstrap.js");
+        jagg.addFooterJS("page/base", "datatables-js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
     }
 });
 %>

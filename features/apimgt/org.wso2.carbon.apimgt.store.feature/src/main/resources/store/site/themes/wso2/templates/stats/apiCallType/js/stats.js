@@ -135,7 +135,7 @@ var drawAppAPICallType = function(from,to){
                                 }
                             }
                       }
-                    $('#AppApiCallTypeTable').dataTable();
+                    $('#AppApiCallTypeTable').datatables_extended();
                 }
                 else if (length == 0) {
                     $('#noData').removeClass('hide');
