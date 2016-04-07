@@ -26,6 +26,8 @@
                         <div class="data-container">
                             <form class="form-horizontal">
                                 <h3>Sign in to your account</h3>
+                                <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">				                    
+				                </div>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <div class="input-group input-wrap">
