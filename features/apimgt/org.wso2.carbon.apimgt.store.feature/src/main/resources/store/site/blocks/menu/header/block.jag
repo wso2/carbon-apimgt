@@ -16,6 +16,7 @@ jagg.block("menu/header", {
 
     getOutputs:function (inputs) {
         return {
+            "user":session.get("logged.user")
         };
     },
 

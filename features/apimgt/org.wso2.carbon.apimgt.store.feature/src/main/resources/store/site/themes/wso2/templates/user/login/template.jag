@@ -1,9 +1,4 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) { %>
-<% var user = outputs.user; %>
-<%
-var i18n = require("i18n");var publisherUrl;
-var localeResourcesBasePath="/site/conf/locales/jaggery/";
-i18n.init(request,localeResourcesBasePath);
 
 var mod = jagg.module("manager");
 var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
@@ -126,3 +121,56 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
 	</div>
 
 <%*/ }); %>
+<div class="page-content-wrapper">
+    <div class="container-fluid ">
+        <div class="container">
+            <div class="login-form-wrapper">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                        <div class="brand-container add-margin-bottom-5x">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
+                                    <img class="img-responsive brand-spacer" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                </div>
+                            </div>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right">API Store</h2>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                        <div class="data-container">
+                            <form class="form-horizontal" id="mainLoginForm" autocomplete="off">
+                                <h3>Sign in to your account</h3>
+                                <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">
+				                    
+				                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <div class="input-group input-wrap">
+                                            <input type="text" id="username" name="name" class="form-control" placeholder="<%=i18n.localize("username")%>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <div class="input-group input-wrap">
+                                            <input type="password" id="password" name="pass" class="form-control" placeholder="<%=i18n.localize("password")%>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="tenant" name="tenant" value="<%=request_tenant%>">
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <button type="button" id="loginBtn" onclick="login()" class="btn btn-default btn-primary add-margin-right-2x">Sign In</button>
+                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary hidden-xs hidden-sm">Go Back</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%}); %>
