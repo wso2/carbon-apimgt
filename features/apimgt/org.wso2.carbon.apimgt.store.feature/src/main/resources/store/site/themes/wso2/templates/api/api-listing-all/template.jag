@@ -52,7 +52,6 @@ var reqUrl = request.getRequestURI();
   <!-- Recently Added APIs -->
   
 <div class="page-header">
-<div class="page-title">
      <%
 
              var tagDisplayName = "";
@@ -77,9 +76,8 @@ var reqUrl = request.getRequestURI();
             	}
              } else{
          %>
-    			<h2>APIs</h2>
+    			<h1>APIs</h1>
    			 <% } %>
-   			 </div>
 </div>
 
 <div class="page-content">

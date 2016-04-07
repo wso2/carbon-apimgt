@@ -10,28 +10,6 @@ header{
 ol.breadcrumb.navbar-brand {
     height: 40px;
 }
-.page-header {
-    height: auto;
-    padding: 20px 00px;
-    border-bottom: none;
-    margin: 0;
-}
-
-.page-header:after {
-    clear: both;
-    content: " ";
-    display: block;
-    height: 0;
-}
-
-.page-title {
-    width: auto;
-    float: left;
-    margin-right: 20px;
-}
-.page-title h3{
-    margin: 0px;
-}
 
 
 .media {
@@ -69,7 +47,7 @@ nav.navigation ul li {
     color: #fff;
     text-decoration: none;
     font-size: 16px;
-    font-weight: 100;
+    font-weight: 400;
     position: relative;
 }
 
@@ -101,6 +79,14 @@ nav.navigation .left-menu-item {
     font-size: 14px;
     display: table;
     margin-left: 40px;
+}
+
+nav.navigation .left-menu-item i{
+    float: none;
+    position: relative;
+    left: 0px;
+    font-size: 10px;
+    display: table-cell;
 }
 
 ul.sublevel-menu {
@@ -615,14 +601,14 @@ ul.product-tags {
     margin: auto;
     font-size: 26px;
 }
-.input-wrap>.form-control, .input-wrap .btn.wrap-input-right  {
+.search-wrap>.form-control, .search-wrap .btn.wrap-input-right  {
     background-color: #215080;
     border: 0px;
     color: #FFF;
     height: 40px;
     margin-top:-3px;
 }
-.input-wrap>.form-control::-webkit-input-placeholder {
+.search-wrap>.form-control::-webkit-input-placeholder {
     color: #fff;
     opacity: 0.9;
     font-weight: 100;
@@ -1070,6 +1056,10 @@ a.remove_rating:hover{ color: #C00}
 .social-container p{
     font-size: 1.3em;
 }
+#mainLoginForm{
+    max-width:100%;
+}
+
 @media (max-width: 767px){
     .data-container h3{
         font-size: 1.2em;

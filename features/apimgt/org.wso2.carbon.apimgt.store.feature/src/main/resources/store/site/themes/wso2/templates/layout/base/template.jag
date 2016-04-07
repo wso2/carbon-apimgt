@@ -11,7 +11,7 @@
     <!-- media-->
     <div class="media">
         <!-- media left-->
-        <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="80" data-side="left" data-width="200">
+        <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="50" data-side="left" data-width="200">
          <%
                 var section = null;
                 if(outputs.middle instanceof Array){ 
@@ -38,7 +38,7 @@
             <% jagg.includeBlock("menu/actions", { page : section }); %>
 
             <div class="container-fluid">      
-            	<div class="body-wrapper">                    
+            	<div class="body-wrapper">
                 	<% jagg.includeBlocks(outputs.middle); %>
                 </div>            
             </div> 
