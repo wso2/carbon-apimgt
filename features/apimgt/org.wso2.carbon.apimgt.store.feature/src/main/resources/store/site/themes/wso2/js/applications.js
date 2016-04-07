@@ -1,4 +1,3 @@
-
 $(document).ready(function() {
 
 $("#subscription-actions").each(function(){
@@ -36,11 +35,22 @@ $("#subscription-actions").each(function(){
     });
 
     $('#subscription-table').on( 'click', 'a.deleteApp', function () {
-        sub_list
-        .row( $(this).parents('tr') )
-        .remove()
-        .draw();
-    });
+        var row = sub_list.row( $(this).parents('tr') );
+        var record = row.data();
+        jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
+            action:"removeSubscription",
+            name: record.apiName,
+            version: record.apiVersion,
+            provider:record.apiProvider,
+            applicationId: $("#subscription-table").attr('data-appid')
+           }, function (result) {
+            if (!result.error) {
+                row.remove().draw();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }, "json"); 
+    });        
 });    
 
 $("#application-actions").each(function(){
@@ -105,17 +115,28 @@ $("#application-actions").each(function(){
     });
 });
 
+});
 
-
-var client = new ZeroClipboard( $(".copy-button") );
-client.on( "ready", function( readyEvent ) {
-  client.on( "aftercopy", function( event ) {
-    // `this` === `client`
-    // `event.target` === the element that was clicked
-    //event.target.style.display = "none";
-    //alert("Copied text to clipboard: " + event.data["text/plain"] );
-  });
+$(document).ready(function() {
+    if(ZeroClipboard){
+        var client = new ZeroClipboard( $(".copy-button") );
+        client.on( "ready", function( readyEvent ) {
+          client.on( "aftercopy", function( event ) {
+            var target = $(event.target);
+            target.attr("title","Copied!")
+            target.tooltip('enable');
+            target.tooltip("show");
+            target.tooltip('disable');
+          });
+        });
+    }
 });
 
 
-});
+function Application () {
+
+}
+ 
+Application.prototype.getInfo = function() {
+    return this.color + ' ' + this.type + ' apple';
+};

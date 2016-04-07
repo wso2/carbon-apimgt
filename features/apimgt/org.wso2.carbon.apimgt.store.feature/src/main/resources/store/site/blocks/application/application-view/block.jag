@@ -30,8 +30,13 @@ jagg.block("application/application-view", {
         var tiers, result;
         result = jagg.module("tiers").getApplicationTiers();
         tiers = result.tiers;
+
+        var store = jagg.module("manager").getAPIStoreObj();
+        gatewayURL = store.getHTTPsGatewayEndpointURLs();
+
         return {
             "tiers":tiers,
+            "gatewayurl":gatewayURL[0],
             "application" : application,
             "oauthapp": oauthapp
         };

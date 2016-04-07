@@ -1,6 +1,7 @@
 <% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { 
-// api should have image and provider
-//
+//@todo api should have image and provider
+//@todo api status should be displayed in 
+//@todo confirmation for subscription delete
 %>
 
 
@@ -10,12 +11,13 @@
 	</div>
 
 	<div id="subscription-table-wrap" class="hide">
-    <table id="subscription-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0" data-app="<%= encode.forHtml(outputs.application.name) %>">
+    <table id="subscription-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0" data-app="<%= encode.forHtml(outputs.application.name) %>" data-appid="<%= encode.forHtml(outputs.application.id) %>">
       	<thead>
 	        <tr>
 	            <th>API Name</th>            
 	            <th>Subscription Tier</th>      
-	            <th>Status</th>      
+	            <th>Status</th>
+              <th>Actions</th>
 	        </tr>
     	</thead>    
     </table>
