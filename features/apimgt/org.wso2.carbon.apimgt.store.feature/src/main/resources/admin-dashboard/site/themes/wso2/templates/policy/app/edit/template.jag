@@ -1,6 +1,7 @@
 <% jagg.template("policy/app/edit", function(inputs, outputs, jagg) { %>
 <%
     var policyName = request.getParameter("policyName");
+    var policyAction = request.getParameter("action");
     var pageTitle = "Add Application Level Policy";
     var nameFieldDisableStatus = "";
 
@@ -32,6 +33,7 @@
 %>
 
 <div id='tier-add-container' class="row-fluid"  style="display:inline">
+    <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
 
     <div class="title-section">
         <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>

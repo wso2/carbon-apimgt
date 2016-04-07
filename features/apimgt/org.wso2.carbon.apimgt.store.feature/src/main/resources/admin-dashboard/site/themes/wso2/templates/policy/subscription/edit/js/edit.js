@@ -6,7 +6,7 @@ var addSubscriptionPolicy = function () {
     }
     var attributes =  getCustomAttributesArray();
     jagg.post("/site/blocks/policy/subscription/edit/ajax/subscription-policy-edit.jag", {
-        action:"add",
+        action:$('#policyAction').val(),
         policyName:$('#policyName').val(),
         description:$('#description').val(),
         defaultQuotaPolicy:$('input[name=select-quota-type]:checked').val(),

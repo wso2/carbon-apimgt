@@ -9036,6 +9036,7 @@ public class ApiMgtDAO {
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         Connection connection = null;
         PreparedStatement updateStatement = null;
+        boolean hasCustomAttrib = false;
 
         if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
             String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
@@ -9045,9 +9046,16 @@ public class ApiMgtDAO {
         }
 
         try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            updateStatement = connection.prepareStatement(SQLConstants.UPDATE_APPLICATION_POLICY_SQL);
+            String updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
+            }
+            updateStatement = connection.prepareStatement(updateQuery);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
@@ -9060,11 +9068,17 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-            updateStatement.setBoolean(7, APIUtil.isContentAwarePolicy(policy));
             updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setString(8, policy.getPolicyName());
-            updateStatement.setInt(9, policy.getTenantId());
+            
+            if(hasCustomAttrib){
+            	updateStatement.setBlob(7, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(8, policy.getPolicyName());
+                updateStatement.setInt(9, policy.getTenantId());
+            }else{
+            	updateStatement.setString(7, policy.getPolicyName());
+                updateStatement.setInt(8, policy.getTenantId());
+            }
             updateStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -9094,6 +9108,7 @@ public class ApiMgtDAO {
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection connection = null;
         PreparedStatement updateStatement = null;
+        boolean hasCustomAttrib = false;
 
         if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
             String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
@@ -9103,9 +9118,16 @@ public class ApiMgtDAO {
         }
 
         try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
+        	String updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL;
+        	 if(hasCustomAttrib){
+             	updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
+             }
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            updateStatement = connection.prepareStatement(SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL);
+            updateStatement = connection.prepareStatement(updateQuery);
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
 
@@ -9118,13 +9140,20 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
-            updateStatement.setBoolean(5, APIUtil.isContentAwarePolicy(policy));
-            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(8, policy.getRateLimitCount());
-            updateStatement.setString(9, policy.getRateLimitTimeUnit());
-            updateStatement.setString(10, policy.getPolicyName());
-            updateStatement.setInt(11, policy.getTenantId());
+ 
+            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(7, policy.getRateLimitCount());
+            updateStatement.setString(8, policy.getRateLimitTimeUnit());
+            
+            if(hasCustomAttrib){
+            	updateStatement.setBlob(9, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(10, policy.getPolicyName());
+                updateStatement.setInt(11, policy.getTenantId());
+            }else{
+            	updateStatement.setString(9, policy.getPolicyName());
+                updateStatement.setInt(10, policy.getTenantId());
+            }
             updateStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
