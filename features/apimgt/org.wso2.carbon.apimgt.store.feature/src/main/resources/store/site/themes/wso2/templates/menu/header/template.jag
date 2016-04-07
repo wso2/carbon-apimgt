@@ -22,8 +22,8 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
        <li class="visible-inline-block">       		
 	         <a href="#" class="dropdown" data-toggle="dropdown">
 	            <span class="icon fw-stack fw-lg">
-	               <i class="fw fw-circle fw-stack-2x"></i>
-	               <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	               <i class="fw fw-circle-outline fw-stack-2x"></i>
+	               <i class="fw fw-user fw-stack-1x"></i>
 	            </span>
 	            <span class="hidden-xs"> &nbsp; <%=user.username%><span class="caret"></span></span>
 	         </a>
@@ -43,8 +43,8 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
 	            <li class="visible-inline-block">
 	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
 	                  <span class="icon fw-stack fw-lg">
-	                  <i class="fw fw-circle fw-stack-2x"></i>
-	                  <i class="fw fw-document fw-stack-1x fw-inverse"></i>
+	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                  <i class="fw fw-document fw-stack-1x"></i>
 	                  </span>
 	                    <span class="hidden-xs"> <%=i18n.localize("signup")%></span>
 	                </a>
@@ -53,8 +53,8 @@ var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
 	            <li class="visible-inline-block">
 	                <a id="login-link">
 	                  <span class="icon fw-stack fw-lg">
-	                  <i class="fw fw-circle fw-stack-2x"></i>
-	                  <i class="fw fw-user fw-stack-1x fw-inverse"></i>
+	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                  <i class="fw fw-user fw-stack-1x"></i>
 	                  </span>
 	                    <span class="hidden-xs"><%=i18n.localize("login")%></span>
 	                </a>
