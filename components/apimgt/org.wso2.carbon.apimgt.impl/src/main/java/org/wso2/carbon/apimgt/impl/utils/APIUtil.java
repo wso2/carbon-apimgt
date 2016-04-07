@@ -84,6 +84,8 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -5308,5 +5310,81 @@ public final class APIUtil {
             return true;
         }
         return false;  
+    }
+
+    public static void addDefaultAdvancedThrottlePoliciesToDB(int tenantId) throws APIManagementException {
+        int[] requestCount = new int[] {20, 5, 1};
+        //Adding application level throttle policies
+        String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE, APIConstants.DEFAULT_APP_POLICY_MEDIUM,
+                                            APIConstants.DEFAULT_APP_POLICY_SMALL};
+        String[] appPolicyDecs = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE_DESC, APIConstants.DEFAULT_APP_POLICY_MEDIUM_DESC,
+                APIConstants.DEFAULT_APP_POLICY_SMALL_DESC};
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        String policyName;
+        //Add application level throttle policies
+        for(int i = 0; i < appPolicies.length ; i++) {
+            policyName = appPolicies[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, policyName)) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDescription(appPolicyDecs[i]);
+                subscriptionPolicy.setTenantId(tenantId);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                RequestCountLimit requestCountLimit = new RequestCountLimit();
+                requestCountLimit.setRequestCount(requestCount[i]);
+                requestCountLimit.setUnitTime(60);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(requestCountLimit);
+                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+            }
+        }
+
+        //Adding Subscription level policies
+        String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE, APIConstants.DEFAULT_SUB_POLICY_MEDIUM,
+                APIConstants.DEFAULT_SUB_POLICY_SMALL};
+        String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE_DESC, APIConstants.DEFAULT_SUB_POLICY_MEDIUM_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_SMALL_DESC};
+        for(int i = 0; i < subPolicies.length ; i++) {
+            policyName = subPolicies[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                ApplicationPolicy applicationPolicy = new ApplicationPolicy(policyName);
+                applicationPolicy.setDescription(subPolicyDecs[i]);
+                applicationPolicy.setTenantId(tenantId);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                RequestCountLimit requestCountLimit = new RequestCountLimit();
+                requestCountLimit.setRequestCount(requestCount[i]);
+                requestCountLimit.setUnitTime(60);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(requestCountLimit);
+                applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                apiMgtDAO.addApplicationPolicy(applicationPolicy);
+            }
+        }
+
+        //Adding Resource level policies
+        String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE, APIConstants.DEFAULT_API_POLICY_MEDIUM,
+                APIConstants.DEFAULT_API_POLICY_SMALL};
+        String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE_DESC, APIConstants.DEFAULT_API_POLICY_MEDIUM_DESC,
+                APIConstants.DEFAULT_API_POLICY_SMALL_DESC};
+        for(int i = 0; i < apiPolicies.length ; i++) {
+            policyName = apiPolicies[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {
+                APIPolicy apiPolicy = new APIPolicy(policyName);
+                apiPolicy.setDescription(apiPolicyDecs[i]);
+                apiPolicy.setTenantId(tenantId);
+                apiPolicy.setUserLevel(APIConstants.API_POLICY_API_LEVEL);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                RequestCountLimit requestCountLimit = new RequestCountLimit();
+                requestCountLimit.setRequestCount(requestCount[i]);
+                requestCountLimit.setUnitTime(60);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(requestCountLimit);
+                apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                apiMgtDAO.addAPIPolicy(apiPolicy);
+            }
+        }
     }
 }
