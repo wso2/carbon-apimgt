@@ -51,8 +51,6 @@
         <% } %>
         <div class="thumbnail-custom">
 
-            <ul class="thumbnails">
-
                 <%
 
                         for(i = 0; i < apis.length; i++) {
@@ -68,32 +66,55 @@
                                        if(provider == 'null')provider = null;
                             thumbURL = api.thumbnailurl;
                             if(thumbURL && thumbURL.indexOf("images/") == 0) {
-                                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+                                thumbURL = null;
+                            }else{
+                                thumbURL = jagg.getRegistryPath(thumbURL);
                             }
                             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
                             
                         %>
-               
-                <li>
-                    <div class="thumbnail">
-                        <a href="<%=path%>">
-                            <img src="<%=thumbURL%>" width="100" height="100"/>
-                        </a>
-                        <div><a href="<%=path%>" class="link-to-api fade-out" title="<%=api.name%>"> <%=api.name%> (<%=api.version%>)</a></div>
-                        <%if(api.isAdvertiseOnly) {%>
-                        	<div><a href="<%=path%>" class="link-to-provider"><%=api.apiOwner%></a></div>
-                        <%}else if(api.apiBusinessOwner != null){%>
-                        	<div><a href="<%=path%>" class="link-to-provider"><%=api.apiBusinessOwner%></a></div>
-						<%}
-                                else {%>
-							<div><a href="<%=path%>" class="link-to-provider"><%=api.provider%></a></div>
-                        <%}%>
-                    </div>
-                </li>
+                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                            <div class="white-wrapper add-margin-bottom-4x">
+                                <div class="thumbnail icon">
+                                	<% if(thumbURL == null) { %>
+                                		<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a href="" class="api-name"><%=api.name%></a>
+											</div>
+										</div>
+                                    <% } else { %>
+                                    	<div class="square-element">
+                                    		<img class="" src="<%=thumbURL%>" alt="">
+                                    	</div>
+                                    <% } %>
+                                    <div class="after">
+                                        <a href="<%=path%>">
+                                    <span class="fw-stack fw-lg">
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    <i class="fw fw-view fw-stack-1x"></i>
+                                    </span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a href="<%=path%>"><%=api.name%></a></h4>
+                                    <h5><a href="<%=path%>"><%=api.version%></a></h5>
+                                    <%if(api.isAdvertiseOnly) {%>
+                                    	<p><%=api.apiOwner%></p>
+                                    <%} else if(api.apiBusinessOwner != null) {%>
+                                    	<p><%=api.apiBusinessOwner%></p>
+                                    <%} else { %>
+                                    	<p><%=api.provider%></p>
+                                    <% } %>
+
+                                </div>
+                            </div>
+                        </div>
 
                 <% } %>
 
-            </ul>
+
             <%
                      if(numberOfPages > 1) { %>
             <div class="pagination">
@@ -243,4 +264,21 @@
         font-weight:bold;
     }
 </style>
+
+<script>
+$(window).load(function(){
+
+    $(".setbgcolor").generateBgcolor({
+        definite:true
+    });
+
+    $(".api-name-icon").each(function() {
+        var elem = $(this).next().children(".api-name");
+        $(this).nametoChar({
+            nameElement: elem
+        });
+    });
+
+});
+</script>
         <% }); %>
