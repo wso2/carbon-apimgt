@@ -10,9 +10,13 @@ var addApiPolicy = function (policy) {
         var gson = new Gson();
         var apiProvider = new APIProviderImpl(provider);
         var apiPolicy = jsonToObject(JSON.parse(policy));
+       // log.info((apiPolicy.toString()));
+
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantId = APIUtil.getTenantId(provider);
+       // log.info(tenantId);
         apiPolicy.setTenantId(tenantId);
+
         log.info((apiPolicy.toString()));
         // var jobj =apiPolicy.toString();
         log.info(policy);
@@ -76,16 +80,17 @@ var getAPIPolicy = function (policyName) {
     }
 };
 //removing api policy
-var removeApiPolicy = function (policyName, userName, policyLevel) {
+var deleteAPIPolicy = function (policyName, userName, policyLevel) {
 
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
-        apiProvider.removePolicy(policyName, userName, policyLevel);
+        var apiPolicies = apiProvider.deletePolicy(provider, "api", policyName);
         return {
-            error: false
+            error: false,
+            apiPolicies : apiPolicies
         };
 
     } catch (ex) {
@@ -127,7 +132,7 @@ var updateApiPolicy = function (policy) {
 var jsonToObject = function (policy) {
 
     try {
-
+        log.info("star JtoO");
         var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
         var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPCondition;
         var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
@@ -153,6 +158,7 @@ var jsonToObject = function (policy) {
         apiPolicyobj.setUserLevel(policyLevel);
         apiPolicyobj.setDescription(policyDescription);
         //exract pipeline info
+        log.info("start");
         while (pipeline[i]) {
 
             var pipe = new Pipeline();
@@ -199,21 +205,27 @@ var jsonToObject = function (policy) {
                 var type = condition[j].type;
                 var invertCondition = condition[j].invertCondition;
                 var conditionEnabled = condition[j].enabled;
+
                 if (type == "IP") {
+                                                                                log.info("med");
+
                     var ipType = condition[j].ipType;
                     var startingIP = condition[j].startingIP;
                     var endingIP = condition[j].endingIP;
                     var specificIP = condition[j].specificIP;
                     //check if the IP is specific
                     if (ipType == "specific" && conditionEnabled) {
+                                                                                    log.info("med");
 
-                        var ipSpecific = new IPCondition();
+                        var ipSpecific = new IPCondition("IPSpecific");
                         ipSpecific.setSpecificIP(specificIP);
                         ipSpecific.setInvertCondition(invertCondition);
                         ipSpecific.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipSpecific);
+                                                                                    log.info("med");
+
                     } else if (ipType = "range" && conditionEnabled) {  //if IP range is given
-                        var ipRange = new IPRangeCondition();
+                        var ipRange = new IPCondition("IPRange");
                         ipRange.setStartingIP(startingIP);
                         ipRange.setEndingIP(endingIP);
                         ipRange.setInvertCondition(invertCondition);
@@ -300,6 +312,7 @@ var jsonToObject = function (policy) {
                 }
                 j++;
             }
+
             //end of extracting conditions of a pipline
             //adding conditions to pipe
             pipe.setConditions(conditionsList);
@@ -392,15 +405,6 @@ var objectToJson = function (policy) {
                 "enabled": false
             },
             {
-                "type": "Date",
-                "dateType": "specific",
-                "startingDate": "",
-                "endingDate": "",
-                "specificDate": "",
-                "invertCondition": false,
-                "enabled": false
-            },
-            {
                 "type": "QueryParam",
                 "keyValPairs": [],
                 "invertCondition": false,
@@ -478,23 +482,19 @@ var objectToJson = function (policy) {
                 executionFlows.conditions[0].startingIP = conditions.get(j).getStartingIP();
                 executionFlows.conditions[0].endingIP = conditions.get(j).getEndingIP();
 
-            } else if (conditions.get(j).getType() == "DateSpecifc") {
-
-                executionFlows.conditions[j].type = "Date";
-                executionFlows.conditions[j].ipType = "specific";
-                executionFlows.conditions[j].specificDate = conditions.get(j).getSpecificDate();
-
-            } else if (conditions.get(j).getType() == "DateRange") {
-
-                executionFlows.conditions[j].type = "Date";
-                executionFlows.conditions[j].ipType = "range";
-                executionFlows.conditions[j].startingDate = conditions.get(j).getStartingDate();
-                executionFlows.conditions[j].endingDate = conditions.get(j).getEndingDate();
-
             } else if (conditions.get(j).getType() == "HTTPVerb") {
 
-                executionFlows.conditions[4].type = "HTTPVerb";
-                executionFlows.conditions[4].httpVerb = conditions.get(i).getHttpVerb();
+                executionFlows.conditions[3].type = "HTTPVerb";
+                executionFlows.conditions[3].httpVerb = conditions.get(i).getHttpVerb();
+            } else if (conditions.get(j).getType() == "QueryParameterType") {
+
+                executionFlows.conditions[2].type = "QueryParam";
+                keyValPairs.name = conditions.get(j).getParameter();
+                log.info(keyValPairs.name);
+                keyValPairs.value = conditions.get(j).getValue();
+                log.info(keyValPairs.value);
+                executionFlows.conditions[2].keyValPairs.push(keyValPairs);
+                l++;
 
             } else if (conditions.get(j).getType() == "Header") {
                 log.info("Header");
@@ -504,22 +504,13 @@ var objectToJson = function (policy) {
                 executionFlows.conditions[1].keyValPairs.push(keyValPairs);
                 k++;
 
-            } else if (conditions.get(j).getType() == "QueryParameterType") {
-
-                executionFlows.conditions[3].type = "QueryParam";
-                keyValPairs.name = conditions.get(j).getParameter();
-                log.info(keyValPairs.name);
-                keyValPairs.value = conditions.get(j).getValue();
-                log.info(keyValPairs.value);
-                executionFlows.conditions[3].keyValPairs.push(keyValPairs);
-                l++;
-
+         
             } else if (conditions.get(j).getType() == "JWTClaims") {
 
-                executionFlows.conditions[5].type = "JWTClaim";
+                executionFlows.conditions[4].type = "JWTClaim";
                 keyValPairs.name = conditions.get(j).getJWTClaim();
                 keyValPairs.value = conditions.get(j).getValue();
-                executionFlows.conditions[5].keyValPairs[m] = keyValPairs;
+                executionFlows.conditions[4].keyValPairs[m] = keyValPairs;
                 m++;
 
             }

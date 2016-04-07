@@ -37,8 +37,8 @@ jagg.module("policy", {
     addApiPolicy: function () {
         return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").addApiPolicy.apply(this, arguments);
     },
-    removeApiPolicy: function () {
-        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").removeApiPolicy.apply(this, arguments);
+    deleteAPIPolicy: function () {
+        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").deleteAPIPolicy.apply(this, arguments);
     },
     updateApiPolicy: function () {
         return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").updateApiPolicy.apply(this, arguments);

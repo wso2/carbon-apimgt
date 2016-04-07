@@ -201,21 +201,21 @@ public class ThrottleHandler extends AbstractHandler {
                         //Pass message context and continue to avaoid peformance issue.
                         //Did not throttled at any level. So let message go and publish event.
                         //publish event to Global Policy Server
-                        String remoteIP = "127.0.0.1";
+                        //String remoteIP = "127.0.0.1";
                         //(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
                         //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-                        if (remoteIP != null && !remoteIP.isEmpty()) {
-                            if (remoteIP.indexOf(",") > 0) {
-                                remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
-                            }
-                        } else {
-                            remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-                        }
+                        //if (remoteIP != null && !remoteIP.isEmpty()) {
+                        //    if (remoteIP.indexOf(",") > 0) {
+                        //        remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+                        //    }
+                        //} else {
+                        //    remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+                       // }
 
                         //todo Added some dummy parameters
-                        Map propertiesMap = new HashMap<String, String>();
-                        propertiesMap.put("remoteIp", remoteIP);
-                        propertiesMap.put("roleID", subscriptionLevelTier);
+                        //Map propertiesMap = new HashMap<String, String>();
+                        //propertiesMap.put("remoteIp", remoteIP);
+                        //propertiesMap.put("roleID", subscriptionLevelTier);
 
                         //this parameter will be used to capture message size and pass it to calculation logic
                         /*int messageSizeInBytes = 0;
@@ -231,16 +231,12 @@ public class ThrottleHandler extends AbstractHandler {
 
                         }*/
 
-                        Object[] objects = new Object[]{synCtx.getMessageID(), applicationLevelThrottleKey,
+                        /*Object[] objects = new Object[]{synCtx.getMessageID(), applicationLevelThrottleKey,
                                 subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
                                 authorizedUser, propertiesMap};
-                        //After publishing events return true
-                        //long start = System.currentTimeMillis();
+                        *///After publishing events return true
                         //log.info("##########################################Publishing event");
-
                         throttleDataPublisher.publishNonThrottledEvent(synCtx);
-                        //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
-
 
                     } else {
                         if (log.isDebugEnabled()) {
@@ -310,7 +306,7 @@ public class ThrottleHandler extends AbstractHandler {
      * handler in chain. Else return false to notify throttled message.
      */
     private boolean doThrottle(MessageContext messageContext) {
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         boolean isThrottled = false;
         if (!messageContext.isResponse()) {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -322,7 +318,7 @@ public class ThrottleHandler extends AbstractHandler {
             // return false;
         }
         long end = System.currentTimeMillis();
-        log.info("Time:" + (end - start));
+        //log.info("Time:" + (end - start));
         return true;
     }
 
