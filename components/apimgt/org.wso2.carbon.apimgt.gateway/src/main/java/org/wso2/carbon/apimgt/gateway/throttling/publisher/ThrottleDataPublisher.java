@@ -81,7 +81,7 @@ public class ThrottleDataPublisher {
     /**
      * This method used to pass message context and let it run within separate thread.
      *
-     * @param messageContext is message context object that holds 
+     * @param messageContext is message context object that holds
      */
     public void publishNonThrottledEvent(MessageContext messageContext) {
         //DataProcessAndPublishingAgent agent = null;
