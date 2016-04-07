@@ -28,8 +28,8 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
         super();
     }
 
-    public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent
-            ) throws APIManagementException {
+    public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
+            String checkedAlertListValues) throws APIManagementException {
 
         try {
             if (publisher == null) {
@@ -44,7 +44,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
 
             AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setAlertTypes(checkedAlertList);
+            alertTypeDTO.setAlertTypes(checkedAlertListValues);
             alertTypeDTO.setEmails(emailList);
             alertTypeDTO.setUserName(userName);
             if ("p" == agent) {
