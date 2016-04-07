@@ -1,0 +1,22 @@
+.checkbox{
+
+    display: block;
+    cursor: pointer;
+    font-weight: 300;
+    padding: 10px 0 0 0;
+
+}
+
+#saveButtons{
+    margin: 10px;
+}
+
+.emailList{
+    padding: 10px 0 10px 0;
+}
+
+
+textarea {
+    width: 600px;
+    height: 150px;
+}

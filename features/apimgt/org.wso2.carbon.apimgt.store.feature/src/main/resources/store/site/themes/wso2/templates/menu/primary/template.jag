@@ -66,6 +66,7 @@
 	                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=topUsers")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("topUsersDropDown")%></span></a></li>
 	                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=apiCallType")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("callType")%></span></a></li>
 	                            <li><a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=faultCount")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("faultyInvocations")%></span></a></li>
+				   	                            <li><a href="<%=jagg.urlTenanted("/site/pages/manage-alert-type.jag")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-api icon"></i><span class="name"><%=i18n.localize("manageAlertTypes")%></span></a></li>
 	                        </ul>
 	                    </li>
 	                   	<li class="purple">
