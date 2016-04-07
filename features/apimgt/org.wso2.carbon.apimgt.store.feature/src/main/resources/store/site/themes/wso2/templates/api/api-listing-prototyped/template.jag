@@ -40,17 +40,14 @@
     <h1><%=i18n.localize("viewprototypedapis")%></h1>
 </div>
 
-<div class="clear"></div>
-<div class="content-section shadow-up">
-    <div class="content-data">
+<div class="page-content">
+    <div class="row">
         <%
         var query=    encode.forUriComponent(request.getParameter('query'));
         if(query == 'null')query = null;
         if(numberOfPages > 1) { %>
         <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
         <% } %>
-        <div class="thumbnail-custom">
-
                 <%
 
                         for(i = 0; i < apis.length; i++) {
@@ -117,8 +114,8 @@
 
             <%
                      if(numberOfPages > 1) { %>
-            <div class="pagination">
-                <ul>
+            <div class="col-sm-12">
+                <ul class="pagination " id="apiListingPagination">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a
                                 <% if(page != 1) { %>
@@ -131,24 +128,10 @@
 
                                 >&lt;&lt;</a></li>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
                     <!-- Displaying differently for lengthy pagination -->
                     <%
 
                            var pConst = 7;
-
 
                            if(numberOfPages <= (pConst+6)){
                                    for(var i=1;i<=numberOfPages;i++) { %>
@@ -249,7 +232,6 @@
                       }
                       }
                     %>
-        </div>
     </div>
 </div>
 <style>
