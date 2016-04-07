@@ -3,6 +3,7 @@
     var policyName = request.getParameter("policyName");
     var pageTitle = "Add subscription Level Policy";
     var nameFieldDisableStatus = "";
+    var policyAction = request.getParameter("action");
 
     if(policyName != null){
         pageTitle = "Edit Subscription Level Policy";
@@ -36,6 +37,7 @@
 
 
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
+        <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
 
         <div class="title-section">
             <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>

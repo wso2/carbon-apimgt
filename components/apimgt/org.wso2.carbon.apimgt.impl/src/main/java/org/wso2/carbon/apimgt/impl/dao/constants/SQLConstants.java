@@ -2135,7 +2135,19 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+    
+    public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
+                    " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
@@ -2149,6 +2161,20 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+    
+    public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_GLOBAL_POLICY_SQL =
@@ -2190,8 +2216,8 @@ public class SQLConstants {
 		public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
 
 		public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
-				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT \n"
-				+ " IS_DEPLOYED, APPLICABLE_LEVEL) \n" + "VALUES (?,?,?,?,?,?,?,?,?,?)";
+				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, APPLICABLE_LEVEL) \n" 
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 		public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
 				+ " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
@@ -2217,11 +2243,9 @@ public class SQLConstants {
 
 		public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE TENANT_ID = ? AND NAME = ?";
 		
-		public static final String INSERT_IP_CONDITION_SQL =
-	            " INSERT INTO AM_IP_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE ) \n" +
-	            " VALUES (?,?,?,?,?)";
+		
 
-		public static final String INSERT_CONDITION_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n"
+		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n"
 															+ " VALUES (?,?,?,?,?,?)";
 
 		public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
@@ -2247,6 +2271,10 @@ public class SQLConstants {
 
 		public static final String INSERT_JWT_CLAIM_CONDITION_SQL = "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_GROUP_ID,CLAIM_URI,CLAIM_ATTRIB,IS_CLAIM_MAPPING) \n"
 				+ " VALUES (?,?,?,?)";
+		
+		public static final String INSERT_IP_CONDITION_SQL =
+	            " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
+	            " VALUES (?,?,?,?,?)";
 		
 		public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
