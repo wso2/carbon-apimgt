@@ -17,19 +17,25 @@ $(window).load(function(){
             distance = el.offset().top  - $(".navigation").offset().top,
             isLastElClicked = el.next().length > 0 ? false : true,
             hasSubMenu = el.find('.sublevel-menu').length == 1 ? true : false,
-            isActiveItem = el.hasClass('active')
+            isActiveItem = el.hasClass('active'),
             url = el.find('a').attr('href');
 
         if($('.sublevel-menu').is(':visible')){
-            $('.sublevel-menu').slideUp();
+            $('.sublevel-menu').slideUp(function(){
+                $(this).parent().find('.left-menu-item i').removeClass('fw-up').addClass('fw-down');
+            });
             delay = 700;
         }
 
         if(isActiveItem && hasSubMenu){
             if(el.find('.sublevel-menu').is(':visible')){
-                el.find('.sublevel-menu').slideUp();
+                el.find('.sublevel-menu').slideUp(function(){
+                    el.find('.left-menu-item i').removeClass('fw-up').addClass('fw-down');
+                });
             }else{
-                el.find('.sublevel-menu').slideDown();
+                el.find('.sublevel-menu').slideDown(function(){
+                    el.find('.left-menu-item i').removeClass('fw-down').addClass('fw-up');
+                });
             }
             return;
         }
@@ -41,7 +47,7 @@ $(window).load(function(){
                 el.delay(delay).animate({
                     top: -distance + 'px'
                 },{
-                    duration:700,
+                    duration:0,
                     step:function(now,fx){
                         if(now == 0){
                             fx.end = -($(fx.elem).offset().top  - $(".navigation").offset().top);
@@ -60,7 +66,9 @@ $(window).load(function(){
                 animating = false;
 
                 if(hasSubMenu){
-                    el.find('.sublevel-menu').slideDown();
+                    el.find('.sublevel-menu').slideDown(function(){
+                        el.find('.left-menu-item i').removeClass('fw-down').addClass('fw-up');
+                    });
                 }
 
                 setTimeout(function(){
