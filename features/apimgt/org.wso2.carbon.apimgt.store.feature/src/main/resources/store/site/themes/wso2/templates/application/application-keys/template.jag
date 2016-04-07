@@ -1,0 +1,109 @@
+<% jagg.template("application/application-keys", function(inputs, outputs, jagg) { 
+//@todo list sandbox keys
+//@todo copy to clip board curl commands
+//@todo if prodkey and consumer is null 
+//@todo place holder when generating keys ie generating.....
+//@todo check production keys with workflows
+//@todo need to username and password to password grant curl
+//@todo check the ui with scope selection
+//@todo add help buttons
+	var type = outputs.type;
+    var app = outputs.app;
+
+    var gatewayurlendpoint = outputs.gatewayurl;
+    var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
+    if (customURL != null) {
+        gatewayurlendpoint = customURL;
+    }
+%>
+<script id="keys-template" type="text/x-handlebars-template">
+  {{#if ConsumerKey }}
+	<div class="row">
+	  <div class="col-md-6">
+	  	<form>
+	  	  <fieldset>
+		  <div class="form-group">
+		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("consumerKey")%></label>
+		    <div class="input-group">
+		      <input type="text" class="form-control" id="<%=type%>ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" value="{{ConsumerKey}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerKey}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("consumerSecret")%></label>
+		    <div class="input-group">
+		      <input type="text" class="form-control" id="<%=type%>ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="{{ConsumerSecret}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("accessToken")%></label>
+		    <div class="input-group">
+		      <input type="text" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		  <p>
+		  <% if(app.KeyScope != ""){%>
+		    Above Token was generated with following scopes : 
+		  	<%=app.KeyScope%>		  			  
+		  <% } %><a href="#">Select scopes.</a>
+		  </p>
+		  </fieldset>
+	  	</form>	
+	  	<form class="form-inline">
+		  <div class="form-group">
+		    <span>Validity Time</span>
+		    <input type="text" value='<%=app.ValidityTime %>' class="form-control" id="validity_time" placeholder=""> Seconds
+		  </div>
+ 		  <button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>
+		</form>		  	
+	  </div>
+	</div>
+	<br />
+	<div class="row">
+	  <div class="col-md-6">
+	  	<h4>Generating Access Tokens</h4>
+	  	<p>Following cURL command shows how to generate an access token using password grant type.</p>
+		<div class="highlight">
+<pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=password" \
+     -H "Authorization: Basic {{basickey}}" \
+     <%= gatewayurlendpoint %>/token</code></pre>
+        </div>
+        <p>In a similar manner you can generate an access token using client credential grant type with the following cURL command.</p>	  	
+		<div class="highlight">
+<pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=client_credentials" \
+     -H "Authorization: Basic {{basickey}}" \
+     <%= gatewayurlendpoint %>/token</code></pre>
+        </div>        
+	  </div>
+	</div>	
+
+  {{else}}
+    <div class="message message-info">
+    	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
+        <p><%=i18n.localize("sandboxKeyMsg")%></p>
+    </div>
+    <button  class="app-key-generate-button btn btn-primary generatekeys" onclick="jagg
+	.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
+		   data-application="<%=encode.forHtmlAttribute("app.name")%>"
+		   data-callbackUrl="<%=encode.forHtmlAttribute("app.callbackUrl")%>"
+		   data-keytype="SANDBOX"
+		   data-username="<%= "userName" %>"
+		   iteration="200">Generate keys</button>    
+  {{/if}}
+</script>
+
+<% }); %>

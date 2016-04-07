@@ -1,9 +1,36 @@
-<% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { %>
+<% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { 
+//@todo api should have image and provider
+//@todo api status should be displayed in 
+//@todo confirmation for subscription delete
+%>
 
 
-	<div class="message message-info">
+	<div  id="subscription-table-nodata" class="hide message message-info">
         <h4><i class="icon fw fw-info"></i>No Subscriptions</h4>
         <p>This application has not yet subscribed to an API. To subscribe, select an API from  <a href="<%=jagg.urlTenanted("/")%>" >API listing page</a> and subscribe to it with an app.</p>
 	</div>
+
+	<div id="subscription-table-wrap" class="hide">
+    <table id="subscription-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0" data-app="<%= encode.forHtml(outputs.application.name) %>" data-appid="<%= encode.forHtml(outputs.application.id) %>">
+      	<thead>
+	        <tr>
+	            <th>API Name</th>            
+	            <th>Subscription Tier</th>      
+	            <th>Status</th>
+              <th>Actions</th>
+	        </tr>
+    	</thead>    
+    </table>
+    </div>
+
+<script id="subscription-actions" type="text/x-handlebars-template">
+  <a href="#" data-id="{{ name }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-delete fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs">Delete</span>
+  </a>
+</script>
 
 <% }); %>

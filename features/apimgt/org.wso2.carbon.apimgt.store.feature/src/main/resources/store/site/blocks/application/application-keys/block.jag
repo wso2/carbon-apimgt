@@ -1,0 +1,11 @@
+<%
+jagg.block("application/application-keys", {
+    initializer:function (data) {
+
+    },
+
+    getOutputs:function (inputs) {
+        return inputs;
+    }
+});
+%>

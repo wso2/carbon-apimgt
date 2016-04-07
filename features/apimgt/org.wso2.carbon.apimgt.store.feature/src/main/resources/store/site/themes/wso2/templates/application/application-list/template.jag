@@ -1,251 +1,58 @@
 <% jagg.template("application/application-list", function(inputs, outputs, jagg) { %>
 <div class="page-header" id="Message">
-    <h1><%=i18n.localize("applications")%></h1>
+    <h2><%=i18n.localize("applications")%></h2>
 </div>
 <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
-<% jagg.log(inputs); %>
+
 <div id="application-list">
-    <%
+  <div  id="application-table-nodata" class="hide message message-info">
+        <h4><i class="icon fw fw-info"></i>No Applications</h4>
+        <p><%=i18n.localize("noAppMsg")%>. Click add applications in the action bar to add an application.</p>
+  </div>
 
-    var i, classes, path, callbackUrl, description, app, apps = outputs.applications;
-
-    var tenant = request_tenant;
-
-    var errors = outputs.error;
-    if(errors == true){
-    %>
-        <div id="errorMessage" style="display: none"><%= outputs.message %></div>
-    <%
-    }
-
-    if(apps != null){
-        length = apps.length;
-    }else{
-        length = 0;
-    }
-
-    if(length > 0) {
-
-    var itemsPerPage = 20; //reduce this number to preview the pagination
-    var page = 1;
-    var numberOfPages = parseInt(length / itemsPerPage);
-
-    var urlPrefix = jagg.getTenantURLPrefix();
-
-
-    if (length % itemsPerPage != 0) {
-       numberOfPages++;
-    }
-
-    if (request.getParameter('page') != null) {
-       page = parseInt(request.getParameter('page'));
-       if((page-1)*itemsPerPage == length){
-            page = page - 1;
-            %>
-            <script>
-                window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/applications.jag")%>" +"?page="+"<%=String(page)%>"+"&"+"<%=urlPrefix%>";
-            </script>
-            <%
-        }
-    }
-    var from = (page - 1)*itemsPerPage;
-    var to = page*itemsPerPage;
-    if(page == numberOfPages){
-       to = length%(itemsPerPage*page);
-       if(to == 0){
-           to=itemsPerPage*page;
-       }
-    }
-    if(length==0){
-        to=0;
-    }
-    var j=0, tiers = outputs.tiers;
-    %>
-    <script type="text/javascript" charset="utf-8">
-
-        var foo='<%= encode.forJavaScript(apps) %>';
-
-    </script>
-    <table cellspacing="0" cellpadding="0" width="100%" class="table table-bordered table-striped table-responsive" id="applicationTable">
+  <div id="application-table-wrap" class="hide">
+    <table id="application-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0">
         <thead>
-            <tr class="alt first last">
-                <th value="Name" class="col-md-2"><%=i18n.localize("name")%></th>
-                <th value="Tier" class="col-md-2"><%=i18n.localize("throttlingTier")%></th>
-                <th value="Status" class="col-md-1"><%=i18n.localize("status")%></th>
-                <th value="APIs Subscribed" class="col-md-1">Subscriptions</th>
-                <th value="Actions" colspan="2" class="col-md-3"><%=i18n.localize("actions")%></th>
-            </tr>
-        </thead>
-        <tbody>
-            <%
-            for(i = from ; i < to; i++) {
-                app = apps[i];
-		callbackUrl = app.callbackUrl; 
-		if (callbackUrl == null || callbackUrl == "") {
-			callbackUrl = i18n.localize("notSpecified");
-		}
-
-		description = app.description;
-		if (description == null || description == "") {
-        			description = i18n.localize("notSpecified");
-        }
-                if(i == 0) classes = "first";
-                else if(i + 1 == length) classes = "last";
-            %>
-            <tr class="<%=classes%>" data-value="<%= encode.forHtmlAttribute(app.name)%>" tier-value="<%= encode.forHtml(app.tier)%>" callback-value="<%=  encode.forHtmlAttribute(callbackUrl)%>" description-value="<%=  encode.forHtmlAttribute(description)%>" api-count="<%= encode.forHtml(app.apiCount)%>" >
-                <td class="app_name_cell wrap-text"><%= encode.forHtml(app.name)%>
-						<%
-				            if(app.groupId !="" && app.groupId !=null) {
-				        %>
-				                (Shared)
-				        <%
-				            }
-				        %>
-				</td>
-                <td class="app_name_cell">
-                    <%=tiers[j].tierDisplayName%>
-                </td>
-				<%
-                var status=app.status;
-                var statusVal;
-                var disableUpdate;
-                if(status=='APPROVED'){
-                    statusVal='ACTIVE';
-                    disableUpdate = false;
-                } else if(status=='REJECTED') {
-                    statusVal='REJECTED';
-                    disableUpdate = true;
-                } else{
-                    statusVal='INACTIVE';
-                    disableUpdate = true;
-                }
-                %>
-                <td class="app_name_cell"><%= encode.forHtml(statusVal)%></td>
-                <td class=""><%= encode.forHtml(app.apiCount)%></td>
-                <td class="text-right">
-                    <a href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag?name=" + encode.forHtmlAttribute(app.name) )%>" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
-                        <span class="fw-stack">
-                            <i class="fw fw-ring fw-stack-2x"></i>
-                            <i class="fw fw-view fw-stack-1x"></i>
-                        </span>
-                        <span class="hidden-xs">View</span>
-                    </a>
-                    <%if(!disableUpdate){%>
-                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
-                        <span class="fw-stack">
-                            <i class="fw fw-ring fw-stack-2x"></i>
-                            <i class="fw fw-edit fw-stack-1x"></i>
-                        </span>
-                        <span class="hidden-xs">Edit</span>
-                    </a>
-                    <%}%>
-                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view"  onclick="deleteApp(this)">
-                        <span class="fw-stack">
-                            <i class="fw fw-ring fw-stack-2x"></i>
-                            <i class="fw fw-delete fw-stack-1x"></i>
-                        </span>
-                        <span class="hidden-xs">Delete</span>
-                    </a>
-                </td>                
-            </tr>
-            <% } %>
-        </tbody>
+          <tr>
+              <th><%=i18n.localize("name")%></th>            
+              <th class="col-md-2"><%=i18n.localize("throttlingTier")%></th>      
+              <th class="col-md-2"><%=i18n.localize("status")%></th>
+              <th class="col-md-2">Subscriptions</th>
+              <th class="col-md-3"><%=i18n.localize("actions")%></th>      
+          </tr>
+      </thead>    
     </table>
-    <% if(numberOfPages > 1) { %>
-    <div class="pagination">
-        <ul>
-          <li <% if(page == 1) { %> class="disabled" <% } %>><a href="?page=<%=String((page-1))%>&<%=urlPrefix%>"><%=i18n.localize("prev")%></a></li>
-
-
-
-        <!-- Displaying differently for lengthy pagination -->
-         <%
-
-           var pConst = 7;
-
-
-           if(numberOfPages <= (pConst+6)){
-                   for(var i=1;i<=numberOfPages;i++) { %>
-                       <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                    <% }
-           }
-           else{
-               if (page <= (pConst+6)){
-                   if(page<pConst){
-                        for(var i=1;i<=((pConst+6) -4);i++) { %>
-                           <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                        <% }  %>
-                           <li class="disabled"><a href="#">...</a></li>
-                           <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                           <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
-                    <% } else if((numberOfPages - page) < pConst){ %>
-                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                           <li class="disabled"><a href="#">...</a></li>
-                            <%
-                           for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                           <% }
-
-                       } else { %>
-                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                           <li class="disabled"><a href="#">...</a></li>
-
-                           <%
-                           for(var i=(page-3);i<= (page +3);i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                           <% } %>
-
-
-                           <li class="disabled"><a href="#">...</a></li>
-                           <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                           <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
-                    <% } %>
-               <%
-               }
-               else{ //  cp 14, 15 ...
-
-                   if (numberOfPages - page < pConst){   %>
-                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                           <li class="disabled"><a href="#">...</a></li>
-                           <%
-                           for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                           <% }
-                   }
-                   else{  %>
-                                       <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                                       <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                                       <li class="disabled"><a href="#">...</a></li>
-
-                                       <%
-                                       for(var i=(page-3);i<= (page +3);i++) { %>
-                                          <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
-                                       <% } %>
-
-
-                                       <li class="disabled"><a href="#">...</a></li>
-                                       <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                                       <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
-                   <%
-                   }
-               }
-           }
-
-
-          %>
-
-
-
-
-          <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a href="?page=<%=String((page+1))%>&<%=urlPrefix%>"><%=i18n.localize("next")%></a></li>
-        </ul>
-      </div>
-    <% } %>
-    <% } else { %>
-    <div class="alert alert-info" role="alert"><%=i18n.localize("noAppMsg")%></div>
-    <% } %>
+  </div>
 </div>
+<%
+  //@todo view link
+  //@todo edit only if active
+  //@todo groupId inform if check 
+%>
+<script id="application-actions" type="text/x-handlebars-template">
+  <a href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag?name=")%>{{ name }}" class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-view fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs">View</span>
+  </a>
+  {{#if isActive}}
+  <a href="#" class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-edit fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs">Edit</span>
+  </a>
+  {{/if}}
+  <a href="#" data-id="{{ name }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-delete fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs">Delete</span>
+  </a>
+</script>
+
 <% }); %>
