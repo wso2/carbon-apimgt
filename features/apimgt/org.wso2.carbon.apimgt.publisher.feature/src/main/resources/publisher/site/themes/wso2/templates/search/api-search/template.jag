@@ -14,7 +14,7 @@ var query=request.getParameter("query");
     			   <%}%>
                             <div class="input-group-btn">
                                 <button class="btn btn-default wrap-input-right" type="submit" title="Search">
-                                    <i class="fw fw-search" aria-hidden="true"></i>
+                                    <i class="fw fw-search" aria-hidden="true" title="search"></i>
                                 </button>
                             </div>
                         </div>
@@ -36,14 +36,14 @@ var query=request.getParameter("query");
    </form>
   </div>
   <div class="col-md-4 api-search ">
-  	<a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom">
+  	<a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="help popup">
   		<span class="icon fw-stack fw-lg" style="font-size:6px">
 			<i class="fw fw-circle fw-stack-2x"></i>
-			<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+			<i class="fw fw-question fw-stack-1x fw-inverse" title="question" style="font-size:8px"></i>
 		</span> Search Options</a></div>
 </div>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
-        <a class="close" data-dismiss="alert">x</a>
+        <a class="close" data-dismiss="alert" title="alert">x</a>
          <div id="searchMessage"></div>
       </div>
 <% }); %>

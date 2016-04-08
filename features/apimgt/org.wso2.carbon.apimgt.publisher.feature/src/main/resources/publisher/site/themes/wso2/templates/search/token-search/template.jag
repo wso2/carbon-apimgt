@@ -5,7 +5,7 @@ var query=request.getParameter("query");
     <input type="text" name="query" class="input-xlarge search-query required" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
            placeholder="<%=i18n.localize("filterTokens")%>"<%}%> />
     <button class="btn btn-primary" id="tokenSearch"><%=i18n.localize("search")%></button>
-    <a class="icon-plus tierHelp" onclick="javascript:$('#searchAPIHelp').toggle()"></a>
+    <a class="icon-plus tierHelp" title="tierHelp" onclick="javascript:$('#searchAPIHelp').toggle()"></a>
     <div id="searchAPIHelp" class="help-block" style="display:none;">
         <div><%=i18n.localize("revokeHelpMsg1")%></div>
         <ol>
@@ -17,7 +17,7 @@ var query=request.getParameter("query");
 
 </form>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
-    <a class="close" data-dismiss="alert">x</a>
+    <a class="close" data-dismiss="alert" title="><%=i18n.localize("close")%>">x</a>
     <div id="searchMessage"></div>
 </div>
 <% }); %>

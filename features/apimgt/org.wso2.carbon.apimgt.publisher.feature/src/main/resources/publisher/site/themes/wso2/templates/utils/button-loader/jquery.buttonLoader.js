@@ -10,7 +10,7 @@
             }
             $('.has-spinner').attr("disabled", true);
             $(self).attr('data-btn-text', $(self).text());
-            $(self).html('<span class="spinner"><i class="fw fw-loader5"></i></span>Loading');
+            $(self).html('<span class="spinner"><i class="fw fw-loader5" title="button-loader"></i></span>Loading');
             $(self).addClass('active');
         }
         if (action == 'stop') {

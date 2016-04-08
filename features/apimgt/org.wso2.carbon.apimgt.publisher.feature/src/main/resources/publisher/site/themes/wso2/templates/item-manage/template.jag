@@ -58,21 +58,21 @@
 <%if(createPermitted){%>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
-        <a href="<%= design_w_link %>" class="wizard-done">
+        <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("design")%>">
             <div class="wizard-number">1</div>
-            <span>Design</span>
+            <span><%=i18n.localize("design")%></span>
         </a>
     </li>
     <li>
-        <a href="<%= implement_w_link %>" class="wizard-done">
+        <a href="<%= implement_w_link %>" class="wizard-done" title="<%=i18n.localize("implement")%>">
             <div class="wizard-number">2</div>
-            <span>Implement</span>
+            <span><%=i18n.localize("implement")%></span>
         </a>
     </li>
     <li>
-        <a href="<%= manage_w_link %>" class="wizard-active">
+        <a href="<%= manage_w_link %>" class="wizard-active" title="<%=i18n.localize("manage")%>">
             <div class="wizard-number">3</div>
-            <span>Manage</span>
+            <span><%=i18n.localize("manage")%></span>
         </a>
     </li>
 </ul>
@@ -103,9 +103,9 @@
                         <div class="wizard-inner">
                         	<%if(createPermitted){%>
 	                            <ol class="wiz-nav-inner no-controls" >
-	                                <li class="wiz-step completed"><a href="<%= design_w_link %>"><span>1</span><span class="hidden-xs">Design</span></a></li>
-	                                <li class="wiz-step completed"><a href="<%= implement_w_link %>"><span>2</span><span class="hidden-xs">Implement</span></a></li>
-	                                <li class="wiz-step current"><a href="<%= manage_w_link %>"><span>3</span><span class="hidden-xs">Manage</span></a></li>
+	                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
+	                                <li class="wiz-step completed"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span>2</span><span class="hidden-xs"><%=i18n.localize("implement")%></span></a></li>
+	                                <li class="wiz-step current"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span>3</span><span class="hidden-xs"><%=i18n.localize("manage")%></span></a></li>
 	                            </ol>
 	                        <%} %>
                         </div>
@@ -128,7 +128,7 @@
 
 	            <div class="form-group">
 	                        <label class = "col-sm-3 control-label">Make this the Default Version:
-	                        <a class="help_popup" help_data="default_api_help" data-trigger="hover" data-placement="bottom">
+	                        <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
 	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
 									<i class="fw fw-circle fw-stack-2x"></i>
 									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -154,7 +154,7 @@
 
                 <div class="form-group">
                         <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span>
-                        	<a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
+                        	<a class="help_popup" help_data="tier_help" title="tier_help" data-trigger="hover" data-placement="bottom">
                         		<span class="icon fw-stack fw-lg" style="font-size:6px">
 									<i class="fw fw-circle fw-stack-2x"></i>
 									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -181,7 +181,7 @@
 
                 <div class="form-group transport-styles">
                 <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
-                	<a class="help_popup" help_data="http_help" data-trigger="hover" data-placement="bottom">
+                	<a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
                 		<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x"></i>
 								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -250,7 +250,7 @@
             <!--Response Caching -->
                 <div class="form-group">
                     <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
-                    	<a class="help_popup" help_data="cache_help" data-trigger="hover" data-placement="bottom">
+                    	<a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
                     		<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x"></i>
 								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -280,7 +280,7 @@
             		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
             			<div class="form-group">
 	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:
-	                        	<a class="help_popup" help_data="subscriptions_help" data-trigger="hover" data-placement="bottom">
+	                        	<a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
 	                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
 										<i class="fw fw-circle fw-stack-2x"></i>
 										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -495,7 +495,7 @@
                 <div class="form-actions" id="saveButtons">
 
                     <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("save")%></button>
-                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("saveNpublish")%>"><%=i18n.localize("saveNpublish")%></a>  <%}%>
 
                     <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
@@ -517,9 +517,9 @@
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
-                <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
-                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary">Go to API Store</a>
-                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
+                <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" title="<%=i18n.localize("keepEditingAPI")%>"><%=i18n.localize("keepEditingAPI")%></button>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("goToStore")%>"><%=i18n.localize("goToStore")%></a>
+                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary" title="<%=i18n.localize("goToOverview")%>"><%=i18n.localize("goToOverview")%></a>
                 </div>
               </div>
             </div><!-- /.modal-content -->
@@ -545,8 +545,8 @@
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">
     <h5>Description :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a><br />       
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a><br />
+    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="Response Content Type">{{ content_type }}</a></h5>
     <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
@@ -581,11 +581,11 @@
             <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
                 <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
             </td>
-            <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
+            <td class="resource_expand"><a class="resource-path" title="resource_path">{{ path }}</a></td>
             <td><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}"></a></td>        
-            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier">{{ x-throttling-tier }}</a></td>
-            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope">{{ x-scope }}</a></td>        </tr>
+            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}" title="x-auth-type"></a></td>
+            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier" title="x-throttling-tier">{{ x-throttling-tier }}</a></td>
+            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope" title="x-scope">{{ x-scope }}</a></td>        </tr>
         <tr><td colspan="6" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
@@ -599,14 +599,14 @@
         <ul>
             {{#each api_doc.x-wso2-security.apim.x-wso2-scopes }}
             <li>
-                <h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
+                <h6><a data-index='{{ @index }}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>"><i class='icon-trash' title="<%=i18n.localize("deleteScope")%>"></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
                 <strong>Roles</strong> : {{ roles }}    
                 <p>{{ description }}</p>
             </li>
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn">
+        <a id="define_scopes" class="pointer btn" title="define_scopes">
 				<span class="icon fw-stack">
 	            	<i class="fw fw-add fw-stack-1x"></i>
 	                <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -853,8 +853,8 @@
     </div>
     <div class="modal-footer">
     <div id="res" class="hide" style="color:red;float:left"></div>
-    <a class="btn" data-dismiss="modal">Close</a>
-    <a class="btn btn-primary" id="scope_submit">Add Scope</a>
+    <a class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
+    <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
     </div>
     </div>
     </div>
@@ -880,7 +880,7 @@
         </div>
         <div class="modal-footer">
         <div id="res" class="hide" style="color:red;float:left"></div>
-        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()">OK</a>
+        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
                                    <script type="text/javascript">
                             function doGatewayAction() {
                             var type=$("#retryType").val();
