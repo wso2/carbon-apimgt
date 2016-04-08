@@ -98,28 +98,33 @@ public class ThrottlePolicyTemplateBuilder {
 
             // for pipelines
             int condition = 0;
-            for (Pipeline pipeline : policy.getPipelines()) {
-                context = new VelocityContext();
-                setConstantContext(context);
-                context.put("pipelineItem", pipeline);
-                context.put("policy", policy);               
 
-                context.put("quotaPolicy", pipeline.getQuotaPolicy());
-                //pipeline name is defined as 'condition0' 'condition1' etc
-                context.put("pipeline", "condition" + condition);
+            //check if executionflows/pipelines are included in policy
+            if (policy.getPipelines() != null) {
 
-                String conditionString = getPolicyCondition(pipeline.getConditions());
-                conditionsSet.add(conditionString);
+                for (Pipeline pipeline : policy.getPipelines()) {
+                    context = new VelocityContext();
+                    setConstantContext(context);
+                    context.put("pipelineItem", pipeline);
+                    context.put("policy", policy);
 
-                context.put("condition", " AND " + conditionString);
-                writer = new StringWriter();
-                template.merge(context, writer);
-                if (log.isDebugEnabled()) {
-                    log.debug("Policy : " + writer.toString());
+                    context.put("quotaPolicy", pipeline.getQuotaPolicy());
+                    //pipeline name is defined as 'condition0' 'condition1' etc
+                    context.put("pipeline", "condition" + condition);
+
+                    String conditionString = getPolicyCondition(pipeline.getConditions());
+                    conditionsSet.add(conditionString);
+
+                    context.put("condition", " AND " + conditionString);
+                    writer = new StringWriter();
+                    template.merge(context, writer);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Policy : " + writer.toString());
+                    }
+                    policyArray.add(writer.toString());
+
+                    condition++;
                 }
-                policyArray.add(writer.toString());
-
-                condition++;
             }
 
             // for default one
