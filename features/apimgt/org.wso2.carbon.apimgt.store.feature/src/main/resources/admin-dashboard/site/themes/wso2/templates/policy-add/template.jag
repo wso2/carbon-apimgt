@@ -1,9 +1,39 @@
 <% jagg.template("policy-add", function(inputs, outputs, jagg) { %>
+<%
+    var policyName = request.getParameter("policyName");
+    policyName = policyName == null ? "" : policyName;
+    var pageTitle = "Add API Level Policy";
+    var nameFieldDisableStatus = "";
+    var policyAction = request.getParameter("action");
+    var policyDesc = "",policyLevel = "", defaultQuotaPolicy = "", defaultBandwidth = "" , defaultBandwidthUnit = "",
+                        defaultRequestCount = "", defaultUnitTime="", defaultTimeUnit="";
+    if(policyName != null && policyName != ""){
+        pageTitle = "Edit API Level Policy";
+        nameFieldDisableStatus = "readonly";
+        var mod = jagg.module("policy");
+        var apiPolicy = mod.getAPIPolicy(policyName).apiPolicy;
+        policyName = apiPolicy.getPolicyName() == null ? "" : apiPolicy.getPolicyName();
+        policyDesc = apiPolicy.getDescription() == null ? "" : apiPolicy.getDescription();
+        policyLevel = apiPolicy.getUserLevel() == null ? "" : apiPolicy.getUserLevel();
+        defaultQuotaPolicy = apiPolicy.getDefaultQuotaPolicy().getType();
+        if (defaultQuotaPolicy == "RequestCount"){
+            defaultRequestCount = apiPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        }
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
+            defaultBandwidth = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount();
+            defaultBandwidthUnit = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
+        }
+
+        defaultUnitTime = apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
+        defaultTimeUnit = apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
+    }
+    %>
+
 <div id="throttle-policies">
 	<div id="general-details">
 
         <div class="page-header">
-            <h2><%=i18n.localize("addThrottlePolicy")%></h2>
+            <h2><%=nameFieldDisableStatus%></h2>
             <p class="lead">General Details</p>
         </div>
 
@@ -16,7 +46,7 @@
                     <p id="name_help" class="hide">Name of the throttle policy.</p></label>
                 </label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-name" name="policy-nam" autofocus="autofocus" value="">
+                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-name" name="policy-nam" autofocus="autofocus" value="<%=policyName%>">
                 </div>
             </div>
             <div class="form-group">
@@ -26,7 +56,7 @@
                     <p id="desc_help" class="hide">Description of the throttle policy.</p>
                 </label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" name="policy-description" autofocus="autofocus" value="">
+                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" name="policy-description" autofocus="autofocus" value="<%=policyDesc%>">
                 </div>
             </div>
             <div class="form-group">
@@ -36,8 +66,8 @@
                 </label>
                 <div class="col-sm-9">
                     <select class="form-control select required valid" id="policy-level" name="level">
-                        <option value="apiLevel" selected>API Level</option>
-                        <option value="useLevel">User Level</option>
+                        <option value="apiLevel" <% if(policyLevel == "" || policyLevel == "apiLevel") {%>selected<%}%> >API</option>
+                        <option value="useLevel" <% if(policyLevel == "userLevel") {%>selected<%}%> >User</option>
                     </select>
                 </div>
             </div>
@@ -54,42 +84,67 @@
                 </label>
                 <div class="col-sm-9">
                     <select class="form-control select required valid" id="default-policy-level" name="default-policy-level">
-                        <option value="requestCount" selected>Request Count</option>
-                        <option value="bandwidthVolume">Bandwidth</option>
+                        <option value="requestCount"  <% if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "RequestCount") {%>selected<%}%> >Request Count</option>
+                        <option value="bandwidthVolume" <% if(defaultQuotaPolicy == "bandwidthVolume") {%>selected<%}%> >Bandwidth</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group" id="request-count-block">
+            <div class="form-group" id="request-count-block" <% if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "RequestCount") {%>style="display:block"<%} else {%>style="display:none"<%}%>>
                 <label class="control-label col-sm-3" for="request-count">Request Count:
                     <span class="requiredAstrix">*</span>
                     <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
                     <p id="name_help" class="hide">Number of requests allowed.</p>
                 </label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control required validInput noSpace" id="request-count" name="request-count" autofocus="autofocus" value="<%=defaultRequestCount%>">
+                </div>
+
+                <label class="control-label col-sm-3" for="request-count">Time:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Time Configuration.</p>
+                </label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput noSpace" id="request-count" name="request-count" autofocus="autofocus" value="">
+                    <input type="text" class="form-control" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
-                        <option value="seconds" selected>Seconds</option>
-                        <option value="minutes">Minutes</option>
-                        <option value="hours">Hours</option>
-                        <option value="days">Days</option>
+                        <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "sec") {%>selected<%}%>>sec</option>
+                        <option value="min" <% if(defaultTimeUnit == "min") {%>selected<%}%>>min</option>
+                        <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>hour</option>
+                        <option value="day" <% if(defaultTimeUnit == "day") {%>selected<%}%>>day</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group" id="bandwidth-block" style="display:none">
+            <div class="form-group" id="bandwidth-block" <% if(defaultQuotaPolicy == "bandwidthVolume") {%>style="display:block"<%} else {%>style="display:none"<%}%>>
                 <label class="control-label col-sm-3" for="request-count">Bandwidth:
                     <span class="requiredAstrix">*</span>
                     <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
                     <p id="name_help" class="hide">Bandwidth Allowed.</p>
                 </label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control required validInput noSpace" id="bandwidth" name="bandwidth" autofocus="autofocus" value="">
+                    <input type="text" class="form-control required validInput noSpace" id="bandwidth" name="bandwidth" autofocus="autofocus" value="<%=defaultBandwidth%>">
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required valid" id="bandwidth-unit" name="bandwidth-unit">
-                        <option value="minutes" selected>kbps</option>
-                        <option value="hours">Mbps</option>
+                        <option value="minutes" selected>KB</option>
+                        <option value="hours">MB</option>
+                    </select>
+                </div>
+                <label class="control-label col-sm-3" for="request-count">Time:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Time Configuration.</p>
+                </label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
+                        <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "sec") {%>selected<%}%>>sec</option>
+                        <option value="min" <% if(defaultTimeUnit == "min") {%>selected<%}%>>min</option>
+                        <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>hour</option>
+                        <option value="day" <% if(defaultTimeUnit == "day") {%>selected<%}%>>day</option>
                     </select>
                 </div>
             </div>
@@ -130,12 +185,14 @@
                 <label class="radio">
                     <span class="fw-stack fw-lg">
                         <i class="fw fw-circle fw-stack-2x fw-inverse"></i>
-                        <i class="fw fw-number fw-stack-1x">2</i>
+                        <i class="fw fw-number fw-stack-1x">{{executionFlow.id}}</i>
                     </span>
                 </label>
                 <div>
                     <div class="heading"><%=i18n.localize("executionFlow")%></div>
-                    <div class="description truncate" title="">Description for pipe 1</div>
+                    <div class="description truncate title" title="">
+                        <a href="#" id="executionFlow-desc-{{executionFlow.id}}" data-type="text" data-pk="1" data-title="Enter Description">Description for flow {{executionFlow.id}}</a>
+                    </div>
                 </div>
                 <div class="clearfix"></div>
             </h4>
@@ -156,21 +213,12 @@
         </a>
         <a href="javascript:void(0)" onclick="showAdvanceOperation('header-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
             <span class="wr-hidden-operations-icon fw-stack">
-                <i class="fw fw-header fw-stack-2x"></i>
+                <i class="fw fw-key fw-stack-2x"></i>
             </span>
             Header Condition
             <span id="header-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
             <span id="header-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
             <span id="header-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
-        </a>
-        <a href="javascript:void(0)" onclick="showAdvanceOperation('date-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
-            <span class="wr-hidden-operations-icon fw-stack">
-                <i class="fw fw-key fw-stack-2x"></i>
-            </span>
-            Date Condition
-            <span id="date-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="date-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="date-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
         </a>
         <a href="javascript:void(0)" onclick="showAdvanceOperation('query-param-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
             <span class="wr-hidden-operations-icon fw-stack">
@@ -180,33 +228,6 @@
             <span id="query-param-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
             <span id="query-param-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
             <span id="query-param-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
-        </a>
-        <a href="javascript:void(0)" onclick="showAdvanceOperation('http-verb-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
-            <span class="wr-hidden-operations-icon fw-stack">
-                <i class="fw fw-key fw-stack-2x"></i>
-            </span>
-            HTTP Verb Condition
-            <span id="http-verb-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="http-verb-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="http-verb-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
-        </a>
-        <a href="javascript:void(0)" onclick="showAdvanceOperation('payload-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
-            <span class="wr-hidden-operations-icon fw-stack">
-                <i class="fw fw-key fw-stack-2x"></i>
-            </span>
-            Payload Condition
-            <span id="payload-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="payload-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="payload-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
-        </a>
-        <a href="javascript:void(0)" onclick="showAdvanceOperation('context-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
-            <span class="wr-hidden-operations-icon fw-stack">
-                <i class="fw fw-key fw-stack-2x"></i>
-            </span>
-            Context Condition
-            <span id="context-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="context-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-            <span id="context-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
         </a>
         <a href="javascript:void(0)" onclick="showAdvanceOperation('jwt-claim-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
             <span class="wr-hidden-operations-icon fw-stack">
@@ -371,85 +392,6 @@
         {{/each}}
         <!-- End of Header Condition policy -->
 
-        <!-- Date Condition policy -->
-        {{#each executionFlow.conditions}}
-        {{#if_eq type "Date"}}
-        <div class="wr-hidden-operation" data-operation="date-condition-{{../../executionFlow.id}}" style="display: none">
-            <div class="panel panel-default operation-data" data-operation="date-condition-{{executionFlow.id}}" data-operation-code="DATE_CONDITION_POLICY">
-                <div id="date-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
-                    <h2 class="sub-title panel-title">
-                        Date Condition Policy
-                        <label id="date-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#date-condition-body-{{../../executionFlow.id}}">
-                            <input id="date-condition-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}} />
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                        </label>
-                        <hr>
-                        <div class="panel-title-description">
-                            This configuration use to define date conditions
-                        </div>
-                    </h2>
-                </div>
-                <div id="date-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="date-condition-body-{{../../executionFlow.id}}">
-
-                    <div id="date-condition-policy-feature-error-msg" class="alert alert-danger hidden" role="alert">
-                        <i class="icon fw fw-error"></i><span></span>
-                    </div>
-
-                    <label class="control-label" for="date-condition-type">Date Condition Type:<span class="requiredAstrix">*</span></label>
-                    <select  onchange="onDateConditionChange('{{../../executionFlow.id}}', this);" class="select required valid" id="date-condition-type-{{../../executionFlow.id}}" name="date-condition-type-{{../../executionFlow.id}}">
-                        {{#if_eq ../dateType "specific"}}
-                            <option value="specificDate" selected>Specific Date</option>
-                            <option value="dateRange">Date Range</option>
-                        {{else}}
-                            <option value="specificDate">Specific Date</option>
-                            <option value="dateRange" selected>Date Range</option>
-                        {{/if_eq}}
-                    </select>
-
-                    {{#if_eq ../dateType "specific"}}
-                    <div class="control-group" style="display:block" id="specific-date-block-{{../../../executionFlow.id}}">
-                        <label class="control-label" for="request-count">Date:<span class="requiredAstrix">*</span></label>
-                         <input type="text" class="input-xlarge required validInput" id="specific-date-address-input-{{../../../executionFlow.id}}" name="specific-date-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificDate}}">
-                     </div>
-
-                     <div class="control-group" style="display:none" id="date-range-block-{{../../../executionFlow.id}}">
-                        <label class="control-label" for="request-count">Starting Date:<span class="requiredAstrix">*</span></label>
-                        <input type="text" class="input-xlarge required validInput" id="date-range-start-date-input-{{../../../executionFlow.id}}" name="date-range-start-date-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
-
-
-                        <label class="control-label" for="end-date">Ending Date:<span class="requiredAstrix">*</span></label>
-                        <input type="text" class="input-xlarge required validInput" id="date-range-end-date-input-{{../../../executionFlow.id}}" name="date-range-end-date-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
-                     </div>
-                     {{else}}
-                     <div class="control-group" style="display:none" id="specific-date-block-{{../../../executionFlow.id}}">
-                        <label class="control-label" for="request-count">Date:<span class="requiredAstrix">*</span></label>
-                         <input type="text" class="input-xlarge required validInput" id="specific-date-address-input-{{../../../executionFlow.id}}" name="specific-date-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
-                     </div>
-
-                     <div class="control-group" style="display:block" id="date-range-block-{{../../../executionFlow.id}}">
-                        <label class="control-label" for="request-count">Starting Date:<span class="requiredAstrix">*</span></label>
-                        <input type="text" class="input-xlarge required validInput" id="date-range-start-date-input-{{../../../executionFlow.id}}" name="date-range-start-date-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="../../startingDate">
-
-
-                        <label class="control-label" for="end-date">Ending Date:<span class="requiredAstrix">*</span></label>
-                        <input type="text" class="input-xlarge required validInput" id="date-range-end-date-input-{{../../../executionFlow.id}}" name="date-range-end-date-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="../../endingDate">
-                     </div>
-                    {{/if_eq}}
-                    <label class="control-label" for="date-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                     <label id="date-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input id="date-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                     </label>
-                </div>
-            </div>
-        </div>
-         {{/if_eq}}
-        {{/each}}
-        <!-- End of Date Condition policy -->
-
-
         <!-- Query Param policy -->
         {{#each executionFlow.conditions}}
         {{#if_eq type "QueryParam"}}
@@ -524,145 +466,6 @@
         {{/if_eq}}
         {{/each}}
         <!-- End of Query Param Condition policy -->
-
-        <!-- Http Verb condition policy -->
-        {{#each executionFlow.conditions}}
-        {{#if_eq type "HTTPVerb"}}
-        <div class="wr-hidden-operation" data-operation="http-verb-condition-{{../../executionFlow.id}}" style="display: none">
-            <div class="panel panel-default operation-data" data-operation="http-verb-condition-{{../../executionFlow.id}}" data-operation-code="HTTP_VERB_CONDITION_POLICY">
-                <div id="http-verb-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
-                    <h2 class="sub-title panel-title">
-                        Http Verb Condition Policy
-                        <label id="http-verb-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#http-verb-condition-body-{{../../executionFlow.id}}">
-                            <input id="http-verb-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                        </label>
-                        <hr>
-                        <div class="panel-title-description">
-                            This configuration use to define http verb conditions
-                        </div>
-                    </h2>
-                </div>
-                <div id="http-verb-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="http-verb-condition-body-{{../../executionFlow.id}}">
-
-                    <div id="http-verb-condition-feature-error-msg" class="alert alert-danger hidden" role="alert">
-                        <i class="icon fw fw-error"></i><span></span>
-                    </div>
-
-                    <label class="control-label" for="http-verb">HTTP Verb:<span class="requiredAstrix">*</span></label>
-                    <select class="select required valid" id="http-verb-selection-{{../../executionFlow.id}}" name="http-verb-selection-{{../../executionFlow.id}}">
-                        <option value="GET" {{#if_eq ../httpVerb "GET"}}selected{{else}}{{#if_eq ../httpVerb ""}}selected{{/if_eq}}{{/if_eq}}>GET</option>
-                        <option value="PUT" {{#if_eq ../httpVerb "PUT"}}selected{{/if_eq}}>PUT</option>
-                        <option value="POST" {{#if_eq ../httpVerb "POST"}}selected{{/if_eq}}>POST</option>
-                        <option value="DELETE" {{#if_eq ../httpVerb "DELETE"}}selected{{/if_eq}}>DELETE</option>
-                        <option value="HEAD" {{#if_eq ../httpVerb "HEAD"}}selected{{/if_eq}}>HEAD</option>
-                        <option value="PATCH" {{#if_eq ../httpVerb "PATCH"}}selected{{/if_eq}}>PATCH</option>
-                    </select>
-
-                    <label class="control-label" for="http-verb-invert-condition">Invert Condition:</label>
-                     <label id="http-verb-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input  id="http-verb-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                     </label>
-                </div>
-            </div>
-        </div>
-        {{/if_eq}}
-        {{/each}}
-        <!-- End of Query Param Condition policy -->
-
-        <!-- Payload condition policy -->
-        {{#each executionFlow.conditions}}
-        {{#if_eq type "Payload"}}
-        <div class="wr-hidden-operation" data-operation="payload-condition-{{../../executionFlow.id}}" style="display: none">
-            <div class="panel panel-default operation-data" data-operation="http-verb-condition-{{../../executionFlow.id}}" data-operation-code="PAYLOAD_CONDITION_POLICY">
-                <div id="payload-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
-                    <h2 class="sub-title panel-title">
-                        Payload Condition Policy
-                        <label id="payload-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#payload-condition-body-{{../../executionFlow.id}}">
-                            <input id="payload-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                        </label>
-                        <hr>
-                        <div class="panel-title-description">
-                            This configuration use to define payload  conditions
-                        </div>
-                    </h2>
-                </div>
-                <div id="payload-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="payload-condition-body-{{../../executionFlow.id}}">
-
-                    <div id="payload-condition-feature-error-msg--{{../../executionFlow.id}}" class="alert alert-danger hidden" role="alert">
-                        <i class="icon fw fw-error"></i><span></span>
-                    </div>
-
-                    <label class="control-label" for="payload-size">Payload Size(<):<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge required validInput" id="payload-size-{{../../executionFlow.id}}" name="payload-size-{{../../executionFlow.id}}" autofocus="autofocus" value="{{../maxSize}}">
-                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
-                        <p id="payload-size-help-{{../../executionFlow.id}}" class="hide">Payload size.</p>
-                    </div>
-
-                    <label class="control-label" for="payload-invert-condition">Invert Condition:</label>
-                     <label id="payload-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input id="payload-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                     </label>
-                </div>
-            </div>
-        </div>
-        {{/if_eq}}
-        {{/each}}
-        <!-- End of Payload Condition policy -->
-
-        <!-- Context condition policy -->
-         {{#each executionFlow.conditions}}
-        {{#if_eq type "Context"}}
-        <div class="wr-hidden-operation" data-operation="context-condition-{{../../executionFlow.id}}" style="display: none">
-            <div class="panel panel-default operation-data" data-operation="http-verb-condition-{{../../executionFlow.id}}" data-operation-code="CONTEXT_CONDITION_POLICY">
-                <div id="context-condition-heading-{{executionFlow.id}}" class="panel-heading" role="tab">
-                    <h2 class="sub-title panel-title">
-                        Context Condition Policy
-                        <label id="context-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#context-condition-body-{{../../executionFlow.id}}">
-                            <input id="context-condition-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}}/>
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                        </label>
-                        <hr>
-                        <div class="panel-title-description">
-                            This configuration use to define context  conditions
-                        </div>
-                    </h2>
-                </div>
-                <div id="context-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="context-condition-body-{{../../executionFlow.id}}">
-
-                    <div id="context-condition-feature-error-msg--{{../../executionFlow.id}}" class="alert alert-danger hidden" role="alert">
-                        <i class="icon fw fw-error"></i><span></span>
-                    </div>
-
-                    <label class="control-label" for="context-name">Context Name:<span class="requiredAstrix">*</span></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge required validInput" id="context-name-{{../../executionFlow.id}}" name="context-name-{{../../executionFlow.id}}" autofocus="autofocus" value="">
-                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
-                        <p id="context-name-help-{{../../executionFlow.id}}" class="hide">Context name.</p>
-                    </div>
-
-                    <label class="control-label" for="context-invert-condition">Invert Condition:</label>
-                     <label id="context-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
-                            <input id="context-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
-                            <span class="helper"></span>
-                            <span class="text"></span>
-                     </label>
-                </div>
-            </div>
-        </div>
-        {{/if_eq}}
-        {{/each}}
-        <!-- End of Context Condition policy -->
-
 
         <!-- JWT Claims condition policy -->
          {{#each executionFlow.conditions}}
@@ -769,15 +572,26 @@
                                     <a class="help_popup" help_data="execution-flow-name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
                                     <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
                                 </label>
-                                <div class="col-sm-6">
+                                <div class="col-sm-9">
                                     <input type="text" class="form-control noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
                                 </div>
+
+                                <label class="control-label col-sm-3" for="request-count">Time:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="execution-flow-unit-time-count-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                </div>
+
                                 <div class="col-sm-3">
                                     <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "seconds"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>Seconds</option>
-                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "minutes"}}selected{{/if_eq}}>Minutes</option>
-                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hours"}}selected{{/if_eq}}>Hours</option>
-                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "days"}}selected{{/if_eq}}>Days</option>
+                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
                                     </select>
                                 </div>
                             </div>
@@ -792,8 +606,27 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
-                                        <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kbps"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>kbps</option>
-                                        <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "Mbps"}}selected{{/if_eq}}>Mbps</option>
+                                        <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
+                                        <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
+                                    </select>
+                                </div>
+
+                                <label class="control-label col-sm-3" for="request-count">Time:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="execution-flow-unit-time-count-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
                                     </select>
                                 </div>
                             </div>
@@ -835,4 +668,11 @@
             <td><button type="button" class="btn btn-primary has-spinner" onclick="removeJwtClaimRow(this, {{tableRow.flowId}})">Delete</button></td>
         </tr>
 </script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        loadPolicy("test", "test");
+    });
+</script>
 <%});%>
+
