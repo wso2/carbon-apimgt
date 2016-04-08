@@ -11,6 +11,14 @@ jagg.module("tier", {
 
     getAllTiers:function () {
         return jagg.require(jagg.getModulesDir() + "tier/tier-manage.jag").getAllTiers.apply(this, arguments);
+    },
+    
+    getTierPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "tier/tier-manage.jag").getTierPermissions.apply(this, arguments);
+    },
+    
+    updateTierPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "tier/tier-edit.jag").updateTierPermissions.apply(this, arguments);
     }
 });
 %>

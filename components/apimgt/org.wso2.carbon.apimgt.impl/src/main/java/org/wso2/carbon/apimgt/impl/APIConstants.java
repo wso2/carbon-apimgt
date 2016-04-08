@@ -435,11 +435,12 @@ public final class APIConstants {
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR
             + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
-    public static final String API_KEY_MANGER_RESTAPI_SCOPES = "RESTAPIScopes.";
-    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES
-            + "Scope.Name";
-    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES
-            + "Scope.Roles";
+
+    public static final String API_RESTAPI = "RESTAPI.";
+    public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
+    public static final String API_RESTAPI_WHITELISTED_URI_URI = API_RESTAPI_WHITELISTED_URI + "URI";
+    public static final String API_RESTAPI_WHITELISTED_URI_HTTPMethods = API_RESTAPI_WHITELISTED_URI + "HTTPMethods";
+
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
@@ -610,6 +611,7 @@ public final class APIConstants {
     public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
     public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
     public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_USAGE_EXECUTION_TIME_STREAM = API_USAGE_STREAMS + "ExecutionTime.";
     public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
     public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
     public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
@@ -618,6 +620,9 @@ public final class APIConstants {
     public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
     public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
     public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
+    public static final String API_EXECUTION_TIME_STREAM_NAME = API_USAGE_EXECUTION_TIME_STREAM + "Name";
+    public static final String API_EXECUTION_TIME_STREAM_VERSION = API_USAGE_EXECUTION_TIME_STREAM + "Version";
+
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";

@@ -1,6 +1,7 @@
 var apiName = "";
 var appName = "";
 
+var apiFilter = "allAPIs";
 var currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
@@ -50,6 +51,12 @@ $( document ).ready(function() {
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
                     });
+                    
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawThrottledTimeGraph(apiName, appName, from,to,apiFilter);
+                    });
+                    
                     $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
                         from = convertTimeString(picker.startDate);
@@ -58,7 +65,7 @@ $( document ).ready(function() {
                         var toStr = to.split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
-                        drawThrottledTimeGraph(apiName, appName, from, to);
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
                     });
 
 
@@ -81,11 +88,11 @@ $( document ).ready(function() {
                     pupulateAPIList();
                 } else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 } else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -124,7 +131,7 @@ var pupulateAPIList = function() {
                     .trigger('change');
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                //$('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class=\"col-sm-4 alert alert-info\" role=\"alert\"><i class=\"icon fw fw-warning\"></i>No Data Available.<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden=\"true\"><i class=\"fw fw-cancel\"></i></span></button></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -153,7 +160,7 @@ var pupulateAppList = function(apiName) {
 
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -183,7 +190,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
         return;
     }
 
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", currentLocation : currentLocation, apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate },
+    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", currentLocation : currentLocation, apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate, apiFilter:apiFilter },
 
         function (json) {
             $('#spinner').hide();
@@ -282,11 +289,11 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                //$('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -297,62 +304,14 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
     , "json");
 };
 
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawThrottledTimeGraph(apiName, appName, from, to);
-}
-
-function convertDateToLong(date){
-    var allSegments=date.split(" ");
-    var dateSegments=allSegments[0].split("-");
-    var timeSegments=allSegments[1].split(":");
-    var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
-    return newDate.getTime();
-}
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
+    drawThrottledTimeGraph(apiName, appName, from, to, apiFilter);
 }

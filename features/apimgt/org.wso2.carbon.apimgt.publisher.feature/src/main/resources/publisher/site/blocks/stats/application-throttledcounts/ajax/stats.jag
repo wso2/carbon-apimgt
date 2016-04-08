@@ -8,6 +8,7 @@ var log = new Log();
             appName = request.getParameter("appName"),
             apiName = request.getParameter("apiName"),
             fromDate = request.getParameter("fromDate"),
+            apiFilter = request.getParameter("apiFilter");
             toDate = request.getParameter("toDate"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag"),
@@ -25,7 +26,7 @@ var log = new Log();
         var usageStatClient;
 
         var currentLocation = request.getParameter("currentLocation");
-        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
             provider = allProviders;
         }
 
@@ -90,24 +91,7 @@ var log = new Log();
             }
             print(obj);
 
-        } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        };
+        } ;
         
     }
 }());

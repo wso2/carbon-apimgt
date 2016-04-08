@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
  *
  */
 public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor {
-
 	private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
 
 	@Override

@@ -1,9 +1,13 @@
 var currentLocation;
+var apiFilter = "allAPIs";
 var statsEnabled = isDataPublishingEnabled();
-    currentLocation = window.location.pathname;
+currentLocation = window.location.pathname;
 
+//setting default date
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-    jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
+jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
         function (json) {
 
             if (!json.error) {
@@ -34,37 +38,38 @@ var statsEnabled = isDataPublishingEnabled();
                             getDateTime(currentDay,currentDay-(604800000*4));
                         });
 
-                        $('#date-range').click(function(){
+                        $('#date-pick').click(function(){
                              $(this).removeClass('active');
                         });
 
                         //date picker
-                        $('#date-range').daterangepicker({
+                        $('#date-pick').daterangepicker({
                               timePicker: true,
                               timePickerIncrement: 30,
                               format: 'YYYY-MM-DD h:mm',
                               opens: 'left',
                         });
+                        
+                        $("#apiFilter").change(function (e) {
+                        	apiFilter = this.value;
+                        	drawProviderAPIVersionUserLastAccess(from,to,apiFilter);
+                        });
 
-                        $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                        $('#date-pick').on('apply.daterangepicker', function(ev, picker) {
                            btnActiveToggle(this);
-                           var from = convertTimeString(picker.startDate);
-                           var to = convertTimeString(picker.endDate);
+                           from = convertTimeString(picker.startDate);
+                           to = convertTimeString(picker.endDate);
                            var fromStr = from.split(" ");
                            var toStr = to.split(" ");
                            var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
-                           $("#date-range span").html(dateStr);
-                           drawProviderAPIVersionUserLastAccess(from,to);
-                        });
-
-                        //setting default date
-                        var to = new Date();
-                        var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+                           $("#date-pick span").html(dateStr);
+                           drawProviderAPIVersionUserLastAccess(from,to,apiFilter);
+                        });                        
 
                         getDateTime(to,from);
 
 
-                        $('#date-range').click(function (event) {
+                        $('#date-pick').click(function (event) {
                         event.stopPropagation();
                         });
 
@@ -77,13 +82,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/templates/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             }
             else {
@@ -97,10 +102,10 @@ var statsEnabled = isDataPublishingEnabled();
         }, "json");
 
 
-var drawProviderAPIVersionUserLastAccess = function(from,to){
+var drawProviderAPIVersionUserLastAccess = function(from,to,apiFilter){
     var fromDate = from;
     var toDate = to;
-    jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action:"getProviderAPIVersionUserLastAccess",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
+    jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action:"getProviderAPIVersionUserLastAccess",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate,apiFilter:apiFilter  },
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -140,17 +145,18 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
-                    $dataTable.append($('<tr><td>' + json.usage[i].api_name + '</td><td>' + json.usage[i].api_version + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccess)+ '</td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].apiVersion + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccessTime)+ '</td></tr>'));
                 }
                 if (length == 0) {
                     $('#lastAccessTable').hide();
+                    $('div#lastAccessTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
-                    $('#lastAccessTable').dataTable({
+                    $('#lastAccessTable').datatables_extended({
                          "order": [[ 3, "desc" ]],
                           "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#lastAccessTable_length option:selected" ).val()
@@ -159,7 +165,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                             else $('#lastAccessTable_paginate').show();
                           }
                     });
-                    $('select').css('width','80px');
+                    //$('select').css('width','80px');
                 }
 
             } else {
@@ -171,55 +177,14 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
             }
         }, "json");
 }
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");        
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
 function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range span").html(dateStr);
-    $('#date-range').data('daterangepicker').setStartDate(from);
-    $('#date-range').data('daterangepicker').setEndDate(to);
-    drawProviderAPIVersionUserLastAccess(from,to);
+    $("#date-pick span").html(dateStr);
+    $('#date-pick').data('daterangepicker').setStartDate(from);
+    $('#date-pick').data('daterangepicker').setEndDate(to);
+    drawProviderAPIVersionUserLastAccess(from,to,apiFilter);
 }

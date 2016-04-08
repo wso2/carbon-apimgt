@@ -39,6 +39,8 @@ public class WorkflowConstants {
 
     public static final String API_MANAGER = "APIManager";
 
+    public static final String EXECUTOR = "executor";
+
     public static final String WORKFLOW_EXTENSIONS = "WorkFlowExtensions";
 
     public static final String PASSWORD = "Password";

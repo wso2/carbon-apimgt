@@ -5,15 +5,13 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     n = Math.round(n);
     var ahrefId = $(link);
     var status = ahrefId.text();
-    var blockType = getRadioValue($('input[name=blockType'+n+']:radio:checked'));
+    var blockType = $('#blockType' + n + '  option:selected').val();
     var newStatus;
     if (status.trim().toUpperCase() == 'Unblock'.toUpperCase()) {
         newStatus = 'UNBLOCKED';
-        $('input[name=blockType'+n+']:radio:checked').removeAttr("checked");
     } else if(blockType == 'blockProduction') {
     	newStatus = 'PROD_ONLY_BLOCKED';
     } else {
-    	$('input[name=blockType'+n+']').attr('checked', 'checked');
         newStatus = 'BLOCKED';
     }
     jagg.post("/site/blocks/users-keys/ajax/subscriptions.jag", {
@@ -26,11 +24,11 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     }, function (result) {
         if (!result.error) {
             if (newStatus == 'UNBLOCKED') {
-            	$('input[name=blockType'+n+']').removeAttr('disabled');
-                ahrefId.html('<i class="glyphicon glyphicon-ban-circle"></i> Block');
+            	$('#blockType' + n).prop('disabled', false);
+                ahrefId.html('<span class="icon fw-stack"><i class="fw fw-block fw-stack-1x" title="block"></i></span> <span class="hidden-xs">Block</span>');
             } else {
-            	$('input[name=blockType'+n+']').attr('disabled', 'disabled');
-            	ahrefId.html('<i class="glyphicon glyphicon-ok-circle"></i> Unblock');
+            	$('#blockType' + n).prop('disabled', true);
+            	ahrefId.html('<span class="icon fw-stack"><i class="fw fw-check fw-stack-1x" title="unblock"></i></span> <span class="hidden-xs">Unblock</span>');
             }
 
         } else {
@@ -51,3 +49,28 @@ var getRadioValue = function (radioButton) {
         return 0;
     }
 };
+
+
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#manage-subscriptions').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#manage-subscriptions_length option:selected" ).val()
+	     || $("#manage-subscriptions_length option:selected" ).val()==-1)
+	       $('#manage-subscriptions_paginate').hide();
+	       else $('#manage-subscriptions_paginate').show();
+	     } ,
+         "aoColumns": [
+         { "bSortable": false },
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
+});
+    

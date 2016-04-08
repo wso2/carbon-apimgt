@@ -10,7 +10,6 @@ i18n.init(request,localeResourcesBasePath);
 
     var title = "API Store-Document Viewer";
     var user=jagg.getUser();
-    isTenantAllowed();
 
     jagg.render({
         "name":"page/base",

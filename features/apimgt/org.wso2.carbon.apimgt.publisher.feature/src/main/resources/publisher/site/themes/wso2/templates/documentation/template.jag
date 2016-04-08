@@ -24,8 +24,8 @@
                 <input type="hidden" id="docAPIName" value="<%=api.name%>"/>
                 <%if(createPermitted){%>
                 <div id="addDoc">
-                <a onclick="newDocFormToggle()" href="#">
-                    <i class=" glyphicon glyphicon-plus-sign"></i> <%=i18n.localize("addNewDoc")%>
+                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>">
+                    <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("addNewDoc")%>"></i> <%=i18n.localize("addNewDoc")%>
                 </a>
                 </div>
                 <br/>
@@ -49,16 +49,16 @@
 		        </div>
 
 		        <div class="control-group">
-		            <label class="control-label" for="textarea"><%=i18n.localize("summary")%></label>
+		            <label class="control-label"<%=i18n.localize("summary")%></label>
 		            <div class="controls">
-		                <textarea  id="summary" class="form-control" rows="3" style="width:100%"></textarea>
+		                <textarea  id="summary" class="form-control" rows="3" style="width:100%" title="summary"></textarea>
 		            </div>
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
 		        <div class="control-group">
 		             <label class="control-label" for="textarea"><%=i18n.localize("visibility")%></label>
 		             <div class="controls">
-		             <a class="icon-question-sign help_popup" help_data="doc_help"></a>
+		             <a class="icon-question-sign help_popup" title="doc_help" help_data="doc_help"></a>
                      <p id="doc_help" class="hide"><%=i18n.localize("docRoleHelpMsg")%></p>
 		            <select id="docVisibility" style="width:100%">
 		              <option value="API_LEVEL" selected="true">Same as API visibility</option>
@@ -73,84 +73,90 @@
 		    </div>
 		    <div class="col-sm-4">
 		        <div class="well">
-		            <div class="control-group">
-		                <label class="control-label"><%=i18n.localize("type")%></label>
+							<div class="control-group">
+								<label class="control-label"><%=i18n.localize("type")%></label>
+								<ul class="nav">
+									<li><label> <input type="radio"
+											name="optionsRadios" id="optionsRadios1" value="how to"
+											checked="" onChange="disableInline()"
+											onclick="javascript:$('#otherTypeDiv').hide('slow')" /> <%=i18n.localize("howTo")%>
+									</label></li>
+									<li><label> <input type="radio"
+											name="optionsRadios" id="optionsRadios2" value="samples"
+											onChange="disableInline()"
+											onclick="javascript:$('#otherTypeDiv').hide('slow')" /> <%=i18n.localize("samples")%>
+									</label></li>
+									<li><label> <input type="radio"
+											name="optionsRadios" id="optionsRadios3" value="public forum"
+											onChange="disableInline('forum')"
+											onclick="javascript:$('#otherTypeDiv').hide('slow')" /> <%=i18n.localize("publicForum")%>
+									</label></li>
+									<label> <input type="radio" name="optionsRadios"
+										id="optionsRadios4" value="support forum"
+										onChange="disableInline('forum')"
+										onclick="javascript:$('#otherTypeDiv').hide('slow')" /> <%=i18n.localize("supportForum")%>
+									</label>
+									<li><label> <input type="radio"
+											name="optionsRadios" id="optionsRadios5" value="other"
+											onChange="disableInline()"
+											onclick="javascript:$('#otherTypeDiv').toggle('slow')" /><%=i18n.localize("other")%>
+									</label></li>
+								</ul>
+								<div id="otherTypeDiv" class="controls" style="display: none;">
+									<span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
+										class="required form-control" id="specifyBox"
+										style="width: 98%;" />
+								</div>
 
-		                    <div class="radio">
-		                    <label >
-		                          <input type="radio" name="optionsRadios" id="optionsRadios1" value="how to" checked="" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
-	<%=i18n.localize("howTo")%>
-		                    </label>
-		                    </div>
-		                    <div class="radio">
-		                    <label>
-		                       <input type="radio" name="optionsRadios" id="optionsRadios2" value="samples" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
-	<%=i18n.localize("samples")%>
-		                    </label>
-		                    </div>
-		                    <div class="radio">
-		                    <label>
-		                     <input type="radio" name="optionsRadios" id="optionsRadios3" value="public forum" onChange="disableInline('forum')" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
-	<%=i18n.localize("publicForum")%>
-		                    </label>
-		                    </div>
-		                    <div class="radio">
-		                    <label>
-		                        <input type="radio" name="optionsRadios" id="optionsRadios4" value="support forum" onChange="disableInline('forum')" onclick="javascript:$('#otherTypeDiv').hide('slow')"/>
-	<%=i18n.localize("supportForum")%>
-		                    </label>
-		                    </div>
-
-                            <div class="radio">
-		                    <label>
-		                        <input type="radio" name="optionsRadios" id="optionsRadios5" value="other" onChange="disableInline()" onclick="javascript:$('#otherTypeDiv').toggle('slow')"/><%=i18n.localize("other")%>
-		                    </label>
-		                    </div>
-									<div id="otherTypeDiv" class="controls" style="display:none;">
-				                 <span class="requiredAstrix">*</span> <input type="text" class="required form-control" id="specifyBox" style="width:98%;"/>
-				                </div>
-
-		            </div>
-		        </div>
+							</div>
+						</div>
 		    </div>
 
 		    <div class="col-sm-4">
 		        <div class="well">
 		            <div class="form-group">
 		                <label class="control-label"><%=i18n.localize("source")%></label>
-
-		                    <div class="radio"><label>
+<ul class="nav">
+<li>
+		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
-		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help"></a>
+		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
            				        <p id="inlineDoc_help" class="hide"><%=i18n.localize("inlineDocHelpMsg")%></p>
-		                      </label></div>
-		                     
-		                    <div class="radio"><label>
+		                      </label>
+		               </li>
+		               <li>      
+		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
-		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help"></a>
+		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
            				        <p id="urlDoc_help" class="hide"><%=i18n.localize("urlDocHelpMsg")%></p>
-		                      </label></div>
-		                    
+		                      </label>
+		                  
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
-		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" id="docUrl">
+		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
 		                    </div>
-
-                            <div class="radio"><label class="radio">
+</li>  
+<li>
+                            <label>
                                         <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
-                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help"></a>
+                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
                                  <p id="fileDoc_help" class="hide"><%=i18n.localize("fileDocHelpMsg")%></p>
-		                    </label></div>
-		                    
-						
-                            <div id="fileNameDiv" style="display:none;"></div>
-                            <a onclick="javascript:$('#sourceFile').toggle('slow')" id="toggleFileDoc" style="display:none;">
-                                    Change File
-                                </a>
-                                    <div id="sourceFile" class="controls" style="display:none;">
-                                     <span class="requiredAstrix">*</span> <input type="file" class="required" style="width:98%" name="docLocation" id="docLocation">
-                                     <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
-                            </div>
-
+		                    </label>
+		                    <div id="fileNameDiv" style="display:none;"></div>
+		                    	<button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">Change File</button>
+								<div id="sourceFile" style="display:none;">
+									<div  class="input-group input-wrap file-upload-control">
+										<div class="input-group-btn">
+											<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">
+												<i class="fw fw-file-browse" aria-hidden="true"></i>
+												<span class="hidden-xs">Browse</span>
+											</button>
+										</div>
+																<input type="file" name="docLocation" id="docLocation" title="doclocation" class="form-control">
+									</div>
+	                                <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
+                                </div>                         
+		                    </li>
+		                    </ul>
 		            </div>
 		        </div>
 		    </div>
@@ -206,18 +212,18 @@
                     <%if(createPermitted){%>
                     <td id="buttonTd">
 			<% if(doc.sourceType == "INLINE") {%>
- 			 	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="glyphicon glyphicon-edit"></i> <%=i18n.localize("editContent")%></a>
+ 			 	<a title="<%=i18n.localize("editContent")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="glyphicon glyphicon-edit" title="<%=i18n.localize("editContent")%>"></i> <%=i18n.localize("editContent")%></a>
                         <% }else if (doc.sourceType == "URL"){%>
-                         	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check"></i> <%=i18n.localize("view")%></a>
+                         	<a title="<%=i18n.localize("view")%>" href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check" title="<%=i18n.localize("view")%>"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=jagg.url("/site/themes/responsive/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check"></i>
+			 <a title="<%=i18n.localize("download")%>" href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check" title="<%=i18n.localize("download")%>"></i>
 			  <%=i18n.localize("open")%>
 			  </a>
 			<%}%>
 
-                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet"></i> <%=i18n.localize("update")%></a>
+                        | <a title="<%=i18n.localize("update")%>" href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet" title="<%=i18n.localize("update")%>"></i> <%=i18n.localize("update")%></a>
                          
-                        |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
+                        |<a title="<%=i18n.localize("deleteMethod")%>" href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash" title="<%=i18n.localize("deleteMethod")%>"></i> <%=i18n.localize("deleteMethod")%></a>
 			</td>
                     <%}%>
                 </tr>

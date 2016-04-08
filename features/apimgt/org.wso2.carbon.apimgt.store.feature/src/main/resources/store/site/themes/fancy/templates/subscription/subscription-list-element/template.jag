@@ -267,36 +267,16 @@
 								id="btnProvideKeyProduction">Provide
 								keys</button>
 								<% } %>
+								<span id="prodValidity" style="padding-left: 5px;">
+		                            Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+		                                    <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+		                                    <a class="icon-question-sign help_popup_prod"></a>
+		                                    <div id="prodtoken_help"></div>
+	                            </span>
                             </div>
-
                         </div>
                         <% } %>
                     </div>
-
-		    		<div class="span6" <%if(app.prodKeyState == "CREATED" || app.prodKeyState == "APPROVED" || app.prodKeyState == "REJECTED"){%> style="display:none" <%}%> >
-						<div class="keyBoxOut-config">
-                        	<!-- START Config section -->
-                            <h5>Allowed Domains</h5>
-                            <div>
-                               <textarea id="allowedDomainsPro"><% if(app.prodKey != null ) { %><%=app.prodAuthorizedDomains%><% } else { %>ALL<% } %></textarea>
-                               <div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
-                               <% if(app.prodKey != null ) { %>
-                               <button class="btn"
-                                       onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this)" style="font-size:11px;">Update Domains</button>
-                               <div style="display:none" class="success-update-msg">Successfully updated.</div>
-                               <a class="icon-question-sign update_domain_popup_prod"></a>
-                               <div id="update_help_prod"></div>
-                               <% } else { %>
-                                    Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
-                                    <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-                                    <a class="icon-question-sign help_popup_prod"></a>
-                                    <div id="prodtoken_help"></div>
-                               <% } %>
-                            </div>
-                        	<!-- END config section -->
-                        </div>
-			   		</div>
-
                 </div>
                 
                 <div class="row-fluid curl-testurlp-wrapper">
@@ -514,37 +494,18 @@
 										id="btnProvideKeySandBox">Provide
 										keys</button>
 		                        <% } %>
+		                        <span id="sandValidity" style="padding-left: 5px;">
+		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
+		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
+                                    <a class="icon-question-sign help_popup_sand"></a>
+                                    <div id="sandtoken_help"></div>
+                                </span>
 							</div>
                        </div>
                        <% } %>
                        <!-- END Show key info -->
 
                     </div>
-
-			   		<div class="span6" <% if(app.sandboxKeyState == "CREATED" || app.sandboxKeyState == "APPROVED" || app.sandboxKeyState == "REJECTED") { %> style="display:none"<%}%>>
-						<div class="keyBoxOut-config">
-                        	<!-- START Config section -->
-                            <h5>Allowed Domains</h5>
-                            <div>
-                               	<textarea id="allowedDomainsSand"><% if(app.sandboxKey!=null){ %><%=app.sandboxAuthorizedDomains%><% }else{ %>ALL<% } %></textarea>
-                               	<div>The domains from which requests are allowed to the APIs. Leave empty or enter "ALL" to allow all domains.</div>
-		                        <% if(app.sandboxKey!=null){ %>
-		                        <button  class="btn"
-		                              onclick="updateAccessAllowDomains('<%=encode.forJavaScript(app.name)%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')" style="font-size:11px;">Update Domains</button>
-		                        <div style="display:none" class="success-update-msg">Successfully updated.</div>
-                               <a class="icon-question-sign update_domain_popup_sand"></a>
-                               <div id="update_help_sand"></div>
-		                        <% } else { %>
-		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
-		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-                                    <a class="icon-question-sign help_popup_sand"></a>
-                                    <div id="sandtoken_help"></div>
-		                        <% } %>
-                            </div>
-                        	<!-- END config section -->
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="row-fluid curl-testurlp-wrapper">

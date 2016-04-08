@@ -24,9 +24,10 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
     public DataBridgeResponsePublisherDTO(ResponsePublisherDTO responsePublisherDTO) {
         setConsumerKey(responsePublisherDTO.getConsumerKey());
         setContext(responsePublisherDTO.getContext());
-        setApi_version(responsePublisherDTO.getApi_version());
+        setApiVersion(responsePublisherDTO.getApiVersion());
         setApi(responsePublisherDTO.getApi());
         setResourcePath(responsePublisherDTO.getResourcePath());
+        setResourceTemplate(responsePublisherDTO.getResourceTemplate());
         setMethod(responsePublisherDTO.getMethod());
         setVersion(responsePublisherDTO.getVersion());
         setResponseTime(responsePublisherDTO.getResponseTime());
@@ -42,6 +43,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setCacheHit(responsePublisherDTO.getCacheHit());
         setResponseSize(responsePublisherDTO.getResponseSize());
         setProtocol(responsePublisherDTO.getProtocol());
+        setResponseCode(responsePublisherDTO.getResponseCode());
     }
 
     public static String getStreamDefinition() {
@@ -62,6 +64,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'api_version','type':'STRING'}," +
                "          {'name':'api','type':'STRING'}," +
                "          {'name':'resourcePath','type':'STRING'}," +
+               "          {'name':'resourceTemplate','type':'STRING'}," +
                "          {'name':'method','type':'STRING'}," +
                "          {'name':'version','type':'STRING'}," +
                "          {'name':'response','type':'INT'}," +
@@ -77,19 +80,20 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'applicationId','type':'STRING'}," +
                "          {'name':'cacheHit','type':'BOOL'}," +
                "          {'name':'responseSize','type':'LONG'}," +
-               "          {'name':'protocol','type':'STRING'}" +
+               "          {'name':'protocol','type':'STRING'}," +
+               "          {'name':'responseCode','type':'INT'}" +
                "  ]" +
 
                "}";
     }
 
     public Object createPayload() {
-        return new Object[]{getConsumerKey(), getContext(), getApi_version(), getApi(),
-                            getResourcePath(), getMethod(),
-                            getVersion(), getResponse(),getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
+        return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(),
+                            getResourcePath(), getResourceTemplate(), getMethod(),
+                            getVersion(), getResponse(), getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
                             getEventTime(), getTenantDomain(), getHostName(),
                             getApiPublisher(), getApplicationName(), getApplicationId(), getCacheHit(),
-                            getResponseSize(),getProtocol()};
+                            getResponseSize(), getProtocol(), getResponseCode()};
     }
 
 }

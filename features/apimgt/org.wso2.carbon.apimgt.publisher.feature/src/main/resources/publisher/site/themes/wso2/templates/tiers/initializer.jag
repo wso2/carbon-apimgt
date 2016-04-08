@@ -2,7 +2,10 @@
 jagg.initializer("tiers", {
 
      preInitialize:function () {
-     jagg.addHeaderJS("tiers", "tiers", "templates/tiers/js/tiers.js");
+     	jagg.addHeaderJS("tiers", "tiers", "templates/tiers/js/tiers.js");
+     	jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
+     	jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
+
     }
 });
 %>

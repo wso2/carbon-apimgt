@@ -10,7 +10,8 @@ var searchAPIs = function (username,apiName) {
 
     return {
             error:false,
-            apis:apis
+            apis:apis,
+            totalLength:apis.length
             };
     } catch (e) {
             log.error(e.message);

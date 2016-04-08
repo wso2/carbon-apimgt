@@ -2,7 +2,7 @@
 var uname=request.getParameter("uname");
 %>
 <div id="user">
-    <div class="title-section"><h2><%=i18n.localize("apisByProviderTitle")%> <%= encode.forHtml(uname)%></h2></div>
+    <div class="page-header"><h2><%=i18n.localize("apisByProviderTitle")%> <%= encode.forHtml(uname)%></h2></div>
     <%
        if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
            jagg.includeBlock("search/apis-by-provider-search", null);
@@ -11,7 +11,7 @@ var uname=request.getParameter("uname");
 
     <div class="content-section shadow-up">
     <div class="content-data">
-        <table class="table table-bordered">
+        <table class="table table-striped table-hover table-bordered display data-table">
             <thead>
             <tr>
                 <th><%=i18n.localize("api")%></th>
@@ -61,7 +61,7 @@ var uname=request.getParameter("uname");
             apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version +"&provider=" + api.provider;
             %>
             <tr>
-            <td><i class="icon-file"></i><a href="<%=apiPath%>"><%=api.name%>-<%=api.version%></a></td>
+            <td><i class="icon-file" title="<%=api.name%>-<%=api.version%>"></i><a title="<%=api.name%>-<%=api.version%>" href="<%=apiPath%>"><%=api.name%>-<%=api.version%></a></td>
             <td class="dateFull"><%=api.lastUpdatedDate%></td>
             <!--<td><i class="icon-edit"></i><a href="#">Stats</a>
                 <i class="icon-trash"></i><a href="#">Revoke Access</a>

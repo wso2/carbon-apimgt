@@ -171,8 +171,21 @@ public final class APIUsageStatisticsClientConstants {
     public static final String ALIAS_THROTTLE_OUT_COUNT = "throttle_out_count";
 
     public static final String TENANT_DOMAIN = "tenantDomain";
+    public static final String API_EXECUTION_TME_DAY_SUMMARY = "API_EXECUTION_TME_DAY_SUMMARY";
+    public static final String API_EXECUTION_TIME_HOUR_SUMMARY = "API_EXECUTION_TIME_HOUR_SUMMARY";
+    public static final String API_EXECUTION_TIME_MINUTE_SUMMARY = "API_EXECUTION_TIME_MINUTE_SUMMARY";
+    public static final String API_EXECUTION_TIME_SECONDS_SUMMARY = "API_EXECUTION_TIME_SECONDS_SUMMARY";
 
     public static final String RDBMS_STATISTICS_CLIENT_TYPE = "RDBMS";
     public static final String REST_STATISTICS_CLIENT_TYPE = "REST";
 
+    public static final String HOUR = "hour";
+    public static final String MINUTES = "minutes";
+    public static final String SECONDS = "seconds";
+    public static final String MEDIATION = "mediationName";
+    public static final String EXECUTION_TIME = "executionTime";
+    public static final String COUNTRY_CITY_FACET = "key_country_city_facet";
+    public static final String API_REQUEST_GEO_LOCATION_SUMMARY = "API_REQUEST_GEO_LOCATION_SUMMARY";
+    public static final String API_REQUEST_USER_BROWSER_SUMMARY = "API_REQUEST_USER_BROWSER_SUMMARY";
+    public static String OS_BROWSER_FACET = "key_os_browser_facet";
 }

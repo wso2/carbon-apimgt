@@ -7,9 +7,15 @@ var isHour=false;
 var isDefault=false;
 var isWeek=false;
 
-    currentLocation = window.location.pathname;
+var apiFilter = "allAPIs";
 
-    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
+//setting default date
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+currentLocation = window.location.pathname;
+
+jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
         function (json) {
 
             if (!json.error) {
@@ -60,26 +66,27 @@ var isWeek=false;
                           format: 'YYYY-MM-DD h:mm',
                           opens: 'left',
                     });
+                    
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawAPIUsageByResourcePath(from,to,apiFilter);
+                    });
 
                     $('#date-range').on('apply.daterangepicker', function(ev, picker) {
                        btnActiveToggle(this);
-                       var from = convertTimeString(picker.startDate);
-                       var to = convertTimeString(picker.endDate);
+                       from = convertTimeString(picker.startDate);
+                       to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
-                       drawAPIUsageByResourcePath(from,to);
+                       drawAPIUsageByResourcePath(from,to,apiFilter);
                         $('.apply-btn').on('click',function(){
                             isDefault=true;
                             isWeek,isMonth,isToday,isHour=false;
                         });
                     });
-
-
-                    //setting default date
-                    var to = new Date();
-                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+                    
 
                     getDateTime(to,from);
                     isMonth=true;
@@ -98,13 +105,13 @@ var isWeek=false;
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
 
             }
@@ -119,10 +126,10 @@ var isWeek=false;
         }, "json");
 
 
-var drawAPIUsageByResourcePath = function (from, to) {
+var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
     var fromDate = from;
     var toDate = to;
-    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getAPIUsageByResourcePath", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
+    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getAPIUsageByResourcePath", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter},
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -131,8 +138,9 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
                 if (length == 0) {
                     $('#resourcePathUsageTable').hide();
+                    $('div#resourcePathUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
 
                 } else {
 
@@ -265,7 +273,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                    time = parsedResponse[i][1][j][1][k][1][m][1][l][1];
                                }
                                rowId++;
-                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+'</a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
+                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+' title="resource_path" </a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
                                hitCount =0;
                             }
                         }
@@ -423,7 +431,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#chartContainer').append($('<div id="lineWithFocusChart"><svg style="height:450px;"></svg></div>'));
                     $('#tableContainer').show();
-                    $('#resourcePathUsageTable').DataTable({
+                    $('#resourcePathUsageTable').datatables_extended({
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#resourcePathUsageTable_length option:selected" ).val()
                             || $("#resourcePathUsageTable_length option:selected" ).val()==-1)
@@ -432,7 +440,7 @@ var drawAPIUsageByResourcePath = function (from, to) {
                                 $('#resourcePathUsageTable_paginate').show();
                         },
                     });
-                    $('select').css('width','80px');
+                    //$('select').css('width','80px');
                 }
 
             } else {
@@ -446,41 +454,6 @@ var drawAPIUsageByResourcePath = function (from, to) {
 
 }
 
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");        
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
 
 function getCell(column, row) {
     var column = $('#' + column).index();
@@ -492,21 +465,14 @@ function dateToUnix(year, month, day, hour, minute, second) {
     return ((new Date(year, month - 1, day, hour, minute, second)).getTime() );
 }
 
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
-
-
 function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawAPIUsageByResourcePath(from,to);
+    drawAPIUsageByResourcePath(from,to,apiFilter);
 }

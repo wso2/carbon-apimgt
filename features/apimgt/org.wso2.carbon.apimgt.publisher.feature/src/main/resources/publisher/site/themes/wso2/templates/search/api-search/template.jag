@@ -2,20 +2,19 @@
 var query=request.getParameter("query");
 %>
 <div class="row">
-  <div class="col-md-6 api-search">
-
+  <div class="col-md-4 api-search">
         <form class="form-horizontal" action="<%=jagg.getMappedUrl("/site/pages/index.jag")%>">
                 <div class="form-group">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="input-group input-wrap">
-                            <input type="text" name="query" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
+                            <input type="text" name="query" title="search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
     placeholder="<%=i18n.localize("filterAPIs")%>"<%}%> />
 			    <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
     				<input type="hidden" class="span5" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
     			   <%}%>
                             <div class="input-group-btn">
-                                <button class="btn btn-default wrap-input-right" type="submit" title="Search">
-                                    <i class="fw fw-search" aria-hidden="true"></i>
+                                <button class="btn btn-default wrap-input-right" type="submit" value="api_search">
+                                 <i class="fw fw-search" title="search"></i>
                                 </button>
                             </div>
                         </div>
@@ -36,10 +35,15 @@ var query=request.getParameter("query");
 	      </div>
    </form>
   </div>
-  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#searchAPIHelp"><i class="fa fa-question-circle"></i> Search Options</a></div>
+  <div class="col-md-4 api-search ">
+  	<a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="help popup">
+  		<span class="icon fw-stack fw-lg" style="font-size:6px">
+			<i class="fw fw-circle fw-stack-2x"></i>
+			<i class="fw fw-question fw-stack-1x fw-inverse" title="question" style="font-size:8px"></i>
+		</span> Search Options</a></div>
 </div>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
-        <a class="close" data-dismiss="alert">x</a>
+        <a class="close" data-dismiss="alert" title="alert">x</a>
          <div id="searchMessage"></div>
       </div>
 <% }); %>

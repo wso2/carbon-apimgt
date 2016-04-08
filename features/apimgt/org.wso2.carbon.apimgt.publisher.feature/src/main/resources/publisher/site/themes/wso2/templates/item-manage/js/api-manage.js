@@ -9,7 +9,7 @@ function validate_tiers(){
         return true;
     }
     //set error
-    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
+    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true">This field is required.</label>').focus();
     return false;
 }
 
@@ -84,11 +84,11 @@ $(document).ready(function(){
 	$('#toggleSequence').parent().next().hide();
     }
     
-    if( $("#toggleThrottle").attr('checked') ) {
-    $('#toggleThrottle').parent().next().show();
+    if( $("#toggleThrottle").is(":checked")) {
+    	$(this).parent().parent().parent().next().children().next().children().show();
     } 
     else {
-    $('#toggleThrottle').parent().next().hide();
+    	$(this).parent().parent().parent().next().children().next().children().hide();
     }
 
 });
@@ -109,9 +109,11 @@ $('.js_hidden_section_title').click(function(){
 
 $("#toggleThrottle").change(function(e){
     if($(this).is(":checked")){
-        $(this).parent().next().show();
+        $(this).parent().parent().parent().next().children().next().children().show();
     }else{
-        $(this).parent().next().hide();
+    	$(this).parent().parent().parent().next().children().next().children().hide();
+    	$('#productionTps').val('');
+    	$('#sandboxTps').val('');
     }
 });
 

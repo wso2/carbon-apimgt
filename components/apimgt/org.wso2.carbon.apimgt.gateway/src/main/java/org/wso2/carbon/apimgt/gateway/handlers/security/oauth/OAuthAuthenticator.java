@@ -197,11 +197,6 @@ public class OAuthAuthenticator implements Authenticator {
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
 
-            try {
-                APIUtil.checkClientDomainAuthorized(info, clientDomain);
-            } catch (APIManagementException e) {
-               throw new APISecurityException(info.getValidationStatus(), e.getMessage(), e);
-            }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");
             }

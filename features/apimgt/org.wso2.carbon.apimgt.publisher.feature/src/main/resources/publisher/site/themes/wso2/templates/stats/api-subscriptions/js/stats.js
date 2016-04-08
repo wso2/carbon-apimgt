@@ -2,10 +2,17 @@ var currentLocation;
 var chartColorScheme=[];
 var colorRangeArray=[];
 var statsEnabled = isDataPublishingEnabled();
+var apiFilter = "allAPIs";
 
-    currentLocation = window.location.pathname;
+currentLocation = window.location.pathname;
 
-    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
+$("#apiFilter").change(function (e) {
+	apiFilter = this.value;
+	drawAPIUsage();
+});
+
+var drawAPIUsage = function () {
+    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation, apiFilter: apiFilter },
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -443,7 +450,7 @@ var statsEnabled = isDataPublishingEnabled();
                     });
                     }
                 }else{
-                    $('#pie-chart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -453,52 +460,11 @@ var statsEnabled = isDataPublishingEnabled();
                 }
             }
         }, "json");
-
-
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");        
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
+    
     }
-    return t;
-};
-function convertDate(date) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var hour=date.getHours();
-    var minute=date.getMinutes();
-    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
-        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
-        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
-}
+
+drawAPIUsage();
+
 
 function getRandomColor() {
   var letters = '0123456789ABCDEF'.split('');

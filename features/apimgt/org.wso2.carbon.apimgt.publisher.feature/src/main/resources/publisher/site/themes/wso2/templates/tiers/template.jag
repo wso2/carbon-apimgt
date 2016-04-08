@@ -4,11 +4,11 @@
 		var tierPermissions = outputs.tierPermissions;
 	%>
 	<div id="tiers">
-		<div class="title-section">
+		<div class="page-header">
                 <h2><%=i18n.localize("tierPermissions")%></h2>
         </div>
         <div class = "col-sm-12">
-        		<table class="table table-bordered">
+        		<table class="table table-striped table-hover table-bordered display data-table">
         			<thead>
         				<tr>
         					<th class="tierSpecialCell"><%=i18n.localize("tiers")%></th>
@@ -69,11 +69,11 @@
 		        					 <%}%>
 		        					 </div>
 		        					 <div class="form-inline">
-		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
-		        					 	<input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">Roles:</label>
+                                        <input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>" data-role="tagsinput"/>
 		        					 	<label class="errorTier errorMsg" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
                                         <label class="errorTier errorMsg" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
-		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesTagHelpMsg")%></p>
 		        					 </div>
 	        					</div>
 		                	

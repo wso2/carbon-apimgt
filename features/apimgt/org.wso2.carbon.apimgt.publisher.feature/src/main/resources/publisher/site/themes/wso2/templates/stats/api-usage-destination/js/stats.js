@@ -1,7 +1,12 @@
 var currentLocation;
 var statsEnabled = isDataPublishingEnabled();
+var apiFilter = "allAPIs";
 
-    currentLocation=window.location.pathname;
+//setting default date
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+currentLocation=window.location.pathname;
 
     jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
         function (json) {
@@ -45,6 +50,11 @@ var statsEnabled = isDataPublishingEnabled();
                           opens: 'left',
                     });
 
+                    $("#apiFilter").change(function (e) {
+                    	apiFilter = this.value;
+                    	drawAPIUsageByDestination(from,to,apiFilter);
+                    });
+                    
                     $('#date-range').on('apply.daterangepicker', function(ev, picker) {
                        btnActiveToggle(this);
                        var from = convertTimeString(picker.startDate);
@@ -53,13 +63,10 @@ var statsEnabled = isDataPublishingEnabled();
                        var toStr = to.split(" ");
                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
-                       drawAPIUsageByDestination(from,to);
+                       drawAPIUsageByDestination(from,to,apiFilter);
                     });
 
-
-                    //setting default date
-                    var to = new Date();
-                    var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+                    
 
                     getDateTime(to,from);
 
@@ -77,13 +84,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
 
             }
@@ -101,7 +108,7 @@ var drawAPIUsageByDestination = function(from,to){
     var fromDate = from;
     var toDate = to;
 
-    jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getAPIUsageByDestination", currentLocation:currentLocation,fromDate:fromDate,toDate:toDate},
+    jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action:"getAPIUsageByDestination", currentLocation:currentLocation,fromDate:fromDate,toDate:toDate, apiFilter: apiFilter},
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
@@ -124,13 +131,14 @@ var drawAPIUsageByDestination = function(from,to){
                 }
                 if (length == 0) {
                     $('#destinationBasedUsageTable').hide();
+                    $('div#destinationBasedUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
 
                 }else{
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
-                    $('#destinationBasedUsageTable').DataTable({
+                    $('#destinationBasedUsageTable').datatables_extended({
                      "order": [[ 4, "desc" ]],
                      "fnDrawCallback": function(){
                          if(this.fnSettings().fnRecordsDisplay()<=$("#destinationBasedUsageTable_length option:selected" ).val()
@@ -153,55 +161,14 @@ var drawAPIUsageByDestination = function(from,to){
         }, "json");
 
 }
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-usage-destination/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");        
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate()+1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t){
-    if (t<10){
-        t="0" + t;
-    }
-    return t;
-};
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
 function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
-    drawAPIUsageByDestination(from,to);
+    drawAPIUsageByDestination(from,to,apiFilter);
 }

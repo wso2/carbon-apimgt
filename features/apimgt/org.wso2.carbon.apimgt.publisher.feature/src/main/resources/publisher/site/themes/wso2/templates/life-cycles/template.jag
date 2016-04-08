@@ -79,7 +79,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      </div>
      <div class="row">
 		<div class="form-group form-inline">
-		        <label class="control-label col-sm-3" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
+		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
 		        <div class="controls col-sm-8">
 				<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>		            
 		         </div> 
@@ -117,14 +117,14 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
       
             if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
 	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
-	                <input type="button" id="actionButton" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	                <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
-	                <input type="button" id="actionButton" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	                <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else {%>
-	                <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
+	                <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
 	           <%}
 	        } else {%>
-	             <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	             <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	      	<%}      
 
         }%>
@@ -135,7 +135,9 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
       </div>
       </form>
 
-<h4><%=i18n.localize("lifecycleHistory")%></h4><br/>
+<div class="page-header">
+		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>
+	</div>
 <%if(lcs!=null){
         var length = lcs.length;
         if (length == 0) {
@@ -152,7 +154,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
         var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
         %>
         <tr>
-        <td><i class="glyphicon glyphicon-info-sign"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user"></i>&nbsp;<a href="<%=path%>"><%=lc.username%></a>
+        <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
         <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
         <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
         <%}%>

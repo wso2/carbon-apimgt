@@ -41,11 +41,11 @@ import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
@@ -106,9 +106,10 @@ import java.util.List;
  * @scr.reference name="tenant.indexloader"
  * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
  * bind="setIndexLoader" unbind="unsetIndexLoader"
- * @scr.reference name="bam.service.data.publisher"
- * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
- * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
+ * @scr.reference name="event.output.adapter.service"
+ * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
+ * cardinality="1..1" policy="dynamic"  bind="setOutputEventAdapterService"
+ * unbind="unsetOutputEventAdapterService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -116,8 +117,6 @@ public class APIManagerComponent {
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
     private ServiceRegistration registration;
-
-    private static ServiceDataPublisherAdmin dataPublisherAdminService;
 
     private static TenantRegistryLoader tenantRegistryLoader;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
@@ -170,7 +169,6 @@ public class APIManagerComponent {
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
-            APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
@@ -197,8 +195,6 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             setupImagePermissions();
-//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
@@ -212,10 +208,13 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-
+            if (analyticsConfiguration.isAnalyticsEnabled()){
+                APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
+                        .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
+                        .SUPER_TENANT_ID);
+            }
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
-            
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -239,29 +238,6 @@ public class APIManagerComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
-    }
-
-    protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
-        dataPublisherAdminService = service;
-        if (log.isDebugEnabled()) {
-            log.debug("Event Data Publisher service bound to the API usage handler");
-            log.debug("Writing Analytics Configuration to Registry...");
-        }
-        APIUtil.writeAnalyticsConfigurationToRegistry(ServiceReferenceHolder.getInstance()
-                                                              .getAPIManagerConfigurationService()
-                                                              .getAPIManagerConfiguration());
-        APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
-    }
-
-    protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
-        if (log.isDebugEnabled()) {
-            log.debug("Event Data Publisher service unbound from the API usage handler");
-        }
-        dataPublisherAdminService = null;
-    }
-
-    public static ServiceDataPublisherAdmin getDataPublisherAdminService() {
-        return dataPublisherAdminService;
     }
 
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
@@ -561,4 +537,21 @@ public class APIManagerComponent {
     }
 
 
+    /**
+     * Initialize the Output EventAdapter Service dependency
+     *
+     * @param outputEventAdapterService Output EventAdapter Service reference
+     */
+    protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
+        ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
+    }
+
+    /**
+     *  De-reference the Output EventAdapter Service dependency.
+     *
+     * @param outputEventAdapterService
+     */
+    protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
+        ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
 }

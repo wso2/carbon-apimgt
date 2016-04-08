@@ -98,7 +98,7 @@ var jagg = jagg || {};
             });
             return;
         }
-        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
+        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" alt="<%=i18n.localize("errorMsgThumb")%>" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
         var type = "";
         if (params.title == undefined) {
             if (params.type == "info") {
@@ -240,9 +240,12 @@ $(document).ready(function(){
     //this can go to main js
     $('a.help_popup').popover({
         html : true,
+        container: 'body',
         content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
+          var msg = $('#'+$(this).attr('help_data')).html();
+          return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
     });
 
     $('html').on('click', function(e) {

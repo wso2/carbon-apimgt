@@ -2,7 +2,7 @@
 
 %>
  <div id="tokens">
-     <div class="title-section"> <h2><%=i18n.localize("revokeTitle")%></h2> </div>
+     <div class="page-header"> <h2><%=i18n.localize("revokeTitle")%></h2> </div>
      <div class="content-section shadow-up">
      <div class="content-data">
  <%jagg.includeBlock("search/token-search", null); %>
@@ -38,7 +38,7 @@
 
            </span></td>
         <td>
-            <i class="icon-trash"></i><a href="#" onclick="revokeAccessToken(<%=String(i)%>)"><%=i18n.localize("revoke")%></a>
+            <i class="icon-trash" title="<%=i18n.localize("revoke")%>"></i><a href="#" onclick="revokeAccessToken(<%=String(i)%>)" title="><%=i18n.localize("revoke")%>"><%=i18n.localize("revoke")%></a>
         </td>
        </tr>
        <input type="hidden" id="consumerKey-<%=String(i)%>" value="<%=accessTokens[i].consumerKey%>"/>

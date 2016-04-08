@@ -116,11 +116,6 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
-
-            if (workflowDTO.getApplicationInfo() != null && workflowDTO.getApplicationInfo().getClientId() != null) {
-                dao.addAccessAllowDomains(workflowDTO.getApplicationInfo().getClientId(), workflowDTO.getAllowedDomains());
-            }
-
         }
     }
 

@@ -93,17 +93,23 @@ function APIDesigner(){
     $( "#api_designer" ).delegate( "a.help_popup", "mouseover", this, function( event ) {
         $('a.help_popup').popover({
             html : true,
+            container: 'body',
             content: function() {
-                return $('#'+$(this).attr('help_data')).html();
-            }
+              var msg = $('#'+$(this).attr('help_data')).html();
+              return msg;
+            },
+            template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
         });
     });
 
     $('a.help_popup i').popover({
         html : true,
+        container: 'body',
         content: function() {
-            return $('#'+$(this).attr('help_data')).html();
-        }
+          var msg = $('#'+$(this).attr('help_data')).html();
+          return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
     });
 
     $( "#api_designer" ).delegate( ".resource_expand", "click", this, function( event ) {
@@ -338,21 +344,25 @@ APIDesigner.prototype.init_controllers = function(){
     $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
     $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
-    this.container.delegate( ".delete_resource", "click", function( event ) {        
+    this.container.delegate( ".delete_resource", "click", function( event ) { 
+    	$(".modal-footer").html("");
         var operations = API_DESIGNER.query($(this).attr('data-path'));
         var operations = operations[0]
         var i = $(this).attr('data-index');
         var pn = $(this).attr('data-path-name');
         var op = $(this).attr('data-operation');        
-        jagg.message({content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',type:'confirm',title:"Remove Resource",
-        okCallback:function(){
-            API_DESIGNER = APIDesigner();
-            delete API_DESIGNER.api_doc.paths[pn][op];
-            API_DESIGNER.render_resources();
-            if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
-                delete API_DESIGNER.api_doc.paths[pn];
-            }
-        }});
+        jagg.message({
+        	content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',
+        	type:'confirm',
+        	title:"Remove Resource",
+        	okCallback:function(){
+        		API_DESIGNER = APIDesigner();
+        		delete API_DESIGNER.api_doc.paths[pn][op];
+        		API_DESIGNER.render_resources();
+        		if(Object.keys(API_DESIGNER.api_doc.paths[pn]).length == 0) {
+        			delete API_DESIGNER.api_doc.paths[pn];
+        		}
+        	}});
         //delete resource if no operations       
     });
 
@@ -727,7 +737,7 @@ $(document).ready(function(){
         $('#swagger_file_help').hide();
         $('.toggleContainers .controls').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).parent().fadeIn();
+        $('#' + $(this).val()).parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
@@ -751,8 +761,8 @@ $(document).ready(function(){
     });
 
     $('#import_swagger').click(function () {
-        if ($('.toggleRadios input[type=radio]:checked').val() == 'swagger_import_file') {
-
+    	
+    	if ($('.toggleRadios input[type=radio]:checked').val() == 'swagger_import_file') {
             $('#import_swagger').buttonLoader('start');
             $('#swagger_help').hide();
             $('#swagger_file_help').hide();
@@ -870,6 +880,8 @@ $(document).ready(function(){
 
             if(tagName.match(/[^a-zA-Z0-9_ -]/g)){
                 $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
+                		$('.tags-error').show();
+                		$('.add-tags-error').hide();
                         $('.add-tags-error').html('');
                         $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
                         return '';
@@ -884,6 +896,8 @@ $(document).ready(function(){
         });
         $('.tags-error').html('');
         $("#tags").on('itemAdded', function(event) {
+        	 $('.tags-error').hide();
+    		 $('.add-tags-error').hide();
              $('.tags-error').html('');
              $('.add-tags-error').html('');
         });
@@ -891,10 +905,13 @@ $(document).ready(function(){
 
     $('.tagContainer .bootstrap-tagsinput input').blur(function() {
         if($(this).val().length > 0){
+        	$('.tags-error').hide();
+    		$('.add-tags-error').show();
             $('.add-tags-error').html('Please press Enter to add the tag.')
             $('.tags-error').html('');
         }
         else if($(this).val().length == 0){
+        	$('.add-tags-error').hide();
             $('.add-tags-error').html('');
         }
     });

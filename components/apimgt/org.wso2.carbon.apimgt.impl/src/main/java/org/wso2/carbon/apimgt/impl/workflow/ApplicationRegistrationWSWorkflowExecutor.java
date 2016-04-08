@@ -44,27 +44,20 @@ import java.util.List;
  * Application Registration process.
  */
 public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor {
-
     private String serviceEndpoint;
-
     private String username;
-
-    private String password;
-
+    private char[] password;
     private String contentType;
-
     private static final Log log = LogFactory.getLog(ApplicationRegistrationWSWorkflowExecutor.class);
 
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-
         if (log.isDebugEnabled()) {
-            log.info("Executing Application registration Workflow..");
+            log.debug("Executing Application registration Workflow..");
         }
         try {
             String action = WorkflowConstants.CREATE_REGISTRATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload =
                     "<wor:ApplicationRegistrationWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
                             + "        <wor:applicationName>$1</wor:applicationName>\n"
@@ -96,7 +89,6 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
             super.execute(workflowDTO);
-
         } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
             throw new WorkflowException("Error sending out message", axisFault);
@@ -117,15 +109,15 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
     @Override
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
-
+        super.complete(workFlowDTO);
         log.info("Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
                 .getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
-        super.complete(workFlowDTO);
+
         if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
             try {
                 generateKeysForApplication((ApplicationRegistrationWorkflowDTO) workFlowDTO);
             } catch (APIManagementException e) {
-                String msg = "Error occurred when updating the status of the Application Registration " + "process";
+                String msg = "Error occurred when updating the status of the Application Registration process";
                 log.error(msg, e);
                 throw new WorkflowException(msg, e);
             }
@@ -147,19 +139,18 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
         try {
             String action = WorkflowConstants.DELETE_REGISTRATION_WS_ACTION;
             ServiceClient client = getClient(action);
-
             String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
                     "   xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
                     "   	<p:workflowRef>" + workflowExtRef + "</p:workflowRef>\n" +
                     "   </p:CancelApplicationRegistrationWorkflowProcessRequest>";
-            client.fireAndForget(AXIOMUtil.stringToOM(payload));
 
+            client.fireAndForget(AXIOMUtil.stringToOM(payload));
         } catch (AxisFault axisFault) {
-            errorMsg = "Error sending out cancel pending registration approval process message. cause: " + axisFault
+            errorMsg = "Error sending out cancel pending registration approval process message. Cause: " + axisFault
                     .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         } catch (XMLStreamException e) {
-            errorMsg = "Error converting registration cleanup String to OMElement. cause: " + e.getMessage();
+            errorMsg = "Error converting registration cleanup String to OMElement. Cause: " + e.getMessage();
             throw new WorkflowException(errorMsg, e);
         }
     }
@@ -187,9 +178,9 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
         // Assumes authentication is required if username and password is given
-        if (username != null && password != null) {
+        if (username != null && !username.isEmpty() && password != null && password.length != 0) {
             auth.setUsername(username);
-            auth.setPassword(password);
+            auth.setPassword(String.valueOf(password));
             auth.setPreemptiveAuthentication(true);
             List<String> authSchemes = new ArrayList<String>();
             authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
@@ -222,11 +213,11 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
         this.username = username;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

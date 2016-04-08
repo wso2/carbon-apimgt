@@ -1,10 +1,19 @@
 <% jagg.template("stats/api-last-access-times", function(inputs, outputs, jagg) { %>
 
 <div id="apiLastAccessTimes-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("overallAPILastAccessTimesTitle")%></h2></div>
-    <br/ >
-    <div class="col-md-12">
-
+    <div class="page-header"> <h2><%=i18n.localize("overallAPILastAccessTimesTitle")%></h2></div>
+    
+    <div class="row">
+    	<div class="form-group col-sm-2">
+	        <select class="select form-control" id="apiFilter" name="apiFilter">
+	        	<option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
+	        	<option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+	        </select>
+		</div>
+		
+		<div class="col-sm-4"></div>
+		
+		<div class="col-sm-6">
         <div id="rangeSliderWrapper" >
            <div id="dateRangePickerContainer" style="text-align:right">
                <div class="btn-group" role="group">
@@ -13,23 +22,27 @@
                    </button>
                    <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
                    <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
-                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
-                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                   <buttton id="date-pick" type="button" class="btn btn-default date-range last-child" >
+                     <i class="fw fw-calendar" title="date-range"></i>
                      <span></span> <b class="caret"></b>
                    </button>
                </div>
            </div>
-        </div>
-
-        <div id="spinner" class="center-wrapper">
-            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
-        </div>
-
-        <div id="noData"></div>
-
-        <br/ >
-        <div id="tableContainer"></div>
+        </div>        
     </div>
+    
+    </div>
+    
+    
+    <div id="spinner" class="center-wrapper">
+            <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
+    </div>
+
+    <div id="noData"></div>
+
+    <br/>
+    <div id="tableContainer"></div>
+        
 </div>
 
 <% }); %>

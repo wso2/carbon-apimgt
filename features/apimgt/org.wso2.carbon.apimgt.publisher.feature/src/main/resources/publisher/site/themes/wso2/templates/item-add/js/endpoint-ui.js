@@ -124,9 +124,15 @@ $(document).ready(function () {
                     "101501": 	i18n.t("endpointUi.101501")
                 }
             },
-                { key:'suspendDuration'},
-                { key:'suspendMaxDuration'},
-                { key:'factor'}]
+            {   key:'suspendDuration',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'suspendMaxDuration',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'factor',
+                fieldHtmlClass:'form-control'
+            }]
 
         }, {
             "type": "fieldset",
@@ -150,7 +156,12 @@ $(document).ready(function () {
                     "101501": 	i18n.t("endpointUi.101501")
                 }
             },
-                'retryTimeOut', 'retryDelay']
+            {   key:'retryTimeOut',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'retryDelay',
+                fieldHtmlClass:'form-control'
+            }]
         }, {
             "type": "fieldset",
             "title": i18n.t("endpointUi.Connection Timeout"),
@@ -165,7 +176,8 @@ $(document).ready(function () {
                     value:'fault'
                 },{
                     key:'actionDuration',
-                    value: '30000'
+                    value: '30000',
+                    fieldHtmlClass:'form-control'
                 }
             ]
         }
@@ -539,7 +551,9 @@ $(document).ready(function () {
 
     $( "#endpoint_form" ).delegate( ".advance_endpoint_config", "click", function() {
         $('form#advance_form').html('');
-        APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
+        if ($(this).attr('ep-config-data')) {
+        	APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
+        }
         $('form#advance_form').jsonForm(APP.form.advance_endpoint_config);
         $('.error_codes_selection').multiselect({
             buttonText: function(options, select) {
@@ -601,24 +615,26 @@ $(document).ready(function () {
             var ec = APP.ep_form.getValues();
             ec.endpoint_type = $('#endpoint_type').val();
             $('.advance_endpoint_config').each(function(index, el){
-                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
-                var name = $(el).attr('field-name');
-                var field = name.replace(/\[([0-9]*)\]$/, '');
-                var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
-                if(value_index == ''){
-                    if(ec[field] != undefined && ec[field] !="")
-                        ec[field] = { url: ec[field].trim() , config: ep_config };
-                    else
-                        ec[field] = undefined;
-                }
-                else{
-                    if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                        ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
-                    else{
-                        ec[field].splice(value_index,1);
-                    }
-                }
-                return true;
+            	if ($(el).attr('ep-config-data')) {
+	                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+	                var name = $(el).attr('field-name');
+	                var field = name.replace(/\[([0-9]*)\]$/, '');
+	                var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
+	                if(value_index == ''){
+	                    if(ec[field] != undefined && ec[field] !="")
+	                        ec[field] = { url: ec[field].trim() , config: ep_config };
+	                    else
+	                        ec[field] = undefined;
+	                }
+	                else{
+	                    if(ec[field][value_index] != undefined && ec[field][value_index] !="")
+	                        ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
+	                    else{
+	                        ec[field].splice(value_index,1);
+	                    }
+	                }
+	                return true;
+            	}
             });
 
             //clear undefined urls

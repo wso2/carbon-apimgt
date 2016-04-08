@@ -1,20 +1,5 @@
 <% jagg.template("stats/api-throttledtime", function(inputs, outputs, jagg) { %>
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/>
 
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/d3.min.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/vega.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.js"))%>"></script>
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.css"))%>"/>
-
-<!--datepicker-->
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/moment.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/js/jquery.daterangepicker.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dojo/dojo.js"))%>"></script>
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/stats/api-throttledtime/js/stats.js"))%>"></script>
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/datepicker/css/daterangepicker.css"))%>"/>
-
-<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/nvd3/css/nv.d3.css"))%>"/>
-  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
 <%
 var mod = jagg.module("api");
 var result = mod.getTiers();
@@ -22,7 +7,7 @@ var result = mod.getTiers();
 <script>
 var res = <%=result%>;
 </script>
-<div class="title-section"> <h2>API Requests Count With Throttling Tiers</h2></div>
+<div class="page-header"> <h2>API Requests Count With Throttling Tiers</h2></div>
 
 <div class="content-section shadow-up">
 <div class="content-data">
