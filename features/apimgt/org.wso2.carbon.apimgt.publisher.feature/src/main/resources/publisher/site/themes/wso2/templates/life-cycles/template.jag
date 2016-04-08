@@ -79,7 +79,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      </div>
      <div class="row">
 		<div class="form-group form-inline">
-		        <label class="control-label col-sm-3" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
+		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
 		        <div class="controls col-sm-8">
 				<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>		            
 		         </div> 
@@ -117,14 +117,14 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
       
             if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
 	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
-	                <input type="button" id="actionButton" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	                <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
-	                <input type="button" id="actionButton" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	                <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else {%>
-	                <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
+	                <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
 	           <%}
 	        } else {%>
-	             <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	             <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	      	<%}      
 
         }%>
