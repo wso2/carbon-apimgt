@@ -1,0 +1,53 @@
+
+        <html>
+<head>
+    <meta charset="utf-8">
+    <title>APIM Filtered Messages</title>
+
+    <!-- CSS -->
+
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    
+    <!--<link rel="stylesheet" type="text/css" href="/portal/libs/bootstrap_3.3.5/css/bootstrap.min.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="/portal/libs/font-wso2_1.0.0/css/font-wso2.min.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="/portal/libs/theme-wso2_1.0/css/theme-wso2.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="/portal/extensions/themes/analytics/css/gadget.css" />-->
+
+    <!-- JS -->
+    <script src="js/jquery-1.10.2.js"></script>
+ 
+    <script src="js/d3.min.js"></script>
+    <script src="js/topojson.js"></script>
+    <script src="js/vega.js"></script>
+    <script src="js/VizGrammar.js"></script>
+    <script src="js/VizGrammarSettings.js"></script>
+    <script src="js/gadgetconf.js"></script>
+    <script src="js/carbon-analytics.js"></script>
+    <script src="js/moment.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/Mustache.js"></script>
+
+</head>
+<body bgcolor="#000000" >
+
+<div id="logViewer"/>
+
+
+<%
+   var carbon = require('carbon');
+    var server = new carbon.server.Server();
+    var tenantId = carbon.server.tenantId();
+
+print(tenantId);
+
+%>
+<script>
+
+var tenantId=  <%=tenantId%>;
+</script>
+
+
+
+<script src="js/main.js"></script>
+</body>
+</html>
