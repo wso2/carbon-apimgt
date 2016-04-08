@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
+/**
+ * This is a DTO class to hold the data of alert types configurations. All methods are getters and setters.
+ */
 public class AlertTypeDTO extends PublisherDTO {
 
     private String userName;

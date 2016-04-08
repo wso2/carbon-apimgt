@@ -7948,9 +7948,9 @@ public class ApiMgtDAO {
     /**
      *
      * @param userName User name.
-     * @param emailList Comma seperated email list.
-     * @param alertTypesList Comma seperated alert types list.
-     * @param agent. if pram value = p we assume those changes from publisher if param value = s those data belongs to
+     * @param emailList Comma separated email list.
+     * @param alertTypesIDList Comma separated alert types list.
+     * @param agent if pram value = p we assume those changes from publisher if param value = s those data belongs to
      * subscriber.
      * @throws APIManagementException
      * @throws SQLException
@@ -7959,17 +7959,10 @@ public class ApiMgtDAO {
             throws APIManagementException, SQLException {
 
         Connection connection = null;
-
-        PreparedStatement preparedStatementForEmailDelete = null;
-        PreparedStatement preparedStatementForAlertTypeDelete = null;
-        PreparedStatement preparedStatementForAlertTypeInsert = null;
-        PreparedStatement preparedStatementForEmailInsert = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
-
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
-
-        int applicationId = 0;
         try {
             connection.setAutoCommit(false);
 
@@ -7977,25 +7970,21 @@ public class ApiMgtDAO {
 
             String deleteAlertTypesByUserNameAndAgentQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
 
-//            if (log.isDebugEnabled()) {
-//                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
-//                        applicationId + " and Token type" );
-//            }
-            preparedStatementForAlertTypeDelete = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
-            preparedStatementForAlertTypeDelete.setString(1, userName);
-            preparedStatementForAlertTypeDelete.setString(2, agent);
-            preparedStatementForAlertTypeDelete.executeUpdate();
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
 
             if(alertTypesIDList != null){
 
                 List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
 
                 for (String alertTypeId : alertTypeIdList) {
-                    preparedStatementForAlertTypeInsert = connection.prepareStatement(alertTypesQuery);
-                    preparedStatementForAlertTypeInsert.setInt(1, Integer.parseInt(alertTypeId));
-                    preparedStatementForAlertTypeInsert.setString(2, userName);
-                    preparedStatementForAlertTypeInsert.setString(3, agent);
-                    preparedStatementForAlertTypeInsert.execute();
+                    ps = connection.prepareStatement(alertTypesQuery);
+                    ps.setInt(1, Integer.parseInt(alertTypeId));
+                    ps.setString(2, userName);
+                    ps.setString(3, agent);
+                    ps.execute();
                 }
 
             }
@@ -8003,30 +7992,26 @@ public class ApiMgtDAO {
             String deleteAlertTypesEmailListsByUserNameAndAgentQuery = SQLConstants.
                     DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT;
 
-//            if (log.isDebugEnabled()) {
-//                log.debug("trying to delete a record from AM_APPLICATION_KEY_MAPPING table by application ID " +
-//                        applicationId + " and Token type" );
-//            }
-            preparedStatementForEmailDelete = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
-            preparedStatementForEmailDelete.setString(1, userName);
-            preparedStatementForEmailDelete.setString(2, agent);
-            preparedStatementForEmailDelete.executeUpdate();
+            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
 
             //Email list save query
             String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
 
-            preparedStatementForEmailInsert = connection.prepareStatement(emailListSaveQuery);
-            preparedStatementForEmailInsert.setString(1, userName);
-            preparedStatementForEmailInsert.setString(2, emailList);
-            preparedStatementForEmailInsert.setString(3, agent);
-            preparedStatementForEmailInsert.execute();
+            ps = connection.prepareStatement(emailListSaveQuery);
+            ps.setString(1, userName);
+            ps.setString(2, emailList);
+            ps.setString(3, agent);
+            ps.execute();
 
             connection.commit();
 
         } catch (SQLException e) {
             handleException("Failed to add Application", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatementForEmailInsert, connection, rs);
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 
         }
     }

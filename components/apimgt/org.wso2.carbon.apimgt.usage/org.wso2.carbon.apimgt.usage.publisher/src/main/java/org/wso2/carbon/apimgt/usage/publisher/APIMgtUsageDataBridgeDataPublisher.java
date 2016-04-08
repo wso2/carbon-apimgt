@@ -187,8 +187,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             dataPublisher.publish(streamID,System.currentTimeMillis(), null, null,
                     (Object[]) dataBridgeAlertTypesPublisherDTO.createPayload());
         } catch (Exception e) {
-            log.error("Error while publishing alert types events events", e);
-            throw new APIManagementException("Wewew");
+            log.error("Error while publishing alert types events.", e);
+            throw new APIManagementException("Error while publishing alert types events");
         }
     }
 
