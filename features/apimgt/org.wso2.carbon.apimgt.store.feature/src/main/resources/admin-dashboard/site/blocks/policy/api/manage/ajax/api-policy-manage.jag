@@ -15,7 +15,6 @@ var log = new Log();
         });        
     } else if (request.getMethod() == 'POST') {
         if (action == "deleteAPIPolicy" ) {
-           log.info("deletingAPIpolicy working");	
 	    mod = jagg.module("policy");
             result = mod.deleteAPIPolicy(request.getParameter("policy", "UTF-8"));
             if (result.error) {

@@ -4,7 +4,6 @@ var log = new Log();
 // adding apiPolicy
 var addApiPolicy = function (policy) {
     try {
-        log.info("=====================================================" + policy);
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var Gson = Packages.com.google.gson.Gson;
