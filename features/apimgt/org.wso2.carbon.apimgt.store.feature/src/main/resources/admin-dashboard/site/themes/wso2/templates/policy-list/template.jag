@@ -25,10 +25,10 @@
         var apiPolicy = apiPolicyArray[j];
         var policyName = apiPolicy.getPolicyName();
         var defaultQuotaPolicy = apiPolicy.getDefaultQuotaPolicy().getType();
-        if (defaultQuotaPolicy == "RequestCount"){
+        if (defaultQuotaPolicy == "requestCount"){
             var quota = apiPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
             var quota = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+apiPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
 
