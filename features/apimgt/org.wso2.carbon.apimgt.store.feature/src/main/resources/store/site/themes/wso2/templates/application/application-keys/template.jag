@@ -56,19 +56,24 @@
 		    </div>
 		  </div>
 		  <p>
-		  <% if(app.KeyScope != ""){%>
-		    Above Token was generated with following scopes : 
-		  	<%=app.KeyScope%>		  			  
-		  <% } %><a href="#">Select scopes.</a>
+		  Above token has a validity period of <strong>{{ ValidityTime }}</strong> seconds.
+		  {{#if KeyScope}}
+			And the token has ( <strong>{{KeyScope}}</strong> ) scopes.		    		  			  
+		  {{/if}}
 		  </p>
 		  </fieldset>
 	  	</form>	
+	  	<h4>Generate New Access Token</h4>
 	  	<form class="form-inline">
-		  <div class="form-group">
-		    <span>Validity Time</span>
-		    <input type="text" value='<%=app.ValidityTime %>' class="form-control" id="validity_time" placeholder=""> Seconds
-		  </div>
- 		  <button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>
+		  <div class="form-group">		    
+		    <span>Scopes </span>
+		    <select class="selectpicker scope_select"  multiple title="Select..">
+			  <option title="sample" data-content="<strong>sample</strong><br /><span>sample scope.</span>">sample</option>
+			</select>	    
+		    <span>Validity period </span>
+		    <input type="text" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
+			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>		    
+		  </div> 		  
 		</form>		  	
 	  </div>
 	</div>
@@ -78,7 +83,7 @@
 	  	<h4>Generating Access Tokens</h4>
 	  	<p>Following cURL command shows how to generate an access token using password grant type.</p>
 		<div class="highlight">
-<pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=password" \
+<pre><a data-clipboard-text="" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><code class="html hljs xml">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
      -H "Authorization: Basic {{basickey}}" \
      <%= gatewayurlendpoint %>/token</code></pre>
         </div>
@@ -96,13 +101,13 @@
     	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
         <p><%=i18n.localize("sandboxKeyMsg")%></p>
     </div>
-    <button  class="app-key-generate-button btn btn-primary generatekeys" onclick="jagg
-	.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
-		   data-application="<%=encode.forHtmlAttribute("app.name")%>"
-		   data-callbackUrl="<%=encode.forHtmlAttribute("app.callbackUrl")%>"
-		   data-keytype="SANDBOX"
-		   data-username="<%= "userName" %>"
-		   iteration="200">Generate keys</button>    
+  	<form class="form-inline">
+	  <div class="form-group">	    
+	    <span>Validity period </span>
+	    <input type="text" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.    
+	    <button  class="btn btn-primary generatekeys">Generate keys</button>    
+	  </div> 		  
+	</form>			    
   {{/if}}
 </script>
 

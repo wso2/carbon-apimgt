@@ -59,7 +59,7 @@
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
+          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>

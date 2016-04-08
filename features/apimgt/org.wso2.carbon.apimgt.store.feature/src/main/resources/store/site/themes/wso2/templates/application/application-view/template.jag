@@ -57,19 +57,20 @@ for(var i=0;i < outputs.tiers.length; i++){
       </div>
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
+        jagg.log(application);
         var prodapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,
             ConsumerKey: oauthapp.prodConsumerKey,
             ConsumerSecret: oauthapp.prodConsumerSecret,
             Key: oauthapp.prodKey,
-            KeyScope: oauthapp.prodKeyScope,
+            KeyScope: oauthapp.prodKeyScopeValue,
             ValidityTime: oauthapp.prodValidityTime
         }
       %>
       </div>
       <%
-        jagg.log(oauthapp)
+        jagg.log(oauthapp);
         var sandapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,            

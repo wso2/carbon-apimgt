@@ -64,12 +64,13 @@
         },
 
         generateKeys: function(){
+            var validity_time = this.element.find(".validity_time").val();
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action: "generateApplicationKey",
                 application: this.app.name,
                 keytype: this.type,
                 callbackUrl: this.app.callbackUrl,
-                validityTime: this.app.ValidityTime,
+                validityTime: validity_time,
                 tokenScope:"",
             }, $.proxy(function (result) {
                 if (!result.error) {
@@ -83,9 +84,12 @@
                     jagg.message({content: result.message, type: "error"});
                 }
             },this), "json");
+            return false;
         },
 
-        regenerateToken: function(){
+        regenerateToken: function(){            
+            var validity_time = this.element.find(".validity_time").val();
+            var scopes = this.element.find(".scope_select").val().join(" ");
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
                 application:this.app.name,
@@ -93,12 +97,15 @@
                 oldAccessToken:this.app.Key,
                 clientId:this.app.ConsumerKey,
                 clientSecret: this.app.ConsumerSecret,
-                validityTime:this.app.ValidityTime,
-                tokenScope:""
+                validityTime:validity_time,
+                tokenScope:scopes
             }, $.proxy(function (result) {
                 if (!result.error) {
+                    console.log(result);
                     this.app.Key = result.data.key.accessToken;
-                    this.render();
+                    this.app.ValidityTime = result.data.key.validityTime;
+                    this.app.KeyScope = result.data.key.tokenScope.join();                    
+                    this.render();                    
                 } else {
                     jagg.message({content:result.message,type:"error"});
                 }
@@ -107,10 +114,11 @@
             return false;
         },
 
-        render: function(){            
+        render: function(){                   
             this.app.basickey = Base64.encode(this.app.ConsumerKey+":"+this.app.ConsumerSecret);
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
+            this.element.find(".selectpicker").selectpicker();
         }
     };
 
