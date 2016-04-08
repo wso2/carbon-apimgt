@@ -224,12 +224,12 @@ jsonform.fieldTemplate = function(inner) {
 
 var fileDisplayTemplate = '<div class="_jsonform-preview">' +
   '<% if (value.type=="image") { %>' +
-  '<img class="jsonform-preview" id="jsonformpreview-<%= id %>" src="<%= value.url %>" />' +
+  '<img class="jsonform-preview" id="jsonformpreview-<%= id %>" src="<%= value.url %>" alt="<%=i18n.localize("jsonFilePreview")%>" />' +
   '<% } else { %>' +
-  '<a href="<%= value.url %>"><%= value.name %></a> (<%= Math.ceil(value.size/1024) %>kB)' +
+  '<a href="<%= value.url %>" title="<%=i18n.localize("jsonFilePreview")%>"><%= value.name %></a> (<%= Math.ceil(value.size/1024) %>kB)' +
   '<% } %>' +
   '</div>' +
-  '<a href="#" class="btn _jsonform-delete"><i class="glyphicon glyphicon-remove" title="Remove"></i></a> ';
+  '<a href="#" class="btn _jsonform-delete" title="<%=i18n.localize("deleteButton")%>"><i class="glyphicon glyphicon-remove" title="Remove"></i></a> ';
 
 var inputFieldTemplate = function (type) {
   return {
@@ -663,7 +663,7 @@ jsonform.elementTypes = {
       '<input type="hidden" name="<%= node.name %>" id="<%= node.id %>" value="<%= value %>" />' +
       '<div class="dropdown">' +
       '<a class="btn<% if (buttonClass && node.value) { %> <%= buttonClass %><% } %>" data-toggle="dropdown" href="#"<% if (node.value) { %> style="max-width:<%= width %>px;max-height:<%= height %>px"<% } %>>' +
-        '<% if (node.value) { %><img src="<% if (!node.value.match(/^https?:/)) { %><%= prefix %><% } %><%= node.value %><%= suffix %>" alt="" /><% } else { %><%= buttonTitle %><% } %>' +
+        '<% if (node.value) { %><img src="<% if (!node.value.match(/^https?:/)) { %><%= prefix %><% } %><%= node.value %><%= suffix %>" alt="<%= node.value %>" /><% } else { %><%= buttonTitle %><% } %>' +
       '</a>' +
       '<div class="dropdown-menu navbar" id="<%= node.id %>_dropdown">' +
         '<div>' +
@@ -718,7 +718,7 @@ jsonform.elementTypes = {
           $(node.el).find('a[data-toggle="dropdown"]')
             .addClass(elt.imageButtonClass)
             .attr('style', 'max-width:' + width + 'px;max-height:' + height + 'px')
-            .html('<img src="' + (!value.match(/^https?:/) ? prefix : '') + value + suffix + '" alt="" />');
+            .html('<img src="' + (!value.match(/^https?:/) ? prefix : '') + value + suffix + '" alt="'+value+'" />');
         }
         else {
           $(node.el).find('input').attr('value', '');

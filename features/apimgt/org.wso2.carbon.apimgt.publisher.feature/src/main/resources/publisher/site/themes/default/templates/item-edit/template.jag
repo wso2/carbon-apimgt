@@ -193,7 +193,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                          <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
                         <div><img id="apiEditThumb" alt="" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
                         <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer">
-                            <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
+                            <i class="icon-picture" title="<%=i18n.localize("changeIcon")%>"></i> <%=i18n.localize("changeIcon")%>
                         </a>
                     </div>
                     <div class="pull-left" id="imageUrl" style="display:none;">
@@ -382,7 +382,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </fieldset>
 
             <fieldset>
-                <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+                <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys" title="<%=i18n.localize("businessInformationTitle")%>"></i></legend>
                 <div style="display: none">
                     <div class="control-group">
                         <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
@@ -412,7 +412,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </fieldset>
 
 			<fieldset>
-                    <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("subscriptionsTitle")%><i class="icon-chevron-right icon-keys"></i></legend>
+                    <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("subscriptionsTitle")%><i class="icon-chevron-right icon-keys" title="<%=i18n.localize("subscriptionsTitle")%>"></i></legend>
                     <div class="control-group" style="display: none">
 	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
 	                			
@@ -490,7 +490,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                             </ul>
                         </div>
-                            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
+                            <button class="btn" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign" title="<%=i18n.localize("addNewResource")%>"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
                         </div>
 
                 <div id="resource_view"></div>
@@ -635,13 +635,13 @@ $(document).ready(function() {
         <ul>
             {{#each scopes}}
             <li>
-                <h6><a data-index='{{idx}}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
+                <h6><a data-index='{{idx}}' class='delete_scope' title='<%=i18n.localize("deleteScope")%>'><i class='icon-trash' title='<%=i18n.localize("deleteScope")%>'></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
                 <p>{{ description }}</p>
             </li>
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn" title='<%=i18n.localize("addScopes")%>'><i class="icon-plus-sign" title='<%=i18n.localize("addScopes")%>'></i>&nbsp;Add Scopes</a>
     </div>
 </script>
 
@@ -651,9 +651,9 @@ $(document).ready(function() {
                         <span style="color:#999">URL Pattern&nbsp;</span>
                         <span style="font-size:18px;font-weight:bold">/{{../context}}/{{../version}}/{{ url_pattern }}</span>
                             <blockquote class="pull-right">
-                            <a data-index='{{idx}}' class='delete_resource'><i class='icon-trash'></i></a>&nbsp;
-                            <a data-index='{{idx}}' class='moveup_resource'><i class='icon-arrow-up '></i></a>&nbsp;
-                            <a data-index='{{idx}}' class='movedown_resource'><i class='icon-arrow-down '></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='delete_resource' title='<%=i18n.localize("deleteResource")%>'><i class='icon-trash' title='<%=i18n.localize("deleteResource")%>'></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='moveup_resource' title='<%=i18n.localize("moveup_resource")%>'><i class='icon-arrow-up ' title='<%=i18n.localize("moveup_resource")%>'></i></a>&nbsp;
+                            <a data-index='{{idx}}' class='movedown_resource' title='<%=i18n.localize("movedown_resource")%>'><i class='icon-arrow-down ' title='<%=i18n.localize("movedown_resource")%>'></i></a>&nbsp;
                             </blockquote>
                         <table style="margin-left:80px;" class="table-hover">
                             <tr>
