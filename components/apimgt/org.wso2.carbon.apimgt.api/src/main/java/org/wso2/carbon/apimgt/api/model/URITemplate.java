@@ -32,6 +32,7 @@ public class URITemplate implements Serializable{
     private LinkedHashSet<String> httpVerbs = new LinkedHashSet<String>();
     private List<String> authTypes = new ArrayList<String>();
     private List<String> throttlingConditions = new ArrayList<String>();
+    private Set<String> conditionGroupSet = new HashSet<String>();
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
     private Scope scope;
@@ -56,7 +57,16 @@ public class URITemplate implements Serializable{
         this.mediationScript = mediationScript;
     }
 
-    /**
+    public Set<String> getConditionGroupSet() {
+		return conditionGroupSet;
+	}
+
+	public void setConditionGroupSet(Set<String> conditionGroupSet) {
+		this.conditionGroupSet = conditionGroupSet;
+	}
+
+
+	/**
      * Set mediation script for a given http method
      * @param method http method name
      * @param mediationScript mediation script content
@@ -263,4 +273,5 @@ public class URITemplate implements Serializable{
         //todo this is a hack to make key validation service stub from braking need to rewrite.
         return JSONValue.toJSONString(verbs);
     }
+
 }

@@ -849,6 +849,7 @@ public class ApiMgtDAO {
 
    
                 infoDTO.setContentAware(isContentAware);
+                //TODO this must implement as a part of throttling implementation.
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 //infoDTO.setThrottlingDataList(null);
@@ -5719,7 +5720,7 @@ public class ApiMgtDAO {
         ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
         //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
+        String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
@@ -5727,26 +5728,61 @@ public class ApiMgtDAO {
             prepStmt.setString(2, version);
 
             rs = prepStmt.executeQuery();
+            
+            //THROTTLING_TIER == POLICY_NAME
+            Map<String,URITemplate> mapByHttpVerbURLPattern = new HashMap<String,URITemplate>();
 
-            URITemplate uriTemplate;
-            while (rs.next()) {
-                uriTemplate = new URITemplate();
-                String script = null;
-                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                List<String> list =  new ArrayList<String>();
-                //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
-                //level.
-                list.add("default");
-                uriTemplate.setThrottlingConditions(list);
-                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                if (mediationScriptBlob != null) {
-                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                }
-                uriTemplate.setMediationScript(script);
-                uriTemplates.add(uriTemplate);
+			while (rs != null && rs.next()) {
+			
+				String httpVerb = rs.getString("HTTP_METHOD");
+				String authType = rs.getString("AUTH_SCHEME");
+				String urlPattern = rs.getString("URL_PATTERN");
+				String policyName = rs.getString("THROTTLING_TIER");
+				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+				String policyConditionGroupId = policyName+":"+conditionGroupId;
+
+				String key = httpVerb + ":" + urlPattern;
+				if (mapByHttpVerbURLPattern.containsKey(key)) {
+					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+						continue;
+					}
+					mapByHttpVerbURLPattern.get(key).getConditionGroupSet().add(policyConditionGroupId);
+				} else {
+					String script = null;
+					URITemplate uriTemplate = new URITemplate();
+					uriTemplate.setThrottlingTier(policyName);
+					uriTemplate.setAuthType(authType);
+					uriTemplate.setHTTPVerb(httpVerb);
+					uriTemplate.setUriTemplate(urlPattern);
+
+					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+					if (mediationScriptBlob != null) {
+						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+					}
+					uriTemplate.setMediationScript(script);
+					
+					Set<String> conditionGroupIdSet = new HashSet<String>();
+					uriTemplate.setConditionGroupSet(conditionGroupIdSet);
+					uriTemplates.add(uriTemplate);
+					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+						continue;
+					}
+					conditionGroupIdSet.add(policyConditionGroupId);
+				}
+
+				// TODO we need to fetch throttling conditions when we used CEP
+				// based advanced throttling for resource
+				// level.
+				// policyName:conditionId
+				// list.add("default");
+
+			}
+            
+            for(URITemplate uriTemplate: uriTemplates){
+            	uriTemplate.getThrottlingConditions().addAll(uriTemplate.getConditionGroupSet());
+            	if(uriTemplate.getThrottlingConditions().isEmpty()){
+            		uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier()+":"+"default");
+            	}
             }
         } catch (SQLException e) {
             handleException("Error while fetching all URL Templates", e);
