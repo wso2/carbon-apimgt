@@ -3696,7 +3696,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (!(policy instanceof GlobalPolicy)) {    //exclude global level policies deploying to GlobalCEP
                     manager.deployPolicyToGlobalCEP(flowString);
                 }
-                manager.deployPolicyToGatewayManager(flowString);
+                //manager.deployPolicyToGatewayManager(flowString);
             }
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
