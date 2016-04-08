@@ -1,6 +1,6 @@
 <% jagg.template("application/application-list", function(inputs, outputs, jagg) { %>
 <div class="page-header" id="Message">
-    <h2><%=i18n.localize("applications")%></h2>
+    <h1><%=i18n.localize("applications")%></h1>
 </div>
 <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
 

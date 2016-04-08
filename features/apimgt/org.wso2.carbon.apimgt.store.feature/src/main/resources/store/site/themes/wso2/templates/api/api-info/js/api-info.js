@@ -108,14 +108,14 @@ function triggerSubscribe() {
                     $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
                 }
-                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                $('#messageModal a.btn-primary').html("i18n.t('info.gotoSubsPage')");
                 $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
                 });
                 $('#messageModal a.btn-primary').click(function() {
-                    urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
-                    location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
+                    urlPrefix = "name=" + applicationName + "&" + urlPrefix;
+                    location.href = "../site/pages/application.jag?" + urlPrefix+"#subscription";
                  });
                    $('#messageModal').modal();
                 }
