@@ -553,14 +553,4 @@ public interface APIProvider extends APIManager {
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 
-    /**
-     *
-     * @param checkedAlertList This parameter will get the list of primary keys of alert types by comma separated.
-     * For ex: 1,2,3
-     * @param emailList Comma separated email list.
-     * @param userName user name.
-     * @throws APIManagementException
-     */
-    void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName) throws
-            APIManagementException;
 }
