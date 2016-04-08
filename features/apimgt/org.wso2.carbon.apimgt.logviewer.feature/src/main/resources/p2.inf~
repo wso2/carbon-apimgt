@@ -1,0 +1,8 @@
+instructions.configure = \
+
+
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/admin-dashboard/modules/la);\
+
+
+
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.logviewer_${feature.version}/jaggeryapps/admin-dashboard/modules/la,target:${installFolder}/../../deployment/server/jaggeryapps/admin-dashboard/modules/la/,overwrite:true);\
