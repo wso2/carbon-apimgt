@@ -281,6 +281,7 @@ public class ThrottleHandler extends AbstractHandler {
      * false to notify error with handler
      */
     public boolean handleRequest(MessageContext messageContext) {
+
         return doThrottle(messageContext);
     }
 
@@ -318,7 +319,7 @@ public class ThrottleHandler extends AbstractHandler {
             // return false;
         }
         long end = System.currentTimeMillis();
-        //log.info("Time:" + (end - start));
+        //log.info("Total-Time:" + (end - start));
         return true;
     }
 

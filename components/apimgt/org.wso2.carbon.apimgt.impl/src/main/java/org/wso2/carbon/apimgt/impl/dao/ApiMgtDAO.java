@@ -849,6 +849,7 @@ public class ApiMgtDAO {
 
    
                 infoDTO.setContentAware(isContentAware);
+                //TODO this must implement as a part of throttling implementation.
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 //infoDTO.setThrottlingDataList(null);
