@@ -29,7 +29,7 @@ public class AuthenticationContext {
     private String applicationTier;
     private String tier;
     private String apiTier;
-    private boolean isContentAware;
+    private boolean isContentAwareTierPresent;
     private String apiKey;
     private String keyType;
     private String callerToken;
@@ -48,12 +48,12 @@ public class AuthenticationContext {
 
     private List<String> throttlingDataList;
 
-    public boolean isContentAware() {
-        return isContentAware;
+    public boolean isContentAwareTierPresent() {
+        return isContentAwareTierPresent;
     }
 
     public void setIsContentAware(boolean isContentAware) {
-        this.isContentAware = isContentAware;
+        this.isContentAwareTierPresent = isContentAware;
     }
 
     public String getApiTier() {
