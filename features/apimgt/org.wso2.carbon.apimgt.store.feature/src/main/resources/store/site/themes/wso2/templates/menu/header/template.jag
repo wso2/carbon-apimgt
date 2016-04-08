@@ -15,9 +15,7 @@ if (jagg.getUser() != null) {
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 	tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 }
-var log = new Log();
-log.info("aaaaaaaaaaaaaaaaaaaaa");
-log.info(tenant);
+
 %>
 <!-- header -->
 <header class="header header-default">
