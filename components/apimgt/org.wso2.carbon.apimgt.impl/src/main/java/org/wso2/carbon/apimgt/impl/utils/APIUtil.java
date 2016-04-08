@@ -5154,6 +5154,13 @@ public final class APIUtil {
 
     }
 
+    /**
+     * This util method retrieves saved email list by user and agent name
+     * @param userName user name with tenant ID.
+     * @param agent if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
+     * @return List of eamil list.
+     * @throws APIManagementException
+     */
     public static List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException{
 
         List<String> list;
@@ -5162,73 +5169,5 @@ public final class APIUtil {
         return list;
     }
 
-//    /**
-//     *
-//     * @param userName
-//     * @param tenantDomain
-//     * @return
-//     */
-//    public  boolean isAdmin(String userName,String tenantDomain){
-//        boolean isAdmin = false;
-//
-//        try {
-//            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-//
-//                APIManagerConfiguration apiManagerConfiguration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
-//                        .getInstance().getAPIManagerConfigurationService().
-//                                getAPIManagerConfiguration();
-//
-//                String serverURL = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-//
-//                UserAdminStub userAdminStub = new UserAdminStub(null, serverURL + "UserAdmin");
-//                String adminUsername = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
-//                String adminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
-//
-//                CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, true, userAdminStub._getServiceClient());
-//
-//                FlaggedName[] flaggedNames = userAdminStub
-//                        .getRolesOfUser(MultitenantUtils.getTenantAwareUsername(userName), "*", -1);
-//                List<String> roles = new ArrayList<String>();
-//                if (flaggedNames != null) {
-//                    for (FlaggedName flaggedName : flaggedNames) {
-//                        if (flaggedName.getSelected()) {
-//                            String userRole = flaggedName.getItemName();
-//                            if (userRole.equals("admin")) {
-//
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//
-//            } else {
-//                RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-//                //UserRealm realm = realmService.getBootstrapRealm();
-//                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-//                        .getTenantId(tenantDomain);
-//                UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-//                org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
-//
-//                String[] userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(userName));
-//
-//                for (String userRole : userRoles) {
-//                    if (userRole.equals(realm.getRealmConfiguration().getAdminRoleName())) {
-//
-//                        break;
-//                    }
-//                }
-//
-//            }
-//        }catch (RemoteException e){
-//
-//        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-//            e.printStackTrace();
-//        } catch (UserStoreException e) {
-//            e.printStackTrace();
-//        } catch (UserAdminUserAdminException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return isAdmin;
-//    }
+
 }

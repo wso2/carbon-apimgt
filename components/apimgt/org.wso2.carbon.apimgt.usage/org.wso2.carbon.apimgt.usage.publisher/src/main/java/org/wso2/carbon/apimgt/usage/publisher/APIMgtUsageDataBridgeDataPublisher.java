@@ -170,6 +170,11 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         return dataPublisher;
     }
 
+    /**
+     * This method will publish event for alert types configurations.
+     * @param alertTypeDTO DTO object.
+     * @throws APIManagementException
+     */
     @Override
     public void publishEvent(AlertTypeDTO alertTypeDTO) throws APIManagementException {
 

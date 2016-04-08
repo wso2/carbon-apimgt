@@ -22,12 +22,25 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.AlertTypeDTO;
 
 import java.sql.SQLException;
 
+/**
+ * This is class will be called from jaggery layer and has methods to persist and publish alert types data to the its
+ * stream.
+ */
 public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
 
     public AlertTypesPublisher() {
         super();
     }
 
+    /**
+     *
+     * @param checkedAlertList Comma separated checked list ids.
+     * @param emailList Comma separated email list.
+     * @param userName user name
+     * @param agent publisher "p" store "s" agent "a".
+     * @param checkedAlertListValues alert type name lists.
+     * @throws APIManagementException
+     */
     public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
             String checkedAlertListValues) throws APIManagementException {
 
@@ -41,8 +54,9 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             }
 
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            //data persist in the database.
             apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
-
+            //set DTO
             AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
             alertTypeDTO.setAlertTypes(checkedAlertListValues);
             alertTypeDTO.setEmails(emailList);
