@@ -397,7 +397,7 @@ var addPolicyToBackend = function () {
 
                 //HTTP Verb condition related properties
                 if (apiPolicyNew.executionFlows[i].conditions[j].type == "HTTPVerb") {
-                    checked = $('#http-verb-condition-checkbox-' + executionFlowId).attr('checked');
+                    checked = $('#http-verb-condition-checkbox-' + executionFlowId).is(':checked');
                     if (checked) {
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         var httpVerb = $("#http-verb-selection-" + executionFlowId + " option:selected").val();
