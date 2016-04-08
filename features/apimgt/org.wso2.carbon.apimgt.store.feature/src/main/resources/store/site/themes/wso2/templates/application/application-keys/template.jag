@@ -18,7 +18,7 @@
 <script id="keys-template" type="text/x-handlebars-template">
   {{#if ConsumerKey }}
 	<div class="row">
-	  <div class="col-md-6">
+	  <div class="col-md-12 col-lg-6">
 	  	<form>
 	  	  <fieldset>
 		  <div class="form-group">
@@ -78,7 +78,7 @@
 	</div>
 	<br />
 	<div class="row">
-	  <div class="col-md-6">
+	  <div class="col-md-12 col-lg-6">
 	  	<h4>Generating Access Tokens</h4>
 	  	<p>Following cURL command shows how to generate an access token using password grant type.</p>
 		<div class="highlight">
