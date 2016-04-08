@@ -196,7 +196,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 									                                    //adding the description of existing tiers to the list
 									                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
                             								%>
-                            								<option value="<%=tier%>"><%=tierDisplayName%></option>
+                            								<option   title="<%= tierDisplayName%>" data-content="<span><strong><%= tierDisplayName %></strong><br /><%=tiersList[j].tierDescription%></span>" value="<%=tier%>"><%=tierDisplayName%></option>
                             										<%}
                             											denied = false;
                              									} %>
@@ -210,20 +210,6 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 							                               firstTierDesc = existingFirstTierDesc[0];
 							                            }
 							                        	%>
-							                          <p class="help-block"  id="tierDesc"><%=firstTierDesc%>
-							                       		 <%if(api.tiers[0].tierAttributes!=null) {
-							                        		var tierAttrs=api.tiers[0].tierAttributes.split(',');
-							                        		for(var k=0;k<tierAttrs.length;k++) {
-							                        			var tierKey=tierAttrs[k].split("::")[0];
-							                        			var tierVal=tierAttrs[k].split("::")[1];
-							                        	%>
-									                            <%if(tierKey!='') {%>
-									                            	<br/><%=tierKey%> : <%=tierVal%>
-									                        	<%
-									                        	}
-								                            }
-							                        	}%>
-							                          </p>
 		                                            </div>
 		                                           <%} %>
 	                                            <button type="button" onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
