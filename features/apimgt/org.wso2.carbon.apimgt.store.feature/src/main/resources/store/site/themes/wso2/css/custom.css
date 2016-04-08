@@ -1118,3 +1118,10 @@ a.remove_rating:hover{ color: #C00}
 .extended-form{
     display: none;
 }
+
+
+/* Customize swagger UI */
+#swagger-ui-container {max-width: 100%;}
+#swagger-ui-container .container{ width: 100% !important;padding: 0 !important; }
+#swagger-ui-container #api_info { display: none;}
+#resources_container ul { padding-left: 0px;}

@@ -31,7 +31,8 @@
     // Create the defaults once
     var pluginName = "keyWidget",
         defaults = {
-            propertyName: "value"            
+            username: "Username",
+            password: "Password"           
         };
 
     // The actual plugin constructor
@@ -89,7 +90,11 @@
 
         regenerateToken: function(){            
             var validity_time = this.element.find(".validity_time").val();
-            var scopes = this.element.find(".scope_select").val().join(" ");
+            if(typeof this.element.find(".scope_select").val() == "Array")
+                var scopes = this.element.find(".scope_select").val().join(" ");
+            else
+                var scopes = "";
+            console.log(scopes);
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
                 application:this.app.name,
@@ -101,7 +106,6 @@
                 tokenScope:scopes
             }, $.proxy(function (result) {
                 if (!result.error) {
-                    console.log(result);
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
                     this.app.KeyScope = result.data.key.tokenScope.join();                    
@@ -116,6 +120,8 @@
 
         render: function(){                   
             this.app.basickey = Base64.encode(this.app.ConsumerKey+":"+this.app.ConsumerSecret);
+            this.app.username = this.options.username;
+            this.app.password = this.options.password;
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
             this.element.find(".selectpicker").selectpicker();
@@ -144,6 +150,8 @@ $(document).ready(function() {
 $("#subscription-actions").each(function(){
     var source   = $("#subscription-actions").html();
     var subscription_actions = Handlebars.compile(source);
+    var source   = $("#subscription-api-name").html();
+    var subscription_api_name = Handlebars.compile(source);    
 
     var sub_list = $('#subscription-table').datatables_extended({
         "ajax": {
@@ -160,10 +168,10 @@ $("#subscription-actions").each(function(){
         },
         "columns": [
             { "data": "apiName", 
-			  "render": function ( data, type, rec, meta ) {
-			  	  console.log(rec);
-			      return '<a href="'+data+'">'+rec.apiName +' - '+ rec.apiVersion +'</a>';
-			  }
+              "render": function ( data, type, rec, meta ) {
+                  console.log(rec);
+                  return subscription_api_name(rec);
+              }
 			},
             { "data": "subscribedTier" },
             { "data": "subStatus" },
