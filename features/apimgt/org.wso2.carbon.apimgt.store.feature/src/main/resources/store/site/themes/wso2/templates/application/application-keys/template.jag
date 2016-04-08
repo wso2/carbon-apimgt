@@ -1,5 +1,4 @@
 <% jagg.template("application/application-keys", function(inputs, outputs, jagg) { 
-//@todo list sandbox keys
 //@todo copy to clip board curl commands
 //@todo if prodkey and consumer is null 
 //@todo place holder when generating keys ie generating.....
@@ -103,7 +102,7 @@
     </div>
   	<form class="form-inline">
 	  <div class="form-group">	    
-	    <span>Validity period </span>
+	    <span>Access token validity period </span>
 	    <input type="text" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.    
 	    <button  class="btn btn-primary generatekeys">Generate keys</button>    
 	  </div> 		  
