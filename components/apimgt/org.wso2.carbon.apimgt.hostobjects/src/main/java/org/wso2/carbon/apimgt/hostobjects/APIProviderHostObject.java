@@ -4791,7 +4791,13 @@ public class APIProviderHostObject extends ScriptableObject {
 
         List<String> scopeNames = new ArrayList<String>();
         Swagger swagger = new SwaggerParser().parse(spec);
-        Map<String,Path> paths = swagger.getPaths();
+        Map<String,Path> paths = null;
+        try{
+            paths = swagger.getPaths();
+        }
+        catch(Throwable e){
+            e.printStackTrace();
+        }
         Operation operation;
         APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
