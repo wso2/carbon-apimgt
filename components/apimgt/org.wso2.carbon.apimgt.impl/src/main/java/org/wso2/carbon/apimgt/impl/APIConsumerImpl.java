@@ -620,15 +620,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] accessAllowDomainsArray,String
-            requestedScopes[], String jsonInput) throws APIManagementException {
+                                            String validityTime, String
+                                                    requestedScopes[], String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -1701,10 +1700,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
         apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
-        if(consumerKey != null){
-            apiMgtDAO.deleteAccessAllowDomains(consumerKey);
-        }
-
     }
 
     /**
@@ -1714,13 +1709,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
-     *@param allowedDomainArray @return
+     * @return
      * @throws APIManagementException
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName, String keyType,
-                                                      String[] allowedDomainArray) throws APIManagementException {
+                                                      String applicationName, String keyType)
+                                                                        throws APIManagementException {
 
         String callBackURL = null;
 
@@ -1743,7 +1738,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -2712,18 +2706,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPISet;
     }
 
-    @Override
-    public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
-    }
-
-    @Override
-    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.updateAccessAllowDomains(accessToken, accessAllowDomains);
-    }
-
     /**
      * Returns a list of tiers denied
      *
@@ -2924,7 +2906,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationId != null && tokenType != null) {
                 apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
                 apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
-                apiMgtDAO.deleteAccessAllowDomains(consumerKey);
             }
         }
     }

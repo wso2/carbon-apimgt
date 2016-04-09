@@ -59,13 +59,12 @@ public class APIManagerInterceptorOps {
 	 * @param version
 	 * @param accessToken
 	 * @param requiredAuthenticationLevel
-	 * @param clientDomain
 	 * @return
 	 * @throws APIManagementException
 	 * @throws org.wso2.carbon.apimgt.interceptor.valve.APIFaultException
 	 */
 	public boolean doAuthenticate(String context, String version, String accessToken,
-	                              String requiredAuthenticationLevel, String clientDomain)
+	                              String requiredAuthenticationLevel)
 	                                                                                      throws APIManagementException,
 	                                                                                      APIFaultException {
 
@@ -74,7 +73,7 @@ public class APIManagerInterceptorOps {
 		}
 		APITokenValidator tokenValidator = new APITokenValidator();
 		apiKeyValidationDTO = tokenValidator.validateKey(context, version, accessToken,
-		                                                 requiredAuthenticationLevel, clientDomain);
+		                                                 requiredAuthenticationLevel);
 		if (apiKeyValidationDTO.isAuthorized()) {
 			String userName = apiKeyValidationDTO.getEndUserName();
 			PrivilegedCarbonContext.getThreadLocalCarbonContext()

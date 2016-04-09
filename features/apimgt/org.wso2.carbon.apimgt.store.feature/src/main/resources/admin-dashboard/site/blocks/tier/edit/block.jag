@@ -13,6 +13,7 @@ jagg.block("tier/edit", {
         getOutputs:function (inputs) {
             // We check whether the tiers are present in the session. If they are not, then
             var tiers = session.get("tiers");
+            var tierPermissions = session.get("tierPermissions");
             if(!tiers){
                 var result;
                 result = jagg.module("tier").getAllTiers();
@@ -20,6 +21,14 @@ jagg.block("tier/edit", {
 
                 // we put results to the session.
                 session.put("tiers", tiers);
+            }
+            if (!tierPermissions) {
+                var result;
+                result = jagg.module("tier").getTierPermissions();
+                tierPermissions = result.tierPermissions;
+
+                // we put results to the session.
+                session.put("tierPermissions", tierPermissions);
             }
         }
 });

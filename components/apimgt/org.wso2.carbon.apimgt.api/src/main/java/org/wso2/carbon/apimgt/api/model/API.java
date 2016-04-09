@@ -87,9 +87,7 @@ public class API implements Serializable{
     
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
-    private Set<String> allowedHeaders;
-    private Set<String> allowedOrigins;
-
+    private CORSConfiguration corsConfiguration;
     private String endpointConfig;
     
     private String responseCache;
@@ -633,20 +631,12 @@ public class API implements Serializable{
         return isPublishedDefaultVersion;
     }
 
-    public Set<String> getAllowedOrigins() {
-        return allowedOrigins;
+    public CORSConfiguration getCorsConfiguration() {
+        return corsConfiguration;
     }
 
-    public void setAllowedOrigins(Set<String> allowedOrigins) {
-        this.allowedOrigins = allowedOrigins;
-    }
-
-    public Set<String> getAllowedHeaders() {
-        return allowedHeaders;
-    }
-
-    public void setAllowedHeaders(Set<String> allowedHeaders) {
-        this.allowedHeaders = allowedHeaders;
+    public void setCorsConfiguration(CORSConfiguration corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
     }
 
     public String getMonetizationCategory() { return this.monetizationCategory; }

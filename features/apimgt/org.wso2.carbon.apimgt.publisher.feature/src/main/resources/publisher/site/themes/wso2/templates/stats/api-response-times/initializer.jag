@@ -1,0 +1,22 @@
+<%
+jagg.initializer("stats/api-response-times", {
+
+    preInitialize:function () {
+        jagg.addHeaderCSS("stats", "datepicker","libs/datepicker/css/daterangepicker-bs3.css");
+        jagg.addHeaderCSS("stats", "nvd3","libs/nvd3/css/nv.d3.css");
+        jagg.addHeaderJS("stats", "common", "templates/stats/js/stats.js"); 
+        jagg.addFooterJS("stats", "d3","libs/nvd3/js/d3.v3.js");
+        jagg.addFooterJS("stats", "nvd3","libs/nvd3/js/nv.d3.js");
+        jagg.addFooterJS("stats", "moment", "libs/datepicker/js/moment.js");
+        jagg.addFooterJS("stats", "datepicker", "libs/datepicker/js/daterangepicker.js");
+        jagg.addFooterJS("stats", "jplot", "templates/stats/api-response-times/js/stats.js");
+    }
+});
+%>
+
+
+
+
+
+
+

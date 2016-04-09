@@ -45,6 +45,7 @@ public class APIMgtGatewayConstants {
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String AUTHORIZED_USER = "AuthorizedUser";
     public static final String SCOPES = "Scopes";
+    public static final String REQUEST_EXECUTION_START_TIME ="request.execution.start.time";
 
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 }

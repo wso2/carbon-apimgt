@@ -26,7 +26,7 @@
                 <%if(createPermitted){%>
                 <div id="addDoc">
                 <a onclick="newDocFormToggle()" href="#">
-                    <i class=" icon-plus-sign"></i> <%=i18n.localize("addNewDoc")%>
+                    <i class=" icon-plus-sign" title="Add New Doc"></i> <%=i18n.localize("addNewDoc")%>
                 </a>
                 </div>
                 <div id="updateDoc" style="display:none;">
@@ -198,19 +198,19 @@
                     <%if(createPermitted){%>
                     <td id="buttonTd">
 			<% if(doc.sourceType == "INLINE") {%>
- 			 	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
+ 			 	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')" title="<%=i18n.localize("editContent")%>" ><i class="icon-edit" title="<%=i18n.localize("editContent")%>"></i> <%=i18n.localize("editContent")%></a>
                         <% }else if (doc.sourceType == "URL"){%>
-                         	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a>
+                         	<a href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" title="<%=i18n.localize("view")%>" ><i class="icon-check" title="<%=i18n.localize("view")%>"></i> <%=i18n.localize("view")%></a>
                         <%}else if (doc.sourceType == "FILE"){ %>
 
-			 <a href="<%=jagg.url("/site/themes/default/templates/documentation/download.jag?tenant=" + tenant  + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="icon-check"></i>
+			 <a href="<%=jagg.url("/site/themes/default/templates/documentation/download.jag?tenant=" + tenant  + "&resourceUrl=" + doc.filePath) %>" target="_blank" title="<%=i18n.localize("download")%>" download><i class="icon-check" title="<%=i18n.localize("download")%>"></i>
 			  <%=i18n.localize("open")%>
 			  </a>
 			<%}%>
 
-                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a>
+                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')" title="<%=i18n.localize("update")%>"><i class="icon-retweet" title="<%=i18n.localize("update")%>"></i> <%=i18n.localize("update")%></a>
                          
-                        |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="icon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
+                        |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')" title="<%=i18n.localize("deleteMethod")%>"><i class="icon-trash" title="<%=i18n.localize("deleteMethod")%>"></i> <%=i18n.localize("deleteMethod")%></a>
 			</td>
                     <%}%>
                 </tr>

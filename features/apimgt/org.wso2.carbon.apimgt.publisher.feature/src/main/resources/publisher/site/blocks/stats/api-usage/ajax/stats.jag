@@ -20,7 +20,9 @@ include("/jagg/jagg.jag");
             var currentLocation = request.getParameter("currentLocation");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
-            if (currentLocation.indexOf("all-statistics") >= 0) {
+            var apiFilter = request.getParameter("apiFilter");
+            
+            if (currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
                 result = mod.getProviderAPIUsage(allProviders, from, to);
             } else {
                 result = mod.getProviderAPIUsage(provider, from, to);
@@ -61,25 +63,7 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-        } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-
+        } 
         else {
             print({
                 error: true,

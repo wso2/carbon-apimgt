@@ -1,0 +1,21 @@
+<% jagg.template("menu/primary", function(inputs, outputs, jagg) { %>
+<%var reqUrl = request.getRequestURI();
+ var inlineUrl=jagg.getAbsoluteUrl("/site/pages/inline-editor.jag");
+
+ var urlPrefix;
+ var urlPostfix;
+
+ var encode = require('encode');
+ encode = new encode.Encode();
+ var tenant = encode.forUriComponent(request.getParameter("tenant"));
+ if(tenant != null && tenant != 'null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+ if(tenant != null && tenant != 'null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+ 
+ var user = outputs.user;
+
+%>
+
+<!-- breadcrumb -->
+<% jagg.includeBlocks(outputs.breadcrumb); %>
+
+<%});%>

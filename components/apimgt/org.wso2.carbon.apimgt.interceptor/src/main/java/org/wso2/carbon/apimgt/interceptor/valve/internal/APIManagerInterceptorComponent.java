@@ -73,7 +73,7 @@ public class APIManagerInterceptorComponent {
     }
     
 	private void setStatPublishingConf() {
-		boolean statsPublishingEnabled = amConfigService.getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+		boolean statsPublishingEnabled = APIUtil.isAnalyticsEnabled();
 		String statsPublisherClass = amConfigService.getAPIAnalyticsConfiguration()
 		                                           .getPublisherClass();
 		String hostName = DataPublisherUtil.getHostAddress();

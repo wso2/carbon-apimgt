@@ -205,7 +205,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
 	@Override
 	public boolean handleResponse(MessageContext arg0) {
-		return true;
+        return true;
 	}
 	
 	private void handleException(String msg) {

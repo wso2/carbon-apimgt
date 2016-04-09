@@ -97,7 +97,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         try {
             APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-            boolean enabled = configuration.isAnalyticsEnabled();
+            boolean enabled = APIUtil.isAnalyticsEnabled();
             if (enabled) {
                 String bamServerURL = configuration.getBamServerUrlGroups();
                 String bamServerUser = configuration.getBamServerUser();

@@ -325,6 +325,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Overview constants for CORS configuration
+    public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
     public static final String LC_NEXT_STATES="nextStates";
@@ -591,6 +593,9 @@ public final class APIConstants {
 // The following properties describes the reason for the throttle out.
     public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED = "API_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
@@ -606,6 +611,7 @@ public final class APIConstants {
     public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
     public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
     public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_USAGE_EXECUTION_TIME_STREAM = API_USAGE_STREAMS + "ExecutionTime.";
     public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
     public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
     public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
@@ -614,6 +620,9 @@ public final class APIConstants {
     public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
     public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
     public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
+    public static final String API_EXECUTION_TIME_STREAM_NAME = API_USAGE_EXECUTION_TIME_STREAM + "Name";
+    public static final String API_EXECUTION_TIME_STREAM_VERSION = API_USAGE_EXECUTION_TIME_STREAM + "Version";
+
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
@@ -749,17 +758,20 @@ public final class APIConstants {
     	private OperationParameter(){    	    
     	}
     }
-    
+
     public static class CORSHeaders {
-    	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+        public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+        public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-    	
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
-    	private CORSHeaders(){    	    
-    	}
+        public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
+        public static final String ALLOW_METHODS_HANDLER_VALUE = "allowedMethods";
+        public static final String ALLOW_ORIGIN_HANDLER_VALUE = "allowedOrigins";
+        public static final String ALLOW_CREDENTIALS_HANDLER_VALUE = "allowCredentials";
+        public static final String IMPLEMENTATION_TYPE_HANDLER_VALUE = "apiImplementationType";
+
+        private CORSHeaders() {
+        }
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";

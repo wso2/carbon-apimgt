@@ -359,7 +359,7 @@ function convertDateToLong(date){
 }
 
 function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+    jagg.post("/site/blocks/stats/ajax/stats.jag", { action: "isDataPublishingEnabled"},
         function (json) {
             if (!json.error) {
                 statsEnabled = json.usage;

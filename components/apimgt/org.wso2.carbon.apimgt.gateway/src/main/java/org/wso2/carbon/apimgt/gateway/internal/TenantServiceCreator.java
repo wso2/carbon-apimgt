@@ -19,35 +19,23 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.config.SynapseConfigurationBuilder;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
-import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
-import org.apache.synapse.config.xml.SequenceMediatorFactory;
-import org.apache.synapse.mediators.base.SequenceMediator;
-import org.apache.synapse.registry.Registry;
 import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
-import org.wso2.carbon.mediation.registry.WSO2Registry;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.rmi.RemoteException;
-import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -70,19 +58,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
-    private SequenceMediator authFailureHandlerSequence = null;
-    private SequenceMediator resourceMisMatchSequence = null;
-    private SequenceMediator throttleOutSequence = null;    
-    private SequenceMediator sandboxKeyErrorSequence = null;
-    private SequenceMediator productionKeyErrorSequence = null;
-    private SequenceMediator corsSequence = null;
-
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-        /*String tenantDomain =
-                PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
-        int tenantId =  PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();*/
-    	String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        log.info("Initializing APIM TenantServiceCreator for the tenant domain : " + tenantDomain);
         try {
 
             // first check which configuration should be active
@@ -147,106 +126,73 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
      */
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
     private void createTenantSynapseConfigHierarchy(File synapseConfigDir, String tenantDomain) {
-
-           if(synapseConfigDir.exists()) {
-               SynapseConfiguration initialSynCfg = SynapseConfigurationBuilder.getDefaultConfiguration();
-
-               //SequenceMediator mainSequence = (SequenceMediator) initialSynCfg.getMainSequence();
-               //SequenceMediator faultSequence = (SequenceMediator) initialSynCfg.getFaultSequence();
-               InputStream in = null;
-               StAXOMBuilder builder = null;
-               SequenceMediatorFactory factory = new SequenceMediatorFactory();
-               try {
-                   if (authFailureHandlerSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       authFailureHandlerSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       authFailureHandlerSequence.setFileName(authFailureHandlerSequenceName + ".xml");
-                   }
-                   if (resourceMisMatchSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       resourceMisMatchSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       resourceMisMatchSequence.setFileName(resourceMisMatchSequenceName + ".xml");
-                   }
-                   if (throttleOutSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + throttleOutSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       throttleOutSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       throttleOutSequence.setFileName(throttleOutSequenceName + ".xml");
-                   }
-                   if (sandboxKeyErrorSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       sandboxKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       sandboxKeyErrorSequence.setFileName(sandboxKeyErrorSequenceName + ".xml");
-                   }
-                   if (productionKeyErrorSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + productionKeyErrorSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       productionKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
-                   }
-                   if (corsSequence == null) {
-                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
-                       builder = new StAXOMBuilder(in);
-                       corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                       corsSequence.setFileName(corsSequenceName + ".xml");
-                   }
-                   FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
-                           new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));
-
-                   FileUtils.copyFile(new File(synapseConfigRootPath + faultSequenceName + ".xml"),
-                           new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + faultSequenceName + ".xml"));
-
-               } catch (IOException e) {
-                   log.error("Error while reading API manager specific synapse sequences" + e);
-
-               } catch (XMLStreamException e) {
-                   log.error("Error while parsing API manager specific synapse sequences" + e);
-               } finally {
-                   IOUtils.closeQuietly(in);
-               }
-
-               Registry registry = new WSO2Registry();
-               initialSynCfg.setRegistry(registry);
-               MultiXMLConfigurationSerializer serializer
-                       = new MultiXMLConfigurationSerializer(synapseConfigDir.getAbsolutePath());
-               try {
-                   serializer.serializeSequence(authFailureHandlerSequence, initialSynCfg, null);
-                   serializer.serializeSequence(sandboxKeyErrorSequence, initialSynCfg, null);
-                   serializer.serializeSequence(productionKeyErrorSequence, initialSynCfg, null);
-                   serializer.serializeSequence(throttleOutSequence, initialSynCfg, null);
-                   serializer.serializeSequence(resourceMisMatchSequence, initialSynCfg, null);
-                   serializer.serializeSequence(corsSequence, initialSynCfg, null);
-                   serializer.serializeSynapseRegistry(registry, initialSynCfg, null);
-               } catch (Exception e) {
-                   handleException("Couldn't serialise the initial synapse configuration " +
-                           "for the domain : " + tenantDomain, e);
-               }
-           }
-    }
-
-    /**
-     * No need to implement
-     */
-    private void addDeployers() {
-
+        Thread tenantSynapseConfigHierarchyCreator
+                = new Thread(new TenantSynapseConfigHierarchyCreator(synapseConfigDir, tenantDomain));
+        tenantSynapseConfigHierarchyCreator.start();
     }
 
     public static boolean isRunningSamplesMode() {
         return true;
     }
 
-    private void handleFatal(String message) {
-        log.fatal(message);
-    }
+    private class TenantSynapseConfigHierarchyCreator implements Runnable{
 
-    private void handleFatal(String message, Exception e) {
-        log.fatal(message, e);
-    }
+        private File synapseConfigDir;
+        private String tenantDomain;
+        final private int timeoutInSeconds = 60;
 
-    private void handleException(String message, Exception e) {
-        log.error(message, e);
+        public TenantSynapseConfigHierarchyCreator(File synapseConfigDir, String tenantDomain) {
+            this.synapseConfigDir = synapseConfigDir;
+            this.tenantDomain = tenantDomain;
+        }
+
+        @Override
+        public void run() {
+            final long startTime = System.currentTimeMillis();
+
+            //wait until the synpase config directory structure is created by carbon-mediation
+            while(!synapseConfigDir.exists()){
+                if((System.currentTimeMillis() - startTime) / 1000 > timeoutInSeconds ){
+                    log.error("Waiting for Synapse Configuration hierarchy of tenant " + tenantDomain +
+                              " timed out. Copying custom sequence files failed!");
+                    return;
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    log.error("Error occurred while waiting for Synapse Configuration hierarchy of tenant "
+                              + tenantDomain, e);
+                }
+            }
+
+            try {
+                FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + mainSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + faultSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + faultSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + authFailureHandlerSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + resourceMisMatchSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + throttleOutSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + throttleOutSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + sandboxKeyErrorSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + productionKeyErrorSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + productionKeyErrorSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + corsSequenceName + ".xml"),
+                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                            + File.separator + corsSequenceName + ".xml"));
+            } catch (IOException e) {
+                log.error("Error while copying API manager specific synapse sequences" + e);
+            }
+        }
     }
 }

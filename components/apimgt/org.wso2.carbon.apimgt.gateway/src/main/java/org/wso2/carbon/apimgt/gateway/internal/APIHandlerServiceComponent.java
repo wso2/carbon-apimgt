@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import java.io.File;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -31,6 +29,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.io.File;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.handlers" immediate="true"
@@ -72,9 +72,6 @@ public class APIHandlerServiceComponent {
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}
-
-
-
     }
 
     protected void deactivate(ComponentContext context) {

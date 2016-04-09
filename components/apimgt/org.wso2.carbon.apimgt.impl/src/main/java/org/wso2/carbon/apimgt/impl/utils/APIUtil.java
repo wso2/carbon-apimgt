@@ -24,6 +24,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -69,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -78,7 +80,9 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -88,9 +92,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
-import org.wso2.carbon.bam.service.data.publisher.conf.RESTAPIConfigData;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -384,6 +385,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -583,6 +585,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -680,6 +683,7 @@ public final class APIUtil {
             api.setUriTemplates(uriTemplates);
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -827,6 +831,9 @@ public final class APIUtil {
 
             }
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                                  APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2210,6 +2217,7 @@ public final class APIUtil {
 
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -2222,24 +2230,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
-    }
-
-
-    /**
-     * Gets the List of Authorized Domains by consumer key.
-     *
-     * @param consumerKey
-     * @return
-     * @throws APIManagementException
-     */
-    public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
-            throws APIManagementException {
-        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
-        if (list != null && !list.isEmpty()) {
-            return Arrays.asList(list.split(","));
-        }
-
-        return null;
     }
 
     public static boolean checkAccessTokenPartitioningEnabled() {
@@ -2536,8 +2526,9 @@ public final class APIUtil {
     /**
      * Load the throttling policy  to the registry for tenants
      *
-     * @param tenant
      * @param tenantID
+     * @param location
+     * @param fileName
      * @throws APIManagementException
      */
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
@@ -2884,70 +2875,7 @@ public final class APIUtil {
     }
 
     public static boolean isAnalyticsEnabled() {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        if (serviceDataPublisherAdmin != null) {
-            return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
-        }
-        return false;
-    }
-
-
-    /**
-     * If Analytics is enabled through api-manager.xml this method will write the details to registry.
-     *
-     * @param configuration api-manager.xml
-     */
-    public static void writeAnalyticsConfigurationToRegistry(APIManagerConfiguration configuration) {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        String usageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        if (usageEnabled != null && serviceDataPublisherAdmin != null) {
-            log.debug("APIUsageTracking set to : " + usageEnabled);
-            boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
-            EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
-            RESTAPIConfigData restApiConfigData = serviceDataPublisherAdmin.getRestAPIConfigData();
-            eventingConfigData.setServiceStatsEnable(usageEnabledState);
-            try {
-                if (usageEnabledState) {
-                    String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-                    String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                    String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                    eventingConfigData.setUrl(bamServerURL);
-                    eventingConfigData.setUserName(bamServerUser);
-                    eventingConfigData.setPassword(bamServerPassword);
-
-                    String restAPIURL = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
-                    String restAPIUser = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
-                    String restAPIPassword = configuration
-                            .getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
-                    restApiConfigData.setUrl(restAPIURL);
-                    restApiConfigData.setUserName(restAPIUser);
-                    restApiConfigData.setPassword(restAPIPassword);
-                    if (log.isDebugEnabled()) {
-                        log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
-                                "BAMServerPassword : " + bamServerPassword);
-                    }
-                    APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, MultitenantConstants.SUPER_TENANT_ID);
-                }
-
-                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
-                serviceDataPublisherAdmin.configureRestAPI(restApiConfigData);
-            } catch (APIManagementException e) {
-                log.error("Error occurred while adding BAMServerProfile", e);
-            } catch (Exception e) {
-                log.error("Error occurred while updating EventingConfiguration", e);
-            }
-        }
-    }
-
-    public static Map<String, String> getAnalyticsConfigFromRegistry() {
-
-        Map<String, String> propertyMap = new HashMap<String, String>();
-        EventingConfigData eventingConfigData = APIManagerComponent.
-                getDataPublisherAdminService().getEventingConfigData();
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS, eventingConfigData.getUrl());
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_USER, eventingConfigData.getUserName());
-        propertyMap.put(APIConstants.API_USAGE_BAM_SERVER_PASSWORD, eventingConfigData.getPassword());
-        return propertyMap;
+        return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
 
     /**
@@ -3845,6 +3773,8 @@ public final class APIUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
             throw new APIManagementException(msg, e);
@@ -4273,22 +4203,6 @@ public final class APIUtil {
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
         }
-    }
-
-    public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
-            throws APIManagementException {
-        if (clientDomain != null) {
-            clientDomain = clientDomain.trim();
-        }
-        List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
-        if (authorizedDomains != null && !(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain)
-        )) {
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
     }
 
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
@@ -5067,6 +4981,9 @@ public final class APIUtil {
      */
     public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
         int index = apiVersion.indexOf("--");
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         String apiProvider;
         if (index != -1) {
             apiProvider = apiVersion.substring(0, index);
@@ -5080,5 +4997,130 @@ public final class APIUtil {
             return apiProvider;
         }
         return null;
+    }
+
+    /**
+     * Used to generate CORS Configuration object from CORS Configuration Json
+     *
+     * @param jsonString json representation of CORS configuration
+     * @return CORSConfiguration Object
+     */
+    public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, CORSConfiguration.class);
+
+    }
+
+    /**
+     * Used to generate Json string from CORS Configuration object
+     *
+     * @param corsConfiguration CORSConfiguration Object
+     * @return Json string according to CORSConfiguration Object
+     */
+    public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
+        return new Gson().toJson(corsConfiguration);
+    }
+
+    /**
+     * Used to get access control allowed headers according to the api-manager.xml
+     *
+     * @return access control allowed headers string
+     */
+    public static String getAllowedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
+    }
+
+    /**
+     * Used to get access control allowed methods define in api-manager.xml
+     *
+     * @return access control allowed methods string
+     */
+    public static String getAllowedMethods() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
+    }
+
+    /**
+     * Used to get access control allowed credential define in api-manager.xml
+     *
+     * @return true if access control allow credential enabled
+     */
+    public static boolean isAllowCredentials() {
+        String allowCredentials =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
+    }
+
+    /**
+     * Used to get CORS Configuration enabled from api-manager.xml
+     *
+     * @return true if CORS-Configuration is enabled in api-manager.xml
+     */
+    public static boolean isCORSEnabled() {
+        String corsEnabled =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(corsEnabled);
+    }
+
+    /**
+     * Used to get access control allowed origins define in api-manager.xml
+     *
+     * @return allow origins list defined in api-manager.xml
+     */
+    public static String getAllowedOrigins() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+
+    }
+
+    /**
+     * Used to get CORSConfiguration according to the API artifact
+     *
+     * @param artifact registry artifact for the API
+     * @return CORS Configuration object extract from the artifact
+     * @throws GovernanceException if attribute couldn't fetch from the artifact.
+     */
+    public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
+        if (corsConfiguration == null) {
+            corsConfiguration = getDefaultCorsConfiguration();
+        }
+        return corsConfiguration;
+    }
+
+    /**
+     * Used to get Default CORS Configuration object according to configuration define in api-manager.xml
+     *
+     * @return CORSConfiguration object accordine to the defined values in api-manager.xml
+     */
+    public static CORSConfiguration getDefaultCorsConfiguration() {
+        List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
+        List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
+        List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
+        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
+    }
+
+    /**
+     * Used to get API name from synapse API Name
+     * @param api_version API name from synapse configuration
+     * @return api name according to the tenant
+     */
+    public static String getAPINamefromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        String api;
+        if (index != -1) {
+            api_version = api_version.substring(index + 2);
+        }
+        api = api_version.split(":")[0];
+        index = api.indexOf("--");
+        if (index != -1) {
+            api = api.substring(index + 2);
+        }
+        return api;
     }
 }

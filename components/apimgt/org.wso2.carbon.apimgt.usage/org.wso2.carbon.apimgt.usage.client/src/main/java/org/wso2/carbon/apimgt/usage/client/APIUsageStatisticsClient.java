@@ -24,6 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
+import org.wso2.carbon.apimgt.usage.client.bean.Result;
+import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -32,10 +36,12 @@ import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
+
+import static java.util.Collections.sort;
 
 /**
  * Abstract class and act as a interface for the Statistic usage client for APIM.
@@ -545,4 +551,229 @@ public abstract class APIUsageStatisticsClient {
      * @return String
      */
     public abstract String getClientType();
+
+    /**
+     * Return list of Latency time for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @return List of latency Times
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+     public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                                 String tenantDomain, String fromDate,
+                                                                                 String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException;
+
+    /**
+     * Return list of Latency time for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @param mediationType - type of mediation
+     * @return List of latency Times
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+    public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                                 String tenantDomain, String fromDate,
+                                                                                 String toDate, String drillDown,
+                                                                                 String mediationType) throws
+            APIMgtUsageQueryServiceClientException;
+
+
+    /**
+     *  Used to get long value of String date.
+     * @param date Date string
+     * @return long value of given date
+     * @throws ParseException on Error
+     */
+    protected long getDateToLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        java.util.Date fDate = dateFormat.parse(date);
+        Long lDate = fDate.getTime();
+        return lDate;
+    }
+    /**
+     * Use to handle exception of common type in single step
+     *
+     * @param msg custom message
+     * @param e   throwable object of the exception
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    protected void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
+        log.error(msg, e);
+        throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
+
+    /**
+     *
+     * @param drillDown selected type of data
+     * @return Table name for view
+     */
+    protected  String getExecutionTimeTableByView(String drillDown){
+        String tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
+        if ("DAY".equals(drillDown)) {
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
+        }else if ("HOUR".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_HOUR_SUMMARY;
+        }else if ("MINUTES".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
+        }else if ("SECONDS".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_SECONDS_SUMMARY;
+        }
+        return tableName;
+    }
+
+    protected void insertZeroElementsAndSort(List<Result<ExecutionTimeOfAPIValues>> resultList, String drillDown,
+                                             long fromDate, long toDate) {
+
+        Calendar from = Calendar.getInstance();
+        from.setTimeInMillis(fromDate);
+        Calendar to = Calendar.getInstance();
+        to.setTimeInMillis(toDate);
+        if ("DAY".equals(drillDown)) {
+            if (((toDate - fromDate) / (1000 * 60 * 60 * 24)) * 5 > resultList.size()) {
+                insertZeroElementsByType(from, to, resultList, Calendar.DATE);
+            }
+        } else if ("HOUR".equals(drillDown)) {
+            if (((toDate - fromDate) / (1000 * 60 * 60)) * 5 > resultList.size()) {
+                insertZeroElementsByType(from, to, resultList, Calendar.HOUR_OF_DAY);
+            }
+        } else if ("MINUTES".equals(drillDown)) {
+            if (((toDate - fromDate) / (1000 * 60)) * 5 > resultList.size()) {
+                insertZeroElementsByType(from, to, resultList, Calendar.MINUTE);
+            }
+        } else if ("SECONDS".equals(drillDown)) {
+            if (((toDate - fromDate) / (1000)) * 5 > resultList.size()) {
+                insertZeroElementsByType(from, to, resultList, Calendar.SECOND);
+            }
+        }
+        sort(resultList, new Comparator<Result<ExecutionTimeOfAPIValues>>() {
+            @Override
+            public int compare(Result<ExecutionTimeOfAPIValues> o1, Result<ExecutionTimeOfAPIValues> o2) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(o1.getValues().getYear(), o1.getValues().getMonth() - 1, o1.getValues().getDay(), o1
+                        .getValues().getHour(), o1.getValues().getMinutes(), o1.getValues().getSeconds());
+                Calendar comparedDate = Calendar.getInstance();
+                comparedDate.set(o2.getValues().getYear(), o2.getValues().getMonth() - 1, o2.getValues().getDay(), o2
+                        .getValues().getHour(), o2.getValues().getMinutes(), o2.getValues().getSeconds());
+                return calendar.getTime().compareTo(comparedDate.getTime());
+            }
+        });
+    }
+
+    private void insertZeroElementsByType(Calendar from, Calendar to, List<Result<ExecutionTimeOfAPIValues>>
+            resultList, int field) {
+        List<Result<ExecutionTimeOfAPIValues>> tempList = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+        Calendar checkedDate = Calendar.getInstance();
+        Set<String> mediationTypes = new HashSet<String>();
+        for (Date date = from.getTime(); from.before(to);
+             from.add(field, 1), date = from.getTime()) {
+            checkedDate.setTime(date);
+            boolean status = false;
+            for (Result<ExecutionTimeOfAPIValues> executionTimeOfAPIValuesResult : resultList) {
+                    int year = executionTimeOfAPIValuesResult.getValues().getYear();
+                    int month = executionTimeOfAPIValuesResult.getValues().getMonth();
+                    int day = executionTimeOfAPIValuesResult.getValues().getDay();
+                    int hour = executionTimeOfAPIValuesResult.getValues().getHour();
+                    int minute = executionTimeOfAPIValuesResult.getValues().getMinutes();
+                    int seconds = executionTimeOfAPIValuesResult.getValues().getSeconds();
+                mediationTypes.add(executionTimeOfAPIValuesResult.getValues().getMediationName());
+                if (checkedDate.get(Calendar.YEAR) == year && checkedDate.get(Calendar.MONTH) +1 ==
+                        month) {
+                    if (field == Calendar.DATE && checkedDate.get(field) == day) {
+                        status = true;
+                        break;
+                    } else if (field == Calendar.HOUR_OF_DAY && checkedDate.get(Calendar.DATE) == day &&
+                            checkedDate.get(field) == hour) {
+                        status = true;
+                        break;
+                    } else if (field == Calendar.MINUTE && checkedDate.get(Calendar.DATE) == day
+                            && checkedDate.get(Calendar.HOUR_OF_DAY) == hour &&
+                            checkedDate.get(field) == minute) {
+                        status = true;
+                        break;
+                    }else if (field == Calendar.SECOND && checkedDate.get(Calendar.DATE) == day
+                            && checkedDate.get(Calendar.HOUR_OF_DAY) == hour&& checkedDate.get(Calendar
+                            .MINUTE) == minute && checkedDate.get(field) == seconds) {
+                        status = true;
+                        break;
+                    }
+                }
+            }
+            if (!status) {
+                int hour,minutes = 0,seconds = 0;
+                if (field == Calendar.HOUR_OF_DAY) {
+                   hour=checkedDate.get(Calendar.HOUR_OF_DAY);
+                } else if (field == Calendar.MINUTE) {
+                    hour=checkedDate.get(Calendar.HOUR_OF_DAY);
+                    minutes = checkedDate.get(Calendar.MINUTE);
+                } else {
+                    hour = checkedDate.get(Calendar.HOUR_OF_DAY);
+                    minutes = checkedDate.get(Calendar.MINUTE);
+                    seconds = checkedDate.get(Calendar.SECOND);
+                }
+                for (String mediation : mediationTypes) {
+                    Result<ExecutionTimeOfAPIValues> tempResult = new Result<ExecutionTimeOfAPIValues>();
+                    ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
+                    executionTimeOfAPIValues.setYear(checkedDate.get(Calendar.YEAR));
+                    executionTimeOfAPIValues.setMonth(checkedDate.get(Calendar.MONTH) + 1);
+                    executionTimeOfAPIValues.setDay(checkedDate.get(Calendar.DATE));
+                    executionTimeOfAPIValues.setHour(hour);
+                    executionTimeOfAPIValues.setMinutes(minutes);
+                    executionTimeOfAPIValues.setSeconds(seconds);
+                    executionTimeOfAPIValues.setMediationName(mediation);
+                    tempResult.setValues(executionTimeOfAPIValues);
+                    tempList.add(tempResult);
+                }
+            }
+        }
+        resultList.addAll(tempList);
+    }
+    /**
+     * Return list of GeoLocation Usage for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @return List of Geolocation  usage
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+    public abstract List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version,
+                                                                                String tenantDomain, String fromDate,
+                                                                                String toDate, String drillDown)
+            throws
+            APIMgtUsageQueryServiceClientException;
+    /**
+     * Return list of UserAgent count for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @return List of count per user Agent
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+    public abstract List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version,
+                                                                             String tenantDomain, String fromDate,
+                                                                             String toDate, String drillDown)
+            throws
+            APIMgtUsageQueryServiceClientException;
 }
