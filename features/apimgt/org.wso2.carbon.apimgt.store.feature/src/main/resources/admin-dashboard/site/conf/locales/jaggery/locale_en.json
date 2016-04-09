@@ -69,6 +69,16 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
+    "deny":"Deny",
+
+    "RequestPatternChanged":"Request Pattern Change",
+    "UnusualIPAccessAlert":"Unusual IP Access",
+    "abnormalRequestsPerMin":"Abnormal Request Count",
+    "abnormalBackendTime":"Abnormal Backend Time",
+    "abnormalResponseTime":"Abnormal Response Time",
+    "healthAvailabilityPerMin":"API Health Monitor",
+    "AbnormalRefreshAlert":"Abnormal Token Refresh",
+    "AbnormalTierUsage":"Abnormal Tier Usage",
+    "FrequentTierHittingAlert":"Tier Crossing"
 
 }

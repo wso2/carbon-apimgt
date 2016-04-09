@@ -5,13 +5,12 @@ user = jagg.getUser();
 var gson = com.google.gson.Gson();
 
 
-var getDataFromAlertTable = function(tableName, searchEntry, startIndex,count) {
+var getDataFromAlertTable = function(tableName, searchEntry, startIndex,count, isAscending) {
 	
-	if(searchEntry == "null"){
-		var log = new Log();
-  		return usageClient.searchTable(tableName,"*:*",startIndex,count,"alertTimestamp",false);
+	if(searchEntry == ""){
+  		return usageClient.searchTable(tableName,"*:*",startIndex,count,"alertTimestamp",isAscending);
   	} else{
-  		return usageClient.searchTable(tableName, searchEntry ,startIndex,count,"alertTimestamp",false);
+  		return usageClient.searchTable(tableName, searchEntry ,startIndex,count,"alertTimestamp",isAscending);
   	}
 };
 
