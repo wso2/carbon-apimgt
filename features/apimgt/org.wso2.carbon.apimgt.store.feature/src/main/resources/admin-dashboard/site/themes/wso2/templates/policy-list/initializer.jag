@@ -2,7 +2,7 @@
 jagg.initializer("policy-list", {
 
      preInitialize:function () {
-     jagg.addHeaderJS("policy-list", "policy-list", "templates/policies/js/policy-list.js");
+     jagg.addHeaderJS("policy-list", "policy-list", "templates/policy-list/js/policy-list.js");
     }
 });
 %>

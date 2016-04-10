@@ -1064,6 +1064,41 @@ public final class APIConstants {
     public static final String DECISION_QUERY_ELEM = "decisionQuery";
     public static final String XML_EXTENSION= ".xml";
 
+    //Advanced throttling related constants
+    public static final String TIME_UNIT_SECOND = "sec";
+    public static final String TIME_UNIT_MINUTE = "min";
+    public static final String TIME_UNIT_HOUR = "hour";
+    public static final String TIME_UNIT_DAY = "day";
+
+    public static final String DEFAULT_APP_POLICY_LARGE = "Large";
+    public static final String DEFAULT_APP_POLICY_MEDIUM = "Medium";
+    public static final String DEFAULT_APP_POLICY_SMALL = "Small";
+
+
+    public static final String DEFAULT_APP_POLICY_LARGE_DESC = "Large tier";
+    public static final String DEFAULT_APP_POLICY_MEDIUM_DESC = "Medium tier";
+    public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Small tier";
+
+    public static final String DEFAULT_SUB_POLICY_LARGE = "Gold";
+    public static final String DEFAULT_SUB_POLICY_MEDIUM = "Silver";
+    public static final String DEFAULT_SUB_POLICY_SMALL = "Platinum";
+
+    public static final String DEFAULT_SUB_POLICY_LARGE_DESC = "Gold tier";
+    public static final String DEFAULT_SUB_POLICY_MEDIUM_DESC = "Silver tier";
+    public static final String DEFAULT_SUB_POLICY_SMALL_DESC = "Platinum tier";
+
+    public static final String DEFAULT_API_POLICY_LARGE = "Ultimate";
+    public static final String DEFAULT_API_POLICY_MEDIUM = "Plus";
+    public static final String DEFAULT_API_POLICY_SMALL = "Basic";
+
+    public static final String DEFAULT_API_POLICY_LARGE_DESC = "Ultimate tier";
+    public static final String DEFAULT_API_POLICY_MEDIUM_DESC = "Plus tier";
+    public static final String DEFAULT_API_POLICY_SMALL_DESC = "Basic tier";
+
+    public static final String API_POLICY_USER_LEVEL = "userLevel";
+    public static final String API_POLICY_API_LEVEL = "apiLevel";
+
+
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
         public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";

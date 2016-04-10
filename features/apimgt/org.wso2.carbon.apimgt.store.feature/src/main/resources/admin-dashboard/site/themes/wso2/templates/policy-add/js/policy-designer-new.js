@@ -397,7 +397,7 @@ var addPolicyToBackend = function () {
 
                 //HTTP Verb condition related properties
                 if (apiPolicyNew.executionFlows[i].conditions[j].type == "HTTPVerb") {
-                    checked = $('#http-verb-condition-checkbox-' + executionFlowId).attr('checked');
+                    checked = $('#http-verb-condition-checkbox-' + executionFlowId).is(':checked');
                     if (checked) {
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         var httpVerb = $("#http-verb-selection-" + executionFlowId + " option:selected").val();
@@ -470,10 +470,11 @@ var addPolicyToBackend = function () {
                 apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
             }
         }
-        console.log(JSON.stringify(apiPolicyNew));
-        jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
-            action: "addApiPolicy",
-            apiPolicy :JSON.stringify(apiPolicyNew),
-        },"json");
+
     }
+    console.log(JSON.stringify(apiPolicyNew));
+    jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+        action: "addApiPolicy",
+        apiPolicy: JSON.stringify(apiPolicyNew),
+    }, "json");
 };

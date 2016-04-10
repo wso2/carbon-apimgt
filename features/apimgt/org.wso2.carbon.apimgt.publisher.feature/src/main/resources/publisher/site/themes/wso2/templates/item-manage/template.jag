@@ -136,7 +136,7 @@
 
 	            <div class="form-group">
 	                        <label class = "col-sm-3 control-label">Make this the Default Version:
-	                        <a class="help_popup" help_data="default_api_help" title=""default_api_help"" data-trigger="hover" data-placement="bottom">
+	                        <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
 	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
 									<i class="fw fw-circle fw-stack-2x"></i>
 									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -579,7 +579,7 @@
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
-                <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+                <button id="editAPI-btn" class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" title="<%=i18n.localize("keepEditingAPI")%>"><%=i18n.localize("keepEditingAPI")%></button>
                 <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("goToStore")%>"><%=i18n.localize("goToStore")%></a>
                 <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary" title="<%=i18n.localize("goToOverview")%>"><%=i18n.localize("goToOverview")%></a>
                 </div>

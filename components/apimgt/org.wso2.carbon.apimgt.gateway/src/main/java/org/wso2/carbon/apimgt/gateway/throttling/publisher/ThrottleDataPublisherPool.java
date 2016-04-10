@@ -26,7 +26,11 @@ import org.apache.commons.pool.impl.StackObjectPool;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
-
+/**
+ * This class implemented to hold throttle data publishing agent pool. Reason for implement this is to
+ * reduce unwanted object creation. This is using stack object pool as we may need to handle some scenarios
+ * where unexpected load comes. In such cases we cannot have fixed size pool.
+ */
 public class ThrottleDataPublisherPool {
 
     private static final Log log = LogFactory.getLog(ThrottleDataPublisherPool.class);
@@ -36,9 +40,13 @@ public class ThrottleDataPublisherPool {
     private final ObjectPool clientPool;
 
     private ThrottleDataPublisherPool() {
-        log.debug("Initializing Throttle data publisher pool");
         //Using stack object pool to handle high concurrency scenarios without droping any messages.
         //Tuning this pool is mandatory according to use cases.
+        //A finite number of "sleeping" or idle instances is enforced, but when the pool is empty, new instances
+        // are created to support the new load. Hence this following data stricture places no limit on the number of "
+        // active" instance created by the pool, but is quite useful for re-using Objects without introducing
+        // artificial limits.
+        //Proper tuning is mandatory for good performance according to system load.
         ThrottleProperties.DataPublisherPool dataPublisherPoolConfiguration = ServiceReferenceHolder
                 .getInstance().getThrottleProperties().getDataPublisherPool();
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
@@ -55,11 +63,11 @@ public class ThrottleDataPublisherPool {
     }
 
     public DataProcessAndPublishingAgent get() throws Exception {
-        //log.info("Active Size= " +clientPool.getNumActive());
         return (DataProcessAndPublishingAgent) clientPool.borrowObject();
     }
 
     public void release(DataProcessAndPublishingAgent client) throws Exception {
+        client.setDataReference(null);
         clientPool.returnObject(client);
     }
 

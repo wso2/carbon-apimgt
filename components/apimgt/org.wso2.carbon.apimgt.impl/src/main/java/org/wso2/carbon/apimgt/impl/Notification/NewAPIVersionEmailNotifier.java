@@ -214,21 +214,23 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         // Getting the message template from registry file
         String content = "";
         try {
-            String templateLocation = (String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY);
+            String template = (String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY);
             int tenantId = notificationDTO.getTenantID();
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
                     (tenantId);
 
-            if (registry.resourceExists(templateLocation)) {
-                Resource resource = registry.get(templateLocation);
+            if (registry.resourceExists(template)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Getting message template from registry resource : " + template);
+                }
+                Resource resource = registry.get(template);
                 content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
             } else {
-                log.error("Cannot find the template in Registry. Inavlid location " + templateLocation);
-                return notificationDTO;
+                content = template;
             }
 
         } catch (RegistryException e) {
-            throw new NotificationException("Error while getting registry service", e);
+            throw new NotificationException("Error while getting registry resource", e);
         }
 
         if (content != null && !content.isEmpty()) {

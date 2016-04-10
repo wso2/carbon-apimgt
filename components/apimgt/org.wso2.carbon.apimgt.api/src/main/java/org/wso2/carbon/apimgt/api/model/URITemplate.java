@@ -55,8 +55,7 @@ public class URITemplate implements Serializable{
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
     }
-
-    /**
+	/**
      * Set mediation script for a given http method
      * @param method http method name
      * @param mediationScript mediation script content
