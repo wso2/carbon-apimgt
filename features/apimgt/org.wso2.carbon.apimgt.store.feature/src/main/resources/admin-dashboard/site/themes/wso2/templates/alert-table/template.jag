@@ -18,10 +18,9 @@
 <div class="content-data">
 
 
-
         <div id="alertTableLabel">
         <label>Alert Type 
-        <select  id="alertSelected" class="input-large" data-live-search="true">
+        <select  id="alertSelected" class="select form-control" data-live-search="true">
             <option value="1">All Alerts</option>
             <option value="2">Unusual IP Access</option>
             <option value="3">Abnormal Request Count</option>

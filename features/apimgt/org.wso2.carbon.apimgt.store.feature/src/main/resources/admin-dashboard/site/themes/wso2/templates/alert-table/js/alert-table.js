@@ -1,14 +1,22 @@
 $( document ).ready(function() { 
+
+    var statsEnabled = isDataPublishingEnabled();
+
     
     var selectedOptionKey = $("#alertSelected option:selected" ).val();
     var tableName = null;
+    var table = null;
     
     changeActiveTableName();
 
     $("#alertSelected").change(function(){
          selectedOptionKey = $("#alertSelected option:selected" ).val();
          changeActiveTableName();
-         table.ajax.reload(null, true);  
+         if(statsEnabled){
+            table.ajax.reload(null, true);
+         } else{
+            alert('stats not enabled');
+         } 
     })
     
 
@@ -37,6 +45,27 @@ $( document ).ready(function() {
 
     }
 
+    function isDataPublishingEnabled(){
+    jagg.post("/site/blocks/alert-table/ajax/alert-table.jag", { action: "isDataPublishingEnabled"},
+        function (json) {
+            if (!json.error) {
+                statsEnabled = json.usage;
+                if(statsEnabled){
+                    drawTable();
+                } else {
+                    alert('stats not enabled');
+                }
+                return statsEnabled;
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");
+}
+
     function changeSelectedAlertType(alertType){
         //var tableName = getParameterByName('tableName');
         if(alertType != null){
@@ -62,7 +91,9 @@ $( document ).ready(function() {
         }   
     }
 
-    var table =$('#alertHistoryTable').DataTable({
+    function drawTable(){
+    
+        table =$('#alertHistoryTable').DataTable({
                         //"processing": true,
                         "serverSide": true,
                         "columns" : [
@@ -89,7 +120,8 @@ $( document ).ready(function() {
                         }
                     });
 
+        }
+    
    
 });
-
-    
+     

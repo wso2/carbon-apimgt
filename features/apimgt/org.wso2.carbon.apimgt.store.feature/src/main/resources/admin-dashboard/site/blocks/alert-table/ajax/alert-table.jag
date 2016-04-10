@@ -20,7 +20,7 @@ i18n.init(request,localeResourcesBasePath);
         });
     } else {
         if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
+            mod = jagg.module("alerts");
             result = mod.isDataPublishingEnabled();
             
             if (result.error == "true") {
