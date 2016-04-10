@@ -19,6 +19,10 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +42,11 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
+import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -59,7 +67,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -3006,6 +3017,63 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
     }
 
+    @Override
+    public boolean deployPolicyInGlobalThrottleEngine(String executionPlan, String name) throws APIManagementException {
+        ServiceClient serviceClient;
+        Options options;
+        AuthenticationAdminStub authenticationAdminStub;
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub;
+        ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService
+                ().getAPIManagerConfiguration().getThrottleProperties().getPolicyDeployer();
+        try {
+            authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
+                    "AuthenticationAdmin");
+            String sessionCookie = null;
+
+            if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration
+                    .getPassword(),new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
+                ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
+                        .getServiceContext();
+                sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            }
+            if (sessionCookie != null) {
+                eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub("/EventProcessorAdminService");
+                serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+                options = serviceClient.getOptions();
+                options.setManageSession(true);
+                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
+
+                eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
+                ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
+                        .getAllActiveExecutionPlanConfigurations();
+                boolean isUpdateRequest = false;
+                for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
+                    if (executionPlanConfigurationDto.getName().equals(name)) {
+                        eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
+                        isUpdateRequest = true;
+                        break;
+                    }
+                }
+                if (!isUpdateRequest) {
+                    eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
+                }
+
+            }
+        } catch (AxisFault axisFault) {
+            axisFault.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (LoginAuthenticationExceptionException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+
+        return false;
+    }
+
     private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
         if (apiTenantConfig != null) {
             Object value = apiTenantConfig.get(configKey);
@@ -3019,4 +3087,5 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return false;
     }
+
 }

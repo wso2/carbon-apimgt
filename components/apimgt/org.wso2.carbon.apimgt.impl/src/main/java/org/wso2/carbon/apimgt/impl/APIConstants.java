@@ -1063,4 +1063,36 @@ public final class APIConstants {
     public static final String POLICY_NAME_ELEM = "name";
     public static final String DECISION_QUERY_ELEM = "decisionQuery";
     public static final String XML_EXTENSION= ".xml";
+
+    public static class AdvancedThrottleConstants {
+        public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
+        public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
+
+        public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
+        public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+
+        public static final String DATA_PUBLISHER_POOL_CONFIGURATION = "DataPublisherPool";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_MAX_IDLE ="MaxIdle";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_INIT_IDLE = "InitIdleCapacity";
+
+        public static final String GLOBAL_POLICY_ENGINE_WS_CONFIGURATION = "GlobalPolicyEngineWSConnectionDetails";
+        public static final String SERVICE_URL ="ServiceURL";
+        public static final String JMS_CONNECTION_DESTINATION = "Destination";
+        public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
+        public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String JMS_TASK_MANAGER = "JMSTaskManager";
+        public static final String MIN_THREAD_POOL_SIZE = "MinThreadPoolSize";
+        public static final String MAX_THREAD_POOL_SIZE = "MaxThreadPoolSize";
+        public static final String KEEP_ALIVE_TIME_IN_MILLIS = "KeepAliveTimeInMillis";
+        public static final String JOB_QUEUE_SIZE = "JobQueueSize";
+        public static final String ENABLE_UNLIMITED_TIER = "EnableUnlimitedTier";
+        public static final String THROTTLE_DATA_SOURCE_NAME = "ThrottleDataSourceName";
+        public static final String POLICY_DEPLOYER_CONFIGURATION = "PolicyDeployer";
+        public static final String BLOCK_CONDITION_RETRIEVER_CONFIGURATION = "BlockCondition";
+
+    }
 }

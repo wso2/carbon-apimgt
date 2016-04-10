@@ -22,9 +22,9 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClient;
-import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
@@ -43,11 +43,15 @@ public class ThrottleDataPublisher {
     private static volatile DataPublisher dataPublisher = null;
 
     static Executor pool = Executors.newFixedThreadPool(100);
-
+    private ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
+            .getThrottleProperties().getDataPublisher();
 
     public ThrottleDataPublisher() {
         try {
-            dataPublisher = new DataPublisher("Binary", "tcp://localhost:9611", "ssl://localhost:9711", "admin", "admin");
+            dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
+                    .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
+                    .getUsername(),
+                    dataPublisherConfiguration.getPassword());
         } catch (DataEndpointAgentConfigurationException e) {
             log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
                     e.getMessage(), e);

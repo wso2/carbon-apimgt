@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 
 public class ThrottleDataPublisherPool {
@@ -37,13 +39,15 @@ public class ThrottleDataPublisherPool {
         log.debug("Initializing Throttle data publisher pool");
         //Using stack object pool to handle high concurrency scenarios without droping any messages.
         //Tuning this pool is mandatory according to use cases.
+        ThrottleProperties.DataPublisherPool dataPublisherPoolConfiguration = ServiceReferenceHolder
+                .getInstance().getThrottleProperties().getDataPublisherPool();
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {
                 log.debug("Initializing new ThrottleDataPublisher instance");
                 return new DataProcessAndPublishingAgent();
             }
-        }, 1000, 200);
+        }, dataPublisherPoolConfiguration.getMaxIdle(), dataPublisherPoolConfiguration.getInitIdleCapacity());
     }
 
     public static ThrottleDataPublisherPool getInstance() {

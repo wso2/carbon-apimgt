@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,21 +27,22 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class WebServiceThrottleDataRetriever implements Runnable {
-    private static final Log log = LogFactory.getLog(WebServiceThrottleDataRetriever.class);
+public class WebServiceBlockConditionsRetriever implements Runnable {
+    private static final Log log = LogFactory.getLog(WebServiceBlockConditionsRetriever.class);
 
     @Override
     public void run() {
         if(log.isDebugEnabled()){
-            log.debug("Starting web service based throttle data retrieving process.");
+            log.debug("Starting web service based block condition data retrieving process.");
         }
-        loadThrottleDecisionsFromWebService();
+        loadBlockConditionsFromWebService();
     }
 
 
@@ -49,14 +51,14 @@ public class WebServiceThrottleDataRetriever implements Runnable {
      *
      * @return String object array which contains throttled keys.
      */
-    private String[] retrieveThrottlingData() {
+    private BlockConditionsDTO retrieveBlockConditionsData() {
 
         try {
-            ThrottleProperties.GlobalEngineWSConnection globalEngineWSConnection = ServiceReferenceHolder
-                    .getInstance().getThrottleProperties().getGlobalEngineWSConnection();
-            String url = globalEngineWSConnection.getServiceUrl();
-            byte[] credentials = Base64.encodeBase64((globalEngineWSConnection.getUsername() + ":" +
-                    globalEngineWSConnection.getPassword()).getBytes
+            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
+                    .getInstance().getThrottleProperties().getBlockCondition();
+            String url = blockConditionRetrieverConfiguration.getServiceUrl();
+            byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
+                    blockConditionRetrieverConfiguration.getPassword()).getBytes
                     (StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
@@ -65,15 +67,12 @@ public class WebServiceThrottleDataRetriever implements Runnable {
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
-                return responseString.split(",");
+             return new Gson().fromJson(responseString, BlockConditionsDTO.class);
             }
-
         } catch (IOException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
         }
-
         return null;
-
     }
 
 
@@ -85,17 +84,14 @@ public class WebServiceThrottleDataRetriever implements Runnable {
      * eventually update as missed events go to global policy engine and decision will be anyway pushed to topic and
      * all subscriber will notify it
      */
-    public void loadThrottleDecisionsFromWebService() {
-        String[] throttleKeyArray = retrieveThrottlingData();
-        if (throttleKeyArray != null && throttleKeyArray.length > 0) {
-            for (String throttleKey : throttleKeyArray) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                        getThrottleDataMap().put(throttleKey, "throttled");
-            }
+    public void loadBlockConditionsFromWebService() {
+        BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
+        if (blockConditionsDTO != null) {
+
         }
     }
 
-    public void startWebServiceThrottleDataRetriever() {
+    public void startWebServiceBlockConditionDataRetriever() {
         new Thread(this).start();
     }
 }

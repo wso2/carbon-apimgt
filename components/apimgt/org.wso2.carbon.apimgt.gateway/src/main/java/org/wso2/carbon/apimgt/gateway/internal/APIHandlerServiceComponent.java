@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.util.WebServiceBlockConditionsRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.WebServiceThrottleDataRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.jms.JMSThrottleDataRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -85,13 +86,16 @@ public class APIHandlerServiceComponent {
                 //service reference holder.
                 ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                 ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
-
+                ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
+                        .getThrottleProperties());
                 //First do web service call and update map.
                 //Then init JMS listener to listen que and update it.
                 //Following method will initialize JMS listnet and listen all updates and keep throttle data map up to date
                 //start web service throttle data retriever as separate thread and start it.
                 WebServiceThrottleDataRetriever webServiceThrottleDataRetriever = new WebServiceThrottleDataRetriever();
                 webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+                WebServiceBlockConditionsRetriever webServiceBlockConditionsRetriever = new WebServiceBlockConditionsRetriever();
+                webServiceBlockConditionsRetriever.startWebServiceBlockConditionDataRetriever();
 
                 //start JMS throttle data retriever as separate thread and start it.
                 JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
