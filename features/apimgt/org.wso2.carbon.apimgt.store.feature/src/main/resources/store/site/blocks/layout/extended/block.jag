@@ -9,16 +9,6 @@ jagg.block("layout/extended", {
     var tenantDomain = jagg.getTenantDomain();
         return {
             "title":inputs.title,
-            "top":[
-                {
-                    "name":"banner/featured",
-                    "inputs":null
-                },
-                {
-                    "name":"search/api-search",
-                    "inputs":null
-                }
-            ],
             "left":[
                 {
                     "name":"api/recently-added",

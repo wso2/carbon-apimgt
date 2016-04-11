@@ -412,8 +412,7 @@
     "editSwaggerSource":"Edit Swagger Source",
     "addParameter":"Add Parameter",
     "apiListing":"API List",
-    "apiBrowse":"Browse API"
-
-
+    "apiBrowse":"Browse API",
+    "manageAlertTypes": "Manage alert types"
 
 }

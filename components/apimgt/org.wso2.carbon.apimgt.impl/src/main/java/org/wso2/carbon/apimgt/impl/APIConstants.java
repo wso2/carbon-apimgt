@@ -301,10 +301,19 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
-    public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
-    public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
-    public static final String ENABLE_JWT_GENERATION = API_CONSUMER_AUTHENTICATION+"EnableTokenGeneration";
-    public static final String CLAIM_CACHE_EXPIRY = API_CONSUMER_AUTHENTICATION+ "APIMClaimCacheExpiry";
+    public static final String JWT_CONFIGS = "JWTConfiguration.";
+    public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
+    public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS +"JWTGeneratorImpl";
+    public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS +"EnableJWTGeneration";
+    public static final String REMOVE_USERNAME_FROM_JWT = JWT_CONFIGS + "RemoveUserNameFromJWTForApplicationToken";
+
+    public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
+    public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
+    public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
+    public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
+    public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
+    public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
+    public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
 
     //documentation rxt
 
@@ -392,24 +401,28 @@ public final class APIConstants {
             
         }
     }
-    
+
     public static final String API_GATEWAY = "APIGateway.";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
-    public static final String API_GATEWAY_KEY_CACHE_ENABLED = API_GATEWAY + "EnableGatewayKeyCache";
-    public static final String API_GATEWAY_RESOURCE_CACHE_ENABLED = API_GATEWAY + "EnableGatewayResourceCache";
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
-    public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
+    public static final String CACHE_CONFIGS = "CacheConfigurations";
+    public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
+    public static final String GATEWAY_RESOURCE_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayResourceCache";
+    public static final String JWT_CLAIM_CACHE_EXPIRY = CACHE_CONFIGS + "JWTClaimCacheExpiry";
+    public static final String KEY_MANAGER_TOKEN_CACHE = CACHE_CONFIGS + "EnableKeyManagerTokenCache";
+    public static final String KEY_MANAGER_TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "KeyManagerTokenCacheExpiry";
+    public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
+    public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
+
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
-    public static final String API_KEY_VALIDATOR_REVOKE_API_URL = API_KEY_VALIDATOR + "RevokeAPIURL";
-    public static final String API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME = API_KEY_VALIDATOR + "TokenEndPointName";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
@@ -418,7 +431,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
-    public static final String API_KEY_VALIDATOR_KEY_CACHE_EXPIRY = API_KEY_VALIDATOR + "APIMKeyCacheExpiry";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -437,7 +449,6 @@ public final class APIConstants {
     public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR
             + "KeyValidationHandlerClassName";
-    public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
 
     public static final String API_RESTAPI = "RESTAPI.";
     public static final String API_RESTAPI_WHITELISTED_URI = API_RESTAPI + "WhiteListedURIs.WhiteListedURI.";
@@ -450,10 +461,7 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
     public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
-    public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR
-            + "EnableKeyMgtValidationInfoCache";
-    public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR
-            + "RemoveUserNameFromJWTForApplicationToken";
+
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
     public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS
             + "UserName";
@@ -461,9 +469,6 @@ public final class APIConstants {
             + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
     public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR
             + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
-    public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
-    public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR + "ApplicationTokenScope";
-
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = API_STORE + "DisplayURL";
@@ -476,7 +481,6 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
-    public static final String API_STORE_TAG_CACHE_DURATION = API_STORE + "TagCacheDuration";
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
@@ -601,21 +605,23 @@ public final class APIConstants {
     public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
 
-    public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
-    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "DASServerURL";
-    public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "DASUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "DASPassword";
-    public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
-    public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
+    public static final String API_ANALYTICS = "Analytics.";
+    public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "DASServerURL";
+    public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
+    public static final String API_USAGE_BAM_SERVER_USER = API_ANALYTICS + "DASUsername";
+    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_ANALYTICS + "DASPassword";
+    public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_ANALYTICS + "SkipEventReceiverConnection";
+    public static final String API_USAGE_PUBLISHER_CLASS = API_ANALYTICS + "PublisherClass";
     public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
-    public static final String API_USAGE_STREAMS = API_USAGE_TRACKING + "Streams.";
+    public static final String API_USAGE_STREAMS = API_ANALYTICS + "Streams.";
+    public static final String STAT_PROVIDER_IMPL = API_ANALYTICS + "StatsProviderImpl";
     public static final String API_USAGE_REQUEST_STREAM = API_USAGE_STREAMS + "Request.";
     public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
     public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
     public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
     public static final String API_USAGE_EXECUTION_TIME_STREAM = API_USAGE_STREAMS + "ExecutionTime.";
+    public static final String API_ALERT_TYPES_STREAM = API_USAGE_STREAMS + "AlertTypes.";
     public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
     public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
     public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
@@ -626,14 +632,16 @@ public final class APIConstants {
     public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
     public static final String API_EXECUTION_TIME_STREAM_NAME = API_USAGE_EXECUTION_TIME_STREAM + "Name";
     public static final String API_EXECUTION_TIME_STREAM_VERSION = API_USAGE_EXECUTION_TIME_STREAM + "Version";
+    public static final String API_ALERT_TYPES_STREAM_NAME = API_ALERT_TYPES_STREAM + "Name";
+    public static final String API_ALERT_TYPES_STREAM_VERSION = API_ALERT_TYPES_STREAM + "Version";
 
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
     //Rest API Config data in api-config.xml
-    public static final String API_USAGE_DAS_REST_API_URL = API_USAGE_TRACKING + "DASRestApiURL";
-    public static final String API_USAGE_DAS_REST_API_USER = API_USAGE_TRACKING + "DASRestApiUsername";
-    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_USAGE_TRACKING + "DASRestApiPassword";
+    public static final String API_USAGE_DAS_REST_API_URL = API_ANALYTICS + "DASRestApiURL";
+    public static final String API_USAGE_DAS_REST_API_USER = API_ANALYTICS + "DASRestApiUsername";
+    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "DASRestApiPassword";
     
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
@@ -861,7 +869,6 @@ public final class APIConstants {
     public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_VERSION = "1.0.0";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
-    public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
 
@@ -1098,4 +1105,34 @@ public final class APIConstants {
     public static final String API_POLICY_USER_LEVEL = "userLevel";
     public static final String API_POLICY_API_LEVEL = "apiLevel";
 
+
+    public static class AdvancedThrottleConstants {
+        public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
+        public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
+
+        public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
+        public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+
+        public static final String DATA_PUBLISHER_POOL_CONFIGURATION = "DataPublisherPool";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_MAX_IDLE ="MaxIdle";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_INIT_IDLE = "InitIdleCapacity";
+
+        public static final String GLOBAL_POLICY_ENGINE_WS_CONFIGURATION = "GlobalPolicyEngineWSConnectionDetails";
+        public static final String SERVICE_URL ="ServiceURL";
+        public static final String JMS_CONNECTION_DESTINATION = "Destination";
+        public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
+        public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String JMS_TASK_MANAGER = "JMSTaskManager";
+        public static final String MIN_THREAD_POOL_SIZE = "MinThreadPoolSize";
+        public static final String MAX_THREAD_POOL_SIZE = "MaxThreadPoolSize";
+        public static final String KEEP_ALIVE_TIME_IN_MILLIS = "KeepAliveTimeInMillis";
+        public static final String JOB_QUEUE_SIZE = "JobQueueSize";
+        public static final String ENABLE_UNLIMITED_TIER = "EnableUnlimitedTier";
+        public static final String POLICY_DEPLOYER_CONFIGURATION = "PolicyDeployer";
+        public static final String BLOCK_CONDITION_RETRIEVER_CONFIGURATION = "BlockCondition";
+    }
 }

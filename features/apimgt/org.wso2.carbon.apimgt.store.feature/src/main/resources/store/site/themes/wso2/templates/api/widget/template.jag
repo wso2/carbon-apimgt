@@ -1,6 +1,5 @@
 <% jagg.template("api/widget", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
-<% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
 <%
     var thumbURL = "";
     var link = jagg.getAbsoluteUrl("/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider)

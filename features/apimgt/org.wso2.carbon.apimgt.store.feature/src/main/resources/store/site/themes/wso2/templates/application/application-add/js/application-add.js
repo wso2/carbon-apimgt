@@ -36,6 +36,7 @@ $(document).ready(function () {
             description:description
         }, function (result) {
             if (result.error == false) {
+                debugger;
                 status=result.status;
                 var date = new Date();
                 date.setTime(date.getTime() + (3 * 1000));
@@ -49,7 +50,7 @@ $(document).ready(function () {
                         window.location.reload(true);
                     }});
                 } else{
-                    window.location.reload(true);
+                    window.location = "/store/site/pages/application.jag?name="+application;
                 }
 
             } else {
@@ -72,13 +73,6 @@ $(document).ready(function () {
             }
         });*/
    
-    $('.help_popup').click(function()
-	    {
-	        $('#callback_help').toggle('fast', function()
-	        {
-	            $('#callback_help').html(i18n.t('info.callBackHelpMsg'));
-	        });
-	        return false;
-	    });
+
 });
 

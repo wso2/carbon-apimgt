@@ -847,12 +847,14 @@ public class ApiMgtDAO {
                 boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
                         null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
 
-   
+
                 infoDTO.setContentAware(isContentAware);
+
+                //TODO this must implement as a part of throttling implementation.
                 String apiLevelThrottlingKey = "api_level_throttling_key";
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
-                //TODO this must implement as a part of throttling implementation.
+                infoDTO.setApiTier("API_LEVEL_TIER");
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 infoDTO.setThrottlingDataList(list);
@@ -871,14 +873,14 @@ public class ApiMgtDAO {
     /*private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
             String subPolicy) throws APIManagementException {
         boolean isAnyContentAware = false;
-        
+
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         boolean isGlobalThrottlingEnabled = Boolean
                 .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-        //only check if using CEP based throttling. 
-        if(isGlobalThrottlingEnabled){                 
-          
+        //only check if using CEP based throttling.
+        if(isGlobalThrottlingEnabled){
+
             ResultSet resultSet = null;
             PreparedStatement ps = null;
             String sqlQuery;
@@ -887,15 +889,15 @@ public class ApiMgtDAO {
             } else {
                 sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
             }
-            
+
             try {
-          
+
                 ps = conn.prepareStatement(sqlQuery);
-               
-                ps.setInt(1, APIUtil.getTenantId(userName));             
+
+                ps.setInt(1, APIUtil.getTenantId(userName));
                 ps.setString(2, appPolicy);
                 ps.setString(3, subPolicy);
-                
+
                 if(apiPolicy != null) {
                     ps.setString(4, apiPolicy);
                 }
@@ -912,41 +914,41 @@ public class ApiMgtDAO {
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
             }
-            
-        }        
+
+        }
 
         return isAnyContentAware;
     }*/
-    
+
     private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
             String subPolicy) throws APIManagementException {
         boolean isAnyContentAware = false;
-        
+
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         boolean isGlobalThrottlingEnabled = Boolean
                 .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-        //only check if using CEP based throttling. 
-        if(isGlobalThrottlingEnabled){                 
-          
+        //only check if using CEP based throttling.
+        if(isGlobalThrottlingEnabled){
+
             ResultSet resultSet = null;
             PreparedStatement ps = null;
             String sqlQuery;
             if(apiPolicy == null){
-            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;	
-                
+            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
+
             } else {
             	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
             }
-            
+
             try {
-          
+
                 ps = conn.prepareStatement(sqlQuery);
-               
-                ps.setInt(1, APIUtil.getTenantId(userName));             
+
+                ps.setInt(1, APIUtil.getTenantId(userName));
                 ps.setString(2, appPolicy);
                 ps.setString(3, subPolicy);
-                
+
                 if(apiPolicy != null) {
                     ps.setString(4, apiPolicy);
                 }
@@ -956,41 +958,41 @@ public class ApiMgtDAO {
                 if(resultSet == null){
                 	throw new APIManagementException(" Result set Null");
                 }
-                
+
                 String quotaType = null;
-                
+
                 if (resultSet.next()) {
                 	if(apiPolicy == null){
                 		quotaType = resultSet.getString("QUOTA_TYPE");
                 	}else{
-                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");                		
+                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");
                 	}
                 }
-                
+
                 if(quotaType == null || StringUtils.isEmpty(quotaType)){
                 	throw new APIManagementException(" Quata Type can not be null ");
                 }
-                
+
                 if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
                 	isAnyContentAware = true;
                 }
-                
+
                 if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_REQUESTCOUNT)){
                 	isAnyContentAware = false;
                 }
-                
+
             } catch (SQLException e) {
                 handleException("Failed to get content awareness of the policies ", e);
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
             }
-            
-        }        
+
+        }
 
         return isAnyContentAware;
     }
 
-   
+
 
     private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
             throws APIManagementException {
@@ -5716,49 +5718,88 @@ public class ApiMgtDAO {
     /**
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
-    public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+	public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
+		Connection connection = null;
+		PreparedStatement prepStmt = null;
+		ResultSet rs = null;
+		ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
-        //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiContext);
-            prepStmt.setString(2, version);
+		// TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
+		String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			prepStmt = connection.prepareStatement(query);
+			prepStmt.setString(1, apiContext);
+			prepStmt.setString(2, version);
 
-            rs = prepStmt.executeQuery();
+			rs = prepStmt.executeQuery();
 
-            URITemplate uriTemplate;
-            while (rs.next()) {
-                uriTemplate = new URITemplate();
-                String script = null;
-                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                List<String> list =  new ArrayList<String>();
-                //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
-                //level.
-                list.add("default");
-                uriTemplate.setThrottlingConditions(list);
-                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                if (mediationScriptBlob != null) {
-                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                }
-                uriTemplate.setMediationScript(script);
-                uriTemplates.add(uriTemplate);
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching all URL Templates", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return uriTemplates;
-    }
+			// THROTTLING_TIER == POLICY_NAME
+			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
+			// HashMap<String,URITemplate>();
+			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
+
+			while (rs != null && rs.next()) {
+
+				String httpVerb = rs.getString("HTTP_METHOD");
+				String authType = rs.getString("AUTH_SCHEME");
+				String urlPattern = rs.getString("URL_PATTERN");
+				String policyName = rs.getString("THROTTLING_TIER");
+				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+				String policyConditionGroupId = policyName + ":" + conditionGroupId;
+
+				String key = httpVerb + ":" + urlPattern;
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+						continue;
+					}
+					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+				} else {
+					String script = null;
+					URITemplate uriTemplate = new URITemplate();
+					uriTemplate.setThrottlingTier(policyName);
+					uriTemplate.setAuthType(authType);
+					uriTemplate.setHTTPVerb(httpVerb);
+					uriTemplate.setUriTemplate(urlPattern);
+
+					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+					if (mediationScriptBlob != null) {
+						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+					}
+					uriTemplate.setMediationScript(script);
+
+					Set<String> conditionGroupIdSet = new HashSet<String>();
+					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
+					uriTemplates.add(uriTemplate);
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+						continue;
+					}
+					conditionGroupIdSet.add(policyConditionGroupId);
+				}
+
+			}
+
+			for (URITemplate uriTemplate : uriTemplates) {
+				String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
+						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+					}
+
+				}
+
+				if (uriTemplate.getThrottlingConditions().isEmpty()) {
+					uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier() + ":" + "default");
+				}
+
+			}
+		} catch (SQLException e) {
+			handleException("Error while fetching all URL Templates", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+		}
+		return uriTemplates;
+	}
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
@@ -7997,6 +8038,171 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method will fetch all alerts type that is available in AM_ALERT_TYPES.
+     * @return List of alert types
+     * @throws APIManagementException
+     */
+    public HashMap<Integer,String> getAllAlertTypesByAgent(String agent) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        HashMap<Integer, String> map = new HashMap<Integer, String>();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery;
+            if(agent == "a"){
+                sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
+                ps = conn.prepareStatement(sqlQuery);
+            }else {
+                sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES;
+                ps = conn.prepareStatement(sqlQuery);
+                ps.setString(1, agent);
+            }
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put(resultSet.getInt(1),resultSet.getString(2));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve alert types ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return map;
+    }
+
+    /**
+     *
+     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @return map of saved values of alert types.
+     * @throws APIManagementException
+     */
+    public List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws APIManagementException{
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<Integer> list = new ArrayList<Integer>();
+
+        try {
+            String sqlQuery;
+            conn = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_SAVED_ALERT_TYPES_BY_USERNAME;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getInt(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve saved alert types by user name. ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
+    }
+
+    public List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<String> list = new ArrayList<String>();
+
+        try {
+            String sqlQuery;
+            conn = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_SAVED_ALERT_EMAILS;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve saved alert types by user name. ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
+
+    }
+
+    /**
+     *
+     * @param userName User name.
+     * @param emailList Comma separated email list.
+     * @param alertTypesIDList Comma separated alert types list.
+     * @param agent if pram value = p we assume those changes from publisher if param value = s those data belongs to
+     * subscriber.
+     * @throws APIManagementException
+     * @throws SQLException
+     */
+    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String agent)
+            throws APIManagementException, SQLException {
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+        try {
+            connection.setAutoCommit(false);
+
+            String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
+
+            String deleteAlertTypesByUserNameAndAgentQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
+
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
+
+            if(alertTypesIDList != null){
+
+                List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
+
+                for (String alertTypeId : alertTypeIdList) {
+                    ps = connection.prepareStatement(alertTypesQuery);
+                    ps.setInt(1, Integer.parseInt(alertTypeId));
+                    ps.setString(2, userName);
+                    ps.setString(3, agent);
+                    ps.execute();
+                }
+
+            }
+
+            String deleteAlertTypesEmailListsByUserNameAndAgentQuery = SQLConstants.
+                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT;
+
+            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
+
+            //Email list save query
+            String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
+
+            ps = connection.prepareStatement(emailListSaveQuery);
+            ps.setString(1, userName);
+            ps.setString(2, emailList);
+            ps.setString(3, agent);
+            ps.execute();
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Failed to save alert preferences", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+
+        }
+    }
+
+    /**
      * Add a Application level throttling policy to database
      *
      * @param policy policy object defining the throttle policy
@@ -8020,7 +8226,7 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             if(hasCustomAttrib){
             	policyStatement.setBlob(10, new ByteArrayInputStream(policy.getCustomAttributes()));
-            }            
+            }
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8050,7 +8256,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement policyStatement = null;
         boolean hasCustomAttrib = false;
-        
+
         try {
         	if(policy.getCustomAttributes() != null){
        		 hasCustomAttrib = true;
@@ -8069,7 +8275,7 @@ public class ApiMgtDAO {
             policyStatement.setString(13, policy.getBillingPlan());
             if(hasCustomAttrib){
             	policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
-            } 
+            }
             policyStatement.executeUpdate();
 
             conn.commit();
@@ -8296,7 +8502,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(psQueryParameterCondition, null, null);
         }
     }
-    
+
 	private void addIPCondition(IPCondition ipCondition, int pipelineId, Connection conn) throws SQLException {
 		PreparedStatement statementIPCondition = null;
 
@@ -8452,7 +8658,7 @@ public class ApiMgtDAO {
                 APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(apiPolicy, rs);
                 apiPolicy.setUserLevel(rs.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
-                
+
                 policies.add(apiPolicy);
             }
         } catch (SQLException e) {
@@ -8813,7 +9019,7 @@ public class ApiMgtDAO {
                 endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
                 specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
                 withinRange = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
-                
+
 
                 if (specificIP != null && !"".equals(specificIP)) {
                     IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
@@ -8838,7 +9044,7 @@ public class ApiMgtDAO {
 
                      Assumes availability of starting date means date range is enforced.
                        Therefore availability of ending date is not checked.
-                    
+
                     DateRangeCondition dateRangeCondition = new DateRangeCondition();
                     dateRangeCondition.setStartingDate(startingDate);
                     dateRangeCondition.setEndingDate(endingDate);
@@ -9072,7 +9278,7 @@ public class ApiMgtDAO {
             }
             updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            
+
             if(hasCustomAttrib){
             	updateStatement.setBlob(7, new ByteArrayInputStream(policy.getCustomAttributes()));
             	updateStatement.setString(8, policy.getPolicyName());
@@ -9142,12 +9348,12 @@ public class ApiMgtDAO {
                 updateStatement.setLong(3, limit.getDataAmount());
                 updateStatement.setString(4, limit.getDataUnit());
             }
- 
+
             updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             updateStatement.setInt(7, policy.getRateLimitCount());
             updateStatement.setString(8, policy.getRateLimitTimeUnit());
-            
+
             if(hasCustomAttrib){
             	updateStatement.setBlob(9, new ByteArrayInputStream(policy.getCustomAttributes()));
             	updateStatement.setString(10, policy.getPolicyName());
@@ -9340,7 +9546,7 @@ public class ApiMgtDAO {
         policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
         //policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
         policyStatement.setBoolean(9, policy.isDeployed());
- 
+
     }
 
     /**
@@ -9383,11 +9589,11 @@ public class ApiMgtDAO {
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
     }
-    
+
     public boolean isPolicyExist(String policyType,int tenantId, String policyName ) throws APIManagementException{
     	Connection connection = null;
         PreparedStatement isExistStatement = null;
-    	
+
     	boolean isExist = false;
     	String policyTable = null;
     	if(PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyType)){
@@ -9425,9 +9631,9 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
         }
-    	
-    	
-    	
+
+
+
     	return isExist;
     }
 }

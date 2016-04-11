@@ -1911,9 +1911,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //Sending Notifications to existing subscribers
             try {
-
-                String isNotificationEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
-                        ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFICATION_ENABLED);
+                String isNotificationEnabled = "false";
+                Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getConfigSystemRegistry(tenantId);
+                if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                    if(content !=null ){
+                        JSONObject tenantConfig= (JSONObject) new JSONParser().parse(content);
+                        isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
+                    }
+                }
 
                 if (JavaUtils.isTrueExplicitly(isNotificationEnabled)){
 
@@ -3856,10 +3864,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //remove from database
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
-    }
-    
-    public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-        return policy;
     }
 }
