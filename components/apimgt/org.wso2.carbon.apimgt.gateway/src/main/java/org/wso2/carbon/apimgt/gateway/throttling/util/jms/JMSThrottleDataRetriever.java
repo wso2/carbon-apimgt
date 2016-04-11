@@ -23,14 +23,15 @@ import org.apache.axis2.transport.base.threads.NativeWorkerPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.util.*;
 
 public class JMSThrottleDataRetriever implements Runnable {
     private static final Log log = LogFactory.getLog(JMSThrottleDataRetriever.class);
-
+    private static final ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
+            ServiceReferenceHolder.getInstance().getThrottleProperties().getJmsConnectionProperties();
     @Override
     public void run() {
         if (log.isDebugEnabled()) {
@@ -44,23 +45,29 @@ public class JMSThrottleDataRetriever implements Runnable {
      * Then this will listen to topic updates and check all update and updare throttle data map accordingly.
      */
     public void subscribeForJmsEvents() {
-        Properties properties = new Properties();
+        Properties properties;
+        Hashtable<String, String> parameters = new Hashtable<String, String>();
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            properties.load(classLoader.getResourceAsStream("mb.properties"));
-            Hashtable<String, String> parameters = new Hashtable<String, String>();
+            if (jmsConnectionProperties.getJmsConnectionProperties().isEmpty()){
+                properties = new Properties();
+                ClassLoader classLoader = getClass().getClassLoader();
+                properties.load(classLoader.getResourceAsStream("mb.properties"));
+            }
+            else{
+                properties = jmsConnectionProperties.getJmsConnectionProperties();
+            }
             for (final String name : properties.stringPropertyNames()) {
                 parameters.put(name, properties.getProperty(name));
             }
-
-            String destination = "throttleData";
+            String destination = jmsConnectionProperties.getDestination();
             JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters, "Siddhi-JMS-Consumer");
             Map<String, String> messageConfig = new HashMap<String, String>();
             messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
-            int minThreadPoolSize = 4;
-            int maxThreadPoolSize = 4;
-            int keepAliveTimeInMillis = 1000;
-            int jobQueueSize = 1000;
+            int minThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMinThreadPoolSize();
+            int maxThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMaxThreadPoolSize();
+            int keepAliveTimeInMillis = jmsConnectionProperties.getJmsTaskManagerProperties()
+                    .getKeepAliveTimeInMillis();
+            int jobQueueSize = jmsConnectionProperties.getJmsTaskManagerProperties().getJobQueueSize();
             JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory,
                     "Siddhi-JMS-Consumer", new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
                             keepAliveTimeInMillis, jobQueueSize, "JMS Threads",

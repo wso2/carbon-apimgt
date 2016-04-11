@@ -104,6 +104,18 @@ paths:
             description: Unexpected error
             schema:
               $ref: '#/definitions/Error'
+  /block:
+    get:
+      summary: throttled events available
+      description: |
+        This will provide access to throttled events in database.
+      responses:
+        200:
+          description: An array of shops around you
+          schema:
+            type: object
+            additionalProperties:
+              $ref: "#/definitions/BlockConditions"
 definitions:
   ThrottledEvent:
     properties:
@@ -127,3 +139,25 @@ definitions:
       fields:
         type: string
 
+  BlockConditions:
+    properties:
+        api:
+         type: array
+         items:
+          type: string
+        application:
+          type: array
+          items:
+           type: string
+        ip:
+          type: array
+          items:
+           type: string
+        user:
+          type: array
+          items:
+           type: string
+        custom:
+          type: array
+          items:
+           type: string

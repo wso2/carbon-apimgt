@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -26,9 +27,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class WebServiceThrottleDataRetriever implements Runnable {
     private static final Log log = LogFactory.getLog(WebServiceThrottleDataRetriever.class);
@@ -50,9 +52,14 @@ public class WebServiceThrottleDataRetriever implements Runnable {
     private String[] retrieveThrottlingData() {
 
         try {
-            String url = "http://localhost:9763/throttle/data/v1/throttleAsString";
-
+            ThrottleProperties.GlobalEngineWSConnection globalEngineWSConnection = ServiceReferenceHolder
+                    .getInstance().getThrottleProperties().getGlobalEngineWSConnection();
+            String url = globalEngineWSConnection.getServiceUrl();
+            byte[] credentials = Base64.encodeBase64((globalEngineWSConnection.getUsername() + ":" +
+                    globalEngineWSConnection.getPassword()).getBytes
+                    (StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
+            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             HttpClient httpClient = HttpClientBuilder.create().build();
             HttpResponse httpResponse = httpClient.execute(method);
 

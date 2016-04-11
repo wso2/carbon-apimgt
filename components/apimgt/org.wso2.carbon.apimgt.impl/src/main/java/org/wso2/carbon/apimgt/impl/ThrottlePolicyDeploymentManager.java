@@ -19,6 +19,9 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +32,21 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
+import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.event.throttle.core.exception.ThrottleConfigurationException;
 
@@ -75,6 +87,7 @@ public class ThrottlePolicyDeploymentManager {
             if(log.isDebugEnabled()){
                 log.debug("deploy policy to global event processor : \n" + policyQuery );
             }
+    //        deployPolicyInGlobalThrottleEngine(fileName,policyQuery);
             throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
@@ -150,5 +163,60 @@ public class ThrottlePolicyDeploymentManager {
             }
         }
 
+    }
+
+    private boolean deployPolicyInGlobalThrottleEngine(String executionPlan, String name) throws
+            APIManagementException {
+        ServiceClient serviceClient;
+        Options options;
+        AuthenticationAdminStub authenticationAdminStub;
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub;
+        ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService
+                        ().getAPIManagerConfiguration().getThrottleProperties().getPolicyDeployer();
+        try {
+            authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
+                    "AuthenticationAdmin");
+            String sessionCookie = null;
+
+            if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration
+                    .getPassword(), new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
+                ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
+                        .getServiceContext();
+                sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            }
+            if (sessionCookie != null) {
+                eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub("/EventProcessorAdminService");
+                serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+                options = serviceClient.getOptions();
+                options.setManageSession(true);
+                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
+
+                eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
+                ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
+                        .getAllActiveExecutionPlanConfigurations();
+                boolean isUpdateRequest = false;
+                for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
+                    if (executionPlanConfigurationDto.getName().equals(name)) {
+                        eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
+                        isUpdateRequest = true;
+                        break;
+                    }
+                }
+                if (!isUpdateRequest) {
+                    eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
+                }
+
+            }
+        } catch (AxisFault axisFault) {
+            log.error("Couldn't deploy the policy", axisFault);
+        } catch (RemoteException e) {
+            log.error("Couldn't connect to  the global policy engine", e);
+        } catch (LoginAuthenticationExceptionException e) {
+            log.error("Couldn't log into  the global policy engine", e);
+        } catch (MalformedURLException e) {
+            log.error("Couldn't resolve the hostname of global policy engine", e);
+        }
+        return false;
     }
 }
