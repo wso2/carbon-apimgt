@@ -49,9 +49,6 @@ import java.io.File;
  * @scr.reference name="throttle.event.core.service"
  * interface="org.wso2.carbon.event.throttle.core.ThrottlerService" cardinality="1..1"
  * policy="dynamic" bind="setThrottlerService" unbind="unsetThrottlerService"
- * @scr.reference name="synapse.configuration.service"
- * interface="org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setSynapseConfigurationService" unbind="unsetSynapseConfigurationService"
  */
 public class APIHandlerServiceComponent {
 
@@ -155,16 +152,5 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setThrottler(null);
-    }
-
-    protected void setSynapseConfigurationService(SynapseConfigurationService synConfService) {
-        //do nothing
-        /*Here we have this service dependency only to make this component wait until SynapseConfigurationService
-        service is available. We actually needs this because we should not register TenantServiceCreator listener
-        before TenantServiceBusInitializer listener of carbon-mediation. */
-    }
-
-    protected void unsetSynapseConfigurationService(SynapseConfigurationService synConfService) {
-        //do nothing
     }
 }
