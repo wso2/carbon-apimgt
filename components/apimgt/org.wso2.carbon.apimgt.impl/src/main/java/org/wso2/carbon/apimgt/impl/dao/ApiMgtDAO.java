@@ -8201,7 +8201,6 @@ public class ApiMgtDAO {
 
         }
     }
-}
 
     /**
      * Add a Application level throttling policy to database
