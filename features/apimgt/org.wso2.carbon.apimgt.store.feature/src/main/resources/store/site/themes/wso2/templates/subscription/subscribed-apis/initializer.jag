@@ -1,0 +1,7 @@
+<%
+jagg.initializer("subscription/subscribed-apis", {
+
+    preInitialize:function () {
+    }
+});
+%>

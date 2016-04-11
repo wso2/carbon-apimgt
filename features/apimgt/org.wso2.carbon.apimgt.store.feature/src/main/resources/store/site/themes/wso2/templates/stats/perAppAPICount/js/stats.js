@@ -73,13 +73,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -133,7 +133,7 @@ var drawGraphAPIUsage = function(from,to){
                         }
                         drawChart('#apiChart'+(k+1),k,chartData);
                         if (length > 0) {
-                            $('#apiTable'+(k+1)).dataTable({
+                            $('#apiTable'+(k+1)).datatables_extended({
                             "fnDrawCallback": function(){
                                 if(this.fnSettings().fnRecordsDisplay()<=$('#apiTable'+(k+1)+'_length option:selected' ).val()
                               || $('#apiTable'+(k+1)+'_length option:selected' ).val()==-1)
@@ -145,7 +145,7 @@ var drawGraphAPIUsage = function(from,to){
                         }
                      }
                     }else{
-                        $('#apiUsage').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#apiUsage').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
                     }
                 } else {
                     if (json.message == "AuthenticateError") {

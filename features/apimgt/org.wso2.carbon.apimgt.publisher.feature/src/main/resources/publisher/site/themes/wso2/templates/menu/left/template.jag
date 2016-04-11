@@ -26,6 +26,8 @@
     var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
     var tierPermissionsUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag");
     var tierPermissionsMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag");
+    var manageAlertTypesUrl =jagg.getAbsoluteUrl("/site/pages/manage-alert-type.jag");
+    var manageAlertTypesMappedUrl =jagg.getMappedUrl("/site/pages/manage-alert-type.jag");
 
 	var page = request.getParameter("page");
     	if(page == null ) {
@@ -142,6 +144,19 @@
 						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("manageSubscriptions")%>"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
 					
 					<%}%>
+					<%
+						var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+						var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+						if(isAnalyticsEnabled) {
+							%>
+							<%if(isPermitted){%>
+								<li <%if(reqUrl.equals(manageAlertTypesMappedUrl) || reqUrl.equals(manageAlertTypesUrl)){ %>class="active"<%} %>><a class="js_toggler"
+									href="<%=manageAlertTypesMappedUrl%><%=urlPrefix%>"
+									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
+							<%}%>
+                    	<%
+						}
+					%>
 				</ul>
 			</div>
 		</div>

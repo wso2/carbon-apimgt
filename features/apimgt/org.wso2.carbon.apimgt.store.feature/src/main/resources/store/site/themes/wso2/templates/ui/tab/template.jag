@@ -1,10 +1,11 @@
 <% jagg.template("ui/tab", function(inputs, outputs, jagg) { %>
-<div class="ui-tab<%=(outputs.classes ? " " + outputs.classes : "")%>">
+<div class="row">
+<div class="add-margin-3x white-wrapper">
     <%
         var tabs = outputs.tabs, length = tabs.length;
         var i, index, tab, classes;
     %>
-    <ul class="nav nav-tabs all-tabs" role="tablist">
+    <ul class="nav nav-tabs" role="tablist">
     <%
     for(i = 0; i < length; i++) {
         tab = tabs[i];
@@ -18,7 +19,7 @@
     %>
     <%if(tab.title!=undefined ||tab.title!=null){%>
         <li class="<%=clazz%>">
-            <a href="#tab<%=String(i)%>"><%=tab.title%></a>
+            <a data-toggle="tab" href="#tab<%=String(i)%>"><%=tab.title%></a>
         </li>
     <% }} %>
     </ul>
@@ -31,5 +32,6 @@
     <div class="tab-pane fade <% if(i==0){%>in active<% } %>" id="tab<%=String(i)%>"><% jagg.includeBlocks(tab.body); %></div>
     <% } %>
     </div>
+</div>
 </div>
 <% }); %>

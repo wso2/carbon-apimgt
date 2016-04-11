@@ -1,40 +1,48 @@
 <% jagg.template("layout/base", function(inputs, outputs, jagg) { %>
-<%
-    var mw = 7;
-    var mww = 12;
-    if(!outputs.left && !outputs.right) {
-        mw = 12;
-        mww = 7;
-    } else if(!outputs.left || !outputs.right) {
-        mw = 9;
-        mww = 8;
-    }
-%>
-    <div id="wrapper" >
+
+	<%
+	var tenant=request_tenant;
+	%>
+
+<%jagg.includeBlock("menu/header", {"pagePath":outputs.pagePath,"tenant":tenant});%>
+
+<!-- #page-content-wrapper -->
+<div class="page-content-wrapper">
+    <!-- media-->
+    <div class="media">
+        <!-- media left-->
+         <div class="media-left sidebar-wrapper sidebar-nav visible-side-pane" id="left-sidebar" data-spy="affix" data-offset-top="80" data-side="left" data-width="200">
+         <%
+                var section = null;
+                if(outputs.middle instanceof Array){ 
+                    section = outputs.middle[0].name;
+                }else{
+                    section = outputs.middle.name;
+                }
+            %>
+            
         <!-- Sidebar -->
-        <% if(outputs.left) { %>
-        <div id="sidebar-wrapper">
-            <% jagg.includeBlocks(outputs.left); %>
+            <% jagg.includeBlock("menu/primary", {"pagePath":section,"tenant":""}); %>
+            
+        <% if(outputs.left) { %>            
+            <% //jagg.includeBlocks(outputs.left); %>
             <% jagg.includeBlocks(outputs.right); %>
-        </div>
         <% } %>                 
+        </div><!-- media left-->
 
-        <!-- /#sidebar-wrapper -->
+        <!-- Page Content -->       
+           
+        
+        <!-- media body-->
+        <div class="media-body">
+            <% jagg.includeBlock("menu/actions", { page : section }); %>
 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <div class="container-fluid">
-                <% jagg.includeBlocks(outputs.top); %>                
-                <% if(outputs.title && outputs.title=="APIs") { %><h2><%=outputs.title%></h2><% } %>            
-                <% jagg.includeBlocks(outputs.middle); %>            
-            </div>
-            <% /* following is a hack to get sticky footer working in responsive mode */ %>
-            <footer class="inside-footer text-center">                                   
-              <%=i18n.localize("copyright", "&copy; Copyright 2011 &ndash; 2013 All Rights Reserved.")%>
-              <a class="powered-by-logo pull-right" href="http://wso2.com/products/api-manager" target="_blank"></a>
-            </footer>             
-        </div>
-        <!-- /#page-content-wrapper -->       
-    </div>
-    <!-- /#wrapper -->
+            <div class="container-fluid">      
+            	<div class="body-wrapper">
+                	<% jagg.includeBlocks(outputs.middle); %>
+                </div>            
+            </div> 
+        </div><!-- /#media body-->               
+    </div><!-- /#media-->
+</div><!-- /#page-content-wrapper -->
 <% }); %>

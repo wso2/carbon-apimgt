@@ -11,6 +11,7 @@
         "applicationSuccess": "Congratulations! You have successfully added the API.",
         "applicationPending": "Congratulations! Your application  request has been submitted and is now awaiting approval.",
         "gotoSubsPage": "Go to My Subscriptions",
+        "viewSubsPage": "View Subscriptions",
         "stayPage": "Stay on this page",
         "returntoAPIPage": "Return back to API detail page?",
         "yes": "Yes",

@@ -1,0 +1,50 @@
+<% jagg.template("alert-table", function(inputs, outputs, jagg) {
+
+  var lenI=0,apps = outputs.applications; if(apps!=null){lenI = apps.length;}
+ %>
+
+<!--get loggedd in user -->
+<%  var username = jagg.getUser().username; %>
+
+<div id="alerts-page">
+
+<div class="title-section">
+    <h2>Alerts History</h2>
+</div> 
+
+<br /> 
+
+
+<div class="content-data">
+
+
+        <div id="alertTableLabel">
+        <label>Alert Type 
+        <select  id="alertSelected" class="select form-control" data-live-search="true">
+            <option value="1">All Alerts</option>
+            <option value="2">Unusual IP Access</option>
+            <option value="3">Abnormal Request Count</option>
+            <option value="4">Abnormal Response Time</option>
+            <option value="5">Abnormal Tier Usage</option>
+            <option value="6">Abnormal Token Refresh</option>
+            <option value="7">Tier Crossing</option>
+            <option value="8">Abnormal Backend Time</option>
+            <option value="9">API Health Monitor</option>
+            <option value="10">Request Pattern Change</option>
+        </select>
+        </label>
+        </div>
+
+        <br/>
+        
+        <div class="span11">     
+            <div id="tableContainer">
+                <table class="display defaultTable" width="100%" cellspacing="0" id="alertHistoryTable"></table>
+            </div>
+        </div>    
+</div>
+
+
+</div>
+   
+<% }); %>
