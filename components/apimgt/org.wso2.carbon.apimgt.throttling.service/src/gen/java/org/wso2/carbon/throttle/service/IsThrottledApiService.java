@@ -9,7 +9,7 @@ import org.wso2.carbon.throttle.service.dto.ThrottledEventDTO;
 import java.util.List;
 
 import java.io.InputStream;
-
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
 
