@@ -53,7 +53,7 @@ function fetch() {
     queryInfo = {
         tableName: "LOGANALYZER",
         searchParams: {
-            query: "*:*",
+            query: "logstream:\"" + tenantID + "\"",
             start: 0, //starting index of the matching record set
             count: 100, //page size for pagination
             sortBy : [
