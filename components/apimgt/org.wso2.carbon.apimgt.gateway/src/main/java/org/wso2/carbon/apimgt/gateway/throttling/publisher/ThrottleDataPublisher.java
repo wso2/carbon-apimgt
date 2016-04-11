@@ -49,8 +49,6 @@ public class ThrottleDataPublisher {
     }
 
     static Executor pool = Executors.newFixedThreadPool(100);
-    private ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
-            .getThrottleProperties().getDataPublisher();
     static volatile DataPublisher dataPublisher = null;
 
     Executor executor;
@@ -60,6 +58,9 @@ public class ThrottleDataPublisher {
      * publisher which we used to publish throttle data.
      */
     public ThrottleDataPublisher() {
+        ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
+                .getThrottleProperties().getDataPublisher();
+
         try {
             executor = new DataPublisherThreadPoolExecutor(200, 500, 100, TimeUnit.SECONDS,
                     new LinkedBlockingDeque<Runnable>() {
