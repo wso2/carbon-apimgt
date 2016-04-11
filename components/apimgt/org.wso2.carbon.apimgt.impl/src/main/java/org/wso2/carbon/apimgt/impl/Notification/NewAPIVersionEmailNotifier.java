@@ -208,8 +208,8 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         APIIdentifier newApi = (APIIdentifier) notificationDTO.getProperties().get(NotifierConstants.NEW_API_KEY);
 
         String title = (String) notificationDTO.getProperty(NotifierConstants.TITLE_KEY);
-        title = title.replaceAll("\\$1", api.getApiName());
-        title = title.replaceAll("\\$2", api.getVersion());
+        title = title.replaceAll("\\$1", newApi.getApiName());
+        title = title.replaceAll("\\$2", newApi.getVersion());
 
         // Getting the message template from registry file
         String content = "";
