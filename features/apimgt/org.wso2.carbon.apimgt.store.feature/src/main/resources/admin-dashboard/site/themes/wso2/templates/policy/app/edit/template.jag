@@ -66,7 +66,7 @@
                                 </textarea>
                             </div>
                         </div>
-                        <legend>Quota Policy</legend>
+                        <legend>Quota</legend>
                         <div id="quotaTypeRadioDev" class="control-group cnl-group form-inline">
 
                             <label class="checkbox-inline radio">
@@ -113,36 +113,6 @@
                                 </div>
                         </div>
 
-                        <legend>Policy Flags (WSO2 Specific Attributes)</legend>
-
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("stopOnQuotaReach")%></label>
-                            <div class="controls cnls">
-                                <input type="checkbox" id="stopOnQuotaReach" name="stopOnQuotaReach"/>
-                            </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("tierPlan")%></label>
-                            <div class="controls cnls">
-                                <select class="select required" id="tierPlan" name="tierPlan" style="width:15%">
-                                    <option value="FREE" selected="true">Free</option>
-                                    <option value="COMMERCIAL">Commercial</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <legend>Custom Attributes</legend>
-
-                        <div class="control-group cnl-group">
-                            <button id="add-attribute-btn" name="add-attribute-btn" type="button" class="btn"
-                                value="<%=i18n.localize('customAttributes')%>" >
-                                <i class="icon-plus-sign"></i>
-                                    Add Custom Attribute
-                            </button>
-                            <table id="custom-attribute-table">
-                                <tbody id="custom-attribute-tbody" name="custom-attribute-tbody"/>
-                            </table>
-                        </div>
                     </fieldset>
 
                     <div class="form-actions">
