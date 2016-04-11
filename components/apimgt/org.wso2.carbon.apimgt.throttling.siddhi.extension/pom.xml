@@ -75,8 +75,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.extension.throttler,
-                            org.wso2.siddhi.extension.throttler.*
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension,
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional

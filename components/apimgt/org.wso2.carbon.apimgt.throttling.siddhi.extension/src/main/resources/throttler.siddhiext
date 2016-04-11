@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-emitOnStateChange=org.wso2.siddhi.extension.throttler.EmitOnStateChange
+emitOnStateChange=org.wso2.carbon.apimgt.throttling.siddhi.extension.EmitOnStateChange
