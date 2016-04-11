@@ -3,7 +3,7 @@ jagg.initializer("alert-table", {
 
     preInitialize:function () {
     jagg.addHeaderCSS("alert-table", " dataTable","templates/utils/dataTables/css/jquery.dataTables.css");
-    jagg.addFooterJS("alert-table", "dataTable","templates/utils/dataTables/js/jquery.dataTables.min.js");
+    //jagg.addFooterJS("alert-table", "dataTable","templates/utils/dataTables/js/jquery.dataTables.min.js");
     //jagg.addFooterJS("alert-table", "dataTable","lib/dataTables/js/dataTables.bootstrap.js");
     jagg.addFooterJS("alert-table", "jagg", "templates/alert-table/js/alert-table.js");
     }

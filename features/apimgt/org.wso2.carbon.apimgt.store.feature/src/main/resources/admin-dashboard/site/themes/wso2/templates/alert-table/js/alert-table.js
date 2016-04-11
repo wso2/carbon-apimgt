@@ -11,7 +11,8 @@ $( document ).ready(function() {
     if(statsEnabled){
         drawTable();
     } else {
-        alert('stats not enabled');
+         $('.content-data').empty();
+         $('.content-data').append('<h2> Stats are disabled.</h2>');
     }
 
     $("#alertSelected").change( function() {
@@ -20,7 +21,8 @@ $( document ).ready(function() {
          if(statsEnabled){
             table.ajax.reload(null, true);
          } else{
-            alert('stats not enabled');
+            $('.content-data').empty();
+            $('.content-data').append('<h2> Stats are disabled.</h2>');
          } 
     })
     
@@ -95,7 +97,7 @@ $( document ).ready(function() {
 
     function drawTable() {
     
-        table =$('#alertHistoryTable').DataTable({
+        table =$('#alertHistoryTable').datatables_extended({
                         //"processing": true,
                         "serverSide": true,
                         "columns" : [
@@ -114,7 +116,7 @@ $( document ).ready(function() {
                             }
                         },
                         "drawCallback": function(){
-                                $("thead").addClass("tableHead");
+                                //$("thead").addClass("tableHead");
                                 $('.alertTypeLink').click(function(){
                                     changeSelectedAlertType(this.text);
                                 });
