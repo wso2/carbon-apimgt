@@ -40,7 +40,7 @@
                     <td><%=quota%></td>
                     <td><%=unitTime%></td>
                     <td>
-                        <a id="editButton<%=count%>" onClick="editAppPolicy('<%=policyName%>')">
+                        <a id="editButton<%=count%>" onClick="editApiPolicy('<%=policyName%>')">
                             <i class="icon-edit"></i>
                                 Edit
                         </a>
@@ -69,9 +69,9 @@
 </div>
 
 <script>
-    function editAppPolicy(policyName){
+    function editApiPolicy(policyName){
             console.log(policyName);
-            location.href = "<%= jagg.url('/app-policy-edit')%>?policyName="+policyName;
+            location.href = "<%= jagg.url('/site/pages/policy-add.jag')%>?policyName="+policyName;
     }
 
     $(document).ready(function(){

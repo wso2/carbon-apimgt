@@ -237,12 +237,12 @@ var addJwtClaim = function (id) {
 };
 
 var loadPolicy = function (policyName) {
-    jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+    jagg.post("/site/blocks/policy-add/ajax/policy-operations.jag", {
         action: "getApiPolicy",
         policyName: policyName},
         function (data) {
             if (!data.error) {
-                policy = data.policy;
+                policy = data.apiPolicy;
                 for (var i = 0 ; i < policy.executionFlows.length; i++) {
                     var source = $("#designer-policy-template").html();
                     policy.executionFlows[i].id = index;

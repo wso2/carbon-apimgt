@@ -48,7 +48,7 @@ var getAllAPIPolicies = function () {
             apiPolicies: apiPolicies
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while getting all api policies (Cause:" + ex.message + ")";
+        var errorMessage = "Error occurred while getting all api policies details (Cause:" + ex.message + ")";
         log.error(errorMessage);
         return {
             error: true,
@@ -60,16 +60,19 @@ var getAllAPIPolicies = function () {
 //get api policy with policyName
 var getAPIPolicy = function (policyName) {
     try {
+        var log = new Log();
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        var apiPolicy = apiProvider.getAPIPolicy(policyName, provider);
+        log.info(provider);
+        log.info(policyName);
+        var apiPolicy = apiProvider.getAPIPolicy(provider, policyName);
         return {
             error: false,
             apiPolicy: apiPolicy
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while getting all api policies (Cause:" + ex.message + ")";
+        var errorMessage = "Error occurred while getting a api policy by name (Cause:" + ex.message + ")";
         log.error(errorMessage);
         return {
             error: true,
@@ -84,14 +87,16 @@ var getAPIPolicyJson = function (policyName) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        var apiPolicy = apiProvider.getAPIPolicy(policyName, provider);
+        var apiPolicy = apiProvider.getAPIPolicy(provider, policyName);
+        var log = new Log();
         apiPolicy = objectToJson(apiPolicy);
+
         return {
             error: false,
             apiPolicy: apiPolicy
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while getting all api policies (Cause:" + ex.message + ")";
+        var errorMessage = "Error occurred while getting api details json (Cause:" + ex.message + ")";
         log.error(errorMessage);
         return {
             error: true,
@@ -200,14 +205,9 @@ var getExecutionFlowTemplate = function () {
 var jsonToObject = function (policy) {
 
     try {
-
         var APIPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
         var IPCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPCondition;
-        var IPRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
-        var DateCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.DateCondition;
-        var DateRangeCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.DateRangeCondition;
         var HeaderCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
-        var HTTPVerbCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
         var JWTClaimsCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
         var QueryParameterCondition = Packages.org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
         var Limit = Packages.org.wso2.carbon.apimgt.api.model.policy.Limit;
@@ -242,15 +242,10 @@ var jsonToObject = function (policy) {
             var timeUnit = pipeline[i].quotaPolicy.limit.timeUnit;
             var dataAmount = pipeline[i].quotaPolicy.limit.dataAmount;
             var dataUnit = pipeline[i].quotaPolicy.limit.dataUnit;
-
             var id = pipeline[i].id;
-
             var conditionsList = new ArrayList();
-
             pipe.setEnabled(enabled);
-
             quotaPolicy.setType(quotaPolicyType);
-
             if (quotaPolicyType == "requestCount") {
                 requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount);
@@ -274,7 +269,6 @@ var jsonToObject = function (policy) {
                 var type = condition[j].type;
                 var invertCondition = condition[j].invertCondition;
                 var conditionEnabled = condition[j].enabled;
-
                 if (type == "IP") {
                     var ipType = condition[j].ipType;
                     var startingIP = condition[j].startingIP;
@@ -295,32 +289,11 @@ var jsonToObject = function (policy) {
                         ipRange.setConditionEnabled(conditionEnabled);
                         conditionsList.add(ipRange);
                     }
-                } else if (type == "Date" & conditionEnabled) {
-                    var dateType = condition[j].dateType;
-                    var startingDate = condition[j].startingDate;
-                    var endingDate = condition[j].endingDate;
-                    var specificDate = condition[j].specificDate;
-                    //if the date is specific
-                    if (dateType == "specific" && conditionEnabled) {
-                        var dateSpecific = new DateCondition();
-                        dateSpecific.setSpecificDate(specificDate);
-                        dateSpecific.setInvertCondition(invertCondition);
-                        dateSpecific.setConditionEnabled(conditionEnabled);
-                        conditionsList.add(dateSpecific);
-                    } else if (dateType == "range" && conditionEnabled) { //id date range is given
-                        var dateRange = new DateRangeCondition();
-                        dateRange.setStartingDate(startingDate);
-                        dateRange.setEndingDate(endingDate);
-                        dateRange.setInvertCondition(invertCondition);
-                        dateRange.setConditionEnabled(conditionEnabled);
-                        conditionsList.add(dateRange);
-                    }
                 }
                 else if (type == "JWTClaim" && conditionEnabled) {
                     var claimUrl;
                     var attribute;
-                    var hasValues = condition[j].hasValues;
-                    while (condition[j].keyValPairs[l]) {
+                     while (condition[j].keyValPairs[l]) {
                         var jwtObj = new JWTClaimsCondition();
                         claimUrl = condition[j].keyValPairs[l].name;
                         attribute = condition[j].keyValPairs[l].value;
@@ -331,7 +304,6 @@ var jsonToObject = function (policy) {
                         conditionsList.add(jwtObj);
                         l++;
                     }
-
                 } else if (type == "Header" && conditionEnabled) {
                     var headerName;
                     var headerVal;
@@ -346,17 +318,6 @@ var jsonToObject = function (policy) {
                         conditionsList.add(headerObj);
                         k++;
                     }
-
-
-                } else if (type == "HTTPVerb" && conditionEnabled) {
-                    var httpVerb = condition[j].httpVerb;
-
-                    var httpVerbObj = new HTTPVerbCondition();
-                    httpVerbObj.setHttpVerb(httpVerb);
-                    httpVerbObj.setInvertCondition(invertCondition);
-                    httpVerbObj.setConditionEnabled(enabled);
-                    conditionsList.add(httpVerbObj);
-
                 } else if (type == "QueryParam" && conditionEnabled) {
                     var param;
                     var value;
@@ -371,7 +332,6 @@ var jsonToObject = function (policy) {
                         conditionsList.add(queryParamObj);
                         m++;
                     }
-
                 }
                 j++;
             }
@@ -499,7 +459,7 @@ var objectToJson = function (policy) {
                     executionFlow.conditions[0].ipType = "specific";
                     executionFlow.conditions[0].specificIP = conditions.get(j).getSpecificIP();
                     executionFlow.conditions[0].invertCondition = conditions.get(j).isInvertCondition();
-                    executionFlow.conditions[0].enabled = conditions.get(j).getConditionEnabled();
+                    executionFlow.conditions[0].enabled = true;
 
                 } else if (conditions.get(j).getType() == "IPRange") {
                     executionFlow.conditions[0].type = "IP";
@@ -507,15 +467,15 @@ var objectToJson = function (policy) {
                     executionFlow.conditions[0].startingIP = conditions.get(j).getStartingIP();
                     executionFlow.conditions[0].endingIP = conditions.get(j).getEndingIP();
                     executionFlow.conditions[0].invertCondition = conditions.get(j).isInvertCondition();
-                    executionFlow.conditions[0].enabled = conditions.get(j).getConditionEnabled();
+                    executionFlow.conditions[0].enabled = true;
 
                 } else if (conditions.get(j).getType() == "Header") {
                     executionFlow.conditions[1].type = "Header";
-                    keyValPairs.name = conditions.get(j).getJWTClaim();
+                    keyValPairs.name = conditions.get(j).getHeaderName();
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[1].keyValPairs.push(keyValPairs);
                     executionFlow.conditions[1].invertCondition = conditions.get(j).isInvertCondition();
-                    executionFlow.conditions[1].enabled = conditions.get(j).getConditionEnabled();
+                    executionFlow.conditions[1].enabled = true;
 
                 } else if (conditions.get(j).getType() == "QueryParameterType") {
                     executionFlow.conditions[2].type = "QueryParam";
@@ -523,15 +483,15 @@ var objectToJson = function (policy) {
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[2].keyValPairs.push(keyValPairs);
                     executionFlow.conditions[2].invertCondition = conditions.get(j).isInvertCondition();
-                    executionFlow.conditions[2].enabled = conditions.get(j).getConditionEnabled();
+                    executionFlow.conditions[2].enabled = true;
 
                 } else if (conditions.get(j).getType() == "JWTClaims") {
                     executionFlow.conditions[3].type = "JWTClaim";
-                    keyValPairs.name = conditions.get(j).getJWTClaim();
-                    keyValPairs.value = conditions.get(j).getValue();
+                    keyValPairs.name = conditions.get(j).getClaimUrl();
+                    keyValPairs.value = conditions.get(j).getAttribute();
                     executionFlow.conditions[3].keyValPairs.push(keyValPairs);
                     executionFlow.conditions[3].invertCondition = conditions.get(j).isInvertCondition();
-                    executionFlow.conditions[3].enabled = conditions.get(j).getConditionEnabled();
+                    executionFlow.conditions[3].enabled = true;
                 }
             }
             apiPolicy.executionFlows.push(executionFlow);
