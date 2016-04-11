@@ -139,6 +139,9 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
+import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
@@ -5123,4 +5126,48 @@ public final class APIUtil {
         }
         return api;
     }
+
+    /**
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * Return all alert types.
+     * @return Hashmap of alert types.
+     * @throws APIManagementException
+     */
+    public static HashMap<Integer, String> getAllAlertTypeByAgent(String agent) throws APIManagementException {
+        HashMap<Integer, String> map;
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByAgent(agent);
+        return map;
+    }
+
+    /**
+     *
+     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @return map of saved values of alert types.
+     * @throws APIManagementException
+     */
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws  APIManagementException{
+
+        List<Integer> list;
+        list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndAgent(userName,agent);
+        return  list;
+
+    }
+
+    /**
+     * This util method retrieves saved email list by user and agent name
+     * @param userName user name with tenant ID.
+     * @param agent if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
+     * @return List of eamil list.
+     * @throws APIManagementException
+     */
+    public static List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException{
+
+        List<String> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,agent);
+
+        return list;
+    }
+
+
 }
