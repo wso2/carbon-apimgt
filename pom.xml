@@ -904,7 +904,7 @@
 
         <carbon.analytics.common.version>5.0.9</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.4</carbon.kernel.version>
+        <carbon.kernel.version>4.4.5</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.2</carbon.commons.version>

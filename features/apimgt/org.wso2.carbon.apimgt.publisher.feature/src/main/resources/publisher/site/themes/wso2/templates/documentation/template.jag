@@ -49,9 +49,9 @@
 		        </div>
 
 		        <div class="control-group">
-		            <label class="control-label" for="textarea"><%=i18n.localize("summary")%></label>
+		            <label class="control-label"<%=i18n.localize("summary")%></label>
 		            <div class="controls">
-		                <textarea  id="summary" class="form-control" rows="3" style="width:100%"></textarea>
+		                <textarea  id="summary" class="form-control" rows="3" style="width:100%" title="summary"></textarea>
 		            </div>
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
@@ -103,7 +103,7 @@
 									</label></li>
 								</ul>
 								<div id="otherTypeDiv" class="controls" style="display: none;">
-									<span class="requiredAstrix">*</span> <input type="text"
+									<span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
 										class="required form-control" id="specifyBox"
 										style="width: 98%;" />
 								</div>
@@ -132,7 +132,7 @@
 		                      </label>
 		                  
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
-		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" id="docUrl">
+		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
 		                    </div>
 </li>  
 <li>
@@ -151,8 +151,7 @@
 												<span class="hidden-xs">Browse</span>
 											</button>
 										</div>
-										<input type="text" name="docName" id="docName" class="form-control" readonly>
-										<input type="file" name="docLocation" id="docLocation" class="form-control">
+																<input type="file" name="docLocation" id="docLocation" title="doclocation" class="form-control">
 									</div>
 	                                <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
                                 </div>                         

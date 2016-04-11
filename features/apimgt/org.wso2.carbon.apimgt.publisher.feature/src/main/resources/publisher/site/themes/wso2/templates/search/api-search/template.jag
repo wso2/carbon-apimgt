@@ -7,14 +7,14 @@ var query=request.getParameter("query");
                 <div class="form-group">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="input-group input-wrap">
-                            <input type="text" name="query" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
+                            <input type="text" name="query" title="search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
     placeholder="<%=i18n.localize("filterAPIs")%>"<%}%> />
 			    <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
     				<input type="hidden" class="span5" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
     			   <%}%>
                             <div class="input-group-btn">
-                                <button class="btn btn-default wrap-input-right" type="submit" title="Search">
-                                    <i class="fw fw-search" aria-hidden="true" title="search"></i>
+                                <button class="btn btn-default wrap-input-right" type="submit" value="api_search">
+                                 <i class="fw fw-search" title="search"></i>
                                 </button>
                             </div>
                         </div>

@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClie
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.*;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
+import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -1100,7 +1101,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIVersionLastAccessTimeDTO> accessTimeByAPI = new ArrayList<APIVersionLastAccessTimeDTO>();
         APIVersionLastAccessTimeDTO accessTimeDTO;
-        DateFormat dateFormat = new SimpleDateFormat();
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
                 if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
@@ -1111,7 +1111,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
-                    accessTimeDTO.setLastAccessTime(dateFormat.format(accessTime.getAccessTime()));
+                    accessTimeDTO.setLastAccessTime(APIUsageClientUtil.getFormattedAPILastAccessDate(
+                            accessTime.getAccessTime()));
                     accessTimeDTO.setUser(accessTime.getUsername());
                     accessTimeByAPI.add(accessTimeDTO);
                 }
