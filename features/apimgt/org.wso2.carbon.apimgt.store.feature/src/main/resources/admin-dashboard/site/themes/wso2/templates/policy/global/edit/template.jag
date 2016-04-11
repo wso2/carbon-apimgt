@@ -1,11 +1,11 @@
 <% jagg.template("policy/global/edit", function(inputs, outputs, jagg) { %>
 <%
     var policyName = request.getParameter("policyName");
-    var pageTitle = "Add Global Level Policy";
+    var pageTitle = "Add Custom Policy";
     var nameFieldDisableStatus = "";
 
     if(policyName != null) {
-        pageTitle = "Edit Global Level Policy";
+        pageTitle = "Edit Custom Policy";
         nameFieldDisableStatus = "readonly";
         var globalPolicies = session.get("globalPolicies");
         var globalPolicy;
