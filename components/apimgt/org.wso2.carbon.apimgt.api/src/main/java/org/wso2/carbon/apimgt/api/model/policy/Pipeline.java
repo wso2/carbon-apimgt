@@ -25,7 +25,7 @@ public class Pipeline {
     private QuotaPolicy quotaPolicy;
     private List<Condition> conditions;
     private boolean enabled;
-
+    private int id;
     public boolean isEnabled() {
         return enabled;
     }
@@ -54,5 +54,12 @@ public class Pipeline {
     public String toString() {
         return "Pipeline [quotaPolicy=" + quotaPolicy + ", conditions=" + conditions + "]";
     }
-    
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

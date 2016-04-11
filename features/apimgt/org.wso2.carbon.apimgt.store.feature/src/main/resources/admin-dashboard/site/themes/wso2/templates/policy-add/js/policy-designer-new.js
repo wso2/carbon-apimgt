@@ -34,7 +34,8 @@ var addPolicy = function () {
             "type": "",
             "limit": {
                 "requestCount": 0,
-                "timeUnit": "",
+                "unitTime": 60,
+                "timeUnit": "sec",
                 "dataAmount": 0,
                 "dataUnit": ""
             }
@@ -296,10 +297,10 @@ var loadPolicy = function (policyName, userName) {
 
     for (var i = 0 ; i < policy.executionFlows.length; i++) {
         var source = $("#designer-policy-template").html();
-        test.executionFlows[i].id = index;
+        policy.executionFlows[i].id = index;
         Handlebars.partials['designer-policy-template'] = Handlebars.compile(source);
         var context = {
-            "executionFlow": test.executionFlows[i]
+            "executionFlow": policy.executionFlows[i]
         };
         var output = Handlebars.partials['designer-policy-template'](context);
         $('#pipeline-content').append(output);
@@ -363,7 +364,7 @@ var addPolicyToBackend = function () {
                     }
 
                     var ipInvertCondition = $('#ip-condition-invert-' + executionFlowId).attr('checked');
-                    if(ipInvertCondition) {
+                    if (ipInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
                 }
@@ -387,7 +388,7 @@ var addPolicyToBackend = function () {
                         apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
                     });
                     var headerInvertCondition = $('#header-condition-invert-' + executionFlowId).attr('checked');
-                    if(headerInvertCondition) {
+                    if (headerInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
                 }
@@ -411,34 +412,34 @@ var addPolicyToBackend = function () {
                         apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
                     });
                     var queryParamInvertCondition = $('#query-param-condition-invert-' + executionFlowId).attr('checked');
-                    if(queryParamInvertCondition) {
+                    if (queryParamInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
                 }
             }
 
-                //Jwt claim condition related properties
-                if (apiPolicyNew.executionFlows[i].conditions[j].type == "JWTClaim") {
-                    checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).is(':checked');
-                    if (checked) {
-                        var claimName, claimVal;
-                        var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
-                        table.find('tr').each(function (i, el) {
-                            var $tds = $(this).find('td');
-                            claimName = $tds.eq(0).text();
-                            claimVal = $tds.eq(1).text();
-                            var keyValPair = {
-                                "name": claimName,
-                                "value": claimVal
-                            };
-                            apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
-                        });
-                        var jwtClaimInvertCondition = $('#jwt-claim-condition-invert-' + executionFlowId).attr('checked');
-                        if(jwtClaimInvertCondition) {
-                            apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
-                        }
+            //Jwt claim condition related properties
+            if (apiPolicyNew.executionFlows[i].conditions[j].type == "JWTClaim") {
+                checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).is(':checked');
+                if (checked) {
+                    var claimName, claimVal;
+                    var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
+                    table.find('tr').each(function (i, el) {
+                        var $tds = $(this).find('td');
+                        claimName = $tds.eq(0).text();
+                        claimVal = $tds.eq(1).text();
+                        var keyValPair = {
+                            "name": claimName,
+                            "value": claimVal
+                        };
+                        apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
+                    });
+                    var jwtClaimInvertCondition = $('#jwt-claim-condition-invert-' + executionFlowId).attr('checked');
+                    if (jwtClaimInvertCondition) {
+                        apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
                 }
+            }
 
             var executionPolicyQuotaType = $("#execution-policy-level-" + executionFlowId + " option:selected").val();
             apiPolicyNew.executionFlows[i].quotaPolicy.type = executionPolicyQuotaType;
@@ -450,10 +451,10 @@ var addPolicyToBackend = function () {
                 apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
             }
         }
-        console.log(JSON.stringify(apiPolicyNew));
-        jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
-            action: "addApiPolicy",
-            apiPolicy :JSON.stringify(apiPolicyNew),
-        },"json");
     }
+    console.log(JSON.stringify(apiPolicyNew));
+    jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+        action: "addApiPolicy",
+        apiPolicy: JSON.stringify(apiPolicyNew),
+    }, "json");
 };

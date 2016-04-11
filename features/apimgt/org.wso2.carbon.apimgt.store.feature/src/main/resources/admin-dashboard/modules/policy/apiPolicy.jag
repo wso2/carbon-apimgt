@@ -125,7 +125,54 @@ var updateApiPolicy = function (policy) {
             message: errorMessage
         };
     }
-}
+};
+
+var getExecutionFlowTemplate = function () {
+    var executionFlow = {
+        "id": 0,
+        "enabled": false,
+        "quotaPolicy": {
+            "type": "",
+            "limit": {
+                "requestCount": 0,
+                "timeUnit": "",
+                "dataAmount": 0,
+                "dataUnit": ""
+            }
+        },
+        "conditions": [
+            {
+                "type": "IP",
+                "ipType": "specific",
+                "startingIP": "",
+                "endingIP": "",
+                "specificIP": "",
+                "invertCondition": false,
+                "enabled": false
+            },
+            {
+                "type": "Header",
+                "keyValPairs": [],
+                "invertCondition": false,
+                "enabled": false
+            },
+            {
+                "type": "QueryParam",
+                "keyValPairs": [],
+                "invertCondition": false,
+                "enabled": false
+            },
+            {
+                "type": "JWTClaim",
+                "keyValPairs": [],
+                "invertCondition": false,
+                "hasValues": false,
+                "enabled": false
+            }
+        ]
+    };
+    return executionFlow;
+};
 
 // inserting json file data to ApiPolicy Object
 var jsonToObject = function (policy) {
@@ -371,66 +418,14 @@ var objectToJson = function (policy) {
     };
 
 
-    var executionFlows = {
-        "id": 0,
-        "enabled": false,
-        "quotaPolicy": {
-            "type": "",
-            "limit": {
-                "requestCount": 0,
-                "timeUnit": "",
-                "dataAmount": 0,
-                "dataUnit": ""
-            }
-        },
-        "conditions": [
-            {
-                "type": "IP",
-                "ipType": "specific",
-                "startingIP": "",
-                "endingIP": "",
-                "specificIP": "",
-                "invertCondition": false,
-                "enabled": false
-            },
-            {
-                "type": "Header",
-                "keyValPairs": [],
-                "invertCondition": false,
-                "enabled": false
-            },
-            {
-                "type": "QueryParam",
-                "keyValPairs": [],
-                "invertCondition": false,
-                "enabled": false
-            },
-            {
-                "type": "HTTPVerb",
-                "httpVerb": "",
-                "invertCondition": false,
-                "enabled": false
-            },
-            {
-                "type": "JWTClaim",
-                "keyValPairs": [],
-                "invertCondition": false,
-                "hasValues": false,
-                "enabled": false
-            }
-        ]
-    };
 
     var keyValPairs = {
         "name": "",
         "value": ""
     };
-    //var jpolicy = JSON.parse(policy.getPolicyName);
+
     var ArrayList = Packages.java.util.ArrayList;
-    var Gson = Packages.com.google.gson.Gson;
-    var gson = new Gson();
-    log.info(gson.toJson(policy));
-    var pipes = new ArrayList();
+    var pipes;
     apiPolicy.policyName = policy.getPolicyName();
     apiPolicy.policyLevel = policy.getUserLevel();
     apiPolicy.policyDescription = policy.getDescription();
@@ -438,89 +433,89 @@ var objectToJson = function (policy) {
     apiPolicy.defaultQuotaPolicy.type = type;
     if (type == "requestCount") {
         apiPolicy.defaultQuotaPolicy.limit.requestCount = policy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        apiPolicy.defaultQuotaPolicy.limit.unitTime = policy.getDefaultQuotaPolicy().getLimit().getUnitTime();
         apiPolicy.defaultQuotaPolicy.limit.timeUnit = policy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
     }
     else if (type == "bandwidthVolume") {
         apiPolicy.defaultQuotaPolicy.limit.dataAmount = policy.getDefaultQuotaPolicy().getLimit().getDataAmount();
         apiPolicy.defaultQuotaPolicy.limit.dataUnit = policy.getDefaultQuotaPolicy().getLimit().getDataUnit();
+        apiPolicy.defaultQuotaPolicy.limit.unitTime = policy.getDefaultQuotaPolicy().getLimit().getUnitTime();
+        apiPolicy.defaultQuotaPolicy.limit.timeUnit = policy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
     }
     else {
         var errorMsg = "Error occured while retrieving details";
     }
-
-    log.info(apiPolicy);
+    var executionFlow;
     pipes = policy.getPipelines();
+    var pipe;
     //if executionflows are included
     if (pipes != null) {
-
         for (var i = 0; i < pipes.size(); i++) {
-            log.info(i);
-            log.info(pipes.get(i).isEnabled().toString());
-            var conditions = new ArrayList();
+            executionFlow = getExecutionFlowTemplate();
+            pipe = pipes.get(i);
+            executionFlow.id = pipe.getId();
+            type = pipe.getQuotaPolicy().getType();
+            if (type == "requestCount") {
+                executionFlow.quotaPolicy.type = type;
+                executionFlow.quotaPolicy.limit.requestCount = pipe.getQuotaPolicy().getLimit().getRequestCount();
+                executionFlow.quotaPolicy.limit.unitTime = pipe.getQuotaPolicy().getLimit().getUnitTime();
+                executionFlow.quotaPolicy.limit.timeUnit = pipe.getQuotaPolicy().getLimit().getTimeUnit();
+            }
+            else if (type == "bandwidthVolume") {
+                executionFlow.quotaPolicy.type = type;
+                executionFlow.quotaPolicy.limit.dataAmount = pipe.getQuotaPolicy().getLimit().getDataAmount();
+                executionFlow.quotaPolicy.limit.dataUnit = pipe.getQuotaPolicy().getLimit().getDataUnit();
+                executionFlow.quotaPolicy.limit.unitTime = pipe.getQuotaPolicy().getLimit().getUnitTime();
+                executionFlow.quotaPolicy.limit.timeUnit = pipe.getQuotaPolicy().getLimit().getTimeUnit();
+            }
+
+            var conditions;
             conditions = pipes.get(i).getConditions();
-            log.info(conditions.toString());
-            var k = 0;  //to iterate through JWTClaims
-            var l = 0;  //to iterate through query parameters
-            var m = 0;  //to iterate through header
             for (var j = 0; j < conditions.size(); j++) {
-
-                executionFlows.conditions[j].invertCondition = conditions.get(j).isInvertCondition();
-                executionFlows.conditions[j].enabled = conditions.get(j).getConditionEnabled();
-
                 if (conditions.get(j).getType() == "IPSpecific") {
-
-                    executionFlows.conditions[0].type = "IP";
-                    executionFlows.conditions[0].ipType = "specific";
-                    executionFlows.conditions[0].specificIP = conditions.get(j).getSpecificIP();
+                    executionFlow.conditions[0].type = "IP";
+                    executionFlow.conditions[0].ipType = "specific";
+                    executionFlow.conditions[0].specificIP = conditions.get(j).getSpecificIP();
+                    executionFlow.conditions[0].invertCondition = conditions.get(j).isInvertCondition();
+                    executionFlow.conditions[0].enabled = conditions.get(j).getConditionEnabled();
 
                 } else if (conditions.get(j).getType() == "IPRange") {
-
-                    executionFlows.conditions[0].type = "IP";
-                    executionFlows.conditions[0].ipType = "range";
-                    executionFlows.conditions[0].startingIP = conditions.get(j).getStartingIP();
-                    executionFlows.conditions[0].endingIP = conditions.get(j).getEndingIP();
+                    executionFlow.conditions[0].type = "IP";
+                    executionFlow.conditions[0].ipType = "range";
+                    executionFlow.conditions[0].startingIP = conditions.get(j).getStartingIP();
+                    executionFlow.conditions[0].endingIP = conditions.get(j).getEndingIP();
+                    executionFlow.conditions[0].invertCondition = conditions.get(j).isInvertCondition();
+                    executionFlow.conditions[0].enabled = conditions.get(j).getConditionEnabled();
 
                 } else if (conditions.get(j).getType() == "Header") {
-
-                    executionFlows.conditions[1].type = "Header";
-                    keyValPairs.name = conditions.get(j).getHeaderName();
-                    keyValPairs.value = conditions.get(j).getValue();
-                    executionFlows.conditions[1].keyValPairs.push(keyValPairs);
-                    k++;
-
-                } else if (conditions.get(j).getType() == "QueryParameterType") {
-
-                    executionFlows.conditions[2].type = "QueryParam";
-                    keyValPairs.name = conditions.get(j).getParameter();
-                    keyValPairs.value = conditions.get(j).getValue();
-                    executionFlows.conditions[2].keyValPairs.push(keyValPairs);
-                    l++;
-
-                } else if (conditions.get(j).getType() == "HTTPVerb") {
-
-                    executionFlows.conditions[3].type = "HTTPVerb";
-                    executionFlows.conditions[3].httpVerb = conditions.get(i).getHttpVerb();
-
-                } else if (conditions.get(j).getType() == "JWTClaims") {
-
-                    executionFlows.conditions[4].type = "JWTClaim";
+                    executionFlow.conditions[1].type = "Header";
                     keyValPairs.name = conditions.get(j).getJWTClaim();
                     keyValPairs.value = conditions.get(j).getValue();
-                    executionFlows.conditions[4].keyValPairs[m] = keyValPairs;
-                    m++;
+                    executionFlow.conditions[1].keyValPairs.push(keyValPairs);
+                    executionFlow.conditions[1].invertCondition = conditions.get(j).isInvertCondition();
+                    executionFlow.conditions[1].enabled = conditions.get(j).getConditionEnabled();
 
+                } else if (conditions.get(j).getType() == "QueryParameterType") {
+                    executionFlow.conditions[2].type = "QueryParam";
+                    keyValPairs.name = conditions.get(j).getParameter();
+                    keyValPairs.value = conditions.get(j).getValue();
+                    executionFlow.conditions[2].keyValPairs.push(keyValPairs);
+                    executionFlow.conditions[2].invertCondition = conditions.get(j).isInvertCondition();
+                    executionFlow.conditions[2].enabled = conditions.get(j).getConditionEnabled();
+
+                } else if (conditions.get(j).getType() == "JWTClaims") {
+                    executionFlow.conditions[3].type = "JWTClaim";
+                    keyValPairs.name = conditions.get(j).getJWTClaim();
+                    keyValPairs.value = conditions.get(j).getValue();
+                    executionFlow.conditions[3].keyValPairs.push(keyValPairs);
+                    executionFlow.conditions[3].invertCondition = conditions.get(j).isInvertCondition();
+                    executionFlow.conditions[3].enabled = conditions.get(j).getConditionEnabled();
                 }
-                log.info(conditions.get(j).toString());
             }
-            apiPolicy.executionFlows.push(executionFlows);
+            apiPolicy.executionFlows.push(executionFlow);
         }
     }
-
-
     log.info(apiPolicy);
     return apiPolicy;
-}
-
-
-
+};
 %>
