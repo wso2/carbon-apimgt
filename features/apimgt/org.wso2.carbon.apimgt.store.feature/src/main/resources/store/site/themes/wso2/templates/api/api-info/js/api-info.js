@@ -108,7 +108,7 @@ function triggerSubscribe() {
                     $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
                 }
-                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                $('#messageModal a.btn-primary').html(i18n.t('info.viewSubsPage'));
                 $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
