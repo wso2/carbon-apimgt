@@ -20,13 +20,12 @@
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>carbon-apimgt</artifactId>
+        <artifactId>apimgt</artifactId>
         <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.throttle.service</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager Throttle Data Service</name>
