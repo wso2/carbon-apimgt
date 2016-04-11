@@ -168,11 +168,11 @@
 <div class="controls col-sm-8 tierSelect">
                             <select id="apiTier" name="apiTier"  class="form-control multiselect selected required">
                             <%
-        for (var i = 0; i < tiers.length; i++) {
-            var isSelectedAPITier = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+        for (var i = 0; i < resourceTiers.length; i++) {
+            var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
 var log = new Log();
 log.info(isSelectedAPITier);
-            %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+            %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option>%%><%
         }
         %>
         </select>
