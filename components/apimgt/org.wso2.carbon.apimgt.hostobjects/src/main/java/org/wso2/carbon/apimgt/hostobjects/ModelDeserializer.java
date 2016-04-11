@@ -30,8 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModelDeserializer extends JsonDeserializer<Model> {
-    @Override
-    public Model deserialize(JsonParser jp, DeserializationContext ctxt)
+    @Override public Model deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {
         JsonNode node = jp.getCodec().readTree(jp);
         JsonNode sub = node.get("$ref");

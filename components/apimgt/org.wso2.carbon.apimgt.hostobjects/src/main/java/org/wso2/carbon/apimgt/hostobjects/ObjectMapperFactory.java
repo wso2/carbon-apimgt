@@ -43,7 +43,8 @@ public class ObjectMapperFactory {
         return create(new YAMLFactory(), includePathDeserializer, includeResponseDeserializer);
     }
 
-    private static ObjectMapper create(JsonFactory jsonFactory, boolean includePathDeserializer, boolean includeResponseDeserializer) {
+    private static ObjectMapper create(JsonFactory jsonFactory, boolean includePathDeserializer,
+            boolean includeResponseDeserializer) {
         ObjectMapper mapper = jsonFactory == null ? new ObjectMapper() : new ObjectMapper(jsonFactory);
 
         Module deserializerModule = new DeserializationModule(includePathDeserializer, includeResponseDeserializer);

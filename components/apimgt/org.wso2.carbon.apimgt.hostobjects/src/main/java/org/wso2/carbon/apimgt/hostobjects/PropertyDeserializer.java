@@ -65,7 +65,7 @@ public class PropertyDeserializer extends JsonDeserializer<Property> {
         while (fieldNameIter.hasNext()) {
             String fieldName = fieldNameIter.next();
 
-            if(fieldName.startsWith("x-")) {
+            if (fieldName.startsWith("x-")) {
                 JsonNode extensionField = node.get(fieldName);
 
                 Object extensionObject = Json.mapper().convertValue(extensionField, Object.class);
@@ -103,12 +103,11 @@ public class PropertyDeserializer extends JsonDeserializer<Property> {
         return node.get(type.getPropertyName());
     }
 
-    @Override
-    public Property deserialize(JsonParser jp, DeserializationContext ctxt)
+    @Override public Property deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {
         JsonNode node = jp.getCodec().readTree(jp);
         Property property = propertyFromNode(node);
-        if(property != null) {
+        if (property != null) {
             property.setXml(getXml(node));
         }
         return property;
@@ -170,29 +169,30 @@ public class PropertyDeserializer extends JsonDeserializer<Property> {
                 detailNode = node.get("properties");
                 String detailNodeType = null;
                 Map<String, Property> properties = new HashMap<String, Property>();
-                if(detailNode != null){
-                    for(Iterator<Map.Entry<String,JsonNode>> iter = detailNode.fields(); iter.hasNext();){
-                        Map.Entry<String,JsonNode> field = iter.next();
+                if (detailNode != null) {
+                    for (Iterator<Map.Entry<String, JsonNode>> iter = detailNode.fields(); iter.hasNext(); ) {
+                        Map.Entry<String, JsonNode> field = iter.next();
                         Property property = propertyFromNode(field.getValue());
-                        if(property != null) {
+                        if (property != null) {
                             properties.put(field.getKey(), property);
-                        }
-                        else {
-                            if("type".equals(field.getKey()) && field.getValue() != null && "array".equals(field.getValue().asText())) {
+                        } else {
+                            if ("type".equals(field.getKey()) && field.getValue() != null && "array"
+                                    .equals(field.getValue().asText())) {
                                 detailNodeType = "array";
                             }
-                            if(("description").equals(field.getKey()) && field.getValue().getNodeType().equals(JsonNodeType.STRING)) {
+                            if (("description").equals(field.getKey()) && field.getValue().getNodeType()
+                                    .equals(JsonNodeType.STRING)) {
                                 description = field.getValue().asText();
                             }
                         }
                     }
                 }
 
-                if("array".equals(detailNodeType)) {
+                if ("array".equals(detailNodeType)) {
                     ArrayProperty ap = new ArrayProperty().description(description);
                     ap.setDescription(description);
 
-                    if(properties.keySet().size() == 1) {
+                    if (properties.keySet().size() == 1) {
                         String key = properties.keySet().iterator().next();
                         ap.setItems(properties.get(key));
                     }
@@ -218,7 +218,8 @@ public class PropertyDeserializer extends JsonDeserializer<Property> {
             }
         }
 
-        final Map<PropertyBuilder.PropertyId, Object> args = new EnumMap<PropertyBuilder.PropertyId, Object>(PropertyBuilder.PropertyId.class);
+        final Map<PropertyBuilder.PropertyId, Object> args = new EnumMap<PropertyBuilder.PropertyId, Object>(
+                PropertyBuilder.PropertyId.class);
         args.put(PropertyBuilder.PropertyId.TYPE, type);
         args.put(PropertyBuilder.PropertyId.FORMAT, format);
         args.put(PropertyBuilder.PropertyId.DESCRIPTION, description);
@@ -230,14 +231,18 @@ public class PropertyDeserializer extends JsonDeserializer<Property> {
         args.put(PropertyBuilder.PropertyId.DESCRIMINATOR, getString(node, PropertyBuilder.PropertyId.DESCRIMINATOR));
         args.put(PropertyBuilder.PropertyId.MIN_ITEMS, getInteger(node, PropertyBuilder.PropertyId.MIN_ITEMS));
         args.put(PropertyBuilder.PropertyId.MAX_ITEMS, getInteger(node, PropertyBuilder.PropertyId.MAX_ITEMS));
-        args.put(PropertyBuilder.PropertyId.MIN_PROPERTIES, getInteger(node, PropertyBuilder.PropertyId.MIN_PROPERTIES));
-        args.put(PropertyBuilder.PropertyId.MAX_PROPERTIES, getInteger(node, PropertyBuilder.PropertyId.MAX_PROPERTIES));
+        args.put(PropertyBuilder.PropertyId.MIN_PROPERTIES,
+                getInteger(node, PropertyBuilder.PropertyId.MIN_PROPERTIES));
+        args.put(PropertyBuilder.PropertyId.MAX_PROPERTIES,
+                getInteger(node, PropertyBuilder.PropertyId.MAX_PROPERTIES));
         args.put(PropertyBuilder.PropertyId.MIN_LENGTH, getInteger(node, PropertyBuilder.PropertyId.MIN_LENGTH));
         args.put(PropertyBuilder.PropertyId.MAX_LENGTH, getInteger(node, PropertyBuilder.PropertyId.MAX_LENGTH));
         args.put(PropertyBuilder.PropertyId.MINIMUM, getDouble(node, PropertyBuilder.PropertyId.MINIMUM));
         args.put(PropertyBuilder.PropertyId.MAXIMUM, getDouble(node, PropertyBuilder.PropertyId.MAXIMUM));
-        args.put(PropertyBuilder.PropertyId.EXCLUSIVE_MINIMUM, getBoolean(node, PropertyBuilder.PropertyId.EXCLUSIVE_MINIMUM));
-        args.put(PropertyBuilder.PropertyId.EXCLUSIVE_MAXIMUM, getBoolean(node, PropertyBuilder.PropertyId.EXCLUSIVE_MAXIMUM));
+        args.put(PropertyBuilder.PropertyId.EXCLUSIVE_MINIMUM,
+                getBoolean(node, PropertyBuilder.PropertyId.EXCLUSIVE_MINIMUM));
+        args.put(PropertyBuilder.PropertyId.EXCLUSIVE_MAXIMUM,
+                getBoolean(node, PropertyBuilder.PropertyId.EXCLUSIVE_MAXIMUM));
         args.put(PropertyBuilder.PropertyId.UNIQUE_ITEMS, getBoolean(node, PropertyBuilder.PropertyId.UNIQUE_ITEMS));
         args.put(PropertyBuilder.PropertyId.READ_ONLY, getBoolean(node, PropertyBuilder.PropertyId.READ_ONLY));
         args.put(PropertyBuilder.PropertyId.VENDOR_EXTENSIONS, getVendorExtensions(node));

@@ -27,9 +27,7 @@ import io.swagger.models.Response;
 import java.io.IOException;
 
 public class ResponseDeserializer extends JsonDeserializer<Response> {
-    @Override
-    public Response deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException {
+    @Override public Response deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
         JsonNode sub = node.get("$ref");
 

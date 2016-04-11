@@ -27,8 +27,7 @@ import io.swagger.models.parameters.*;
 import java.io.IOException;
 
 public class ParameterDeserializer extends JsonDeserializer<Parameter> {
-    @Override
-    public Parameter deserialize(JsonParser jp, DeserializationContext ctxt)
+    @Override public Parameter deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {
         Parameter result = null;
 

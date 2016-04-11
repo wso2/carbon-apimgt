@@ -30,8 +30,7 @@ import io.swagger.models.auth.SecuritySchemeDefinition;
 import java.io.IOException;
 
 public class SecurityDefinitionDeserializer extends JsonDeserializer<SecuritySchemeDefinition> {
-    @Override
-    public SecuritySchemeDefinition deserialize(JsonParser jp, DeserializationContext ctxt)
+    @Override public SecuritySchemeDefinition deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {
         SecuritySchemeDefinition result = null;
 

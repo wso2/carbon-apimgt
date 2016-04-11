@@ -16,6 +16,7 @@
 * under the License.
 */
 package org.wso2.carbon.apimgt.hostobjects;
+
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -25,11 +26,12 @@ public class Json {
     private static ObjectMapper mapper;
 
     public static ObjectMapper mapper() {
-        if(mapper == null) {
+        if (mapper == null) {
             mapper = ObjectMapperFactory.createJson();
         }
         return mapper;
     }
+
     public static ObjectWriter pretty() {
         return mapper().writer(new DefaultPrettyPrinter());
     }
@@ -62,7 +64,6 @@ public class Json {
      */
     private static ObjectMapper pathMapper;
     private static ObjectMapper responseMapper;
-
 
     protected static ObjectMapper pathMapper() {
         if (pathMapper == null) {
