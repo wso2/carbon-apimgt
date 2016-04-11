@@ -20,13 +20,13 @@ package org.wso2.carbon.throttle.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.wso2.carbon.throttle.service.dto.BlockConditionsDTO;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +51,7 @@ public final class BlockConditionDBUtil {
             return;
         }
         Properties properties  = new Properties();
-        properties.load(new FileInputStream("throttle.properties"));
+        properties.load(new ClassPathResource("../throttle.properties").getInputStream());
         String dataSourceName = (String) properties.get("block.datasource.name");
         synchronized (BlockConditionDBUtil.class) {
             if (dataSource == null) {

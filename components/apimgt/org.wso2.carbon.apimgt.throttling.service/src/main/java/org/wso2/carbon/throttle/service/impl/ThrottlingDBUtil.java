@@ -20,6 +20,7 @@ package org.wso2.carbon.throttle.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.wso2.carbon.throttle.service.dto.ThrottledEventDTO;
 
 import javax.naming.Context;
@@ -54,7 +55,7 @@ public final class ThrottlingDBUtil {
             return;
         }
         Properties properties  = new Properties();
-        properties.load(new FileInputStream("throttle.properties"));
+        properties.load(new ClassPathResource("../throttle.properties").getInputStream());
         String dataSourceName = (String) properties.get("throttle.datasource.name");
         synchronized (ThrottlingDBUtil.class) {
             if (dataSource == null) {
