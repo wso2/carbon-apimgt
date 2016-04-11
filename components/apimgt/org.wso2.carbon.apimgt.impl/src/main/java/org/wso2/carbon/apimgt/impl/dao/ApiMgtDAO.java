@@ -9353,14 +9353,16 @@ public class ApiMgtDAO {
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             updateStatement.setInt(7, policy.getRateLimitCount());
             updateStatement.setString(8, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(9, policy.isStopOnQuotaReach());
+            updateStatement.setString(10, policy.getBillingPlan());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(9, new ByteArrayInputStream(policy.getCustomAttributes()));
-            	updateStatement.setString(10, policy.getPolicyName());
-                updateStatement.setInt(11, policy.getTenantId());
+            	updateStatement.setBlob(11, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(12, policy.getPolicyName());
+                updateStatement.setInt(13, policy.getTenantId());
             }else{
-            	updateStatement.setString(9, policy.getPolicyName());
-                updateStatement.setInt(10, policy.getTenantId());
+            	updateStatement.setString(11, policy.getPolicyName());
+                updateStatement.setInt(12, policy.getTenantId());
             }
             updateStatement.executeUpdate();
             connection.commit();

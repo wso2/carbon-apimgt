@@ -2207,6 +2207,8 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ? " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
@@ -2220,6 +2222,8 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
                     " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
