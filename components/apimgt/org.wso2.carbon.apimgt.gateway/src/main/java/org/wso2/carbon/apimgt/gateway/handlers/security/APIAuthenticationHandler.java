@@ -93,22 +93,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "LEST_LOST_EXCEPTION_STACK_TRACE", justification = "The exception needs to thrown for fault sequence invocation")
     private void initializeAuthenticator() {
-        String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-                getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
-        if (authenticatorType == null) {
-            /*
-            if the APIManagerConfigurationService is not set at the time the APIAuthenticationHandler intializes
-            the authenticator is null. Then we need to initialize the authenticator in the first request
-             */
-            authenticatorType = OAuthAuthenticator.class.getName();
-        }
-        try {
-            authenticator = (Authenticator) APIUtil.getClassForName(authenticatorType).newInstance();
-        } catch (Exception e) {
-            // Just throw it here - Synapse will handle it
-            throw new SynapseException("Error while initializing authenticator of " +
-                    "type: " + authenticatorType);
-        }
+        authenticator = new OAuthAuthenticator();
         authenticator.init(synapseEnvironment);
     }
 

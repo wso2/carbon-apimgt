@@ -18,7 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.dao.test;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -32,6 +37,15 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -42,8 +56,10 @@ public class APIMgtDAOTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
+        initializeDatabase  (dbConfigPath);
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(config));
         APIMgtDBUtil.initialize();
@@ -51,6 +67,59 @@ public class APIMgtDAOTest extends TestCase {
         IdentityTenantUtil.setRealmService(new TestRealmService());
         String identityConfigPath = System.getProperty("IdentityConfigurationPath");
         IdentityConfigParser.getInstance(identityConfigPath);
+    }
+
+    private void initializeDatabase(String configFilePath) {
+
+        InputStream in = null;
+        try {
+            in = FileUtils.openInputStream(new File(configFilePath));
+            StAXOMBuilder builder = new StAXOMBuilder(in);
+            String dataSource = builder.getDocumentElement().getFirstChildWithName(new QName("DataSourceName")).
+                    getText();
+            OMElement databaseElement = builder.getDocumentElement().getFirstChildWithName(new QName("Database"));
+            String databaseURL = databaseElement.getFirstChildWithName(new QName("URL")).getText();
+            String databaseUser = databaseElement.getFirstChildWithName(new QName("Username")).getText();
+            String databasePass = databaseElement.getFirstChildWithName(new QName("Password")).getText();
+            String databaseDriver = databaseElement.getFirstChildWithName(new QName("Driver")).getText();
+
+            BasicDataSource basicDataSource = new BasicDataSource();
+            basicDataSource.setDriverClassName(databaseDriver);
+            basicDataSource.setUrl(databaseURL);
+            basicDataSource.setUsername(databaseUser);
+            basicDataSource.setPassword(databasePass);
+
+            // Create initial context
+            System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+                        "org.apache.naming.java.javaURLContextFactory");
+            System.setProperty(Context.URL_PKG_PREFIXES,
+                    "org.apache.naming");
+            InitialContext ic = new InitialContext();
+            ic.createSubcontext("java:");
+            ic.createSubcontext("java:/comp");
+            ic.createSubcontext("java:/comp/env");
+            ic.createSubcontext("java:/comp/env/jdbc");
+
+            ic.bind("java:/comp/env/jdbc/WSO2AM_DB", basicDataSource);
+
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void testDataSource(){
+        Context ctx = null;
+        try {
+            ctx = new InitialContext();
+            DataSource dataSource = (DataSource) ctx.lookup("java:/comp/env/jdbc/WSO2AM_DB");
+            Assert.assertNotNull(dataSource);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
     }
 
     public void testGetSubscribersOfProvider() throws Exception {
