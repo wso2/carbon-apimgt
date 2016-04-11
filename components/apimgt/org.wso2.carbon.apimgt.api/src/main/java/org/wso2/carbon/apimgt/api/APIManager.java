@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.util.List;
@@ -437,5 +438,5 @@ public interface APIManager {
      * @param policyName name of the policy
      * @throws APIManagementException
      */
-    void getAPIPolicy(String username, String policyName) throws APIManagementException;
+    APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException;
 }
