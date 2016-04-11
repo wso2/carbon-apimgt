@@ -184,21 +184,21 @@ var reqUrl = request.getRequestURI();
                                     		<img class="" src="<%=thumbURL%>" alt="">
                                     	</div>
                                     <% } %>
-                                    <div class="after">
-                                        <a href="<%=path%>">
-                                    <span class="fw-stack fw-lg">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-view fw-stack-1x"></i>
-                                    </span>
-                                        </a>
-                                    </div>
+                                     <a href="<%=path%>">
+	                                    <div class="after">                                       
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>          
+	                                    </div>
+	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a href="<%=path%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p><%=api.apiOwner%></p>
-                                    <%} else if(api.apiBusinessOwner != null) {%>
+                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
                                     	<p><%=api.apiBusinessOwner%></p>
                                     <%} else { %>
                                     	<p><%=api.provider%></p>
@@ -319,13 +319,13 @@ var reqUrl = request.getRequestURI();
 
             <% if(totalLength == 0) {
                          if (request.getParameter("query") == null) {  %>
-				            <div class="message message-info">
-				                <strong><%=i18n.localize("noAPIMsg")%></strong>
-				            </div>
+                         	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIMsg")%></h4>
+						    </div>
 			            <%   } else {    %>
-			            <div class="message message-info">
-			                <strong><%=i18n.localize("noSearchResultMsg")%></strong>
-			            </div>
+			            	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noSearchResultMsg")%></h4>
+						    </div>
 			            <%
 			                         }
                       }
