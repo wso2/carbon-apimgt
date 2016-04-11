@@ -671,10 +671,10 @@
             <Password>admin</Password>
             <Destination>throttleData</Destination>
             <JMSConnectionParameters>
-                <property1>value1</property1>
-                <property2>value2</property2>
-                <property3>value3</property3>
-                <property4>value4</property4>
+                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+                <connectionfactory.TopicConnectionFactory>amqp://admin:admin@clientid/carbon?brokerlist='tcp://localhost:5672'</connectionfactory.TopicConnectionFactory>
             </JMSConnectionParameters>
             <JMSTaskManager>
                 <MinThreadPoolSize>100</MinThreadPoolSize>

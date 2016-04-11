@@ -3017,63 +3017,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
     }
 
-    @Override
-    public boolean deployPolicyInGlobalThrottleEngine(String executionPlan, String name) throws APIManagementException {
-        ServiceClient serviceClient;
-        Options options;
-        AuthenticationAdminStub authenticationAdminStub;
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub;
-        ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService
-                ().getAPIManagerConfiguration().getThrottleProperties().getPolicyDeployer();
-        try {
-            authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
-                    "AuthenticationAdmin");
-            String sessionCookie = null;
-
-            if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration
-                    .getPassword(),new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
-                ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
-                        .getServiceContext();
-                sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            }
-            if (sessionCookie != null) {
-                eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub("/EventProcessorAdminService");
-                serviceClient = eventProcessorAdminServiceStub._getServiceClient();
-                options = serviceClient.getOptions();
-                options.setManageSession(true);
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
-
-                eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
-                ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
-                        .getAllActiveExecutionPlanConfigurations();
-                boolean isUpdateRequest = false;
-                for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-                    if (executionPlanConfigurationDto.getName().equals(name)) {
-                        eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
-                        isUpdateRequest = true;
-                        break;
-                    }
-                }
-                if (!isUpdateRequest) {
-                    eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
-                }
-
-            }
-        } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (LoginAuthenticationExceptionException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-
-        return false;
-    }
-
     private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
         if (apiTenantConfig != null) {
             Object value = apiTenantConfig.get(configKey);

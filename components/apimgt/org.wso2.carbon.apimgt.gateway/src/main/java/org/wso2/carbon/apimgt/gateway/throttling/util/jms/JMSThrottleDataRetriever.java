@@ -52,12 +52,12 @@ public class JMSThrottleDataRetriever implements Runnable {
                 properties = new Properties();
                 ClassLoader classLoader = getClass().getClassLoader();
                 properties.load(classLoader.getResourceAsStream("mb.properties"));
-                for (final String name : properties.stringPropertyNames()) {
-                    parameters.put(name, properties.getProperty(name));
-                }
             }
             else{
                 properties = jmsConnectionProperties.getJmsConnectionProperties();
+            }
+            for (final String name : properties.stringPropertyNames()) {
+                parameters.put(name, properties.getProperty(name));
             }
             String destination = jmsConnectionProperties.getDestination();
             JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters, "Siddhi-JMS-Consumer");

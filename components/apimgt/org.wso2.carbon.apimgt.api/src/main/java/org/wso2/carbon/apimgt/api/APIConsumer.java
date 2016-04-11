@@ -580,5 +580,4 @@ public interface APIConsumer extends APIManager {
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
-    boolean deployPolicyInGlobalThrottleEngine(String executionPlan, String name) throws APIManagementException;
 }
