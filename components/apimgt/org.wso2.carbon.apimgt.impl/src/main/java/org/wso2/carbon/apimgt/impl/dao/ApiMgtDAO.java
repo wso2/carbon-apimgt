@@ -5827,9 +5827,10 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(6, api.getId().getApiName());
-                prepStmt.setString(7, api.getId().getVersion());
+                               prepStmt.setString(5, api.getApiLevelPolicy());
+                                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                                prepStmt.setString(7, api.getId().getApiName());
+                                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
             }
 
@@ -8201,7 +8202,6 @@ public class ApiMgtDAO {
 
         }
     }
-}
 
     /**
      * Add a Application level throttling policy to database
