@@ -33,9 +33,9 @@ var jagg = jagg || {};
    jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
         if(params.title == undefined){
-            $('#messageModal h4.modal-title').html('API Store');
+            $('#messageModal h3.modal-title').html('API Store');
         }else{
-            $('#messageModal h4.modal-title').html(params.title);
+            $('#messageModal h3.modal-title').html(params.title);
         }
         $('#messageModal div.modal-body').html(params.content);
         if(params.buttons != undefined){
