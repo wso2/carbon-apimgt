@@ -121,7 +121,7 @@ public class ThrottleHandler extends AbstractHandler {
         String applicationLevelThrottleKey;
         String subscriptionLevelThrottleKey;
         String resourceLevelThrottleKey;
-        String apiLevelThrottleKey;
+        String apiLevelThrottleKey = "";
 
         //Throttle Tiers
         String applicationLevelTier;
@@ -152,13 +152,14 @@ public class ThrottleHandler extends AbstractHandler {
             applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
-            apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
-
-            //Check if request is blocked. If request is blocked then will not proceed further and
-            //inform to client.
-            //TODO handle blocked and throttled requests separately.
-            isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                    apiLevelThrottleKey, applicationLevelThrottleKey, authorizedUser);
+            if ( (authContext.getThrottlingDataList() !=null) && (authContext.getThrottlingDataList().get(0) !=null)){
+                apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
+                //Check if request is blocked. If request is blocked then will not proceed further and
+                //inform to client.
+                //TODO handle blocked and throttled requests separately.
+                isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
+                        apiLevelThrottleKey, applicationLevelThrottleKey, authorizedUser);
+            }
             if (isBlockedRequest){
                 if (log.isDebugEnabled()) {
                     log.debug("Request blocked as it violates defined blocking conditions, for API:" + apiContext +
@@ -172,7 +173,7 @@ public class ThrottleHandler extends AbstractHandler {
                 apiLevelTier = authContext.getApiTier();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply
                 // for it
-                if (apiLevelTier != null && apiLevelTier.length() > 0) {
+                if (apiLevelTier != null && apiLevelTier.length() > 0 && apiLevelThrottleKey.length() > 0) {
                     isThrottled = isApiLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                             isThrottled(apiLevelThrottleKey);
                 } else {
