@@ -27,7 +27,7 @@
                                 Add Application
                             </a>
                         </li> 
-                    <% }else if(inputs.page == "application/application-add" || inputs.page == "application/application-view"){%>
+                    <% }else if(inputs.page == "application/application-add"){%>
                         <li>
                             <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
                                 <span class="icon fw-stack">
@@ -35,6 +35,25 @@
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                 </span>
                                 Application List
+                            </a>
+                        </li>
+                    <% }else if(inputs.page == "application/application-view"){ %>
+                        <li>
+                            <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+                                <span class="icon fw-stack">
+                                    <i class="fw fw-left fw-stack-1x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>
+                                Application List
+                            </a>
+                        </li>                        
+                        <li>
+                            <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+                                <span class="icon fw-stack">
+                                    <i class="fw fw-edit fw-stack-1x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>
+                                Edit
                             </a>
                         </li>
                     <% }else if(inputs.page == "forum/forum-list"){%>

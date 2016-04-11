@@ -11,7 +11,15 @@ var site = require("/site/conf/site.json");
 		}
 	}
 
+	var tenant = jagg.getTenantDomain();
+    var queryString = "";
+
+	if(tenant == "null"){
+		queryString = "?tenant=carbon.super";
+	}else{
+		queryString = "?tenant="+tenant;
+	}
 	
     session.put("showLogin", "true");
-    response.sendRedirect(openRedirectValidation(request.getParameter("redirectToHome")));
+    response.sendRedirect(openRedirectValidation(request.getParameter("redirectToHome")) + queryString);
 %>

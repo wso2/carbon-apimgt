@@ -133,7 +133,7 @@ var drawGraphAPIUsage = function(from,to){
                         }
                         drawChart('#apiChart'+(k+1),k,chartData);
                         if (length > 0) {
-                            $('#apiTable'+(k+1)).dataTable({
+                            $('#apiTable'+(k+1)).datatables_extended({
                             "fnDrawCallback": function(){
                                 if(this.fnSettings().fnRecordsDisplay()<=$('#apiTable'+(k+1)+'_length option:selected' ).val()
                               || $('#apiTable'+(k+1)+'_length option:selected' ).val()==-1)
@@ -145,7 +145,7 @@ var drawGraphAPIUsage = function(from,to){
                         }
                      }
                     }else{
-                        $('#apiUsage').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#apiUsage').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
                     }
                 } else {
                     if (json.message == "AuthenticateError") {

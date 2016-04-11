@@ -89,6 +89,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String username = "";
             String applicationName = "";
             String applicationId = "";
+            String applicationOwner = "";
             String tier = "";
             if (authContext != null) {
                 consumerKey = authContext.getConsumerKey();
@@ -96,6 +97,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 applicationName = authContext.getApplicationName();
                 applicationId = authContext.getApplicationId();
                 tier = authContext.getTier();
+                applicationOwner = authContext.getSubscriber();
             }
             String hostName = DataPublisherUtil.getHostAddress();
             org.apache.axis2.context.MessageContext axis2MsgContext =
@@ -146,6 +148,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setTier(tier);
             requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
             requestPublisherDTO.setClientIp(clientIp);
+            requestPublisherDTO.setApplicationOwner(applicationOwner);
             publisher.publishEvent(requestPublisherDTO);
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);

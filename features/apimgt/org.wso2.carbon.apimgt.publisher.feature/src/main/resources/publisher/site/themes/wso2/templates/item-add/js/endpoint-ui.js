@@ -124,9 +124,15 @@ $(document).ready(function () {
                     "101501": 	i18n.t("endpointUi.101501")
                 }
             },
-                { key:'suspendDuration'},
-                { key:'suspendMaxDuration'},
-                { key:'factor'}]
+            {   key:'suspendDuration',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'suspendMaxDuration',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'factor',
+                fieldHtmlClass:'form-control'
+            }]
 
         }, {
             "type": "fieldset",
@@ -150,7 +156,12 @@ $(document).ready(function () {
                     "101501": 	i18n.t("endpointUi.101501")
                 }
             },
-                'retryTimeOut', 'retryDelay']
+            {   key:'retryTimeOut',
+                fieldHtmlClass:'form-control'
+            },
+            {   key:'retryDelay',
+                fieldHtmlClass:'form-control'
+            }]
         }, {
             "type": "fieldset",
             "title": i18n.t("endpointUi.Connection Timeout"),
@@ -165,7 +176,8 @@ $(document).ready(function () {
                     value:'fault'
                 },{
                     key:'actionDuration',
-                    value: '30000'
+                    value: '30000',
+                    fieldHtmlClass:'form-control'
                 }
             ]
         }

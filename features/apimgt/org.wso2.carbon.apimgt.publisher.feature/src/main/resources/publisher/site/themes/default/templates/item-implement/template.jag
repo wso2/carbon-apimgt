@@ -69,7 +69,7 @@
     <div class="title-section">
         <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>
         <% if(api){ %>
-            &nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a>
+            &nbsp;<a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" title='<%=i18n.localize("goToOverView")%>' ><i class=" icon-list-alt" title='<%=i18n.localize("goToOverView")%>'></i> Go to Overview</a>
         <% } %></h2>
     </div>
     <div class="content-section shadow-up">

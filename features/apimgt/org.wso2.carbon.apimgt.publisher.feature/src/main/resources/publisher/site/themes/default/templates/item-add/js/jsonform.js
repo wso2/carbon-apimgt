@@ -794,8 +794,8 @@ jsonform.elementTypes = {
   'array': {
     'template': '<div id="<%= id %>"><ul class="_jsonform-array-ul" style="list-style-type:none;"><%= children %></ul>' +
       '<span class="_jsonform-array-buttons">' +
-        '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add new"></i></a> ' +
-        '<a href="#" class="btn _jsonform-array-deletelast"><i class="icon-minus-sign" title="Delete last"></i></a>' +
+        '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add New"></i></a> ' +
+        '<a href="#" class="btn _jsonform-array-deletelast"><i class="icon-minus-sign" title="Delete Last"></i></a>' +
       '</span>' +
       '</div>',
     'fieldtemplate': true,
