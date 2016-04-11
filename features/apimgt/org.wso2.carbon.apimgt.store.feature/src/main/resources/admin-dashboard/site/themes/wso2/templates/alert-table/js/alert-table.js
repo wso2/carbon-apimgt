@@ -73,23 +73,23 @@ $( document ).ready(function() {
 
     function changeSelectedAlertType(alertType) {
         if(alertType != null){
-            if(alertType == "Unusual IP Access"){
+            if(alertType == "Unseen Source IP Address"){
                  $('#alertSelected').val(2).change();
             } else if(alertType == "Abnormal Request Count"){
                  $('#alertSelected').val(3).change();
             } else if(alertType == "Abnormal Response Time"){
                  $('#alertSelected').val(4).change();
-            } else if(alertType == "Abnormal Tier Usage"){
+            } else if(alertType == "Abnormal API Usage"){
                  $('#alertSelected').val(5).change();
-            } else if(alertType == "Abnormal Token Refresh"){
+            } else if(alertType == "Abnormal Renewal of Access Tokens"){
                  $('#alertSelected').val(6).change();
             } else if(alertType == "Tier Crossing"){
                  $('#alertSelected').val(7).change();
             } else if(alertType == "Abnormal Backend Time"){
                  $('#alertSelected').val(8).change();
-            } else if(alertType == "API Health Monitor"){
+            } else if(alertType == "Availability of APIs"){
                  $('#alertSelected').val(9).change();
-            } else if(alertType == "Request Pattern Change"){
+            } else if(alertType == "Abnormal Resource Access Pattern"){
                 $('#alertSelected').val(10).change();
             }     
         }   

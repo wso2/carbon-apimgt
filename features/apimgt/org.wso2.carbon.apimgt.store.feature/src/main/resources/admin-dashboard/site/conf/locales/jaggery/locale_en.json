@@ -72,14 +72,14 @@
     "allow":"Allow",
     "deny":"Deny",
 
-    "RequestPatternChanged":"Request Pattern Change",
-    "UnusualIPAccessAlert":"Unusual IP Access",
+    "RequestPatternChanged":"Abnormal Resource Access Pattern",
+    "UnusualIPAccessAlert":"Unseen Source IP Address",
     "abnormalRequestsPerMin":"Abnormal Request Count",
     "abnormalBackendTime":"Abnormal Backend Time",
     "abnormalResponseTime":"Abnormal Response Time",
-    "healthAvailabilityPerMin":"API Health Monitor",
-    "AbnormalRefreshAlert":"Abnormal Token Refresh",
-    "AbnormalTierUsage":"Abnormal Tier Usage",
+    "healthAvailabilityPerMin":"Availability of APIs",
+    "AbnormalRefreshAlert":"Abnormal Renewal of Access Tokens",
+    "AbnormalTierUsage":"Abnormal API Usage",
     "FrequentTierHittingAlert":"Tier Crossing"
 
 }
