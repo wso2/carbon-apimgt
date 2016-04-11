@@ -8009,7 +8009,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            handleException("Failed to add Application", e);
+            handleException("Failed to save alert preferences", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 

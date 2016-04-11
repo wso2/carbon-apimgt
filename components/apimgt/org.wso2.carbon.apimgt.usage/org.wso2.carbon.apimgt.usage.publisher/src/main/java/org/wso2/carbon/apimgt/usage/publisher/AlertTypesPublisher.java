@@ -45,12 +45,13 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             String checkedAlertListValues) throws APIManagementException {
 
         try {
-            if (publisher == null) {
-                this.initializeDataPublisher();
-            }
 
             if (!enabled || skipEventReceiverConnection) {
                 throw new APIManagementException("Data publisher is not enabled");
+            }
+
+            if (publisher == null) {
+                this.initializeDataPublisher();
             }
 
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
