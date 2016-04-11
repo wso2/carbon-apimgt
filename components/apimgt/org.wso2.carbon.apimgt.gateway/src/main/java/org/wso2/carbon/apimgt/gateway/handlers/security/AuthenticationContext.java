@@ -45,7 +45,8 @@ public class AuthenticationContext {
     public void setThrottlingDataList(List<String> throttlingDataList) {
         this.throttlingDataList = throttlingDataList;
     }
-
+    //Following throttle data list can be use to hold throttle data and api level throttle key
+    //should be its first element.
     private List<String> throttlingDataList;
 
     public boolean isContentAwareTierPresent() {

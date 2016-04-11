@@ -192,6 +192,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
             authContext.setConsumerKey(info.getConsumerKey());
+            authContext.setApiTier(info.getApiTier());
             authContext.setThrottlingDataList(info.getThrottlingDataList());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
 

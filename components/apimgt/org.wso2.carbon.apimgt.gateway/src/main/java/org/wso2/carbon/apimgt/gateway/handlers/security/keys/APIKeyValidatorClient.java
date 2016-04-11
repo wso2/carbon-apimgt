@@ -135,6 +135,7 @@ public class APIKeyValidatorClient {
         dto.setApiName(generatedDto.getApiName());
         dto.setValidityPeriod(generatedDto.getValidityPeriod());
         dto.setIssuedTime(generatedDto.getIssuedTime());
+        dto.setApiTier(generatedDto.getApiTier());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
         return dto;

@@ -849,10 +849,12 @@ public class ApiMgtDAO {
 
    
                 infoDTO.setContentAware(isContentAware);
+
+                //TODO this must implement as a part of throttling implementation.
                 String apiLevelThrottlingKey = "api_level_throttling_key";
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
-                //TODO this must implement as a part of throttling implementation.
+                infoDTO.setApiTier("API_LEVEL_TIER");
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 infoDTO.setThrottlingDataList(list);
@@ -5716,38 +5718,39 @@ public class ApiMgtDAO {
     /**
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
-    public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+	public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
+		Connection connection = null;
+		PreparedStatement prepStmt = null;
+		ResultSet rs = null;
+		ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
-        //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiContext);
-            prepStmt.setString(2, version);
+		// TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
+		String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			prepStmt = connection.prepareStatement(query);
+			prepStmt.setString(1, apiContext);
+			prepStmt.setString(2, version);
 
-            rs = prepStmt.executeQuery();
-            
-            //THROTTLING_TIER == POLICY_NAME
-            //Map<String,URITemplate> mapByHttpVerbURLPattern = new HashMap<String,URITemplate>();
-            Map<String,Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String,Set<String>>();
+			rs = prepStmt.executeQuery();
+
+			// THROTTLING_TIER == POLICY_NAME
+			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
+			// HashMap<String,URITemplate>();
+			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
 
 			while (rs != null && rs.next()) {
-			
+
 				String httpVerb = rs.getString("HTTP_METHOD");
 				String authType = rs.getString("AUTH_SCHEME");
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId = policyName+":"+conditionGroupId;
+				String policyConditionGroupId = policyName + ":" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
 						continue;
 					}
 					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
@@ -5764,38 +5767,39 @@ public class ApiMgtDAO {
 						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
 					}
 					uriTemplate.setMediationScript(script);
-					
+
 					Set<String> conditionGroupIdSet = new HashSet<String>();
-					mapByHttpVerbURLPatternToId.put(key,conditionGroupIdSet);
+					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
-					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
 						continue;
 					}
 					conditionGroupIdSet.add(policyConditionGroupId);
 				}
 
 			}
-            
-            for(URITemplate uriTemplate: uriTemplates){
-            	String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-            	if(mapByHttpVerbURLPatternToId.containsKey(key)){
-            		if(!mapByHttpVerbURLPatternToId.get(key).isEmpty()){
-            			uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
-            		}
-            		
-            	}
-            	
-            	if(uriTemplate.getThrottlingConditions().isEmpty()){
-            		uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier()+":"+"default");
-            	}
-            }
-        } catch (SQLException e) {
-            handleException("Error while fetching all URL Templates", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return uriTemplates;
-    }
+
+			for (URITemplate uriTemplate : uriTemplates) {
+				String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
+						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+					}
+
+				}
+
+				if (uriTemplate.getThrottlingConditions().isEmpty()) {
+					uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier() + ":" + "default");
+				}
+
+			}
+		} catch (SQLException e) {
+			handleException("Error while fetching all URL Templates", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+		}
+		return uriTemplates;
+	}
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
