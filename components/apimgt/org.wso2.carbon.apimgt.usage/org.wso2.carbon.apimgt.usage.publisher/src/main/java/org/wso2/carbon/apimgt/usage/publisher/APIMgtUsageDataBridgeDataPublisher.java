@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
@@ -168,4 +169,27 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         return dataPublisher;
     }
+
+    /**
+     * This method will publish event for alert types configurations.
+     * @param alertTypeDTO DTO object.
+     * @throws APIManagementException
+     */
+    @Override
+    public void publishEvent(AlertTypeDTO alertTypeDTO) throws APIManagementException {
+
+        DataBridgeAlertTypesPublisherDTO dataBridgeAlertTypesPublisherDTO = new
+                DataBridgeAlertTypesPublisherDTO(alertTypeDTO);
+        try {
+            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamName() + ":" +
+                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamVersion();
+
+            dataPublisher.publish(streamID,System.currentTimeMillis(), null, null,
+                    (Object[]) dataBridgeAlertTypesPublisherDTO.createPayload());
+        } catch (Exception e) {
+            log.error("Error while publishing alert types events.", e);
+            throw new APIManagementException("Error while publishing alert types events");
+        }
+    }
+
 }
