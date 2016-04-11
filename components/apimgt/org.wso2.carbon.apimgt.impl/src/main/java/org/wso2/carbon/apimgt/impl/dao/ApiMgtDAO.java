@@ -849,10 +849,12 @@ public class ApiMgtDAO {
 
    
                 infoDTO.setContentAware(isContentAware);
+
+                //TODO this must implement as a part of throttling implementation.
                 String apiLevelThrottlingKey = "api_level_throttling_key";
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
-                //TODO this must implement as a part of throttling implementation.
+                infoDTO.setApiTier("API_LEVEL_TIER");
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 infoDTO.setThrottlingDataList(list);
@@ -5739,7 +5741,9 @@ public class ApiMgtDAO {
                 uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
                 uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
                 uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                //This is resource level throttling tier
                 uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                //Resource level throttling execution list if multiple executions applied at tier level.
                 List<String> list =  new ArrayList<String>();
                 //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
                 //level.

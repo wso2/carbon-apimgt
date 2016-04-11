@@ -52,6 +52,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long validityPeriod;
     private long issuedTime;
     private List<String> authorizedDomains;
+    private  List<String> throttlingDataList;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -60,8 +61,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setThrottlingDataList(List<String> throttlingDataList) {
         this.throttlingDataList = throttlingDataList;
     }
-
-    private  List<String> throttlingDataList;
 
     public String getApiTier() {
         return apiTier;
