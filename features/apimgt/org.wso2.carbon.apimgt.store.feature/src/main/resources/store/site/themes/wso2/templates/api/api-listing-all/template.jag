@@ -198,7 +198,7 @@ var reqUrl = request.getRequestURI();
                                     <h5><a href="<%=path%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p><%=api.apiOwner%></p>
-                                    <%} else if(api.apiBusinessOwner != null) {%>
+                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
                                     	<p><%=api.apiBusinessOwner%></p>
                                     <%} else { %>
                                     	<p><%=api.provider%></p>
