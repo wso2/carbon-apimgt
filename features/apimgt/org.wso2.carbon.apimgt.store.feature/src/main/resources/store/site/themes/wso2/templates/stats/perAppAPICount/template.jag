@@ -1,10 +1,9 @@
 <% jagg.template("stats/perAppAPICount", function(inputs, outputs, jagg) { %>
-
+<div class="page-header">
+    <h1><%=i18n.localize("apiUsageTitle")%></h1>
+</div>
 <div id="apiUsage-stat-page" class="stat-page">
-   <div class="page-header">     
-    			<h1><%=i18n.localize("apiUsageTitle")%></h1>   			 
-	</div>
-
+--------------
     <div id="rangeSliderWrapper" >
        <div id="dateRangePickerContainer" style="text-align:right">
            <div class="btn-group" role="group">
@@ -20,7 +19,7 @@
            </div>
        </div>
     </div>
-
+--------------
     <div id="spinner" class="center-wrapper">
         <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
     </div>
