@@ -5723,7 +5723,7 @@ public class ApiMgtDAO {
         ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
         //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
-        String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
+        String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
@@ -5731,26 +5731,63 @@ public class ApiMgtDAO {
             prepStmt.setString(2, version);
 
             rs = prepStmt.executeQuery();
+            
+            //THROTTLING_TIER == POLICY_NAME
+            //Map<String,URITemplate> mapByHttpVerbURLPattern = new HashMap<String,URITemplate>();
+            Map<String,Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String,Set<String>>();
 
-            URITemplate uriTemplate;
-            while (rs.next()) {
-                uriTemplate = new URITemplate();
-                String script = null;
-                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
-                List<String> list =  new ArrayList<String>();
-                //TODO we need to fetch throttling conditions when we used CEP based advanced throttling for resource
-                //level.
-                list.add("default");
-                uriTemplate.setThrottlingConditions(list);
-                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                if (mediationScriptBlob != null) {
-                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                }
-                uriTemplate.setMediationScript(script);
-                uriTemplates.add(uriTemplate);
+			while (rs != null && rs.next()) {
+			
+				String httpVerb = rs.getString("HTTP_METHOD");
+				String authType = rs.getString("AUTH_SCHEME");
+				String urlPattern = rs.getString("URL_PATTERN");
+				String policyName = rs.getString("THROTTLING_TIER");
+				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+				String policyConditionGroupId = policyName+":"+conditionGroupId;
+
+				String key = httpVerb + ":" + urlPattern;
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+						continue;
+					}
+					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+				} else {
+					String script = null;
+					URITemplate uriTemplate = new URITemplate();
+					uriTemplate.setThrottlingTier(policyName);
+					uriTemplate.setAuthType(authType);
+					uriTemplate.setHTTPVerb(httpVerb);
+					uriTemplate.setUriTemplate(urlPattern);
+
+					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+					if (mediationScriptBlob != null) {
+						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+					}
+					uriTemplate.setMediationScript(script);
+					
+					Set<String> conditionGroupIdSet = new HashSet<String>();
+					mapByHttpVerbURLPatternToId.put(key,conditionGroupIdSet);
+					uriTemplates.add(uriTemplate);
+					if(conditionGroupId == null || conditionGroupId.trim().length() == 0){
+						continue;
+					}
+					conditionGroupIdSet.add(policyConditionGroupId);
+				}
+
+			}
+            
+            for(URITemplate uriTemplate: uriTemplates){
+            	String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            	if(mapByHttpVerbURLPatternToId.containsKey(key)){
+            		if(!mapByHttpVerbURLPatternToId.get(key).isEmpty()){
+            			uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+            		}
+            		
+            	}
+            	
+            	if(uriTemplate.getThrottlingConditions().isEmpty()){
+            		uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier()+":"+"default");
+            	}
             }
         } catch (SQLException e) {
             handleException("Error while fetching all URL Templates", e);
