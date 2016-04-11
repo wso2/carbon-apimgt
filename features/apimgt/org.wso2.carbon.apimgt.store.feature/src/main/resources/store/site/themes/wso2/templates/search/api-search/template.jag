@@ -10,8 +10,9 @@ var tenant = jagg.getTenantDomain();
       <div class="input-group-btn">
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
           <i class="fw fw-search" aria-hidden="true"></i>
-        </button>        
-      </div>
+        </button> 
+      </div>     
+        
       <div id="apiSearchHelp" class="hide help-popover-content" >
             <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
@@ -29,7 +30,6 @@ var tenant = jagg.getTenantDomain();
     </div><!-- /input-group -->
   </div>
 </form>
-
 <!-- div class="row">
   <div class="col-md-6 api-search">
     <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">

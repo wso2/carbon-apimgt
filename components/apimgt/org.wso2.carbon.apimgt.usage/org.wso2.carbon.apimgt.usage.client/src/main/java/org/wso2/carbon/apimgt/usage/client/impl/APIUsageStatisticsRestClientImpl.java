@@ -26,6 +26,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -2342,6 +2343,51 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
 
+    /**
+     * Search a DAS indexed table and get the json response.
+     *
+     * @param tableName name of the table
+     * @param query     lucene query
+     * @param start     start index of the result list
+     * @param count     number of results required
+     * @param sortField from which field the sorting should happen, null if you don't want it sorted
+     * @param ascending sorting ascending or not
+     * @return json string of the response
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchTable(String tableName, String query, int start, int count, String sortField, boolean ascending)
+            throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        List<Map<String, String>> sortBy = new ArrayList();
+        if (sortField != null) {
+            Map<String, String> sortFieldMap = new HashedMap();
+            sortFieldMap.put("field", sortField);
+            String sortType = (ascending) ? "ASC" : "DESC";
+            sortFieldMap.put("sortType", sortType);
+            sortBy.add(sortFieldMap);
+        }
+        //create the bean
+        RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
+        String result = null;
+        //do post and get the results
+        try {
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
                                                                         String tenantDomain, String fromDate,
@@ -2397,6 +2443,36 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Couldn't parse the date", e);
         }
         return obj;
+    }
+
+    /**
+     * Provides the count for the search result.
+     *
+     * @param tableName name of the table
+     * @param query     search query
+     * @return count of the search results
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchCount(String tableName, String query) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        //create the bean
+        RequestSearchCountBean request = new RequestSearchCountBean(tableName, query);
+        String result = null;
+        //do post and get the results
+        try {
+            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
     }
 
     @Override
@@ -2510,3 +2586,4 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return obj;
     }
 }
+

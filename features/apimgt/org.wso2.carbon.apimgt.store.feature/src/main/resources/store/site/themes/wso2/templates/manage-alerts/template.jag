@@ -38,7 +38,7 @@
 
                            %>
                             <div class="checkbox">
-                                <label><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=key%>" <%=isChecked%>><%=allAlertType[key]%></label>
+                                <label><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=key%>" <%=isChecked%>><%= i18n.localize(allAlertType[key]) %></label>
                             </div>
                            <%
 
