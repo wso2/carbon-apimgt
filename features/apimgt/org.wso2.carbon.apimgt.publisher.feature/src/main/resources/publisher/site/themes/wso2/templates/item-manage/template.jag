@@ -160,6 +160,29 @@
 	                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
 	            </div>
 
+<div class="form-group">
+                        <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span>
+                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        </label>
+<div class="controls col-sm-8 tierSelect">
+                            <select id="apiTier" name="apiTier"  class="form-control multiselect selected required">
+                            <%
+        for (var i = 0; i < tiers.length; i++) {
+            var isSelectedAPITier = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+var log = new Log();
+log.info(isSelectedAPITier);
+            %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+        }
+        %>
+        </select>
+        <a class=" help_popup" help_data="tier_help"></a>
+        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+</div>
+</div>
+
+
+
              <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
                   <!--<div class="form-group">
                         <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span>
