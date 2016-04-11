@@ -14,14 +14,14 @@
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  </script>
-<div class="title-section">
-           <h2><%=i18n.localize("applications")%></h2>
+
+<div class="page-header" id="Message">
+    <h1>Add Application</h1>
 </div>
-<div class="content-section shadow-up">
+<div class="content-section">
 <div class="content-data">
-An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+<p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
         
-<br />
 <div class="alert alert-success" id="appAddMessage" style="display:none">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>
@@ -31,11 +31,6 @@ An application is a logical collection of APIs. Applications allow you to use a 
         <strong><%=i18n.localize("preAddPendingMsg")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("afterAddPendingMsg")%></strong>
 </div>        
 <br />
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><strong><%=i18n.localize("addApp")%></strong></h3>
-  </div>
-  <div class="panel-body">
 <form class="form-horizontal" id="appAddForm">
   <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
   <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
@@ -64,7 +59,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
+          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>
@@ -94,16 +89,10 @@ An application is a logical collection of APIs. Applications allow you to use a 
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
+        <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
 </form>
-  </div>
-</div>
-
-
-
-
-    <% jagg.includeBlock("application/application-list", {user:inputs.user}); %>
 </div>
 </div>
 <% }); %>
