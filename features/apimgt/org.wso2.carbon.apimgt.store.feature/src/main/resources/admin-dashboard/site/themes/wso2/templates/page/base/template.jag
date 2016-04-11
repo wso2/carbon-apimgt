@@ -60,7 +60,7 @@ var user = jagg.getUser();
 
 
 
-
+<% if(user) { %>
 <!-- header -->
 <header class="header header-default">
 	<div class="container-fluid">
@@ -98,6 +98,7 @@ var user = jagg.getUser();
 	</div>
 </header>
 <!-- End header -->
+<%} %>
 
 
     <% jagg.includeBlocks(outputs.header); %>
