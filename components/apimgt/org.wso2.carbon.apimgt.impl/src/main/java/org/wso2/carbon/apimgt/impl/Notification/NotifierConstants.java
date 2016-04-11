@@ -52,5 +52,5 @@ public class NotifierConstants {
 
     public final static String NOTIFICATION_TYPE_NEW_VERSION = "new_api_version";
     public final static String NOTIFICATIONS_ENABLED = "NotificationsEnabled";
-
+    public final static String CLAIMS_RETRIEVER_IMPL_CLASS = "ClaimsRetrieverImplClass";
 }
