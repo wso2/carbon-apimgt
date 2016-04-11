@@ -216,16 +216,15 @@
 
 
             <% if(totalLength == 0) {
-                         if (request.getParameter("query") == null) {
+                 if (request.getParameter("query") == null) {
                     %>
-            <div class="alert alert-info">
-                <strong><%=i18n.localize("noPrototypedAPIMsg")%></strong>
-            </div>
-            <%   } else {
-                    %>
-            <div class="alert alert-info">
-                <strong><%=i18n.localize("noSearchResultMsg")%></strong>
-            </div>
+		            <div class="message message-info">
+				    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noPrototypedAPIMsg")%></h4>
+				    </div>
+            <%   } else { %>
+            		 <div class="message message-info">
+				    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noSearchResultMsg")%></h4>
+				    </div>
             <%
                          }
                       }
