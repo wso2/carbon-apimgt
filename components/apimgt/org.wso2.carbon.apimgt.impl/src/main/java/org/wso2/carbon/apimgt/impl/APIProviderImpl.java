@@ -1855,9 +1855,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //Sending Notifications to existing subscribers
             try {
-
-                String isNotificationEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService
-                        ().getAPIManagerConfiguration().getFirstProperty(NotifierConstants.NOTIFICATION_ENABLED);
+                String isNotificationEnabled = "false";
+                registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
+                        (tenantId);
+                if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                    if(content !=null ){
+                        JSONObject tenantConfig= (JSONObject) new JSONParser().parse(content);
+                        isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
+                    }
+                }
 
                 if (JavaUtils.isTrueExplicitly(isNotificationEnabled)){
 
