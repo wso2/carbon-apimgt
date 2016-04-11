@@ -31,13 +31,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
-import org.wso2.carbon.apimgt.usage.client.bean.Result;
-import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
-import org.wso2.carbon.apimgt.usage.client.bean.TableExistResponseBean;
+import org.wso2.carbon.apimgt.usage.client.bean.*;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 
 import java.io.BufferedReader;
@@ -189,6 +185,81 @@ public class DASRestClient {
 
         //parse the response back to the java objects
         return parse(response, type);
+    }
+
+    /**
+     * Make post requests to DAS REST api and get the result as a json.
+     * @param request Request Search Bean for the request
+     * @return the json of the response
+     * @throws JsonSyntaxException
+     * @throws IOException
+     */
+    public String doPost(RequestSortBean request) throws JsonSyntaxException, IOException {
+        //get the json string of the request object
+        String json = gson.toJson(request);
+
+        //doing a post request on the Search REST API
+        CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_REST_API_URL);
+        BufferedReader reader = null;
+        return getResponseString(response, reader);
+    }
+
+    /**
+     * Returns the count of an indexed table in DAS.
+     * @param searchCountBean search count request bean
+     * @return the count of the table for the request bean
+     * @throws JsonSyntaxException
+     * @throws IOException
+     */
+    public String doPost(RequestSearchCountBean searchCountBean) throws JsonSyntaxException, IOException {
+        //get the json string of the request object
+        String json = gson.toJson(searchCountBean);
+
+        //doing a post request on the Search REST API for the count
+        CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_COUNT_REST_API_URL);
+        BufferedReader reader = null;
+        return getResponseString(response, reader);
+    }
+
+    /**
+     * Returns the response as a string.
+     * @param response CloseableHttpResponse response
+     * @param reader Buffered Reader
+     * @return the response as a string
+     * @throws IOException
+     */
+    private String getResponseString(CloseableHttpResponse response, BufferedReader reader) throws IOException {
+        String result;
+        try {
+            // convert the response to a string
+            reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            StringBuilder builder = new StringBuilder();
+            String aux;
+            while ((aux = reader.readLine()) != null) {
+                builder.append(aux);
+            }
+            result = builder.toString();
+        } finally {
+            if (reader != null) {
+                try {
+                    //close the buffered reader
+                    reader.close();
+                } catch (IOException e) {
+                    //this is logged and the process is continued because parsing is done
+                    log.error("Error occurred while closing the buffers reader.", e);
+                }
+            }
+            if (response != null) {
+                try {
+                    //close the response reader
+                    response.close();
+                } catch (IOException e) {
+                    //this is logged and the process is continued because parsing is done
+                    log.error("Error occurred while closing the response.", e);
+                }
+            }
+        }
+        return result;
     }
 
     /**

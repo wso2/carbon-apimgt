@@ -27,44 +27,44 @@
 	                    <ul class="nav navbar-nav">
 	                    <% if(inputs.page == "application/application-list"){%>
 	                        <li>
-	                            <a href="<%= jagg.urlTenanted("/site/pages/application-add.jag") %>">
+	                            <a title="<%=i18n.localize( 'addApplication')%>" href="<%= jagg.urlTenanted("/site/pages/application-add.jag") %>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-	                                Add Application
+	                                <%=i18n.localize( 'addApplication')%>
 	                            </a>
 	                        </li> 
 	                    <% }else if(inputs.page == "application/application-add"){%>
 	                        <li>
-	                            <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+	                            <a title="<%=i18n.localize( 'applicationList')%>" href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-left fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-	                                Application List
+	                                <%=i18n.localize( 'applicationList')%>
 	                            </a>
 	                        </li>
 	                    <% }else if(inputs.page == "application/application-view"){ %>
 	                        <li>
-	                            <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+	                            <a title="<%=i18n.localize( 'applicationList')%>" href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-left fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-	                                Application List
+	                                 <%=i18n.localize( 'applicationList')%>
 	                            </a>
 	                        </li>                        
 	                        <li>
-	                            <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
+	                            <a title="<%=i18n.localize("edit")%>" href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-edit fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-	                                Edit
+	                                <%=i18n.localize("edit")%>
 	                            </a>
 	                        </li>
-	                    <% }else if(inputs.page == "forum/forum-list"){%>
+	                    <% } else if(inputs.page == "forum/forum-list") {%>
 	                    	<%	var parentId = siteConf.forum.resourceIdentifier;
 	                    		var urlSuffix = jagg.getTenantURLPrefix();
 	                    		var needLoginStyleClass = "";		
@@ -73,7 +73,7 @@
 	                    		}
 	                    	%>
 		                    <li>
-			                    <a class="<%= needLoginStyleClass %>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>">
+			                    <a title="<%=i18n.localize( 'forum.createNewTopic')%>" class="<%= needLoginStyleClass %>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>">
 			                        <span class="icon fw-stack">
 			                            <i class="fw fw-add fw-stack-1x"></i>
 			                            <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -81,7 +81,17 @@
 			                        <%=i18n.localize( 'forum.createNewTopic')%>
 			                    </a>
 		                	</li> 
-	            		<% } %>                      
+	            		<% } if(inputs.page == "api/api-info" || inputs.page == "api/api-listing-prototyped"){%>
+	                        <li>
+	                            <a title="<%=i18n.localize("goBack")%>" href="<%= jagg.urlTenanted("/") %>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="Go Back"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="Go Back"></i>
+	                                </span>
+	                               <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li> 
+	                    <% } %>            
 	                    </ul>
 	
 	                </div><!--/.nav-collapse -->

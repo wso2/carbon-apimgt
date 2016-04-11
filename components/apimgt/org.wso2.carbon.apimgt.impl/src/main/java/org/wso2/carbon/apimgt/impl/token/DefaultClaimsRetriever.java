@@ -65,7 +65,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
 
     protected Cache getClaimsLocalCache() {
         String apimClaimsCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.CLAIM_CACHE_EXPIRY);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY);
         if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {init();
             isClaimsCacheInitialized = true;
            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).

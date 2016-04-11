@@ -114,7 +114,7 @@ public class APIAuthenticationAdminClient {
         boolean loggedIn = false;
 
         String keyMgtKeyCacheEnabledString =
-                config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
+                config.getFirstProperty(APIConstants.KEY_MANAGER_TOKEN_CACHE);
 
         //If keyMgt server key cache enabled we login to KM
         if (keyMgtKeyCacheEnabledString != null) {
@@ -130,7 +130,7 @@ public class APIAuthenticationAdminClient {
             loggedIn = true;
             cookie = loginGateway(environment);
         }
-        /*String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+        /*String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
         //If gateway key cache enabled we need to login to gateway
         if (gatewayKeyCacheEnabledString != null) {
             Boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
@@ -239,7 +239,7 @@ public class APIAuthenticationAdminClient {
     private String getServiceEndpointToClearCache(Environment environment, String serviceName) {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+        String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
         //If gateway key cache enabled we return gateway URL
         if (gatewayKeyCacheEnabledString != null) {
             boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
@@ -247,7 +247,7 @@ public class APIAuthenticationAdminClient {
                 return environment.getServerURL() + serviceName;
             }
         }
-        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
+        String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.KEY_MANAGER_TOKEN_CACHE);
         //If keyMgt server key cache enabled we return gateway URL
         if (keyMgtKeyCacheEnabledString != null) {
             boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);

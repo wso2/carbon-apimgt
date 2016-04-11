@@ -160,7 +160,7 @@ var reqUrl = request.getRequestURI();
                 
                 	<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
                             <div class="white-wrapper add-margin-bottom-4x">
-                            	<!--<%if(true) {%>
+                            	<%if(outputs.isMonetizationEnabled) {%>
 				                    <div class="ribbon-wrapper">
 				                    <%if (api.monetizationCategory.equalsIgnoreCase("Freemium")) { %>
 				                        <div class="ribbon-yellow">FREEMIUM</div>
@@ -170,7 +170,7 @@ var reqUrl = request.getRequestURI();
 				                        <div class="ribbon-blue">PAID</div>
 				                    <%}%>
 				                    </div>
-				                <%}%>-->
+				                <%}%>
                                 <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
                                 		<div class="square-element setbgcolor">
