@@ -155,7 +155,7 @@ public class APIKeyMgtUtil {
 
     private static Cache getKeyManagerCache(){
         String apimKeyCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_KEY_VALIDATOR_KEY_CACHE_EXPIRY);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.KEY_MANAGER_TOKEN_CACHE_EXPIRY);
         if(!isKeyCacheInistialized && apimKeyCacheExpiry != null ) {
             isKeyCacheInistialized = true;
             return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
