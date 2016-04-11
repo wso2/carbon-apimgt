@@ -1,0 +1,109 @@
+<% jagg.template("application/application-view", function(inputs, outputs, jagg) {
+ var application = outputs.application;
+ var oauthapp = outputs.oauthapp;
+ jagg.log(outputs.tiers);
+
+var app_tier;
+for(var i=0;i < outputs.tiers.length; i++){
+  if(outputs.tiers[i].tierName == application.tier){
+     app_tier = outputs.tiers[i]; 
+  }
+}
+%>
+<div class="page-header" id="Message">
+    <h1 id="application_name"><%= encode.forHtml(application.name) %></h1>
+    <p class="lead">Application</p>
+</div>
+  <!-- Nav tabs -->
+  <div class="white-wrapper">
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>    
+      <li role="presentation"><a href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
+      <li role="presentation"><a href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>      
+      <li role="presentation"><a href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
+      <li role="presentation"><a href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="details">
+<form class="form-horizontal">
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Status</label>
+    <div class="col-sm-10">
+      <p class="form-control-static"><strong><%= encode.forHtml(application.status) %></strong></p>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Throttling Tier</label>
+    <div class="col-sm-10">
+      <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;( <%= app_tier.tierDescription %> )</p>
+      <p>An application is available at different levels of service. The maximum number of requests you can make to an API is determined by this tier.</p>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Callback URL</label>
+    <div class="col-sm-10">
+      <p class="form-control-static"><%if(application.callbackUrl){%><strong><%= encode.forHtml(application.callbackUrl) %></strong><% }else{%>Not Given<%}%></p>
+      <p>This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize.</p>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-10">
+      <p class="form-control-static"><%if(application.description){%><%=encode.forHtml(application.description) %><% }else{%>Not Given<%}%></p>
+    </div>
+  </div>  
+</form>      
+      </div>
+      <div role="tabpanel" class="tab-pane fade production-keys" id="production">
+      <%
+        jagg.log(application);
+        var prodapp = {
+            name: application.name,
+            callbackUrl:application.callbackUrl,
+            ConsumerKey: oauthapp.prodConsumerKey,
+            ConsumerSecret: oauthapp.prodConsumerSecret,
+            Key: oauthapp.prodKey,
+            KeyScope: oauthapp.prodKeyScopeValue,
+            ValidityTime: oauthapp.prodValidityTime
+        }
+      %>
+      </div>
+      <%
+        jagg.log(oauthapp);
+        var sandapp = {
+            name: application.name,
+            callbackUrl:application.callbackUrl,            
+            ConsumerKey: oauthapp.sandboxConsumerKey,
+            ConsumerSecret: oauthapp.sandboxConsumerSecret,
+            Key: oauthapp.sandboxKey,
+            KeyScope: oauthapp.sandKeyScope,
+            ValidityTime: oauthapp.sandValidityTime
+        }
+      %>      
+      <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
+      </div>      
+      <div role="tabpanel" class="tab-pane fade" id="subscription">      
+      <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
+      </div>
+      <div role="tabpanel" class="tab-pane fade" id="sdks">
+        Place holder. 
+      </div>      
+    </div>
+  </div>
+  <script language="javascript">
+    var prodapp = <%= stringify(prodapp)%>;
+    var sandapp = <%= stringify(sandapp)%>;
+    $(document).ready(function() {
+      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION"});
+      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX"}); 
+
+      //activate a tab based on hash
+      if(location.hash != undefined || location.hash !=""){
+        $("a[href='"+location.hash+"']").tab("show");
+      }       
+    });
+  </script>
+  <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>
+<% }); %>

@@ -1,0 +1,25 @@
+<%
+jagg.block("subscription/subscribed-apis", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+        }
+    },
+
+    getOutputs:function (inputs) {       
+		return {
+            application: inputs.application
+		};
+     },
+
+    getStaticBlocks:function() {
+        return [
+        ];
+    }
+
+
+});
+%>

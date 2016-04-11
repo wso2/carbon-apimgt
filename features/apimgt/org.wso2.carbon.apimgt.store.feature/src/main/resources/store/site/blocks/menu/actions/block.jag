@@ -1,0 +1,27 @@
+<%
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
+jagg.block("menu/actions", {
+
+    initialize:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+        };
+    },
+
+    getOutputs:function (inputs) {
+        return {
+        };
+    },
+
+    getStaticBlocks:function () {
+        return [
+        ];
+    }
+});
+%>
