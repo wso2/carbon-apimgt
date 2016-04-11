@@ -4,7 +4,7 @@ var tenant = jagg.getTenantDomain();
 %>
 
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
-  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+  <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
       <input type="text" class="form-control appm-content-search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("searchAPI")%>...">
       <div class="input-group-btn">
