@@ -430,4 +430,12 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Policy[] getPolicies(String username, String level) throws APIManagementException;
+
+    /**
+     * Get api throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    void getAPIPolicy(String username, String policyName) throws APIManagementException;
 }
