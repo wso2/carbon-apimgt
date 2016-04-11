@@ -72,7 +72,7 @@
                                 </textarea>
                             </div>
                         </div>
-                        <legend>Quota Policy</legend>
+                        <legend>Quota</legend>
                         <div id="quotaTypeRadioDev" class="control-group cnl-group form-inline">
 
                             <label class="checkbox-inline radio">
@@ -131,7 +131,7 @@
                              </div>
                         </div>
 
-                        <legend>Policy Flags (WSO2 Specific Attributes)</legend>
+                        <legend>Policy Flags</legend>
 
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label"><%=i18n.localize("stopOnQuotaReach")%></label>
