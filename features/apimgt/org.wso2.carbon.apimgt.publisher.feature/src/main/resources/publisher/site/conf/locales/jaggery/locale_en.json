@@ -400,5 +400,14 @@
     "addParameter":"Add Parameter",
     "apiListing":"API List",
     "apiBrowse":"Browse API",
-    "manageAlertTypes": "Manage alert types"
+    "manageAlertTypes": "Manage Alert Types",
+    "abnormalBackendTime": "Abnormal backend time",
+    "abnormalResponseTime":"Abnormal response time",
+    "abnormalRequestsPerMin":"Abnormal request counts",
+    "RequestPatternChanged":"Abnormal resource access pattern",
+    "UnusualIPAccessAlert":"Unseen source IP access",
+    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
+    "FrequentTierHittingAlert":"Frequent tier limit hitting",
+    "AbnormalTierUsage":"Abnormal API usage",
+    "healthAvailabilityPerMin":"Availability of APIs"
 }
