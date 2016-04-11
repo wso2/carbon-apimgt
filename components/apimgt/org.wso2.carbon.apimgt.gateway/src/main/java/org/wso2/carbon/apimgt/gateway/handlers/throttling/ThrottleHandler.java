@@ -166,7 +166,9 @@ public class ThrottleHandler extends AbstractHandler {
                     //If verbInfo is present then only we will do resource level throttling
                     if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
                         //If unlimited tier throttling will not apply at resource level and pass it
-                        //TODO add debug logs
+                        if (log.isDebugEnabled()) {
+                            log.debug("Resource level throttling set as unlimited and request will pass resource level");
+                        }
                     } else {
                         //If tier is not unlimited only throttling will apply.
                         resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
@@ -213,41 +215,6 @@ public class ThrottleHandler extends AbstractHandler {
                             //Pass message context and continue to avaoid peformance issue.
                             //Did not throttled at any level. So let message go and publish event.
                             //publish event to Global Policy Server
-                            //String remoteIP = "127.0.0.1";
-                            //(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
-                            //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-                            //if (remoteIP != null && !remoteIP.isEmpty()) {
-                            //    if (remoteIP.indexOf(",") > 0) {
-                            //        remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
-                            //    }
-                            //} else {
-                            //    remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-                            // }
-
-                            //todo Added some dummy parameters
-                            //Map propertiesMap = new HashMap<String, String>();
-                            //propertiesMap.put("remoteIp", remoteIP);
-                            //propertiesMap.put("roleID", subscriptionLevelTier);
-
-                            //this parameter will be used to capture message size and pass it to calculation logic
-                        /*int messageSizeInBytes = 0;
-                        //getThrottleData.isContentAwareTierPresent
-                        if (authContext.isContentAwareTierPresent()) {
-                            //this request can match with with bandwidth policy. So we need to get message size.
-                            httpVerb = verbInfoDTO.getHttpVerb();
-                            Object obj = ((TreeMap) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                                    getProperty("TRANSPORT_HEADERS")).get("Content-Length");
-                            if (obj != null) {
-                                messageSizeInBytes = Integer.parseInt(obj.toString());
-                            }
-
-                        }*/
-
-                        /*Object[] objects = new Object[]{synCtx.getMessageID(), applicationLevelThrottleKey,
-                                subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
-                                authorizedUser, propertiesMap};
-                        *///After publishing events return true
-                            //log.info("##########################################Publishing event");
                             throttleDataPublisher.publishNonThrottledEvent(synCtx);
 
                         } else {
