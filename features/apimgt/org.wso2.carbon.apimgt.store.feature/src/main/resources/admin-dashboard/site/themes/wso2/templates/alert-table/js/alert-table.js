@@ -1,15 +1,20 @@
 $( document ).ready(function() { 
 
     var statsEnabled = isDataPublishingEnabled();
-
-    
+    var table = null;
+   
     var selectedOptionKey = $("#alertSelected option:selected" ).val();
     var tableName = null;
-    var table = null;
     
     changeActiveTableName();
 
-    $("#alertSelected").change(function(){
+    if(statsEnabled){
+        drawTable();
+    } else {
+        alert('stats not enabled');
+    }
+
+    $("#alertSelected").change( function() {
          selectedOptionKey = $("#alertSelected option:selected" ).val();
          changeActiveTableName();
          if(statsEnabled){
@@ -20,7 +25,7 @@ $( document ).ready(function() {
     })
     
 
-    function changeActiveTableName(){
+    function changeActiveTableName() {
         if(selectedOptionKey == 1){
             tableName = "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM"
         } else if(selectedOptionKey== 2){
@@ -45,29 +50,26 @@ $( document ).ready(function() {
 
     }
 
-    function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/alert-table/ajax/alert-table.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                if(statsEnabled){
-                    drawTable();
+    function isDataPublishingEnabled() {
+        var isStatsEnabled;
+    
+        jagg.syncPost("/site/blocks/alert-table/ajax/alert-table.jag", { action: "isDataPublishingEnabled"},
+            function (json) {
+                if (!json.error) {
+                    isStatsEnabled = json.usage;
                 } else {
-                    alert('stats not enabled');
+                    if (json.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content: json.message, type: "error"});
+                    }
                 }
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
-}
+            }, "json");
 
-    function changeSelectedAlertType(alertType){
-        //var tableName = getParameterByName('tableName');
+        return isStatsEnabled;
+    }
+
+    function changeSelectedAlertType(alertType) {
         if(alertType != null){
             if(alertType == "Unusual IP Access"){
                  $('#alertSelected').val(2).change();
@@ -91,7 +93,7 @@ $( document ).ready(function() {
         }   
     }
 
-    function drawTable(){
+    function drawTable() {
     
         table =$('#alertHistoryTable').DataTable({
                         //"processing": true,

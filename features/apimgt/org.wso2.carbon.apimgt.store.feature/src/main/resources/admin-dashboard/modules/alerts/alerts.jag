@@ -5,50 +5,20 @@ user = jagg.getUser();
 var gson = com.google.gson.Gson();
 
 
-var getDataFromAlertTable = function(tableName, searchEntry, startIndex,count, isAscending) {
+var getDataFromAlertTable = function (tableName, searchEntry, startIndex,count, isAscending) {
 	
-	if(searchEntry == ""){
+	if (searchEntry == "") {
   		return usageClient.searchTable(tableName,"*:*",startIndex,count,"alertTimestamp",isAscending);
-  	} else{
+  	} else { 
   		return usageClient.searchTable(tableName, searchEntry ,startIndex,count,"alertTimestamp",isAscending);
   	}
 };
 
-var getCountFromAlertTable = function(tableName, searchEntry){
-	if(searchEntry == "null"){
+var getCountFromAlertTable = function (tableName, searchEntry) {
+	if (searchEntry == "null") {
 		searchEntry = null;
 	}
 	return usageClient.searchCount(tableName,searchEntry);
 };
-
-function isDataPublishingEnabled(providerName, server) {
-    var usage = [];
-    var usageout = [];
-    try {
-        usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
-        if (log.isDebugEnabled()) {
-            log.debug("isDataPublishingEnabled check");
-        }
-        if (usage == null) {
-            return {
-                error:true
-            };
-
-        } else {
-
-            return {
-                error:false,
-                usage:usage
-            };
-        }
-    } catch (e) {
-        log.error(e.message);
-        return {
-            error:e,
-            usage:null
-
-        };
-    }
-}
 
 %>

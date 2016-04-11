@@ -20,7 +20,7 @@ i18n.init(request,localeResourcesBasePath);
         });
     } else {
         if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("alerts");
+            mod = jagg.module("stats");
             result = mod.isDataPublishingEnabled();
             
             if (result.error == "true") {
@@ -55,7 +55,7 @@ i18n.init(request,localeResourcesBasePath);
                 sortOrderBool = true;
             }
 
-            if(searchEntry != "") {
+            if (searchEntry != "") {
                 var lucenePrefix = "";
                 if(searchEntry.indexOf(":") == -1){
                     lucenePrefix = "msg:";
@@ -78,28 +78,28 @@ i18n.init(request,localeResourcesBasePath);
                     };
             } else {
                 var type = null;
-                if(tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS"){
+                if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
                     type = "Unusual IP Access";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") {
                     type = "Abnormal Request Count";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
                     type = "Abnormal Response Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
                     type = "Abnormal Tier Usage";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH") {
                     type = "Abnormal Token Refresh";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
                     type = "Tier Crossing";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
                     type = "Abnormal Backend Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
                     type = "API Health Monitor";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM"){
+                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
                     type = "Request Pattern Change";
                 } 
 
                 var arr = new Array(parsedDataResult.length);
-                for(i=0; i<parsedDataResult.length ;i++){
+                for (i=0; i<parsedDataResult.length ;i++) {
                     
                     arr[i] = new Array(3);
                    
