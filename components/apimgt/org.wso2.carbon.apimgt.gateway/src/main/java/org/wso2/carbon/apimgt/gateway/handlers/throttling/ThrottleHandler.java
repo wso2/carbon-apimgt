@@ -151,7 +151,9 @@ public class ThrottleHandler extends AbstractHandler {
             applicationLevelTier = authContext.getApplicationTier();
             subscriptionLevelTier = authContext.getTier();
             apiLevelTier = authContext.getApiTier();
-            apiLevelThrottleKey = apiContext + apiVersion;
+            //Following throttle data list can be use to hold throttle data and api level throttle key
+            //should be its first element.
+            apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
             VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
             //If API level throttle policy is present then it will apply and no resource level policy will apply for it.
             if (apiLevelTier != null && apiLevelTier.length() > 0) {
