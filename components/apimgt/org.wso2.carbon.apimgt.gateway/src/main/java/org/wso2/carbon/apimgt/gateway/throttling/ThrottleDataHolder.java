@@ -61,6 +61,11 @@ public class ThrottleDataHolder {
         }
 
 
+        Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedCustomConditionsMap = new ConcurrentHashMap();
+
         Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
         /**
@@ -95,5 +100,19 @@ public class ThrottleDataHolder {
             dataPublisher.tryPublish(event);
         }
 
+        public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey){
+            if(blockedCustomConditionsMap.size() < 1){
+                for(int i=0 ; i <10000; i++ ){
+                    blockedCustomConditionsMap.put("test"+i,"test1"+i);
+                    blockedApplicationConditionsMap.put("test"+i,"test1"+i);
+                    blockedUserConditionsMap.put("test"+i,"test1"+i);
+                    blockedCustomConditionsMap.put("test"+i,"test1"+i);
+                }
+            }
+            return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
+            blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
+            blockedUserConditionsMap.containsKey(userBlockingKey) ||
+            blockedCustomConditionsMap.containsKey("test"));
+        }
 
     }
