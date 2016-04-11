@@ -8065,8 +8065,10 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setInt(10, policy.getRateLimitCount());
             policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setBoolean(12, policy.isStopOnQuotaReach());
+            policyStatement.setString(13, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
             } 
             policyStatement.executeUpdate();
 
