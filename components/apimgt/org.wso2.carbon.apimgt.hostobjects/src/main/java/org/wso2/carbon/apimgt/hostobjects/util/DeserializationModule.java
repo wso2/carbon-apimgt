@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.hostobjects;
+package org.wso2.carbon.apimgt.hostobjects.util;
 
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -8,6 +8,7 @@ import io.swagger.models.Response;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
+import org.wso2.carbon.apimgt.hostobjects.util.*;
 
 public class DeserializationModule extends SimpleModule {
 

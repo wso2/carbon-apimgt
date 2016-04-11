@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.apimgt.hostobjects;
+package org.wso2.carbon.apimgt.hostobjects.util;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.models.parameters.*;
+import org.wso2.carbon.apimgt.hostobjects.util.Json;
 
 import java.io.IOException;
 

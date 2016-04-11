@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.hostobjects;
+package org.wso2.carbon.apimgt.hostobjects.util;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
