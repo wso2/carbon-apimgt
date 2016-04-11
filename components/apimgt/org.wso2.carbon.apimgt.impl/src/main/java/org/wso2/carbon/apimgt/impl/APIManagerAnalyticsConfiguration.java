@@ -49,6 +49,8 @@ public class APIManagerAnalyticsConfiguration {
     private String throttleStreamVersion;
     private String executionTimeStreamName;
     private String executionTimeStreamVersion;
+    private String alertTypeStreamName;
+    private String alertTypeStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
     }
@@ -94,6 +96,13 @@ public class APIManagerAnalyticsConfiguration {
             if (executionTimeStreamName == null || executionTimeStreamVersion == null) {
                 log.error("Execution Time stream name or version is null. Check api-manager.xml");
             }
+
+            alertTypeStreamName = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_NAME);
+            alertTypeStreamVersion = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_VERSION);
+            if (alertTypeStreamName == null || alertTypeStreamVersion == null) {
+                log.error("Execution Time stream name or version is null. Check api-manager.xml");
+            }
+
             bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
             bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
             bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
@@ -152,6 +161,14 @@ public class APIManagerAnalyticsConfiguration {
 
     public String getFaultStreamVersion() {
         return faultStreamVersion;
+    }
+
+    public String getAlertTypeStreamName() {
+        return alertTypeStreamName;
+    }
+
+    public String getAlertTypeStreamVersion() {
+        return alertTypeStreamVersion;
     }
 
     public String getThrottleStreamName() {

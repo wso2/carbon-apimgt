@@ -93,11 +93,11 @@
 							<i class="fw fw-html"></i>
 							<%= i18n.localize("themeUpload") %></a></li>
 
-					</ul>				
+					</ul>
 				</li>
 				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%></a>
 					<ul class="nav nav-pills secondary-nav collapse in">
-						
+
 					    <%
 					    if(!mod.isGlobalCEPThrottlingEnabled()){
 					    %>
@@ -105,10 +105,11 @@
 							href="<%= jagg.url("/tier-manage") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-					    <%}
-					    else if(mod.isGlobalCEPThrottlingEnabled()){
-					    %>
-					    	<li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
+							<%= i18n.localize("tierManagement") %></a></li>
+						<%}
+                        else if(mod.isGlobalCEPThrottlingEnabled()){
+                            %>
+                                <li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/site/pages/policy-list.jag") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
@@ -119,20 +120,34 @@
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 					        <%= "App Policies" %></a></li>
-					        
-					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a 
+
+					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/site/pages/subscription-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 					        <%= "Subscription Policies" %></a></li>
-					        
-					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a 
+
+					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 					        <%= "Global Policies" %></a></li>
 
 					     <%}%>
+												<%
+						var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+						var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+						if(isAnalyticsEnabled) {
+							%>
+							<li <%if (reqUrl.match("manage-alert-type")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/manage-alert-type") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("manageAlertTypes") %></a></li>
+							<%
+						}
+						%>
+
 					</ul>				
 				</li>
 			</ul>

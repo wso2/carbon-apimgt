@@ -1,49 +1,3 @@
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.page-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  z-index: 1010;
-  padding-top: 10px;
-  display: none;
-}
-
-.inside-footer{
-  display: block;
-}
-
-
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
-
-body > .container {
-  padding: 60px 15px 0;
-}
-.container .text-muted {
-  margin: 20px 0;
-}
-
-.page-footer > .container {
-  padding-right: 15px;
-  padding-left: 15px;
-}
-
-code {
-  font-size: 80%;
-}
-
 
 /*!
  * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
@@ -59,7 +13,6 @@ code {
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
-    padding-top: 50px;
 }
 
 #wrapper.no-left{
@@ -93,7 +46,6 @@ code {
 #page-content-wrapper {
     width: 100%;
     position: absolute;
-    padding: 5px 15px 15px 15px;
 }
 
 #wrapper.toggled #page-content-wrapper {
@@ -181,7 +133,6 @@ code {
     }      
 
     #page-content-wrapper {
-        padding: 5px 20px 20px 20px;
         position: relative;
     }
 
@@ -189,22 +140,6 @@ code {
         position: relative;
         margin-right: 0;
     }
-}
-
-
-/** Bootstrap overides **/
-.breadcrumb{
-  margin: 0px;
-  padding: 0px;
-  background: #FFF;
-}
-
-.page-header{
-  margin-top: 20px;
-}
-
-.page-header h2{
-  margin-bottom: 0px;
 }
 
 
@@ -268,11 +203,12 @@ code {
 input#access_token {margin-right: 20px}
 .average-rating {
     background: transparent url("../images/bigstar.png") no-repeat scroll 0 0;
-    font-size: 18px;
+    background-size : 40px 40px;
+    font-size: 12px;
     font-weight: bold;
     height: 64px;
-    line-height: 70px;
-    padding-left: 20px;
+    line-height: 45px;
+    padding-left: 11px;
     width: 70px;
 }
 

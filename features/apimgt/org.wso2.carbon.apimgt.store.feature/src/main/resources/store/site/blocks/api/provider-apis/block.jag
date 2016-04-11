@@ -15,9 +15,11 @@ jagg.block("api/provider-apis", {
         var apiBizOwner = inputs.apiBizOwner;
         if(providerId != 'Provider'){
             var mod = jagg.module("api");
+
             var result = mod.getPublishedAPIsByProvider(providerId,username,currentApi,currentApiVersion,inputs.count,
-                                                        apiOwner, apiBizOwner);
+                                                        apiOwner, apiBizOwner);            
             var apis=result.apis;
+            
             return {
                 "apis":apis,
                 "providerId":providerId,

@@ -278,7 +278,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER" +      
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -796,7 +796,7 @@ public class SQLConstants {
             "   AND AKM.KEY_TYPE = 'SANDBOX' " +
             "   AND (IAT.TOKEN_STATE = 'ACTIVE' OR IAT.TOKEN_STATE = 'EXPIRED' OR IAT.TOKEN_STATE = 'REVOKED') " +
             " ORDER BY IAT.TIME_CREATED DESC ";
-    
+
     //--------------------New tier permission management
 
     public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
@@ -824,9 +824,9 @@ public class SQLConstants {
             " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
             " FROM AM_TIER_PERMISSIONS " +
             " WHERE TENANT_ID = ?";
-    
+
   //--------------------
-    
+
     public static final String GET_TIER_PERMISSION_ID_SQL =
             " SELECT TIER_PERMISSIONS_ID " +
             " FROM AM_TIER_PERMISSIONS " +
@@ -852,8 +852,8 @@ public class SQLConstants {
             " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
             " FROM AM_TIER_PERMISSIONS " +
             " WHERE TENANT_ID = ?";
-    
-    
+
+
 
     public static final String GET_PERMISSION_OF_TIER_SQL =
             " SELECT PERMISSIONS_TYPE, ROLES " +
@@ -1524,7 +1524,7 @@ public class SQLConstants {
             "   CONTEXT = ?, " +
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ? " +    
+            "   UPDATED_TIME = ? " +
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
@@ -2024,14 +2024,65 @@ public class SQLConstants {
             "   AND IOAT.TENANT_ID = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
             "   AND LOWER(IOAT.USER_DOMAIN) = ?";
-    
-    
+
+    public static final String GET_ALL_ALERT_TYPES =
+            "SELECT " +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  " +
+            " WHERE " +
+            "   AGENT = ?";
+
+
+    public static final String GET_ALL_ALERT_TYPES_FOR_ADMIN =
+            "SELECT DISTINCT" +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  ";
+
+    public static final String GET_SAVED_ALERT_TYPES_BY_USERNAME =
+            " SELECT " +
+            "   ALERT_TYPE_ID " +
+            " FROM " +
+            "   AM_ALERT_TYPES_VALUES " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND AGENT = ? ";
+
+    public static final String GET_SAVED_ALERT_EMAILS =
+
+            " SELECT " +
+            "   EMAIL_LIST " +
+            " FROM " +
+            "   AM_ALERT_EMAILLIST " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND AGENT = ? ";
+
+
+    public static final String ADD_ALERT_TYPES_VALUES =
+            " INSERT INTO AM_ALERT_TYPES_VALUES (ALERT_TYPE_ID, USER_NAME , AGENT) " +
+            " VALUES(?,?,?)";
+
+    public static final String ADD_ALERT_EMAIL_LIST =
+            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, EMAIL_LIST , AGENT) " +
+            " VALUES(?,?,?)";
+
+    public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT =
+            "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND AGENT = ?";
+
+    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT =
+            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND AGENT = ?";
+
+
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?)";
-    
+
     public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED,CUSTOM_ATTRIBUTES) \n" +
@@ -2042,7 +2093,7 @@ public class SQLConstants {
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT) \n" +
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-    
+
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
@@ -2120,7 +2171,7 @@ public class SQLConstants {
                     "NAME = ? AND " +
                     "TENANT_ID =?";
 
-    
+
 
     public static final String UPDATE_APPLICATION_POLICY_SQL =
             "UPDATE AM_POLICY_APPLICATION " +
@@ -2132,7 +2183,7 @@ public class SQLConstants {
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
-    
+
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
             "UPDATE AM_POLICY_APPLICATION " +
             "SET " +
@@ -2157,7 +2208,7 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
-    
+
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
             "UPDATE AM_POLICY_SUBSCRIPTION " +
             "SET " +
@@ -2196,22 +2247,22 @@ public class SQLConstants {
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
             "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
-    
+
     /** Throttle related constants**/
-    
+
     public static class ThrottleSQLConstants{
-    	
+
     	public static final String QUOTA_TYPE_BANDWIDTH = PolicyConstants.BANDWIDTH_TYPE;
-    	
+
     	public static final String QUOTA_TYPE_REQUESTCOUNT = PolicyConstants.REQUEST_COUNT_TYPE;
-    	
+
 		public static final String GET_POLICY_NAMES = " SELECT " + "   NAME " + "FROM " + "   AM_API_THROTTLE_POLICY"
 				+ " WHERE" + "   TYPE = ?" + "   AND TENANT_ID =?";
 
 		public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
 
 		public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
-				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, APPLICABLE_LEVEL) \n" 
+				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, APPLICABLE_LEVEL) \n"
 				+ " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 		public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
@@ -2237,8 +2288,8 @@ public class SQLConstants {
 		public static final String UPDATE_API_POLICY_STATUS_SQL = "UPDATE AM_API_THROTTLE_POLICY SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
 
 		public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE TENANT_ID = ? AND NAME = ?";
-		
-		
+
+
 
 		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n"
 															+ " VALUES (?,?,?,?,?,?)";
@@ -2266,20 +2317,20 @@ public class SQLConstants {
 
 		public static final String INSERT_JWT_CLAIM_CONDITION_SQL = "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_GROUP_ID,CLAIM_URI,CLAIM_ATTRIB,IS_CLAIM_MAPPING) \n"
 				+ " VALUES (?,?,?,?)";
-		
+
 		public static final String INSERT_IP_CONDITION_SQL =
 	            " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
 	            " VALUES (?,?,?,?,?)";
-		
+
 		public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
 				+ " WHERE APPPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
-		
+
 		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "SELECT APIPOLICY.TENANT_ID, APIPOLICY.DEFAULT_QUOTA_TYPE "
 				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, " + "AM_POLICY_APPLICATION APPPOLICY, "
 				+ " AM_POLICY_SUBSCRIPTION SUBPOLICY " + "WHERE APIPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND "
 				+ " SUBPOLICY.NAME=? AND " + "APIPOLICY.NAME =?  ";
-		
+
 		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, "
 				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT  "
 				+ " FROM AM_API_URL_MAPPING AUM"
@@ -2289,8 +2340,8 @@ public class SQLConstants {
 				+ " where API.CONTEXT= ? AND API.API_VERSION = ?"
 				+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN"
 				+ " ORDER BY AUM.URL_MAPPING_ID";
-	
-		
+
+
 
 	}
 }
