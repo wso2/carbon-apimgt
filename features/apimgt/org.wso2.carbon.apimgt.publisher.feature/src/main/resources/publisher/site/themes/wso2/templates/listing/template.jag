@@ -137,14 +137,14 @@
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
-                                    <div class="after">
-                                        <a href="<%=path%>">
-                                            <span class="fw-stack fw-lg">
-                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                            <i class="fw fw-view fw-stack-1x"></i>
-                                            </span>
-                                        </a>
-                                    </div>
+                                    <a href="<%=path%>">
+	                                    <div class="after">                                        
+	                                            <span class="fw-stack fw-lg">
+	                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                            <i class="fw fw-view fw-stack-1x"></i>
+	                                            </span>                                        
+	                                    </div>
+                                    </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
@@ -195,14 +195,14 @@
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
-                                    <div class="after">
-                                        <a href="<%=path%>" title="<%=i18n.localize("apiBrowse")%>"> 
-                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("apiBrowse")%>">
-                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("apiBrowse")%>"></i>
-                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("apiBrowse")%>"></i>
-                                            </span>
-                                        </a>
-                                    </div>
+                                    <a href="<%=path%>" title="<%=i18n.localize("apiBrowse")%>"> 
+	                                    <div class="after">                                        
+	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("apiBrowse")%>">
+	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("apiBrowse")%>"></i>
+	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("apiBrowse")%>"></i>
+	                                            </span>                                        
+	                                    </div>
+                                    </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="api name"><%=api.name%></a></h4>
