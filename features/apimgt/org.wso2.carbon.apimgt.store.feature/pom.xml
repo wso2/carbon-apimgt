@@ -209,6 +209,7 @@
                                 <importFeatureDef>org.wso2.carbon.identity.user.registration.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
+                                <importBundleDef>commons-io.wso2:commons-io:2.4.0.wso2v1</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:2.1.6.wso2v1</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:3.4.0.wso2v1</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
