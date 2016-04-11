@@ -76,5 +76,11 @@ var isGlobalCEPThrottlingEnabled = function() {
         return false;
     }
 };
+var getUsageClient = function() {
+    var user = jagg.getUser();
+    var client= org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl();
+    //client.initializeDataSource();
+    return client;
+}
 
 %>

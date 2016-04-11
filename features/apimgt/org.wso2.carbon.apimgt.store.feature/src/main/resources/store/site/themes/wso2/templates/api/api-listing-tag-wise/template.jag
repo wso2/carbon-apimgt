@@ -2,20 +2,11 @@
 
     <%
         var i, tag, tags = outputs.tags, length = tags.length;
-        var urlPrefix;
         var tenant=request_tenant;
-        urlPrefix = jagg.getTenantURLPrefix("&");
+        var urlPrefix = jagg.getTenantURLPrefix("&");
 
         function getThumbnailUrl(tag){
-            
-            var urlPrefix = "";
-            var tenantDomain = jagg.getTenantDomain();
-            if (tenantDomain == "carbon.super"){
-                tenantDomain = "";
-            } else {
-                urlPrefix = "/t/";
-            }
-			if(tag.isThumbnailExists){
+            if(tag.isThumbnailExists){
                 return tag.thumbnailUrl;
             }else{
                 return jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-group-default.png"));

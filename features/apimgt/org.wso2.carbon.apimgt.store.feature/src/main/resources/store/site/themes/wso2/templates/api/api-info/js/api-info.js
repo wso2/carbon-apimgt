@@ -30,7 +30,7 @@ function triggerSubscribe() {
         if (result.error == false) {
             if(result.status.subscriptionStatus == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h4.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
+                $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
                 $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
                 $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
                 $('#messageModal a.btn-primary').click(function() {
@@ -60,7 +60,7 @@ function triggerSubscribe() {
                               }
                     }else{
                       $('#messageModal').html($('#confirmation-data').html());
-                      $('#messageModal h4.modal-title').html("Redirection");
+                      $('#messageModal h3.modal-title').html("Redirection");
                       $('#messageModal div.modal-body').html(jsonObj.redirectConfirmationMsg);
                       $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
                       $('#messageModal a.btn-other').html(i18n.t('info.cancelSubs'));
@@ -98,31 +98,50 @@ function triggerSubscribe() {
                      }
                   }
                }else {
-                $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h4.modal-title').html(i18n.t('info.subscription'));
-                if(result.status.subscriptionStatus  == 'ON_HOLD'){
-                     $('#application-list :selected').remove();
-                    $('#messageModal h4.modal-title').html(i18n.t('info.subscriptionPendingTitle')); 
+                 $('#messageModal').html($('#confirmation-data').html());
+                 $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                 if (result.status.subscriptionStatus == 'ON_HOLD') {
+                    $('#application-list :selected').remove();
+                    $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionPendingTitle'));
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
-                }else{
-                    $('#application-list :selected').remove();   
+                 } else {
+                    $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
                 }
-                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                $('#messageModal a.btn-primary').html(i18n.t('info.viewSubsPage'));
                 $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
                 });
                 $('#messageModal a.btn-primary').click(function() {
-                    urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
-                    location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
-                });
-           
-                 $('#messageModal').modal();
-            }
-           } 
-        } else {
-            jagg.message({content:result.message,type:"error"});
+                    urlPrefix = "name=" + applicationName + "&" + urlPrefix;
+                    location.href = "../site/pages/application.jag?" + urlPrefix+"#subscription";
+                 });
+                   $('#messageModal').modal();
+                }
+              }
+        
+       } else {
+          jagg.message({content:result.message,type:"error"});
+        //$('#messageModal').html($('#confirmation-data').html());
+        /*$('#messageModal h3.modal-title').html('API Provider');
+          $('#messageModal div.modal-body').html('\n\nSuccessfully subscribed to the API.\n Do you want to go to the subscription page?');
+          $('#messageModal a.btn-primary').html('Yes');
+          $('#messageModal a.btn-other').html('No');
+         */
+         /*$('#messageModal a.btn-other').click(function(){
+             v.resetForm();
+         });*/
+         /*
+           $('#messageModal a.btn-primary').click(function() {
+           var current = window.location.pathname;
+           if (current.indexOf(".jag") >= 0) {
+              location.href = "index.jag";
+           } else {
+              location.href = 'site/pages/index.jag';
+           }
+          });*/
+         //                        $('#messageModal').modal();
         }
     }, "json");
 }
@@ -241,7 +260,7 @@ $('.rating-tooltip-manual').rating({
             rating:rating
         }, function (result) {
             if (result.error == false) {
-               addRating(result.rating,rating);                                
+                addRating(result.rating,rating);
             } else {
                 jagg.message({content:result.message,type:"error"});
             }

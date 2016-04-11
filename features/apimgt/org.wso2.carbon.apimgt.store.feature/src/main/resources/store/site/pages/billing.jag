@@ -27,11 +27,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/base",
                     "inputs":{
                         "title":"My Billing Information",
-                        "top":[
-                            {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
+                        "top":[                            
                             {
                                 "name":"search/api-search",
                                 "inputs":null

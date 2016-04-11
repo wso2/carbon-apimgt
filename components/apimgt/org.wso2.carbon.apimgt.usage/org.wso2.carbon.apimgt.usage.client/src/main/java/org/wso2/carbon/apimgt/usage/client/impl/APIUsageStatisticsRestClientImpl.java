@@ -26,6 +26,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.*;
+import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
@@ -184,7 +186,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+                                                     String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -219,7 +221,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+                                                          String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
         String query = null;
@@ -299,7 +301,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                            int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -334,7 +336,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                 int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
         String query = null;
         //extending lucene query with time ranges
@@ -412,7 +414,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                  int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -447,7 +449,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+                                                         String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
         String query = null;
 
@@ -527,7 +529,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+                                                      String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String firstKey;
@@ -561,7 +563,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                     int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
         String query = null;
 
@@ -678,7 +680,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<APIUsageByUserName> getAPIUsageByUserData(String providerName, String fromDate, String toDate,
-            Integer limit) throws APIMgtUsageQueryServiceClientException {
+                                                           Integer limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
         String query = null;
@@ -750,7 +752,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                              int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get the response time data of the apis
         List<APIResponseTime> responseTimes = getAPIResponseTimeData(providerName, fromDate, toDate, limit);
@@ -876,7 +878,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+                                                                                 String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get the last access time data of the apis
         List<APIAccessTime> accessTimes = getLastAccessTimesByAPIData(providerName, fromDate, toDate, limit);
@@ -884,7 +886,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIVersionLastAccessTimeDTO> apiVersionLastAccessTimeUsage = new ArrayList<APIVersionLastAccessTimeDTO>();
         APIVersionLastAccessTimeDTO accessTimeDTO;
-        DateFormat dateFormat = new SimpleDateFormat();
         String apiName;
 
         //iterate over all the result data
@@ -901,7 +902,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
                     accessTimeDTO.setUser(accessTime.getUsername());
-                    accessTimeDTO.setLastAccessTime(dateFormat.format(accessTime.getAccessTime()));
+                    accessTimeDTO.setLastAccessTime(APIUsageClientUtil.getFormattedAPILastAccessDate(
+                            accessTime.getAccessTime()));
                     apiVersionLastAccessTimeUsage.add(accessTimeDTO);
                 }
             }
@@ -917,7 +919,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<APIAccessTime> getLastAccessTimesByAPIData(String providerName, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                            int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
@@ -1022,7 +1024,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+                                                                       String toDate) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
         StringBuilder query = new StringBuilder();
@@ -1142,7 +1144,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<APIUsageByDestination> getAPIUsageByDestinationData(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+                                                                     String toDate) throws APIMgtUsageQueryServiceClientException {
 
         StringBuilder query = new StringBuilder();
         //extending lucene query with time ranges
@@ -1239,8 +1241,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
                         providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
                         providerAPI.getContext().equals(usage.getContext())) {
-                    String[] apiData = { usage.getApiName(), usage.getApiVersion(),
-                            providerAPI.getId().getProviderName() };
+                    String[] apiData = {usage.getApiName(), usage.getApiVersion(),
+                            providerAPI.getId().getProviderName()};
                     //format result using json array
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(0, apiData[0]);
@@ -1410,7 +1412,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private List<APIResponseFaultCount> getAPIResponseFaultCountData(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+                                                                     String toDate) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
         StringBuilder query = new StringBuilder();
 
@@ -1493,7 +1495,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
-            String appName, String fromDate, String toDate, String groupBy)
+                                                                             String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException {
 
         //get the tenant domain
@@ -1588,7 +1590,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+                                                                       String toDate) throws APIMgtUsageQueryServiceClientException {
 
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
@@ -1815,7 +1817,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+                                                          String toDate) throws APIMgtUsageQueryServiceClientException {
 
         //get the api usage data of the apis by version
         List<APIUsage> usageData = this
@@ -2179,7 +2181,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+                                                          int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
@@ -2274,8 +2276,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of APIVersionLastAccessTimeDTO
      */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
-            int limit) {
-        sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
+                                                                          int limit) {
+        Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2341,6 +2343,51 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
 
+    /**
+     * Search a DAS indexed table and get the json response.
+     *
+     * @param tableName name of the table
+     * @param query     lucene query
+     * @param start     start index of the result list
+     * @param count     number of results required
+     * @param sortField from which field the sorting should happen, null if you don't want it sorted
+     * @param ascending sorting ascending or not
+     * @return json string of the response
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchTable(String tableName, String query, int start, int count, String sortField, boolean ascending)
+            throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        List<Map<String, String>> sortBy = new ArrayList();
+        if (sortField != null) {
+            Map<String, String> sortFieldMap = new HashedMap();
+            sortFieldMap.put("field", sortField);
+            String sortType = (ascending) ? "ASC" : "DESC";
+            sortFieldMap.put("sortType", sortType);
+            sortBy.add(sortFieldMap);
+        }
+        //create the bean
+        RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
+        String result = null;
+        //do post and get the results
+        try {
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
                                                                         String tenantDomain, String fromDate,
@@ -2396,6 +2443,36 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Couldn't parse the date", e);
         }
         return obj;
+    }
+
+    /**
+     * Provides the count for the search result.
+     *
+     * @param tableName name of the table
+     * @param query     search query
+     * @return count of the search results
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchCount(String tableName, String query) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        //create the bean
+        RequestSearchCountBean request = new RequestSearchCountBean(tableName, query);
+        String result = null;
+        //do post and get the results
+        try {
+            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
     }
 
     @Override
@@ -2509,3 +2586,4 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return obj;
     }
 }
+

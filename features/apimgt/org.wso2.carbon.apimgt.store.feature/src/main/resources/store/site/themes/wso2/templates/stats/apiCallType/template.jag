@@ -1,29 +1,29 @@
 <% jagg.template("stats/apiCallType", function(inputs, outputs, jagg) { %>
 
 <div id="apiCallType-stat-page" class="stat-page">
-    <div class="title-section">
-        <h2>Store Statistics</h2>
-    </div>
 
-    <div id="rangeSliderWrapper" >
-       <div id="dateRangePickerContainer" style="text-align:right">
-           <div class="btn-group" role="group">
-               <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-               <button id="today-btn" type="button" class="btn btn-default date-range">Day
-               </button>
-               <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-               <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
-               <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
-                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
-                 <span></span> <b class="caret"></b>
-               </button>
-           </div>
-       </div>
-    </div>
-    </div>
+	
+    <div class="page-header">     
+    			<h1><%=i18n.localize("callTypeTitle")%></h1>   			 
+	</div>
 
-    <h3><%=i18n.localize("callTypeTitle")%></h3>
-
+	<div class="row">
+	    <div id="rangeSliderWrapper" >
+	       <div id="dateRangePickerContainer" style="text-align:right">
+	           <div class="btn-group" role="group">
+	               <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+	               <button id="today-btn" type="button" class="btn btn-default date-range">Day
+	               </button>
+	               <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+	               <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+	               <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
+	                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+	                 <span></span> <b class="caret"></b>
+	               </button>
+	           </div>
+	       </div>
+	    </div>
+	</div>
         <div id="spinner" class="center-wrapper">
             <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
         </div>
@@ -40,7 +40,9 @@
                  </table>
             </div>
 
-        <h3 id="noData" class="no-data-heading center-wrapper hide">No Data Available</h3>
+        <div id="noData" class="hide message message-info">
+			<h4><i class="icon fw fw-info"></i>No Data Available.</h4>
+		</div>
 </div>
 
 <% }); %>

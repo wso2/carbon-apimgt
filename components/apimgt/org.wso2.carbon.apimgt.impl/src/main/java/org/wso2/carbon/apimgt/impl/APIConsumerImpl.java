@@ -115,7 +115,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private void readTagCacheConfigs() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
-        String enableTagCache = config.getFirstProperty(APIConstants.API_STORE_TAG_CACHE_DURATION);
+        String enableTagCache = config.getFirstProperty(APIConstants.STORE_TAG_CACHE_DURATION);
         if (enableTagCache == null) {
             isTagCacheEnabled = false;
             tagCacheValidityTime = 0;

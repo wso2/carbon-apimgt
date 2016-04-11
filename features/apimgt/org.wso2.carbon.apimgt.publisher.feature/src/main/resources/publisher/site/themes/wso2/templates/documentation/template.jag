@@ -24,7 +24,7 @@
                 <input type="hidden" id="docAPIName" value="<%=api.name%>"/>
                 <%if(createPermitted){%>
                 <div id="addDoc">
-                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>">
+                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>" class="btn  btn-sm padding-reduce-on-grid-view">
                     <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("addNewDoc")%>"></i> <%=i18n.localize("addNewDoc")%>
                 </a>
                 </div>
@@ -49,9 +49,9 @@
 		        </div>
 
 		        <div class="control-group">
-		            <label class="control-label" for="textarea"><%=i18n.localize("summary")%></label>
+		            <label class="control-label"<%=i18n.localize("summary")%></label>
 		            <div class="controls">
-		                <textarea  id="summary" class="form-control" rows="3" style="width:100%"></textarea>
+		                <textarea  id="summary" class="form-control" rows="3" style="width:100%" title="summary"></textarea>
 		            </div>
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
@@ -103,7 +103,7 @@
 									</label></li>
 								</ul>
 								<div id="otherTypeDiv" class="controls" style="display: none;">
-									<span class="requiredAstrix">*</span> <input type="text"
+									<span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
 										class="required form-control" id="specifyBox"
 										style="width: 98%;" />
 								</div>
@@ -132,7 +132,7 @@
 		                      </label>
 		                  
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
-		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" id="docUrl">
+		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
 		                    </div>
 </li>  
 <li>
@@ -151,8 +151,7 @@
 												<span class="hidden-xs">Browse</span>
 											</button>
 										</div>
-										<input type="text" name="docName" id="docName" class="form-control" readonly>
-										<input type="file" name="docLocation" id="docLocation" class="form-control">
+																<input type="file" name="docLocation" id="docLocation" title="doclocation" class="form-control">
 									</div>
 	                                <p id="fileType_help"><%=i18n.localize("fileDocTypeHelpMsg")%></p>
                                 </div>                         
@@ -174,7 +173,7 @@
 	  </div>
         </div>
         </form>
-            <table class="table table-bordered" id="docTable">
+            <table class="table table-striped table-hover table-bordered display data-table" id="docTable">
                 <thead>
                 <tr>
                     <th><%=i18n.localize("name")%></th>
@@ -213,18 +212,45 @@
                     <%if(createPermitted){%>
                     <td id="buttonTd">
 			<% if(doc.sourceType == "INLINE") {%>
- 			 	<a title="<%=i18n.localize("editContent")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')"><i class="glyphicon glyphicon-edit" title="<%=i18n.localize("editContent")%>"></i> <%=i18n.localize("editContent")%></a>
-                        <% }else if (doc.sourceType == "URL"){%>
-                         	<a title="<%=i18n.localize("view")%>" href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" ><i class="glyphicon glyphicon-check" title="<%=i18n.localize("view")%>"></i> <%=i18n.localize("view")%></a>
-                        <%}else if (doc.sourceType == "FILE"){ %>
-			 <a title="<%=i18n.localize("download")%>" href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" download><i class="glyphicon glyphicon-check" title="<%=i18n.localize("download")%>"></i>
-			  <%=i18n.localize("open")%>
-			  </a>
+				<a title="<%=i18n.localize("editContent")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+				      <span class="fw-stack">
+				          <i class="fw fw-circle-outline fw-stack-2x"></i>
+				          <i class="fw fw-edit fw-stack-1x"></i>
+				      </span>
+				      <span class="hidden-xs"><%=i18n.localize("editContent")%></span>
+				  </a>
+            <% }else if (doc.sourceType == "URL"){%>
+              	<a title="<%=i18n.localize("editContent")%>" href="<%= encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%><%=urlPrefix%>" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+				      <span class="fw-stack">
+				          <i class="fw fw-circle-outline fw-stack-2x"></i>
+				          <i class="fw fw-view fw-stack-1x"></i>
+				      </span>
+				      <span class="hidden-xs"><%=i18n.localize("view")%></span>
+				  </a>
+            <%}else if (doc.sourceType == "FILE"){ %>
+				 <a title="<%=i18n.localize("download")%>" href="<%=jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + doc.filePath) %>" target="_blank" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+				      <span class="fw-stack">
+				          <i class="fw fw-circle-outline fw-stack-2x"></i>
+				          <i class="fw fw-view fw-stack-1x"></i>
+				      </span>
+				      <span class="hidden-xs"><%=i18n.localize("open")%></span>
+				  </a>
 			<%}%>
-
-                        | <a title="<%=i18n.localize("update")%>" href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet" title="<%=i18n.localize("update")%>"></i> <%=i18n.localize("update")%></a>
-                         
-                        |<a title="<%=i18n.localize("deleteMethod")%>" href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash" title="<%=i18n.localize("deleteMethod")%>"></i> <%=i18n.localize("deleteMethod")%></a>
+			
+						<a title="<%=i18n.localize("update")%>" href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+					      <span class="fw-stack">
+					          <i class="fw fw-circle-outline fw-stack-2x"></i>
+					          <i class="fw fw-edit fw-stack-1x"></i>
+					      </span>
+					      <span class="hidden-xs"><%=i18n.localize("update")%></span>
+					  </a>
+					  <a title="<%=i18n.localize("deleteMethod")%>" href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+					      <span class="fw-stack">
+					          <i class="fw fw-circle-outline fw-stack-2x"></i>
+					          <i class="fw fw-delete fw-stack-1x"></i>
+					      </span>
+					      <span class="hidden-xs"><%=i18n.localize("view")%></span>
+					  </a>
 			</td>
                     <%}%>
                 </tr>

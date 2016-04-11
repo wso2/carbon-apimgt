@@ -211,7 +211,7 @@ public class APIKeyValidator {
     public boolean isAPIKeyValidationEnabled() {
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+            String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
             return Boolean.parseBoolean(serviceURL);
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
@@ -221,7 +221,7 @@ public class APIKeyValidator {
     public boolean isAPIResourceValidationEnabled() {
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_RESOURCE_CACHE_ENABLED);
+            String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED);
             return Boolean.parseBoolean(serviceURL);
         } catch (Exception e) {
             log.error("Did not found valid API Resource Validation Information cache configuration. Use default configuration" + e);

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -92,7 +93,7 @@ public class UsageClient {
         //read the api-manager.xml and get the Statistics class name
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        String className = config.getFirstProperty("StatisticClientProvider");
+        String className = config.getFirstProperty(APIConstants.STAT_PROVIDER_IMPL);
 
         try {
             //get the Class from the class name

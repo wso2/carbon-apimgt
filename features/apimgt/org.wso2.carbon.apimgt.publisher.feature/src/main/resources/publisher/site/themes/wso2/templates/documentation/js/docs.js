@@ -24,6 +24,21 @@ $(document).ready(function() {
         validInput(docId, 'Duplicate Document Name.', errorCondition);
 
     });
+    
+    $('#docTable').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#docTable_length option:selected" ).val()
+	     || $("#docTable option:selected" ).val()==-1)
+	       $('#docTable_paginate').hide();
+	       else $('#docTable_paginate').show();
+	     } ,
+        "aoColumns": [
+        null,
+        null,
+        null,
+        { "bSortable": false }
+        ]
+	});
 
 
 });

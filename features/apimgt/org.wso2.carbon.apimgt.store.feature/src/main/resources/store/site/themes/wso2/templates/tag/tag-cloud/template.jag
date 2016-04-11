@@ -1,11 +1,8 @@
-<% 
-var tenant=request_tenant;
-var urlPrefix = jagg.getTenantURLPrefix();
-jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
+<% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
 
-<div id="tag-cloud" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("tags")%></div>
-  <div class="panel-body" id="tag-content" style="width:100%;">
+<div class="tags-wrapper hidden-xs hidden-sm">
+  <div class="tag-title"> Tags</div>
+  <div class="tag-content" id="tag-content" style="width:100%;">
   </div>
 </div>
 
@@ -32,7 +29,7 @@ jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
               };
               $.fn.tagcloud.defaults = {
                 size: {start: 14, end: 18, unit: 'pt'},
-                color: {start: '#cde', end: '#f52'}
+                color: {start: '#777', end: '#333'}
               };
 
               $(function () {

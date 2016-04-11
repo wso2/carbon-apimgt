@@ -24,11 +24,7 @@ var tenantDomain = jagg.getTenantDomain();
                     "name":"layout/base",
                     "inputs":{
                         "title":"Applications",
-                        "top":[
-                            {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
+                        "top":[                            
                             {
                                 "name":"search/api-search",
                                 "inputs":null
@@ -42,7 +38,7 @@ var tenantDomain = jagg.getTenantDomain();
                         ],
                         "middle":[
                             {
-                                "name":"application/application-add",
+                                "name":"application/application-list",
                                 "inputs":{
                                     "apis":apis,
                                     "user":user
