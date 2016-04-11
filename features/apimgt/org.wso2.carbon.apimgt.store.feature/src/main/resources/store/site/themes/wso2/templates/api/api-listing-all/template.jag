@@ -319,13 +319,13 @@ var reqUrl = request.getRequestURI();
 
             <% if(totalLength == 0) {
                          if (request.getParameter("query") == null) {  %>
-				            <div class="message message-info">
-				                <strong><%=i18n.localize("noAPIMsg")%></strong>
-				            </div>
+                         	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIMsg")%></h4>
+						    </div>
 			            <%   } else {    %>
-			            <div class="message message-info">
-			                <strong><%=i18n.localize("noSearchResultMsg")%></strong>
-			            </div>
+			            	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noSearchResultMsg")%></h4>
+						    </div>
 			            <%
 			                         }
                       }
