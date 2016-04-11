@@ -5405,6 +5405,8 @@ public final class APIUtil {
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan("FREE");
                 apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
             }
         }
