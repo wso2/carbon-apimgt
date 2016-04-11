@@ -26,6 +26,8 @@
     var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
     var tierPermissionsUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag");
     var tierPermissionsMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag");
+    var manageAlertTypesUrl =jagg.getAbsoluteUrl("/site/pages/manage-alert-type.jag");
+    var manageAlertTypesMappedUrl =jagg.getMappedUrl("/site/pages/manage-alert-type.jag");
 
 	var page = request.getParameter("page");
     	if(page == null ) {
