@@ -405,7 +405,7 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * set the CEP based Throttle Properties into Configuration
+     * set the Advance Throttle Properties into Configuration
      *
      * @param element
      */
@@ -482,7 +482,8 @@ public class APIManagerConfiguration {
 
                 // Data publisher pool configuration
 
-                OMElement dataPublisherPoolConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
+                OMElement dataPublisherPoolConfigurationElement = dataPublisherConfigurationElement
+                        .getFirstChildWithName(new
                         QName
                         (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_POOL_CONFIGURATION));
 
