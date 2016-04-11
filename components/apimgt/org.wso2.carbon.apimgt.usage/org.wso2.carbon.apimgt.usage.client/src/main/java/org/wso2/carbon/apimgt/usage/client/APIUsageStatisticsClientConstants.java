@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 public final class APIUsageStatisticsClientConstants {
 
     public static final String API_LAST_ACCESS_TIME_SUMMARY = "API_LAST_ACCESS_TIME_SUMMARY";
@@ -105,16 +107,6 @@ public final class APIUsageStatisticsClientConstants {
     
     public static final String ALL_PROVIDERS = "__all_providers__";
 
-    public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-
-    public static final String API_USAGE_JDBC_DRIVER =  API_USAGE_TRACKING + "JDBCDriver";
-
-    public static final String API_USAGE_JDBC_URL =  API_USAGE_TRACKING + "JDBCUrl";
-
-    public static final String API_USAGE_JDBC_UserName =  API_USAGE_TRACKING + "JDBCUserName";
-
-    public static final String API_USAGE_JDBC_Password =  API_USAGE_TRACKING + "JDBCPassword";
-    
     public static final String API_USAGEBY_DESTINATION_SUMMARY = "API_DESTINATION_SUMMARY";
 
     public static final String APPLICATION_NAME = "applicationName";
