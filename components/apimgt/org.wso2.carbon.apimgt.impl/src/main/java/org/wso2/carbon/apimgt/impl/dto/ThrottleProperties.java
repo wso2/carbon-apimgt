@@ -103,11 +103,11 @@ public class ThrottleProperties {
     }
 
     public static class DataPublisher {
-        private String type;
-        private String receiverUrlGroup;
-        private String authUrlGroup;
-        private String username;
-        private String password;
+        private String type = "Binary";
+        private String receiverUrlGroup = "tcp://localhost:9611";
+        private String authUrlGroup = "ssl://localhost:9711";
+        private String username = "admin";
+        private String password = "admin";
 
         public String getType() {
             return type;
@@ -151,8 +151,8 @@ public class ThrottleProperties {
     }
 
     public static class DataPublisherPool {
-        private int maxIdle;
-        private int initIdleCapacity;
+        private int maxIdle = 1000;
+        private int initIdleCapacity = 200;
 
         public int getMaxIdle() {
             return maxIdle;
@@ -173,7 +173,7 @@ public class ThrottleProperties {
 
     public static class GlobalEngineWSConnection {
         private String dataSource;
-        private boolean enabled;
+        private boolean enabled = false;
         private String serviceUrl;
         private String username;
         private String password;
