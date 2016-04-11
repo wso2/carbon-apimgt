@@ -140,6 +140,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String HTTP_AUTH_HEADER_TYPE = "Basic";
 
     public static final String DAS_SEARCH_REST_API_URL = "/analytics/search";
+    public static final String DAS_SEARCH_COUNT_REST_API_URL = "/analytics/search_count";
     public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
     public static final String DAS_TABLE_EXIST_REST_API_URL = "/analytics/table_exists";
 

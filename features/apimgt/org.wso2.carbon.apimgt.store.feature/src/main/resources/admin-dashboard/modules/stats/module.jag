@@ -1,0 +1,9 @@
+<%
+jagg.module("stats", {
+
+    isDataPublishingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "stats/stats.jag").isDataPublishingEnabled.apply(this, arguments);        
+    }
+    
+ });
+ %>
