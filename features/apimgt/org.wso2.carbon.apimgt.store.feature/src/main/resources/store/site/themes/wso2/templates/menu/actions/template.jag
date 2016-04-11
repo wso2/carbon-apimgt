@@ -81,7 +81,7 @@
 			                        <%=i18n.localize( 'forum.createNewTopic')%>
 			                    </a>
 		                	</li> 
-	            		<% } if(inputs.page == "api/api-info"){%>
+	            		<% } if(inputs.page == "api/api-info" || inputs.page == "api/api-listing-prototyped"){%>
 	                        <li>
 	                            <a title="<%=i18n.localize("goBack")%>" href="<%= jagg.urlTenanted("/") %>">
 	                                <span class="icon fw-stack">
