@@ -93,6 +93,11 @@
 							<i class="fw fw-html"></i>
 							<%= i18n.localize("themeUpload") %></a></li>
 
+					</ul>				
+				</li>
+				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%></a>
+					<ul class="nav nav-pills secondary-nav collapse in">
+						
 					    <%
 					    if(!mod.isGlobalCEPThrottlingEnabled()){
 					    %>
@@ -106,21 +111,25 @@
 					    	<li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/site/pages/policy-list.jag") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
 							<%= i18n.localize("addAPI") %></a></li>
 
 					        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/site/pages/app-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
 					        <%= "App Level Policies" %></a></li>
 					        
 					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a 
 					        href="<%= jagg.url("/site/pages/subscription-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
 					        <%= "Subscription Level Policies" %></a></li>
 					        
 					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a 
 					        href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
 					        <%= "Global Level Policies" %></a></li>
 
 					     <%}%>
