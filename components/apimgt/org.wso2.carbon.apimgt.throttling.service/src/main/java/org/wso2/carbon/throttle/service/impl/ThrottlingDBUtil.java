@@ -26,12 +26,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,14 +53,14 @@ public final class ThrottlingDBUtil {
         if (dataSource != null) {
             return;
         }
-
+        Properties properties  = new Properties();
+        properties.load(new FileInputStream("throttle.properties"));
+        String dataSourceName = (String) properties.get("throttle.datasource.name");
         synchronized (ThrottlingDBUtil.class) {
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                String dataSourceName = "apimgt_throttle_ds";
-
                 if (dataSourceName != null) {
                     try {
                         Context ctx = new InitialContext();

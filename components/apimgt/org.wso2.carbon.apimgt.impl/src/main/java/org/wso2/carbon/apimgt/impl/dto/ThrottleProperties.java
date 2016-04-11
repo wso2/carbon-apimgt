@@ -172,10 +172,19 @@ public class ThrottleProperties {
     }
 
     public static class GlobalEngineWSConnection {
+        private String dataSource;
         private boolean enabled;
         private String serviceUrl;
         private String username;
         private String password;
+
+        public String getDataSource() {
+            return dataSource;
+        }
+
+        public void setDataSource(String dataSource) {
+            this.dataSource = dataSource;
+        }
 
         public String getServiceUrl() {
             return serviceUrl;
@@ -333,9 +342,18 @@ public class ThrottleProperties {
         }
     }
     public static class BlockCondition {
+        private String dataSource;
         private String serviceUrl;
         private String username;
         private String password;
+
+        public String getDataSource() {
+            return dataSource;
+        }
+
+        public void setDataSource(String dataSource) {
+            this.dataSource = dataSource;
+        }
 
         public String getServiceUrl() {
             return serviceUrl;

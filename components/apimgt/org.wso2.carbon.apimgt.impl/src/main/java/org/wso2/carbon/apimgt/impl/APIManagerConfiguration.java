@@ -429,14 +429,6 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableUnlimitedTier(JavaUtils.isTrueExplicitly(enableUnlimitedTierElement
                         .getText()));
             }
-
-            OMElement throttlingDataSourceNameElement = throttleConfigurationElement
-                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
-                            .THROTTLE_DATA_SOURCE_NAME));
-            if (throttlingDataSourceNameElement != null) {
-                throttleProperties.setThrottleDataSourceName(throttlingDataSourceNameElement.getText());
-            }
-
             if (throttleProperties.isEnabled()) {
 
                 ThrottleProperties.DataPublisher dataPublisher = new ThrottleProperties.DataPublisher();

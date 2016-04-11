@@ -684,6 +684,5 @@
             </JMSTaskManager>
         </JMSConnectionDetails>
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
-        <ThrottleDataSourceName>jdbc/WSO2AM_DB</ThrottleDataSourceName>
     </ThrottlingConfigurations>
 </APIManager>

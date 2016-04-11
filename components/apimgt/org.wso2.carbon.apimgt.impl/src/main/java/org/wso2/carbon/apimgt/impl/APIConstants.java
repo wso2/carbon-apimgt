@@ -1125,9 +1125,7 @@ public final class APIConstants {
         public static final String KEEP_ALIVE_TIME_IN_MILLIS = "KeepAliveTimeInMillis";
         public static final String JOB_QUEUE_SIZE = "JobQueueSize";
         public static final String ENABLE_UNLIMITED_TIER = "EnableUnlimitedTier";
-        public static final String THROTTLE_DATA_SOURCE_NAME = "ThrottleDataSourceName";
         public static final String POLICY_DEPLOYER_CONFIGURATION = "PolicyDeployer";
         public static final String BLOCK_CONDITION_RETRIEVER_CONFIGURATION = "BlockCondition";
-
     }
 }
