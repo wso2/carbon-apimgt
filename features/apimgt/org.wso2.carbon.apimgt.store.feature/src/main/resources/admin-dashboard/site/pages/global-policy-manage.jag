@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Global Level Policy Management",
+            "title":"Custom Policy Management",
             "header":{
                 "name":"menu/primary"
             },
