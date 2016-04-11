@@ -1525,6 +1525,7 @@ public class SQLConstants {
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
             "   UPDATED_TIME = ? " +
+                    " API_TIER = ? " +
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
