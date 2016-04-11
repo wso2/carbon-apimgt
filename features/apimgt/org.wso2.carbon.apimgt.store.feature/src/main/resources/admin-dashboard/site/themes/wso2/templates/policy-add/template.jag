@@ -105,7 +105,7 @@
                     <p id="name_help" class="hide">Time Configuration.</p>
                 </label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
+                    <input type="text" class="form-control" id="request-unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
@@ -137,7 +137,7 @@
                     <p id="name_help" class="hide">Time Configuration.</p>
                 </label>
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
+                    <input type="text" class="form-control" id="bandwidth-unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
@@ -583,15 +583,15 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-unit-time-count-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
                                 </div>
 
                                 <div class="col-sm-3">
                                     <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                        <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
                                     </select>
                                 </div>
                             </div>
@@ -618,15 +618,15 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-unit-time-count-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
                                 </div>
 
                                 <div class="col-sm-3">
                                     <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                        <option value="seconds"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                        <option value="minutes" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                        <option value="hours" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                        <option value="days" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                        <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
                                     </select>
                                 </div>
                             </div>
@@ -669,10 +669,12 @@
         </tr>
 </script>
 
+<% if(policyName != null && policyName != "") {%>
 <script type="text/javascript">
     $(document).ready(function() {
-        loadPolicy("test", "test");
+        loadPolicy("<%=policyName%>");
     });
 </script>
+<%}%>
 <%});%>
 

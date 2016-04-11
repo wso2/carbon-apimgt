@@ -48,10 +48,10 @@ include("/jagg/jagg.jag");
                     }
                 }
             }//remove api policy
-            else if (action == "getApiPolicy" && request.getMethod() == 'GET') {
+            else if (action == "getApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");
                 var policyName =  request.getParameter("policyName");
-                result = mod.removeApiPolicy(subPolicy);
+                result = mod.getAPIPolicyJson(policyName);
                 if (result.error) {
                     obj = {
                         error: result.error,
@@ -62,6 +62,7 @@ include("/jagg/jagg.jag");
                         error: false
                     }
                 }
+                print(obj);
             }
             else {
                 print({

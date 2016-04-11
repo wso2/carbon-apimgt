@@ -48,6 +48,9 @@ jagg.module("policy", {
     },
     getAPIPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").getAPIPolicy.apply(this, arguments);
+    },
+    getAPIPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/apiPolicy.jag").getAPIPolicyJson.apply(this, arguments);
     }
 });
 %>

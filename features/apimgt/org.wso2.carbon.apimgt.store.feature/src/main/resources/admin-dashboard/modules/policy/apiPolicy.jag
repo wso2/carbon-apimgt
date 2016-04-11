@@ -78,6 +78,28 @@ var getAPIPolicy = function (policyName) {
     }
 };
 
+//get api policy with policyName
+var getAPIPolicyJson = function (policyName) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+        var apiPolicy = apiProvider.getAPIPolicy(policyName, provider);
+        apiPolicy = objectToJson(apiPolicy);
+        return {
+            error: false,
+            apiPolicy: apiPolicy
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting all api policies (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
 //removing api policy
 var deleteAPIPolicy = function (policyName, userName, policyLevel) {
 

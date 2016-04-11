@@ -236,79 +236,32 @@ var addJwtClaim = function (id) {
     $('#jwt-claim-value-' + id).val("");
 };
 
-var loadPolicy = function (policyName, userName) {
-    var policy = {
-        "policyName":"qqsqsqs",
-        "policyLevel":"apiLevel",
-        "policyDescription":"qsqsqsqss",
-        "executionFlows":
-            [
-                {
-                    "id":0,
-                    "enabled":true,
-                    "quotaPolicy":{
-                        "type":"requestCount",
-                        "limit":
-                        {
-                            "requestCount":"12",
-                            "timeUnit":"seconds",
-                            "dataAmount":0,
-                            "dataUnit":""}},
-                    "conditions":
-                        [{
-                            "type":"IP",
-                            "ipType":"specific",
-                            "startingIP":"",
-                            "endingIP":"",
-                            "specificIP":"1212121212",
-                            "invertCondition":false,
-                            "enabled":true
-                        },
-                            {
-                                "type":"Header",
-                                "keyValPairs":
-                                    [{"name":"12121","value":"1212"}],
-                                "invertCondition":false,
-                                "enabled":true},
-                            {
-                                "type":"QueryParam",
-                                "keyValPairs":
-                                    [{
-                                        "name":"121212","value":"121212"}],
-                                "invertCondition":false,
-                                "enabled":true},
-                            {
-                                "type":"JWTClaim",
-                                "keyValPairs":
-                                    [{
-                                        "name":"1212121",
-                                        "value":"1212112"}],
-                                "invertCondition":false,
-                                "hasValues":false,
-                                "enabled":false}]}],
-        "defaultQuotaPolicy":{
-            "type":"requestCount",
-            "limit":{
-                "requestCount":"12",
-                "timeUnit":"sec",
-                "dataAmount":0,
-                "dataUnit":""
-            }}};
+var loadPolicy = function (policyName) {
+    jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+        action: "getApiPolicy",
+        policyName: policyName},
+        function (data) {
+            if (!data.error) {
+                policy = data.policy;
+                for (var i = 0 ; i < policy.executionFlows.length; i++) {
+                    var source = $("#designer-policy-template").html();
+                    policy.executionFlows[i].id = index;
+                    Handlebars.partials['designer-policy-template'] = Handlebars.compile(source);
+                    var context = {
+                        "executionFlow": policy.executionFlows[i]
+                    };
+                    var output = Handlebars.partials['designer-policy-template'](context);
+                    $('#pipeline-content').append(output);
+                    $('#executionFlow-desc-' + index).editable();
+                    apiPolicy.executionFlows.push(policy.executionFlows[i]);
+                    console.log(apiPolicy);
+                    index++;
+                }
+            } else {
 
-    for (var i = 0 ; i < policy.executionFlows.length; i++) {
-        var source = $("#designer-policy-template").html();
-        policy.executionFlows[i].id = index;
-        Handlebars.partials['designer-policy-template'] = Handlebars.compile(source);
-        var context = {
-            "executionFlow": policy.executionFlows[i]
-        };
-        var output = Handlebars.partials['designer-policy-template'](context);
-        $('#pipeline-content').append(output);
-        $('#executionFlow-desc-' + index).editable();
-        apiPolicy.executionFlows.push(policy.executionFlows[i]);
-        console.log(apiPolicy);
-        index++;
-    }
+            }
+        }
+    , "json");
 };
 
 var addPolicyToBackend = function () {
@@ -320,6 +273,7 @@ var addPolicyToBackend = function () {
     var defaultPolicyType = $("#default-policy-level option:selected").val();
     var defaultPolicyLimit;
     var defaultPolicyUnit;
+    var defaultPolicyUnitTime;
 
     apiPolicyNew.policyName = policyName;
     apiPolicyNew.policyDescription = policyDescription;
@@ -329,12 +283,16 @@ var addPolicyToBackend = function () {
     if (defaultPolicyType == 'requestCount') {
         defaultPolicyLimit = $('#request-count').val();
         defaultPolicyUnit = $("#request-count-unit option:selected").val();
+        defaultPolicyUnitTime = $("#request-unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
+        apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
     } else {
         defaultPolicyLimit = $('#bandwidth').val();
         defaultPolicyUnit = $("#bandwidth-unit option:selected").val();
+        defaultPolicyUnitTime = $("#bandwidth-unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
+        apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyUnit;
     }
 
@@ -377,7 +335,7 @@ var addPolicyToBackend = function () {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                     var headerName, headerVal;
                     var table = $("#header-value-table-content-" + executionFlowId + " > tbody");
-                    table.find('tr').each(function (i, el) {
+                    table.find('tr').each(function (k, el) {
                         var $tds = $(this).find('td');
                         headerName = $tds.eq(0).text();
                         headerVal = $tds.eq(1).text();
@@ -401,7 +359,7 @@ var addPolicyToBackend = function () {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                     var queryParamName, queryParamVal;
                     var table = $("#query-param-value-table-content-" + executionFlowId + " > tbody");
-                    table.find('tr').each(function (i, el) {
+                    table.find('tr').each(function (k, el) {
                         var $tds = $(this).find('td');
                         queryParamName = $tds.eq(0).text();
                         queryParamVal = $tds.eq(1).text();
@@ -420,11 +378,12 @@ var addPolicyToBackend = function () {
 
             //Jwt claim condition related properties
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "JWTClaim") {
+                apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                 checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     var claimName, claimVal;
                     var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
-                    table.find('tr').each(function (i, el) {
+                    table.find('tr').each(function (k, el) {
                         var $tds = $(this).find('td');
                         claimName = $tds.eq(0).text();
                         claimVal = $tds.eq(1).text();
@@ -440,21 +399,30 @@ var addPolicyToBackend = function () {
                     }
                 }
             }
+        }
 
-            var executionPolicyQuotaType = $("#execution-policy-level-" + executionFlowId + " option:selected").val();
-            apiPolicyNew.executionFlows[i].quotaPolicy.type = executionPolicyQuotaType;
-            if (defaultPolicyType == 'requestCount') {
-                apiPolicyNew.executionFlows[i].quotaPolicy.limit.requestCount = $('#execution-flow-request-count-' + executionFlowId).val();
-                apiPolicyNew.executionFlows[i].quotaPolicy.limit.timeUnit = $("#execution-flow-request-count-unit-" + executionFlowId + " option:selected").val();
-            } else {
-                apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataAmount = $('#execution-flow-bandwidth-' + executionFlowId).val();
-                apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
-            }
+        var executionPolicyQuotaType = $("#execution-policy-level-" + executionFlowId + " option:selected").val();
+        apiPolicyNew.executionFlows[i].quotaPolicy.type = executionPolicyQuotaType;
+        if (defaultPolicyType == 'requestCount') {
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.unitTime = $("#execution-flow-request-count-request-unit-time-" + executionFlowId).val();
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.requestCount = $('#execution-flow-request-count-' + executionFlowId).val();
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.timeUnit = $("#execution-flow-request-count-unit-" + executionFlowId + " option:selected").val();
+        } else {
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.unitTime = $("#execution-flow-request-count-bandwidth-unit-time-" + executionFlowId).val();
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataAmount = $('#execution-flow-bandwidth-' + executionFlowId).val();
+            apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
         }
     }
+
     console.log(JSON.stringify(apiPolicyNew));
-    jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
+    jagg.post("/site/blocks/policy-add/ajax/policy-operations.jag", {
         action: "addApiPolicy",
-        apiPolicy: JSON.stringify(apiPolicyNew),
+        apiPolicy: JSON.stringify(apiPolicyNew)
+    }, function (data) {
+        if (!data.error) {
+
+        } else {
+
+        }
     }, "json");
 };
