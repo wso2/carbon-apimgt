@@ -54,7 +54,7 @@ div.image-container {
     background: rgba(0, 0, 0, .6);
     cursor: pointer;
 }
-.thumbnail.icon>.after>a>span.fw-stack.fw-lg {
+.thumbnail.icon>a>.after>span.fw-stack.fw-lg {
     position: absolute;
     top: 0;
     left: 0;

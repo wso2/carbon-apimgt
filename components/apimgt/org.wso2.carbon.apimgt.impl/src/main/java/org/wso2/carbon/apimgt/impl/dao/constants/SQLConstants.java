@@ -1996,4 +1996,55 @@ public class SQLConstants {
             "   AND IOAT.TENANT_ID = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
             "   AND LOWER(IOAT.USER_DOMAIN) = ?";
+
+    public static final String GET_ALL_ALERT_TYPES =
+            "SELECT " +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  " +
+            " WHERE " +
+            "   AGENT = ?";
+
+
+    public static final String GET_ALL_ALERT_TYPES_FOR_ADMIN =
+            "SELECT DISTINCT" +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  ";
+
+    public static final String GET_SAVED_ALERT_TYPES_BY_USERNAME =
+            " SELECT " +
+            "   ALERT_TYPE_ID " +
+            " FROM " +
+            "   AM_ALERT_TYPES_VALUES " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND AGENT = ? ";
+
+    public static final String GET_SAVED_ALERT_EMAILS =
+
+            " SELECT " +
+            "   EMAIL_LIST " +
+            " FROM " +
+            "   AM_ALERT_EMAILLIST " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND AGENT = ? ";
+
+
+    public static final String ADD_ALERT_TYPES_VALUES =
+            " INSERT INTO AM_ALERT_TYPES_VALUES (ALERT_TYPE_ID, USER_NAME , AGENT) " +
+            " VALUES(?,?,?)";
+
+    public static final String ADD_ALERT_EMAIL_LIST =
+            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, EMAIL_LIST , AGENT) " +
+            " VALUES(?,?,?)";
+
+    public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT =
+            "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND AGENT = ?";
+
+    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT =
+            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND AGENT = ?";
 }
