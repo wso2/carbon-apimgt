@@ -1,0 +1,24 @@
+<%
+log = new Log(),
+usageClient = jagg.module("manager").getUsageClient(),
+user = jagg.getUser();
+var gson = com.google.gson.Gson();
+
+
+var getDataFromAlertTable = function (tableName, searchEntry, startIndex,count, isAscending) {
+	
+	if (searchEntry == "") {
+  		return usageClient.searchTable(tableName,"*:*",startIndex,count,"alertTimestamp",isAscending);
+  	} else { 
+  		return usageClient.searchTable(tableName, searchEntry ,startIndex,count,"alertTimestamp",isAscending);
+  	}
+};
+
+var getCountFromAlertTable = function (tableName, searchEntry) {
+	if (searchEntry == "null") {
+		searchEntry = null;
+	}
+	return usageClient.searchCount(tableName,searchEntry);
+};
+
+%>

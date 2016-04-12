@@ -1,128 +1,55 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) { %>
-<% var user = outputs.user; %>
-<%
-var i18n = require("i18n");var publisherUrl;
-var localeResourcesBasePath="/site/conf/locales/jaggery/";
-i18n.init(request,localeResourcesBasePath);
 
-var mod = jagg.module("manager");
-var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
-// @todo Log in link
-// Signup link *
-// @todo Logged in user
-// Password change * need icon
-// Logout link *
-// Theme change * removed
-// @todo Go to API Store list
-// @todo Publisher link
-%>
-<% if(user){ %>
-       <ul class="nav navbar-right float-remove-xs text-center-xs">
-       <li class="visible-inline-block">       		
-	         <a href="#" class="dropdown" data-toggle="dropdown">
-	            <span class="icon fw-stack fw-lg">
-	               <i class="fw fw-circle fw-stack-2x"></i>
-	               <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-	            </span>
-	            <span class="hidden-xs"> &nbsp; <%=user.username%><span class="caret"></span></span>
-	         </a>
-         <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
-           <li class="dropdown-header visible-xs">&nbsp; <%=user.username%> <span class="caret"></span></li>
-           <% if(isSelfSignupEnabled) { %>
-           <li><a href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><%=i18n.localize("privacy")%></a></li> 
-           <% } %>           
-           <li class="divider visible-xs"></li>
-           <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Log out</a></li>
-         </ul>
-         </li>
-       </ul>
-<% } else { %>
-		<ul class="nav navbar-right float-remove-xs text-center-xs">
-			<%if(isSelfSignupEnabled){%>
-	            <li class="visible-inline-block">
-	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
-	                  <span class="icon fw-stack fw-lg">
-	                  <i class="fw fw-circle fw-stack-2x"></i>
-	                  <i class="fw fw-document fw-stack-1x fw-inverse"></i>
-	                  </span>
-	                    <span class="hidden-xs"> <%=i18n.localize("signup")%></span>
-	                </a>
-	            </li>
-	          <% } %>       
-	            <li class="visible-inline-block">
-	                <a id="login-link">
-	                  <span class="icon fw-stack fw-lg">
-	                  <i class="fw fw-circle fw-stack-2x"></i>
-	                  <i class="fw fw-user fw-stack-1x fw-inverse"></i>
-	                  </span>
-	                    <span class="hidden-xs"><%=i18n.localize("login")%></span>
-	                </a>
-	            </li>
-        </ul>      
-<% } %>
+<div class="page-content-wrapper">
+    <div class="container-fluid ">
+        <div class="container">
+            <div class="login-form-wrapper">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                        <div class="brand-container add-margin-bottom-5x">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
+                                    <img class="img-responsive brand-spacer" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                </div>
+                            </div>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right">API Store</h2>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                        <div class="data-container">
+                            <form class="form-horizontal" id="mainLoginForm" autocomplete="off">
+                                <h3>Sign in to your account</h3>
+                                <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">
+				                    
+				                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <div class="input-group input-wrap">
+                                            <input type="text" id="username" name="name" class="form-control" placeholder="<%=i18n.localize("username")%>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <div class="input-group input-wrap">
+                                            <input type="password" id="password" name="pass" class="form-control" placeholder="<%=i18n.localize("password")%>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="tenant" name="tenant" value="<%=request_tenant%>">
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <button type="button" id="loginBtn" onclick="login()" class="btn btn-default btn-primary add-margin-right-2x">Sign In</button>
+                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary hidden-xs hidden-sm">Go Back</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-<% /*
-        var isSuperTenant, tenantDomain;
-        var httpsUrl= mod.getHTTPsURL();
-		
-		var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
-    var log = new Log();
-
-        var currentURL = request.getRequestURI();
-        if(request.getQueryString()){
-            currentURL += "?" + request.getQueryString();
-        }
-        var tenant=request_tenant;
-        var urlPrefix = jagg.getTenantURLPrefix();
-        
-        if (jagg.getUser() != null) {
-        	isSuperTenant = jagg.getUser().isSuperTenant;
-		var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    		tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
-        }
-        
-
-
-%>
-
-<ul class="nav navbar-nav navbar-right">
-<%if ((jagg.getTenantDomain() != null)&& site.showPublicStoreURL){%>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-external-link"></i> Go to <span class="caret"></span></a>
-  <ul class="dropdown-menu" role="menu">
-    <li><a href="<%=jagg.getAbsoluteUrl("/")%>"><i class="fa fa-globe"></i> <%=i18n.localize("publicAPIStore")%></a></li>
-  </ul>
-</li>      
-<%}%>
-
-
-<%if(jagg.getUser().hasPublisherAccess){%>
-<%publisherUrl = jagg.module("manager").getAPIPublisherURL().url;
-<%}%>
-
-
-</ul>
-<% /*%>
-<!--Links to Access Tenant Store and Public Store-->
-<div class="tenant-position-setter">
-<%if(jagg.getUser()!=null){%>
-	<!--Links to Access Tenant Store and Public Store-->
-		<%if (jagg.getUser().hasPublisherAccess) {%>
-			Go to <a href="<%=publisherUrl%>" target="_blank" ><%=i18n.localize("apipublisher")%></a>
-           <%if(site.showPublicStoreURL){%>
-           |
-
-		<%}}%>
-	<%}%>
-
-		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
-				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
-		<%} else if ((tenant != null)&& site.showPublicStoreURL){%>
-			  Go to <a href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
-		<%}%>
-
-
-	</div>
-
-<%*/ }); %>
+<%}); %>

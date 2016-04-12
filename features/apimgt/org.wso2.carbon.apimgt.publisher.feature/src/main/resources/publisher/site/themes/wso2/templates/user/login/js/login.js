@@ -22,8 +22,9 @@ var login = function () {
                       }
 
                   } else {
-                      $('#loginError').show('fast');
-                      $('#loginErrorSpan').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
+                      $('#loginErrorMsg').show();
+                      $('#loginErrorMsg').html('<i class="icon fw fw-error"></i><strong>Error!</strong>' + i18n.t("errorMsgs.login") + result.message + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
+                      
                   }
               }, "json");
 

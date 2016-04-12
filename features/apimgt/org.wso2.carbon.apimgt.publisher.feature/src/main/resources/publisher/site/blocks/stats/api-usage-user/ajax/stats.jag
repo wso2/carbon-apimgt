@@ -1,4 +1,4 @@
-<%
+    <%
 include("/jagg/jagg.jag");
 
 (function () {

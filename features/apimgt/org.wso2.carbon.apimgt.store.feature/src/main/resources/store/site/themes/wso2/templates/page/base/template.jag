@@ -68,7 +68,6 @@
     </script>
 </head>
 <body>
-<% jagg.includeBlock("menu/header", {"pagePath":outputs.pagePath,"tenant":tenant}); %>
 
 <% jagg.includeBlocks(outputs.body); %>
 

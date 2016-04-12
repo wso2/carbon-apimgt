@@ -1,0 +1,10 @@
+<%
+jagg.initializer("manage-alerts", {
+
+     preInitialize:function () {
+     jagg.addHeaderJS("manage-alerts", "manage-alerts", "templates/manage-alerts/js/manage-alerts.js");
+     jagg.addFooterCSS("manage-alerts", "manage-alerts", "templates/manage-alerts/css/manageAlerts.css");
+         //jagg.addHeaderCSS("api-designer.css", "jagg", "templates/item-design/css/api-designer.css");
+     }
+});
+%>

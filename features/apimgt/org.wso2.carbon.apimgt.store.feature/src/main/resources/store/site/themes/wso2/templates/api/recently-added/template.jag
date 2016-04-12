@@ -7,9 +7,7 @@
 %>
 
 <div class="page-header">
-	<div class="page-title">
-		<h2><%=i18n.localize("recentlyAdded")%></h2>
-	</div>
+    <h1><%=i18n.localize("recentlyAdded")%></h1>
 </div>
 
 <div  class="page-content">
@@ -17,7 +15,7 @@
     <script id="recently-added-template" type="text/x-handlebars-template">
     {{#each apis}}
 
-<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
                             <div class="white-wrapper add-margin-bottom-4x">
                                 <div class="thumbnail icon">
 									{{#if thumbnailurl}}
@@ -32,14 +30,14 @@
 											</div>
 										</div> 
 									{{/if}}
-                                    <div class="after">
-                                        <a title="<%=i18n.localize("browse")%>" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
-                                    <span class="fw-stack fw-lg">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-view fw-stack-1x"></i>
-                                    </span>
-                                        </a>
-                                    </div>
+									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?") title="<%=i18n.localize("browse")%>"%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
+                                    	<div class="after">                                        
+                                    		<span class="fw-stack fw-lg">
+                                    			<i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    			<i class="fw fw-view fw-stack-1x"></i>
+                                    		</span>                                        
+                                    	</div>
+									</a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">{{ name }}-{{ version }}</a></h4>
@@ -75,7 +73,7 @@
             if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
               result.apis[i].displayOwner = result.apis[i].owner;
             }
-            else if(result.apis[i].businessOwner != null) {
+            else if(result.apis[i].businessOwner != null && result.apis[i].businessOwner.trim() != "") {
               result.apis[i].displayOwner = result.apis[i].businessOwner;
             }
             else{

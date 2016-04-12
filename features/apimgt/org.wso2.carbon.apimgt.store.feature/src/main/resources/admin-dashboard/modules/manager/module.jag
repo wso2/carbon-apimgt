@@ -24,5 +24,9 @@ jagg.module("manager", {
     getAPIProviderObj:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIProviderObj.apply(this, arguments);
      },
+
+     getUsageClient:function () {
+       return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getUsageClient.apply(this, arguments);
+     }
  });
  %>

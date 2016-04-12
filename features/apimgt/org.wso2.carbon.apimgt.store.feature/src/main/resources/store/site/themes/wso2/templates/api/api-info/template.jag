@@ -6,14 +6,16 @@ var tenant=request_tenant;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 var urlPrefix = jagg.getTenantURLPrefix("&");
-var displayOwner = api.provider;
-if(api.isAdvertiseOnly && api.apiOwner != null) {
-	displayOwner = api.apiOwner;
-} else if(api.bizOwner != null) {
-    displayOwner = api.bizOwner;
-} 
+
 %>
 <%if(api!=null){
+    
+    var displayOwner = api.provider;
+    if(api.isAdvertiseOnly && api.apiOwner != null) {
+    	displayOwner = api.apiOwner;
+    } else if(api.bizOwner != null) {
+        displayOwner = api.bizOwner;
+    } 
 
    thumbURL = api.thumbnailurl;
    if(thumbURL && thumbURL.indexOf("images/") == 0) {
@@ -65,12 +67,11 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
    }
 %>
 <div class="page-header">
-	<div class="page-title">
 
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h2><%=api.name%> - <%=api.version%></h2>
+    <h1><%=api.name%> - <%=api.version%></h1>
     <%
             var tagDisplayName = "";
             var tag = "";
@@ -93,7 +94,6 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
                 }
             }
         %>
-        </div>
 </div>
 <div class="page-content">       
         <div class="row">
@@ -196,7 +196,7 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
 									                                    //adding the description of existing tiers to the list
 									                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
                             								%>
-                            								<option value="<%=tier%>"><%=tierDisplayName%></option>
+                            								<option   title="<%= tierDisplayName%>" data-content="<span><strong><%= tierDisplayName %></strong><br /><%=tiersList[j].tierDescription%></span>" value="<%=tier%>"><%=tierDisplayName%></option>
                             										<%}
                             											denied = false;
                              									} %>
@@ -210,22 +210,10 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
 							                               firstTierDesc = existingFirstTierDesc[0];
 							                            }
 							                        	%>
-							                          <p class="help-block"  id="tierDesc"><%=firstTierDesc%>
-							                       		 <%if(api.tiers[0].tierAttributes!=null) {
-							                        		var tierAttrs=api.tiers[0].tierAttributes.split(',');
-							                        		for(var k=0;k<tierAttrs.length;k++) {
-							                        			var tierKey=tierAttrs[k].split("::")[0];
-							                        			var tierVal=tierAttrs[k].split("::")[1];
-							                        	%>
-									                            <%if(tierKey!='') {%>
-									                            	<br/><%=tierKey%> : <%=tierVal%>
-									                        	<%
-									                        	}
-								                            }
-							                        	}%>
-							                          </p>
 		                                            </div>
 		                                           <%} %>
+                                                    <div class="form-group">
+                                                        <label for="tier-select1">&nbsp;</label>                                           
 	                                            <button type="button" onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
                                 							class="btn btn-primary<% if(!user) { %>need-login<% } %>">
 			                                        <span class="icon fw-stack">
@@ -237,18 +225,42 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
                                 							<span id="subsBtnDesc" class="help-block"><%=i18n.localize("noTiers")%></span>
                             						<%}%>
 	                                            </button>
+                                                </div>
 	                                        </form>
+                                        <%} else {%>
+                                        		<%if (api.isAdvertiseOnly && api.redirectURL != null) {
+						                        	var tenantDomain = 'carbon.super';
+						                        if(api.redirectURL.indexOf("?") != -1){
+													tenantDomain = api.redirectURL.split("?")[1];
+												} else if (api.apiOwner != null && api.apiOwner.indexOf("@") != -1) {
+													tenantDomain = api.apiOwner.split("@")[1];
+												} else if (api.apiOwner != null && api.apiOwner.indexOf("-AT-") != -1) {
+													tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.apiOwner));
+												}
+						                    	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
+						                      %>
+						                      	<a id="store-redirect-link" class="btn btn-primary"  href="<%=path%>" target="_">
+			                                        <span class="icon fw-stack">
+				                                        <i class="fw fw-subscribe fw-stack-1x"></i>
+				                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+			                                        </span>
+			                                                <%=i18n.localize("goToSubscribe")%>
+
+	                                            </a>
+						                     <%}%>
                                         <%} %>
                                     </div>
                                 </div>
                             </div>
         </div>
+        <% jagg.includeBlock("ui/tab", outputs.tabs); %>
+               
         <div class="api-info">
             <div class="row-fluid">
                 <div class="span12">                        
 
                     <%if (api.isAdvertiseOnly && api.redirectURL != null) {
-                        var tenantDomain = 'carbon.super';
+                        	var tenantDomain = 'carbon.super';
                         if(api.redirectURL.indexOf("?") != -1){
 							tenantDomain = api.redirectURL.split("?")[1];
 						} else if (api.apiOwner != null && api.apiOwner.indexOf("@") != -1) {
@@ -260,12 +272,10 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
                     %>
                     	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" href="<%=path%>" target="_"><%=i18n.localize("goToSubscribe")%></a></div>
                     <%}%>
-                    <div class="span12 tabs-section">
-                        <% jagg.includeBlock("ui/tab", outputs.tabs); %>
-                    </div>
                 </div>
             </div>
         </div>
+        
         <%} else { %>
         	<div style="padding-bottom:10px">
             	<div class="alert alert-info">
@@ -277,6 +287,11 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
         	</div>  
         <% } %>
         </div>
+        <%if(api != null) {%>
+        	<hr/>
+        	<%jagg.includeBlock("api/provider-apis",{providerId:api.provider,apiOwner:api.apiOwner,currentApi:api.name,currentApiVersion:api.version,apiBizOwner:api.bizOwner});%>
+        <% } %>
+        
         
 <script>
 $(window).load(function(){

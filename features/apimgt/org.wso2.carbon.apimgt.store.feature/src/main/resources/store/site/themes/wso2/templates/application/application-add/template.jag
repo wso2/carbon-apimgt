@@ -31,11 +31,6 @@
         <strong><%=i18n.localize("preAddPendingMsg")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("afterAddPendingMsg")%></strong>
 </div>        
 <br />
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><strong>Application Details</strong></h3>
-  </div>
-  <div class="panel-body">
 <form class="form-horizontal" id="appAddForm">
   <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
   <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
@@ -64,7 +59,7 @@
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
+          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>
@@ -94,12 +89,10 @@
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
+        <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
 </form>
-  </div>
-</div>
-
 </div>
 </div>
 <% }); %>

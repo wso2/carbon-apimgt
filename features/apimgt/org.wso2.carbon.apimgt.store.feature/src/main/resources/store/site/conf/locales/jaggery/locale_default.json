@@ -121,12 +121,15 @@
     "noOfAPICalls": "Number of API Calls",
     "faultCount" : "Faulty API Invocation Count",
     "faultyInvocationTitle" : "Faulty Invocations per Application",
-    "callType" : "API Usage from Resource Path per Application",
+    "faultyInvocations" : "Faulty Invocations",
+    "callType" : "Resource Usage",
     "callTypeTitle" : "API Usage from Resource Path",
     "registeredUseres" : "Registered Users For Applications",
     "topUsersTitle" : "Top Users For Applications",
-    "topUsersDropDown" : "Top Users per Application",
-    "apiUsage" : "API Usage per Application",
+    "usersTitle" : "Users For Applications",
+    "topUsersDropDown" : "Top Users",
+    "apiUsage" : "API Usage",
+    "apiUsageTitle" : "API Usage per Application",
     "subscriber": "Subscriber",
     "callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
 
@@ -260,9 +263,12 @@
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
     "provideAccessToken" : "If you already have an access token please provide it below.",
     "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
-
+    
+    "goBack" : "Go Back",
+    "applicationList" : "Application List",
+    "addApplication" : "Add Application",
     "activePage":"Active Page",
     "pagination":"Pagination"
-
+  
     
 }

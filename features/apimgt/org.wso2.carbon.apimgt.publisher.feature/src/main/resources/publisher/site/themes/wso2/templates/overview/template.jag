@@ -102,13 +102,13 @@
             <%if(api.wsdl!=''){%>
             <tr>
                 <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a href="site/themes/wso2/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
+                <td id="wsdl"><a title="<%=i18n.localize("wsdl")%>" href="site/themes/wso2/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
             </tr>
             <%}
             if(api.wadl!=''){%>
             <tr>
                 <td><%=i18n.localize("wadl")%></td>
-                <td id="wadl"><a href="<%= encode.forHtmlAttribute(api.wadl)%>" target="_blank"><%= encode.forHtml(api.wadl)%></a></td>
+                <td id="wadl"><a title="<%=i18n.localize("wadl")%>" href="<%= encode.forHtmlAttribute(api.wadl)%>" target="_blank"><%= encode.forHtml(api.wadl)%></a></td>
             </tr>
             <%}%>
             <tr>
@@ -140,7 +140,7 @@
              <tr>
                 <td><%=i18n.localize("busiOwner")%></td>
                 <td id="bizOwnerData"><%=api.bizOwner%> <% if(api.bizOwnerMail!=''){%>
-                [<a href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+                [<a title="mailto" href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
                 <%}%>
                 </td>
             </tr>
@@ -149,7 +149,7 @@
              <tr>
                 <td><%=i18n.localize("techOwner")%></td>
                 <td id="techOwnerData"><%=api.techOwner%><% if(api.techOwnerMail!=''){%>
-                [<a href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+                [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=api.techOwnerMail%></a>]
                 <%}%>
                 </td>
             </tr>

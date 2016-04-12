@@ -52,7 +52,6 @@ var reqUrl = request.getRequestURI();
   <!-- Recently Added APIs -->
   
 <div class="page-header">
-<div class="page-title">
      <%
 
              var tagDisplayName = "";
@@ -77,7 +76,7 @@ var reqUrl = request.getRequestURI();
             	}
              } else{
          %>
-    			<h2>APIs</h2>
+    			<h1>APIs</h1>
    			 <% } %>
    			 </div>
 </div>
@@ -160,9 +159,9 @@ var reqUrl = request.getRequestURI();
                 </div>
                 <%} else {%>
                 
-                	<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
                             <div class="white-wrapper add-margin-bottom-4x">
-                            	<!--<%if(true) {%>
+                            	<%if(outputs.isMonetizationEnabled) {%>
 				                    <div class="ribbon-wrapper">
 				                    <%if (api.monetizationCategory.equalsIgnoreCase("Freemium")) { %>
 				                        <div class="ribbon-yellow">FREEMIUM</div>
@@ -172,7 +171,7 @@ var reqUrl = request.getRequestURI();
 				                        <div class="ribbon-blue">PAID</div>
 				                    <%}%>
 				                    </div>
-				                <%}%>-->
+				                <%}%>
                                 <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
                                 		<div class="square-element setbgcolor">
@@ -186,21 +185,21 @@ var reqUrl = request.getRequestURI();
                                     		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
                                     	</div>
                                     <% } %>
-                                    <div class="after">
-                                        <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
-                                    <span class="fw-stack fw-lg">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-view fw-stack-1x"></i>
-                                    </span>
-                                        </a>
-                                    </div>
+                                     <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
+	                                    <div class="after">                                       
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>          
+	                                    </div>
+	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p><%=api.apiOwner%></p>
-                                    <%} else if(api.apiBusinessOwner != null) {%>
+                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
                                     	<p><%=api.apiBusinessOwner%></p>
                                     <%} else { %>
                                     	<p><%=api.provider%></p>
@@ -321,13 +320,13 @@ var reqUrl = request.getRequestURI();
 
             <% if(totalLength == 0) {
                          if (request.getParameter("query") == null) {  %>
-				            <div class="message message-info">
-				                <strong><%=i18n.localize("noAPIMsg")%></strong>
-				            </div>
+                         	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIMsg")%></h4>
+						    </div>
 			            <%   } else {    %>
-			            <div class="message message-info">
-			                <strong><%=i18n.localize("noSearchResultMsg")%></strong>
-			            </div>
+			            	<div class="message message-info">
+						    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noSearchResultMsg")%></h4>
+						    </div>
 			            <%
 			                         }
                       }

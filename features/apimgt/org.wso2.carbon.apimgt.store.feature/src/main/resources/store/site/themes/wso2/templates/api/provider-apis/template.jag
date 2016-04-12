@@ -1,14 +1,14 @@
 <% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
 <%  
     var owner="";
-    if(outputs.apiBizOwner != null){ owner = outputs.apiBizOwner }
+    if(outputs.apiBizOwner != null) { owner = outputs.apiBizOwner }
     else if(outputs.apiOwner != null){ owner =outputs.apiOwner }
 
 %>
-<%if(outputs.apiOwner!=null){%>
-<div id="recently-added" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("moreAPI")%>  '<%= owner %>'</div>
-  <div class="panel-body">
+<%if(outputs.apiOwner!=null && outputs.apis && outputs.apis.length > 0){%>
+  <h3><%=i18n.localize("moreAPI")%>  '<%= owner %>'</h3>
+  <div class="page-content">
+  	<div class="row">
     <%
     var urlPrefix;
     var tenant=request_tenant;
@@ -21,32 +21,46 @@
             api = apis[i];
             thumbURL = api.thumbURL;
             if(thumbURL && thumbURL.indexOf("images/") == 0) {
-                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+                thumbURL = null;
             } else {
                 thumbURL = jagg.getRegistryPath(thumbURL);
             }
             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version +
                    "&provider=" + api.provider+ urlPrefix;
     %>
-        <%if(i){ %><hr /><% } %>
-        <div class="row">
-          <div class="col-md-4">
-            <a href="<%=path%>" title="<%=i18n.localize("apiThumb")%>" >
-              <img src="<%=thumbURL%>" width="70px" alt="<%=i18n.localize("apiThumb")%>" />
-            </a>
-          </div>
-          <div class="col-md-8">
-            <a href="<%=path%>" >      
-            <strong class="fade-out"><%=api.name%>-<%=api.version%></strong>
-            </a>
-            <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%= api.rating %>" />
-          </div>
-        </div>   
-    <%  }
-    }else{ %>        
-        <div class="text-muted" style="padding:15px">No other APIs from this provider.</div>  
-    <%}%>
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+    			<div class="white-wrapper">
+                                <div class="thumbnail icon">
+                                	<% if(thumbURL == null) { %>
+                                		<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a href="" title="<%=i18n.localize("name")%>" class="api-name"><%=api.name%></a>
+											</div>
+										</div> 
+                                    <% } else { %>
+                                    	<div class="square-element">
+                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
+                                    	</div>
+                                    <% } %>
+                                     <a href="<%=path%>" title="<%=i18n.localize("browse")%>">
+                                     	<div class="after">                                       
+		                                    <span class="fw-stack fw-lg">
+		                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+		                                    <i class="fw fw-view fw-stack-1x"></i>
+		                                    </span>		                                        
+		                                    </div>
+		                               </a>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.name%>-<%=api.version%></a></h4>
+                                    <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%= api.rating %>" /> 
+                                </div>
+                            </div>
+               </div>
+    <%  }} %>
+    </div>
   </div>
-</div>
+
 <%}%>
 <% }); %>

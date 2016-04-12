@@ -47,6 +47,7 @@
     "settings":"Settings",
 
     "tierManagement":"Throttling Tiers",
+    "manageAlertTypes" : "Manage Alert Types",
     "tierName":"Name",
     "tierAddTitle":"Add Tier",
     "tierEditTitle":"Edit Tier",
@@ -69,6 +70,15 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
+    "deny":"Deny",
+    "abnormalBackendTime": "Abnormal backend time",
+    "abnormalResponseTime":"Abnormal response time",
+    "abnormalRequestsPerMin":"Abnormal request counts",
+    "RequestPatternChanged":"Abnormal resource access pattern",
+    "UnusualIPAccessAlert":"Unseen source IP access",
+    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
+    "FrequentTierHittingAlert":"Frequent tier limit hitting",
+    "AbnormalTierUsage":"Abnormal API usage",
+    "healthAvailabilityPerMin":"Availability of APIs"
 
 }

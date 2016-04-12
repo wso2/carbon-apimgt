@@ -74,9 +74,10 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <%  } %>
     <% } %>
     <% if(empty) { %>
-    <div class="alert alert-info" style="margin-bottom:10px">
-    <i class="fa fa-info"></i> &nbsp;&nbsp; No documents have been associated with this API so far. 
-    </div>  
+    <div class="message message-info">
+        <h4><i class="icon fw fw-info"></i>No Documents Found</h4>
+        <p>No documents have been associated with this API so far.</p>
+    </div>    
     <% } %>
 </div>
 <% }); %>

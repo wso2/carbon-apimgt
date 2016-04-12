@@ -116,7 +116,7 @@ var responsiveTextRatio = 0.2,
                     input.val(log);
                 } else {
                     if (log) {
-                        alert(log);
+                        //alert(log);
                     }
                 }
             });

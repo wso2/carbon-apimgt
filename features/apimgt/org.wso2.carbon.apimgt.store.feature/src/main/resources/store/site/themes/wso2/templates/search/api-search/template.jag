@@ -2,19 +2,34 @@
 var query=request.getParameter("query");
 var tenant = jagg.getTenantDomain();
 %>
-<div class="form-group">
-  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+
+<form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
+  <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
-      <input type="text" class="form-control appm-content-search" placeholder="Search...">
+      <input type="text" class="form-control appm-content-search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("searchAPI")%>...">
       <div class="input-group-btn">
-        <button class="btn btn-default wrap-input-right" type="button" title="Search">
+        <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
           <i class="fw fw-search" aria-hidden="true"></i>
-        </button>
-      </div>
+        </button> 
+      </div>     
+        
+      <div id="apiSearchHelp" class="hide help-popover-content" >
+            <ol>
+                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+            </ol>
+        </div>
+      <%if(tenant != null){ %>
+        <input type="hidden" class="span5" name="tenant" value="<%= tenant %>" />
+        <%}%> 
     </div><!-- /input-group -->
   </div>
-</div>
-
+</form>
 <!-- div class="row">
   <div class="col-md-6 api-search">
     <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
@@ -44,4 +59,5 @@ var tenant = jagg.getTenantDomain();
   <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> Search Options</a>
 </div>
 </div -->
+
 <% }); %>
