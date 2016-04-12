@@ -144,23 +144,6 @@ public class APISecurityConstants {
         return errorDescription;
     }
 
-    public static final String API_SECURITY_CONFIGURATION = "APIConsumerAuthentication.";
-    public static final String API_SECURITY_AUTHENTICATOR =
-            API_SECURITY_CONFIGURATION + "Authenticator";
-    public static final String API_SECURITY_OAUTH_HEADER =
-            API_SECURITY_CONFIGURATION + "OAuthHeader";
-    public static final String API_SECURITY_CONSUMER_KEY_HEADER_SEGMENT =
-            API_SECURITY_CONFIGURATION + "KeyHeaderSegment";
-    public static final String API_SECURITY_CONSUMER_KEY_SEGMENT_DELIMITER =
-            API_SECURITY_CONFIGURATION + "KeySegmentDelimiter";
-    public static final String API_SECURITY_OAUTH_HEADER_SPLITTER =
-            API_SECURITY_CONFIGURATION + "OAuthHeaderSplitter";
-    
-    public static final String API_SECURITY_CONTEXT_HEADER =
-            API_SECURITY_CONFIGURATION + "SecurityContextHeader";
-    public static final String API_SECURITY_REMOVE_OAUTH_HEADERS_FROM_OUT_MESSAGE =
-            API_SECURITY_CONFIGURATION + "RemoveOAuthHeadersFromOutMessage";
-
     public static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
     public static final String API_SECURITY_NS_PREFIX = "ams";
     

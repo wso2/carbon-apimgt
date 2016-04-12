@@ -1,6 +1,6 @@
 {
     "theme" : {
-        "base" : "fancy"
+        "base" : "wso2"
     },
     "context" : "/store",
     "showPublicStoreURL":true,

@@ -2,20 +2,11 @@
 
     <%
         var i, tag, tags = outputs.tags, length = tags.length;
-        var urlPrefix;
         var tenant=request_tenant;
-        urlPrefix = jagg.getTenantURLPrefix("&");
+        var urlPrefix = jagg.getTenantURLPrefix("&");
 
         function getThumbnailUrl(tag){
-            
-            var urlPrefix = "";
-            var tenantDomain = jagg.getTenantDomain();
-            if (tenantDomain == "carbon.super"){
-                tenantDomain = "";
-            } else {
-                urlPrefix = "/t/";
-            }
-			if(tag.isThumbnailExists){
+            if(tag.isThumbnailExists){
                 return tag.thumbnailUrl;
             }else{
                 return jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-group-default.png"));
@@ -43,8 +34,8 @@
                             %>
                             <li>
                                 <div class="thumbnail cat-thumb">
-                                    <a href="<%=path%>" >
-                                        <img width="100" height="100" src="<%=getThumbnailUrl(tag)%>">
+                                    <a href="<%=path%>" title="<%=i18n.localize("apiThumb")%>" >
+                                        <img width="100" height="100" src="<%=getThumbnailUrl(tag)%>" alt="<%=i18n.localize("apiThumb")%>">
                                     </a>
                                         
                                     <div><a title="<%=tag.name%>" class="link-to-api" href="<%=path%>" ><%=tagName%></a></div>

@@ -35,9 +35,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-//import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-//import org.wso2.carbon.apimgt.tier.cache.stub.TierCacheServiceStub;
+import org.wso2.carbon.apimgt.tier.cache.stub.TierCacheServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 
@@ -77,11 +77,11 @@ public class TierCacheInvalidationClient {
     }
 
     public void clearCache(String tenantDomain, String serverURL, String cookie) throws AxisFault, RemoteException {
-     //   TierCacheServiceStub tierCacheServiceStub;
+        TierCacheServiceStub tierCacheServiceStub;
 
         ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-       // tierCacheServiceStub = new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
-        ServiceClient client = null;//tierCacheServiceStub._getServiceClient();
+        tierCacheServiceStub = new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
+        ServiceClient client = tierCacheServiceStub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
         options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
@@ -89,7 +89,7 @@ public class TierCacheInvalidationClient {
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
 
-        //tierCacheServiceStub.invalidateCache(tenantDomain);
+        tierCacheServiceStub.invalidateCache(tenantDomain);
     }
 
     private String login(String serverURL, String userName, String password) throws AxisFault {

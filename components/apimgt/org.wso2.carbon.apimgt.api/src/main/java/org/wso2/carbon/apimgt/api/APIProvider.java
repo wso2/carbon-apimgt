@@ -552,4 +552,5 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
+
 }

@@ -69,8 +69,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private String signatureAlgorithm = SHA256_WITH_RSA;
 
-    private static final String SIGNATURE_ALGORITHM = "APIConsumerAuthentication.SignatureAlgorithm";
-
     private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<Integer, Key>();
     private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<Integer, Certificate>();
 
@@ -79,12 +77,12 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
 
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(ClaimsRetriever.CONSUMER_DIALECT_URI);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
         signatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(SIGNATURE_ALGORITHM);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_SIGNATURE_ALGORITHM);
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm) || SHA256_WITH_RSA.equals
                 (signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
@@ -93,7 +91,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         String claimsRetrieverImplClass =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(ClaimsRetriever.CLAIMS_RETRIEVER_IMPL_CLASS);
+                        getAPIManagerConfiguration().getFirstProperty(APIConstants.CLAIMS_RETRIEVER_CLASS);
 
         if (claimsRetrieverImplClass != null) {
             try {

@@ -9,7 +9,6 @@
         var jsonParameters = parse(prodJsonString);
         var clientName = jsonParameters.client_name;
 
-        log.info(jsonParameters.iProductionAuthAppContact);
         if(typeof(jsonParameters.contacts) !="undefined"  && jsonParameters.contacts){
             var iProductionAuthAppContact = jsonParameters.contacts;
         }else{

@@ -33,9 +33,9 @@ var jagg = jagg || {};
    jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
         if(params.title == undefined){
-            $('#messageModal h4.modal-title').html('API Store');
+            $('#messageModal h3.modal-title').html('API Store');
         }else{
-            $('#messageModal h4.modal-title').html(params.title);
+            $('#messageModal h3.modal-title').html(params.title);
         }
         $('#messageModal div.modal-body').html(params.content);
         if(params.buttons != undefined){
@@ -191,14 +191,12 @@ var jagg = jagg || {};
          );
         $('#username').focus();
         $('#loginErrorBox').show();
-        $('#loginBtn').attr('disabled', false);
         $('#loginErrorMsg').html('<strong>Session Timed Out </strong>- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ');
     };
 
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
             $('#loginErrorBox').show();
-            $('#loginBtn').attr('disabled', false);
             $('#loginErrorMsg').html('Username, Password fields are empty.');
             $('#username').focus();
             return;
@@ -214,7 +212,6 @@ var jagg = jagg || {};
                          }
                      } else {
                          $('#loginErrorBox').show();
-                         $('#loginBtn').attr('disabled', false);
                          $('#loginErrorMsg').html(result.message);
 
                      }

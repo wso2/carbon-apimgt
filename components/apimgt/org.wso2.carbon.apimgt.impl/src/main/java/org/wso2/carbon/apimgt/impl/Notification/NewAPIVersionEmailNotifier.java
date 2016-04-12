@@ -60,10 +60,10 @@ public class NewAPIVersionEmailNotifier extends Notifier {
                 .SUBSCRIBERS_PER_API);
         Map<String, String> emailProperties = null;
 
-        // Notifications are sent only if there is subscribers
+        // Notifications are sent only if there are subscribers
         if (subscriberList.size() > 0) {
 
-            Set<String> notifierSet=getNotifierSet(subscriberList);
+            Set<String> notifierSet=getNotifierSet(notificationDTO);
             notificationDTO.setNotifierSet(notifierSet);
             notificationDTO = loadMessageTemplate(notificationDTO);
 
@@ -108,14 +108,17 @@ public class NewAPIVersionEmailNotifier extends Notifier {
 
     /**
      *
-     * @param subscriberList
+     * @param notificationDTO
      * @return a set of email ids
      * @throws NotificationException
      */
-    public Set<String> getNotifierSet(Set<Subscriber> subscriberList) throws NotificationException {
+    public Set<String> getNotifierSet(NotificationDTO notificationDTO) throws NotificationException {
 
-        String claimsRetrieverImplClass = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getFirstProperty(ClaimsRetriever.CLAIMS_RETRIEVER_IMPL_CLASS);
+        Set<Subscriber> subscriberList = (Set<Subscriber>) notificationDTO.getProperty(NotifierConstants
+                .SUBSCRIBERS_PER_API);
+
+        String claimsRetrieverImplClass = (String) notificationDTO.getProperty(NotifierConstants
+                .CLAIMS_RETRIEVER_IMPL_CLASS);
         ClaimsRetriever claimsRetriever = null;
         Set<String> emaiset = new HashSet<String>();
 
@@ -137,7 +140,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         } catch (InstantiationException e) {
             throw new NotificationException("Error while retrieving Email Claims ", e);
         } catch (ClassNotFoundException e) {
-            throw new NotificationException("Error while retrieving Email Claims ", e);
+            throw new NotificationException("Cannot find claimsRetrieverImplClass ", e);
         } catch (APIManagementException e) {
             throw new NotificationException("Error while retrieving Email Claims ", e);
         }
@@ -208,8 +211,8 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         APIIdentifier newApi = (APIIdentifier) notificationDTO.getProperties().get(NotifierConstants.NEW_API_KEY);
 
         String title = (String) notificationDTO.getProperty(NotifierConstants.TITLE_KEY);
-        title = title.replaceAll("\\$1", api.getApiName());
-        title = title.replaceAll("\\$2", api.getVersion());
+        title = title.replaceAll("\\$1", newApi.getApiName());
+        title = title.replaceAll("\\$2", newApi.getVersion());
 
         // Getting the message template from registry file
         String content = "";
