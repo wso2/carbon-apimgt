@@ -280,7 +280,7 @@ public class SQLConstants {
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
             "   API.API_TIER," +
-            "   API.API_PROVIDER" +      
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -2096,7 +2096,7 @@ public class SQLConstants {
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN) \n" +
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    
+
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
@@ -2347,8 +2347,13 @@ public class SQLConstants {
 				+ " where API.CONTEXT= ? AND API.API_VERSION = ?"
 				+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN"
 				+ " ORDER BY AUM.URL_MAPPING_ID";
-
-
-
-	}
+        public static final String ADD_BLOCK_CONDITIONS_SQL =
+                "INSERT INTO `AM_BLOCK_CONDITIONS` (`TYPE`,`VALUE`,`ENABLED`,`DOMAIN`) VALUES (?,?,?,?)";
+        public static final String GET_BLOCK_CONDITIONS_SQL =
+                "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+        public static final String UPDATE_BLOCK_CONDITION_STATE_SQL =
+                "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
+        public static final String DELETE_BLOCK_CONDITION_SQL =
+                "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `CONDITION_ID`=?";
+    }
 }
