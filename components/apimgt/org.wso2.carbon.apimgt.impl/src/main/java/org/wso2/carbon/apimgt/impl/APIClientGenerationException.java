@@ -15,4 +15,8 @@ public class APIClientGenerationException extends Exception {
     public APIClientGenerationException(Throwable throwable) {
         super(throwable);
     }
+
+    public String getErrorMessage(){
+        return super.getMessage();
+    }
 }
