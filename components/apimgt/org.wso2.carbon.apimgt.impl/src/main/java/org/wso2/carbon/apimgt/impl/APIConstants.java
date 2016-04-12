@@ -303,7 +303,9 @@ public final class APIConstants {
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
     public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS +"JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS +"EnableJWTGeneration";
-    public static final String REMOVE_USERNAME_FROM_JWT = JWT_CONFIGS + "RemoveUserNameFromJWTForApplicationToken";
+    public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
+    public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
+    public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
