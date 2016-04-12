@@ -173,6 +173,7 @@
 	  </div>
         </div>
         </form>
+         <% if (docs.length > 0) { %>
             <table class="table table-striped table-hover table-bordered display data-table" id="docTable">
                 <thead>
                 <tr>
@@ -254,16 +255,15 @@
 			</td>
                     <%}%>
                 </tr>
-                <% } %>
-                <%
-                if (length == 0) {
-                %>
-                <tr><td colspan="6"><%=i18n.localize("noDocsMsg")%></td><td></td><td></td><td></td><td></td></tr>
-                <%
-                }
-                %>
+                <% } %>               
                 </tbody>
             </table>
+            <%} else { %>
+             	<div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("noDocsMsg")%></h4>
+                    <p><%=i18n.localize("noDocsMsgDesc") %></p>
+                </div>
+             <% } %>
 
 </div>
 <%});%>
