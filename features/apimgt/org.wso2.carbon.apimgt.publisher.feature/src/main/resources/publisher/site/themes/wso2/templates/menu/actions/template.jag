@@ -87,8 +87,9 @@
 	                        <%} %>
                         <%} %>
                         <% if(reqUrl.indexOf(infoUrl)>=0 ||reqUrl.indexOf(infoMappedUrl)>=0){%>
-	                        <%if(isCreatePermitted) {
-	                            var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+	                        <%
+	                        	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+	                        	if(isCreatePermitted) {	                            
 	                        %>
 	                        <li>
 	                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("editAPI")%>">
