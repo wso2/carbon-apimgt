@@ -100,23 +100,22 @@
 					</ul>				
 				</li>
 				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
-                                <ul class="nav nav-pills secondary-nav collapse in">
-                                	<li><a
-                                                                href="<%=loganalyzer%>"
-                                                                onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                                                                <i class="fw fw-task"></i>
-                                                                Dashboard</a></li>
-                                                                </li>
-                                						<li><a
-                                                                href="<%=liveLogViewer%>"
-                                                                onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                                                                <i class="fw fw-task"></i>
-                                                                Live log viewer</a></li>
-                                                                </ul>
-                                                                </li>
-                                					</ul>
-                                </li>
-			</ul>
+                    <ul class="nav nav-pills secondary-nav collapse in">
+                         <li><a href="<%=loganalyzer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Dashboard</a></li>
+                         </li>
+                         <li><a href="<%=liveLogViewer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Live log viewer</a>
+                         </li>
+                    </ul>
+                 </li>
+            </ul>
+           </li>
+	      </ul>
 		</div>
 		</div>
 </div>

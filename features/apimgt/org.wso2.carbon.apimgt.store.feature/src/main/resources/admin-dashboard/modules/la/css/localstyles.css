@@ -337,33 +337,6 @@ a.powered-by-logo {
 .tierSpecialCell{
     width:50px;
 }
-/*
-@media all and (max-width: 850px) {
-    #left{
-        display:block;
-        width:100%;
-    }
-}
-@media all and (max-width: 900px) {
-    div.login-container div.row{
-        padding:0 10px;
-    }
-    div.login-container div.span4{
-        width:94%;
-        margin:0;
-        display:block;
-        float:none;
-    }
-    #layout-base {
-        min-height:0;
-    }
-}
-@media all and (max-width: 1025px) {
-     .pagination a{
-        padding:0 9px;
-    }
-}
-*/
 .login-container{
     margin-top:20px;
 }
