@@ -30,7 +30,7 @@
 											</div>
 										</div> 
 									{{/if}}
-									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?") title="<%=i18n.localize("browse")%>"%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
+									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" title="<%=i18n.localize("browse")%>">
                                     	<div class="after">                                        
                                     		<span class="fw-stack fw-lg">
                                     			<i class="fw fw-circle-outline fw-stack-2x"></i>
