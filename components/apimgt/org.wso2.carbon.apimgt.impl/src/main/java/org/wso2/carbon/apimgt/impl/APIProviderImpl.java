@@ -41,21 +41,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -3864,5 +3850,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //remove from database
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
+    }
+
+    @Override
+    public List<BlockConditionsDTO> getBlockConditions() throws APIManagementException {
+        return apiMgtDAO.getBlockConditions(MultitenantUtils.getTenantDomain(username));
+    }
+
+    @Override
+    public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
+        return apiMgtDAO.updateBlockConditionState(conditionId,state);
+    }
+
+    @Override
+    public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
+        return apiMgtDAO.addBlockConditions(conditionType,conditionValue,MultitenantUtils.getTenantDomain(username));
+    }
+
+    @Override
+    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
+        return apiMgtDAO.deleteBlockCondition(conditionId);
+    }
+
+
+    public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
+        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+        return policy;
     }
 }
