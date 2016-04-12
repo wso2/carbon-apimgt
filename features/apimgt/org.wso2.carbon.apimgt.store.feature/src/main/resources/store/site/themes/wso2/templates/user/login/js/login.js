@@ -11,7 +11,7 @@ var login = login || {};
                          } else if(url){
                              window.location.href = url;
                          }else{
-                             window.location.reload();
+                             window.location.href = siteContext;
                          }
                      } else {
                          $('#loginErrorMsg').show();
@@ -97,7 +97,7 @@ $(document).ready(function () {
 	        if ($(this).attr("href")) {
 	        	$.cookie("goto_url",$(this).attr("href"));
 	        } else {
-	        	if ($('#tenant').val()) { 
+	        	if ($('#tenant').val() && $('#tenant').val() != "null") { 
 	        		$.cookie("goto_url",siteContext + '?tenant=' + $('#tenant').val());
 	        	} else {
 	        		$.cookie("goto_url",siteContext);
@@ -110,7 +110,7 @@ $(document).ready(function () {
 	         
 	         var loginUrl = siteContext + '/site/pages/login.jag';
 	         
-	         if ($('#tenant').val()) {
+	         if ($('#tenant').val() && $('#tenant').val() != "null") {
 	        	 loginUrl = siteContext + '/site/pages/login.jag?tenant='+$('#tenant').val();
 	         }
 	         

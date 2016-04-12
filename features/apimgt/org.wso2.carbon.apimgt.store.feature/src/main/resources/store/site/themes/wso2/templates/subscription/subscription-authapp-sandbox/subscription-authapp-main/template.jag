@@ -8,7 +8,6 @@
         var jsonParametersSandBox = parse(inputs.app.jsonParametersSandBox);
         var clientNameSandBox = jsonParametersSandBox.client_name;
 
-        log.info(jsonParametersSandBox.iSandboxAuthAppContact);
         if(typeof(jsonParametersSandBox.contact) !="undefined"  && jsonParametersSandBox.contact){
             var iSandboxAuthAppContact = jsonParametersSandBox.contact;
         }else{

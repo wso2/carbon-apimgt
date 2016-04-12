@@ -70,13 +70,13 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>
-        <a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl)%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
+        <a title="<%=i18n.localize("wsdl")%>" href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl)%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
         <h4><%=i18n.localize("wadl")%>:</h4>
     <p>
-        <a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl)%>" target="_blank"><%=api.wadl%></a>
+        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl)%>" target="_blank"><%=api.wadl%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
@@ -90,7 +90,7 @@
         <h4><%=i18n.localize("busiOwner")%>:</h4>
     <p>
         <%=api.bizOwner%> <% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
-           [<a href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+           [<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
         <%}%>
     </p>
     <% } %>
@@ -99,7 +99,7 @@
     <p>
         <%=api.techOwner%>
         <% if(api.techOwnerMail && api.techOwnerMail!=""){%>
-           [<a href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
         <%}%>
     </p>
     <% } %>
@@ -107,7 +107,7 @@
     <div class="btn-group" role="group" aria-label="...">
       <button type="button" class="btn btn-default share_links" ref="social"><%=i18n.localize("SocialSites")%></button>
       <button type="button" class="btn btn-default share_links" ref="embed"><%=i18n.localize("embed")%></button>
-      <a href="" id="api_mailto" class="btn btn-default"><i class="fa fa-envelope-o"></i> <%=i18n.localize("email")%></a>
+      <a title="<%=i18n.localize("email")%>" href="" id="api_mailto" class="btn btn-default"><i class="fa fa-envelope-o"></i> <%=i18n.localize("email")%></a>
     </div>
     <div class="row">    
     <div id="share_div_embed" class="share_dives col-sm-6" style="display:none">

@@ -1,0 +1,29 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("configure-alerts/domain/edit", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+
+        getOutputs:function (inputs) {            
+            var domainName = request.getParameter("domainName");
+            var mode = request.getParameter("mode");
+            var configurationName = request.getParameter("configurationName");
+            var domainDto = jagg.module("configure-alerts").getDomain(domainName);
+            var domainConfiguration = null;
+            if(mode==="edit" && configurationName != null){
+                domainConfiguration = jagg.module("configure-alerts").getDomainConfiguration(domainName,configurationName);
+            }
+
+            return{
+                "domainDto" : domainDto,
+                "domainConfiguration" : domainConfiguration
+            }       
+        }
+});
+%>
