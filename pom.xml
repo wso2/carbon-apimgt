@@ -946,7 +946,7 @@
         <carbon.apimgt.version>6.0.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.0.12-SNAPSHOT</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.0.12-alpha</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.5</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
@@ -1054,8 +1054,8 @@
         <!-- apache pdfbox version -->
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
-        <org.wso2.carbon.databridge.agent.version>5.0.12-SNAPSHOT</org.wso2.carbon.databridge.agent.version>
-        <event.processor.stub.version>2.0.13-SNAPSHOT</event.processor.stub.version>
+        <org.wso2.carbon.databridge.agent.version>5.0.12-alpha</org.wso2.carbon.databridge.agent.version>
+        <event.processor.stub.version>2.0.13-alpha</event.processor.stub.version>
 
     </properties>
 </project>
