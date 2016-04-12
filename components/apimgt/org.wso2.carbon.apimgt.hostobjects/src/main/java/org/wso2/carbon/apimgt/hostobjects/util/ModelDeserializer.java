@@ -29,7 +29,8 @@ import org.wso2.carbon.apimgt.hostobjects.util.Json;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+/*This is a temporary solution to convert swagger object to json object. This class will be deleted
+ once a fixed swagger parser version is released */
 public class ModelDeserializer extends JsonDeserializer<Model> {
     @Override public Model deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {

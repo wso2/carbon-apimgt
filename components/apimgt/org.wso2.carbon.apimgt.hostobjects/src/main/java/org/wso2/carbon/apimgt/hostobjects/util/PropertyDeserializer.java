@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-
+/*This is a temporary solution to convert swagger object to json object. This class will be deleted
+ once a fixed swagger parser version is released */
 public class PropertyDeserializer extends JsonDeserializer<Property> {
     Logger LOGGER = LoggerFactory.getLogger(PropertyDeserializer.class);
 

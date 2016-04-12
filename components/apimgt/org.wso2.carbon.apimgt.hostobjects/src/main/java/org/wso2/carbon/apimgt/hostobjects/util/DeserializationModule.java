@@ -9,7 +9,8 @@ import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
 import org.wso2.carbon.apimgt.hostobjects.util.*;
-
+/*This is a temporary solution to convert swagger object to json object. This class will be deleted
+ once a fixed swagger parser version is released */
 public class DeserializationModule extends SimpleModule {
 
     public DeserializationModule(boolean includePathDeserializer,
