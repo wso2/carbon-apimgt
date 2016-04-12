@@ -48,5 +48,20 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
+    "deny":"Deny",
+    "alerts":"Configure Alerts",
+    "templateName":"Template Name",
+    "configName":"Configuration Name",
+    "description":"Description",
+    "addConfiguration":"Add Configuration",
+    "editConfigurations":"Edit Configurations",
+    "domainTableColumnName":"Configuration Name",
+    "domainTableColumnDescription":"Description",
+    "templateType":"Template Type",
+    "actions":"Actions",
+    "common.button.edit":"Edit",
+    "common.button.delete":"Delete",
+     "schedulerConfiguration":"Scheduler Configuration",
+    "cronExpression":"Cron Expression",
+    "domains":"Domains"
 }
