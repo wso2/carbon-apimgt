@@ -1,29 +1,32 @@
 ###################################  macros  #######################################
-##
-###generate key
-#macro( getKey )##
-str:concat('app_${policy.getPolicyName()}_', app_key,'_key')##
-#end
-###generate rule
-#macro( getRule $policy)
-app_${policy.getPolicyName()}##
-#end
-<policy tier="app_$policy.getPolicyName()" level="app" name="#getRule($policy)">
-	<eligibilityQuery>
-		FROM RequestStream
-		SELECT '#getRule($policy)' AS rule, messageID, ( app_tier == '${policy.getPolicyName()}') AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
-		INSERT INTO EligibilityStream;
-	</eligibilityQuery>
-	<decisionQuery>	
-#if($quotaPolicy != "")
-		FROM EligibilityStream[isEligible==true AND rule == '#getRule($policy)']#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit()) 
-#if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
-		select throttle_key, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
-#else
-		select throttle_key, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
-#end
-		group by throttle_key
-		INSERT ALL EVENTS into ResultStream;
-#end
-	</decisionQuery>
-</policy>
+        ##
+        ###generate key
+        #macro( getKey )##
+        str:concat('app_${policy.getPolicyName()}_', app_key,'_key')##
+        #end
+        ###generate rule
+        #macro( getRule $policy)
+        app_${policy.getPolicyName()}##
+        #end
+
+        @Plan:name( #getRule($policy) )
+        @Plan:description(ExecutionPlan for #getRule($policy))
+        @Import('RequestStream:1.0.0')
+
+        Define stream RequestStream (messageID string, app_key string, app_tier string, subscription_key string, subscription_tier string, resource_key string, resource_tier string, user_id string, propertiesMap object);
+
+        @Export('GlobalThrottleStream:1.0.0')
+        define stream GlobalThrottleStream (throttle_key string, isThrottled bool);
+
+        FROM RequestStream
+        SELECT '#getRule($policy)' AS rule, messageID, ( #getRule($policy) == $policy.getPolicyName()) AS isEligible, app_key AS throttle_key
+        INSERT INTO EligibilityStream;
+
+        FROM EligibilityStream[isEligible==true AND rule == $policy.getPolicyName() ]#window.time( $quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit())
+        select throttle_key, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled
+        group by throttle_key
+        INSERT ALL EVENTS into ResultStream;
+
+        from ResultStream#throttler:emitOnStateChange(throttle_key, isThrottled)
+        select *
+        insert into GlobalThrottleStream;

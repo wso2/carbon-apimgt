@@ -3688,7 +3688,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             for (String flowString : executionFlows) {
                 if (!(policy instanceof GlobalPolicy)) {    //exclude global level policies deploying to GlobalCEP
-                    manager.deployPolicyToGlobalCEP(flowString);
+                    manager.deployPolicyToGlobalCEP(policy.getPolicyName(),flowString);
                 }
                 //manager.deployPolicyToGatewayManager(flowString);
             }
@@ -3750,7 +3750,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
              */
             for (String flowString : executionFlows) {
                 if (!(policy instanceof GlobalPolicy)) { // Exclude global level policies from deploying to GlobalCEP
-                    deploymentManager.deployPolicyToGlobalCEP(flowString);
+                    deploymentManager.deployPolicyToGlobalCEP(policy.getPolicyName(), flowString);
                 }
                 deploymentManager.deployPolicyToGatewayManager(flowString);
             }
