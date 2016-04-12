@@ -919,6 +919,23 @@
                 <version>${swagger.codegen.version}</version>
             </dependency>
 
+            <!-- Siddhi Extensions -->
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-query-api</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-core</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.event-processing</groupId>
+                <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
+                <version>${event.processor.stub.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -942,6 +959,7 @@
         <carbon.multitenancy.version>4.5.1</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
+        <siddhi.version>3.0.5</siddhi.version>
 
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
@@ -1037,6 +1055,7 @@
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
         <org.wso2.carbon.databridge.agent.version>5.0.12-SNAPSHOT</org.wso2.carbon.databridge.agent.version>
+        <event.processor.stub.version>2.0.13-SNAPSHOT</event.processor.stub.version>
 
     </properties>
 </project>

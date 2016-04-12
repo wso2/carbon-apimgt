@@ -22,6 +22,8 @@ public class SubscriptionPolicy extends Policy {
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private byte[] customAttributes;
+    private boolean stopOnQuotaReach;
+    private String billingPlan;
 
     public SubscriptionPolicy(String name) {
         super(name);
@@ -42,8 +44,22 @@ public class SubscriptionPolicy extends Policy {
     public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
-    
-    
+
+    public String getBillingPlan() {
+        return billingPlan;
+    }
+
+    public void setBillingPlan(String billingPlan) {
+        this.billingPlan = billingPlan;
+    }
+
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
+    }
 
     public byte[] getCustomAttributes() {
 		return customAttributes;

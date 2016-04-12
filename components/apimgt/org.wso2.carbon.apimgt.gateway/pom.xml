@@ -31,11 +31,6 @@
 
     <dependencies>
         <dependency>
-            <artifactId>org.wso2.carbon.event.throttle.core</artifactId>
-            <groupId>org.wso2.carbon.event-processing</groupId>
-            <version>2.0.13-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.databridge.agent</artifactId>
         </dependency>

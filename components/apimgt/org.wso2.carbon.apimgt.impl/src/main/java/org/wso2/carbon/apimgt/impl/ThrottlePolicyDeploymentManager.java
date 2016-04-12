@@ -18,17 +18,6 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -47,13 +36,19 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
-import org.wso2.carbon.event.throttle.core.ThrottlerService;
-import org.wso2.carbon.event.throttle.core.exception.ThrottleConfigurationException;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 
 public class ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManager.class);
     private static ThrottlePolicyDeploymentManager instance;
-    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
     private Map<String, Environment> environments;
 
     private ThrottlePolicyDeploymentManager() {
@@ -88,13 +83,9 @@ public class ThrottlePolicyDeploymentManager {
                 log.debug("deploy policy to global event processor : \n" + policyQuery );
             }
     //        deployPolicyInGlobalThrottleEngine(fileName,policyQuery);
-            throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
+            //throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg , e);
-            throw new APIManagementException(msg);
-        } catch (ThrottleConfigurationException e) {
-            String msg = "Error while deploying policy to global event processor: ";
             log.error(msg , e);
             throw new APIManagementException(msg);
         }

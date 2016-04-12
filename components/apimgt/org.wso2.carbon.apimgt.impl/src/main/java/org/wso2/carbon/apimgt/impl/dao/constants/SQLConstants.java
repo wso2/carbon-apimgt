@@ -2094,14 +2094,14 @@ public class SQLConstants {
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
-                    " RATE_LIMIT_TIME_UNIT) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-
+                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN) \n" +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
-                    " RATE_LIMIT_TIME_UNIT,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2210,6 +2210,8 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ? " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
@@ -2223,6 +2225,8 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
                     " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
