@@ -1,0 +1,21 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("configure-alerts/domain/manage", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+
+        getOutputs:function (inputs) {               
+            var domainName = request.getParameter("domainName");
+            var result = jagg.module("configure-alerts").getDomainSpecificConfigurationsInfo(domainName);
+            return{
+                "configurationInfo" : result
+            }       
+        }
+});
+%>

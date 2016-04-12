@@ -78,8 +78,7 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><div class="message message-warning"><h4><i class="icon fw fw-warning"></i> Not Configured</h4><p>' +i18n.t('errorMsgs.checkBAMConnectivity')+ '</p></div></span><div class="add-margin-top-5x"><img class="img-responsive" src="../themes/wso2/images/statsThumb.png" alt="Stats Disabled"></div></div>'));
                 }
             }
             else {

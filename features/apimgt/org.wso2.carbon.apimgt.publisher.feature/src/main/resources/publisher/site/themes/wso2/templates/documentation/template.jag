@@ -49,9 +49,9 @@
 		        </div>
 
 		        <div class="control-group">
-		            <label class="control-label"<%=i18n.localize("summary")%></label>
+		            <label class="control-label"><%=i18n.localize("summary")%><span class="requiredAstrix">*</span></label>
 		            <div class="controls">
-		                <textarea  id="summary" class="form-control" rows="3" style="width:100%" title="summary"></textarea>
+		                <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
 		            </div>
 		        </div>
 		        <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
@@ -258,7 +258,7 @@
                 <%
                 if (length == 0) {
                 %>
-                <tr><td colspan="6"><%=i18n.localize("noDocsMsg")%></td></tr>
+                <tr><td colspan="6"><%=i18n.localize("noDocsMsg")%></td><td></td><td></td><td></td><td></td></tr>
                 <%
                 }
                 %>

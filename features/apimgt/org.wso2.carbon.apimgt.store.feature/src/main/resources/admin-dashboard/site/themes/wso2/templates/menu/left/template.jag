@@ -134,6 +134,11 @@
 					        <%= "Global Policies" %></a></li>
 
 					     <%}%>
+						<li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/alerts-domain-list") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("alerts") %></a></li>
 												<%
 						var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 						var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();

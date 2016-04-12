@@ -117,7 +117,6 @@
     "noOfAPICalls": "Number of API Calls",
     "faultCount" : "Faulty API Invocation Count",
     "faultyInvocationTitle" : "Faulty Invocations per Application",
-    "manageAlertTypes" : "Manage Alerts",
     "faultyInvocations" : "Faulty Invocations",
     "callType" : "Resource Usage",
     "callTypeTitle" : "API Usage from Resource Path",
@@ -261,7 +260,17 @@
     
     "goBack" : "Go Back",
     "applicationList" : "Application List",
-    "addApplication" : "Add Application"
+    "addApplication" : "Add Application",
+    "manageAlertTypes": "Manage Alert Types",
+    "abnormalBackendTime": "Abnormal backend time",
+    "abnormalResponseTime":"Abnormal response time",
+    "abnormalRequestsPerMin":"Abnormal request counts",
+    "RequestPatternChanged":"Abnormal resource access pattern",
+    "UnusualIPAccessAlert":"Unseen source IP access",
+    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
+    "FrequentTierHittingAlert":"Frequent tier limit hitting",
+    "AbnormalTierUsage":"Abnormal API usage",
+    "healthAvailabilityPerMin":"Availability of APIs"
 
    
 }
