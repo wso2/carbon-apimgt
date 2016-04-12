@@ -920,7 +920,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
                 <artifactId>swagger-codegen</artifactId>
-                <version>2.1.5.wso2v1</version>
+                <version>2.1.6.wso2v1</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>

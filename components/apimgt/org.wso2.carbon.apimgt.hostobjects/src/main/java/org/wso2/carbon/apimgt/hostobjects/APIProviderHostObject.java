@@ -4717,7 +4717,7 @@ import java.util.regex.Pattern;
         Operation operation;
         APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+        String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
         String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
         tokenUrl = tokenUrl != null ? tokenUrl.replace("'", "") : null;
 
