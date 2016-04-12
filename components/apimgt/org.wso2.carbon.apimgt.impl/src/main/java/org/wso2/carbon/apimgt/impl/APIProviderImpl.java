@@ -1545,7 +1545,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.CEPBasedThrottleHandler",

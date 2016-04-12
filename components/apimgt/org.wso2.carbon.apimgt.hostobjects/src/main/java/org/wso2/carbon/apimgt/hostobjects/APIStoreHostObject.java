@@ -2010,7 +2010,7 @@ public class APIStoreHostObject extends ScriptableObject {
         
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
         
         boolean isTenantFlowStarted = false;
         try {
