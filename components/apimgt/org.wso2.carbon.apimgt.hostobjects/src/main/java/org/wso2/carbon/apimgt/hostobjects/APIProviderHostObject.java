@@ -274,6 +274,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return row;
     }
 
+
     /**
      * This method is used to update the permission cache from jaggery side. user name should be passed as a parameter
      *
@@ -460,8 +461,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20
-                    .getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates =
+                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -1747,7 +1748,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         String uriTempVal = (String) resource.get("url_pattern");
                         uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
                         template.setUriTemplate(uriTempVal);
-                        template.setHTTPVerb((String) mapEntry.getKey());
+                        template.setHTTPVerb((String)mapEntry.getKey());
                         String authType = (String) mapEntryValue.get("auth_type");
                         if (authType.equals("Application & Application User")) {
                             authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1762,7 +1763,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         template.setAuthType(authType);
                         template.setResourceURI(endpoint);
                         template.setResourceSandboxURI(sandboxUrl);
-                        Scope scope = APIUtil.findScopeByKey(scopeList, (String) mapEntryValue.get("scope"));
+                        Scope scope= APIUtil.findScopeByKey(scopeList,(String) mapEntryValue.get("scope"));
                         template.setScope(scope);
                         uriTemplates.add(template);
                     }
@@ -1770,7 +1771,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 //todo handle casting exceptions
                 api.setUriTemplates(uriTemplates);
                 //todo clean out the code.
-            } else {
+            }else{
                 //following is the old fashioned way of processing resources
                 NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
                 NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
@@ -1856,15 +1857,15 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setTransports(transport);
-        if (!"none".equals(inSequence)) {
+        if(!"none".equals(inSequence)){
             api.setInSequence(inSequence);
         }
-        if (!"none".equals(outSequence)) {
+        if(!"none".equals(outSequence)){
             api.setOutSequence(outSequence);
         }
 
         List<String> sequenceList = apiProvider.getCustomFaultSequences();
-        if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
+        if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
         api.setOldInSequence(oldApi.getInSequence());
@@ -1893,7 +1894,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
-            if ("digestAuth".equals(endpointAuthDigest)) {
+            if("digestAuth".equals(endpointAuthDigest)){
                 api.setEndpointAuthDigest(true);
             } else {
                 api.setEndpointAuthDigest(false);
@@ -1906,21 +1907,21 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
 
                 String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
-                        fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
+                        fileHostObject.getJavaScriptFile().getContentType(),apiProvider, api);
 
             } else if (oldApi.getThumbnailUrl() != null) {
                 // retain the previously uploaded image
                 api.setThumbnailUrl(oldApi.getThumbnailUrl());
             }
 
-            if (thumbUrl != null && !thumbUrl.isEmpty()) {
+            if(thumbUrl != null && !thumbUrl.isEmpty()){
                 try {
                     URL url = new URL(thumbUrl);
                     String imageType = url.openConnection().getContentType();
 
                     File fileToUploadFromUrl = new File("tmp/icon");
                     if (!fileToUploadFromUrl.exists()) {
-                        if (!fileToUploadFromUrl.createNewFile()) {
+                        if(!fileToUploadFromUrl.createNewFile()){
                             log.error("Unable to create new file under tmp/icon");
                         }
                     }
@@ -1939,8 +1940,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (apiData.get("swagger", apiData) != null) {
                 // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates = definitionFromSwagger20
-                        .getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                        String.valueOf(apiData.get("swagger", apiData)));
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -2128,95 +2129,100 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj) throws APIManagementException {
-        if (args == null || args.length == 0) {
-            handleException("Invalid input parameters.");
-        }
-
-        NativeObject tierData = (NativeObject) args[0];
-        boolean success = false;
-        String tierName = (String) tierData.get("tierName", tierData);
-        String permissionType = (String) tierData.get("permissiontype", tierData);
-        String roles = (String) tierData.get("roles", tierData);
-
-        try {
-            APIProvider apiProvider = getAPIProvider(thisObj);
-            apiProvider.updateTierPermissions(tierName, permissionType, roles);
-            return true;
-
-        } catch (APIManagementException e) {
-            handleException("Error while updating subscription status", e);
-            return false;
-        }
-
-    }
-
-    public static NativeArray jsFunction_getTierPermissions(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj) {
-        NativeArray myn = new NativeArray(0);
-        APIProvider apiProvider = getAPIProvider(thisObj);
-         /* Create an array with everyone role */
-        String everyOneRoleName = ServiceReferenceHolder.getInstance().getRealmService().
-                getBootstrapRealmConfiguration().getEveryOneRoleName();
-        String defaultRoleArray[] = new String[1];
-        defaultRoleArray[0] = everyOneRoleName;
-        try {
-            Set<Tier> tiers = apiProvider.getTiers();
-            Set<TierPermissionDTO> tierPermissions = apiProvider.getTierPermissions();
-            int i = 0;
-            if (tiers != null) {
-
-                for (Tier tier : tiers) {
-                    NativeObject row = new NativeObject();
-                    boolean found = false;
-                    for (TierPermissionDTO permission : tierPermissions) {
-                        if (permission.getTierName().equals(tier.getName())) {
-                            row.put("tierName", row, permission.getTierName());
-                            row.put("tierDisplayName", row, tier.getDisplayName());
-                            row.put("permissionType", row, permission.getPermissionType());
-                            String[] roles = permission.getRoles();
-                             /*If no roles defined return default role list*/
-                            if (roles == null || roles.length == 0) {
-                                row.put("roles", row, defaultRoleArray);
-                            } else {
-                                row.put("roles", row, permission.getRoles());
-                            }
-                            found = true;
-                            break;
-                        }
-                    }
-                     /* If no permissions has defined for this tier*/
-                    if (!found) {
-                        row.put("tierName", row, tier.getName());
-                        row.put("tierDisplayName", row, tier.getDisplayName());
-                        row.put("permissionType", row, APIConstants.TIER_PERMISSION_ALLOW);
-                        row.put("roles", row, defaultRoleArray);
-                    }
-                    myn.put(i, myn, row);
-                    i++;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error while getting available tiers", e);
-        }
-        return myn;
-    }
-
-    public static String jsFunction_getDefaultAPIVersion(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
-        String provider = args[0].toString();
-        provider = APIUtil.replaceEmailDomain(provider);
-        String apiname = args[1].toString();
-        String version = ""; // unused attribute
+    	if (args == null ||args.length == 0) {
+    		handleException("Invalid input parameters.");
+    	}
 
-        APIIdentifier apiid = new APIIdentifier(provider, apiname, version);
-        APIProvider apiProvider1 = getAPIProvider(thisObj);
+    	NativeObject tierData = (NativeObject) args[0];
+    	boolean success = false;
+    	String tierName = (String) tierData.get("tierName", tierData);
+    	String permissionType = (String) tierData.get("permissiontype", tierData);
+    	String roles = (String) tierData.get("roles", tierData);
+
+    	try {
+    		APIProvider apiProvider = getAPIProvider(thisObj);
+    		apiProvider.updateTierPermissions(tierName, permissionType, roles);
+    		return true;
+
+    	} catch (APIManagementException e) {
+    		handleException("Error while updating subscription status", e);
+    		return false;
+    	}
+
+    }
+
+    public static NativeArray jsFunction_getTierPermissions(Context cx, Scriptable thisObj,
+            Object[] args,
+            Function funObj) {
+    	 NativeArray myn = new NativeArray(0);
+         APIProvider apiProvider = getAPIProvider(thisObj);
+         /* Create an array with everyone role */
+         String everyOneRoleName = ServiceReferenceHolder.getInstance().getRealmService().
+			 		getBootstrapRealmConfiguration().getEveryOneRoleName();
+         String defaultRoleArray[] = new String[1];
+         defaultRoleArray[0] = everyOneRoleName;
+         try {
+        	 Set<Tier> tiers = apiProvider.getTiers();
+             Set<TierPermissionDTO> tierPermissions = apiProvider.getTierPermissions();
+             int i = 0;
+             if (tiers != null) {
+
+            	 for (Tier tier: tiers) {
+            		 NativeObject row = new NativeObject();
+            		 boolean found = false;
+            		 for (TierPermissionDTO permission : tierPermissions) {
+            			 if (permission.getTierName().equals(tier.getName())) {
+            				 row.put("tierName", row, permission.getTierName());
+            				 row.put("tierDisplayName", row, tier.getDisplayName());
+                             row.put("permissionType", row,
+                            		 permission.getPermissionType());
+                             String[] roles = permission.getRoles();
+                             /*If no roles defined return default role list*/
+                             if (roles == null ||  roles.length == 0) {
+                            	 row.put("roles", row, defaultRoleArray);
+                             } else {
+                            	 row.put("roles", row,
+                            		 permission.getRoles());
+                             }
+            				 found = true;
+            				 break;
+            			 }
+            		 }
+            		 /* If no permissions has defined for this tier*/
+            		 if (!found) {
+            			 row.put("tierName", row, tier.getName());
+            			 row.put("tierDisplayName", row, tier.getDisplayName());
+                         row.put("permissionType", row,
+                        		 APIConstants.TIER_PERMISSION_ALLOW);
+                         row.put("roles", row, defaultRoleArray);
+                     }
+            		 myn.put(i, myn, row);
+                     i++;
+            	 }
+             }
+         } catch (Exception e) {
+             log.error("Error while getting available tiers", e);
+         }
+         return myn;
+    }
+
+    public static String jsFunction_getDefaultAPIVersion(Context cx,Scriptable thisObj, Object[] args,
+                                                         Function funObj) throws APIManagementException {
+        String provider =args[0].toString();
+        provider=APIUtil.replaceEmailDomain(provider);
+        String apiname=args[1].toString();
+        String version=""; // unused attribute
+
+        APIIdentifier apiid=new APIIdentifier(provider,apiname,version);
+        APIProvider apiProvider1=getAPIProvider(thisObj);
         return apiProvider1.getDefaultVersion(apiid);
     }
 
-    public static boolean jsFunction_checkIfResourceExists(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj) throws APIManagementException {
+    public static boolean jsFunction_checkIfResourceExists(Context cx, Scriptable thisObj,
+                                                Object[] args,
+                                                Function funObj) throws APIManagementException {
         boolean result = false;
 
         if (args == null || args.length == 0) {
@@ -2226,7 +2232,7 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeObject apiData = (NativeObject) args[0];
 
         String providerName = String.valueOf(apiData.get("provider", apiData));
-        //        String providerNameTenantFlow = args[0].toString();
+//        String providerNameTenantFlow = args[0].toString();
         providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
@@ -2237,7 +2243,8 @@ public class APIProviderHostObject extends ScriptableObject {
         try {
             String tenantDomain = MultitenantUtils.
                     getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().
@@ -2246,7 +2253,7 @@ public class APIProviderHostObject extends ScriptableObject {
             result = apiProvider.checkIfAPIExists(apiId);
         } catch (Exception e) {
             handleException("Error occurred while checking if API exists " + apiName +
-                    "-" + version, e);
+                            "-" + version, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -2255,8 +2262,9 @@ public class APIProviderHostObject extends ScriptableObject {
         return result;
     }
 
-    public static NativeArray jsFunction_getScopes(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException {
+    public static NativeArray jsFunction_getScopes(Context cx, Scriptable thisObj,
+                                                Object[] args,
+                                                Function funObj) throws APIManagementException {
         NativeArray myn = new NativeArray(0);
 
         if (args == null || !isStringValues(args)) {
@@ -4133,7 +4141,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
 	/**
      * Retrieves custom sequences from registry
-     *
      * @param cx
      * @param thisObj
      * @param args
