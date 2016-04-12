@@ -86,6 +86,8 @@ public class APIHandlerServiceComponent {
                 //start web service throttle data retriever as separate thread and start it.
                 WebServiceThrottleDataRetriever webServiceThrottleDataRetriever = new WebServiceThrottleDataRetriever();
                 webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+
+                //Get blocking details from web service call.
                 WebServiceBlockConditionsRetriever webServiceBlockConditionsRetriever = new WebServiceBlockConditionsRetriever();
                 webServiceBlockConditionsRetriever.startWebServiceBlockConditionDataRetriever();
 
