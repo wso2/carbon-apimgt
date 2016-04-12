@@ -88,7 +88,8 @@ for(var i=0;i < outputs.tiers.length; i++){
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
       <div role="tabpanel" class="tab-pane fade" id="sdks">
-        Place holder. 
+     <button class="btn btn-primary" onclick="generateAndroidSdk('<%=application.name%>','android')" type="button">Android</button>
+          <button class="btn btn-primary" onclick="generateAndroidSdk('<%=application.name%>','java')" type="button">Java</button>
       </div>      
     </div>
   </div>
