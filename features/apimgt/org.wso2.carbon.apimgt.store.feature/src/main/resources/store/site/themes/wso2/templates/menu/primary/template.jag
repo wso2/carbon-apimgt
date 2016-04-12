@@ -2,9 +2,6 @@
   var tenant = jagg.getTenantDomain();
   var user = jagg.getUser();
   var reqUrl = request.getRequestURI();
-  
-  var log = new Log();
-  log.info(inputs.pagePath);
 %>
             <nav class="navigation">
                 <ul>
