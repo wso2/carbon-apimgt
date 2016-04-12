@@ -35,15 +35,15 @@
                                 		<div class="square-element setbgcolor">
 											<div class="api-name-icon"></div>
 											<div style="display: none">
-												<a href="" class="api-name"><%=api.name%></a>
+												<a href="" title="<%=i18n.localize("name")%>" class="api-name"><%=api.name%></a>
 											</div>
 										</div> 
                                     <% } else { %>
                                     	<div class="square-element">
-                                    		<img class="" src="<%=thumbURL%>" alt="">
+                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
                                     	</div>
                                     <% } %>
-                                     <a href="<%=path%>">
+                                     <a href="<%=path%>" title="<%=i18n.localize("browse")%>">
                                      	<div class="after">                                       
 		                                    <span class="fw-stack fw-lg">
 		                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -53,7 +53,7 @@
 		                               </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a href="<%=path%>"><%=api.name%>-<%=api.version%></a></h4>
+                                    <h4><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.name%>-<%=api.version%></a></h4>
                                     <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%= api.rating %>" /> 
                                 </div>
                             </div>
