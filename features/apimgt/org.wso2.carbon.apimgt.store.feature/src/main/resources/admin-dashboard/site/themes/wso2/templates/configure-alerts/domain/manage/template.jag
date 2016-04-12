@@ -1,0 +1,121 @@
+<% jagg.template("configure-alerts/domain/manage", function(inputs, outputs, jagg) { %>
+<%
+    var configurations = outputs.configurationInfo;
+    var domainName = request.getParameter("domainName");
+%>
+
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/bootstrap.min.css"))%>" rel="stylesheet">
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/common.css"))%>" rel="stylesheet">
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+    
+  
+
+    <div class="row">
+           
+
+            <div class="container col-md-12">
+            <h2><%=(request.getParameter("domainName"))%></h2>
+                <!--ul >
+                    <li class="title-section"><h2><%=(request.getParameter("domainName"))%></h2>
+                    </li>
+                </ul-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="container col-md-12 marg-top-20">
+                <div class="action-container">
+
+
+                    <button id="" type="button"
+                            onclick= "location.href = '<%=jagg.url('/alerts-domain-edit?domainName='+domainName)%>';"
+                            class="btn btn-default btn-add col-md-3 col-xs-12 pull-left">Add Configuration
+                    </button>
+                </div>
+                <br class="c-both"/>
+                <br class="c-both"/>
+
+
+                <%
+                    if (configurations != null && configurations.length > 0) {
+                %>
+
+                <table class="table table-bordered" id="tblConfigs">
+
+                    <thead>
+                    <tr>                      
+                        <th><%=i18n.localize("domainTableColumnName")%></th>
+                        <th><%=i18n.localize("domainTableColumnDescription")%></th>
+                        <th><%=i18n.localize("templateType")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                        for (var i in configurations) {
+                    %>
+                    <tr>
+                        <td>
+                            <%=configurations[i].getName()%>
+                        </td>
+                        <td><%=configurations[i].getDescription()%>
+                        </td>
+                        <td><%=configurations[i].getType()%>
+                        <td class="tcenter">
+                            <a onclick="deleteConfiguration('<%=configurations[i].getFrom()%>','<%=configurations[i].getName()%>')">
+                                <i class="glyphicon glyphicon-remove"></i>
+                                <%=i18n.localize("common.button.delete")%></a></td>
+                        
+                        <td class="tcenter">
+                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+configurations[i].getFrom()+"&configurationName="+configurations[i].getName()+"&templateType="+configurations[i].getType()+"&mode=edit")%>">
+                                <i class="glyphicon glyphicon-cog"></i>
+                                <%=i18n.localize("common.button.edit")%></a></td>
+                    </tr>
+                    <%
+                        }
+                    } else {
+
+                    %>
+
+                    <table class="styledLeft">
+                        <tbody>
+                        <tr>
+                            <td class="formRaw">
+                                <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
+                                    <tbody>
+                                    <tr>
+                                        <td class="leftCol-med" colspan="2">No Configurations to be listed
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+
+
+                    </table>
+                    <%
+                                }
+
+                    %>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="row pad-bot-50">
+            <div class="container col-md-8">
+                &nbsp;
+            </div>
+            <div class="container col-md-4">
+                &nbsp;
+            </div>
+            <br class="c-both "/>
+        </div>
+
+</div>
+
+
+<%});%>

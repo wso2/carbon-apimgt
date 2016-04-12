@@ -1,0 +1,7 @@
+<%
+jagg.initializer("configure-alerts/domain/list", {
+    preInitialize:function () {
+        jagg.addHeaderJS("tier/edit", "jagg", "templates/tier/edit/js/edit.js");
+    }
+});
+%>

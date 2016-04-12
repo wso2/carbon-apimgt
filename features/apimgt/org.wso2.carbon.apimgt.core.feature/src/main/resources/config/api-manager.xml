@@ -124,7 +124,7 @@
     -->
     <Analytics>
         <!-- Enable Analytics for API Manager -->
-        <!--Enabled>false</Enabled-->
+        <Enabled>false</Enabled>
 
         <!-- Server URL of the remote DAS/CEP server used to collect statistics. Must
              be specified in protocol://hostname:port/ format.

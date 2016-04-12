@@ -584,7 +584,7 @@
 
             			<tr>
 						 <td>
-						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="<%=i18n.localize("apiThumb")%>" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
 						 	<dl>
 							  <dt>&nbsp; <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a></dt>
 							  <dd>&nbsp; API Status : 
@@ -732,7 +732,7 @@
         <% if(lenS > 0){ %>
             <div id="scopePopupTarget" class="modal hide fade" tabindex="-1" role="dialog">
                     <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">ï¿½</button>
                     <h3><%=i18n.localize("selectScopes")%></h3>
                     </div>
                     <div class="modal-body">
