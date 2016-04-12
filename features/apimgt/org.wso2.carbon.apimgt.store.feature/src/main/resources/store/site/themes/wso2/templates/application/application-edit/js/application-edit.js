@@ -9,7 +9,7 @@ $(document).ready(function () {
       contentType: "application/x-www-form-urlencoded; charset=utf-8"
     });
 
-    var application = $("#application-name").val("");
+    //var application = $("#application-name").val("");
 
      $.validator.addMethod('validateSpecialChars', function(value, element) {
         return !/(["\'])/g.test(value);
@@ -36,6 +36,7 @@ $(document).ready(function () {
             description:description
         }, function (result) {
             if (result.error == false) {
+                debugger;
                 status=result.status;
                 var date = new Date();
                 date.setTime(date.getTime() + (3 * 1000));
@@ -49,7 +50,7 @@ $(document).ready(function () {
                         window.location.reload(true);
                     }});
                 } else{
-                    window.location.reload(true);
+                    window.location = "/store/site/pages/application.jag?name="+application;
                 }
 
             } else {
@@ -63,15 +64,7 @@ $(document).ready(function () {
 			allowed: 70,
 			warning: 50,
 			counterText: 'Characters left: '
-		});
-    $("#application-name").val('');
-
-    /*$('#application-name').keydown(function(event) {
-         if (event.which == 13) {
-               applicationAdd();
-            }
-        });*/
-   
+		}); 
 
 });
 

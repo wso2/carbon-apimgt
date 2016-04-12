@@ -21,7 +21,7 @@ for(var i=0;i < outputs.tiers.length; i++){
       <li role="presentation"><a href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
       <li role="presentation"><a href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>      
       <li role="presentation"><a href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
-      <li role="presentation"><a href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li>
+      <!-- li role="presentation"><a href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li -->
     </ul>
 
     <!-- Tab panes -->
