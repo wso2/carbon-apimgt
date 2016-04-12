@@ -38,7 +38,7 @@
       <span class="hidden-xs">View</span>
   </a>
   {{#if isActive}}
-  <a href="#" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-edit fw-stack-1x"></i>

@@ -17,10 +17,13 @@ $(document).ready(function () {
 
     $("#appAddForm").validate({
         submitHandler: function(form) {
-            applicationAdd();
+            updateApplication();
+            return false;
         }
     });
-    var applicationAdd = function(){
+
+
+    var updateApplication = function(){
         var application = $("#application-name").val();
         var tier = $("#appTier").val();
         var callbackUrl = $("#callback-url").val();
@@ -28,31 +31,17 @@ $(document).ready(function () {
         var goBack = $("#goBack").val();
         var description = $("#description").val();
         var status='';
-        jagg.post("/site/blocks/application/application-add/ajax/application-add.jag", {
-            action:"addApplication",
-            application:application,
+        var applicationOld = $("#application-name-old").val();
+        jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
+            action:"updateApplication",
+            applicationNew:application,
+            applicationOld:applicationOld,
             tier:tier,
-            callbackUrl:callbackUrl,
-            description:description
+            callbackUrlNew:callbackUrl,
+            descriptionNew:description
         }, function (result) {
-            if (result.error == false) {
-                debugger;
-                status=result.status;
-                var date = new Date();
-                date.setTime(date.getTime() + (3 * 1000));
-                $.cookie('highlight','true',{ expires: date});
-                $.cookie('lastAppName',application,{ expires: date});
-                $.cookie('lastAppStatus',status,{ expires: date});
-                if(goBack == "yes"){
-                    jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
-                    window.location.href = apiViewUrl + "?" +  apiPath;
-                    },cancelCallback:function(){
-                        window.location.reload(true);
-                    }});
-                } else{
-                    window.location = "/store/site/pages/application.jag?name="+application;
-                }
-
+            if (result.error == false) {                
+                window.location = "/store/site/pages/application.jag?name="+application;
             } else {
                 jagg.message({content:result.message,type:"error"});
             }

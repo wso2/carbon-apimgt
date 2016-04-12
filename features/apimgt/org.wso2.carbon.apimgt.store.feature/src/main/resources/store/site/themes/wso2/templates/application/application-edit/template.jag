@@ -12,6 +12,14 @@
  var i=0, tiers = outputs.tiers;
  var app = outputs.application;
 
+ var description = "";
+ var callbackUrl = "";
+ if(app.description != null ){
+  description = app.description; 
+ }
+ if(app.callbackUrl != null ){
+  callbackUrl = app.callbackUrl; 
+ }
  %>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
@@ -60,7 +68,7 @@
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].defaultTier){print("selected=\"selected\"")}%>>          
+          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>          
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>
@@ -76,7 +84,7 @@
   <div class="form-group">
     <label class="col-lg-2 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
     <div class="col-lg-4 col-md-6">
-        <input type="text" class="validInput form-control" name="callback-url"  id="callback-url"/>
+        <input type="text" class="validInput form-control" name="callback-url"  id="callback-url" value="<%= encode.forHtmlAttribute(callbackUrl)%>"/>
     </div>
     <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
     <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
@@ -84,7 +92,7 @@
   <div class="form-group">
     <label for="description" class="col-lg-2 col-md-3 control-label">Description</label>    
     <div class="col-lg-4 col-md-6">
-        <textarea id="description"  class="form-control" type="text" rows="3"></textarea>
+        <textarea id="description"  class="form-control" type="text" rows="3"><%= encode.forHtml(description)%></textarea>
     </div>
   </div>  
   <div class="form-group">
@@ -93,6 +101,7 @@
         <a href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
+  <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>      
 </form>
 </div>
 </div>

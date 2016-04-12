@@ -17,10 +17,10 @@ $(document).ready(function () {
 
     $("#appAddForm").validate({
         submitHandler: function(form) {
-            applicationAdd();
+            applicationEdit();
         }
     });
-    var applicationAdd = function(){
+    var applicationEdit = function(){
         var application = $("#application-name").val();
         var tier = $("#appTier").val();
         var callbackUrl = $("#callback-url").val();
@@ -36,7 +36,6 @@ $(document).ready(function () {
             description:description
         }, function (result) {
             if (result.error == false) {
-                debugger;
                 status=result.status;
                 var date = new Date();
                 date.setTime(date.getTime() + (3 * 1000));
