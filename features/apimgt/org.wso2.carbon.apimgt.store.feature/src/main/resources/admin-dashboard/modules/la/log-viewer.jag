@@ -6,7 +6,7 @@
 
     <!-- CSS -->
 
-    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="modules/la/css/style.css" type="text/css"/>
     
     <!--<link rel="stylesheet" type="text/css" href="/portal/libs/bootstrap_3.3.5/css/bootstrap.min.css" />-->
     <!--<link rel="stylesheet" type="text/css" href="/portal/libs/font-wso2_1.0.0/css/font-wso2.min.css" />-->
@@ -14,18 +14,11 @@
     <!--<link rel="stylesheet" type="text/css" href="/portal/extensions/themes/analytics/css/gadget.css" />-->
 
     <!-- JS -->
-    <script src="js/jquery-1.10.2.js"></script>
- 
-    <script src="js/d3.min.js"></script>
-    <script src="js/topojson.js"></script>
-    <script src="js/vega.js"></script>
-    <script src="js/VizGrammar.js"></script>
-    <script src="js/VizGrammarSettings.js"></script>
-    <script src="js/gadgetconf.js"></script>
-    <script src="js/carbon-analytics.js"></script>
-    <script src="js/moment.js"></script>
-    <script src="js/moment.min.js"></script>
-    <script src="js/Mustache.js"></script>
+    <script src="modules/la/js/jquery-1.10.2.js"></script>
+
+    <script src="modules/la/js/topojson.js"></script>
+    <script src="modules/la/js/carbon-analytics.js"></script>
+    <script src="modules/la/js/Mustache.js"></script>
 
 </head>
 <body bgcolor="#000000" >
@@ -48,6 +41,6 @@ var tenantId=  <%=tenantId%>;
 
 
 
-<script src="js/main.js"></script>
+<script src="modules/la/js/main.js"></script>
 </body>
 </html>

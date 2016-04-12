@@ -973,7 +973,7 @@ function AnalyticsClient() {
 AnalyticsClient.prototype.init = function (username, password, svrUrl) {
 
     if (svrUrl == null) {
-        this.serverUrl = "https://localhost:8243/laRestApi";
+        this.serverUrl = "https://localhost:8243/LogAnalyzerRestApi/1.0";
     } else {
         this.serverUrl = svrUrl;
     }

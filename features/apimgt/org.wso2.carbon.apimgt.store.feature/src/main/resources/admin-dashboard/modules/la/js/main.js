@@ -19,28 +19,8 @@ var client = new AnalyticsClient().init();
 var dataM = [];
 var filterdMessage;
 var template1 = "<ul class='template3'>{{#arr}}<li class='class'>{{class}}</li>{{/arr}}</ul>";
-function initialize() {
-    //fetch();
-    //$("#tblArtifactDeleted").html(getDefaultText());
-}
 
-function getDefaultText() {
-    return '<div class="status-message">' +
-        '<div class="message message-info">' +
-        '<h4><i class="icon fw fw-info"></i>No content to display</h4>' +
-        '<p>Please select a date range to view stats.</p>' +
-        '</div>' +
-        '</div>';
-};
 
-function getEmptyRecordsText() {
-    return '<div class="status-message">' +
-        '<div class="message message-info">' +
-        '<h4><i class="icon fw fw-info"></i>No records found</h4>' +
-        '<p>Please select a date range to view stats.</p>' +
-        '</div>' +
-        '</div>';
-}
 
 $(document).ready(function () {
     fetch();
@@ -53,7 +33,7 @@ function fetch() {
     queryInfo = {
         tableName: "LOGANALYZER",
         searchParams: {
-            query: "logstream:\"" + tenantID + "\"",
+            query: "logstream:\"" + tenantId + "\"",
             start: 0, //starting index of the matching record set
             count: 100, //page size for pagination
             sortBy : [
@@ -71,8 +51,9 @@ function fetch() {
 
         if (d["status"] === "success") {
             for (var i = 0; i < obj.length; i++) {
-                dataM.push([{           
-                    class: obj[i].values._class + "-" + obj[i].values._content        
+            var tempDay = new Date(receivedData[i].values._timestamp)
+                dataM.push([{
+                    class: tempDay.toDateString() + "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace
                 }]);
             }
             writeToLogViewer();
