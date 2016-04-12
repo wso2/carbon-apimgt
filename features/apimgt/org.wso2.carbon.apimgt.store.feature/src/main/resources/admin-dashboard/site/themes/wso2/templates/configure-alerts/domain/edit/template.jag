@@ -125,6 +125,9 @@
                 var parameterDTOs = currentTemplate.getParameterDTOs();
                 for (var i in parameterDTOs) {
 
+                    if (!parameterDTOs[i]) { 
+                        continue;
+                    }
                     if (!isExistingConfig) {
                         parameterValue = parameterDTOs[i].getDefaultValue().trim();
                     } else if (configurationDTO.getParameterDTOs() != null) {
@@ -136,6 +139,7 @@
                             }
                         }
                     }
+
             %>
 
 
@@ -237,6 +241,9 @@ if (isExistingConfig && (configurationDTO.getExecutionParameters() != null)) {
 <%
  executionParamString =  "document.getElementById('cronExpressionValue').value";
 
+ if (parameterString.length < 1) {
+        parameterString = "''";
+ }
  
 }
 %>
