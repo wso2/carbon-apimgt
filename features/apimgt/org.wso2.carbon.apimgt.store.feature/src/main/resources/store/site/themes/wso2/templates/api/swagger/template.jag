@@ -240,7 +240,7 @@ function checkOnKeyPress(e) {
 
 <div class="swagger-section">
 <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-<div id="Download" style="float:right;font-size:14px"><a href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
+<div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
 <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
 <%  }); %>

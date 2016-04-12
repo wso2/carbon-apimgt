@@ -123,7 +123,7 @@
                 <td class="app_name_cell"><%= encode.forHtml(statusVal)%></td>
                 <td class=""><%= encode.forHtml(app.apiCount)%></td>
                 <td class="text-right">
-                    <a href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag?name=" + encode.forHtmlAttribute(app.name) )%>" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
+                    <a title="<%=i18n.localize("app")%>" href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag?name=" + encode.forHtmlAttribute(app.name) )%>" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
                         <span class="fw-stack">
                             <i class="fw fw-ring fw-stack-2x"></i>
                             <i class="fw fw-view fw-stack-1x"></i>
@@ -131,7 +131,7 @@
                         <span class="hidden-xs">View</span>
                     </a>
                     <%if(!disableUpdate){%>
-                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
+                    <a title="<%=i18n.localize("edit")%>" href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view">
                         <span class="fw-stack">
                             <i class="fw fw-ring fw-stack-2x"></i>
                             <i class="fw fw-edit fw-stack-1x"></i>
@@ -139,7 +139,7 @@
                         <span class="hidden-xs">Edit</span>
                     </a>
                     <%}%>
-                    <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view"  onclick="deleteApp(this)">
+                    <a title="<%=i18n.localize("delete")%>" href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view"  onclick="deleteApp(this)">
                         <span class="fw-stack">
                             <i class="fw fw-ring fw-stack-2x"></i>
                             <i class="fw fw-delete fw-stack-1x"></i>

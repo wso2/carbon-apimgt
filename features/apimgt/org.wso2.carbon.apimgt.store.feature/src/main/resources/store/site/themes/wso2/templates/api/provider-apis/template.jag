@@ -31,8 +31,8 @@
         <%if(i){ %><hr /><% } %>
         <div class="row">
           <div class="col-md-4">
-            <a href="<%=path%>" >
-              <img src="<%=thumbURL%>" width="70px" />
+            <a href="<%=path%>" title="<%=i18n.localize("apiThumb")%>" >
+              <img src="<%=thumbURL%>" width="70px" alt="<%=i18n.localize("apiThumb")%>" />
             </a>
           </div>
           <div class="col-md-8">

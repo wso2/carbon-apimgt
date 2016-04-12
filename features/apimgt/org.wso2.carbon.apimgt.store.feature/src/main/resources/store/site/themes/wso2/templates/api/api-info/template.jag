@@ -85,8 +85,8 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
                 %>
 
     <ul class="breadcrumb">
-        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>">APIs groups</a> <span class="divider">/</span></li>
-        <li><a href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
+        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>" title="<%=i18n.localize("listAPIs")%>">APIs groups</a> <span class="divider">/</span></li>
+        <li><a title="<%=i18n.localize("tags")%>" href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
         <li class="active"><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%></li>
     </ul>
     <%
@@ -109,7 +109,7 @@ if(api.isAdvertiseOnly && api.apiOwner != null) {
 							</div> 
                          <% } else { %>
                             <div class="square-element">
-                            	<img class="" src="<%=thumbURL%>" alt="">
+                            	<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
                             </div>
                         <% } %>
                     	
