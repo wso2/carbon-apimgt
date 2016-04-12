@@ -15,7 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var client = new AnalyticsClient().init();
+var gatewayPort = location.port -9443 + 8243; //Calculate the port offset based gateway port.
+var serverUrl = "https://"+location.hostname +":"+ gatewayPort+"/LogAnalyzerRestApi/1.0";
+var client = new AnalyticsClient().init(null, null, serverUrl);
 var dataM = [];
 var filterdMessage;
 var template1 = "<ul class='template3'>{{#arr}}<li class='class'>{{class}}</li>{{/arr}}</ul>";
@@ -48,12 +50,13 @@ function fetch() {
     console.log(queryInfo);
     client.search(queryInfo, function (d) {
         var obj = JSON.parse(d["message"]);
-
         if (d["status"] === "success") {
+
             for (var i = 0; i < obj.length; i++) {
-            var tempDay = new Date(receivedData[i].values._timestamp)
+            var tempDay = new Date(parseInt(obj[i].values._eventTimeStamp)).toUTCString()
+
                 dataM.push([{
-                    class: tempDay.toDateString() + "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace
+                    class: tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace
                 }]);
             }
             writeToLogViewer();
@@ -72,5 +75,3 @@ function writeToLogViewer() {
 
     }
 }
-
-
