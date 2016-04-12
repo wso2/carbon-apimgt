@@ -79,23 +79,23 @@ i18n.init(request,localeResourcesBasePath);
             } else {
                 var type = null;
                 if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
-                    type = "Unusual IP Access";
+                    type = "Unseen Source IP Address";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") {
                     type = "Abnormal Request Count";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
                     type = "Abnormal Response Time";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
-                    type = "Abnormal Tier Usage";
+                    type = "Abnormal API Usage";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH") {
-                    type = "Abnormal Token Refresh";
+                    type = "Abnormal Renewal of Access Tokens";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
                     type = "Tier Crossing";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
                     type = "Abnormal Backend Time";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
-                    type = "API Health Monitor";
+                    type = "Availability of APIs";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
-                    type = "Request Pattern Change";
+                    type = "Abnormal Resource Access Pattern";
                 } 
 
                 var arr = new Array(parsedDataResult.length);

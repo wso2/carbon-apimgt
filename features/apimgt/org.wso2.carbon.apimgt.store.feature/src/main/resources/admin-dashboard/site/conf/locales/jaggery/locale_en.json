@@ -71,6 +71,17 @@
     "permissions":"Permissions",
     "allow":"Allow",
     "deny":"Deny",
+
+    "RequestPatternChanged":"Abnormal Resource Access Pattern",
+    "UnusualIPAccessAlert":"Unseen Source IP Address",
+    "abnormalRequestsPerMin":"Abnormal Request Count",
+    "abnormalBackendTime":"Abnormal Backend Time",
+    "abnormalResponseTime":"Abnormal Response Time",
+    "healthAvailabilityPerMin":"Availability of APIs",
+    "AbnormalRefreshAlert":"Abnormal Renewal of Access Tokens",
+    "AbnormalTierUsage":"Abnormal API Usage",
+    "FrequentTierHittingAlert":"Tier Crossing",
+
     
     "alerts":"Configure Alerts",
     "templateName":"Template Name",
@@ -86,16 +97,8 @@
     "common.button.delete":"Delete",
      "schedulerConfiguration":"Scheduler Configuration",
     "cronExpression":"Cron Expression",
-    "domains":"Domains",
+    "domains":"Domains"
 
-    "abnormalBackendTime": "Abnormal backend time",
-    "abnormalResponseTime":"Abnormal response time",
-    "abnormalRequestsPerMin":"Abnormal request counts",
-    "RequestPatternChanged":"Abnormal resource access pattern",
-    "UnusualIPAccessAlert":"Unseen source IP access",
-    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
-    "FrequentTierHittingAlert":"Frequent tier limit hitting",
-    "AbnormalTierUsage":"Abnormal API usage",
-    "healthAvailabilityPerMin":"Availability of APIs"
+
 
 }
