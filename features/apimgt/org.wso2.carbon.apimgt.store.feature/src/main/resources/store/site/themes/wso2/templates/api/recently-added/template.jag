@@ -20,17 +20,17 @@
                                 <div class="thumbnail icon">
 									{{#if thumbnailurl}}
 										<div class="square-element">
-                                    		<img class="" src="{{ thumbnailurl }}" alt=""> 
+                                    		<img class="" src="{{ thumbnailurl }}" alt="<%=i18n.localize("apiThumb")%>">
                                     	</div>										                               		
 									{{else}}     
                                     	<div class="square-element setbgcolor">
 											<div class="api-name-icon"></div>
 											<div style="display: none">
-												<a href="" class="api-name">{{ name }}</a>
+												<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ name }}</a>
 											</div>
 										</div> 
 									{{/if}}
-									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
+									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?") title="<%=i18n.localize("browse")%>"%>&name={{ name }}&version={{ version }}&provider={{ provider }}">
                                     	<div class="after">                                        
                                     		<span class="fw-stack fw-lg">
                                     			<i class="fw fw-circle-outline fw-stack-2x"></i>
