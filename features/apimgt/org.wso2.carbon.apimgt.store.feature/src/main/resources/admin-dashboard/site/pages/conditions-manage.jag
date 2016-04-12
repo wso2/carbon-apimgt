@@ -8,8 +8,6 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 (function () {
-    var log = new Log();
-    log.info("conditons-manage");
     var user = jagg.getUser();
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
@@ -19,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Tier Management",
+            "title":"Condition Management",
             "header":{
                 "name":"menu/primary"
             },

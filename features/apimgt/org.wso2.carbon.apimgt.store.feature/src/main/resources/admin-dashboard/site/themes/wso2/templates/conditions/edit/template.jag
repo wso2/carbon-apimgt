@@ -57,7 +57,7 @@
                     <div class="form-actions">
                         <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
                             class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
-                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                        <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
                     </div>
                 </form>
             </div>
@@ -82,6 +82,11 @@
         },
     "json");
     }
+        $(document).ready(function(){
+        $('#cancel-condition-btn').on('click',function(){
+            location.href = "<%= jagg.url('/site/pages/conditions-manage.jag')%>";
+                });
+        });
 </script>
 
 <%});%>

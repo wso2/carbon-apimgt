@@ -11,20 +11,23 @@
 
     <div class="content-section shadow-up">
     <div class="content-data">
+    <%
+          var conditionslist =  outputs.conditions;
+            var conditonsArray = conditionslist.toArray();
+            var conditionsListSize  = conditionslist.size();
+    %>
+    <%if(conditionsListSize > 0){%>
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
                 <th class="userSpecialCell">Condition Id</th>
                 <th class="appSpecialCell">Condition Type</th>
                 <th class="appSpecialCell">Condition Value</th>
-                <th class="userSpecialCell">Enable</th>
+                <th class="userSpecialCell"></th>
             </tr>
         </thead>
 
         <%
-            var conditionslist =  outputs.conditions;
-            var conditonsArray = conditionslist.toArray();
-            var conditionsListSize  = conditionslist.size();
             var count = 0;
 
             for(j = 0; j < conditionsListSize; j++) {
@@ -59,6 +62,7 @@
             }
             %>  
     </table>
+        <%}%>
     </div>
 
     </div>
