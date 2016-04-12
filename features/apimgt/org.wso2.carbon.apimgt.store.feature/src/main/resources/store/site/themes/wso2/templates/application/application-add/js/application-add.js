@@ -17,10 +17,10 @@ $(document).ready(function () {
 
     $("#appAddForm").validate({
         submitHandler: function(form) {
-            applicationEdit();
+            applicationAdd();
         }
     });
-    var applicationEdit = function(){
+    var applicationAdd = function(){
         var application = $("#application-name").val();
         var tier = $("#appTier").val();
         var callbackUrl = $("#callback-url").val();
