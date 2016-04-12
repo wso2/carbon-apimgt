@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 
 import java.util.*;
 import java.io.File;
@@ -51,7 +52,8 @@ import io.swagger.codegen.DefaultGenerator;
 public class APIClientGenerationManager {
     private static final Log log = LogFactory.getLog(APIClientGenerationManager.class);
 
-    public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId) {
+    public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
+            throws APIClientGenerationException, IOException {
         Subscriber currentSubscriber = null;
         String swagger = null;
         Set<SubscribedAPI> apiSet = null;
@@ -64,6 +66,7 @@ public class APIClientGenerationManager {
             apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName, groupId);
         } catch (APIManagementException e) {
             log.error("Unexpected error when getting the subscribed api set", e);
+            throw new APIClientGenerationException("Unexpected error when getting the subscribed api set", e);
         }
 
         if (apiSet.isEmpty()) {
@@ -84,6 +87,7 @@ public class APIClientGenerationManager {
                 FileUtils.deleteDirectory(tempFolder);
             } catch (IOException e) {
                 log.error("Problem deleting the temporary swaggerCodegen folder", e);
+                throw new APIClientGenerationException("Problem deleting the temporary swaggerCodegen folder", e);
             }
             tempFolder.mkdir();
         }
@@ -107,6 +111,7 @@ public class APIClientGenerationManager {
                         .resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
             } catch (RegistryException e) {
                 log.error("Problem while checking weather the resource exists or not", e);
+                throw new APIClientGenerationException("Problem while checking weather the resource exists or not", e);
             }
             if (isFirstApi && isResourceExists) {
                 try {
@@ -114,6 +119,8 @@ public class APIClientGenerationManager {
                             .getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
                 } catch (APIManagementException e) {
                     log.error("Error loading swagger file from registry", e);
+                    throw new APIClientGenerationException("Error loading swagger file from registry", e);
+
                 }
                 initial = new SwaggerParser().parse(swagger);
                 paths = initial.getPaths();
@@ -128,6 +135,7 @@ public class APIClientGenerationManager {
                         .resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME);
             } catch (RegistryException e) {
                 log.error("Problem while checking weather the resource exists or not", e);
+                throw new APIClientGenerationException("Problem while checking weather the resource exists or not", e);
             }
             if (!isFirstApi && isResourceExists) {
                 try {
@@ -135,6 +143,7 @@ public class APIClientGenerationManager {
                             .getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
                 } catch (APIManagementException e) {
                     log.error("Error loading swagger file from registry", e);
+                    throw new APIClientGenerationException("Error loading swagger file from registry", e);
                 }
                 temp = new SwaggerParser().parse(swagger);
 
@@ -177,16 +186,21 @@ public class APIClientGenerationManager {
             spec = new File(specLocation);
 
             FileWriter fileWriter = null;
+            BufferedWriter bufferedWriter = null;
             try {
                 if (!spec.exists()) {
                     spec.createNewFile();
                 }
                 fileWriter = new FileWriter(spec.getAbsoluteFile());
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(swagger);
-                bufferedWriter.close();
             } catch (IOException e) {
                 log.error("problem when storing the temporary swagger file", e);
+                throw new APIClientGenerationException("problem when storing the temporary swagger file", e);
+            }finally {
+                if (bufferedWriter != null){
+                    bufferedWriter.close();
+                }
             }
 
         }
@@ -200,6 +214,7 @@ public class APIClientGenerationManager {
             FileUtils.deleteDirectory(deleteProject);
         } catch (IOException e) {
             log.error("Problem while archiving the generated SDK", e);
+            throw new APIClientGenerationException("Problem while archiving the generated SDK", e);
         }
 
         spec.delete();
@@ -216,7 +231,6 @@ public class APIClientGenerationManager {
         } else {
             configClass = null;
         }
-        try{
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
 
@@ -231,9 +245,6 @@ public class APIClientGenerationManager {
             codegenConfigurator.setOutputDir(outPutDir);
             final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
             new DefaultGenerator().opts(clientOptInput).generate();
-        }catch (Throwable e){
-            log.error("Error generating the client SDK",e);
-        }
 
     }
 }
