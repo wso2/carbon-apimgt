@@ -95,4 +95,8 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_IS_CLAIM_MAPPING = "IS_CLAIM_MAPPING";
     
     public static final String COLUMN_IS_PARAM_MAPPING = "IS_PARAM_MAPPING";
+
+    public static final String COLUMN_STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
+
+    public static final String COLUMN_BILLING_PLAN = "BILLING_PLAN";
 }
