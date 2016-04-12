@@ -33,13 +33,16 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WebServiceBlockConditionsRetriever implements Runnable {
     private static final Log log = LogFactory.getLog(WebServiceBlockConditionsRetriever.class);
 
     @Override
     public void run() {
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Starting web service based block condition data retrieving process.");
         }
         loadBlockConditionsFromWebService();
@@ -67,7 +70,7 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
-             return new Gson().fromJson(responseString, BlockConditionsDTO.class);
+                return new Gson().fromJson(responseString, BlockConditionsDTO.class);
             }
         } catch (IOException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
@@ -87,11 +90,27 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
     public void loadBlockConditionsFromWebService() {
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
         if (blockConditionsDTO != null) {
-
+            //TODO if possible try to get data as map since this can cause performance issue.
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
+                    generateMap(blockConditionsDTO.getApi()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().putAll(
+                    generateMap(blockConditionsDTO.getApi()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().putAll(
+                    generateMap(blockConditionsDTO.getApi()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().putAll(
+                    generateMap(blockConditionsDTO.getApi()));
         }
     }
 
     public void startWebServiceBlockConditionDataRetriever() {
         new Thread(this).start();
+    }
+
+    public <T> Map<String, T> generateMap(Collection<T> list) {
+        Map<String, T> map = new HashMap<String, T>();
+        for (T el : list) {
+            map.put(el.toString(), el);
+        }
+        return map;
     }
 }
