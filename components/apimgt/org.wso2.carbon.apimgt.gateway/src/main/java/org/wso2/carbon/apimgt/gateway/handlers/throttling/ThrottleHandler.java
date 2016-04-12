@@ -157,9 +157,10 @@ public class ThrottleHandler extends AbstractHandler {
                 //Check if request is blocked. If request is blocked then will not proceed further and
                 //inform to client.
                 //TODO handle blocked and throttled requests separately.
-                isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                        apiLevelThrottleKey, applicationLevelThrottleKey, authorizedUser);
+
             }
+            isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
+                    apiLevelThrottleKey, applicationLevelThrottleKey, authorizedUser);
             if (isBlockedRequest){
                 if (log.isDebugEnabled()) {
                     log.debug("Request blocked as it violates defined blocking conditions, for API:" + apiContext +

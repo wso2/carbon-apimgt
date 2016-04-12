@@ -1134,5 +1134,9 @@ public final class APIConstants {
         public static final String ENABLE_UNLIMITED_TIER = "EnableUnlimitedTier";
         public static final String POLICY_DEPLOYER_CONFIGURATION = "PolicyDeployer";
         public static final String BLOCK_CONDITION_RETRIEVER_CONFIGURATION = "BlockCondition";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION = "DataPublisherThreadPool";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE = "CorePoolSize";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_MAXMIMUM_POOL_SIZE = "MaxmimumPoolSize";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME = "KeepAliveTime";
     }
 }

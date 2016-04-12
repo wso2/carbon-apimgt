@@ -60,9 +60,15 @@ public class ThrottleDataPublisher {
     public ThrottleDataPublisher() {
         ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
                 .getThrottleProperties().getDataPublisher();
+        ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
+                .getInstance().getThrottleProperties().getDataPublisherThreadPool();
 
         try {
-            executor = new DataPublisherThreadPoolExecutor(200, 500, 100, TimeUnit.SECONDS,
+            executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
+                    dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
+                    .getKeepAliveTime(),
+                    TimeUnit
+                            .SECONDS,
                     new LinkedBlockingDeque<Runnable>() {
                     });
             dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration

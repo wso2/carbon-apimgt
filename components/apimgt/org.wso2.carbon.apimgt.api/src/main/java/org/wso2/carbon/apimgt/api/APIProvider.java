@@ -567,9 +567,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
-
-
-
+    
+    
     /**
      * Get a policy names for given policy level and user name
      * @param username
@@ -579,5 +578,48 @@ public interface APIProvider extends APIManager {
      */
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
+    /**
+     * Delete throttling policy
+     * @param username
+     * @param policyLevel
+     * @param policyName
+     * @throws APIManagementException
+     */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+
+    /**
+     *
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionId id of the condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionType
+     * @param conditionValue
+     * @return
+     * @throws APIManagementException
+     */
+    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
+     *
+     * @param conditionId
+     * @return
+     * @throws APIManagementException
+     */
+    boolean deleteBlockCondition(int conditionId) throws APIManagementException;
+
 }

@@ -26,23 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -934,8 +918,7 @@ public class ApiMgtDAO {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled = Boolean
-                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
         //only check if using CEP based throttling.
         if(isGlobalThrottlingEnabled){
 
@@ -9650,5 +9633,120 @@ public class ApiMgtDAO {
 
 
     	return isExist;
+    }
+
+    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement insertPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            insertPreparedStatement = connection.prepareStatement(query);
+            insertPreparedStatement.setString(1, conditionType);
+            insertPreparedStatement.setString(2, conditionValue);
+            insertPreparedStatement.setString(4, tenantDomain);
+            insertPreparedStatement.setString(3, "TRUE");
+            status = insertPreparedStatement.execute();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to add Block condition : " + conditionType+" and "+conditionValue, e);
+
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<BlockConditionsDTO>();
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setString(1, tenantDomain);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+                blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
+                blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
+                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockConditionsDTOList.add(blockConditionsDTO);
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to get Block condition", e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockConditionsDTOList;
+    }
+    public boolean updateBlockConditionState(int conditionId,String state) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
+            updateBlockConditionPreparedStatement.setString(1,state.toUpperCase());
+            updateBlockConditionPreparedStatement.setInt(2, conditionId);
+            updateBlockConditionPreparedStatement.executeUpdate();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                     connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to update Block condition with condition id "+conditionId, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.DELETE_BLOCK_CONDITION_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
+            deleteBlockConditionPreparedStatement.setInt(1, conditionId);
+            status = deleteBlockConditionPreparedStatement.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to delete Block condition with condition id"+conditionId, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
     }
 }

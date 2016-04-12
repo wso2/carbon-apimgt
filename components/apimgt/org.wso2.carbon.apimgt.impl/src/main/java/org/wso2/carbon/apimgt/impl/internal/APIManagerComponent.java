@@ -212,7 +212,7 @@ public class APIManagerComponent {
                         .SUPER_TENANT_ID);
             }
             //Adding default throttle policies
-            boolean advancedThrottlingEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
             if(advancedThrottlingEnabled) {
                 addDefaultAdvancedThrottlePolicies();
             }
