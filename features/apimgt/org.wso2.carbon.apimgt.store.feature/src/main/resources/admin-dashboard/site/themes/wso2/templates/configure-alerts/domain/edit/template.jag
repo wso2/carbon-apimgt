@@ -61,7 +61,7 @@
                     var parameterValue = "";
                     var description = "";
             %>
-            <label class="input-label col-md-5"><%=i18n.localize("templateName")%></label>
+            <label class="control-label col-md-5"><%=i18n.localize("templateName")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
                 <select id="cBoxTemplates"
@@ -92,7 +92,7 @@
                     saveButtonText = "template.update.button.text";
                 }
             %>
-            <label class="input-label col-md-5"><%=i18n.localize("configName")%></label>
+            <label class="control-label col-md-5"><%=i18n.localize("configName")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
                 <input type="text" id="txtName"
@@ -108,7 +108,7 @@
                     description = configurationDTO.getDescription().trim();
                 }
             %>
-            <label class="input-label col-md-5"><%=i18n.localize("description")%></label>
+            <label class="control-label col-md-5"><%=i18n.localize("description")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
                 <input type="text" id="txtDescription"
@@ -143,7 +143,7 @@
             %>
 
 
-            <label class="input-label col-md-5"><%
+            <label class="control-label col-md-5"><%
                 if (parameterDTOs[i].getDisplayName() == null) {
                     print(parameterDTOs[i].getName());
                 } else {
@@ -214,7 +214,7 @@ if ("batch".equals(currentTemplate.getExecutionType())) {
 %>
            <h4><%=i18n.localize("schedulerConfiguration")%></h4>
 
- <label class="input-label col-md-5">
+ <label class="control-label col-md-5">
  <%=i18n.localize("cronExpression")%>
  </label>
  
