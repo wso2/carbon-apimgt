@@ -118,8 +118,7 @@ public class APIExecutor implements Execution {
             
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean
-                    .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
             
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 

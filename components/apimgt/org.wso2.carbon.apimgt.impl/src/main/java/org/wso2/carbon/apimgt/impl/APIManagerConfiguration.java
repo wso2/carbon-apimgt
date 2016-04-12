@@ -493,6 +493,43 @@ public class APIManagerConfiguration {
                 }
                 throttleProperties.setDataPublisherPool(dataPublisherPool);
 
+                // Data publisher thread pool configuration
+
+                OMElement dataPublisherThreadPoolConfigurationElement = dataPublisherConfigurationElement
+                        .getFirstChildWithName(new
+                                QName
+                                (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_THREAD_POOL_CONFIGURATION));
+
+                ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPool = new ThrottleProperties
+                        .DataPublisherThreadPool();
+                if (dataPublisherThreadPoolConfigurationElement != null) {
+                    OMElement corePoolSizeElement = dataPublisherPoolConfigurationElement.getFirstChildWithName(new
+                            QName
+                            (APIConstants.AdvancedThrottleConstants
+                                    .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE));
+                    if (corePoolSizeElement != null) {
+                        dataPublisherThreadPool.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
+                    }
+                    OMElement maximumPoolSizeElement = dataPublisherThreadPoolConfigurationElement
+                            .getFirstChildWithName(new
+                                    QName
+                                    (APIConstants.AdvancedThrottleConstants
+                                            .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_MAXMIMUM_POOL_SIZE));
+                    if (maximumPoolSizeElement != null) {
+                        dataPublisherThreadPool.setMaximumPoolSize(Integer.parseInt(maximumPoolSizeElement.getText()));
+                    }
+                    OMElement keepAliveTimeElement = dataPublisherThreadPoolConfigurationElement.getFirstChildWithName
+                            (new
+                                    QName
+                                    (APIConstants.AdvancedThrottleConstants
+                                            .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME));
+                    if (keepAliveTimeElement != null) {
+                        dataPublisherThreadPool.setKeepAliveTime(Long.parseLong(keepAliveTimeElement.getText()));
+                    }
+                }
+                throttleProperties.setDataPublisherThreadPool(dataPublisherThreadPool);
+
+
                 //GlobalPolicyEngineWSConnectionDetails
                 OMElement globalEngineWSConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName
