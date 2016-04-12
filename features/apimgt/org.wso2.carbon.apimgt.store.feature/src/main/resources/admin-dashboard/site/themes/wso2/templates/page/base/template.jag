@@ -73,6 +73,18 @@ var user = jagg.getUser();
 			</a>
 		</div>
 		<ul class="nav navbar-right float-remove-xs text-center-xs">
+            <li class="visible-inline-block">
+                 <a href="analytics-alerts")%>"> 
+                        <span class="icon fw-stack fw-lg">
+                           <i class="fw fw-circle fw-stack-2x"></i>
+                           <i class="fw fw-alert fw-stack-1x fw-inverse"></i>
+                        </span>
+                        <span class="hidden-xs">
+                                <%if(user!=null){%>Alerts
+                                <%}%> 
+                        </span> 
+                    </a>
+            </li>
 			<li class="visible-inline-block">
 				<a href="#" class="dropdown" data-toggle="dropdown"> 
 					<span class="icon fw-stack fw-lg">
