@@ -249,7 +249,7 @@
 					          <i class="fw fw-circle-outline fw-stack-2x"></i>
 					          <i class="fw fw-delete fw-stack-1x"></i>
 					      </span>
-					      <span class="hidden-xs"><%=i18n.localize("view")%></span>
+					      <span class="hidden-xs"><%=i18n.localize("deleteMethod")%></span>
 					  </a>
 			</td>
                     <%}%>
