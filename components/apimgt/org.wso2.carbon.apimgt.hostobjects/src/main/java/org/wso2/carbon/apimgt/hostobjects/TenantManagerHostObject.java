@@ -34,23 +34,25 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.apache.commons.io.FilenameUtils;
 
+
 public class TenantManagerHostObject extends ScriptableObject {
-    private static final Log log = LogFactory.getLog(TenantManagerHostObject.class);
+	private static final Log log = LogFactory.getLog(TenantManagerHostObject.class);
+
 
     //using a set for file extensions white list since it will be faster to search
-    private static final Set<String> EXTENTION_WHITELIST = new HashSet<String>(
-            Arrays.asList(new String[] { "css", "jpg", "png", "gif", "svg", "ttf", "html", "js" }));
+    private static final Set<String> EXTENTION_WHITELIST = new HashSet<String>(Arrays.asList(
+            new String[]{"css", "jpg", "png", "gif", "svg", "ttf", "html", "js"}
+    ));
 
     public static String getStoreTenantThemesPath() {
         return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
-                + File.separator + "store" + File.separator + "site" + File.separator + "tenant_themes"
-                + File.separator;
+                + File.separator + "store" + File.separator + "site" + File.separator + "tenant_themes" + File.separator;
     }
 
-    @Override public String getClassName() {
+    @Override
+    public String getClassName() {
         return "APIManager";
     }
 
@@ -70,14 +72,14 @@ public class TenantManagerHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_addTenantTheme(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length != 2) {
+            throws APIManagementException{
+        if ( args == null || args.length != 2) {
             handleException("Invalid input parameters for addTenantTheme");
         }
 
         FileHostObject uploadFile = null;
         String tenant = null;
-        try {
+        try{
             uploadFile = (FileHostObject) args[0];
             tenant = (String) args[1];
         } catch (ClassCastException ce) {
@@ -91,25 +93,25 @@ public class TenantManagerHostObject extends ScriptableObject {
     }
 
     //would be nice to have zip4j
-    private static void deployTenantTheme(FileHostObject themeFile, String tenant) throws APIManagementException {
-        ZipInputStream zis = null;
+    private static void deployTenantTheme(FileHostObject themeFile, String tenant)throws APIManagementException{
+        ZipInputStream zis=null;
         byte[] buffer = new byte[1024];
 
-        String outputFolder = TenantManagerHostObject.getStoreTenantThemesPath() + tenant;
+        String outputFolder = TenantManagerHostObject.getStoreTenantThemesPath()+tenant;
 
         InputStream zipInputStream = null;
-        try {
+        try{
             zipInputStream = themeFile.getInputStream();
-        } catch (ScriptException e) {
-            handleException("Error occurred while deploying tenant theme file", e);
+        } catch(ScriptException e) {
+             handleException("Error occurred while deploying tenant theme file" , e);
         }
 
-        try {
+        try{
 
             //create output directory if it is not exists
             File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
+            if(!folder.exists()){
+                if(!folder.mkdirs()){
                     handleException("Unable to create tenant theme directory");
                 }
             }
@@ -120,20 +122,21 @@ public class TenantManagerHostObject extends ScriptableObject {
             ZipEntry ze = zis.getNextEntry();
             String ext = null;
 
-            while (ze != null) {
+            while(ze!=null){
 
                 String fileName = ze.getName();
                 File newFile = new File(outputFolder + File.separator + fileName);
-                if (ze.isDirectory()) {
-                    if (!newFile.exists()) {
-                        boolean status = newFile.mkdir();
-                        if (status) {
+                if(ze.isDirectory()){
+                    if(!newFile.exists()){
+                         boolean status = newFile.mkdir();
+                         if(status){
                             //todo handle exception
-                        }
+                         }
                     }
-                } else {
+                }
+                else{
                     ext = FilenameUtils.getExtension(ze.getName());
-                    if (TenantManagerHostObject.EXTENTION_WHITELIST.contains(ext)) {
+                    if(TenantManagerHostObject.EXTENTION_WHITELIST.contains(ext)){
                         //create all non exists folders
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
@@ -145,9 +148,8 @@ public class TenantManagerHostObject extends ScriptableObject {
                         }
 
                         fos.close();
-                    } else {
-                        log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : " + ze
-                                .getName());
+                    }else{
+                        log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : "+ ze.getName());
                     }
 
                 }
@@ -157,10 +159,11 @@ public class TenantManagerHostObject extends ScriptableObject {
             zis.closeEntry();
             zis.close();
 
-        } catch (IOException ex) {
-            handleException("Failed to deploy tenant theme", ex);
+        }catch(IOException ex){
+            handleException("Failed to deploy tenant theme",ex);
             //todo remove if the tenant theme directory is created.
-        } finally {
+        }
+        finally {
             IOUtils.closeQuietly(zis);
             IOUtils.closeQuietly(zipInputStream);
         }
