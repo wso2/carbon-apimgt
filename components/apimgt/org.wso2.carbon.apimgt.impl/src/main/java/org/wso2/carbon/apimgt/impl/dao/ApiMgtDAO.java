@@ -5812,8 +5812,10 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-
-            if (api.isApiHeaderChanged()) {
+            //Header change check not required here as we update API level throttling tier
+            //from same call.
+            //TODO review and run tier update as separate query if need.
+            //if (api.isApiHeaderChanged()) {
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
                 String contextTemplate = api.getContextTemplate();
@@ -5827,11 +5829,12 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(6, api.getId().getApiName());
-                prepStmt.setString(7, api.getId().getVersion());
+                               prepStmt.setString(5, api.getApiLevelPolicy());
+                                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                                prepStmt.setString(7, api.getId().getApiName());
+                                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
-            }
+            //}
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
                 // happen
