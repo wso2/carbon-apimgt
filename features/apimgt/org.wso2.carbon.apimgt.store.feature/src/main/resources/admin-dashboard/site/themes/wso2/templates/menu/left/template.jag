@@ -115,7 +115,7 @@
 					<ul class="nav nav-pills secondary-nav collapse in">
 
 					    <%
-					    if(!mod.isGlobalCEPThrottlingEnabled()){
+					    if(!APIUtil.isAdvanceThrottlingEnabled()){
 					    %>
 						<li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/tier-manage") %>"
@@ -123,7 +123,7 @@
 							<i class="fw fw-settings"></i>
 							<%= i18n.localize("tierManagement") %></a></li>
 						<%}
-                        else if(mod.isGlobalCEPThrottlingEnabled()){
+                        else if(APIUtil.isAdvanceThrottlingEnabled()){
                             %>
                                 <li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/site/pages/policy-list.jag") %>"
