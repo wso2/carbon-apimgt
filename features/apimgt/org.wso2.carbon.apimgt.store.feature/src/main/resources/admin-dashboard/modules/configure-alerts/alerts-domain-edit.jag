@@ -99,11 +99,13 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         var parameterStrings = parametersJson.split(",");
         var parameters = new Array();
 
-        for (var i in parameterStrings) {
-            var parameterDTO = new ParameterDTOE();
-            parameterDTO.setName(parameterStrings[i].split(valueSeparator)[0]);
-            parameterDTO.setValue(parameterStrings[i].split(valueSeparator)[1]);
-            parameters.push(parameterDTO);
+        if (parametersJson.length > 0) {
+          for (var i in parameterStrings) {
+              var parameterDTO = new ParameterDTOE();
+              parameterDTO.setName(parameterStrings[i].split(valueSeparator)[0]);
+              parameterDTO.setValue(parameterStrings[i].split(valueSeparator)[1]);
+              parameters.push(parameterDTO);
+          }
         }
 
         templateConfigurationDTO.setParameterDTOs(parameters);
