@@ -252,6 +252,7 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
+            "   API.API_TIER," +
             "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
@@ -278,7 +279,8 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER" +
+            "   API.API_TIER," +
+            "   API.API_PROVIDER" +      
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +

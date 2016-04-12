@@ -788,6 +788,7 @@ public class ApiMgtDAO {
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
         boolean defaultVersionInvoked = false;
+        boolean isAPILevelTier = false;
 
         //Check if the api version has been prefixed with _default_
         if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
@@ -833,6 +834,8 @@ public class ApiMgtDAO {
                     infoDTO.setAuthorized(false);
                     return false;
                 }
+                
+                String tier = rs.getString("API_TIER");
 
                 infoDTO.setTier(rs.getString("TIER_ID"));
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
@@ -854,7 +857,10 @@ public class ApiMgtDAO {
                 String apiLevelThrottlingKey = "api_level_throttling_key";
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
-                infoDTO.setApiTier("API_LEVEL_TIER");
+                if(tier != null && tier.trim().length() > 0 ){
+                	infoDTO.setApiTier(tier);
+                }
+                //infoDTO.setApiTier("API_LEVEL_TIER");
                 //We also need to set throttling data list associated with given API. This need to have policy id and
                 // condition id list for all throttling tiers associated with this API.
                 infoDTO.setThrottlingDataList(list);
@@ -869,6 +875,8 @@ public class ApiMgtDAO {
         }
         return false;
     }
+    
+    
 
     /*private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
             String subPolicy) throws APIManagementException {
