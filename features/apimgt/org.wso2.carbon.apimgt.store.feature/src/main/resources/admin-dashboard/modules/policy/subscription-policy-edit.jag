@@ -2,14 +2,14 @@
 var log = new Log();
 
 var saveSubscriptionPolicy = function (action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
-                                      defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
+                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
         var policy = constructPolicyObject(provider, policyName, description, defaultQuotaPolicy, defaultRequestCount,
-                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit);
+                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
 
         if (action == "add") {
             apiProvider.addPolicy(policy);
@@ -31,13 +31,14 @@ var saveSubscriptionPolicy = function (action, policyName, description, defaultQ
 };
 
 var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
-                                      defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit) {
+                                      defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
+                                      stopOnQuotaReach, tierPlan, attributes) {
     var SubscriptionPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
     var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
     var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
     var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
+    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var String = Packages.java.lang.String;
     var subscriptionPolicy = new SubscriptionPolicy(policyName);
 
     subscriptionPolicy.setPolicyName(policyName);
@@ -46,6 +47,16 @@ var constructPolicyObject = function (userName, policyName, description, default
     var tenantId = APIUtil.getTenantId(userName);
     subscriptionPolicy.setTenantId(tenantId);
 
+    if(stopOnQuotaReach == "true"){
+        subscriptionPolicy.setStopOnQuotaReach(true);
+    }else{
+        subscriptionPolicy.setStopOnQuotaReach(false);
+
+    }
+    var attr = new String(attributes[0]);
+
+    subscriptionPolicy.setCustomAttributes(attr.getBytes());
+    subscriptionPolicy.setBillingPlan(tierPlan);
     var default_quotaPolicy = new QuotaPolicy();
 
     if (defaultQuotaPolicy == "RequestCount") {

@@ -8282,8 +8282,10 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setInt(10, policy.getRateLimitCount());
             policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setBoolean(12, policy.isStopOnQuotaReach());
+            policyStatement.setString(13, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
             }
             policyStatement.executeUpdate();
 
@@ -8741,6 +8743,8 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(subPolicy, rs);
                 subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
@@ -9362,14 +9366,16 @@ public class ApiMgtDAO {
             updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             updateStatement.setInt(7, policy.getRateLimitCount());
             updateStatement.setString(8, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(9, policy.isStopOnQuotaReach());
+            updateStatement.setString(10, policy.getBillingPlan());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(9, new ByteArrayInputStream(policy.getCustomAttributes()));
-            	updateStatement.setString(10, policy.getPolicyName());
-                updateStatement.setInt(11, policy.getTenantId());
+            	updateStatement.setBlob(11, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(12, policy.getPolicyName());
+                updateStatement.setInt(13, policy.getTenantId());
             }else{
-            	updateStatement.setString(9, policy.getPolicyName());
-                updateStatement.setInt(10, policy.getTenantId());
+            	updateStatement.setString(11, policy.getPolicyName());
+                updateStatement.setInt(12, policy.getTenantId());
             }
             updateStatement.executeUpdate();
             connection.commit();
