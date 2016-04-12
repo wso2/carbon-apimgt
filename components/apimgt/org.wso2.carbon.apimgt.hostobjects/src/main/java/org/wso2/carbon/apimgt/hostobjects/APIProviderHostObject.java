@@ -484,8 +484,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 handleException("Error while reading tenant information ", e);
             }
 
-            apiProvider.saveSwagger20Definition(api.getId(),
-                    addSecurityDef((String) apiData.get("swagger", apiData), scopes));
+
+            //Save swagger in the registry
+            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
 
         // removing scopes from cache
