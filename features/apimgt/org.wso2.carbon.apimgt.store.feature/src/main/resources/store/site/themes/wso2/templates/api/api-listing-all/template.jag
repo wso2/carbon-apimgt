@@ -79,7 +79,7 @@ var reqUrl = request.getRequestURI();
     			<h1>APIs</h1>
    			 <% } %>
    			 </div>
-</div>
+
 
 <div class="page-content">
     <div class="row">
