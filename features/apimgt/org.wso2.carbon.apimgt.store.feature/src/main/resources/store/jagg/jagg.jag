@@ -781,8 +781,8 @@ var jagg = jagg || (function () {
     }
 
     var log = function(message){
-        var log = new Log();
-        log.info(message);
+        //var log = new Log();
+        //log.info(message);
     }
 
     var isCSRFTokenValid = function(){
