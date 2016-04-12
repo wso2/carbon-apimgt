@@ -343,22 +343,42 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         JSONArray xWso2ScopesArray = new JSONArray();
         JSONObject xWso2ScopesObject;
+
+        JSONObject xScopesObject;//++++++++
+        JSONArray xScopesArray = new JSONArray();//+++++++
+        JSONObject scopesJsonObject = new JSONObject();//+++++
+        JSONObject securityDefinitionJsonObject = new JSONObject() ;//+++++++
+        JSONObject securityDefinitionAttr =new JSONObject();
+
         if (scopes != null) {
             for (Scope scope : scopes) {
                 xWso2ScopesObject = new JSONObject();
+                xScopesObject = new JSONObject();//++++++
+                xScopesObject.put(scope.getName(),scope.getDescription());//+++++
                 xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
 
                 xWso2ScopesArray.add(xWso2ScopesObject);
+                xScopesArray.add(xScopesObject);//+++++++++++++
             }
         }
+
+        scopesJsonObject.put("scopes",xScopesArray);//++++++++
+
+        securityDefinitionAttr.put("petstore_auth",scopesJsonObject);//++++
+        securityDefinitionAttr.put("type","oauth2");//++++
+        securityDefinitionAttr.put("authorizationUrl","test.com");//+++
+        securityDefinitionAttr.put("flow","implicit");//++++
+
+        //securityDefinitionJsonObject.put("petstore_auth",scopesJsonObject);//++++++
 
         scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
         securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
 
         swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
+        swaggerObject.put("securityDefinitions",securityDefinitionAttr);//++++++
 
         return swaggerObject.toJSONString();
     }

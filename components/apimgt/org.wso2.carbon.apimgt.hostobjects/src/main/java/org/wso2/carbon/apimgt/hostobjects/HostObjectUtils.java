@@ -16,7 +16,6 @@
 * under the License.
 */
 
-
 package org.wso2.carbon.apimgt.hostobjects;
 
 import java.util.Comparator;
@@ -48,7 +47,7 @@ public class HostObjectUtils {
     private static final Log log = LogFactory.getLog(APIProviderHostObject.class);
     private static ConfigurationContextService configContextService = null;
 
-     public static void setConfigContextService(ConfigurationContextService configContext) {
+    public static void setConfigContextService(ConfigurationContextService configContext) {
         HostObjectUtils.configContextService = configContext;
     }
 
@@ -103,6 +102,7 @@ public class HostObjectUtils {
 
     /**
      * Used to get instance of ProviderKeyMgtClient
+     *
      * @return ProviderKeyMgtClient
      * @throws APIManagementException
      */
@@ -128,7 +128,7 @@ public class HostObjectUtils {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
-    
+
     public static class RequiredUserFieldComparator implements Comparator<UserFieldDTO> {
 
         public int compare(UserFieldDTO filed1, UserFieldDTO filed2) {
@@ -139,23 +139,24 @@ public class HostObjectUtils {
             if (filed2.getDisplayOrder() == 0) {
                 filed2.setDisplayOrder(Integer.MAX_VALUE);
             }
-            
-            if (!filed1.getRequired() && filed2.getRequired()){
-            	return 1;
+
+            if (!filed1.getRequired() && filed2.getRequired()) {
+                return 1;
             }
-            
-            if (filed1.getRequired() && filed2.getRequired()){
-            	return 0;
+
+            if (filed1.getRequired() && filed2.getRequired()) {
+                return 0;
             }
-            
-            if (filed1.getRequired() && !filed2.getRequired()){
-            	return -1;
+
+            if (filed1.getRequired() && !filed2.getRequired()) {
+                return -1;
             }
 
             return 0;
         }
 
     }
+
     public static class UserFieldComparator implements Comparator<UserFieldDTO> {
 
         public int compare(UserFieldDTO filed1, UserFieldDTO filed2) {
@@ -166,7 +167,7 @@ public class HostObjectUtils {
             if (filed2.getDisplayOrder() == 0) {
                 filed2.setDisplayOrder(Integer.MAX_VALUE);
             }
-            
+
             if (filed1.getDisplayOrder() < filed2.getDisplayOrder()) {
                 return -1;
             }
@@ -182,8 +183,9 @@ public class HostObjectUtils {
     }
 
     /**
-    *This methods is to check whether stat publishing is enabled
-    * @return boolean
+     * This methods is to check whether stat publishing is enabled
+     *
+     * @return boolean
      */
     protected static boolean checkDataPublishingEnabled() {
         return APIUtil.isAnalyticsEnabled();
@@ -191,27 +193,28 @@ public class HostObjectUtils {
 
     /**
      * This method will clear recently added API cache.
+     *
      * @param username
      */
-    public static void invalidateRecentlyAddedAPICache(String username){
-        try{
+    public static void invalidateRecentlyAddedAPICache(String username) {
+        try {
             PrivilegedCarbonContext.startTenantFlow();
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-            boolean isRecentlyAddedAPICacheEnabled =
-                  Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
-            
+            boolean isRecentlyAddedAPICacheEnabled = Boolean
+                    .parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
+
             if (username != null && isRecentlyAddedAPICacheEnabled) {
                 String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
-                if (tenantDomainFromUserName != null &&
-                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomainFromUserName)) {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomainFromUserName,
-                                                                                          true);
+                if (tenantDomainFromUserName != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                        .equals(tenantDomainFromUserName)) {
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(tenantDomainFromUserName, true);
                 } else {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                           .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                            .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache("RECENTLY_ADDED_API")
-                       .remove(username + ":" + tenantDomainFromUserName);
+                        .remove(username + ":" + tenantDomainFromUserName);
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -228,6 +231,6 @@ public class HostObjectUtils {
     }
 
     protected static boolean isStatPublishingEnabled() {
-            return APIUtil.isAnalyticsEnabled();
+        return APIUtil.isAnalyticsEnabled();
     }
 }

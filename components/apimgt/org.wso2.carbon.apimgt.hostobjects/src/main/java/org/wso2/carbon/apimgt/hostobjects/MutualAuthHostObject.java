@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import javax.script.ScriptException;
 
 /**
@@ -36,16 +37,15 @@ public class MutualAuthHostObject extends ScriptableObject {
     private static final Log log = LogFactory.getLog(MutualAuthHostObject.class);
 
     // issuerId, relyingPartyObject .this is to provide sso functionality to multiple jaggery apps.
-    private static  MutualAuthHostObject mutualAuthHostObject;
+    private static MutualAuthHostObject mutualAuthHostObject;
 
-    @Override
-    public String getClassName() {
+    @Override public String getClassName() {
         return "MutualAuthHostObject";
     }
 
     /**
-     * @param cx        context
-     * @param args      - args[0]-issuerId, this issuer need to be registered in Identity server.
+     * @param cx      context
+     * @param args    - args[0]-issuerId, this issuer need to be registered in Identity server.
      * @param ctorObj
      * @return
      * @throws Exception
@@ -59,17 +59,18 @@ public class MutualAuthHostObject extends ScriptableObject {
 
     /**
      * Validate the provided user name against user store
-     * @param cx context
+     *
+     * @param cx      context
      * @param thisObj this object
-     * @param args arguments
+     * @param args    arguments
      * @return boolean
      * @throws Exception
      */
-    public static boolean jsFunction_validateUserNameHeader(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj) throws Exception {
+    public static boolean jsFunction_validateUserNameHeader(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws Exception {
 
         int argLength = args.length;
-        if (argLength != 1 || !(args[0] instanceof String) ) {
+        if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. User Name is not set properly");
         }
 
@@ -99,8 +100,5 @@ public class MutualAuthHostObject extends ScriptableObject {
         return isValidUser;
 
     }
-
-
-
 
 }

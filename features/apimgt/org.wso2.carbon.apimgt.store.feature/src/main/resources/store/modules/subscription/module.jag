@@ -1,6 +1,8 @@
 <%
 jagg.module("subscription", {
-
+    generateClientSdk:function(){
+        return jagg.require(jagg.getModulesDir()+"subscription/list.jag").generateClientSdk.apply(this, arguments);
+    },
     addAPISubscription:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addAPISubscription.apply(this, arguments);
     },
@@ -13,10 +15,6 @@ jagg.module("subscription", {
 
     getAllSubscriptions:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptions.apply(this, arguments);
-    },
-
-    getAllSubscriptionsOfApplication:function () {
-        return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptionsOfApplication.apply(this, arguments);
     },
     cleanUpApplicationRegistration:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").cleanUpApplicationRegistration.apply(this, arguments);
