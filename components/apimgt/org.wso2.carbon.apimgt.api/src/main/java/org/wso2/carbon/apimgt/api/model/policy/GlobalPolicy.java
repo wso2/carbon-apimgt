@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 public class GlobalPolicy extends Policy {
     private String siddhiQuery;
+    private String keyTemplate;
 
     public GlobalPolicy(String name) {
         super(name);
@@ -31,6 +32,14 @@ public class GlobalPolicy extends Policy {
 
     public void setSiddhiQuery(String siddhiQuery) {
         this.siddhiQuery = siddhiQuery;
+    }
+
+    public String getKeyTemplate() {
+        return this.keyTemplate;
+    }
+
+    public void setKeyTemplate(String keyTemplate) {
+        this.keyTemplate = keyTemplate;
     }
 
     @Override

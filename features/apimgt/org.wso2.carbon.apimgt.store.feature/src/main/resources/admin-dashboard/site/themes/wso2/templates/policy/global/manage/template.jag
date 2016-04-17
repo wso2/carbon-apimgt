@@ -10,6 +10,7 @@
             <tr>
                 <th class="userSpecialCell"><%="Name"%></th>
                 <th class="appSpecialCell"><%="Description"%></th>
+                <th class="keyTempplate"><%="Key Template"%></th>
                 <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>

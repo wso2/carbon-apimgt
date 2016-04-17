@@ -944,6 +944,31 @@ public final class APIConstants {
         OPTIONS
     }
 
+    public enum SupportedCustomPolicyKeys {
+        APP_ID("APP_ID"),
+        IP("IP"),
+        STARTING_IP("STARTING_IP"),
+        END_IP("END_IP"),
+        ACCESS_TOKEN("ACCESS_TOKEN"),
+        USERNAME("APP_ID"),
+        QUERY_PARAM("QUERY_PARAM"),
+        HEADER("HEADER"),
+        BANDWIDTH("BANDWIDTH"),
+        JWT_CLAIM("JWT_CLAIM"),
+        CONTEXT("CONTEXT"),
+        VERSION("VERSION");
+
+        private final String name;
+
+        SupportedCustomPolicyKeys(String s) {
+            name = s;
+        }
+
+        public String getValue() {
+            return this.name;
+        }
+    }
+
     public static class ConfigParameters {
         public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
         private ConfigParameters() {
