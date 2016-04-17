@@ -63,7 +63,7 @@ public class APIClientGenerationManager {
      * @throws APIClientGenerationException if failed to generate the SDK
      */
     public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
-            throws APIClientGenerationException, IOException {
+            throws APIClientGenerationException {
         Subscriber currentSubscriber = null;
         String swagger = null;
         Set<SubscribedAPI> apiSet = null;
@@ -209,7 +209,12 @@ public class APIClientGenerationManager {
                 throw new APIClientGenerationException("problem when storing the temporary swagger file", e);
             } finally {
                 if (bufferedWriter != null) {
-                    bufferedWriter.close();
+                    try {
+                        bufferedWriter.close();
+                    } catch (IOException e) {
+                        log.error("problem when closing the connection which is opened to store the swagger file", e);
+                        throw new APIClientGenerationException("problem when closing the connection which is opened to store the swagger file", e);
+                    }
                 }
             }
 
