@@ -197,8 +197,8 @@ public class APIClientGenerationManager {
             } catch (IOException e) {
                 log.error("problem when storing the temporary swagger file", e);
                 throw new APIClientGenerationException("problem when storing the temporary swagger file", e);
-            }finally {
-                if (bufferedWriter != null){
+            } finally {
+                if (bufferedWriter != null) {
                     bufferedWriter.close();
                 }
             }
@@ -231,20 +231,20 @@ public class APIClientGenerationManager {
         } else {
             configClass = null;
         }
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
 
-            CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
-            codegenConfigurator.setGroupId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_GROUPID));
-            codegenConfigurator.setArtifactId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_ARTIFACTID) + appName);
-            codegenConfigurator
-                    .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + appName);
-            codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + appName);
-            codegenConfigurator.setInputSpec(spec);
-            codegenConfigurator.setLang(configClass);
-            codegenConfigurator.setOutputDir(outPutDir);
-            final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
-            new DefaultGenerator().opts(clientOptInput).generate();
+        CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
+        codegenConfigurator.setGroupId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_GROUPID));
+        codegenConfigurator.setArtifactId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_ARTIFACTID) + appName);
+        codegenConfigurator
+                .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + appName);
+        codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + appName);
+        codegenConfigurator.setInputSpec(spec);
+        codegenConfigurator.setLang(configClass);
+        codegenConfigurator.setOutputDir(outPutDir);
+        final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
+        new DefaultGenerator().opts(clientOptInput).generate();
 
     }
 }

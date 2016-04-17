@@ -33,7 +33,7 @@ public class APIClientGenerationException extends Exception {
         super(throwable);
     }
 
-    public String getErrorMessage(){
+    public String getErrorMessage() {
         return super.getMessage();
     }
 }
