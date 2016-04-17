@@ -52,6 +52,16 @@ import io.swagger.codegen.DefaultGenerator;
 public class APIClientGenerationManager {
     private static final Log log = LogFactory.getLog(APIClientGenerationManager.class);
 
+    /**
+     * Get access token key for given userId and API Identifier
+     *
+     * @param appName          name of the application
+     * @param sdkLanguage preffered SDK language
+     * @param userName      username of the logged in user
+     * @param groupId         group ID of the logged in user
+     * @return Name of the generated SDK
+     * @throws APIClientGenerationException if failed to generate the SDK
+     */
     public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
             throws APIClientGenerationException, IOException {
         Subscriber currentSubscriber = null;
