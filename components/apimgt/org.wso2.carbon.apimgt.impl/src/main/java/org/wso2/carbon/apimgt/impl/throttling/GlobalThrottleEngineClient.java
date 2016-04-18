@@ -45,7 +45,7 @@ public class GlobalThrottleEngineClient {
 
     private String login() throws RemoteException, LoginAuthenticationExceptionException, MalformedURLException {
         authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
-                "/AuthenticationAdmin");
+                "AuthenticationAdmin");
         String sessionCookie = null;
 
         if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(),
