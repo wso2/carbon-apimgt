@@ -5,7 +5,7 @@
 #if($policy.getUserLevel() == $ACROSS_ALL)
 str:concat(resourceKey,'${pipeline}')##
 #else
-str:concat(resourceKey, '_', user_id , '_${pipeline}')##
+str:concat(resourceKey, '_', userId , '_${pipeline}')##
 #end
 #end
 ###generate rule
@@ -15,8 +15,8 @@ api_${policy.getPolicyName()}_${pipeline}##
 
 @Plan:name('#getRule($policy)')
 @Plan:description('ExecutionPlan for #getRule($policy)')
-@Import('org.wso2.throttle.request.stream:1.0.0')
 
+@Import('org.wso2.throttle.processed.request.stream:1.0.0')
 define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, propertiesMap string);
 
 @Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
