@@ -1,4 +1,4 @@
-<% jagg.template("policy-add", function(inputs, outputs, jagg) { %>
+<% jagg.template("policy/resource/policy-add", function(inputs, outputs, jagg) { %>
 <%
     var log = new Log();
     var policyName = request.getParameter("policyName");

@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Add API Policies",
+            "title":"API Policies",
              "header":{
                 "name":"menu/primary"
             },
@@ -26,7 +26,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"policy-list"
+                            "name":"policy/resource/policy-list"
                         }
                     }
                 }
