@@ -1,0 +1,8 @@
+<%
+jagg.initializer("policy-list", {
+
+     preInitialize:function () {
+     jagg.addHeaderJS("policy-list", "policy-list", "templates/policy-list/js/policy-list.js");
+    }
+});
+%>

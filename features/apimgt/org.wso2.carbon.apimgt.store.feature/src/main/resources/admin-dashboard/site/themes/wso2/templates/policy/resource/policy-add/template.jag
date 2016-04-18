@@ -1,0 +1,683 @@
+<% jagg.template("policy-add", function(inputs, outputs, jagg) { %>
+<%
+    var log = new Log();
+    var policyName = request.getParameter("policyName");
+    policyName = policyName == null ? "" : policyName;
+    var pageTitle = "Add API Level Policy";
+    var nameFieldDisableStatus = "";
+    var policyAction = request.getParameter("action");
+    var policyDesc = "",policyLevel = "", defaultQuotaPolicy = "", defaultBandwidth = "" , defaultBandwidthUnit = "",
+                        defaultRequestCount = "", defaultUnitTime="", defaultTimeUnit="";
+    log.info("===========================");
+    log.info(policyName);
+    if(policyName != null && policyName != ""){
+        pageTitle = "Edit API Level Policy";
+        nameFieldDisableStatus = "readonly";
+        var mod = jagg.module("policy");
+        var apiPolicy = mod.getAPIPolicy(policyName).apiPolicy;
+        policyName = apiPolicy.getPolicyName() == null ? "" : apiPolicy.getPolicyName();
+        policyDesc = apiPolicy.getDescription() == null ? "" : apiPolicy.getDescription();
+        policyLevel = apiPolicy.getUserLevel() == null ? "" : apiPolicy.getUserLevel();
+        defaultQuotaPolicy = apiPolicy.getDefaultQuotaPolicy().getType();
+        if (defaultQuotaPolicy == "requestCount"){
+            defaultRequestCount = apiPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        }
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
+            defaultBandwidth = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount();
+            defaultBandwidthUnit = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
+        }
+
+        defaultUnitTime = apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
+        defaultTimeUnit = apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
+    }
+    %>
+
+<div id="throttle-policies">
+	<div id="general-details">
+
+        <div class="page-header">
+            <h2><%=nameFieldDisableStatus%></h2>
+            <p class="lead">General Details</p>
+        </div>
+
+
+        <form class="form-horizontal" method="" id="" action="">
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="policy-name">Policy Name:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Name of the throttle policy.</p></label>
+                </label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-name" name="policy-nam" autofocus="autofocus" value="<%=policyName%>">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="policy-description">Policy Description:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="desc_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="desc_help" class="hide">Description of the throttle policy.</p>
+                </label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" name="policy-description" autofocus="autofocus" value="<%=policyDesc%>">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="level">Level:
+                    <a class="help_popup" help_data="level_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="level_help" class="hide"><strong>APi Lavel :</strong> Will be applicable per whole API.<br><strong> User Level :</strong>  Applicable in user level.<br></p>
+                </label>
+                <div class="col-sm-9">
+                    <select class="form-control select required valid" id="policy-level" name="level">
+                        <option value="apiLevel" <% if(policyLevel == "" || policyLevel == "apiLevel") {%>selected<%}%> >API</option>
+                        <option value="useLevel" <% if(policyLevel == "userLevel") {%>selected<%}%> >User</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h2><br/></h2>
+                <p class="lead">Default Policy</p>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="default-policy-level">Type:
+                    <a class="help_popup" help_data="default-policy-level-help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="default-policy-level-help" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br></p>
+                </label>
+                <div class="col-sm-9">
+                    <select class="form-control select required valid" id="default-policy-level" name="default-policy-level">
+                        <option value="requestCount"  <% if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "RequestCount") {%>selected<%}%> >Request Count</option>
+                        <option value="bandwidthVolume" <% if(defaultQuotaPolicy == "bandwidthVolume") {%>selected<%}%> >Bandwidth</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" id="request-count-block" <% if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "requestCount") {%>style="display:block"<%} else {%>style="display:none"<%}%>>
+                <label class="control-label col-sm-3" for="request-count">Request Count:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Number of requests allowed.</p>
+                </label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control required validInput noSpace" id="request-count" name="request-count" autofocus="autofocus" value="<%=defaultRequestCount%>">
+                </div>
+
+                <label class="control-label col-sm-3" for="request-count">Time:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Time Configuration.</p>
+                </label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="request-unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
+                        <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "sec") {%>selected<%}%>>sec</option>
+                        <option value="min" <% if(defaultTimeUnit == "min") {%>selected<%}%>>min</option>
+                        <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>hour</option>
+                        <option value="day" <% if(defaultTimeUnit == "day") {%>selected<%}%>>day</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" id="bandwidth-block" <% if(defaultQuotaPolicy == "bandwidthVolume") {%>style="display:block"<%} else {%>style="display:none"<%}%>>
+                <label class="control-label col-sm-3" for="request-count">Bandwidth:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Bandwidth Allowed.</p>
+                </label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control required validInput noSpace" id="bandwidth" name="bandwidth" autofocus="autofocus" value="<%=defaultBandwidth%>">
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control select required valid" id="bandwidth-unit" name="bandwidth-unit">
+                        <option value="minutes" selected>KB</option>
+                        <option value="hours">MB</option>
+                    </select>
+                </div>
+                <label class="control-label col-sm-3" for="request-count">Time:
+                    <span class="requiredAstrix">*</span>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <p id="name_help" class="hide">Time Configuration.</p>
+                </label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="bandwidth-unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>">
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control select required valid" id="request-count-unit" name="request-count-unit">
+                        <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "sec") {%>selected<%}%>>sec</option>
+                        <option value="min" <% if(defaultTimeUnit == "min") {%>selected<%}%>>min</option>
+                        <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>hour</option>
+                        <option value="day" <% if(defaultTimeUnit == "day") {%>selected<%}%>>day</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+    <div class="page-header">
+        <h2><br/></h2>
+        <p class="lead"><%=i18n.localize("executionFlows")%></p>
+    </div>
+    <div id="throttle-policies-pipeline-content">
+        <button class="btn btn-primary" type="button" onclick="addPolicy()">
+            <span class="icon fw-stack">
+                <i class="fw fw-add fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
+        </button>
+        <div id="pipeline-content"></div>
+    </div>
+    <div id="add-policy-button">
+        <button type="button" id="addNewAPIButton" name="addNeWThrottleButton" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner">
+            <span class="icon fw-stack">
+                <i class="fw fw-add fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>&nbsp;<%=i18n.localize("addThrottlePolicy")%>
+        </button>
+    </div>
+</div>
+
+<script id="designer-policy-template" type="text/x-handlebars-template">
+
+<div id="accordion2" class="panel-group" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="collapse-{{executionFlow.id}}" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}">
+            <h4 class="panel-title">
+                <label class="radio">
+                    <span class="fw-stack fw-lg">
+                        <i class="fw fw-circle fw-stack-2x fw-inverse"></i>
+                        <i class="fw fw-number fw-stack-1x">{{executionFlow.id}}</i>
+                    </span>
+                </label>
+                <div>
+                    <div class="heading"><%=i18n.localize("executionFlow")%></div>
+                    <div class="description truncate title" title="">
+                        <a href="#" id="executionFlow-desc-{{executionFlow.id}}" data-type="text" data-pk="1" data-title="Enter Description">Description for flow {{executionFlow.id}}</a>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </h4>
+        </div>
+        <div id="pipeline-{{executionFlow.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="collapse-{{executionFlow.id}}">
+            <div class="panel-body">
+                <div class="row no-gutter">
+                    <div class='wr-advance-operations'>
+    <div class="wr-hidden-operations-nav col-lg-4">
+        <a href="javascript:void(0)" onclick="showAdvanceOperation('ip-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')" class="selected">
+            <span class="wr-hidden-operations-icon fw-stack">
+                <i class="fw fw-key fw-stack-2x"></i>
+            </span>
+            IP Condition
+            <span id="ip-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="ip-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="ip-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+        </a>
+        <a href="javascript:void(0)" onclick="showAdvanceOperation('header-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
+            <span class="wr-hidden-operations-icon fw-stack">
+                <i class="fw fw-key fw-stack-2x"></i>
+            </span>
+            Header Condition
+            <span id="header-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="header-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="header-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+        </a>
+        <a href="javascript:void(0)" onclick="showAdvanceOperation('query-param-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
+            <span class="wr-hidden-operations-icon fw-stack">
+                <i class="fw fw-key fw-stack-2x"></i>
+            </span>
+            Query Param Condition
+            <span id="query-param-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="query-param-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="query-param-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+        </a>
+        <a href="javascript:void(0)" onclick="showAdvanceOperation('jwt-claim-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
+            <span class="wr-hidden-operations-icon fw-stack">
+                <i class="fw fw-key fw-stack-2x"></i>
+            </span>
+            JWT Claim Condition
+            <span id="jwt-claim-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="jwt-claim-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
+            <span id="jwt-claim-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+        </a>
+    </div>
+    <div class="wr-hidden-operations-content col-lg-8">
+        <!-- IP Condition policy -->
+        {{#each executionFlow.conditions}}
+        {{#if_eq type "IP"}}
+        <div class="wr-hidden-operation" data-operation="ip-condition-{{../../executionFlow.id}}" style="display: block">
+            <div class="panel panel-default operation-data" data-operation="ip-condition-policy" data-operation-code="IP_CONDITION_POLICY">
+                <div id="ip-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
+                    <h2 class="sub-title panel-title">
+                        IP Condition Policy
+                        <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#ip-condition-body-{{../../executionFlow.id}}">
+                            <input id="ip-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                        </label>
+                        <hr>
+                        <div class="panel-title-description">
+                            This configuration use to define ip condition
+                        </div>
+                    </h2>
+                </div>
+                <div id="ip-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="ip-condition-body-{{../../executionFlow.id}}">
+                    <div id="ip-condition-feature-error-msg-{{../../executionFlow.id}}" class="alert alert-danger hidden" role="alert">
+                        <i class="icon fw fw-error"></i><span></span>
+                    </div>
+
+                    <label class="control-label" for="ip-condition-type">IP Condition Type:<span class="requiredAstrix">*</span></label>
+                    <select  onchange="onIpConditionChange('{{../../executionFlow.id}}', this);" class="select required valid" id="ip-condition-type-{{../../executionFlow.id}}" name="ip-condition-type-{{../../executionFlow.id}}">
+                        {{#if_eq ../ipType "specific"}}
+                            <option value="specificIp" selected>Specific IP</option>
+                            <option value="IPRange">IP Range</option>
+                        {{else}}
+                            <option value="specificIp">Specific IP</option>
+                            <option value="IPRange" selected>IP Range</option>
+                        {{/if_eq}}
+                    </select>
+
+                        {{#if_eq ../ipType "specific"}}
+                            <div class="control-group" style="display:block" id="specific-ip-block-{{../../../executionFlow.id}}">
+                                <label class="control-label" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificIP}}">
+                            </div>
+
+                            <div class="control-group" style="display:none" id="ip-range-block-{{../../../executionFlow.id}}">
+                                <label class="control-label" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+
+
+                                <label class="control-label" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                            </div>
+                        {{else}}
+                                <div class="control-group" style="display:none" id="specific-ip-block-{{../../../executionFlow.id}}">
+                                <label class="control-label" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                            </div>
+
+                            <div class="control-group" style="display:block" id="ip-range-block-{{../../../executionFlow.id}}">
+                                <label class="control-label" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../startingIP}}">
+
+
+                                <label class="control-label" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
+                                <input type="text" class="input-xlarge required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../endingIP}}">
+                            </div>
+                        {{/if_eq}}
+                     <label class="control-label" for="ip-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
+                     <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="ip-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                     </label>
+                </div>
+            </div>
+        </div>
+        {{/if_eq}}
+        {{/each}}
+        <!-- End of IP Condition policy -->
+
+        <!-- Header Condition policy -->
+        {{#each executionFlow.conditions}}
+        {{#if_eq type "Header"}}
+        <div class="wr-hidden-operation" data-operation="header-condition-{{../../executionFlow.id}}" style="display: none">
+            <div class="panel panel-default operation-data" data-operation="header-condition-policy" data-operation-code="HEADER_CONDITION_POLICY">
+                <div id="header-condition-policy-heading" class="panel-heading" role="tab">
+                    <h2 class="sub-title panel-title">
+                        Header Condition Policy
+                        <label id="header-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#header-condition-body-{{../../executionFlow.id}}">
+                            <input id="header-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                        </label>
+                        <hr>
+                        <div class="panel-title-description">
+                            This configuration use to define header conditions
+                        </div>
+                    </h2>
+                </div>
+                <div id="header-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="header-condition-body-{{../../executionFlow.id}}">
+                    <div id="header-condition-feature-error-msg-{{../../executionFlow.id}}" class="alert alert-danger hidden" role="alert">
+                        <i class="icon fw fw-error"></i><span></span>
+                    </div>
+
+                    <label class="control-label" for="header-name">Header Name:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="header-name-{{../../executionFlow.id}}" name="header-name-{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="header-name-help-{{../../executionFlow.id}}" class="hide">Name of the header.</p>
+                    </div>
+
+                     <label class="control-label" for="header-value">Param Value:<span class="requiredAstrix">*</span></label>
+                     <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="header-value-{{../../executionFlow.id}}" name="header-value-{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="header-value-help-{{../../executionFlow.id}}" class="hide">Value of the header.</p>
+                    </div>
+
+                    <button type="button" onclick="addHeader('{{../../executionFlow.id}}')" id="add-new-header-{{../../executionFlow.id}}" name="add-new-header-{{../../executionFlow.id}}" class="btn btn-primary has-spinner">Add</button>
+
+                    <div class="container" {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="header-value-table-{{../../executionFlow.id}}">
+                        <table class="table table-striped" id="header-value-table-content-{{../../executionFlow.id}}">
+                            <thead>
+                                <tr>
+                                    <th>Header</th>
+                                    <th>Value</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                        {{#each keyValPairs}}
+                                                <tr>
+                                                    <td>{{name}}</td>
+                                                    <td>{{value}}</td>
+                                                    <td><button type="button" class="btn btn-primary has-spinner" onclick="removeHeaderRow(this, {{../../../executionFlow.id}})">Delete</button></td>
+                                                </tr>
+                                        {{/each}}
+                             </tbody>
+                        </table>
+                    </div>
+
+                    <label class="control-label" for="header-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
+                     <label id="header-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="header-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}} />
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                     </label>
+
+                </div>
+            </div>
+        </div>
+        {{/if_eq}}
+        {{/each}}
+        <!-- End of Header Condition policy -->
+
+        <!-- Query Param policy -->
+        {{#each executionFlow.conditions}}
+        {{#if_eq type "QueryParam"}}
+        <div class="wr-hidden-operation" data-operation="query-param-condition-{{../../executionFlow.id}}" style="display: none">
+            <div class="panel panel-default operation-data" data-operation="date-condition-{{../../executionFlow.id}}" data-operation-code="QUERY_PARAM_CONDITION_POLICY">
+                <div id="query-param-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
+                    <h2 class="sub-title panel-title">
+                        Query Param Condition Policy
+                        <label id="query-param-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#query-param-condition-body-{{../../executionFlow.id}}">
+                            <input id="query-param-condition-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}} />
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                        </label>
+                        <hr>
+                        <div class="panel-title-description">
+                            This configuration use to define query param conditions
+                        </div>
+                    </h2>
+                </div>
+                <div id="query-param-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="query-param-condition-body-{{../../executionFlow.id}}">
+
+                    <div id="query-param-condition-policy-feature-error-msg" class="alert alert-danger hidden" role="alert">
+                        <i class="icon fw fw-error"></i><span></span>
+                    </div>
+
+                    <label class="control-label" for="query-param-name">Param Name:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="query-param-name-{{../../executionFlow.id}}" name="query-param-name-{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="query-param-name-help-{{../../executionFlow.id}}" class="hide">Name of the query param.</p>
+                    </div>
+
+                     <label class="control-label" for="query-param-name">Param Value:<span class="requiredAstrix">*</span></label>
+                     <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="query-param-value-{{../../executionFlow.id}}" name="query-param-value--{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="query-param-value-help-{{../../executionFlow.id}}" class="hide">Value of the query param.</p>
+                    </div>
+
+                    <button type="button" onclick="addQueryParam('{{../../executionFlow.id}}')" id="add-new-query-param-{{../../executionFlow.id}}" name="add-new-query-param-{{../../executionFlow.id}}" class="btn btn-primary has-spinner">Add</button>
+
+                    <div class="container" {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="query-param-value-table-{{../../executionFlow.id}}">
+                        <table class="table table-striped" id="query-param-value-table-content-{{../../executionFlow.id}}">
+                            <thead>
+                                <tr>
+                                    <th>Query Param</th>
+                                    <th>Value</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               {{#each keyValPairs}}
+                                      <tr>
+                                        <td>{{name}}</td>
+                                        <td>{{value}}</td>
+                                        <td><button type="button" class="btn btn-primary has-spinner" onclick="removeQueryParamRow(this, {{../../../executionFlow.id}})">Delete</button></td>
+                                      </tr>
+                               {{/each}}
+                             </tbody>
+                        </table>
+                    </div>
+
+                    <label class="control-label" for="query-param-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
+                     <label id="query-param-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="query-param-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                            <span class="helper"></span>`
+                            <span class="text"></span>
+                     </label>
+                </div>
+            </div>
+        </div>
+        {{/if_eq}}
+        {{/each}}
+        <!-- End of Query Param Condition policy -->
+
+        <!-- JWT Claims condition policy -->
+         {{#each executionFlow.conditions}}
+        {{#if_eq type "JWTClaim"}}
+        <div class="wr-hidden-operation" data-operation="jwt-claim-condition-{{../../executionFlow.id}}" style="display: none">
+            <div class="panel panel-default operation-data" data-operation="jwt-claim-condition-{{executionFlow.id}}" data-operation-code="JWT_CLAIMS_CONDITION_POLICY">
+                <div id="jwt-claim-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
+                    <h2 class="sub-title panel-title">
+                        Jwt Condition Policy
+                        <label id="jwt-claims-condition-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#jwt-claim-condition-body-{{../../executionFlow.id}}">
+                            <input id="jwt-claim-condition-checkbox-{{../../executionFlow.id}}"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
+                            <span class="helper"></span>
+                            <span class="text"></span>`
+                        </label>
+                        <hr>
+                        <div class="panel-title-description">
+                            This configuration use to define jwt claims conditions
+                        </div>
+                    </h2>
+                </div>
+                <div id="jwt-claim-condition-body-{{../../executionFlow.id}}" class="panel-collapse panel-body collapse {{#if ../enabled}}in{{/if}}" role="tabpanel" aria-labelledby="jwt-claim-condition-body-{{../../executionFlow.id}}">
+
+                    <div id="jwt-claims-condition-feature-error-msg-{{../../executionFlow.id}}" class="alert alert-danger hidden" role="alert">
+                        <i class="icon fw fw-error"></i><span></span>
+                    </div>
+
+                    <label class="control-label" for="jwt-claim-name">Claim Name:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="jwt-claim-name-{{../../executionFlow.id}}" name="jwt-claim-name-{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="jwt-claim-name-help-{{../../executionFlow.id}}" class="hide">Name of the query param.</p>
+                    </div>
+
+                     <label class="control-label" for="jwt-claim-name">Claim Value:<span class="requiredAstrix">*</span></label>
+                     <div class="controls">
+                        <input type="text" class="input-xlarge required validInput" id="jwt-claim-value-{{../../executionFlow.id}}" name="jwt-claim-value-{{../../executionFlow.id}}" autofocus="autofocus" value="">
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
+                        <p id="jwt-claim-value-help-{{executionFlow.id}}" class="hide">Value of the jwt claim.</p>
+                    </div>
+
+                    <button type="button" onclick="addJwtClaim('{{../../executionFlow.id}}')" id="add-new-jwt-claim-{{../../executionFlow.id}}" name="add-new-jwt-claim-{{../../executionFlow.id}}" class="btn btn-primary has-spinner">Add</button>
+
+                    <div class="container" {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="jwt-claim-value-table-{{../../executionFlow.id}}">
+                        <table class="table table-striped" id="jwt-claim-value-table-content-{{../../executionFlow.id}}">
+                            <thead>
+                                <tr>
+                                    <th>Claim</th>
+                                    <th>Value</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {{#each keyValPairs}}
+                                    <tr>
+                                        <td>{{name}}</td>
+                                        <td>{{value}}</td>
+                                        <td><button type="button" class="btn btn-primary has-spinner" onclick="removeJwtClaimRow(this, {{../../../executionFlow.id}})">Delete</button></td>
+                                      </tr>
+                            {{/each}}
+                             </tbody>
+                        </table>
+                    </div>
+
+                    <label class="control-label" for="jwt-claim-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
+                     <label id="jwt-claim-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                            <input id="jwt-claim-condition-invert-{{../../executionFlow.id}}" type="checkbox" {{#if ../invertCondition}}checked{{/if}}/>
+                            <span class="helper"></span>
+                            <span class="text"></span>
+                     </label>
+                </div>
+            </div>
+        </div>
+        {{/if_eq}}
+        {{/each}}
+        <!-- End of jwt claim Condition policy -->
+        </div>
+        <!-- End of Restrictions -->
+
+                        </div>
+                    </div>
+
+
+                    <div class="no-gutter">
+                        <div class="page-header">
+                            <h2></h2>
+                            <p class="lead">Execution Policy</p>
+                        </div>
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-sm-3" for="policy-type">Policy Type:
+                                    <a class="help_popup" help_data="execution-policy-level-help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="execution-policy-level-help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-9">
+                                    <select class="form-control select required valid" id="execution-policy-level-{{executionFlow.id}}" name="execution-policy-level-{{executionFlow.id}}" onchange="onExecutionFlowTypeChange('{{executionFlow.id}}', this);">
+                                        <option value="requestCount" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}selected{{/if_eq}}{{/if_eq}}>Request Count</option>
+                                        <option value="bandwidthVolume" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}selected{{/if_eq}}>Bandwidth</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}style="display:block"{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}style="display:block"{{else}}style="display:none"{{/if_eq}}{{/if_eq}} id="execution-flow-request-count-block-{{executionFlow.id}}">
+                                <label class="control-label col-sm-3" for="execution-flow-request-count-{{executionFlow.id}}">Request Count:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="execution-flow-name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
+                                </div>
+
+                                <label class="control-label col-sm-3" for="request-count">Time:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                        <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}style="display:block"{{else}}style="display:none"{{/if_eq}} id="execution-flow-bandwidth-block-{{executionFlow.id}}">
+                                <label class="control-label col-sm-3" for="request-count">Bandwidth:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control required noSpace" id="execution-flow-bandwidth-{{executionFlow.id}}" name="execution-flow-bandwidth-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.dataAmount}}">
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
+                                        <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
+                                        <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
+                                    </select>
+                                </div>
+
+                                <label class="control-label col-sm-3" for="request-count">Time:
+                                    <span class="requiredAstrix">*</span>
+                                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                    <p id="name_help" class="hide">Time Configuration.</p>
+                                </label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                        <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                        <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                        <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                        <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</script>
+
+<script id="designer-query-pram-table-content" type="text/x-handlebars-template">
+        <tr>
+            <td>{{tableRow.name}}</td>
+            <td>{{tableRow.value}}</td>
+            <td><button type="button" class="btn btn-primary has-spinner" onclick="removeQueryParamRow(this, {{tableRow.flowId}})">Delete</button></td>
+      </tr>
+</script>
+
+<script id="designer-header-value-table-content" type="text/x-handlebars-template">
+        <tr>
+            <td>{{tableRow.name}}</td>
+            <td>{{tableRow.value}}</td>
+            <td><button type="button" class="btn btn-primary has-spinner" onclick="removeHeaderRow(this, {{tableRow.flowId}})">Delete</button></td>
+        </tr>
+</script>
+
+<script id="designer-jwt-claim-value-table-content" type="text/x-handlebars-template">
+        <tr>
+            <td>{{tableRow.name}}</td>
+            <td>{{tableRow.value}}</td>
+            <td><button type="button" class="btn btn-primary has-spinner" onclick="removeJwtClaimRow(this, {{tableRow.flowId}})">Delete</button></td>
+        </tr>
+</script>
+
+<% if(policyName != null && policyName != "") {%>
+<script type="text/javascript">
+    $(document).ready(function() {
+        loadPolicy("<%=policyName%>");
+    });
+</script>
+<%}%>
+<%});%>
+
