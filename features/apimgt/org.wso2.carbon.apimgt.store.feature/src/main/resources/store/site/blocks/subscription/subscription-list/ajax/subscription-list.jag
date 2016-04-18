@@ -74,7 +74,7 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    }else if (action == "getAllSubscriptions") {
+    }else if (action == "getAllSubscriptionsOfApplication") {
         /*
          This will be called when the user calls listAllSubscription via the Rest API.
         */
