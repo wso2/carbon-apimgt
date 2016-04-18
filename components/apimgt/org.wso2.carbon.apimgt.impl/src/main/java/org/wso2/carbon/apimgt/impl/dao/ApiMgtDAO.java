@@ -9640,16 +9640,39 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
+        boolean valid = false;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(true);
-            insertPreparedStatement = connection.prepareStatement(query);
-            insertPreparedStatement.setString(1, conditionType);
-            insertPreparedStatement.setString(2, conditionValue);
-            insertPreparedStatement.setString(4, tenantDomain);
-            insertPreparedStatement.setString(3, "TRUE");
-            status = insertPreparedStatement.execute();
+            if ("API".equals(conditionType)) {
+                String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
+                if (extractedTenantDomain == null){
+                    extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+                   if (tenantDomain.equals(extractedTenantDomain) && isValidateContext(conditionValue)){
+                       valid = true;
+                   }
+            } else if ("APPLICATION".equals(conditionType)) {
+                valid = true;
+            } else if ("USER".equals(conditionType)) {
+                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)){
+                    valid = true;
+                }
+            }else {
+                    valid = true;
+            }
+            if (valid){
+                connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
+                insertPreparedStatement = connection.prepareStatement(query);
+                insertPreparedStatement.setString(1, conditionType);
+                insertPreparedStatement.setString(2, conditionValue);
+                insertPreparedStatement.setString(4, tenantDomain);
+                insertPreparedStatement.setString(3, "TRUE");
+                status = insertPreparedStatement.execute();
+                connection.commit();
+            }else{
+                throw new APIManagementException("Condition is not a valid");
+            }
         } catch (SQLException e) {
             if (connection != null) {
                 try {
@@ -9747,6 +9770,35 @@ public class ApiMgtDAO {
             }
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+    public boolean isValidateContext(String context) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement validateContextPreparedStatement = null;
+        ResultSet resultSet = null;
+        boolean status = true;
+        try {
+            String query = "select count(*) COUNT from AM_API where CONTEXT=?";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            validateContextPreparedStatement = connection.prepareStatement(query);
+            validateContextPreparedStatement.setString(1, context);
+            resultSet = validateContextPreparedStatement.executeQuery();
+            connection.commit();
+            if (resultSet.getInt("COUNT") > 0){
+                status = false;
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to check Block condition with context "+context, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
         return status;
     }

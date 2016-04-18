@@ -720,6 +720,30 @@ public class APIManagerConfiguration {
                         blockConditionRetrieverConfiguration.setUsername
                                 (blockConditionRetrieverServiceUsernameElement.getText());
                     }
+                    OMElement blockConditionRetrieverThreadPoolSizeElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .MAX_THREAD_POOL_SIZE));
+                    if (blockConditionRetrieverThreadPoolSizeElement != null) {
+
+                        blockConditionRetrieverConfiguration.setCorePoolSize
+                                (Integer.parseInt(blockConditionRetrieverThreadPoolSizeElement.getText()));
+                    }
+                    OMElement blockConditionRetrieverInitIdleElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .BLOCK_CONDITION_RETRIEVER_INIT_DELAY));
+                    if (blockConditionRetrieverInitIdleElement != null) {
+                        blockConditionRetrieverConfiguration.setInitDelay(Long.parseLong
+                                (blockConditionRetrieverInitIdleElement
+                                .getText()));
+                    }
+                    OMElement blockConditionRetrieverTimeIntervalElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .BLOCK_CONDITION_RETRIEVER_PERIOD));
+                    if (blockConditionRetrieverTimeIntervalElement != null) {
+                        blockConditionRetrieverConfiguration.setPeriod(Long.parseLong
+                                (blockConditionRetrieverTimeIntervalElement
+                                .getText()));
+                    }
                     String blockConditionRetrieverServicePassword;
                     String blockConditionRetrieverServicePasswordKey = APIConstants.AdvancedThrottleConstants
                             .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants

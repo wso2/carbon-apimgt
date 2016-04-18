@@ -47,4 +47,5 @@ public class APIThrottleConstants {
     public static final String HARD_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED;
 
     public static final int SC_TOO_MANY_REQUESTS = 429;
+    public static final String BLOCKED_REASON = APIConstants.BLOCKED_REASON_KEY;
 }

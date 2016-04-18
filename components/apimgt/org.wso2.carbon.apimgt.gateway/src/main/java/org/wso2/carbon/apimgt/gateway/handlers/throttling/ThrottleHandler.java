@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -48,8 +49,10 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfiguration
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
+import org.wso2.carbon.databridge.agent.util.DataPublisherUtil;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +67,7 @@ import java.util.Map;
 public class ThrottleHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
+    private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     private static volatile DataPublisher dataPublisher = null;
 
@@ -139,7 +143,7 @@ public class ThrottleHandler extends AbstractHandler {
         boolean isApplicationLevelThrottled = false;
         boolean isSubscriptionLevelThrottled = false;
         boolean isApiLevelThrottled = false;
-        boolean isBlockedRequest = false;
+        boolean isBlockedRequest;
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -159,13 +163,17 @@ public class ThrottleHandler extends AbstractHandler {
                 //TODO handle blocked and throttled requests separately.
 
             }
+            String ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
             isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                    apiLevelThrottleKey, applicationLevelThrottleKey, authorizedUser);
+                    apiContext, applicationLevelThrottleKey, authorizedUser,ipLevelBlockingKey);
             if (isBlockedRequest){
+                String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
+                        " ,application:" + applicationLevelThrottleKey + " ,user:" + authorizedUser;
                 if (log.isDebugEnabled()) {
-                    log.debug("Request blocked as it violates defined blocking conditions, for API:" + apiContext +
-                            " ,application:" + applicationLevelThrottleKey + " ,user:" + authorizedUser);
+                    log.debug(msg);
                 }
+                synCtx.setProperty(APIThrottleConstants.BLOCKED_REASON,msg);
+                isThrottled = true;
             } else {
                 //If request is not blocked then only we perform throttling.
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
@@ -437,5 +445,24 @@ public class ThrottleHandler extends AbstractHandler {
 
     public String gePolicyKeyResource() {
         return policyKeyResource;
+    }
+
+    private String getClientIp(MessageContext synCtx) {
+        String clientIp;
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
+        if (!StringUtils.isEmpty(xForwardForHeader)) {
+            clientIp = xForwardForHeader;
+            int idx = xForwardForHeader.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        } else {
+            clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+        }
+        return clientIp;
     }
 }
