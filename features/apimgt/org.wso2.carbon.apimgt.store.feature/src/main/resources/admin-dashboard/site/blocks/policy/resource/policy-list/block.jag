@@ -1,20 +1,28 @@
 <%
 include("/jagg/jagg.jag");
 
-jagg.block("policy-add", {
-    initializer:function (data) {
+jagg.block("policy/api/manage", {
+    initializer:function (data) {},
 
+    getInputs:function () {
+        return {
+
+        }
     },
-    
+
     getOutputs:function (inputs) {
         var apiPolicies, result;
         result = jagg.module("policy").getAllAPIPolicies();
         apiPolicies = result.apiPolicies;
-	    session.put("apiPolicies",apiPolicies);
+
+        // we put results to the session.
+        session.put("apiPolicies", apiPolicies);
         return {
             "apiPolicies":apiPolicies
         };
     }
-    
-    });
+});
 %>
+
+
+

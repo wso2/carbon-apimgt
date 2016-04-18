@@ -232,7 +232,6 @@ var jsonToObject = function (policy) {
         var pipeLines = new ArrayList();
         for (var i = 0 ; i < pipeline.length; i++) {
             isPipelinePresent = true;
-            log.info("======================================STRART");
             var pipe = new Pipeline();
             var quotaPolicy = new QuotaPolicy();
             var limit = new Limit();
