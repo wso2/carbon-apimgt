@@ -196,6 +196,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.execution.manager.stub</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
                 <version>${carbon.identity.version}</version>
@@ -343,6 +349,20 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.samples.pizzashack</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.samples.pizzashack</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
@@ -892,6 +912,36 @@
                 <version>${swagger.codegen.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>1.0.17.wso2v1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-codegen</artifactId>
+                <version>2.1.6.wso2v1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>1.5.8</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -902,16 +952,16 @@
         <carbon.apimgt.version>6.0.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.0.9</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.0.12-SNAPSHOT</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.4</carbon.kernel.version>
+        <carbon.kernel.version>4.4.5</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.2</carbon.commons.version>
-        <carbon.registry.version>4.5.3-SNAPSHOT</carbon.registry.version>
-        <carbon.mediation.version>4.6.1-BETA</carbon.mediation.version>
+        <carbon.registry.version>4.5.3</carbon.registry.version>
+        <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
         <carbon.identity.version>5.0.8</carbon.identity.version>
-        <carbon.governance.version>4.6.2-SNAPSHOT</carbon.governance.version>
+        <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.multitenancy.version>4.5.1</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
@@ -956,7 +1006,7 @@
         <jaggery.version>0.12.3</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v1</synapse.version>
+        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 

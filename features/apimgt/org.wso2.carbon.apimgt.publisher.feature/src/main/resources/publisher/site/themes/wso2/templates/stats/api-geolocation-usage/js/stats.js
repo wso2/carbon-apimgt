@@ -1,5 +1,4 @@
-var currentLocation;
-currentLocation = window.location.pathname;
+var currentLocation = "allAPIs";
 var statsEnabled = isDataPublishingEnabled();
 var apiNameVersionMap = {};
 var apiName;
@@ -32,15 +31,23 @@ $( document ).ready(function() {
        apiName = this.value;
        populateVersionList(apiName,false);
     });
+      $("#apiFilter").change(function (e) {
+      currentLocation = this.value;
+      populateAPIList();
+    });
      $('#select-version').on('click', function () {
         enableVersion = true;
          populateVersionList(apiName,false);
-       $("#divVersion").css('display','inline');
-       $(this).hide();
+       $("#select-version-div-label").css('display','none');
+       $("#select-version-btn").css('display','none');
+       $("#version-select").css('display','inline');
+       $("#version-label").css('display','inline');
     });
       $('#button-clear').on('click', function () {
-       $("#divVersion").css('display','none');
-       $("#select-version").css('display','inline');
+       $("#select-version-div-label").css('display','inline');
+       $("#select-version-btn").css('display','inline');
+       $("#version-select").css('display','none');
+       $("#version-label").css('display','none');
        version="ALL";
        enableVersion = false;
        renderGraph(from,to);        
@@ -88,7 +95,7 @@ $( document ).ready(function() {
                          });
 });
 var populateAPIList = function(){
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
+           jagg.post("/site/blocks/stats/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
         function (json) {
         if (!json.error) {
               apiNameVersionMap = json.apiNameVersionMap;
@@ -128,60 +135,11 @@ var populateVersionList = function(apiName,compare){
                     .selectpicker('refresh')                    
                     .trigger('change');
         };
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes())+":"+formatTimeChunk(d.getSeconds());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function convertDate(date) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var hour=date.getHours();
-    var minute=date.getMinutes();
-    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
-        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
-        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
-}
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
+        getDateTime(to,from);
     var data = [];
            jagg.post("/site/blocks/stats/api-geolocation-usage/ajax/stats.jag", { action : "getGeolocationUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drilldown},
         function (json) {
@@ -202,14 +160,15 @@ function renderGraph(fromDate,toDate){
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#temploadinglatencytTime').html('');
-                    $('#temploadinglatencytTime').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').empty();
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                     $('#chartContainer').hide();
 
                 }
                 else {
                          $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
            }
             }
             else {
@@ -223,13 +182,14 @@ function renderGraph(fromDate,toDate){
   }else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
   }
 }
 
 function drawGraphInArea(rdata){
       $('#chartContainer').show();
-      $('#chartContainer').empty()
+      $('#chartContainer').empty();
+      $('#noData').empty();
       $('#temploadinglatencytTime').empty();
   var data =  [
         {
@@ -292,3 +252,13 @@ function drawGraphInArea(rdata){
     worldChart.draw("#chartContainer", [{type:"click", callback:callbackmethod}]);
     $('#chartContainer').show();
         };
+function getDateTime(currentDay,fromDay){
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
+}

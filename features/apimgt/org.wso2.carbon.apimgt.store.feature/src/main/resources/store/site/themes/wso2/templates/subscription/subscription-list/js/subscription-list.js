@@ -62,25 +62,7 @@ $(document).ready(function () {
             $('.app-key-generate-button',$(this).parent().parent().parent()).removeAttr('disabled');
         }
     });
-    $('.generateAgainBtn').click(function () {
 
-        var elem = $(this);
-        var keyType = elem.attr("data-keyType");
-        var applicationName = elem.attr("data-applicationName");
-
-        jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-            action:"cleanUpApplicationRegistration",
-            applicationName:applicationName,
-            keyType:keyType
-        }, function (result) {
-            if (!result.error) {
-                location.reload();
-            } else {
-                jagg.message({content:result.message,type:"error"});
-            }
-        }, "json");
-
-    });
 
     $('.js_toggle').click(function(){
         var $i = $('i',this);
@@ -133,7 +115,7 @@ $(document).ready(function () {
          */
 
 
-        $(this).prop('disabled', true);//disable button to prevent double clicking
+
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
 
             action: "generateApplicationKey",
@@ -252,20 +234,6 @@ $(document).ready(function () {
         return false;
     });
 
-    $('.curlHelp_popup_prod').click(function () {
-        $('#curlProdtoken_help').toggle('fast', function() {
-            $('#curlProdtoken_help').html(i18n.t('info.curlHelpMsg'));
-        });
-        return false;
-    });
-
-    $('.curlHelp_popup_sand').click(function () {
-        $('#curlSandtoken_help').toggle('fast', function () {
-            $('#curlSandtoken_help').html(i18n.t('info.curlHelpMsg'));
-        });
-        return false;
-    });
-
    $('#btnProvideKeyProduction').click(function () {
        $('.cDivParentOfManualAuthAppCreateProduction').show();
        $('.cDivDefaultBtnSet').hide();
@@ -288,25 +256,11 @@ $(document).ready(function () {
     });
 
     $("#btnProvideKeyProductionSave").click(function () {
-
-        if($("#inputConsumerKeyProduction").val().trim() == "" || $("#inputConsumerSecretProduction").val().trim() == "") {
-            jagg.message({content: "Consumer key and Consumer secret can not be empty.", type: "error"});
-        }
-        else{
-            mapExistingOauthClient($(this));
-        }
-
+        mapExistingOauthClient($(this));
     });
 
     $("#btnProvideKeySandBoxSave").click(function () {
-
-        if($("#inputConsumerKeySandBox").val().trim() == "" || $("#inputConsumerSecretSandBox").val().trim() == "") {
-            jagg.message({content: "Consumer key and Consumer secret can not be empty.", type: "error"});
-        }
-        else{
-            mapExistingOauthClient($(this));
-        }
-
+        mapExistingOauthClient($(this));
     });
 
 });
@@ -340,8 +294,7 @@ var mapExistingOauthClient=function(oBtnElement){
         "username" : userName,
         "key_type" : keyType,
         "client_secret":clientSecret,
-        "validityPeriod" : validityTime,
-        "client_id" : clientId
+        "applicationName" : "erere"
     };
     console.log(oJsonParams);
 
@@ -431,35 +384,6 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                             generatedScopesNames+=", ";
                         }
                     }
-                }
-            }
-
-            // get scopeTxtBox successor
-            var tokenTxtBox=$('#prodAccess').parents(".row-fluid .keys");
-            var scopeTxtBox=$('#prodAccessScope');          // select scopeTxtBox
-
-            //checking whether Scope is selected
-            if(generatedScopesNames!=""){
-
-                if(scopeTxtBox.length==0){  // checking whether scopeTxtBox is already exist
-
-                    //generate scopeTxtBox and append
-                    var scopeTxtDiv = '<div class="row keys">'+
-                                    '<div class="col-sm-3">'+
-                                    '<b>Scope:</b>'+
-                                    '</div>'+
-                                    '<div class="col-sm-9">'+
-                                    '<div class="token bg-info">'+
-                                    '<span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="'+generatedScopesNames+'">'+generatedScopesNames+'</span>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>';
-                    tokenTxtBox.before(scopeTxtDiv);
-                }
-            }else{  // if Scope is not selected
-                if(scopeTxtBox.length>0){
-                    //remove scopeTxtBox if Scope is not selected
-                   tokenTxtBox.prev().remove();
                 }
             }
 
@@ -612,7 +536,7 @@ function toggleTokenTimeSection(link){
 function removeSubscription(apiName, version, provider,  applicationId, delLink) {
     jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h4.modal-title').html(i18n.t('confirm.delete'));
+    $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
     $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.unsubscribeMsg') +'<b>"' + apiName+'-'+version + '</b>"?');
     $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
     $('#messageModal a.btn-other').html(i18n.t('info.no'));

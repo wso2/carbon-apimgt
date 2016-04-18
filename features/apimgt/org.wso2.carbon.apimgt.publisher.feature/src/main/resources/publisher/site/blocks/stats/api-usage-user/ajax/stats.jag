@@ -1,4 +1,4 @@
-<%
+    <%
 include("/jagg/jagg.jag");
 
 (function () {
@@ -65,25 +65,6 @@ include("/jagg/jagg.jag");
             } else {
                 result = mod.getFirstAccessTime(provider);
             }
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-
-         else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
             if (result.error == "true") {
                 obj = {
                     error: result.error,

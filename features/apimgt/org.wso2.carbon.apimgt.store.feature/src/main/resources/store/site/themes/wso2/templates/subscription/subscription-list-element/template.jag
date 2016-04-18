@@ -22,13 +22,6 @@
 	   if (length % itemsPerPage != 0) {
 	   		numberOfPages++;
 	   }
-	   var prodKeyScopeArray, sandKeyScopeArray;
-	   if(app.prodKeyScopeValue != null){
-	   		prodKeyScopeArray = app.prodKeyScopeValue.split(" ");
-	   }
-	   if(app.sandKeyScopeValue != null){
-	   		sandKeyScopeArray = app.sandKeyScopeValue.split(" ");
-	   }
 %>
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -63,9 +56,7 @@
                          }
 
                         %>
-
-                        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null )
-	   { %>
+                        <% if((app.prodKey != null || app.prodKeyState == "COMPLETED") && app.prodConsumerKey != null) { %>
                         <!-- START Show key info -->
 
                         <div class="row keys">
@@ -163,7 +154,7 @@
 												<div class="form-inline proRegenerateForm pull-right">
 
 													<% if(lenS > 0){ %>
-												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
+												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" data-target="#scopePopupTarget" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
                                             						            <% } %>		
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
@@ -193,11 +184,6 @@
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="PRODUCTION"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
-                                   		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
-											data-keyType="PRODUCTION"
-										    data-applicationName="<%=app.name%>">
-											Clean up
-										</button>
                         		</div>
 							<%}%>
 
@@ -215,7 +201,7 @@
                         <%=i18n.localize("prodKeyMsg")%>
                         <% if(lenS > 0){ %>
                             <br><br>
-                            <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                            <a href="#scopePopup" role="dialog" data-target="#scopePopupTarget" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
                         	<div class="cDivParentOfManualAuthAppCreateProduction form-horizontal margin-top">
@@ -323,7 +309,7 @@
 <div class="row">
   <div class="col-md-6">
                         <!-- START Show key info -->
-                    	<% if((app.sandboxKey!=null || app.sandboxKeyState == "COMPLETED")  && app.sandboxConsumerKey != null){%>
+                    	<% if(app.sandboxKey!=null){%>
 
                         <div class="row keys">
 							<div class="col-sm-3">
@@ -407,8 +393,6 @@
 													    title="View cURL command to generate a token as an end user">
 															cURL <span class="caret"></span>
 			   										</button>
-			   										<a class="icon-question-sign curlHelp_popup_sand"></a>
-                                                    <div id="curlSandtoken_help"></div>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'sandboxCurl');">GrantType: Password</a></li>
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'sandboxCurl');">GrantType: Client Credentials</a></li>
@@ -418,7 +402,7 @@
 											<div class="col-sm-10">
 												<div class="form-inline proRegenerateForm pull-right">
 												    <% if(lenS > 0){ %>
-													    <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													    <a href="#scopePopup" type="button" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
@@ -446,11 +430,6 @@
                                    		data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
                                    		data-keytype="SANDBOX"
                                    		iteration="200"><%=i18n.localize("generateKey")%></button>
-                                   		<button title="<%=i18n.localize("cleanUpWarning")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
-											data-keyType="SANDBOX"
-										    data-applicationName="<%=app.name%>">
-											Clean up
-										</button>
                         		</div>
 					   		<%}%>
 					   		<% if(app.sandboxKeyState == "COMPLETED" && app.sandboxKey == null){ %>
@@ -605,7 +584,7 @@
 
             			<tr>
 						 <td>
-						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="<%=i18n.localize("apiThumb")%>" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
 						 	<dl>
 							  <dt>&nbsp; <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a></dt>
 							  <dd>&nbsp; API Status : 
@@ -614,7 +593,21 @@
                             <span class="label label-warning"><%=i18n.localize("deprecated")%></span>
                             <% } else if(api.status == "RETIRED") { %>
                             <span class="label label-danger"><%=i18n.localize("retired")%></span>
-                            <% else if(api.subStatus == "BLOCKED" || api.subStatus == "BLOCKED") { %>
+                            <% } else if(api.status == "PUBLISHED"){%>
+                            <span class="label label-primary"><%=api.status%></span>
+                            <%} %></dd>
+							</dl>
+						 </td>
+				         <td>
+				            <% if(api.businessOwner != null){%>
+				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
+				            <%}
+				            <% else {%>
+				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
+				            <%}%>
+				         </td>
+				         <td>							
+                            <%  if(api.subStatus == "BLOCKED" || api.subStatus == "BLOCKED") { %>
                             <span class="label label-danger"><%=i18n.localize("blocked")%></span>
                             <% } else if(api.subStatus == "PROD_ONLY_BLOCKED") {%>
                             <span class="label label-danger"><%=i18n.localize("prodBlocked")%></span>
@@ -640,22 +633,11 @@
                         <div class="container-fluid">
                             <div class="row-fluid">
                                 <div class="span4">
-                                    <a href="<%=path%>" class="thumbnailInsideLink"><img width="70" alt="" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+                                    
                                 </div>
                                 <div class="span8">
-                                    <% if(api.subStatus != "BLOCKED" || api.subStatus != "PROD_ONLY_BLOCKED" || api.status != "REJECTED"){ %>
-                                    <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/close.png"))%>" onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" align="right"  class="closeBtn" />
-                                    <%}%>
-                                    <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a>
-                                    <div class="provider-info">
-                                        <% if(api.businessOwner != null){%>
-                                            <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
-                                        <%}
-                                        <% else {%>
-                                            <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
-                                        <%}%>
-                                    </div>
-                                    <div class="tier-info"><%=api.tier%> Subscription</div>
+                                    
+                                    
                                 </div>
                             </div>
                         </div>
@@ -748,9 +730,9 @@
         </div><!-- End container-fluid -->
 
         <% if(lenS > 0){ %>
-            <div id="scopePopup" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div id="scopePopupTarget" class="modal hide fade" tabindex="-1" role="dialog">
                     <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">�</button>
                     <h3><%=i18n.localize("selectScopes")%></h3>
                     </div>
                     <div class="modal-body">
@@ -766,37 +748,6 @@
 
                     <div class="modal-footer">
                     <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPop" value="Select">
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                    </div>
-            </div>
-            
-            <div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3><%=i18n.localize("selectScopes")%></h3>
-                    </div>
-                    <div class="modal-body">
-                        <ul>
-
-                                <% for (var i = 0; i < lenS; i++) {
-                                         %><li><input type="checkbox" name="<%=  encode.forHtml(scopes[i].scopeName) %>" value="<%=  encode.forHtml(scopes[i].scopeKey) %>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxSand" <%
-                                         if(app.sandKeyScopeValue != null){
-                                         	for(var j = 0; j < sandKeyScopeArray.length; j++){
-                                         		if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
-                                         			%>checked<%
-                                         			break;
-                                         		}
-                                         	}
-                                         }
-                                         	
-                                         %>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
-                                        }
-                                        %></ul><%
-                                 %>
-                    </div>
-
-                    <div class="modal-footer">
-                    <input class="btn btn-primary" data-dismiss="modal" type="button" id="scopeSelectButtonPopSand" value="Select">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                     </div>
             </div>

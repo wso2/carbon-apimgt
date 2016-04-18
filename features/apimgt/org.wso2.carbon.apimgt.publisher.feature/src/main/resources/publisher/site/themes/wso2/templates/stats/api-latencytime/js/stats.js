@@ -49,26 +49,31 @@ $( document ).ready(function() {
       renderGraph(from,to,"HOUR");
       versionComparison = false;
       depth = "HOUR";
+      btnActiveToggle(this);
     });
        $('#hour-btn').on('click', function () {
         from = currentDay - 3600000;
         to = currentDay;
         depth = "MINUTES";
         versionComparison = false;
-         renderGraph(from,to,depth);      
+        renderGraph(from,to,depth);     
+        btnActiveToggle(this);
       });
       $('#clear-btn').on('click', function () {
          versionComparison = false;
          renderGraph(from,to,depth);  
-         $('#compareVersion-div').css("display", "none");
-      });
+         $('#compare-selection').css("display", "none");
+         $('#compare-selection-label').css("display", "none");
+         $('#compare-version-btn').css("display", "inline");
+         $('#compare-btn-label').css("display", "inline");
+         });
        $('#week-btn').on('click', function () {
         from = currentDay - 604800000;
         to = currentDay;
         depth = "DAY";
         versionComparison = false;
         renderGraph(from,to,depth);
-         
+        btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
         from = currentDay - (604800000 * 4);
@@ -76,20 +81,18 @@ $( document ).ready(function() {
         depth = "DAY";
         versionComparison = false;
         renderGraph(from,to,depth);
-        
+        btnActiveToggle(this);
         });
         $('#date-range').click(function () {
          $(this).removeClass('active');
          });
         $('#compare-btn').on('click', function () {
-        if (apiNameVersionMap[apiName].length == 1) {
-          alert("There's not have any version to compare");
-        }else{
           populateVersionList(apiName,true);
-               $('#compareVersion-div').css("display", "inline");
-        }
+               $('#compare-selection').css("display", "inline");
+               $('#compare-selection-label').css("display", "inline");
+               $('#compare-version-btn').css("display", "none");
+               $('#compare-btn-label').css("display", "none");
         });
- 
                    //date picker
         $('#date-range').daterangepicker({
                         timePicker: true,
@@ -116,7 +119,7 @@ $( document ).ready(function() {
 });
 
 var populateAPIList = function(){
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
+           jagg.post("/site/blocks/stats/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
         function (json) {
         if (!json.error) {
               apiNameVersionMap = json.apiNameVersionMap;
@@ -198,58 +201,10 @@ var populateMediations = function(data){
                     .append(mediations)
                     .selectpicker('refresh');
 };
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes())+":"+formatTimeChunk(d.getSeconds());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function convertDate(date) {
-    var month = date.month() + 1;
-    var day = date.date();
-    var hour=date.hour();
-    var minute=date.minute();
-    return date.year() + '-' + (('' + month).length < 2 ? '0' : '')
-        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
-        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
-}
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
 function renderGraph(fromDate,toDate,drillDown){
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
+        getDateTime(to,from);
     if (statsEnabled) {
         jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
         function (json) {
@@ -270,15 +225,15 @@ function renderGraph(fromDate,toDate,drillDown){
                     drawGraphInArea(data1,drillDown);
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#temploadinglatencytTime').html('');
-                    $('#temploadinglatencytTime').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').html('');
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                     $('#chartContainer').hide();
 
                 }
                 else {
                   $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                   }
             }
             else {
@@ -292,12 +247,13 @@ function renderGraph(fromDate,toDate,drillDown){
     }else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
     }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
+    getDateTime(to,from);
            jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : from , toDate : to,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
         function (json) {
             if (!json.error) {
@@ -309,6 +265,7 @@ function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
 function drawGraphInArea(rdata,drilldown){
     $('#chartContainer').show();
     $('#chartContainer').empty();
+    $('#noData').empty();
     $('#temploadinglatencytTime').empty();
     var renderdata = [];
     var dateFormat;
@@ -406,4 +363,14 @@ var pickLegandColor = function(legand){
           return "#06DA0A";
         break;
 }
+}
+function getDateTime(currentDay,fromDay){
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
+    var toDate = to.split(" ");
+    var fromDate = from.split(" ");
+    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
 }

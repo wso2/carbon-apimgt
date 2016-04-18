@@ -1,9 +1,8 @@
 <% jagg.template("api/api-listing-prototyped", function(inputs, outputs, jagg) { %>
 
 <%
-          var urlPrefix;
-          var tenant=request_tenant;
-          urlPrefix = jagg.getTenantURLPrefix("&");
+          var tenant=request_tenant;          
+          var urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
 				<label><b><%=outputs.message%></b></label>
 <% }else{
@@ -12,7 +11,7 @@
                   if(apis!=null){
                         length = totalLength;
 
-                        var itemsPerPage = 10; //reduce this number to preview the pagination
+                        var itemsPerPage = 12; //reduce this number to preview the pagination
                         var page = 1;
                         var numberOfPages = parseInt(length / itemsPerPage);
 
@@ -37,23 +36,18 @@
 
 					var reqUrl = request.getRequestURI();
  %>
-<div class="title-section">
-    <h2><%=i18n.localize("viewprototypedapis")%></h2>
+<div class="page-header" id="Prototype">
+    <h1><%=i18n.localize("viewprototypedapis")%></h1>
 </div>
 
-<div class="clear"></div>
-<div class="content-section shadow-up">
-    <div class="content-data">
+<div class="page-content">
+    <div class="row">
         <%
         var query=    encode.forUriComponent(request.getParameter('query'));
         if(query == 'null')query = null;
         if(numberOfPages > 1) { %>
         <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
         <% } %>
-        <div class="thumbnail-custom">
-
-            <ul class="thumbnails">
-
                 <%
 
                         for(i = 0; i < apis.length; i++) {
@@ -69,41 +63,59 @@
                                        if(provider == 'null')provider = null;
                             thumbURL = api.thumbnailurl;
                             if(thumbURL && thumbURL.indexOf("images/") == 0) {
-                                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
+                                thumbURL = null;
+                            }else{
+                                thumbURL = jagg.getRegistryPath(thumbURL);
                             }
                             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
                             
                         %>
-               
-                <li>
-                    <div class="thumbnail">
-                        <a href="<%=path%>">
-                              <% if(thumbURL == null) { %>
-                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))" width="100" height="100"/>
-                            <% } else{ %>
-                            <img src="<%=thumbURL%>" width="100" height="100"/>
-                            <% } %> 
-                            
-                        </a>
-                        <div><a href="<%=path%>" class="link-to-api fade-out" title="<%=api.name%>"> <%=api.name%> (<%=api.version%>)</a></div>
-                        <%=api.version%>
-                         <%if(api.isAdvertiseOnly) {%>
-                        	<div><a href="<%=path%>" class="link-to-provider"><%=api.apiOwner%></a></div>
-                        <%}else if(api.apiBusinessOwner != null){%>
-                                <a href="<%=path%>" class="link-to-provider"><%=api.apiBusinessOwner%></a>
-                        <%}else {%>
-                        	<a href="<%=path%>" class="link-to-provider"><%=api.provider%></a></div>
-                        <%}%>
-                    </div>
-                </li>
+                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                            <div class="white-wrapper add-margin-bottom-4x">
+                                <div class="thumbnail icon">
+                                	<% if(thumbURL == null) { %>
+                                		<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a href="" title="<%=i18n.localize("name")%>" class="api-name"><%=api.name%></a>
+											</div>
+										</div>
+                                    <% } else { %>
+                                    	<div class="square-element">
+                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
+                                    	</div>
+                                    <% } %>
+                                    <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
+	                                    <div class="after">                                        
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>                                        
+	                                    </div>
+                                    </a>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a href="<%=path%>" title="<%=i18n.localize("name")%>"><%=api.name%></a></h4>
+                                    <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
+                                    <%if(api.isAdvertiseOnly) {%>
+                                    	<p><%=api.apiOwner%></p>
+                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
+                                    	<p><%=api.apiBusinessOwner%></p>
+                                    <%} else { %>
+                                    	<p><%=api.provider%></p>
+                                    <% } %>
+
+                                </div>
+                            </div>
+                        </div>
 
                 <% } %>
 
-            </ul>
+
             <%
                      if(numberOfPages > 1) { %>
-            <div class="pagination">
-                <ul>
+            <div class="col-sm-12">
+                <ul class="pagination " id="apiListingPagination">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a
                                 <% if(page != 1) { %>
@@ -116,90 +128,76 @@
 
                                 >&lt;&lt;</a></li>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
                     <!-- Displaying differently for lengthy pagination -->
                     <%
 
                            var pConst = 7;
 
-
                            if(numberOfPages <= (pConst+6)){
                                    for(var i=1;i<=numberOfPages;i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%= query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%= query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
                            }
                            else{
                                if (page <= (pConst+6)){
                                    if(page<pConst){
                                         for(var i=1;i<=((pConst+6) -4);i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }  %>
-                    <li class="disabled"><a href="#">...</a></li>
-                    <li><a href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    <li><a href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    <li class="disabled"><a href="#" title="<%=i18n.localize("pagination")%>">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     <% } else if((numberOfPages - page) < pConst){ %>
-                    <li><a href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
-                    <li><a href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
+                    <li class="disabled"><a href="#" title="<%=i18n.localize("pagination")%>">...</a></li>
                     <%
                                            for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
 
                                        } else { %>
-                    <li><a href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
-                    <li><a href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
+                    <li class="disabled"><a href="#" title="<%=i18n.localize("pagination")%>">...</a></li>
 
                     <%
                                            for(var i=(page-3);i<= (page +3);i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% } %>
 
 
-                    <li class="disabled"><a href="#">...</a></li>
-                    <li><a href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    <li><a href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    <li class="disabled"><a title="<%=i18n.localize("pagination")%>" href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     <% } %>
                     <%
                                }
                                else{ //  cp 14, 15 ...
 
                                    if (numberOfPages - page < pConst){   %>
-                    <li><a href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
-                    <li><a href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
+                    <li class="disabled"><a title="<%=i18n.localize("pagination")%>" href="#">...</a></li>
                     <%
                                            for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
                                    }
                                    else{  %>
-                    <li><a href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
-                    <li><a href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
-                    <li class="disabled"><a href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">1</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(2)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>">2</a></li>
+                    <li class="disabled"><a title="<%=i18n.localize("pagination")%>" href="#">...</a></li>
 
                     <%
                                                        for(var i=(page-3);i<= (page +3);i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% } %>
 
 
-                    <li class="disabled"><a href="#">...</a></li>
-                    <li><a href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    <li><a href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    <li class="disabled"><a title="<%=i18n.localize("pagination")%>" href="#">...</a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages-1)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    <li><a title="<%=i18n.localize("pagination")%>" href="?page=<%=String(numberOfPages)%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     <%
                                    }
                                }
@@ -208,7 +206,7 @@
 
                           %>
 
-                    <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"<% } %>>&gt;&gt;</a></li>
+                    <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a title="<%=i18n.localize("pagination")%>" <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%><%=urlPrefix%><% if(query!=null){ %>&query=<%=query%><%}%>"<% } %>>&gt;&gt;</a></li>
 
 
 
@@ -218,23 +216,22 @@
 
 
             <% if(totalLength == 0) {
-                         if (request.getParameter("query") == null) {
+                 if (request.getParameter("query") == null) {
                     %>
-            <div class="alert alert-info">
-                <strong><%=i18n.localize("noPrototypedAPIMsg")%></strong>
-            </div>
-            <%   } else {
-                    %>
-            <div class="alert alert-info">
-                <strong><%=i18n.localize("noSearchResultMsg")%></strong>
-            </div>
+		            <div class="message message-info">
+				    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noPrototypedAPIMsg")%></h4>
+				    </div>
+            <%   } else { %>
+            		 <div class="message message-info">
+				    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("noSearchResultMsg")%></h4>
+				    </div>
             <%
                          }
                       }
                       }
                       }
                     %>
-        </div>
+       
     </div>
 </div>
 <style>
@@ -249,4 +246,21 @@
         font-weight:bold;
     }
 </style>
+
+<script>
+$(window).load(function(){
+
+    $(".setbgcolor").generateBgcolor({
+        definite:true
+    });
+
+    $(".api-name-icon").each(function() {
+        var elem = $(this).next().children(".api-name");
+        $(this).nametoChar({
+            nameElement: elem
+        });
+    });
+
+});
+</script>
         <% }); %>

@@ -56,8 +56,6 @@ import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
-import org.wso2.carbon.identity.oauth.OAuthUtil;
-import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -68,7 +66,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -500,7 +497,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 
         String tokenEndpointName = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME);
+                getFirstProperty(APIConstants.TOKEN_ENDPOINT_NAME);
         String keyMgtServerURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         URL keymgtURL = new URL(keyMgtServerURL);
@@ -521,7 +518,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
       
         //To revoke tokens we should call revoke API deployed in API gateway.
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+                getFirstProperty(APIConstants.REVOKE_API_URL);
 
 		URL revokeEndpointURL = new URL(revokeEndpoint);
 		String revokeEndpointProtocol = revokeEndpointURL.getProtocol();

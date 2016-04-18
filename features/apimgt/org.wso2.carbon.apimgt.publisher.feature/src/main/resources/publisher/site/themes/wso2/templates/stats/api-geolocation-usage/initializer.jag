@@ -2,6 +2,7 @@
 jagg.initializer("stats/api-geolocation-usage", {
 
     preInitialize:function () {
+        jagg.addHeaderJS("stats", "common", "templates/stats/js/stats.js");
     	jagg.addHeaderJS("stats", "stats", "templates/stats/api-geolocation-usage/js/stats.js");
     	jagg.addFooterJS("stats", "moment", "libs/datepicker/js/moment.js");
     	jagg.addHeaderCSS("stats", "datepicker","libs/datepicker/css/daterangepicker-bs3.css");

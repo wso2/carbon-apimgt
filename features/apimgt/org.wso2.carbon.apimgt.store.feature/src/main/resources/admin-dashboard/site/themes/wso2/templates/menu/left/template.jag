@@ -5,6 +5,8 @@
     var reqUrl = request.getRequestURI();
     var listUrl=jagg.url("/site/pages/index.jag");
     var listMappedUrl=jagg.url("/site/pages/index.jag");
+    var liveLogViewer=jagg.url("/log-viewer");
+    var loganalyzer =jagg.url("/log-analyzer");
     var subsUrl=jagg.url("/site/pages/index.jag");
     var subsMappedUrl=jagg.url("/site/pages/index.jag");
 
@@ -95,9 +97,44 @@
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 							<%= i18n.localize("tierManagement") %></a></li>
+						<li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/alerts-domain-list") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("alerts") %></a></li>
+												<%
+						var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+						var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+						if(isAnalyticsEnabled) {
+							%>
+							<li <%if (reqUrl.match("manage-alert-type")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/manage-alert-type") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("manageAlertTypes") %></a></li>
+							<%
+						}
+						%>
+
 					</ul>				
 				</li>
-			</ul>
+				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
+                    <ul class="nav nav-pills secondary-nav collapse in">
+                         <li><a href="<%=loganalyzer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Dashboard</a></li>
+                         </li>
+                         <li><a href="<%=liveLogViewer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Live log viewer</a>
+                         </li>
+                    </ul>
+                 </li>
+            </ul>
+           </li>
+	      </ul>
 		</div>
 		</div>
 </div>

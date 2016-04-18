@@ -88,11 +88,11 @@ $( document ).ready(function() {
                     pupulateAPIList();
                 } else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 } else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -160,7 +160,7 @@ var pupulateAppList = function(apiName) {
 
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
+                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -289,7 +289,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
@@ -304,30 +304,6 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
     , "json");
 };
 
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
 function getDateTime(currentDay,fromDay){  
     to = convertTimeString(currentDay);
     from = convertTimeString(fromDay);
@@ -338,28 +314,4 @@ function getDateTime(currentDay,fromDay){
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
     drawThrottledTimeGraph(apiName, appName, from, to, apiFilter);
-}
-
-function convertDateToLong(date){
-    var allSegments=date.split(" ");
-    var dateSegments=allSegments[0].split("-");
-    var timeSegments=allSegments[1].split(":");
-    var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
-    return newDate.getTime();
-}
-
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");
 }

@@ -47,6 +47,7 @@
     "settings":"Settings",
 
     "tierManagement":"Throttling Tiers",
+    "manageAlertTypes" : "Manage Alert Types",
     "tierName":"Name",
     "tierAddTitle":"Add Tier",
     "tierEditTitle":"Edit Tier",
@@ -69,6 +70,35 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
-    "deny":"Deny"
+    "deny":"Deny",
+
+    "RequestPatternChanged":"Abnormal Resource Access Pattern",
+    "UnusualIPAccessAlert":"Unseen Source IP Address",
+    "abnormalRequestsPerMin":"Abnormal Request Count",
+    "abnormalBackendTime":"Abnormal Backend Time",
+    "abnormalResponseTime":"Abnormal Response Time",
+    "healthAvailabilityPerMin":"Availability of APIs",
+    "AbnormalRefreshAlert":"Abnormal Renewal of Access Tokens",
+    "AbnormalTierUsage":"Abnormal API Usage",
+    "FrequentTierHittingAlert":"Tier Crossing",
+
+    
+    "alerts":"Configure Alerts",
+    "templateName":"Template Name",
+    "configName":"Configuration Name",
+    "description":"Description",
+    "addConfiguration":"Add Configuration",
+    "editConfigurations":"Edit Configurations",
+    "domainTableColumnName":"Configuration Name",
+    "domainTableColumnDescription":"Description",
+    "templateType":"Template Type",
+    "actions":"Actions",
+    "common.button.edit":"Edit",
+    "common.button.delete":"Delete",
+     "schedulerConfiguration":"Scheduler Configuration",
+    "cronExpression":"Cron Expression",
+    "domains":"Domains"
+
+
 
 }

@@ -105,13 +105,13 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
 
             }
@@ -140,7 +140,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                     $('#resourcePathUsageTable').hide();
                     $('div#resourcePathUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
 
                 } else {
 
@@ -273,7 +273,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                                    time = parsedResponse[i][1][j][1][k][1][m][1][l][1];
                                }
                                rowId++;
-                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+'</a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
+                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" >'+contextName+' title="resource_path" </a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
                                hitCount =0;
                             }
                         }
@@ -454,41 +454,6 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
 
 }
 
-function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "isDataPublishingEnabled"},
-        function (json) {
-            if (!json.error) {
-                statsEnabled = json.usage;
-                return statsEnabled;
-            } else {
-                if (json.message == "AuthenticateError") {
-                    jagg.showLogin();
-                } else {
-                    jagg.message({content: json.message, type: "error"});
-                }
-            }
-        }, "json");        
-}
-
-var convertTimeString = function(date){
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
-    return formattedDate;
-};
-
-var convertTimeStringPlusDay = function (date) {
-    var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
-    return formattedDate;
-};
-
-var formatTimeChunk = function (t) {
-    if (t < 10) {
-        t = "0" + t;
-    }
-    return t;
-};
-
 
 function getCell(column, row) {
     var column = $('#' + column).index();
@@ -499,13 +464,6 @@ function getCell(column, row) {
 function dateToUnix(year, month, day, hour, minute, second) {
     return ((new Date(year, month - 1, day, hour, minute, second)).getTime() );
 }
-
-function btnActiveToggle(button){
-    $(button).siblings().removeClass('active');
-    $(button).addClass('active');
-}
-
-
 
 function getDateTime(currentDay,fromDay){
     to = convertTimeString(currentDay);

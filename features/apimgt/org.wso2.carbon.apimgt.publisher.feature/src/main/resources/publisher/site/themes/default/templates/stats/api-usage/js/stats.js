@@ -482,7 +482,7 @@ var drawProviderAPIUsage = function(from,to){
 }
 
 function isDataPublishingEnabled(){
-    jagg.post("/site/blocks/stats/api-usage/ajax/stats.jag", { action: "isDataPublishingEnabled"},
+    jagg.post("/site/blocks/stats/ajax/stats.jag", { action: "isDataPublishingEnabled"},
         function (json) {
             if (!json.error) {
                 statsEnabled = json.usage;

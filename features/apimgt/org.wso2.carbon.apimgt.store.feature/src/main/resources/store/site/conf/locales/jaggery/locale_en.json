@@ -54,7 +54,7 @@
     "listAPI.app" : "By Application",
 
     "moreAPI" : "More APIs from",
-    "recentlyAdded" : "Recently Added",
+    "recentlyAdded" : "Recently Added APIs",
     "searchAPI" : "Search API",
 
     "docSum" : "Summary",
@@ -117,12 +117,15 @@
     "noOfAPICalls": "Number of API Calls",
     "faultCount" : "Faulty API Invocation Count",
     "faultyInvocationTitle" : "Faulty Invocations per Application",
-    "callType" : "API Usage from Resource Path per Application",
+    "faultyInvocations" : "Faulty Invocations",
+    "callType" : "Resource Usage",
     "callTypeTitle" : "API Usage from Resource Path",
     "registeredUseres" : "Registered Users For Applications",
     "topUsersTitle" : "Top Users For Applications",
-    "topUsersDropDown" : "Top Users per Application",
-    "apiUsage" : "API Usage per Application",
+    "usersTitle" : "Users For Applications",
+    "topUsersDropDown" : "Top Users",
+    "apiUsage" : "API Usage",
+    "apiUsageTitle" : "API Usage per Application",
     "subscriber": "Subscriber",
 
     "keysPro" : "Keys - Production",
@@ -253,7 +256,21 @@
 
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
     "provideAccessToken" : "If you already have an access token please provide it below.",
-    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token."
+    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
+    
+    "goBack" : "Go Back",
+    "applicationList" : "Application List",
+    "addApplication" : "Add Application",
+    "manageAlertTypes": "Manage Alert Types",
+    "abnormalBackendTime": "Abnormal backend time",
+    "abnormalResponseTime":"Abnormal response time",
+    "abnormalRequestsPerMin":"Abnormal request counts",
+    "RequestPatternChanged":"Abnormal resource access pattern",
+    "UnusualIPAccessAlert":"Unseen source IP access",
+    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
+    "FrequentTierHittingAlert":"Frequent tier limit hitting",
+    "AbnormalTierUsage":"Abnormal API usage",
+    "healthAvailabilityPerMin":"Availability of APIs"
 
    
 }

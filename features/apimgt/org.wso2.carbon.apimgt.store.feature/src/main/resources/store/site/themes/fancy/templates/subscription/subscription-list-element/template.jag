@@ -524,6 +524,7 @@
         </div>
 
         <h3 data-section="api-listing" class="js_toggle">Subscribed APIs <i class="icon-chevron-down icon-keys"></i></h3>
+        
         <div class="container-fluid subsApiListing api-section">
             <div class="row-fluid">
 
@@ -548,7 +549,15 @@
                     apiName = api.name.substring(0,10)+ "..";
                 }
             %>
-                <div class="span4 keyListPadding">
+          <div class="container">
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">Subscribed APIs</a></li>
+    <li><a data-toggle="tab" href="#menu1">Generate SDK</a></li>
+  </ul>
+
+
+            <div class="tab-content">
+                <div id="home" class="span4 keyListPadding tab-pane fade in active ">
                     <div id="<%=api.name%>" class="thumbnail <% if(api.status == "DEPRECATED" || api.status == "RETIRED" || api.status == "BLOCKED") { %>deprecated<% } %>">
                         <div class="deprecatedLabel">
                             <% if(api.status == "DEPRECATED") { %>
@@ -588,7 +597,21 @@
                     </div>
                 </div>
             <% } %>
+            <div id="menu1" class="tab-pane fade">
+              </select>
+         <button onclick="generateAndroidSdk('<%=app.name%>','android')" type="button">Android</button>
+          <button onclick="generateAndroidSdk('<%=app.name%>','java')" type="button">Java</button>
+          <a class="icon-question-sign help_popup_cli_gen"></a>
+         <div id="cligen_help"></div>
+    </div>
             </div><!-- End row -->
+<%
+var log = new Log();
+log.info(app.name);
+%>
+
+            </div>
+            </div>
             <%
 	   if(numberOfPages > 1) { %>
             <div class="pagination">

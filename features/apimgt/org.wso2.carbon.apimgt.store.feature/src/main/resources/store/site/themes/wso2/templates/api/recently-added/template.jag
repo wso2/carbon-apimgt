@@ -1,5 +1,4 @@
 <% jagg.template("api/recently-added", function(inputs, outputs, jagg) { %>
-<% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
 <% 
 
    var theme = jagg.getUserTheme().base;
@@ -7,53 +6,52 @@
    var registryPath = jagg.getRegistryPath("");
 %>
 
-<div id="recently-added" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("recentlyAdded")%></div>
-  <div class="panel-body">
-         <%
-        var tenant=request_tenant;
-        var urlPrefix = jagg.getTenantURLPrefix("&");
-        var i, api, path, thumbURL, thumbURL1 , apis = outputs.apis, length = 0;
-        if(length>8){length=8;}
-        for(i = 0; i < length; i++) {
-            api = apis[i];
-            thumbURL = api.thumbnailurl;
-            if(thumbURL && thumbURL.indexOf("images/") == 0) {
-                thumbURL = jagg.getAbsoluteUrl(jagg.getThemeFile(thumbURL));
-            }else{
-                thumbURL = jagg.getRegistryPath(thumbURL);
-            }
-            var apiProvider = api.provider;
-            if(api.isAdvertiseOnly != null && api.isAdvertiseOnly){
-            	apiProvider = api.owner;
-            }
-            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ urlPrefix;
+<div class="page-header">
+    <h1><%=i18n.localize("recentlyAdded")%></h1>
+</div>
 
-        %>
-  Loading ....
-  </div>
-  <script id="recently-added-template" type="text/x-handlebars-template">
+<div  class="page-content">
+    <div id="recently-added" class="row">
+    <script id="recently-added-template" type="text/x-handlebars-template">
     {{#each apis}}
-    {{#if @index}}<hr />{{/if}}
-    <div class="row">
-      <div class="col-md-4">
-        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >
-          <img src="{{ thumbnailurl }}" width="70px" height="70px"/>
-        </a>
-      </div>
-      <div class="col-md-8">
-        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >      
-        <strong class="fade-out">{{ name }}-{{ version }}</strong>
-        </a>
-        <div>{{ displayOwner }}</div>
-        <input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
-      </div>
-    </div>
-    {{else}}      
-          <div class="text-muted" style="padding:15px">No APIs to display.</div>  
+
+<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                            <div class="white-wrapper add-margin-bottom-4x">
+                                <div class="thumbnail icon">
+									{{#if thumbnailurl}}
+										<div class="square-element">
+                                    		<img class="" src="{{ thumbnailurl }}" alt="<%=i18n.localize("apiThumb")%>">
+                                    	</div>										                               		
+									{{else}}     
+                                    	<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ name }}</a>
+											</div>
+										</div> 
+									{{/if}}
+									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" title="<%=i18n.localize("browse.title")%>">
+                                    	<div class="after">                                        
+                                    		<span class="fw-stack fw-lg">
+                                    			<i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    			<i class="fw fw-view fw-stack-1x"></i>
+                                    		</span>                                        
+                                    	</div>
+									</a>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4><a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">{{ name }}-{{ version }}</a></h4>
+                                    <h5>{{ displayOwner }}</h5>
+									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
+                                </div>
+                            </div>
+                        </div>
     {{/each}}   
   </script>  
+    </div>
 </div>
+
+
 
 <script type="text/javascript">
   $(function(){
@@ -67,7 +65,7 @@
          if (result.error == false) {
           for(var i = 0; i < result.apis.length;i++){
             if(/^images\//.test(result.apis[i].thumbnailurl)){
-              result.apis[i].thumbnailurl = "<%= themePath %>"+result.apis[i].thumbnailurl;
+              result.apis[i].thumbnailurl = null;
             }
             else{
               result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;  
@@ -75,7 +73,7 @@
             if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
               result.apis[i].displayOwner = result.apis[i].owner;
             }
-            else if(result.apis[i].businessOwner != null) {
+            else if(result.apis[i].businessOwner != null && result.apis[i].businessOwner.trim() != "") {
               result.apis[i].displayOwner = result.apis[i].businessOwner;
             }
             else{
@@ -84,12 +82,24 @@
           } 
           var source   = $("#recently-added-template").html();
           var template = Handlebars.compile(source);
-          $("#recently-added .panel-body").html(template(result));
+          $("#recently-added").html(template(result));
           $(".recent_rating").rating();
+          $(".setbgcolor").generateBgcolor({
+              definite:true
+          });
+
+          $(".api-name-icon").each(function() {
+              var elem = $(this).next().children(".api-name");
+              $(this).nametoChar({
+                  nameElement: elem
+              });
+          });
+
          } else {
              jagg.message({content:result.message,type:"error"});
          }
     }, "json");
   });
+
 </script>
 <% }); %>

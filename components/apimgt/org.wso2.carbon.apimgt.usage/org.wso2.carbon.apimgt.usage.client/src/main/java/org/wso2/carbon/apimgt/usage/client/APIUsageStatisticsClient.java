@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
+import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -392,7 +393,7 @@ public abstract class APIUsageStatisticsClient {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String appName = rs.getString("NAME");
                 APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
-                String tokenEncryptionConfig = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS);
+                String tokenEncryptionConfig = config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
 
                 boolean isTokenEncryptionEnabled = Boolean.parseBoolean(tokenEncryptionConfig);
 
@@ -740,7 +741,7 @@ public abstract class APIUsageStatisticsClient {
         resultList.addAll(tempList);
     }
     /**
-     * Return list of Latency time for given api and its version
+     * Return list of GeoLocation Usage for given api and its version
      *
      * @param apiName - Name of th API
      * @param version - Version of the API
@@ -748,13 +749,31 @@ public abstract class APIUsageStatisticsClient {
      * @param fromDate - Start date of the time span
      * @param toDate - End date of time span
      * @param drillDown - Type of data
-     * @return List of latency Times
+     * @return List of Geolocation  usage
      * @throws APIMgtUsageQueryServiceClientException
      */
 
     public abstract List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version,
                                                                                 String tenantDomain, String fromDate,
                                                                                 String toDate, String drillDown)
+            throws
+            APIMgtUsageQueryServiceClientException;
+    /**
+     * Return list of UserAgent count for given api and its version
+     *
+     * @param apiName - Name of th API
+     * @param version - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate - Start date of the time span
+     * @param toDate - End date of time span
+     * @param drillDown - Type of data
+     * @return List of count per user Agent
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+
+    public abstract List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version,
+                                                                             String tenantDomain, String fromDate,
+                                                                             String toDate, String drillDown)
             throws
             APIMgtUsageQueryServiceClientException;
 }

@@ -780,6 +780,11 @@ var jagg = jagg || (function () {
         }     
     }
 
+    var log = function(message){
+        //var log = new Log();
+        //log.info(message);
+    }
+
     var isCSRFTokenValid = function(){
         var log = new Log();
         var cookie = request.getCookie("csrftoken");
@@ -892,7 +897,8 @@ var jagg = jagg || (function () {
         setCSRFToken:setCSRFToken,
         isCSRFTokenValid:isCSRFTokenValid,
         validateInputs:validateInputs,
-        getTenantURLPrefix:getTenantURLPrefix
+        getTenantURLPrefix:getTenantURLPrefix,
+        log:log
     };
 
 }());
