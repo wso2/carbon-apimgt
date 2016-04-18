@@ -173,7 +173,7 @@ $(document).ready(function(){
 
 function showHideDefaultQuotaPolicy(){
     var quotaPolicy = $('input[name=select-quota-type]:checked').val();
-    if (quotaPolicy == "RequestCount"){
+    if (quotaPolicy == "requestCount"){
         $('#defaultBandwidthBasedDiv').hide();
     } else{
         $('#defaultBandwidthBasedDiv').show();
@@ -211,7 +211,7 @@ function validateInputs(){
     var defaultBandwidth = $('#defaultBandwidth');
     var defaultBandwidthTxt = defaultBandwidth.val();
 
-    if(defaultQuotaPolicy=="RequestCount") {
+    if(defaultQuotaPolicy=="requestCount") {
         if(!validateNumbersInput(defaultRequestCountTxt,defaultRequestCount,requiredMsg, invalidErrorMsg)){
             return false;
         }
