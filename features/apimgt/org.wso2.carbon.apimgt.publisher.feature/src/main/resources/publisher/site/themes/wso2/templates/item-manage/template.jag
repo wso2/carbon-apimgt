@@ -160,6 +160,8 @@
 	                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
 	            </div>
 
+          <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
+
 <div class="form-group">
                         <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span>
                             <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
@@ -168,19 +170,25 @@
 <div class="controls col-sm-8 tierSelect">
                             <select id="apiTier" name="apiTier"  class="form-control multiselect selected required">
                             <%
-        for (var i = 0; i < resourceTiers.length; i++) {
-            var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
-var log = new Log();
-log.info(isSelectedAPITier);
-            %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option>%%><%
-        }
-        %>
-        </select>
-        <a class=" help_popup" help_data="tier_help"></a>
-        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                            var log = new Log();
+                          
+                            for (var i = 0; i < resourceTiers.length; i++) {
+                                var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
+                                var isSelected = false;
+                                
+                                if(resourceTiers[i].tierName == api.apiLevelPolicy){
+                                    isSelected = true;
+                                }
+                               
+                                %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option>%%><%
+                            }
+                            %>
+                            </select>
+                            <a class=" help_popup" help_data="tier_help"></a>
+                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
 </div>
 </div>
-
+<%  }%>
 
 
              <%  if(mod.isGlobalCEPThrottlingEnabled()){%>

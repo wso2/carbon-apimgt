@@ -3690,7 +3690,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             for (String flowString : executionFlows) {
                 if (!(policy instanceof GlobalPolicy)) {    //exclude global level policies deploying to GlobalCEP
-                    manager.deployPolicyToGlobalCEP(flowString);
+                    manager.deployPolicyToGlobalCEP(policy.getPolicyName(),flowString);
                 }
                 //manager.deployPolicyToGatewayManager(flowString);
             }
@@ -3709,7 +3709,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> executionFlows = new ArrayList<String>();
         String policyLevel = null;
-
+        String policyName = null;
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
@@ -3751,10 +3751,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
              * Therefore for loop is wrapped inside a try catch block
              */
             for (String flowString : executionFlows) {
-                if (!(policy instanceof GlobalPolicy)) { // Exclude global level policies from deploying to GlobalCEP
-                    deploymentManager.deployPolicyToGlobalCEP(flowString);
-                }
-                deploymentManager.deployPolicyToGatewayManager(flowString);
+                    deploymentManager.deployPolicyToGlobalCEP(policyLevel + "_"+policy.getPolicyName(), flowString);
             }
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);

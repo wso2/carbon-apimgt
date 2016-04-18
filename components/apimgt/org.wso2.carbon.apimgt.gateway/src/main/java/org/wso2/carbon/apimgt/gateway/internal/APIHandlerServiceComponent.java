@@ -73,29 +73,31 @@ public class APIHandlerServiceComponent {
 			  bundleContext.registerService(
 			          Axis2ConfigurationContextObserver.class.getName(), listener, null);
 
-                //TODO we need to do following only if CEP based throttling is enabled.
-                //While initializing component we need to create throttle data holder and set it to
-                //service reference holder.
-                ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-                ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
-                ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
-                        .getThrottleProperties());
-                //First do web service call and update map.
-                //Then init JMS listener to listen que and update it.
-                //Following method will initialize JMS listnet and listen all updates and keep throttle data map up to date
-                //start web service throttle data retriever as separate thread and start it.
-                WebServiceThrottleDataRetriever webServiceThrottleDataRetriever = new WebServiceThrottleDataRetriever();
-                webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+                if (configuration.getThrottleProperties().isEnabled()) {
+                    ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+                    ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
+                    ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
+                            .getThrottleProperties());
+                    //First do web service call and update map.
+                    //Then init JMS listener to listen que and update it.
+                    //Following method will initialize JMS listnet and listen all updates and keep throttle data map
+                    // up to date
+                    //start web service throttle data retriever as separate thread and start it.
+                    WebServiceThrottleDataRetriever webServiceThrottleDataRetriever = new
+                            WebServiceThrottleDataRetriever();
+                    webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
 
-                //Get blocking details from web service call.
-                WebServiceBlockConditionsRetriever webServiceBlockConditionsRetriever = new WebServiceBlockConditionsRetriever();
-                webServiceBlockConditionsRetriever.startWebServiceBlockConditionDataRetriever();
+                    //Get blocking details from web service call.
+                    WebServiceBlockConditionsRetriever webServiceBlockConditionsRetriever = new
+                            WebServiceBlockConditionsRetriever();
+                    webServiceBlockConditionsRetriever.startWebServiceBlockConditionDataRetriever();
 
-                //start JMS throttle data retriever as separate thread and start it.
-                JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
-                jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
+                    //start JMS throttle data retriever as separate thread and start it.
+                    JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
+                    jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
 
-			}
+                }
+            }
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}

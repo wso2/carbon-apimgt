@@ -19,10 +19,10 @@
         }
         var description = appPolicy.getDescription() == null ? "" : appPolicy.getDescription();
         var defaultQuotaPolicy = appPolicy.getDefaultQuotaPolicy().getType();
-        if (defaultQuotaPolicy == "RequestCount"){
+        if (defaultQuotaPolicy == "requestCount"){
            var  defaultRequestCount = appPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
            var defaultBandwidth = appPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount();
            var defaultBandwidthUnit = appPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
@@ -70,7 +70,7 @@
                         <div id="quotaTypeRadioDev" class="control-group cnl-group form-inline">
 
                             <label class="checkbox-inline radio">
-                                <input type="radio"  name="select-quota-type" value="RequestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                                <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
                                 Request Count
                             </label>
                             <label class="checkbox-inline radio">
@@ -142,11 +142,11 @@
           $('#defaultUnitTime').val("<%=defaultUnitTime%>");
           $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
 
-          if("<%=defaultQuotaPolicy%>" == ("RequestCount")){
+          if("<%=defaultQuotaPolicy%>" == ("requestCount")){
             $('#requestCountType').prop('checked',true);
             $('#defaultRequestCount').val("<%=defaultRequestCount%>");
           }
-          else if("<%=defaultQuotaPolicy%>" == ("Bandwidth")){
+          else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             $('#bandwidthType').prop('checked',true);
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
             $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");

@@ -317,7 +317,9 @@ public final class APIUtil {
 
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                //api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+            	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+            	api.setApiLevelPolicy(apiLevelTier);
 
                Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
@@ -537,7 +539,9 @@ public final class APIUtil {
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                //api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+            	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+            	api.setApiLevelPolicy(apiLevelTier);
 
                Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);

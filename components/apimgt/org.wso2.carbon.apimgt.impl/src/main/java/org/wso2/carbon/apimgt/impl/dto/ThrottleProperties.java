@@ -355,6 +355,27 @@ public class ThrottleProperties {
         private String serviceUrl;
         private String username;
         private String password;
+        private int corePoolSize = 1;
+        // by Default 5 mins
+        private long initDelay = 300000;
+        // by default per hour
+        private long period = 3600000;
+
+        public long getPeriod() {
+            return period;
+        }
+
+        public void setPeriod(long period) {
+            this.period = period;
+        }
+
+        public long getInitDelay() {
+            return initDelay;
+        }
+
+        public void setInitDelay(long initDelay) {
+            this.initDelay = initDelay;
+        }
 
         public String getDataSource() {
             return dataSource;
@@ -386,6 +407,14 @@ public class ThrottleProperties {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public void setCorePoolSize(int corePoolSize) {
+            this.corePoolSize = corePoolSize;
+        }
+
+        public int getCorePoolSize() {
+            return corePoolSize;
         }
     }
 

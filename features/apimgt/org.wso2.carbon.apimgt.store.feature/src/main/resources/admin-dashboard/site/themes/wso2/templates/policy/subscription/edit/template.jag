@@ -19,7 +19,7 @@
         }
         var description = subscriptionPolicy.getDescription() == null ? "" : subscriptionPolicy.getDescription();
         var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
-        if (defaultQuotaPolicy == "RequestCount"){
+        if (defaultQuotaPolicy == "requestCount"){
             var  defaultRequestCount = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
         else if (defaultQuotaPolicy == "bandwidthVolume"){
@@ -78,7 +78,7 @@
                         <div id="quotaTypeRadioDev" class="control-group cnl-group form-inline">
 
                             <label class="checkbox-inline radio">
-                                <input type="radio"  name="select-quota-type" value="RequestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                                <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
                                 Request Count
                             </label>
                             <label class="checkbox-inline radio">
@@ -193,7 +193,7 @@
           $('#rateLimitCount').val("<%=rateLimitCount%>");
           $('#rateLimitTimeUnit').val("<%=rateLimitTimeUnit%>");
 
-          if("<%=defaultQuotaPolicy%>" == ("RequestCount")){
+          if("<%=defaultQuotaPolicy%>" == ("requestCount")){
             $('#requestCountType').prop('checked',true);
             $('#defaultRequestCount').val("<%=defaultRequestCount%>");
           }
