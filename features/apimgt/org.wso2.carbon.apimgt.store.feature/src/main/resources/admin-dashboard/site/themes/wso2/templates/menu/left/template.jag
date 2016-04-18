@@ -4,7 +4,7 @@
 
     var reqUrl = request.getRequestURI();
     var listUrl=jagg.url("/site/pages/index.jag");
-    var listMappedUrl=jagg.url("/modules/la/log-viewer.jag");
+    var listMappedUrl=jagg.url("/site/pages/index.jag");
     var liveLogViewer=jagg.url("/log-viewer");
     var loganalyzer =jagg.url("/log-analyzer");
     var subsUrl=jagg.url("/site/pages/index.jag");
