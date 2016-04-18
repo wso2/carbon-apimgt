@@ -175,6 +175,13 @@
 	<field type="text">
             <name>Sandbox Tps</name>
         </field>
+     <field type="text">
+            <name>Sub Policy</name>
+     </field>
+
+     <field type="text">
+            <name>Api Policy</name>
+     </field>
     </table>
     <table name="URITemplate" columns="4">
             <subheading>

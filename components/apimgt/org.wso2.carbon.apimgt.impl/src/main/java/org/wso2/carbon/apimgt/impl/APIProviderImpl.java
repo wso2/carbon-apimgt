@@ -1548,7 +1548,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler",
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler",
                         Collections.<String, String> emptyMap());
             } else {
                 properties.put("id", "A");
