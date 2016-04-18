@@ -55,10 +55,10 @@ public class APIClientGenerationManager {
     /**
      * Get access token key for given userId and API Identifier
      *
-     * @param appName     name of the application
+     * @param appName          name of the application
      * @param sdkLanguage preffered SDK language
-     * @param userName    username of the logged in user
-     * @param groupId     group ID of the logged in user
+     * @param userName      username of the logged in user
+     * @param groupId         group ID of the logged in user
      * @return Name of the generated SDK
      * @throws APIClientGenerationException if failed to generate the SDK
      */
@@ -211,7 +211,8 @@ public class APIClientGenerationManager {
                 if (bufferedWriter != null) {
                     try {
                         bufferedWriter.close();
-                    } catch (IOException ignore) {
+                    } catch (IOException e) {
+                        log.error("problem when closing the connection which is opened to store the swagger file", e);
                     }
                 }
             }
