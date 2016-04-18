@@ -5,7 +5,7 @@ var deleteAPIPolicy = function (policyObject) {
         type:'confirm',
         anotherDialog:true,
         okCallback:function(){
-           jagg.post("/site/blocks/policy/policy/resource/policy-list/ajax/api-policy-manage.jag", {
+           jagg.post("/site/blocks/policy/resource/policy-list/ajax/api-policy-manage.jag", {
                 action:"deleteAPIPolicy",
                 policy:policyObject
                 }, function (result) {

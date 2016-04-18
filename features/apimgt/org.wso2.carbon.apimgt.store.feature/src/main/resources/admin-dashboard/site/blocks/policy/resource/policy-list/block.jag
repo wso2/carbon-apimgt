@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
-jagg.block("policy/api/manage", {
+jagg.block("policy/resource/policy-list", {
     initializer:function (data) {},
 
     getInputs:function () {
