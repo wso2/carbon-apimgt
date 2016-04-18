@@ -73,7 +73,7 @@ public class GlobalThrottleEngineClient {
                 .getAllActiveExecutionPlanConfigurations();
         boolean isUpdateRequest = false;
         for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-            if (executionPlanConfigurationDto.getName().equals(name)) {
+            if (executionPlanConfigurationDto.getName().trim().equals(name)) {
                 eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
                 isUpdateRequest = true;
                 break;

@@ -19,7 +19,7 @@
         define stream GlobalThrottleStream (throttle_key string, isThrottled bool);
 
         FROM RequestStream
-        SELECT '#getRule($policy)' AS rule, messageID, ( #getRule($policy) == $policy.getPolicyName()) AS isEligible, app_key AS throttle_key
+        SELECT #getRule($policy) AS rule, messageID, ( #getRule($policy) == $policy.getPolicyName()) AS isEligible, app_key AS throttle_key
         INSERT INTO EligibilityStream;
 
         FROM EligibilityStream[isEligible==true AND rule == $policy.getPolicyName() ]#window.time( $quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit())
