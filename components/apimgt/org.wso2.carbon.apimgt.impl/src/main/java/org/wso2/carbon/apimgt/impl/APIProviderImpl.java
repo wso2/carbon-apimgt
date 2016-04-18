@@ -3749,10 +3749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
              * Therefore for loop is wrapped inside a try catch block
              */
             for (String flowString : executionFlows) {
-                if (!(policy instanceof GlobalPolicy)) { // Exclude global level policies from deploying to GlobalCEP
                     deploymentManager.deployPolicyToGlobalCEP(policyLevel + "_"+policy.getPolicyName(), flowString);
-                }
-                deploymentManager.deployPolicyToGatewayManager(flowString);
             }
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);

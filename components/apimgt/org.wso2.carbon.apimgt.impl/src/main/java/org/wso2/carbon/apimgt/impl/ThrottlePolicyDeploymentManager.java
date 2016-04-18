@@ -79,25 +79,6 @@ public class ThrottlePolicyDeploymentManager {
         } catch (Exception e) {
             log.error(e);
         }
-        /*try {
-            OMElement element = AXIOMUtil.stringToOM(policy);
-            String elegibilityQuery = element.getFirstChildWithName(new QName(APIConstants.ELIGIBILITY_QUERY_ELEM))
-                    .getText();
-            String decisionQuery = element.getFirstChildWithName(new QName(APIConstants.DECISION_QUERY_ELEM))
-                    .getText();
-            String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
-            //deploy to cep
-            String policyQuery = elegibilityQuery + "\n" + decisionQuery;
-            if(log.isDebugEnabled()){
-                log.debug("deploy policy to global event processor : \n" + policyQuery );
-            }
-            deployPolicyInGlobalThrottleEngine(fileName,policyQuery);
-            //throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg , e);
-            throw new APIManagementException(msg);
-        }*/
     }
     
     /**

@@ -72,13 +72,14 @@ public class GlobalThrottleEngineClient {
         ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
                 .getAllActiveExecutionPlanConfigurations();
         boolean isUpdateRequest = false;
+        if(executionPlanConfigurationDtos != null){
         for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
             if (executionPlanConfigurationDto.getName().trim().equals(name)) {
                 eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
                 isUpdateRequest = true;
                 break;
             }
-        }
+        }}
         if(!isUpdateRequest){
             eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
         }
