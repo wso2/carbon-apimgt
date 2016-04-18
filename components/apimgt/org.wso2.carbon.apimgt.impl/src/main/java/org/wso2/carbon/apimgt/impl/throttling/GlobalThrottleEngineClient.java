@@ -23,6 +23,8 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
@@ -30,17 +32,24 @@ import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RemoteException;
 
 public class GlobalThrottleEngineClient {
     private AuthenticationAdminStub authenticationAdminStub = null;
     private static final Logger log = Logger.getLogger(GlobalThrottleEngineClient.class);
+    ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties()
+            .getPolicyDeployer();
 
-    private String login() throws RemoteException, LoginAuthenticationExceptionException {
-        authenticationAdminStub = new AuthenticationAdminStub("https://" + "127.0.0.1" + ":" + "9443" + "/services/AuthenticationAdmin");
+    private String login() throws RemoteException, LoginAuthenticationExceptionException, MalformedURLException {
+        authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
+                "/AuthenticationAdmin");
         String sessionCookie = null;
 
-        if (authenticationAdminStub.login("admin", "admin", "127.0.0.1")) {
+        if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(),
+                new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
             ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
                     .getServiceContext();
             sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
@@ -61,8 +70,8 @@ public class GlobalThrottleEngineClient {
         ServiceClient serviceClient;
         Options options;
 
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub("https://"
-                + "127.0.0.1" + ":" + "9443"+ "/services/EventProcessorAdminService");
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                (policyDeployerConfiguration.getServiceUrl()+"EventProcessorAdminService");
         serviceClient = eventProcessorAdminServiceStub._getServiceClient();
         options = serviceClient.getOptions();
         options.setManageSession(true);
