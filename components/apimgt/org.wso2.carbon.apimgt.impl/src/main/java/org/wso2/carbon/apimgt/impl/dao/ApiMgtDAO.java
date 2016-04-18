@@ -918,8 +918,7 @@ public class ApiMgtDAO {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled = Boolean
-                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+        boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
         //only check if using CEP based throttling.
         if(isGlobalThrottlingEnabled){
 

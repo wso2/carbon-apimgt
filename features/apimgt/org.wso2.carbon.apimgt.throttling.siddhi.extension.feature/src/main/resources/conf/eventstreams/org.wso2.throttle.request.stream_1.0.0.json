@@ -1,0 +1,36 @@
+{
+  "name": "org.wso2.throttle.request.stream",
+  "version": "1.0.0",
+  "nickName": "org.wso2.throttle.request.stream",
+  "description": "org.wso2.throttle.request.stream",
+  "metaData": [
+    {
+      "name": "messageID",
+      "type": "STRING"
+    },
+    {
+      "name": "app_key",
+      "type": "STRING"
+    },
+    {
+      "name": "api_key",
+      "type": "STRING"
+    },
+    {
+      "name": "app_tier",
+      "type": "STRING"
+    },
+    {
+      "name": "api_tier",
+      "type": "STRING"
+    },
+    {
+      "name": "user_id",
+      "type": "STRING"
+    },
+    {
+      "name": "object",
+      "type": "STRING"
+    }
+  ]
+}

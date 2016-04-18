@@ -24,11 +24,20 @@ public class ThrottleProperties {
     private DataPublisher dataPublisher;
     private GlobalEngineWSConnection globalEngineWSConnection;
     private DataPublisherPool dataPublisherPool;
+    private DataPublisherThreadPool dataPublisherThreadPool;
     private JMSConnectionProperties jmsConnectionProperties;
     private boolean enableUnlimitedTier;
     private String throttleDataSourceName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
+
+    public DataPublisherThreadPool getDataPublisherThreadPool() {
+        return dataPublisherThreadPool;
+    }
+
+    public void setDataPublisherThreadPool(DataPublisherThreadPool dataPublisherThreadPool) {
+        this.dataPublisherThreadPool = dataPublisherThreadPool;
+    }
 
     public BlockCondition getBlockCondition() {
         return blockCondition;
@@ -377,6 +386,37 @@ public class ThrottleProperties {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+
+    public static class DataPublisherThreadPool {
+        private int corePoolSize = 200;
+        private int maximumPoolSize = 500;
+        private long keepAliveTime = 100;
+
+        public int getCorePoolSize() {
+
+            return corePoolSize;
+        }
+
+        public void setCorePoolSize(int corePoolSize) {
+            this.corePoolSize = corePoolSize;
+        }
+
+        public int getMaximumPoolSize() {
+            return maximumPoolSize;
+        }
+
+        public void setMaximumPoolSize(int maximumPoolSize) {
+            this.maximumPoolSize = maximumPoolSize;
+        }
+
+        public long getKeepAliveTime() {
+            return keepAliveTime;
+        }
+
+        public void setKeepAliveTime(long keepAliveTime) {
+            this.keepAliveTime = keepAliveTime;
         }
     }
 }

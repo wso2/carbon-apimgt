@@ -407,8 +407,6 @@
     <!-- For APIM implemented Statistic client for RDBMS -->
     <!--StatisticClientProvider>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatisticClientProvider-->
 
-    <!-- To use global event processor for throttling -->
-    <EnableGlobalCEPThrottling>false</EnableGlobalCEPThrottling>
 
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
@@ -452,7 +450,7 @@
         </WhiteListedURIs>
     </RESTAPI>
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
+        <EnableAdvanceThrottling>false</EnableAdvanceThrottling>
         <DataPublisher>
             <Type>Binary</Type>
             <ReceiverUrlGroup>tcp://localhost:9611</ReceiverUrlGroup>
@@ -463,6 +461,11 @@
                 <MaxIdle>1000</MaxIdle>
                 <InitIdleCapacity>200</InitIdleCapacity>
             </DataPublisherPool>
+            <DataPublisherThreadPool>
+                <CorePoolSize>1000</CorePoolSize>
+                <MaxmimumPoolSize>200</MaxmimumPoolSize>
+                <KeepAliveTime>200</KeepAliveTime>
+            </DataPublisherThreadPool>
         </DataPublisher>
         <PolicyDeployer>
             <ServiceURL>http://localhost:9443/services/</ServiceURL>
@@ -470,7 +473,7 @@
             <Password>admin</Password>
         </PolicyDeployer>
         <BlockCondition>
-            <ServiceURL>http://localhost:9763/block/data/v1/block</ServiceURL>
+            <ServiceURL>http://localhost:9763/throttle/data/v1/block</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
         </BlockCondition>
