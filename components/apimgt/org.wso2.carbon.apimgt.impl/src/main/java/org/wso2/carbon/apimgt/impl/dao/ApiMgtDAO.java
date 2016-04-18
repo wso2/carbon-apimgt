@@ -8296,7 +8296,7 @@ public class ApiMgtDAO {
      * @param policy policy object to add
      * @throws APIManagementException
      */
-    public void addAPIPolicy(APIPolicy policy) throws APIManagementException {
+    public APIPolicy addAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
 
         try {
@@ -8318,6 +8318,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
+        return policy;
     }
 
     /**
@@ -8423,6 +8424,7 @@ public class ApiMgtDAO {
 				int pipelineId = rs.getInt(1); // Get the inserted
 												// CONDITION_GROUP_ID (auto
 												// incremented value)
+                pipeline.setId(pipelineId);
 				for (Condition condition : conditionList) {
 					if (condition == null) {
 						continue;
