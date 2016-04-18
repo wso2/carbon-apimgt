@@ -31,7 +31,7 @@ include("/jagg/jagg.jag");
                         error: false
                     }
                 }
-                return obj;
+                print(obj);
             }//remove api policy
             else if (action == "removeApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");

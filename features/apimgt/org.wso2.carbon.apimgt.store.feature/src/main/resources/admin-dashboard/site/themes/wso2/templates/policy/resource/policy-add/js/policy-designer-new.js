@@ -415,14 +415,14 @@ var addPolicyToBackend = function () {
     }
 
     console.log(JSON.stringify(apiPolicyNew));
-    jagg.post("/site/blocks/policy-add/ajax/policy-operations.jag", {
+    jagg.post("/site/blocks/policy/resource/policy-add/ajax/policy-operations.jag", {
         action: "addApiPolicy",
         apiPolicy: JSON.stringify(apiPolicyNew)
     }, function (data) {
         if (!data.error) {
-
+            location.href = 'site/pages/policy-list.jag';
         } else {
-
+            jagg.message({content:result.message,type:"error"});
         }
     }, "json");
 };
