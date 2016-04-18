@@ -146,7 +146,7 @@
             $('#requestCountType').prop('checked',true);
             $('#defaultRequestCount').val("<%=defaultRequestCount%>");
           }
-          else if("<%=defaultQuotaPolicy%>" == ("Bandwidth")){
+          else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             $('#bandwidthType').prop('checked',true);
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
             $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");

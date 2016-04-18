@@ -30,7 +30,7 @@
         if (defaultQuotaPolicy == "RequestCount"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
 
