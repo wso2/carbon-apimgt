@@ -8559,14 +8559,15 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             policyStatement.setString(1, policy.getPolicyName());
-            policyStatement.setInt(2, policy.getTenantId());
-            policyStatement.setString(3, policy.getDescription());
+            policyStatement.setString(2, policy.getKeyTemplate());
+            policyStatement.setInt(3, policy.getTenantId());
+            policyStatement.setString(4, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
             siddhiQueryInputStream = new ByteArrayInputStream(
                     policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
-            policyStatement.setBinaryStream(4, siddhiQueryInputStream);
-            policyStatement.setBoolean(5, false);
+            policyStatement.setBinaryStream(5, siddhiQueryInputStream);
+            policyStatement.setBoolean(6, false);
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
