@@ -3652,8 +3652,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                apiMgtDAO.addAPIPolicy(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                executionFlows.add(defaultPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;

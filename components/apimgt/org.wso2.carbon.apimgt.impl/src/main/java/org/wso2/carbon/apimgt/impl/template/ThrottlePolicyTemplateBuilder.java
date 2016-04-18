@@ -45,7 +45,8 @@ import java.util.Set;
 public class ThrottlePolicyTemplateBuilder {
 
     private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
-    private static final String POLICY_VELOCITY_API = "throttle_policy_template_api";
+    private static final String POLICY_VELOCITY_RESOURCE = "throttle_policy_template_resource";
+    private static final String POLICY_VELOCITY_RESOURCE_DEFAULT = "throttle_policy_template_resource_default";
     private static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_template_global";
     private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
@@ -109,8 +110,7 @@ public class ThrottlePolicyTemplateBuilder {
                     context.put("policy", policy);
 
                     context.put("quotaPolicy", pipeline.getQuotaPolicy());
-                    //pipeline name is defined as 'condition0' 'condition1' etc
-                    context.put("pipeline", "condition" + condition);
+                    context.put("pipeline", "condition_" + pipeline.getId());
 
                     String conditionString = getPolicyCondition(pipeline.getConditions());
                     conditionsSet.add(conditionString);
@@ -126,15 +126,58 @@ public class ThrottlePolicyTemplateBuilder {
                     condition++;
                 }
             }
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+
+        return policyArray;
+    }
+
+    /**
+     * Generate default policy for api level throttling
+     *
+     * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
+     *            the api level. Policy can have multiple pipelines and a default condition which will be used as
+     *            else condition
+     * @return
+     * @throws APITemplateException
+     */
+    public String getThrottlePolicyForAPILevelDefualt(APIPolicy policy) throws APITemplateException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Generating policy for apiLevel :" + policy.toString());
+        }
+        Set<String> conditionsSet = new HashSet<String>();
+
+        if(!(policy instanceof APIPolicy)){
+            throw new APITemplateException("Invalid policy level : Has to be 'api'");
+        }
+
+        try {
+            VelocityEngine velocityengine = new VelocityEngine();
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        "org.apache.velocity.runtime.log.Log4JLogChute");
+                velocityengine.setProperty("runtime.log.logsystem.log4j.logger", getVelocityLogger());
+            }
+            velocityengine.init();
+            Template template = velocityengine.getTemplate(getTemplatePathForAPIDefaultPolicy());
+            StringWriter writer;
+            VelocityContext context;
+
+            for(Pipeline pipeline : policy.getPipelines()) {
+                String conditionString = getPolicyCondition(pipeline.getConditions());
+                conditionsSet.add(conditionString);
+            }
 
             // for default one
-
             context = new VelocityContext();
             setConstantContext(context);
-           //default policy is defined as 'elseCondition' 
+            //default policy is defined as 'elseCondition'
             context.put("pipeline", "elseCondition"); //// constant
             context.put("pipelineItem", null);
-            context.put("policy", policy);           
+            context.put("policy", policy);
 
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
             context.put("condition", " AND " + getConditionForDefault(conditionsSet));
@@ -143,14 +186,11 @@ public class ThrottlePolicyTemplateBuilder {
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
             }
-            policyArray.add(writer.toString());
-
+            return writer.toString();
         } catch (Exception e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
         }
-
-        return policyArray;
     }
 
     /**
@@ -292,7 +332,11 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     private  String getTemplatePathForAPI() {
-        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_API + ".xml";
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_RESOURCE + ".xml";
+    }
+
+    private  String getTemplatePathForAPIDefaultPolicy() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_RESOURCE_DEFAULT + ".xml";
     }
 
     private  String getTemplatePathForGlobal() {
