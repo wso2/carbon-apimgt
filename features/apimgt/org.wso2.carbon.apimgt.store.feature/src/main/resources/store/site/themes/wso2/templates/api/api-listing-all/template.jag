@@ -204,7 +204,7 @@ var reqUrl = request.getRequestURI();
                                     <%} else { %>
                                     	<p><%=api.provider%></p>
                                     <% } %>
-
+                                    <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
                                 </div>
                             </div>
                         </div>

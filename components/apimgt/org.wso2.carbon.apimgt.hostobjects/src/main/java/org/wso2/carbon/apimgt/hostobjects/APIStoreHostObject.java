@@ -1372,6 +1372,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 row.put("apiOwner", row, apiOwner);
                 row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                row.put("rates", row, api.getRating());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -1487,6 +1488,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
                     row.put("apiBusinessOwner", row, api.getBusinessOwner());
+                    row.put("rates", row, api.getRating());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();
