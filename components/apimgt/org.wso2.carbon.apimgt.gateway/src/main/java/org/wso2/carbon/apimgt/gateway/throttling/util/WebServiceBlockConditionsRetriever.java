@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 
 public class WebServiceBlockConditionsRetriever implements Runnable {
     private static final Log log = LogFactory.getLog(WebServiceBlockConditionsRetriever.class);
@@ -79,32 +80,36 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
     }
 
 
-    /**
-     * This method will call throttle data web service deployed in central plocy engine at server loading time.
-     * Then it will update local throttle data map with the results obtained. This need to be fine tuned as large
-     * number of results can slow down web service call. However this need to be controlled from server side and
-     * this client will add all recieved events to local map. Even if we missed few events from this call it will
-     * eventually update as missed events go to global policy engine and decision will be anyway pushed to topic and
-     * all subscriber will notify it
-     */
     public void loadBlockConditionsFromWebService() {
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
         if (blockConditionsDTO != null) {
             //TODO if possible try to get data as map since this can cause performance issue.
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().clear();
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().clear();
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().clear();
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().clear();
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().clear();
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
                     generateMap(blockConditionsDTO.getApi()));
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getApi()));
+                    generateMap(blockConditionsDTO.getApplication()));
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getApi()));
+                    generateMap(blockConditionsDTO.getUser()));
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getApi()));
+                    generateMap(blockConditionsDTO.getCustom()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().putAll(
+                    generateMap(blockConditionsDTO.getIp()));
         }
     }
 
     public void startWebServiceBlockConditionDataRetriever() {
-        new Thread(this).start();
-    }
+        ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
+                .getInstance().getThrottleProperties().getBlockCondition();
+        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor
+                (blockConditionRetrieverConfiguration.getCorePoolSize());
+        scheduledExecutorService.scheduleAtFixedRate(new WebServiceBlockConditionsRetriever(),
+                blockConditionRetrieverConfiguration.getInitDelay(),blockConditionRetrieverConfiguration.getPeriod(),
+                TimeUnit.MILLISECONDS);    }
 
     public <T> Map<String, T> generateMap(Collection<T> list) {
         Map<String, T> map = new HashMap<String, T>();
