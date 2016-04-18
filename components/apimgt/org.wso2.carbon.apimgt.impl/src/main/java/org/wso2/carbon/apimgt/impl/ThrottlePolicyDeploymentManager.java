@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.throttling.GlobalThrottleEngineClient;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
@@ -50,11 +51,13 @@ public class ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManager.class);
     private static ThrottlePolicyDeploymentManager instance;
     private Map<String, Environment> environments;
+    private GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClient();
 
     private ThrottlePolicyDeploymentManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         environments = config.getApiGatewayEnvironments();
+
     }
 
     public static synchronized ThrottlePolicyDeploymentManager getInstance() {
@@ -69,8 +72,14 @@ public class ThrottlePolicyDeploymentManager {
      * @param policy
      * @throws APIManagementException
      */
-    public void deployPolicyToGlobalCEP(String policy) throws APIManagementException {
+    public void deployPolicyToGlobalCEP(String policyName, String policy) throws APIManagementException {
+
         try {
+            globalThrottleEngineClient.deployExecutionPlan(policyName, policy);
+        } catch (Exception e) {
+            log.error(e);
+        }
+        /*try {
             OMElement element = AXIOMUtil.stringToOM(policy);
             String elegibilityQuery = element.getFirstChildWithName(new QName(APIConstants.ELIGIBILITY_QUERY_ELEM))
                     .getText();
@@ -82,13 +91,13 @@ public class ThrottlePolicyDeploymentManager {
             if(log.isDebugEnabled()){
                 log.debug("deploy policy to global event processor : \n" + policyQuery );
             }
-    //        deployPolicyInGlobalThrottleEngine(fileName,policyQuery);
+            deployPolicyInGlobalThrottleEngine(fileName,policyQuery);
             //throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
             log.error(msg , e);
             throw new APIManagementException(msg);
-        }
+        }*/
     }
     
     /**
