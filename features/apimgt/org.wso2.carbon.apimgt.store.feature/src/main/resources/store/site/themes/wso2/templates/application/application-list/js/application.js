@@ -131,11 +131,11 @@ function deleteApp(linkObj) {
     var apiCount = $(theTr).attr('api-count');
     $('#messageModal').html($('#confirmation-data').html());
     if(apiCount > 0){
-        $('#messageModal h4.modal-title').html(i18n.t('confirm.delete'));
+        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
         $('#messageModal div.modal-body').text('\n\n' +i18n.t('confirm.deleteSubsMsg1')
             + apiCount + i18n.t('confirm.deleteSubsMsg2') +i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
     } else {
-        $('#messageModal h4.modal-title').html(i18n.t('confirm.delete'));
+        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
         $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '" ?');
     }
     $('#messageModal a.btn-primary').html(i18n.t('info.yes'));

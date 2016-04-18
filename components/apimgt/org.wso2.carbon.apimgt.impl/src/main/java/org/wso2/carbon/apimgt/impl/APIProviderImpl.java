@@ -1856,10 +1856,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Sending Notifications to existing subscribers
             try {
                 String isNotificationEnabled = "false";
-                registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
-                        (tenantId);
-                if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                    Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getConfigSystemRegistry(tenantId);
+                if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
                     String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                     if(content !=null ){
                         JSONObject tenantConfig= (JSONObject) new JSONParser().parse(content);

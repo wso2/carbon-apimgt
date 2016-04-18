@@ -1,7 +1,8 @@
-{
+{   "apistoreHome":"APIStore Home",
     "rating" : "Rating",
     "context" : "Context",
     "version" : "Version",
+    "apiThumb": "API Thumbnail",
     "status" : "Status",
     "updated" : "Updated",
     "urls" : "URLs",
@@ -48,6 +49,7 @@
     "browse.title" : "Browse APIs",
     "signupTitle" : "Sign - Up for a New Account",
 
+    "listAPIs" : "List APIs",
     "listAPI" : "List APIs By",
     "listAPI.newest" : "Newest",
     "listAPI.catog" : "By Category",
@@ -58,6 +60,9 @@
     "searchAPI" : "Search API",
 
     "docSum" : "Summary",
+    "docInline" : "Inline Documentation",
+    "docFile" : "File based Documentation",
+    "docContent" : "Document Content",
     "viewDoc" : "View Content",
     "download" : "Download",
 
@@ -109,6 +114,7 @@
     "apiName": "API Name",
     "api" : "API",
     "apiOwner" : "Owner",
+    "apiProvider" : "API Provider",
     "subscriptionStatus" : "Subscription Status",
     "subscription" : "Subscription",
     "appName" : "Application Name",
@@ -213,6 +219,7 @@
     "throttlingLimit":"Throttling Limit",
     "multipleAPIStoresHeading":"API Stores available on this server" ,
     "storeNameSuffix":"/store",
+    "tenantStore":"Tenant Store",
     "timeWarn":"Enter a valid number",
     "noTiers":"You may not be entitled to any of the available tiers",
 
@@ -255,7 +262,13 @@
 
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
     "provideAccessToken" : "If you already have an access token please provide it below.",
-    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token."
+    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
+    
+    "goBack" : "Go Back",
+    "applicationList" : "Application List",
+    "addApplication" : "Add Application",
+    "activePage":"Active Page",
+    "pagination":"Pagination"
   
     
 }

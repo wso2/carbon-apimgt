@@ -285,6 +285,7 @@
     "changeAPIStatusMsg": "changed the API status from",
     "noActiveSubscribersMsg": "No active subscribers",
     "noDocsMsg": "No documentation associated with the API",
+    "noDocsMsgDesc": "There are no documentation created for this API. You can add new documentation to this API by clicking \"Add New Document\" button.",
     "noSubsMsg": "No subscriptions yet.",
     "searchAPIHelpMsg1":"Search Options",
     "searchAPIHelpMsg2":"By API Name [Default]  or",
@@ -400,5 +401,14 @@
     "addParameter":"Add Parameter",
     "apiListing":"API List",
     "apiBrowse":"Browse API",
-    "manageAlertTypes": "Manage alert types"
+    "manageAlertTypes": "Manage Alert Types",
+    "abnormalBackendTime": "Abnormal backend time",
+    "abnormalResponseTime":"Abnormal response time",
+    "abnormalRequestsPerMin":"Abnormal request counts",
+    "RequestPatternChanged":"Abnormal resource access pattern",
+    "UnusualIPAccessAlert":"Unseen source IP access",
+    "AbnormalRefreshAlert":"Abnormal renewal of access tokens",
+    "FrequentTierHittingAlert":"Frequent tier limit hitting",
+    "AbnormalTierUsage":"Abnormal API usage",
+    "healthAvailabilityPerMin":"Availability of APIs"
 }
