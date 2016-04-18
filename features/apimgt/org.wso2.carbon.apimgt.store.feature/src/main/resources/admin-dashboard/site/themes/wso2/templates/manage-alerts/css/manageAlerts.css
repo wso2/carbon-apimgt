@@ -7,12 +7,8 @@
 
 }
 
-.messageText{
-    color: #ffffff;
-}
-
 #saveButtons{
-    margin: 10px;
+
 }
 
 .emailList{
@@ -23,4 +19,17 @@
 textarea {
     width: 600px;
     height: 150px;
+}
+
+.form-horizontal {
+    max-width: 100%;
+}
+
+.col-sm-1 {
+    width: 0px;
+    margin: 0 20px 0 0;
+}
+
+.email{
+    margin: 0 20px 0 0;
 }

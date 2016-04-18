@@ -62,13 +62,13 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             alertTypeDTO.setAlertTypes(checkedAlertListValues);
             alertTypeDTO.setEmails(emailList);
             alertTypeDTO.setUserName(userName);
-            if ("p" == agent) {
+            if ("publisher".equals(agent)) {
                 alertTypeDTO.setPublisher(true);
                 alertTypeDTO.setSubscriber(false);
-            } else if ("s" == agent) {
+            } else if ("subscriber".equals(agent)) {
                 alertTypeDTO.setSubscriber(true);
                 alertTypeDTO.setPublisher(false);
-            }else if("a" == agent){
+            }else if("admin-dashboard".equals(agent)){
                 alertTypeDTO.setSubscriber(true);
                 alertTypeDTO.setPublisher(true);
             }
