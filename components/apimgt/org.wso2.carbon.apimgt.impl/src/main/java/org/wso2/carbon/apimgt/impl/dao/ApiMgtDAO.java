@@ -9749,4 +9749,33 @@ public class ApiMgtDAO {
         }
         return status;
     }
+    
+    public String getAPILevelTier(int id) throws APIManagementException{
+    	 Connection connection = null;
+         PreparedStatement selectPreparedStatement = null;
+         ResultSet resultSet = null;
+         String apiLevelTier = null;
+         try {
+             String query = SQLConstants.GET_API_DETAILS_SQL;
+             connection = APIMgtDBUtil.getConnection();
+             connection.setAutoCommit(true);
+             selectPreparedStatement = connection.prepareStatement(query + " WHERE API_ID = ?");
+             selectPreparedStatement.setInt(1, id);
+             resultSet = selectPreparedStatement.executeQuery();
+             while (resultSet.next()) {
+            	 apiLevelTier = resultSet.getString("API_TIER");
+             }
+         } catch (SQLException e) {
+             if (connection != null) {
+                 try {
+                     connection.rollback();
+                 } catch (SQLException ex) {
+                     handleException("Failed to get API Details", e);
+                 }
+             }
+         } finally {
+             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+         }
+         return apiLevelTier;
+    }
 }

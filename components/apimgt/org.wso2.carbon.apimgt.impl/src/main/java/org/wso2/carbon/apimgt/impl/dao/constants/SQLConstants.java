@@ -2254,6 +2254,8 @@ public class SQLConstants {
 
     public static final String DELETE_GLOBAL_POLICY_SQL =
             "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
+    
+    public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
     /** Throttle related constants**/
 
