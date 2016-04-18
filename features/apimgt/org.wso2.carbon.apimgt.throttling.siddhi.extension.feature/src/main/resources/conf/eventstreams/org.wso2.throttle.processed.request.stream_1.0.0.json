@@ -1,0 +1,52 @@
+{
+  "name": "org.wso2.throttle.processed.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "messageID",
+      "type": "STRING"
+    },
+    {
+      "name": "appKey",
+      "type": "STRING"
+    },
+    {
+      "name": "appTier",
+      "type": "STRING"
+    },
+    {
+      "name": "subscriptionKey",
+      "type": "STRING"
+    },
+    {
+      "name": "apiKey",
+      "type": "STRING"
+    },
+    {
+      "name": "apiTier",
+      "type": "STRING"
+    },
+    {
+      "name": "subscriptionTier",
+      "type": "STRING"
+    },
+    {
+      "name": "resourceKey",
+      "type": "STRING"
+    },
+    {
+      "name": "resourceTier",
+      "type": "STRING"
+    },
+    {
+      "name": "userId",
+      "type": "STRING"
+    },
+    {
+      "name": "propertiesMap",
+      "type": "STRING"
+    }
+  ]
+}
