@@ -48,7 +48,7 @@ var constructPolicyObject = function (userName, policyName, description, default
 
     var default_quotaPolicy = new QuotaPolicy();
 
-    if (defaultQuotaPolicy == "RequestCount") {
+    if (defaultQuotaPolicy == "requestCount") {
         var requestCountLimit = new RequestCountLimit();
         requestCountLimit.setRequestCount(defaultRequestCount);
         requestCountLimit.setUnitTime(defaultUnitTime);

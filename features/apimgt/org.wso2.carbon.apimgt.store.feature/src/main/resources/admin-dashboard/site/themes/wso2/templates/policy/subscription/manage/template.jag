@@ -27,7 +27,7 @@
         var subscriptionPolicy = subscriptionPolicyArray[j];
         var policyName = subscriptionPolicy.getPolicyName();
         var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
-        if (defaultQuotaPolicy == "RequestCount"){
+        if (defaultQuotaPolicy == "requestCount"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
         else if (defaultQuotaPolicy == "bandwidthVolume"){
