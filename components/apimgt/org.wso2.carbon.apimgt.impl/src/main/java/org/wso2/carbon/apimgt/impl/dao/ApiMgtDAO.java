@@ -9638,7 +9638,8 @@ public class ApiMgtDAO {
     	return isExist;
     }
 
-    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws APIManagementException {
+    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+            APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
@@ -9647,22 +9648,32 @@ public class ApiMgtDAO {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if ("API".equals(conditionType)) {
                 String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
-                if (extractedTenantDomain == null){
+                if (extractedTenantDomain == null) {
                     extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
                 }
-                   if (tenantDomain.equals(extractedTenantDomain) && isValidateContext(conditionValue)){
-                       valid = true;
-                   }
-            } else if ("APPLICATION".equals(conditionType)) {
-                valid = true;
-            } else if ("USER".equals(conditionType)) {
-                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)){
+                if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
                     valid = true;
                 }
-            }else {
+            } else if ("APPLICATION".equals(conditionType)) {
+                String appArray[] = conditionValue.split(":");
+                if (appArray.length > 1) {
+                    String appOwner = appArray[0];
+                    String appName = appArray[1];
+
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
+                            (appOwner,
+                            appName)) {
+                        valid = true;
+                    }
+                }
+            } else if ("USER".equals(conditionType)) {
+                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
+                }
+            } else {
+                valid = true;
             }
-            if (valid){
+            if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 insertPreparedStatement = connection.prepareStatement(query);
@@ -9672,7 +9683,7 @@ public class ApiMgtDAO {
                 insertPreparedStatement.setString(3, "TRUE");
                 status = insertPreparedStatement.execute();
                 connection.commit();
-            }else{
+            } else {
                 throw new APIManagementException("Condition is not a valid");
             }
         } catch (SQLException e) {
@@ -9680,8 +9691,7 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to add Block condition : " + conditionType+" and "+conditionValue, e);
-
+                    handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
                 }
             }
         } finally {
@@ -9775,7 +9785,7 @@ public class ApiMgtDAO {
         }
         return status;
     }
-    public boolean isValidateContext(String context) throws APIManagementException {
+    private boolean isValidContext(String context) throws APIManagementException {
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
@@ -9804,7 +9814,38 @@ public class ApiMgtDAO {
         }
         return status;
     }
-    
+    private boolean isValidApplication(String appOwner, String appName) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement validateContextPreparedStatement = null;
+        ResultSet resultSet = null;
+        boolean status = true;
+        try {
+            String query = "SELECT * FROM AM_APPLICATION App,AM_SUBSCRIBER SUB  WHERE App.NAME=? AND App" +
+                    ".SUBSCRIBER_ID=SUB.SUBSCRIBER_ID AND SUB.USER_ID=?";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            validateContextPreparedStatement = connection.prepareStatement(query);
+            validateContextPreparedStatement.setString(1,appName);
+            validateContextPreparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(appOwner));
+            resultSet = validateContextPreparedStatement.executeQuery();
+            connection.commit();
+            if (resultSet.next()){
+                status = false;
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to check Block condition with Application Name " + appName + " with " +
+                            "Application Owner" + appOwner, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
+        }
+        return status;
+    }
     public String getAPILevelTier(int id) throws APIManagementException{
     	 Connection connection = null;
          PreparedStatement selectPreparedStatement = null;
