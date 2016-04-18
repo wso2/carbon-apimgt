@@ -13,7 +13,7 @@ if (outputs.error) { %>
                         if(apis!=null) {
 	                        length = totalLength;
 	
-	                        var itemsPerPage = 10; //reduce this number to preview the pagination
+	                        var itemsPerPage = 12; //reduce this number to preview the pagination
 	                        var page = 1;
 	                        var numberOfPages = parseInt(length / itemsPerPage);
 

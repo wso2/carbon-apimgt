@@ -29,11 +29,19 @@ public class ZIPUtils {
     public void zipDir(String dirName, String nameZipFile) throws IOException {
         ZipOutputStream zip = null;
         FileOutputStream fW = null;
-        fW = new FileOutputStream(nameZipFile);
-        zip = new ZipOutputStream(fW);
-        addFolderToZip("", dirName, zip);
-        zip.close();
-        fW.close();
+        try {
+            fW = new FileOutputStream(nameZipFile);
+            zip = new ZipOutputStream(fW);
+            addFolderToZip("", dirName, zip);
+        } finally {
+            if (zip != null) {
+                zip.close();
+            }
+            if (fW != null) {
+                fW.close();
+            }
+        }
+
     }
 
     private void addFolderToZip(String path, String srcFolder, ZipOutputStream zip) throws IOException {
@@ -61,10 +69,17 @@ public class ZIPUtils {
             } else {
                 byte[] buf = new byte[1024];
                 int len;
-                FileInputStream in = new FileInputStream(srcFile);
-                zip.putNextEntry(new ZipEntry(path + "/" + folder.getName()));
-                while ((len = in.read(buf)) > 0) {
-                    zip.write(buf, 0, len);
+                FileInputStream in = null;
+                try {
+                    in = new FileInputStream(srcFile);
+                    zip.putNextEntry(new ZipEntry(path + "/" + folder.getName()));
+                    while ((len = in.read(buf)) > 0) {
+                        zip.write(buf, 0, len);
+                    }
+                } finally {
+                    if (in != null) {
+                        in.close();
+                    }
                 }
             }
         }

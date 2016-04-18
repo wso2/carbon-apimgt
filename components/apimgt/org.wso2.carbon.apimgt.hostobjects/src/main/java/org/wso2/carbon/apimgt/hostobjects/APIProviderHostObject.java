@@ -486,7 +486,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
 
             //Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
+            apiProvider.saveSwagger20Definition(api.getId(),
+                    addSecurityDef((String) apiData.get("swagger", apiData), scopes));
         }
 
         // removing scopes from cache
