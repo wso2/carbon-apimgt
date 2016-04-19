@@ -60,6 +60,13 @@ $(document).ready(function(){
         }
     });
 
+   validateAPITier();
+
+    $("select[name='apiTier']").change(function(){
+       validateAPITier();
+        
+    });
+
 
     $("select[name='tier']").change(function() {
             // multipleValues will be an array
@@ -164,4 +171,16 @@ function validate_Transports(){
     }
     $( "div.checkbox" ).addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
     return false;
+}
+
+function validateAPITier(){
+     var apiTier = $( "#apiTier option:selected" ).text();
+        var designer = APIDesigner();
+        if(apiTier != ''){
+            designer.setApiLevelPolicy(true);
+            designer.render_resources();
+        }else{
+            designer.setApiLevelPolicy(false);
+            designer.render_resources();
+        }
 }

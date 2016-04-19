@@ -12,9 +12,9 @@ var getDomain = function (domainName) {
 
         var carbon = require('carbon'),
         conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['APIUsageTracking'].*::['DASRestApiURL'].text();
-        username = conf.*::['APIUsageTracking'].*::['DASUsername'].text();
-        password = conf.*::['APIUsageTracking'].*::['DASPassword'].text();
+        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
+        username = conf.*::['Analytics'].*::['DASUsername'].text();
+        password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
         var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
@@ -50,9 +50,9 @@ var getDomainConfiguration = function (domainName, configurationName) {
 
         var carbon = require('carbon'),
         conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['APIUsageTracking'].*::['DASRestApiURL'].text();
-        username = conf.*::['APIUsageTracking'].*::['DASUsername'].text();
-        password = conf.*::['APIUsageTracking'].*::['DASPassword'].text();
+        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
+        username = conf.*::['Analytics'].*::['DASUsername'].text();
+        password = conf.*::['Analytics'].*::['DASPassword'].text();
 
         var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
         var client = stub._getServiceClient();
@@ -99,11 +99,13 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         var parameterStrings = parametersJson.split(",");
         var parameters = new Array();
 
-        for (var i in parameterStrings) {
-            var parameterDTO = new ParameterDTOE();
-            parameterDTO.setName(parameterStrings[i].split(valueSeparator)[0]);
-            parameterDTO.setValue(parameterStrings[i].split(valueSeparator)[1]);
-            parameters.push(parameterDTO);
+        if (parametersJson.length > 0) {
+          for (var i in parameterStrings) {
+              var parameterDTO = new ParameterDTOE();
+              parameterDTO.setName(parameterStrings[i].split(valueSeparator)[0]);
+              parameterDTO.setValue(parameterStrings[i].split(valueSeparator)[1]);
+              parameters.push(parameterDTO);
+          }
         }
 
         templateConfigurationDTO.setParameterDTOs(parameters);
@@ -117,9 +119,9 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
 
         var carbon = require('carbon'),
         conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['APIUsageTracking'].*::['DASRestApiURL'].text();
-        username = conf.*::['APIUsageTracking'].*::['DASUsername'].text();
-        password = conf.*::['APIUsageTracking'].*::['DASPassword'].text();
+        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
+        username = conf.*::['Analytics'].*::['DASUsername'].text();
+        password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
         var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");

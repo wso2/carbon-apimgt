@@ -92,5 +92,41 @@ var getAPISubscriptionsForApplication = function (username, appName) {
         };
     }
 };
+var generateClientSdk = function (appName,language,userName,groupId){
+    var sdkGen = Packages.org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
+    var generator = new sdkGen();
+    var object = null;
+    var log = new Log();
 
+    try {
+        var appName = generator.sdkGeneration(appName,language,userName,groupId);
+        if(appName!=null){
+            return {
+                appName:appName,
+                error:false
+            };
+        }
+        else{
+            return {
+                message:"App doesn't have any APIs",
+                error:true
+            };
+        }
+
+    } catch (e) {
+        log.error(e.message);
+        if (e.javaException instanceof org.wso2.carbon.apimgt.impl.APIClientGenerationException){
+            return {
+                error:true,
+                message:e.javaException.getErrorMessage()
+            };
+        } else {
+            return {
+                error:true,
+                message:"Problem generating the SDK"
+            };
+        }
+    }
+
+};
 %>
