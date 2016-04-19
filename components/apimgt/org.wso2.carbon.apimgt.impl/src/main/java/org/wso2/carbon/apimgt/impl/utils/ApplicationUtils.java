@@ -77,8 +77,8 @@ public class ApplicationUtils {
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
-    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL, String tokenScope, String
-            clientDetails)
+    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
+            String tokenScope, String clientDetails)
             throws
             APIManagementException {
 
@@ -92,7 +92,8 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance().buildFromJSON(authApplicationInfo, clientDetails);
+            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance().buildFromJSON(authApplicationInfo,
+                    clientDetails);
 
             if (log.isDebugEnabled()) {
                 log.debug("Additional json parameters when building OauthAppRequest =  " + clientDetails);

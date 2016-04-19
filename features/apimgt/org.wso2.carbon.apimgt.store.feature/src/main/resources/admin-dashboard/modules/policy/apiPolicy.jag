@@ -220,15 +220,17 @@ var jsonToObject = function (policy) {
         var policyName = policy.policyName;
         var policyLevel = policy.policyLevel;
         var policyDescription = policy.policyDescription;
-        var i = 0;    //to iterate through execution flows
         var pipeline = policy.executionFlows;
         var apiPolicyobj = new APIPolicy(policyName);
         apiPolicyobj.setUserLevel(policyLevel);
         apiPolicyobj.setDescription(policyDescription);
         //exract pipeline info
         log.info("start");
+        log.info(policy);
+        log.info(pipeline.length);
         var isPipelinePresent = false;
-        while (pipeline[i]) {
+        var pipeLines = new ArrayList();
+        for (var i = 0 ; i < pipeline.length; i++) {
             isPipelinePresent = true;
             var pipe = new Pipeline();
             var quotaPolicy = new QuotaPolicy();
@@ -260,7 +262,6 @@ var jsonToObject = function (policy) {
             pipe.setQuotaPolicy(quotaPolicy);
             var j = 0;   //to iterate through conditions
             var condition = pipeline[i].conditions;
-            var pipeLines = new ArrayList();
             var l = 0;
             var m = 0;
             var k = 0;
@@ -341,7 +342,6 @@ var jsonToObject = function (policy) {
             pipe.setConditions(conditionsList);
             //adding pipe to pipelines object
             pipeLines.add(pipe);
-            i++;
         }
         //end of pipeline info extracttion
         //adding pipelines to policy if pipeline/executionflow is presented

@@ -144,7 +144,8 @@ public class ThrottleHandler extends AbstractHandler {
         boolean isSubscriptionLevelThrottled = false;
         boolean isApiLevelThrottled = false;
         boolean isBlockedRequest;
-
+        String ipLevelBlockingKey = null;
+        String appLevelBlockingKey = null;
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
@@ -162,13 +163,14 @@ public class ThrottleHandler extends AbstractHandler {
                 //inform to client.
                 //TODO handle blocked and throttled requests separately.
 
+                ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
+                appLevelBlockingKey = authContext.getSubscriber()+":"+authContext.getApplicationName();
             }
-            String ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
             isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                    apiContext, applicationLevelThrottleKey, authorizedUser,ipLevelBlockingKey);
+                    apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
             if (isBlockedRequest){
                 String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
-                        " ,application:" + applicationLevelThrottleKey + " ,user:" + authorizedUser;
+                        " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
                 if (log.isDebugEnabled()) {
                     log.debug(msg);
                 }

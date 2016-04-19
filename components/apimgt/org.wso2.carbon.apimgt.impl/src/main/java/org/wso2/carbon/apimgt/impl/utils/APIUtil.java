@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.google.gson.Gson;
 
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -96,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -147,9 +149,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
-import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
@@ -1938,9 +1937,7 @@ public final class APIUtil {
             }
         }
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
+        if (isEnabledUnlimitedTier()) {
             Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
             tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
             tier.setDisplayName(APIConstants.UNLIMITED_TIER);
@@ -5280,43 +5277,43 @@ public final class APIUtil {
     }
 
     /**
-     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @param stakeHolder value "publisher" for publisher value "subscriber" for subscriber value "admin-dashboard" for admin
      * Return all alert types.
      * @return Hashmap of alert types.
      * @throws APIManagementException
      */
-    public static HashMap<Integer, String> getAllAlertTypeByAgent(String agent) throws APIManagementException {
+    public static HashMap<Integer, String> getAllAlertTypeByStakeHolder(String stakeHolder) throws APIManagementException {
         HashMap<Integer, String> map;
-        map = ApiMgtDAO.getInstance().getAllAlertTypesByAgent(agent);
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByStakeHolder(stakeHolder);
         return map;
     }
 
     /**
      *
      * @param userName user name with tenant domain ex: admin@carbon.super
-     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
      * @return map of saved values of alert types.
      * @throws APIManagementException
      */
-    public static List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws  APIManagementException{
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws  APIManagementException{
 
         List<Integer> list;
-        list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndAgent(userName,agent);
+        list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, stakeHolder);
         return  list;
 
     }
 
     /**
-     * This util method retrieves saved email list by user and agent name
+     * This util method retrieves saved email list by user and stakeHolder name
      * @param userName user name with tenant ID.
-     * @param agent if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
+     * @param stakeHolder if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
      * @return List of eamil list.
      * @throws APIManagementException
      */
-    public static List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException{
+    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException{
 
         List<String> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,agent);
+        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,stakeHolder);
 
         return list;
     }
@@ -5450,4 +5447,21 @@ public final class APIUtil {
                 .getThrottleProperties().isEnabled();
     }
 
+    /**
+     * Used to get unlimited throttling tier is enable
+     *
+     * @return condition of enable unlimited tier
+     */
+    public static boolean isEnabledUnlimitedTier() {
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties();
+        if (throttleProperties.isEnabled()) {
+            return throttleProperties.isEnableUnlimitedTier();
+        } else {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            return JavaUtils.isTrueExplicitly(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER));
+        }
+    }
 }

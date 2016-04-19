@@ -310,8 +310,14 @@ var getAPILevelPolicies = function () {
     try {
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
         var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_API);
-        
-
+      if(isUnlimitedTierEnabled){
+            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+            var policy = new org.wso2.carbon.apimgt.api.model.policy.APIPolicy(APIConstants.UNLIMITED_TIER);
+            policy.setPolicyName(APIConstants.UNLIMITED_TIER);
+            policy.setDescription(APIConstants.UNLIMITED_TIER_DESC);
+            var length = policies.length;
+             policies[length-1] = policy;    
+            }
         if (log.isDebugEnabled()) {
             log.debug("getAPILevelPolicies " +  " : " + stringify(policies));
         }
@@ -332,6 +338,11 @@ var getAPILevelPolicies = function () {
 var isGlobalCEPThrottlingEnabled = function() {
      var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         return APIUtil.isAdvanceThrottlingEnabled();
+};
+
+var isUnlimitedTierEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isEnabledUnlimitedTier();
 };
 
 var getResourceTiers = function () {
@@ -355,7 +366,14 @@ var getResourceTiers = function () {
                 tier.defaultTier = (i == 0);
                 tierArray[i] = tier;
             }
-
+          if(isUnlimitedTierEnabled){
+            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+            var tempTier = {};
+            tempTier.tierName = APIConstants.UNLIMITED_TIER;
+            tempTier.tierDisplayName = APIConstants.UNLIMITED_TIER;
+            tempTier.tierDescription = APIConstants.UNLIMITED_TIER_DESC;
+             tierArray[policies.length] = tempTier;    
+            }
             if (log.isDebugEnabled()) {
                 log.debug("getTiers " +  " : " + stringify(tierArray));
             }

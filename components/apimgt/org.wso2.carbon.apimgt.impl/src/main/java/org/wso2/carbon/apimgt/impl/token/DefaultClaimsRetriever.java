@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  * It reads user claim values from the default carbon user store.
  * The user claims are encoded to the JWT in the natural order of the claimURIs.
  * To engage this class its fully qualified class name should be mentioned under
- * api-manager.xml -> APIConsumerAuthentication -> ClaimsRetrieverImplClass
+ * api-manager.xml -> JWTConfiguration -> ClaimsRetrieverImplClass
  */
 public class DefaultClaimsRetriever implements ClaimsRetriever {
     //TODO refactor caching implementation
@@ -52,12 +52,12 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     private  boolean isClaimsCacheInitialized = false;
     /**
      * Reads the DialectURI of the ClaimURIs to be retrieved from api-manager.xml ->
-     * APIConsumerAuthentication -> ConsumerDialectURI.
+     * JWTConfiguration -> ConsumerDialectURI.
      * If not configured it uses http://wso2.org/claims as default
      */
     public void init() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(CONSUMER_DIALECT_URI);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }

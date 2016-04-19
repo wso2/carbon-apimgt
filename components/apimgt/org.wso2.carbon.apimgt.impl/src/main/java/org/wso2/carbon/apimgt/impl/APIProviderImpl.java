@@ -3652,8 +3652,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                apiMgtDAO.addAPIPolicy(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                executionFlows.add(defaultPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
@@ -3807,19 +3809,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-
-            if (PolicyConstants.ACROSS_ALL.equals(policy.getUserLevel())) {
-                policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_all_";
-            } else if (PolicyConstants.PER_USER.equals(policy.getUserLevel())) {
-                policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName + "_per_";
-            }
+            policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName;
             //add default policy file name
-            policyFileNames.add(policyFile + "elseCondition");
+            policyFileNames.add(policyFile + "_defualt");
 
             for (int i = 0; i < policy.getPipelines().size(); i++) {
-                policyFileNames.add(policyFile + "condition" + i);
+                policyFileNames.add(policyFile + "_condition_" + i);
             }
-
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
             policyFileNames.add(policyFile);
@@ -3834,11 +3830,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
 
         try {
-            //undeploy from gateway
-            manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
-            //undeploy from global cep
-            if (!PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) { //exclude global level policies
-                manager.undeployPolicyFromGlobalCEP(policyFileNames);
+            //Application and subscription policies can remove straight way as they have single
+            //execution flow.
+            if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
+                manager.undeployPolicyFromGlobalCEP("app_"+policyName);
+            }
+            else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
+                manager.undeployPolicyFromGlobalCEP("sub_"+policyName);
+
+            }
+            else {
+                manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
+                //undeploy from global cep
+                if (!PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) { //exclude global level policies
+                    //manager.undeployPolicyFromGlobalCEP(policyFileNames);
+                }
             }
         } catch (Exception e) {
             String msg = "Error while undeploying policy: ";

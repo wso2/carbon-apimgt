@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.throttling;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
@@ -45,7 +46,7 @@ public class GlobalThrottleEngineClient {
 
     private String login() throws RemoteException, LoginAuthenticationExceptionException, MalformedURLException {
         authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
-                "/AuthenticationAdmin");
+                "AuthenticationAdmin");
         String sessionCookie = null;
 
         if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(),
@@ -61,7 +62,8 @@ public class GlobalThrottleEngineClient {
      * 1. Check validity of execution plan
      * 2. If execution plan exist with same name edit it
      * 3. Else deploy new execution plan
-     * @param name Name of execution plan
+     *
+     * @param name          Name of execution plan
      * @param executionPlan execution query plan
      * @param sessionCookie session cookie to use established connection
      * @throws RemoteException
@@ -71,7 +73,7 @@ public class GlobalThrottleEngineClient {
         Options options;
 
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                (policyDeployerConfiguration.getServiceUrl()+"EventProcessorAdminService");
+                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
         serviceClient = eventProcessorAdminServiceStub._getServiceClient();
         options = serviceClient.getOptions();
         options.setManageSession(true);
@@ -81,18 +83,19 @@ public class GlobalThrottleEngineClient {
         ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
                 .getAllActiveExecutionPlanConfigurations();
         boolean isUpdateRequest = false;
-        if(executionPlanConfigurationDtos != null){
-        for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-            if (executionPlanConfigurationDto.getName().trim().equals(name)) {
-                eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
-                isUpdateRequest = true;
-                break;
+        if (executionPlanConfigurationDtos != null) {
+            for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
+                if (executionPlanConfigurationDto.getName().trim().equals(name)) {
+                    eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
+                    isUpdateRequest = true;
+                    break;
+                }
             }
-        }}
-        if(!isUpdateRequest){
+        }
+        if (!isUpdateRequest) {
             eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
         }
-        
+
     }
 
 
@@ -118,5 +121,44 @@ public class GlobalThrottleEngineClient {
                 log.error("Error when logging out from global throttling engine. " + e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * This method will be used to delete single execution plan.
+     * @param name execution plan name to be deleted.
+     */
+    public void deleteExecutionPlan(String name) {
+        ServiceClient serviceClient;
+        Options options;
+        String sessionID = null;
+        try {
+            sessionID = login();
+        } catch (RemoteException e) {
+            log.error("Error while connecting to login central policy management server" + e.getMessage());
+        } catch (LoginAuthenticationExceptionException e) {
+            log.error("Error while connecting to login central policy management server, " +
+                    "Check user name and password"
+                    + e.getMessage());
+        } catch (MalformedURLException e) {
+            log.error("Error while connecting to login central policy management server, check URL" +
+                    e.getMessage());
+        }
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
+        try {
+            eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                    (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+            serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+            options = serviceClient.getOptions();
+            options.setManageSession(true);
+            options.setProperty(HTTPConstants.COOKIE_STRING, sessionID);
+            eventProcessorAdminServiceStub.undeployActiveExecutionPlan(name);
+        } catch (AxisFault axisFault) {
+            log.error("Error while connecting to login central policy management server to delete " +
+                    "execution plan." + axisFault);
+        } catch (RemoteException e) {
+            log.error("Error while connecting to login central policy management server to delete " +
+                    "execution plan." + e.getMessage());
+        }
+
     }
 }

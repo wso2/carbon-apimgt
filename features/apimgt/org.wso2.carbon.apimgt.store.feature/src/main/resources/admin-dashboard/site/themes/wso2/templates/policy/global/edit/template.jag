@@ -78,7 +78,7 @@
         </div>
     </div>
 </div>
-
+ 
 <script>
 var isNewPolicy = true;
     $(document).ready(function(){

@@ -32,12 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
@@ -8033,10 +8028,12 @@ public class ApiMgtDAO {
 
     /**
      * This method will fetch all alerts type that is available in AM_ALERT_TYPES.
+     * @param stakeHolder the name of the stakeholder. whether its "subscriber", "publisher" or
+     * "admin-dashboard"
      * @return List of alert types
      * @throws APIManagementException
      */
-    public HashMap<Integer,String> getAllAlertTypesByAgent(String agent) throws APIManagementException {
+    public HashMap<Integer,String> getAllAlertTypesByStakeHolder(String stakeHolder) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -8045,13 +8042,13 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery;
-            if(agent == "a"){
+            if(stakeHolder == "admin-dashboard"){
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
                 ps = conn.prepareStatement(sqlQuery);
             }else {
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES;
                 ps = conn.prepareStatement(sqlQuery);
-                ps.setString(1, agent);
+                ps.setString(1, stakeHolder);
             }
 
             resultSet = ps.executeQuery();
@@ -8069,11 +8066,11 @@ public class ApiMgtDAO {
     /**
      *
      * @param userName user name with tenant domain ex: admin@carbon.super
-     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
      * @return map of saved values of alert types.
      * @throws APIManagementException
      */
-    public List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws APIManagementException{
+    public List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName,String stakeHolder) throws APIManagementException{
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -8085,7 +8082,7 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_SAVED_ALERT_TYPES_BY_USERNAME;
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, userName);
-            ps.setString(2,agent);
+            ps.setString(2,stakeHolder);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(resultSet.getInt(1));
@@ -8098,7 +8095,14 @@ public class ApiMgtDAO {
         return list;
     }
 
-    public List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException {
+    /**
+     * This method will retrieve saved emails list by user name and stakeholder.
+     * @param userName user name.
+     * @param stakeHolder "publisher" , "subscriber" or "admin-dashboard"
+     * @return
+     * @throws APIManagementException
+     */
+    public List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
@@ -8111,7 +8115,7 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_SAVED_ALERT_EMAILS;
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, userName);
-            ps.setString(2,agent);
+            ps.setString(2,stakeHolder);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(resultSet.getString(1));
@@ -8130,12 +8134,12 @@ public class ApiMgtDAO {
      * @param userName User name.
      * @param emailList Comma separated email list.
      * @param alertTypesIDList Comma separated alert types list.
-     * @param agent if pram value = p we assume those changes from publisher if param value = s those data belongs to
+     * @param stakeHolder if pram value = p we assume those changes from publisher if param value = s those data belongs to
      * subscriber.
      * @throws APIManagementException
      * @throws SQLException
      */
-    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String agent)
+    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String  stakeHolder)
             throws APIManagementException, SQLException {
 
         Connection connection = null;
@@ -8148,11 +8152,11 @@ public class ApiMgtDAO {
 
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
-            String deleteAlertTypesByUserNameAndAgentQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
+            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER;
 
-            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
-            ps.setString(2, agent);
+            ps.setString(2, stakeHolder);
             ps.executeUpdate();
 
             if(alertTypesIDList != null){
@@ -8163,18 +8167,18 @@ public class ApiMgtDAO {
                     ps = connection.prepareStatement(alertTypesQuery);
                     ps.setInt(1, Integer.parseInt(alertTypeId));
                     ps.setString(2, userName);
-                    ps.setString(3, agent);
+                    ps.setString(3, stakeHolder);
                     ps.execute();
                 }
 
             }
 
-            String deleteAlertTypesEmailListsByUserNameAndAgentQuery = SQLConstants.
-                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT;
+            String deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery = SQLConstants.
+                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER;
 
-            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
+            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
-            ps.setString(2, agent);
+            ps.setString(2, stakeHolder);
             ps.executeUpdate();
 
             //Email list save query
@@ -8183,7 +8187,7 @@ public class ApiMgtDAO {
             ps = connection.prepareStatement(emailListSaveQuery);
             ps.setString(1, userName);
             ps.setString(2, emailList);
-            ps.setString(3, agent);
+            ps.setString(3, stakeHolder);
             ps.execute();
 
             connection.commit();
@@ -8296,7 +8300,7 @@ public class ApiMgtDAO {
      * @param policy policy object to add
      * @throws APIManagementException
      */
-    public void addAPIPolicy(APIPolicy policy) throws APIManagementException {
+    public APIPolicy addAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
 
         try {
@@ -8318,6 +8322,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
+        return policy;
     }
 
     /**
@@ -8423,6 +8428,7 @@ public class ApiMgtDAO {
 				int pipelineId = rs.getInt(1); // Get the inserted
 												// CONDITION_GROUP_ID (auto
 												// incremented value)
+                pipeline.setId(pipelineId);
 				for (Condition condition : conditionList) {
 					if (condition == null) {
 						continue;
@@ -9636,7 +9642,8 @@ public class ApiMgtDAO {
     	return isExist;
     }
 
-    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws APIManagementException {
+    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+            APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
@@ -9645,22 +9652,32 @@ public class ApiMgtDAO {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if ("API".equals(conditionType)) {
                 String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
-                if (extractedTenantDomain == null){
+                if (extractedTenantDomain == null) {
                     extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
                 }
-                   if (tenantDomain.equals(extractedTenantDomain) && isValidateContext(conditionValue)){
-                       valid = true;
-                   }
-            } else if ("APPLICATION".equals(conditionType)) {
-                valid = true;
-            } else if ("USER".equals(conditionType)) {
-                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)){
+                if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
                     valid = true;
                 }
-            }else {
+            } else if ("APPLICATION".equals(conditionType)) {
+                String appArray[] = conditionValue.split(":");
+                if (appArray.length > 1) {
+                    String appOwner = appArray[0];
+                    String appName = appArray[1];
+
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
+                            (appOwner,
+                            appName)) {
+                        valid = true;
+                    }
+                }
+            } else if ("USER".equals(conditionType)) {
+                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
+                }
+            } else {
+                valid = true;
             }
-            if (valid){
+            if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 insertPreparedStatement = connection.prepareStatement(query);
@@ -9670,7 +9687,7 @@ public class ApiMgtDAO {
                 insertPreparedStatement.setString(3, "TRUE");
                 status = insertPreparedStatement.execute();
                 connection.commit();
-            }else{
+            } else {
                 throw new APIManagementException("Condition is not a valid");
             }
         } catch (SQLException e) {
@@ -9678,8 +9695,7 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to add Block condition : " + conditionType+" and "+conditionValue, e);
-
+                    handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
                 }
             }
         } finally {
@@ -9773,11 +9789,11 @@ public class ApiMgtDAO {
         }
         return status;
     }
-    public boolean isValidateContext(String context) throws APIManagementException {
+    private boolean isValidContext(String context) throws APIManagementException {
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
-        boolean status = true;
+        boolean status = false;
         try {
             String query = "select count(*) COUNT from AM_API where CONTEXT=?";
             connection = APIMgtDBUtil.getConnection();
@@ -9787,7 +9803,7 @@ public class ApiMgtDAO {
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
             if (resultSet.getInt("COUNT") > 0){
-                status = false;
+                status = true;
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -9802,7 +9818,38 @@ public class ApiMgtDAO {
         }
         return status;
     }
-    
+    private boolean isValidApplication(String appOwner, String appName) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement validateContextPreparedStatement = null;
+        ResultSet resultSet = null;
+        boolean status = false;
+        try {
+            String query = "SELECT * FROM AM_APPLICATION App,AM_SUBSCRIBER SUB  WHERE App.NAME=? AND App" +
+                    ".SUBSCRIBER_ID=SUB.SUBSCRIBER_ID AND SUB.USER_ID=?";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            validateContextPreparedStatement = connection.prepareStatement(query);
+            validateContextPreparedStatement.setString(1,appName);
+            validateContextPreparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(appOwner));
+            resultSet = validateContextPreparedStatement.executeQuery();
+            connection.commit();
+            if (resultSet.next()){
+                status = true;
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to check Block condition with Application Name " + appName + " with " +
+                            "Application Owner" + appOwner, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
+        }
+        return status;
+    }
     public String getAPILevelTier(int id) throws APIManagementException{
     	 Connection connection = null;
          PreparedStatement selectPreparedStatement = null;

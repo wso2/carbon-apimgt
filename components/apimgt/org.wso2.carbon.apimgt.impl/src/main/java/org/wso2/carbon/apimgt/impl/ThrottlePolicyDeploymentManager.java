@@ -86,8 +86,12 @@ public class ThrottlePolicyDeploymentManager {
      * @param policies names of the policy files.
      * @throws APIManagementException
      */
-    public void undeployPolicyFromGlobalCEP(List<String> policies) throws APIManagementException {
-        //TODO
+    public void undeployPolicyFromGlobalCEP(String policyName) throws APIManagementException {
+        try {
+            globalThrottleEngineClient.deleteExecutionPlan(policyName);
+        } catch (Exception e) {
+            log.error(e);
+        }
     }
 
     /**

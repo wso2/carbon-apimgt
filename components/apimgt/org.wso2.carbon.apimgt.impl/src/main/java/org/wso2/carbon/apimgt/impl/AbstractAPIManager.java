@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -1259,7 +1260,6 @@ public abstract class AbstractAPIManager implements APIManager {
         } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)){
             policies = apiMgtDAO.getGlobalPolicies(tenantID);
         }
-        
         return policies;
     }
 
