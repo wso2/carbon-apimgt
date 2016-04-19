@@ -840,8 +840,14 @@ public class ApiMgtDAO {
 
                 //TODO this must implement as a part of throttling implementation.
                 String apiLevelThrottlingKey = "api_level_throttling_key";
+                String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
+                list.add(spikeArrest);
+                list.add(spikeArrestUnit);
+                list.add(stopOnQuotaReach);
                 if(tier != null && tier.trim().length() > 0 ){
                 	infoDTO.setApiTier(tier);
                 }
@@ -8732,6 +8738,11 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(blob != null){
+                    byte[] customAttrib = blob.getBytes(1,(int)blob.length());
+                    subPolicy.setCustomAttributes(customAttrib);
+                }
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
@@ -8908,7 +8919,6 @@ public class ApiMgtDAO {
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 byte[] customAttrib = blob.getBytes(1,(int)blob.length());
-                blob.free();
                 policy.setCustomAttributes(customAttrib);
             } else {
                 handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
@@ -9031,7 +9041,7 @@ public class ApiMgtDAO {
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
-                    /* Assumes availability of starting ip means ip range is enforced.
+                        /* Assumes availability of starting ip means ip range is enforced.
                        Therefore availability of ending ip is not checked.
                     */
                 	IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
