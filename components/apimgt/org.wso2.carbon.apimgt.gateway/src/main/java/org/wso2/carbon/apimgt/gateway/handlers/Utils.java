@@ -83,8 +83,19 @@ public class Utils {
         messageContext.getEnvelope().getBody().addChild(payload);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        //If an Accept header has been provided.
-        if(!StringUtils.isEmpty(acceptType) && !"*/*".equals(acceptType)){
+        Set<String> supportedMimes = new HashSet<String>(Arrays.asList("application/x-www-form-urlencoded",
+                                                                       "multipart/form-data",
+                                                                       "text/html",
+                                                                       "application/xml",
+                                                                       "text/xml",
+                                                                       "application/soap+xml",
+                                                                       "text/plain",
+                                                                       "application/json",
+                                                                       "application/json/badgerfish",
+                                                                       "text/javascript"));
+
+        //If an Accept header has been provided and is supported by the Gateway
+        if(!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)){
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
         }
     }
