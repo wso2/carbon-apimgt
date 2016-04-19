@@ -444,7 +444,7 @@
         </WhiteListedURIs>
     </RESTAPI>
     <ThrottlingConfigurations>
-        <EnableAdvanceThrottling>false</EnableAdvanceThrottling>
+        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
         <DataPublisher>
             <Type>Binary</Type>
             <ReceiverUrlGroup>tcp://localhost:9611</ReceiverUrlGroup>
@@ -462,7 +462,7 @@
             </DataPublisherThreadPool>
         </DataPublisher>
         <PolicyDeployer>
-            <ServiceURL>http://localhost:9443/services/</ServiceURL>
+            <ServiceURL>https://localhost:9443/services/</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
         </PolicyDeployer>

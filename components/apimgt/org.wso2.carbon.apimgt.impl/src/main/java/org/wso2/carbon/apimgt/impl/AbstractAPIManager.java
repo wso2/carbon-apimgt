@@ -1260,16 +1260,6 @@ public abstract class AbstractAPIManager implements APIManager {
         } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)){
             policies = apiMgtDAO.getGlobalPolicies(tenantID);
         }
-        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
-        if (throttleProperties.isEnableUnlimitedTier()) {
-            Policy unlimitedPolicy = new Policy(APIConstants.UNLIMITED_TIER);
-            unlimitedPolicy.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-            unlimitedPolicy.setTenantId(tenantID);
-            if (policies != null) {
-                policies[policies.length + 1] = unlimitedPolicy;
-            }
-        }
         return policies;
     }
 
