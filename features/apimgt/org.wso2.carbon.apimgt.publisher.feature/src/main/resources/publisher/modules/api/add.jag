@@ -284,7 +284,14 @@ var getSubsriptionLevelPolicies = function () {
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
         var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_SUB);
         
-
+      if(isUnlimitedTierEnabled){
+            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+            var policy = new org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy(APIConstants.UNLIMITED_TIER);
+            policy.setPolicyName(APIConstants.UNLIMITED_TIER);
+            policy.setDescription(APIConstants.UNLIMITED_TIER_DESC);
+            var length = policies.length;
+             policies[length-1] = policy;    
+            }
         if (log.isDebugEnabled()) {
             log.debug("getSubsriptionLevelPolicies " +  " : " + stringify(policies));
         }
@@ -311,6 +318,7 @@ var getAPILevelPolicies = function () {
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
         var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_API);
       if(isUnlimitedTierEnabled){
+        log.info("unlimited api level tier");
             var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
             var policy = new org.wso2.carbon.apimgt.api.model.policy.APIPolicy(APIConstants.UNLIMITED_TIER);
             policy.setPolicyName(APIConstants.UNLIMITED_TIER);

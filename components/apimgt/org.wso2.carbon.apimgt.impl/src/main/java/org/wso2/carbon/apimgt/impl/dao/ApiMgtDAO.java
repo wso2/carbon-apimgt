@@ -9656,6 +9656,9 @@ public class ApiMgtDAO {
                 }
                 if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
                     valid = true;
+                } else {
+                    throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
+                            conditionValue);
                 }
             } else if ("APPLICATION".equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -9667,11 +9670,17 @@ public class ApiMgtDAO {
                             (appOwner,
                             appName)) {
                         valid = true;
+                    }else{
+                        throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
+                                "name " + appName + "from Application " +
+                                "Owner " + appOwner);
                     }
                 }
             } else if ("USER".equals(conditionType)) {
                 if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
+                }else{
+                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
             } else {
                 valid = true;
@@ -9686,8 +9695,6 @@ public class ApiMgtDAO {
                 insertPreparedStatement.setString(3, "TRUE");
                 status = insertPreparedStatement.execute();
                 connection.commit();
-            } else {
-                throw new APIManagementException("Condition is not a valid");
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -9801,7 +9808,7 @@ public class ApiMgtDAO {
             validateContextPreparedStatement.setString(1, context);
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
-            if (resultSet.getInt("COUNT") > 0){
+            if (resultSet.next() && resultSet.getInt("COUNT") > 0) {
                 status = true;
             }
         } catch (SQLException e) {
