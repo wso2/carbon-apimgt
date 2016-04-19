@@ -61,6 +61,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -826,16 +827,22 @@ public class ApiMgtDAO {
                 infoDTO.setType(type);
 
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
-                boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
-                        null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                //TODO isContentAware
+                boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
 
 
                 infoDTO.setContentAware(isContentAware);
 
                 //TODO this must implement as a part of throttling implementation.
                 String apiLevelThrottlingKey = "api_level_throttling_key";
+                String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                 List<String> list = new ArrayList<String>();
                 list.add(apiLevelThrottlingKey);
+                list.add(spikeArrest);
+                list.add(spikeArrestUnit);
+                list.add(stopOnQuotaReach);
                 if(tier != null && tier.trim().length() > 0 ){
                 	infoDTO.setApiTier(tier);
                 }
@@ -956,7 +963,7 @@ public class ApiMgtDAO {
                 }
 
                 if(quotaType == null || StringUtils.isEmpty(quotaType)){
-                	throw new APIManagementException(" Quata Type can not be null ");
+                	return false;
                 }
 
                 if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
@@ -8733,6 +8740,11 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(blob != null){
+                    byte[] customAttrib = blob.getBytes(1,(int)blob.length());
+                    subPolicy.setCustomAttributes(customAttrib);
+                }
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
@@ -8907,6 +8919,9 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                byte[] customAttrib = blob.getBytes(1,(int)blob.length());
+                policy.setCustomAttributes(customAttrib);
             } else {
                 handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
@@ -9028,7 +9043,7 @@ public class ApiMgtDAO {
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
-                    /* Assumes availability of starting ip means ip range is enforced.
+                        /* Assumes availability of starting ip means ip range is enforced.
                        Therefore availability of ending ip is not checked.
                     */
                 	IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
@@ -9655,6 +9670,9 @@ public class ApiMgtDAO {
                 }
                 if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
                     valid = true;
+                } else {
+                    throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
+                            conditionValue);
                 }
             } else if ("APPLICATION".equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -9666,11 +9684,17 @@ public class ApiMgtDAO {
                             (appOwner,
                             appName)) {
                         valid = true;
+                    }else{
+                        throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
+                                "name " + appName + "from Application " +
+                                "Owner " + appOwner);
                     }
                 }
             } else if ("USER".equals(conditionType)) {
                 if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
+                }else{
+                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
             } else {
                 valid = true;
@@ -9685,8 +9709,6 @@ public class ApiMgtDAO {
                 insertPreparedStatement.setString(3, "TRUE");
                 status = insertPreparedStatement.execute();
                 connection.commit();
-            } else {
-                throw new APIManagementException("Condition is not a valid");
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -9800,7 +9822,7 @@ public class ApiMgtDAO {
             validateContextPreparedStatement.setString(1, context);
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
-            if (resultSet.getInt("COUNT") > 0){
+            if (resultSet.next() && resultSet.getInt("COUNT") > 0) {
                 status = true;
             }
         } catch (SQLException e) {

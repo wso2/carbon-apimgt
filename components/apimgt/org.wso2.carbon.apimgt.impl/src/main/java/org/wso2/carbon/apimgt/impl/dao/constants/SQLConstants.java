@@ -253,13 +253,17 @@ public class SQLConstants {
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
             "   API.API_TIER," +
-            "   API.API_PROVIDER" +
+            "   API.API_PROVIDER," +
+            "   APS.RATE_LIMIT_COUNT," +
+            "   APS.RATE_LIMIT_TIME_UNIT," +
+            "   APS.STOP_ON_QUOTA_REACH" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
             "   AM_APPLICATION APP," +
             "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API " +
+            "   AM_API API," +
+            "   AM_POLICY_SUBSCRIPTION APS" +
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
@@ -267,7 +271,7 @@ public class SQLConstants {
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+            "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
@@ -280,13 +284,17 @@ public class SQLConstants {
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
             "   API.API_TIER," +
-            "   API.API_PROVIDER" +
+            "   API.API_PROVIDER," +
+            "   APS.RATE_LIMIT_COUNT," +
+            "   APS.RATE_LIMIT_TIME_UNIT," +
+            "   APS.STOP_ON_QUOTA_REACH" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
             "   AM_APPLICATION APP," +
             "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API" +
+            "   AM_API API," +
+            "   AM_POLICY_SUBSCRIPTION APS" +
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
@@ -295,7 +303,7 @@ public class SQLConstants {
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+            "   AND APS.NAME = SUB.TIER_ID";;
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 

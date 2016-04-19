@@ -120,5 +120,11 @@
     "addAPI":"API Level Policies",
     "user":"User",
     "subsPendingApproval":"Subscription is pending approval",
-    "tiers":"Tier"
+    "tiers":"Tier",
+    "conditionList":"Condition List",
+    "addnewCondition":"Add New Condition",
+    "conditionIdHead":"Condition Id",
+    "conditionTypeHead":"Condition Type",
+    "conditionValueHead":"Condition Value",
+    "conditionManagementTitle":"Condition Management"
 }

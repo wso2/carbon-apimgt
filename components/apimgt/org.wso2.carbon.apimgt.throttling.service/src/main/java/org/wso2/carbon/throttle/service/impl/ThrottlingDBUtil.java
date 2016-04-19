@@ -105,13 +105,13 @@ public final class ThrottlingDBUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
-        String sqlQuery = "select THROTTLE_KEY from ThrottleTable";
+        String sqlQuery = "select THROTTLEKEY from ThrottleTable";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             rs = ps.executeQuery();
             while (rs.next()) {
-                String throttleKey = rs.getString("THROTTLE_KEY");
+                String throttleKey = rs.getString("THROTTLEKEY");
                 ThrottledEventDTO throttledEventDTO = new ThrottledEventDTO();
                 throttledEventDTO.setThrottleKey(throttleKey);
                 throttledEventDTOList.add(throttledEventDTO);
@@ -152,13 +152,13 @@ public final class ThrottlingDBUtil {
             Connection conn = null;
             PreparedStatement ps = null;
             ResultSet rs = null;
-            String sqlQuery = "select THROTTLE_KEY from ThrottleTable";
+            String sqlQuery = "select THROTTLEKEY from ThrottleTable";
             try {
                 conn = ThrottlingDBUtil.getConnection();
                 ps = conn.prepareStatement(sqlQuery);
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    String throttleKey = rs.getString("THROTTLE_KEY");
+                    String throttleKey = rs.getString("THROTTLEKEY");
                     if (throttledEventString.length() > 1) {
                         throttledEventString = throttledEventString + "," + throttleKey;
                     } else {
@@ -189,13 +189,13 @@ public final class ThrottlingDBUtil {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlQuery = "select THROTTLE_KEY from ThrottleTable WHERE THROTTLE_KEY = '"+query+"'";
+        String sqlQuery = "select THROTTLEKEY from ThrottleTable WHERE THROTTLEKEY = '"+query+"'";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             rs = ps.executeQuery();
             while (rs.next()) {
-                String throttleKey = rs.getString("THROTTLE_KEY");
+                String throttleKey = rs.getString("THROTTLEKEY");
                 throttledEventDTO.setThrottleState("THROTTLED");
             }
         } catch (SQLException e) {

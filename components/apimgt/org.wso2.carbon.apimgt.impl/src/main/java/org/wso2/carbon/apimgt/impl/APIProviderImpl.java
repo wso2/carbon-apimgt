@@ -3839,7 +3839,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<BlockConditionsDTO> getBlockConditions() throws APIManagementException {
-        return apiMgtDAO.getBlockConditions(MultitenantUtils.getTenantDomain(username));
+        return apiMgtDAO.getBlockConditions(tenantDomain);
     }
 
     @Override
@@ -3849,7 +3849,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
-        return apiMgtDAO.addBlockConditions(conditionType,conditionValue,MultitenantUtils.getTenantDomain(username));
+        return apiMgtDAO.addBlockConditions(conditionType,conditionValue,tenantDomain);
     }
 
     @Override
