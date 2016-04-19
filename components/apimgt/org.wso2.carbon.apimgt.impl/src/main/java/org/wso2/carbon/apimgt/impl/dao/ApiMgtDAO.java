@@ -963,7 +963,7 @@ public class ApiMgtDAO {
                 }
 
                 if(quotaType == null || StringUtils.isEmpty(quotaType)){
-                	throw new APIManagementException(" Quata Type can not be null ");
+                	return false;
                 }
 
                 if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
