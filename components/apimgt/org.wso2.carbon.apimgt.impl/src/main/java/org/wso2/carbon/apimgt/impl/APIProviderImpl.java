@@ -3755,8 +3755,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /* If single pipeline fails to deploy then whole deployment should fail.
              * Therefore for loop is wrapped inside a try catch block
              */
-            for (String flowName : policiesToUndeploy) {
-                deploymentManager.undeployPolicyFromGlobalCEP(flowName);
+            if(PolicyConstants.POLICY_LEVEL_GLOBAL.equalsIgnoreCase(policyLevel)) {
+                for (String flowName : policiesToUndeploy) {
+                    deploymentManager.undeployPolicyFromGlobalCEP(flowName);
+                }
             }
 
             for (String flowString : executionFlows) {
