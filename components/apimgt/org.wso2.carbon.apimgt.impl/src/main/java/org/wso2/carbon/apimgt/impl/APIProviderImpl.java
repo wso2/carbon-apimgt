@@ -3766,26 +3766,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      *
-     * @param ip ip address as a string
-     * @return ip address in long
-     */
-    public long ipToLong(String ip) {
-        long ipAddressinLong = 0;
-        if (ip != null) {
-            //convert ipaddress into a long
-            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
-
-            for (int i = 0; i < ipAddressArray.length; i++) {
-                int power = 3 - i;
-                long ipAddress = Long.parseLong(ipAddressArray[i]);   //parse to long
-                ipAddressinLong += ipAddress * Math.pow(256, power);
-            }
-        }
-        return ipAddressinLong;
-    }
-
-    /**
-     *
      * @param username username to recognize tenant
      * @param level policy level to be applied
      * @return

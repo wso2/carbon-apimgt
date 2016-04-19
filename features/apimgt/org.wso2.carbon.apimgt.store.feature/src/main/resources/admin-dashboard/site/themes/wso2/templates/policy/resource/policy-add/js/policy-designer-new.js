@@ -237,7 +237,7 @@ var addJwtClaim = function (id) {
 };
 
 var loadPolicy = function (policyName) {
-    jagg.post("/site/blocks/policy-add/ajax/policy-operations.jag", {
+    jagg.post("/site/blocks/policy/resource/policy-add/ajax/policy-operations.jag", {
         action: "getApiPolicy",
         policyName: policyName},
         function (data) {

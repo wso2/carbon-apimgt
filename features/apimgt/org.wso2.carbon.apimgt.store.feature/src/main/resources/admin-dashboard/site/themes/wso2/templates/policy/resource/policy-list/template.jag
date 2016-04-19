@@ -71,7 +71,7 @@
 <script>
     function editApiPolicy(policyName){
             console.log(policyName);
-            location.href = "<%= jagg.url('api-policy-edit')%>?policyName="+policyName;
+            location.href = "<%= jagg.url('/api-policy-edit')%>?policyName="+policyName;
     }
     $(document).ready(function(){
         $('#add-policy-btn').on('click',function(){
