@@ -72,8 +72,10 @@
     "subscriptions":"Subscriptions",
     "throttlePolicies":"Throttle Policies",
     "addThrottlePolicy":"Add Throttle Policy",
+    "editThrottlePolicy":"Save Throttle Policy",
     "executionFlow":"Execution Flow",
     "addExecutionFlow":"Add Execution Flow",
+    "editExecutionFlow":"Edit Execution Flow",
     "executionFlows":"Execution Flows",
     "tiers":"Tier"
 }

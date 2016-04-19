@@ -9183,7 +9183,7 @@ public class ApiMgtDAO {
      * @param policy updated policy object
      * @throws APIManagementException
      */
-    public void updateAPIPolicy(APIPolicy policy) throws APIManagementException {
+    public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
         PreparedStatement selectStatement = null;
         PreparedStatement deleteStatement = null;
@@ -9214,9 +9214,8 @@ public class ApiMgtDAO {
             deleteStatement.setInt(1, policy.getTenantId());
             deleteStatement.setString(2, policy.getPolicyName());
             deleteStatement.executeUpdate();
-
             policy.setPolicyId(oldPolicyId);
-            addAPIPolicy(policy, connection);
+            //addAPIPolicy(policy, connection);
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
@@ -9233,6 +9232,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
         }
+        return policy;
     }
 
     /**
