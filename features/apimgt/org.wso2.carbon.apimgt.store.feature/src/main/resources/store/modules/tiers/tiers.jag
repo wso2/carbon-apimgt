@@ -51,7 +51,14 @@ var getApplicationTiers = function () {
                 //tier.defaultTier = (i == 0);
                 tierArray[i] = tier;                
             }
-
+            if(isUnlimitedTierEnabled){
+            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+            var tempTier = {};
+            tempTier.tierName = APIConstants.UNLIMITED_TIER;
+            tempTier.tierDisplayName = APIConstants.UNLIMITED_TIER;
+            tempTier.tierDescription = APIConstants.UNLIMITED_TIER_DESC;
+             tierArray[tierList.length] = tempTier;    
+            }
             if (log.isDebugEnabled()) {
                 log.debug("getTiers : " + stringify(tierArray));
             }
@@ -117,6 +124,9 @@ var isGlobalCEPThrottlingEnabled = function() {
      var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         return APIUtil.isAdvanceThrottlingEnabled();
 };
-
+var isUnlimitedTierEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isEnabledUnlimitedTier();
+};
 %>
 

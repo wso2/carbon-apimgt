@@ -32,12 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
@@ -9798,7 +9793,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
-        boolean status = true;
+        boolean status = false;
         try {
             String query = "select count(*) COUNT from AM_API where CONTEXT=?";
             connection = APIMgtDBUtil.getConnection();
@@ -9808,7 +9803,7 @@ public class ApiMgtDAO {
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
             if (resultSet.getInt("COUNT") > 0){
-                status = false;
+                status = true;
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -9827,7 +9822,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
         ResultSet resultSet = null;
-        boolean status = true;
+        boolean status = false;
         try {
             String query = "SELECT * FROM AM_APPLICATION App,AM_SUBSCRIBER SUB  WHERE App.NAME=? AND App" +
                     ".SUBSCRIBER_ID=SUB.SUBSCRIBER_ID AND SUB.USER_ID=?";
@@ -9839,7 +9834,7 @@ public class ApiMgtDAO {
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
             if (resultSet.next()){
-                status = false;
+                status = true;
             }
         } catch (SQLException e) {
             if (connection != null) {

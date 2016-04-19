@@ -219,10 +219,8 @@ public final class BlockConditionDBUtil {
             }
             while(true) {
                 if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
-                    System.out.println("DB reading Started. Reading database");
                     lastAccessed = System.currentTimeMillis();
                     processCommand();
-                    System.out.println("DB reading End.Time taken = "+ (System.currentTimeMillis() - lastAccessed) );
                     try {
                         Thread.sleep(timeBetweenUpdates);
                     } catch (InterruptedException e) {
