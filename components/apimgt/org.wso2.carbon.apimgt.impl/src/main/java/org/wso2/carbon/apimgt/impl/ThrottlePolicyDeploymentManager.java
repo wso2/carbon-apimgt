@@ -21,30 +21,18 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.throttling.GlobalThrottleEngineClient;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
-import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
+
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.List;
 import java.util.Map;
 
 public class ThrottlePolicyDeploymentManager {
@@ -68,34 +56,37 @@ public class ThrottlePolicyDeploymentManager {
     }
 
     /**
-     * Deploy policy in the global even processor
-     * @param policy
+     * This method will be used to deploy policy to Global policy engine.
+     *
+     * @param policyName policy name of the policy to be deployed.
+     * @param policy     Policy string to be deployed.
      * @throws APIManagementException
      */
     public void deployPolicyToGlobalCEP(String policyName, String policy) throws APIManagementException {
-
         try {
             globalThrottleEngineClient.deployExecutionPlan(policyName, policy);
         } catch (Exception e) {
-            log.error(e);
+            log.error("Error while deploying policy to global policy server." + e.getMessage());
         }
     }
-    
+
     /**
-     * Undeploy policy from global CEP. 
-     * @param policies names of the policy files.
+     * Undeploy policy from global CEP.
+     *
+     * @param policyName name of the policy file to be deleted.
      * @throws APIManagementException
      */
     public void undeployPolicyFromGlobalCEP(String policyName) throws APIManagementException {
         try {
             globalThrottleEngineClient.deleteExecutionPlan(policyName);
         } catch (Exception e) {
-            log.error(e);
+            log.error("Error while undeploying policy from global policy server." + e.getMessage());
         }
     }
 
     /**
      * deploy policy in the gateway manager
+     *
      * @param policy
      * @throws APIManagementException
      */
@@ -105,24 +96,26 @@ public class ThrottlePolicyDeploymentManager {
             element = AXIOMUtil.stringToOM(policy);
             String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
             for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("deploy policy to gateway : " + environment.getValue().getName());
                 }
-                APIGatewayAdminClient client = new APIGatewayAdminClient(null , environment.getValue());
+                APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment.getValue());
                 client.deployPolicy(policy, fileName);
             }
-     
+
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg , e);
+            log.error(msg, e);
             throw new APIManagementException(msg);
         } catch (IOException e) {
             String msg = "Error while deploying the policy in gateway manager: ";
-            log.error(msg , e);
+            log.error(msg, e);
             throw new APIManagementException(msg);
         }
-        
+
     }
+
+    //TODO this method should never used and should be removed.
 
     /**
      * Undeploy policy from the gateway manager nodes
@@ -148,60 +141,5 @@ public class ThrottlePolicyDeploymentManager {
             }
         }
 
-    }
-
-    private boolean deployPolicyInGlobalThrottleEngine(String executionPlan, String name) throws
-            APIManagementException {
-        ServiceClient serviceClient;
-        Options options;
-        AuthenticationAdminStub authenticationAdminStub;
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub;
-        ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService
-                        ().getAPIManagerConfiguration().getThrottleProperties().getPolicyDeployer();
-        try {
-            authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
-                    "AuthenticationAdmin");
-            String sessionCookie = null;
-
-            if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration
-                    .getPassword(), new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
-                ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
-                        .getServiceContext();
-                sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            }
-            if (sessionCookie != null) {
-                eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub("/EventProcessorAdminService");
-                serviceClient = eventProcessorAdminServiceStub._getServiceClient();
-                options = serviceClient.getOptions();
-                options.setManageSession(true);
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
-
-                eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
-                ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
-                        .getAllActiveExecutionPlanConfigurations();
-                boolean isUpdateRequest = false;
-                for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-                    if (executionPlanConfigurationDto.getName().equals(name)) {
-                        eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
-                        isUpdateRequest = true;
-                        break;
-                    }
-                }
-                if (!isUpdateRequest) {
-                    eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
-                }
-
-            }
-        } catch (AxisFault axisFault) {
-            log.error("Couldn't deploy the policy", axisFault);
-        } catch (RemoteException e) {
-            log.error("Couldn't connect to  the global policy engine", e);
-        } catch (LoginAuthenticationExceptionException e) {
-            log.error("Couldn't log into  the global policy engine", e);
-        } catch (MalformedURLException e) {
-            log.error("Couldn't resolve the hostname of global policy engine", e);
-        }
-        return false;
     }
 }

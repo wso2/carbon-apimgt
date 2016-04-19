@@ -2,9 +2,9 @@
     <div id="listing">
     	<div class="page-header">
                 <div class="page-title">
-                    <h1>Condition List</h1>
+                    <h1><%=i18n.localize("conditionList")%></h1>
                     <div class="form-actions">
-        <input id="add-condition-btn" type="button" class="btn btn-primary" value="Add New Condition">
+        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("addnewCondition")%>">
     </div>
                  </div>
          </div>
@@ -20,9 +20,9 @@
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class="userSpecialCell">Condition Id</th>
-                <th class="appSpecialCell">Condition Type</th>
-                <th class="appSpecialCell">Condition Value</th>
+                <th class="userSpecialCell"><%=i18n.localize("conditionIdHead")%></th>
+                <th class="appSpecialCell"><%=i18n.localize("conditionTypeHead")%></th>
+                <th class="appSpecialCell"><%=i18n.localize("conditionValueHead")%></th>
                 <th class="userSpecialCell"></th>
             </tr>
         </thead>

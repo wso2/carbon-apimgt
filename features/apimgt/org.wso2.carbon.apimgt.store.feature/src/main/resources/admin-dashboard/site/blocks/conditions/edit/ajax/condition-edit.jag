@@ -51,11 +51,11 @@ include("/jagg/jagg.jag");
             var conditionType =  request.getParameter("conditionType", "UTF-8");
             var conditionValue =  request.getParameter("conditionValue", "UTF-8");
             mod = jagg.module("conditions");
-            var updateCondition = mod.addCondition(conditionType,conditionValue);                
+            var updateCondition = mod.addCondition(conditionType,conditionValue);
             if (updateCondition.error) {
                 obj = {
                     error:true,
-                    message:msg.error.backendError(action)
+                    message:updateCondition.message.split(":")[2]
                 };
             } else {
                 obj = {
