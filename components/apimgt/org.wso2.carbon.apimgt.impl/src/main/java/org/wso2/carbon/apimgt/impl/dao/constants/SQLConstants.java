@@ -2004,7 +2004,7 @@ public class SQLConstants {
             " FROM " +
             "   AM_ALERT_TYPES AT  " +
             " WHERE " +
-            "   AGENT = ?";
+            "   STAKE_HOLDER   = ?";
 
 
     public static final String GET_ALL_ALERT_TYPES_FOR_ADMIN =
@@ -2021,7 +2021,7 @@ public class SQLConstants {
             "   AM_ALERT_TYPES_VALUES " +
             " WHERE " +
             "   USER_NAME = ? " +
-            "   AND AGENT = ? ";
+            "   AND STAKE_HOLDER   = ? ";
 
     public static final String GET_SAVED_ALERT_EMAILS =
 
@@ -2031,20 +2031,20 @@ public class SQLConstants {
             "   AM_ALERT_EMAILLIST " +
             " WHERE " +
             "   USER_NAME = ? " +
-            "   AND AGENT = ? ";
+            "   AND STAKE_HOLDER  = ? ";
 
 
     public static final String ADD_ALERT_TYPES_VALUES =
-            " INSERT INTO AM_ALERT_TYPES_VALUES (ALERT_TYPE_ID, USER_NAME , AGENT) " +
+            " INSERT INTO AM_ALERT_TYPES_VALUES (ALERT_TYPE_ID, USER_NAME , STAKE_HOLDER) " +
             " VALUES(?,?,?)";
 
     public static final String ADD_ALERT_EMAIL_LIST =
-            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, EMAIL_LIST , AGENT) " +
+            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, EMAIL_LIST , STAKE_HOLDER) " +
             " VALUES(?,?,?)";
 
-    public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT =
-            "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND AGENT = ?";
+    public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER  =
+            "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
 
-    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT =
-            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND AGENT = ?";
+    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER  =
+            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
 }

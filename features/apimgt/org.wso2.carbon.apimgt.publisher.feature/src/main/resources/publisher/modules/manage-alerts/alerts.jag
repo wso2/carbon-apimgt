@@ -1,7 +1,7 @@
 <%
-var agent = "p";
+var agent = "publisher";
 var retrieveSavedAlertsTypes = function () {
-    var log = new Log();
+    var i,api,apis,length, log = new Log();
 
     var gson = com.google.gson.Gson();
     try {
@@ -18,7 +18,7 @@ var retrieveSavedAlertsTypes = function () {
 
         }
 
-        var allAlertTypes = APIUtil.getAllAlertTypeByAgent(agent);
+        var allAlertTypes = APIUtil.getAllAlertTypeByStakeHolder(agent);
 
         var allAlertTypesJson = JSON.parse(gson.toJson(allAlertTypes));
 
@@ -32,7 +32,7 @@ var retrieveSavedAlertsTypes = function () {
 
 
         //pass "p" param because we need to fetch publisher data
-        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndAgent(userName, agent);
+        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, agent);
         var allSavedAlertTypesJsonObj = JSON.parse(gson.toJson(allSavedAlertTypes));
 
         return {

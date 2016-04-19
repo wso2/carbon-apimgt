@@ -7853,10 +7853,12 @@ public class ApiMgtDAO {
 
     /**
      * This method will fetch all alerts type that is available in AM_ALERT_TYPES.
+     * @param stakeHolder the name of the stakeholder. whether its "subscriber", "publisher" or
+     * "admin-dashboard"
      * @return List of alert types
      * @throws APIManagementException
      */
-    public HashMap<Integer,String> getAllAlertTypesByAgent(String agent) throws APIManagementException {
+    public HashMap<Integer,String> getAllAlertTypesByStakeHolder(String stakeHolder) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7865,13 +7867,13 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery;
-            if(agent == "a"){
+            if(stakeHolder == "admin-dashboard"){
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
                 ps = conn.prepareStatement(sqlQuery);
             }else {
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES;
                 ps = conn.prepareStatement(sqlQuery);
-                ps.setString(1, agent);
+                ps.setString(1, stakeHolder);
             }
 
             resultSet = ps.executeQuery();
@@ -7889,11 +7891,11 @@ public class ApiMgtDAO {
     /**
      *
      * @param userName user name with tenant domain ex: admin@carbon.super
-     * @param agent value "p" for publisher value "s" for subscriber value "a" for admin
+     * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
      * @return map of saved values of alert types.
      * @throws APIManagementException
      */
-    public List<Integer> getSavedAlertTypesIdsByUserNameAndAgent(String userName,String agent) throws APIManagementException{
+    public List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName,String stakeHolder) throws APIManagementException{
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7905,7 +7907,7 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_SAVED_ALERT_TYPES_BY_USERNAME;
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, userName);
-            ps.setString(2,agent);
+            ps.setString(2,stakeHolder);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(resultSet.getInt(1));
@@ -7918,7 +7920,14 @@ public class ApiMgtDAO {
         return list;
     }
 
-    public List<String> retrieveSavedEmailList(String userName, String agent) throws APIManagementException {
+    /**
+     * This method will retrieve saved emails list by user name and stakeholder.
+     * @param userName user name.
+     * @param stakeHolder "publisher" , "subscriber" or "admin-dashboard"
+     * @return
+     * @throws APIManagementException
+     */
+    public List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
@@ -7931,7 +7940,7 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_SAVED_ALERT_EMAILS;
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, userName);
-            ps.setString(2,agent);
+            ps.setString(2,stakeHolder);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(resultSet.getString(1));
@@ -7950,12 +7959,12 @@ public class ApiMgtDAO {
      * @param userName User name.
      * @param emailList Comma separated email list.
      * @param alertTypesIDList Comma separated alert types list.
-     * @param agent if pram value = p we assume those changes from publisher if param value = s those data belongs to
+     * @param stakeHolder if pram value = p we assume those changes from publisher if param value = s those data belongs to
      * subscriber.
      * @throws APIManagementException
      * @throws SQLException
      */
-    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String agent)
+    public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String  stakeHolder)
             throws APIManagementException, SQLException {
 
         Connection connection = null;
@@ -7968,11 +7977,11 @@ public class ApiMgtDAO {
 
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
-            String deleteAlertTypesByUserNameAndAgentQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
+            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER;
 
-            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndAgentQuery);
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
-            ps.setString(2, agent);
+            ps.setString(2, stakeHolder);
             ps.executeUpdate();
 
             if(alertTypesIDList != null){
@@ -7983,18 +7992,18 @@ public class ApiMgtDAO {
                     ps = connection.prepareStatement(alertTypesQuery);
                     ps.setInt(1, Integer.parseInt(alertTypeId));
                     ps.setString(2, userName);
-                    ps.setString(3, agent);
+                    ps.setString(3, stakeHolder);
                     ps.execute();
                 }
 
             }
 
-            String deleteAlertTypesEmailListsByUserNameAndAgentQuery = SQLConstants.
-                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_AGENT;
+            String deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery = SQLConstants.
+                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER;
 
-            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndAgentQuery);
+            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
-            ps.setString(2, agent);
+            ps.setString(2, stakeHolder);
             ps.executeUpdate();
 
             //Email list save query
@@ -8003,7 +8012,7 @@ public class ApiMgtDAO {
             ps = connection.prepareStatement(emailListSaveQuery);
             ps.setString(1, userName);
             ps.setString(2, emailList);
-            ps.setString(3, agent);
+            ps.setString(3, stakeHolder);
             ps.execute();
 
             connection.commit();
