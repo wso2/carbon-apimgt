@@ -23,6 +23,7 @@ import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.RelatesTo;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -82,7 +83,10 @@ public class Utils {
         messageContext.getEnvelope().getBody().addChild(payload);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
+        //If an Accept header has been provided.
+        if(!StringUtils.isEmpty(acceptType) && !"*/*".equals(acceptType)){
+            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
+        }
     }
     
     public static void setSOAPFault(MessageContext messageContext, String code, 
