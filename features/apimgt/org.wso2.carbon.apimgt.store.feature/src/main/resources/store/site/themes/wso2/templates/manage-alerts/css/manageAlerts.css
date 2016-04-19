@@ -33,3 +33,10 @@ textarea {
 .email{
     margin: 0 20px 0 0;
 }
+
+.bootstrap-tagsinput {
+    width: 100%;
+}
+.label {
+    line-height: 2 !important;
+}

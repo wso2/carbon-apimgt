@@ -1,5 +1,6 @@
 <% jagg.template("manage-alerts", function(inputs, outputs, jagg) { %>
 
+
 		<div id="col-sm-12">
         <div id="manageAlerts">
 			<div class="page-header">
@@ -52,9 +53,7 @@
                             //print(key + " -> " + allAlertType[key]);
                         }
                     }
-
                     %>
-
                         <div class="form-group">
                                 <label class="col-sm-1 email"><p class=""><strong>Email</strong></p></label>
                                 <%
@@ -64,20 +63,16 @@
                                     }
                                 %>
                                 <div class="col-sm-10">
-                                    <textarea id="tokenfield" placeholder=""><%=savedEmailList%></textarea>
+                                    <input id="tokenfield" type="text" value="<%=savedEmailList%>" data-role="tagsinput" />
+                                    <!--<textarea id="tokenfield" placeholder=""><%=savedEmailList%></textarea>-->
                                 </div>
-                                <!--<input type="text" class="form-control" id="tokenfield" value="red,green,blue" />-->
                         </div>
                         </form>
                             <div class="" id="saveButtons">
                                 <button type="submit" class="btn btn-primary " id="saveBtn" >Save</button>
                                 <!--<button type="submit" class="btn btn-primary " id="cancle" >Cancle</button>-->
                             </div>
-
-
-
                     <%
-
                 }else{
                     %>
                     <div class="alert alert-danger" id="loginError">
@@ -85,13 +80,8 @@
                     </div>
                     <%
                 }
-
                 %>
-
         </div>
-
-
-
     </div>
     </div>
 
