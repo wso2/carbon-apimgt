@@ -18,9 +18,10 @@ include("/jagg/jagg.jag");
             var policyName =  request.getParameter("policyName", "UTF-8");
             var description =  request.getParameter("description", "UTF-8");
             var siddhiQuery =  request.getParameter("siddhiQuery", "UTF-8");
+            var keyTemplate =  request.getParameter("keyTemplate", "UTF-8");
 
             mod = jagg.module("policy");
-            result = mod.addGlobalPolicy(action, policyName, description, siddhiQuery);
+            result = mod.addGlobalPolicy(action, policyName, description, siddhiQuery, keyTemplate);
             if (result.error) {
                 obj = {
                     error:true,

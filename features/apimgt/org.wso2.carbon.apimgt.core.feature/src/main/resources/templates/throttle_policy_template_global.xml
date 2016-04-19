@@ -1,15 +1,19 @@
-###################################  macros  #######################################
-##
-###generate key
-#macro( getKey )##
-global_${policy.getPolicyName()}_key##
-#end
-###generate rule
-#macro( getRule $policy)
-global_${policy.getPolicyName()}##
-#end
-<policy tier="global_$policy.getPolicyName()" level="global" name="#getRule($policy)">
-	<eligibilityQuery>
-$policy.getSiddhiQuery()
-	</eligibilityQuery>	
-</policy>
+        /* Enter a unique ExecutionPlan */
+        @Plan:name('app_${policy.getPolicyName()}')
+
+        /* Enter a unique description for ExecutionPlan */
+        @Plan:description('ExecutionPlan for app_${policy.getPolicyName()}')
+
+        /* define streams/tables and write queries here ... */
+
+        @Import('org.wso2.throttle.processed.request.stream:1.0.0')
+        define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, propertiesMap string);
+
+        @Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
+        define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
+
+        ${policy.getSiddhiQuery()}
+
+        from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)
+        select *
+        insert into GlobalThrottleStream;

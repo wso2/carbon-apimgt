@@ -8,7 +8,8 @@ var saveGlobalPolicy = function () {
             action: action,
             policyName:$('#policyName').val(),
             description:$('#description').val().trim(),
-            siddhiQuery:$('#siddhiQuery').val()
+            siddhiQuery:$('#siddhiQuery').val(),
+            keyTemplate:$('#keyTemplate').val()
 
         }, function (result) {
             if (result.error == false) {

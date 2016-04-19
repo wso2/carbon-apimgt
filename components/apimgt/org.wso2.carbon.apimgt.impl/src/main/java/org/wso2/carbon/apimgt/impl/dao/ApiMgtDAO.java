@@ -8571,8 +8571,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             policyStatement.setString(1, policy.getPolicyName());
-            policyStatement.setString(2, policy.getKeyTemplate());
-            policyStatement.setInt(3, policy.getTenantId());
+            policyStatement.setInt(2, policy.getTenantId());
+            policyStatement.setString(3, policy.getKeyTemplate());
             policyStatement.setString(4, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
@@ -8785,6 +8785,7 @@ public class ApiMgtDAO {
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
 
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
