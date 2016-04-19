@@ -2424,7 +2424,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 			}
             String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
+            artifactManager.removeGenericArtifact(apiArtifact);
             artifactManager.removeGenericArtifact(artifactId);
+            
 
             String thumbPath = APIUtil.getIconPath(identifier);
             if (registry.resourceExists(thumbPath)) {
@@ -2505,6 +2507,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                    identifier.getProviderName();
+            
             if(registry.resourceExists(apiProviderPath)){
             	Resource providerCollection=registry.get(apiProviderPath);
             	CollectionImpl collection=(CollectionImpl)providerCollection;
