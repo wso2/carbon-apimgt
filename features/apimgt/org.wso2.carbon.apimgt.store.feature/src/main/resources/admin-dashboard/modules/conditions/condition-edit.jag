@@ -32,7 +32,7 @@ var addCondition = function(conditionType,conditionValue){
             result: conditions
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while adding conditions (Cause:" + ex.message + ")";
+        var errorMessage = "Error occurred while adding conditions:" + ex.message;
         log.error(errorMessage);
         return {
             error: true,

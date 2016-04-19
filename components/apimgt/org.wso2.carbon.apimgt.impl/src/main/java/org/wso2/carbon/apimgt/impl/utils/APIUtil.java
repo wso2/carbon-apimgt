@@ -310,8 +310,6 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
 
@@ -327,7 +325,7 @@ public final class APIUtil {
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -549,7 +547,7 @@ public final class APIUtil {
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -726,7 +724,7 @@ public final class APIUtil {
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -2313,7 +2311,7 @@ public final class APIUtil {
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
