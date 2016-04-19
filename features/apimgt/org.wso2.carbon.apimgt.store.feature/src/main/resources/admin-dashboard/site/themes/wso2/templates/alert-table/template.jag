@@ -22,15 +22,15 @@
         <label>Alert Type 
         <select  id="alertSelected" class="select form-control" data-live-search="true">
             <option value="1">All Alerts</option>
-            <option value="2">Unusual IP Access</option>
+            <option value="2">Unseen Source IP Address</option>
             <option value="3">Abnormal Request Count</option>
             <option value="4">Abnormal Response Time</option>
-            <option value="5">Abnormal Tier Usage</option>
-            <option value="6">Abnormal Token Refresh</option>
+            <option value="5">Abnormal API Usage</option>
+            <option value="6">Abnormal Renewal of Access Tokens</option>
             <option value="7">Tier Crossing</option>
             <option value="8">Abnormal Backend Time</option>
-            <option value="9">API Health Monitor</option>
-            <option value="10">Request Pattern Change</option>
+            <option value="9">Availability of APIs</option>
+            <option value="10">Abnormal Resource Access Pattern</option>
         </select>
         </label>
         </div>

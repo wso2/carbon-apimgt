@@ -25,7 +25,7 @@
                               <li><a href="<%=jagg.urlTenanted("/site/pages/manage-alert-type.jag")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-notification icon"></i><span class="name"><%=i18n.localize("manageAlertTypes")%></span></a></li>                              
 	                        </ul>
 	                    </li>
-	                  <%} else if (inputs.pagePath == "application/application-list" || inputs.pagePath == "application/application-add" || inputs.pagePath == "application/application-view") { %> 
+	                  <%} else if (inputs.pagePath == "application/application-list" || inputs.pagePath == "application/application-add" || inputs.pagePath == "application/application-view" || inputs.pagePath == "application/application-edit") { %> 
 	                  	<li class="green active"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li> 
 	                  	<li class="purple">
 	                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
