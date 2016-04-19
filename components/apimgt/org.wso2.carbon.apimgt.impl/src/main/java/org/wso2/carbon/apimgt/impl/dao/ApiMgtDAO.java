@@ -8157,7 +8157,7 @@ public class ApiMgtDAO {
 
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
-            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_AGENT;
+            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER;
 
             ps = connection.prepareStatement(deleteAlertTypesByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
