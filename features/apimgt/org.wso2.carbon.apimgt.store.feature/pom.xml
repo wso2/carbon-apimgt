@@ -96,62 +96,50 @@
         <dependency>
             <groupId>org.wso2.orbit.org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.7.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.7.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.7.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.7.2</version>
         </dependency>
         <dependency>
             <groupId>com.samskivert</groupId>
             <artifactId>jmustache</artifactId>
-            <version>1.12</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.5.7</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
-            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
-            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
-            <version>2.1.6.wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -181,7 +169,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>javax.validation:validation-api</bundleDef>
-                                <bundleDef>com.google.guava:guava</bundleDef>
+                                <bundleDef>com.google.guava:guava:${google.guava.version}</bundleDef>
                                 <bundleDef>io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>

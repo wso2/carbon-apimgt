@@ -242,6 +242,7 @@ var jsonToObject = function (policy) {
 
             var requestCount = pipeline[i].quotaPolicy.limit.requestCount;
             var timeUnit = pipeline[i].quotaPolicy.limit.timeUnit;
+            var unitTime = pipeline[i].quotaPolicy.limit.unitTime;
             var dataAmount = pipeline[i].quotaPolicy.limit.dataAmount;
             var dataUnit = pipeline[i].quotaPolicy.limit.dataUnit;
             var id = pipeline[i].id;
@@ -252,11 +253,14 @@ var jsonToObject = function (policy) {
                 requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount);
                 requestCountLimit.setTimeUnit(timeUnit);
+                requestCountLimit.setUnitTime(unitTime);
                 quotaPolicy.setLimit(requestCountLimit);
             } else if (quotaPolicyType == "bandwidthVolume") {
                 bandwidthLimit = new BandwidthLimit();
                 bandwidthLimit.setDataAmount(dataAmount);
                 bandwidthLimit.setDataUnit(dataUnit);
+                bandwidthLimit.setTimeUnit(timeUnit);
+                bandwidthLimit.setUnitTime(unitTime);
                 quotaPolicy.setLimit(bandwidthLimit);
             }
             pipe.setQuotaPolicy(quotaPolicy);
@@ -353,6 +357,7 @@ var jsonToObject = function (policy) {
         var defaultQuotaPolicyType = policy.defaultQuotaPolicy.type;
         var defaultRequestCount = policy.defaultQuotaPolicy.limit.requestCount;
         var defaultTimeUnit = policy.defaultQuotaPolicy.limit.timeUnit;
+        var defaultUnitTime = policy.defaultQuotaPolicy.limit.unitTime;
         var defaultDataAmount = policy.defaultQuotaPolicy.limit.dataAmount;
         var defaultDataUnit = policy.defaultQuotaPolicy.limit.dataUnit;
         defaultQuotaPolicy.setType(defaultQuotaPolicyType);
@@ -360,11 +365,14 @@ var jsonToObject = function (policy) {
             requestCountLimit = new RequestCountLimit();
             requestCountLimit.setRequestCount(defaultRequestCount);
             requestCountLimit.setTimeUnit(defaultTimeUnit);
+            requestCountLimit.setUnitTime(defaultUnitTime);
             defaultQuotaPolicy.setLimit(requestCountLimit);
         } else if (defaultQuotaPolicyType == "bandwidthVolume") {
             bandwidthLimit = new BandwidthLimit();
             bandwidthLimit.setDataAmount(defaultDataAmount);
             bandwidthLimit.setDataUnit(defaultDataUnit);
+            bandwidthLimit.setUnitTime(defaultUnitTime);
+            bandwidthLimit.setTimeUnit(defaultTimeUnit);
             defaultQuotaPolicy.setLimit(bandwidthLimit);
         }
         apiPolicyobj.setDefaultQuotaPolicy(defaultQuotaPolicy);
