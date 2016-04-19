@@ -8410,7 +8410,8 @@ public class ApiMgtDAO {
 
 			// Add data to the AM_CONDITION table
 			conditionStatement = conn.prepareStatement(sqlAddQuery, PreparedStatement.RETURN_GENERATED_KEYS);
-			conditionStatement.setInt(1, policyID);
+			conditionStatement.
+                    setInt(1, policyID);
 			conditionStatement.setString(2, pipeline.getQuotaPolicy().getType());
 
 			if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
@@ -9230,7 +9231,7 @@ public class ApiMgtDAO {
             deleteStatement.setString(2, policy.getPolicyName());
             deleteStatement.executeUpdate();
             policy.setPolicyId(oldPolicyId);
-            //addAPIPolicy(policy, connection);
+            addAPIPolicy(policy, connection);
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {

@@ -3709,7 +3709,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                policy = apiMgtDAO.updateAPIPolicy(apiPolicy);
+                //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
+                //TODO Need to fix appropriately
+                apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_API, policyName, policy.getTenantId());
+                policy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 String policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName;
                 //add default policy file name
