@@ -4,6 +4,7 @@ jagg.initializer("application/application-view", {
     preInitialize:function () {        
         jagg.addFooterJS("application/view", "ZeroClipboard", "js/lib/ZeroClipboard.min.js");
         jagg.addFooterJS("application/view", "applications", "js/applications.js");
+        jagg.addFooterJS("application/view", "generateSdk", "templates/application/application-view/js/generateSdk.js");
     }
 });
 %>

@@ -305,7 +305,9 @@ public final class APIConstants {
     public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
     public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS +"JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS +"EnableJWTGeneration";
-    public static final String REMOVE_USERNAME_FROM_JWT = JWT_CONFIGS + "RemoveUserNameFromJWTForApplicationToken";
+    public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
+    public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
+    public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
@@ -442,7 +444,7 @@ public final class APIConstants {
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
-    
+
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
     public static final String OPEN_ID_SCOPE_NAME = "openid";
@@ -1081,6 +1083,12 @@ public final class APIConstants {
     public static final String HOST_NAME = "HostName";
     public static final int DEFAULT_HTTPS_PORT = 443;
     public static final String PROXY_CONTEXT_PATH = "ProxyContextPath";
+
+    //Constants for swagger-codegen client generation
+    public static final String CLIENT_CODEGEN_GROUPID = "SwaggerCodegen.ClientGeneration.GroupId";
+    public static final String CLIENT_CODEGEN_ARTIFACTID = "SwaggerCodegen.ClientGeneration.ArtifactId";
+    public static final String CLIENT_CODEGEN_MODAL_PACKAGE = "SwaggerCodegen.ClientGeneration.ModelPackage";
+    public static final String CLIENT_CODEGEN_API_PACKAGE = "SwaggerCodegen.ClientGeneration.ApiPackage";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";
