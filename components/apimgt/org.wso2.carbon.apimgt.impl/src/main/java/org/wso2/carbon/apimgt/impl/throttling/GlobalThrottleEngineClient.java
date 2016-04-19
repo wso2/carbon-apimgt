@@ -61,7 +61,8 @@ public class GlobalThrottleEngineClient {
      * 1. Check validity of execution plan
      * 2. If execution plan exist with same name edit it
      * 3. Else deploy new execution plan
-     * @param name Name of execution plan
+     *
+     * @param name          Name of execution plan
      * @param executionPlan execution query plan
      * @param sessionCookie session cookie to use established connection
      * @throws RemoteException
@@ -71,7 +72,7 @@ public class GlobalThrottleEngineClient {
         Options options;
 
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                (policyDeployerConfiguration.getServiceUrl()+"EventProcessorAdminService");
+                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
         serviceClient = eventProcessorAdminServiceStub._getServiceClient();
         options = serviceClient.getOptions();
         options.setManageSession(true);
@@ -81,18 +82,19 @@ public class GlobalThrottleEngineClient {
         ExecutionPlanConfigurationDto[] executionPlanConfigurationDtos = eventProcessorAdminServiceStub
                 .getAllActiveExecutionPlanConfigurations();
         boolean isUpdateRequest = false;
-        if(executionPlanConfigurationDtos != null){
-        for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
-            if (executionPlanConfigurationDto.getName().trim().equals(name)) {
-                eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
-                isUpdateRequest = true;
-                break;
+        if (executionPlanConfigurationDtos != null) {
+            for (ExecutionPlanConfigurationDto executionPlanConfigurationDto : executionPlanConfigurationDtos) {
+                if (executionPlanConfigurationDto.getName().trim().equals(name)) {
+                    eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlan, name);
+                    isUpdateRequest = true;
+                    break;
+                }
             }
-        }}
-        if(!isUpdateRequest){
+        }
+        if (!isUpdateRequest) {
             eventProcessorAdminServiceStub.deployExecutionPlan(executionPlan);
         }
-        
+
     }
 
 
@@ -118,5 +120,20 @@ public class GlobalThrottleEngineClient {
                 log.error("Error when logging out from global throttling engine. " + e.getMessage(), e);
             }
         }
+    }
+
+
+    public void deleteExecutionPlan(String name)
+            throws Exception {
+        ServiceClient serviceClient;
+        Options options;
+        String sessionID = login();
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+        serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+        options = serviceClient.getOptions();
+        options.setManageSession(true);
+        options.setProperty(HTTPConstants.COOKIE_STRING, sessionID);
+        eventProcessorAdminServiceStub.undeployActiveExecutionPlan(name);
     }
 }
