@@ -75,5 +75,11 @@
     "executionFlow":"Execution Flow",
     "addExecutionFlow":"Add Execution Flow",
     "executionFlows":"Execution Flows",
-    "tiers":"Tier"
+    "tiers":"Tier",
+    "conditionList":"Condition List",
+    "addnewCondition":"Add New Condition",
+    "conditionIdHead":"Condition Id",
+    "conditionTypeHead":"Condition Type",
+    "conditionValueHead":"Condition Value",
+    "conditionManagementTitle":"Condition Management"
 }
