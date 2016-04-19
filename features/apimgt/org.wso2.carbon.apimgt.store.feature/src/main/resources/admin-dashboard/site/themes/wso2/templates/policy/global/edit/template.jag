@@ -18,6 +18,7 @@
         }
         var description = globalPolicy.getDescription() == null ? "" : globalPolicy.getDescription();
         var siddhiQuery = globalPolicy.getSiddhiQuery() == null ? "" : globalPolicy.getSiddhiQuery();
+        var keyTemplate = globalPolicy.getKeyTemplate() == null ? "" : globalPolicy.getKeyTemplate();
     }
 %>
 
@@ -43,7 +44,7 @@
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label"><%="Name"%></label>
                             <div class="controls cnls">
-                                <input type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>//>
+                                <input type="text" id="policyName" name="policyName" value="<%=nameFieldDisableStatus%>"/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
@@ -51,6 +52,12 @@
                             <div class="controls cnls">
                                 <textarea id="description" class="text" cols="40" rows ="2" name="description">
                                 </textarea>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label">Key Template</label>
+                            <div class="controls cnls">
+                                <input type="text" id="keyTemplate" name="keyTemplate" value=""/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
@@ -71,7 +78,7 @@
         </div>
     </div>
 </div>
-
+ 
 <script>
 var isNewPolicy = true;
     $(document).ready(function(){
@@ -85,6 +92,7 @@ var isNewPolicy = true;
         if(!isNewPolicy){
           $('#policyName').val("<%=policyName%>");
           $('#description').val("<%=description%>");
+          $('#keyTemplate').val("<%=keyTemplate%>");
           $('#siddhiQuery').val("<%=siddhiQuery%>");
         }
     });

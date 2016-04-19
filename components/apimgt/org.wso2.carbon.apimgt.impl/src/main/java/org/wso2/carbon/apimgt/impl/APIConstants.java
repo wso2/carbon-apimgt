@@ -595,8 +595,8 @@ public final class APIConstants {
     public static final String API_USAGE_THROTTLE_OUT_PROPERTY_KEY = "isThrottleOutIgnored";
 
     public static final String THROTTLE_OUT_REASON_KEY = "THROTTLED_OUT_REASON";
-
-// The following properties describes the reason for the throttle out.
+    public static final String BLOCKED_REASON_KEY = "BLOCKED_REASON";
+    // The following properties describes the reason for the throttle out.
     public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED = "API_LIMIT_EXCEEDED";
@@ -943,6 +943,31 @@ public final class APIConstants {
         OPTIONS
     }
 
+    public enum SupportedCustomPolicyKeys {
+        APP_ID("APP_ID"),
+        IP("IP"),
+        STARTING_IP("STARTING_IP"),
+        END_IP("END_IP"),
+        ACCESS_TOKEN("ACCESS_TOKEN"),
+        USERNAME("APP_ID"),
+        QUERY_PARAM("QUERY_PARAM"),
+        HEADER("HEADER"),
+        BANDWIDTH("BANDWIDTH"),
+        JWT_CLAIM("JWT_CLAIM"),
+        CONTEXT("CONTEXT"),
+        VERSION("VERSION");
+
+        private final String name;
+
+        SupportedCustomPolicyKeys(String s) {
+            name = s;
+        }
+
+        public String getValue() {
+            return this.name;
+        }
+    }
+
     public static class ConfigParameters {
         public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
         private ConfigParameters() {
@@ -1137,5 +1162,8 @@ public final class APIConstants {
         public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE = "CorePoolSize";
         public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_MAXMIMUM_POOL_SIZE = "MaxmimumPoolSize";
         public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME = "KeepAliveTime";
+        public static final String BLOCK_CONDITION_RETRIEVER_INIT_DELAY =  "InitDelay";
+        public static final String BLOCK_CONDITION_RETRIEVER_PERIOD =  "Period";
+
     }
 }

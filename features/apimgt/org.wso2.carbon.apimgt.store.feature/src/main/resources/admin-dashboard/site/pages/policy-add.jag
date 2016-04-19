@@ -25,7 +25,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"policy-add"
+                            "name":"policy/resource/policy-add"
                         }
                     }
                 }
