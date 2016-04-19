@@ -8,9 +8,9 @@
     var policyAction = request.getParameter("action");
     var policyDesc = "",policyLevel = "", defaultQuotaPolicy = "", defaultBandwidth = "" , defaultBandwidthUnit = "",
                         defaultRequestCount = "", defaultUnitTime="", defaultTimeUnit="";
-    log.info("===========================");
-    log.info(policyName);
+    var action = "new";
     if(policyName != null && policyName != ""){
+        action = "edit";
         pageTitle = "Edit API Level Policy";
         nameFieldDisableStatus = "readonly";
         var mod = jagg.module("policy");
@@ -62,6 +62,7 @@
                     <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" name="policy-description" autofocus="autofocus" value="<%=policyDesc%>">
                 </div>
             </div>
+            <input type="hidden" id="action" name="action" value="<%=action%>">
             <div class="form-group">
                 <label class="control-label col-sm-3" for="level">Level:
                     <a class="help_popup" help_data="level_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
@@ -165,7 +166,7 @@
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-            </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
+                </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
         </button>
         <div id="pipeline-content"></div>
     </div>
@@ -174,7 +175,11 @@
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-            </span>&nbsp;<%=i18n.localize("addThrottlePolicy")%>
+                <% if (action == "new") {%>
+                 </span>&nbsp;<%=i18n.localize("addThrottlePolicy")%>
+                 <% } else { %>
+                </span>&nbsp;<%=i18n.localize("editThrottlePolicy")%>
+                <% } %>
         </button>
     </div>
 </div>
@@ -586,7 +591,7 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
                                 </div>
 
                                 <div class="col-sm-3">
@@ -621,7 +626,7 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
                                 </div>
 
                                 <div class="col-sm-3">

@@ -32,6 +32,21 @@ include("/jagg/jagg.jag");
                     }
                 }
                 print(obj);
+            } else if (action == "updateApiPolicy" && request.getMethod() == 'POST') {
+                mod = jagg.module("policy");
+                var apiPolicy = request.getParameter("apiPolicy");
+                result = mod.updateApiPolicy(apiPolicy);
+                if (result.error) {
+                    obj = {
+                        error: result.error,
+                        message: result.message
+                    }
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+                print(obj);
             }//remove api policy
             else if (action == "removeApiPolicy" && request.getMethod() == 'POST') {
                 mod = jagg.module("policy");

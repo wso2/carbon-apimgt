@@ -8360,7 +8360,6 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setLong(7, 1);
             policyStatement.setString(10, policy.getUserLevel());
             if (policyId != -1) {
 
@@ -8411,7 +8410,8 @@ public class ApiMgtDAO {
 
 			// Add data to the AM_CONDITION table
 			conditionStatement = conn.prepareStatement(sqlAddQuery, PreparedStatement.RETURN_GENERATED_KEYS);
-			conditionStatement.setInt(1, policyID);
+			conditionStatement.
+                    setInt(1, policyID);
 			conditionStatement.setString(2, pipeline.getQuotaPolicy().getType());
 
 			if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
@@ -9199,7 +9199,7 @@ public class ApiMgtDAO {
      * @param policy updated policy object
      * @throws APIManagementException
      */
-    public void updateAPIPolicy(APIPolicy policy) throws APIManagementException {
+    public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
         Connection connection = null;
         PreparedStatement selectStatement = null;
         PreparedStatement deleteStatement = null;
@@ -9230,7 +9230,6 @@ public class ApiMgtDAO {
             deleteStatement.setInt(1, policy.getTenantId());
             deleteStatement.setString(2, policy.getPolicyName());
             deleteStatement.executeUpdate();
-
             policy.setPolicyId(oldPolicyId);
             addAPIPolicy(policy, connection);
             connection.commit();
@@ -9249,6 +9248,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
             APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
         }
+        return policy;
     }
 
     /**

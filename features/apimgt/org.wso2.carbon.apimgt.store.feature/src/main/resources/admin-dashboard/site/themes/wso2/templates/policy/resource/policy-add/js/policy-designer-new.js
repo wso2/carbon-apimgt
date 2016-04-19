@@ -414,9 +414,16 @@ var addPolicyToBackend = function () {
         }
     }
 
+    var value = $("#action").val();
+    var action;
+    if(action == "new") {
+       action =  "addApiPolicy";
+    } else {
+       action = "updateApiPolicy"
+    }
     console.log(JSON.stringify(apiPolicyNew));
     jagg.post("/site/blocks/policy/resource/policy-add/ajax/policy-operations.jag", {
-        action: "addApiPolicy",
+        action: action,
         apiPolicy: JSON.stringify(apiPolicyNew)
     }, function (data) {
         if (!data.error) {

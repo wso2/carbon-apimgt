@@ -6,21 +6,11 @@ var addApiPolicy = function (policy) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-        var Gson = Packages.com.google.gson.Gson;
-        var gson = new Gson();
         var apiProvider = new APIProviderImpl(provider);
         var apiPolicy = jsonToObject(JSON.parse(policy));
-        // log.info((apiPolicy.toString()));
-
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantId = APIUtil.getTenantId(provider);
-        // log.info(tenantId);
         apiPolicy.setTenantId(tenantId);
-
-        log.info((apiPolicy.toString()));
-        // var jobj =apiPolicy.toString();
-        log.info(policy);
-        log.info(objectToJson(apiPolicy));
         apiProvider.addPolicy(apiPolicy);
         return {
             error: false
@@ -64,7 +54,6 @@ var getAPIPolicy = function (policyName) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        log.info(provider);
         log.info(policyName);
         var apiPolicy = apiProvider.getAPIPolicy(provider, policyName);
         return {
@@ -137,9 +126,11 @@ var updateApiPolicy = function (policy) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-
-        var updatedPolicy = jsonToObject(policy);
-        apiProvider.updatePolicy(policy);
+        var updatedPolicy = jsonToObject(JSON.parse(policy));
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var tenantId = APIUtil.getTenantId(provider);
+        updatedPolicy.setTenantId(tenantId);
+        apiProvider.updatePolicy(updatedPolicy);
         return {
             error: false
         };
@@ -479,6 +470,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "Header") {
                     executionFlow.conditions[1].type = "Header";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getHeaderName();
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[1].keyValPairs.push(keyValPairs);
@@ -487,6 +482,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "QueryParameterType") {
                     executionFlow.conditions[2].type = "QueryParam";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getParameter();
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[2].keyValPairs.push(keyValPairs);
@@ -495,6 +494,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "JWTClaims") {
                     executionFlow.conditions[3].type = "JWTClaim";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getClaimUrl();
                     keyValPairs.value = conditions.get(j).getAttribute();
                     executionFlow.conditions[3].keyValPairs.push(keyValPairs);

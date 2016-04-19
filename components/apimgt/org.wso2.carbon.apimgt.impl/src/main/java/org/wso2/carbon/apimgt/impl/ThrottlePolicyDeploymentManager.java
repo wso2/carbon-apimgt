@@ -115,8 +115,6 @@ public class ThrottlePolicyDeploymentManager {
 
     }
 
-    //TODO this method should never used and should be removed.
-
     /**
      * Undeploy policy from the gateway manager nodes
      *
@@ -126,20 +124,14 @@ public class ThrottlePolicyDeploymentManager {
      */
     public void undeployPolicyFromGatewayManager(String[] policyNames) throws APIManagementException {
 
-        for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-            if (log.isDebugEnabled()) {
-                log.debug("undeploy policy from gateway : " + environment.getValue().getName());
-            }
-            APIGatewayAdminClient client;
             try {
-                client = new APIGatewayAdminClient(null, environment.getValue());
-                client.undeployPolicy(policyNames);
+                for(String policyName : policyNames) {
+                    globalThrottleEngineClient.deleteExecutionPlan(policyName);
+                }
             } catch (AxisFault axisFault) {
-                String msg = "Error occurred when undeploying from gateway " + environment.getValue().getName();
+                String msg = "Error occurred when undeploying policy");
                 log.error(msg, axisFault);
                 throw new APIManagementException(msg);
             }
         }
-
-    }
 }
