@@ -827,8 +827,8 @@ public class ApiMgtDAO {
                 infoDTO.setType(type);
 
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
-                boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"),
-                        null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                //TODO isContentAware
+                boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
 
 
                 infoDTO.setContentAware(isContentAware);
