@@ -2026,11 +2026,13 @@ public class SQLConstants {
     public static final String GET_SAVED_ALERT_EMAILS =
 
             " SELECT " +
-            "   EMAIL_LIST " +
+            "   EMAIL " +
             " FROM " +
-            "   AM_ALERT_EMAILLIST " +
+            "   AM_ALERT_EMAILLIST , " +
+            "   AM_ALERT_EMAILLIST_DETAILS  " +
             " WHERE " +
-            "   USER_NAME = ? " +
+            "   AM_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
+            "   AND USER_NAME = ? " +
             "   AND STAKE_HOLDER  = ? ";
 
 
@@ -2039,12 +2041,26 @@ public class SQLConstants {
             " VALUES(?,?,?)";
 
     public static final String ADD_ALERT_EMAIL_LIST =
-            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, EMAIL_LIST , STAKE_HOLDER) " +
-            " VALUES(?,?,?)";
+            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, STAKE_HOLDER) " +
+            " VALUES(?,?)";
 
     public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER  =
             "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
 
-    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER  =
-            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
+    public static final String DELETE_EMAILLIST_BY_EMAIL_LIST_ID  =
+            "DELETE FROM AM_ALERT_EMAILLIST_DETAILS   WHERE EMAIL_LIST_ID= ? ";
+
+    public static final String GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER =
+            " SELECT " +
+            "   EMAIL_LIST_ID " +
+            " FROM " +
+            "   AM_ALERT_EMAILLIST " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND STAKE_HOLDER  = ? ";
+
+    public static final String SAVE_EMAIL_LIST_DETAILS_QUERY =
+            " INSERT INTO AM_ALERT_EMAILLIST_DETAILS  (EMAIL_LIST_ID, EMAIL) " +
+            " VALUES(?,?)";
+
 }

@@ -7967,7 +7967,7 @@ public class ApiMgtDAO {
     public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String  stakeHolder)
             throws APIManagementException, SQLException {
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement ps = null;
         ResultSet rs = null;
         connection = APIMgtDBUtil.getConnection();
@@ -7984,7 +7984,7 @@ public class ApiMgtDAO {
             ps.setString(2, stakeHolder);
             ps.executeUpdate();
 
-            if(alertTypesIDList != null){
+            if(!StringUtils.isEmpty(alertTypesIDList)){
 
                 List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
 
@@ -7998,23 +7998,65 @@ public class ApiMgtDAO {
 
             }
 
-            String deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery = SQLConstants.
-                    DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER;
-
-            ps = connection.prepareStatement(deleteAlertTypesEmailListsByUserNameAndStakeHolderQuery);
+            String getEmailListIdByUserNameAndStakeHolderQuery = SQLConstants.GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER;
+            ps = connection.prepareStatement(getEmailListIdByUserNameAndStakeHolderQuery);
             ps.setString(1, userName);
-            ps.setString(2, stakeHolder);
-            ps.executeUpdate();
+            ps.setString(2,stakeHolder);
+            rs = ps.executeQuery();
+            int emailListId = 0;
+            while (rs.next()) {
+                emailListId = rs.getInt(1);
+            }
+            if(emailListId != 0){
+                String deleteEmailListDetailsByEmailListId = SQLConstants.DELETE_EMAILLIST_BY_EMAIL_LIST_ID;
+                ps = connection.prepareStatement(deleteEmailListDetailsByEmailListId);
+                ps.setInt(1, emailListId);
+                ps.executeUpdate();
 
-            //Email list save query
-            String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
+                if(!StringUtils.isEmpty(emailList)){
 
-            ps = connection.prepareStatement(emailListSaveQuery);
-            ps.setString(1, userName);
-            ps.setString(2, emailList);
-            ps.setString(3, stakeHolder);
-            ps.execute();
+                    List<String> extractedEmailList = Arrays.asList(emailList.split(","));
 
+                    String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
+
+                    for (String email : extractedEmailList) {
+                        ps = connection.prepareStatement(saveEmailListDetailsQuery);
+                        ps.setInt(1, emailListId);
+                        ps.setString(2, email);
+                        ps.execute();
+                    }
+
+                }
+
+            } else {
+
+                String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
+
+                ps = connection.prepareStatement(emailListSaveQuery);
+                ps.setString(1, userName);
+                ps.setString(2, stakeHolder);
+                ps.execute();
+
+                rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    int generatedEmailIdList = rs.getInt(1);
+                    if(!StringUtils.isEmpty(emailList)){
+
+                        List<String> extractedEmailList = Arrays.asList(emailList.split(","));
+
+                        String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
+
+                        for (String email : extractedEmailList) {
+                            ps = connection.prepareStatement(saveEmailListDetailsQuery);
+                            ps.setInt(1, generatedEmailIdList);
+                            ps.setString(2, email);
+                            ps.execute();
+                        }
+
+                    }
+                }
+
+            }
             connection.commit();
 
         } catch (SQLException e) {
