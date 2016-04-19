@@ -479,6 +479,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "Header") {
                     executionFlow.conditions[1].type = "Header";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getHeaderName();
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[1].keyValPairs.push(keyValPairs);
@@ -487,6 +491,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "QueryParameterType") {
                     executionFlow.conditions[2].type = "QueryParam";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getParameter();
                     keyValPairs.value = conditions.get(j).getValue();
                     executionFlow.conditions[2].keyValPairs.push(keyValPairs);
@@ -495,6 +503,10 @@ var objectToJson = function (policy) {
 
                 } else if (conditions.get(j).getType() == "JWTClaims") {
                     executionFlow.conditions[3].type = "JWTClaim";
+                    var keyValPairs = {
+                        "name": "",
+                        "value": ""
+                    };
                     keyValPairs.name = conditions.get(j).getClaimUrl();
                     keyValPairs.value = conditions.get(j).getAttribute();
                     executionFlow.conditions[3].keyValPairs.push(keyValPairs);

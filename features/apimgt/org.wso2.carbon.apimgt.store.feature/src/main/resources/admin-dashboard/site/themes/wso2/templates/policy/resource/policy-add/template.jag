@@ -586,7 +586,7 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
                                 </div>
 
                                 <div class="col-sm-3">
@@ -621,7 +621,7 @@
                                 </label>
 
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="">
+                                    <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
                                 </div>
 
                                 <div class="col-sm-3">
