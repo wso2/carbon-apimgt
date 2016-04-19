@@ -97,10 +97,6 @@ public class ThrottlePolicyTemplateBuilder {
             StringWriter writer;
             VelocityContext context;
 
-            // for pipelines
-            int condition = 0;
-
-            //check if executionflows/pipelines are included in policy
             if (policy.getPipelines() != null) {
 
                 for (Pipeline pipeline : policy.getPipelines()) {
@@ -122,8 +118,6 @@ public class ThrottlePolicyTemplateBuilder {
                         log.debug("Policy : " + writer.toString());
                     }
                     policyArray.add(writer.toString());
-
-                    condition++;
                 }
             }
         } catch (Exception e) {

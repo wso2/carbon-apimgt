@@ -333,6 +333,7 @@ var addPolicyToBackend = function () {
                 checked = $('#header-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
+                    apiPolicyNew.executionFlows[i].conditions[j].keyValPairs = [];
                     var headerName, headerVal;
                     var table = $("#header-value-table-content-" + executionFlowId + " > tbody");
                     table.find('tr').each(function (k, el) {
@@ -357,6 +358,7 @@ var addPolicyToBackend = function () {
                 checked = $('#query-param-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
+                    apiPolicyNew.executionFlows[i].conditions[j].keyValPairs = [];
                     var queryParamName, queryParamVal;
                     var table = $("#query-param-value-table-content-" + executionFlowId + " > tbody");
                     table.find('tr').each(function (k, el) {
@@ -379,6 +381,7 @@ var addPolicyToBackend = function () {
             //Jwt claim condition related properties
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "JWTClaim") {
                 apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
+                apiPolicyNew.executionFlows[i].conditions[j].keyValPairs = [];
                 checked = $('#jwt-claim-condition-checkbox-' + executionFlowId).is(':checked');
                 if (checked) {
                     var claimName, claimVal;
@@ -416,7 +419,7 @@ var addPolicyToBackend = function () {
 
     var value = $("#action").val();
     var action;
-    if(action == "new") {
+    if(value == "new") {
        action =  "addApiPolicy";
     } else {
        action = "updateApiPolicy"
