@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.throttling;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
@@ -122,18 +123,42 @@ public class GlobalThrottleEngineClient {
         }
     }
 
-
-    public void deleteExecutionPlan(String name)
-            throws Exception {
+    /**
+     * This method will be used to delete single execution plan.
+     * @param name execution plan name to be deleted.
+     */
+    public void deleteExecutionPlan(String name) {
         ServiceClient serviceClient;
         Options options;
-        String sessionID = login();
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
-        serviceClient = eventProcessorAdminServiceStub._getServiceClient();
-        options = serviceClient.getOptions();
-        options.setManageSession(true);
-        options.setProperty(HTTPConstants.COOKIE_STRING, sessionID);
-        eventProcessorAdminServiceStub.undeployActiveExecutionPlan(name);
+        String sessionID = null;
+        try {
+            sessionID = login();
+        } catch (RemoteException e) {
+            log.error("Error while connecting to login central policy management server" + e.getMessage());
+        } catch (LoginAuthenticationExceptionException e) {
+            log.error("Error while connecting to login central policy management server, " +
+                    "Check user name and password"
+                    + e.getMessage());
+        } catch (MalformedURLException e) {
+            log.error("Error while connecting to login central policy management server, check URL" +
+                    e.getMessage());
+        }
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
+        try {
+            eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                    (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+            serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+            options = serviceClient.getOptions();
+            options.setManageSession(true);
+            options.setProperty(HTTPConstants.COOKIE_STRING, sessionID);
+            eventProcessorAdminServiceStub.undeployActiveExecutionPlan(name);
+        } catch (AxisFault axisFault) {
+            log.error("Error while connecting to login central policy management server to delete " +
+                    "execution plan." + axisFault);
+        } catch (RemoteException e) {
+            log.error("Error while connecting to login central policy management server to delete " +
+                    "execution plan." + e.getMessage());
+        }
+
     }
 }
