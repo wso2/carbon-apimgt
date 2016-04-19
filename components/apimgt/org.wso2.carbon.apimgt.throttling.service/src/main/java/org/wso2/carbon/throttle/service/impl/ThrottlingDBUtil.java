@@ -20,21 +20,18 @@ package org.wso2.carbon.throttle.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.wso2.carbon.throttle.service.dto.ThrottledEventDTO;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,7 +40,9 @@ public final class ThrottlingDBUtil {
     private static final Log log = LogFactory.getLog(ThrottlingDBUtil.class);
 
     private static volatile DataSource dataSource = null;
+    private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     private  static volatile ThrottledEventDTO[] throttledEventDTOs = null;
+    private static final String DB_CONFIG = "Database.";
     private static volatile String throttledEvents = "";
     private static long lastAccessed;
     private static long timeBetweenUpdates = 10000;
@@ -52,14 +51,16 @@ public final class ThrottlingDBUtil {
         if (dataSource != null) {
             return;
         }
-        Properties properties  = new Properties();
-        properties.load(new ClassPathResource("../throttle.properties").getInputStream());
-        String dataSourceName = (String) properties.get("throttle.datasource.name");
+
         synchronized (ThrottlingDBUtil.class) {
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
+
+                //TODO : We need to add a config for this
+                String dataSourceName = "WSO2_THROTTLE_DB";
+
                 if (dataSourceName != null) {
                     try {
                         Context ctx = new InitialContext();
@@ -116,7 +117,7 @@ public final class ThrottlingDBUtil {
                 throttledEventDTO.setThrottleKey(throttleKey);
                 throttledEventDTOList.add(throttledEventDTO);
             }
-            int count;
+            int count = 1;
             if(query != null && query.length()> 0){
                 count =  Integer.parseInt(query);
                 for (int i = 0; i < count; i++ ){
@@ -189,6 +190,7 @@ public final class ThrottlingDBUtil {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
         String sqlQuery = "select THROTTLE_KEY from ThrottleTable WHERE THROTTLE_KEY = '"+query+"'";
         try {
             conn = ThrottlingDBUtil.getConnection();
@@ -275,13 +277,17 @@ public final class ThrottlingDBUtil {
         }
         @Override
         public void run() {
+            String throttledEvents;
+            System.out.println(Thread.currentThread().getName()+" Start. Command = "+command);
             if(lastAccessed <1){
                 lastAccessed = System.currentTimeMillis();
             }
             while(true) {
                 if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
+                    System.out.println("DB reading Started. Reading database");
                     lastAccessed = System.currentTimeMillis();
                     processCommand();
+                    System.out.println("DB reading End.Time taken = "+ (System.currentTimeMillis() - lastAccessed) );
                     try {
                         Thread.sleep(timeBetweenUpdates);
                     } catch (InterruptedException e) {
