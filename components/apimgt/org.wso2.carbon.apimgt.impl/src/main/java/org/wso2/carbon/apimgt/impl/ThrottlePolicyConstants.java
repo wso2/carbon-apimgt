@@ -99,4 +99,6 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
 
     public static final String COLUMN_BILLING_PLAN = "BILLING_PLAN";
+
+    public static final String COLUMN_CUSTOM_ATTRIB = "CUSTOM_ATTRIBUTES";
 }
