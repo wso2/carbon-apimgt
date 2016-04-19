@@ -123,15 +123,8 @@ public class ThrottlePolicyDeploymentManager {
      * @throws APIManagementException
      */
     public void undeployPolicyFromGatewayManager(String[] policyNames) throws APIManagementException {
-
-            try {
-                for(String policyName : policyNames) {
-                    globalThrottleEngineClient.deleteExecutionPlan(policyName);
-                }
-            } catch (AxisFault axisFault) {
-                String msg = "Error occurred when undeploying policy");
-                log.error(msg, axisFault);
-                throw new APIManagementException(msg);
+            for(String policyName : policyNames) {
+                globalThrottleEngineClient.deleteExecutionPlan(policyName);
             }
-        }
+    }
 }
