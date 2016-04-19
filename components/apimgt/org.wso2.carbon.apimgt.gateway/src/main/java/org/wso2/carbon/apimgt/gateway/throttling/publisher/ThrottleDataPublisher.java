@@ -22,7 +22,9 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
@@ -46,6 +48,7 @@ public class ThrottleDataPublisher {
         return dataPublisher;
     }
 
+    static Executor pool = Executors.newFixedThreadPool(100);
     static volatile DataPublisher dataPublisher = null;
 
     Executor executor;
@@ -55,11 +58,24 @@ public class ThrottleDataPublisher {
      * publisher which we used to publish throttle data.
      */
     public ThrottleDataPublisher() {
+        ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
+                .getThrottleProperties().getDataPublisher();
+        ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
+                .getInstance().getThrottleProperties().getDataPublisherThreadPool();
+
         try {
-            executor = new DataPublisherThreadPoolExecutor(200, 500, 100, TimeUnit.SECONDS,
+            executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
+                    dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
+                    .getKeepAliveTime(),
+                    TimeUnit
+                            .SECONDS,
                     new LinkedBlockingDeque<Runnable>() {
                     });
-            dataPublisher = new DataPublisher("thrift", "tcp://localhost:7611", "ssl://localhost:7711", "admin", "admin");
+            dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
+                    .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
+                    .getUsername(),
+                    dataPublisherConfiguration.getPassword());
+
         } catch (DataEndpointAgentConfigurationException e) {
             log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
                     e.getMessage(), e);

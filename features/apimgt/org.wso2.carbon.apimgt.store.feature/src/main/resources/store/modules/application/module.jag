@@ -18,6 +18,31 @@ jagg.module("application", {
 
     removeApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/remove.jag").removeApplication.apply(this, arguments);
+    },
+
+    getApplicationDisplayStatus:function(status){
+        var statusVal;
+        if(status=='APPROVED'){
+            statusVal='ACTIVE';
+        } else if(status=='REJECTED') {
+            statusVal='REJECTED';
+        } else{
+            statusVal='INACTIVE';
+        }
+        return statusVal;
+    },
+
+    getApplicationUpdateEnabled:function(status){
+        var statusVal;
+        var disableUpdate;
+        if(status=='APPROVED'){
+            disableUpdate = false;
+        } else if(status=='REJECTED') {
+            disableUpdate = true;
+        } else{
+            disableUpdate = true;
+        }
+        return disableUpdate;
     }
 });
 %>

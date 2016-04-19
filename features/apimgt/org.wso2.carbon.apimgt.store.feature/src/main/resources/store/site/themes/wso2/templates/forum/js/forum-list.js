@@ -97,7 +97,66 @@ function forum_load_replies(page) {
             });
             $('#forum_topic_content').html(template);
 
-         
+            $('.rating-tooltip-manual').rating({
+              extendSymbol: function () {
+                var title;
+                $(this).tooltip({
+                  container: 'body',
+                  placement: 'bottom',
+                  trigger: 'manual',
+                  title: function () {
+                    return title;
+                  }
+                });
+                $(this).on('rating.rateenter', function (e, rate) {
+                  title = rate;
+                  $(this).tooltip('show');
+                })
+                .on('rating.rateleave', function () {
+                  $(this).tooltip('hide');
+                });
+              }
+            });
+
+            var topicId=result.data.topic[0].topicId;
+            $('input.rate_save').on('change',{ topicID:topicId },   function (event) {
+                jagg.post("/site/blocks/forum/ajax/ratings.jag", {
+                    action: "rateTopic",
+                    topicId: event.data.topicID,
+                    rating: $(this).val()
+                }, function (result) {
+                    if (result.error == false) {
+                        if($('.average-rating').length > 0){
+                            $('.average-rating').text(result.averageRating.toFixed(1));
+                            $('.average-rating').show();
+                            }else{
+                                $('.user_rating').before("<div class='average-rating'>"+result.averageRating+"</div>");
+                            }
+                            $('.your_rating').text(parseInt(result.averageRating)+"/5");
+                        } else {
+                            jagg.message({content:result.message,type:"error"});
+                        }
+                }, "json");
+            });
+
+            $('.remove_rating').on("click",{ topicID:topicId },function(event){
+
+                $('input.rate_save').val(0);
+                $('input.rate_save').rating('rate', 0);
+                //var api = jagg.api;
+                jagg.post("/site/blocks/forum/ajax/ratings.jag", {
+                        action: "removeRating",
+                        topicId: event.data.topicID
+                }, function (result) {
+                    if (!result.error) {
+                        $('.average-rating').hide();
+                        $('.your_rating').text("N/A");
+                    } else {
+                        jagg.message({content:result.message,type:"error"});
+                    }
+                }, "json");
+            });
+
             var template = Handlebars.partials['replies_list']({
                 'replies': result.data
             });
@@ -129,7 +188,8 @@ function forum_load_replies(page) {
                 height: 300
             });
 
-            initStars();
+
+            $('#forum-rating').rating();
 
         } else {
             jagg.message({
@@ -605,32 +665,6 @@ var removeTopicRating = function (topic) {
         }
     }, "json");
 };
-
-var initStars = function(){
-
-    jagg.initStars($("#forum_topic_rating_block"), function (rating, data) {
-            jagg.post("/site/blocks/forum/ajax/ratings.jag", {
-                action: "rateTopic",
-                topicId: data.topicId,
-                rating: rating
-            }, function (result) {
-                if (result.error == false) {
-                    addTopicRating(result.averageRating, rating);
-                } else {
-                    jagg.message({
-                        content: result.message,
-                        type: "error"
-                    });
-                }
-            }, "json");
-        }, function (data) {
-            removeTopicRating(data);
-        }, {
-            topicId: topicId
-        });
-
-
-}
 
 var addTopicRating = function (newRating, userRating) {
     var tableRow = $("#forum_topic_rating_block").find('table.table > tbody > tr:nth-child(1)');

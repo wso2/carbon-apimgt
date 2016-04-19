@@ -37,7 +37,9 @@ import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,6 +62,44 @@ public class ThrottleDataHolder {
             this.throttleDataMap = throttleDataMap;
         }
 
+
+    public Map<String, String> getBlockedAPIConditionsMap() {
+        return blockedAPIConditionsMap;
+    }
+
+    public void setBlockedAPIConditionsMap(Map<String, String> blockedAPIConditionsMap) {
+        this.blockedAPIConditionsMap = blockedAPIConditionsMap;
+    }
+
+    public Map<String, String> getBlockedApplicationConditionsMap() {
+        return blockedApplicationConditionsMap;
+    }
+
+    public void setBlockedApplicationConditionsMap(Map<String, String> blockedApplicationConditionsMap) {
+        this.blockedApplicationConditionsMap = blockedApplicationConditionsMap;
+    }
+
+    public Map<String, String> getBlockedUserConditionsMap() {
+        return blockedUserConditionsMap;
+    }
+
+    public void setBlockedUserConditionsMap(Map<String, String> blockedUserConditionsMap) {
+        this.blockedUserConditionsMap = blockedUserConditionsMap;
+    }
+
+    public Map<String, String> getBlockedCustomConditionsMap() {
+        return blockedCustomConditionsMap;
+    }
+
+    public void setBlockedCustomConditionsMap(Map<String, String> blockedCustomConditionsMap) {
+        this.blockedCustomConditionsMap = blockedCustomConditionsMap;
+    }
+
+    Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap();
+        Map<String, String> blockedCustomConditionsMap = new ConcurrentHashMap();
+    Map<String, String> blockedIpConditionsMap = new ConcurrentHashMap();
 
         Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
@@ -95,5 +135,52 @@ public class ThrottleDataHolder {
             dataPublisher.tryPublish(event);
         }
 
+        public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
+                                        String ipBlockingKey){
+            return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
+            blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
+            blockedUserConditionsMap.containsKey(userBlockingKey) ||
+            blockedCustomConditionsMap.containsKey("test") ||
+                    blockedIpConditionsMap.containsKey(ipBlockingKey));
+        }
 
+    /**
+     * Convert IP address to long(unsigned integer)
+     *
+     * @param ip
+     * @return
+     */
+    public static long ipToLong(InetAddress ip) {
+        byte[] octets = ip.getAddress();
+        long result = 0;
+        for (byte octet : octets) {
+            result <<= 8;
+            result |= octet & 0xff;
+        }
+        return result;
     }
+
+    /**
+     * Check IP address is within given IP range
+     *
+     * @param startIP
+     * @param endIP
+     * @param ipToCheck
+     * @return
+     * @throws UnknownHostException
+     */
+    public boolean isIPAddressWithinRange(String startIP, String endIP, String ipToCheck) throws UnknownHostException {
+        long ipLo = ipToLong(InetAddress.getByName(startIP));
+        long ipHi = ipToLong(InetAddress.getByName(endIP));
+        long ipToTest = ipToLong(InetAddress.getByName(ipToCheck));
+        return (ipToTest >= ipLo && ipToTest <= ipHi);
+    }
+
+    public Map<String, String> getBlockedIpConditionsMap() {
+        return blockedIpConditionsMap;
+    }
+
+    public void setBlockedIpConditionsMap(Map<String, String> blockedIpConditionsMap) {
+        this.blockedIpConditionsMap = blockedIpConditionsMap;
+    }
+}

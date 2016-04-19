@@ -18,14 +18,6 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -34,20 +26,26 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.throttling.GlobalThrottleEngineClient;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
-import org.wso2.carbon.event.throttle.core.ThrottlerService;
-import org.wso2.carbon.event.throttle.core.exception.ThrottleConfigurationException;
+
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.util.Map;
 
 public class ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManager.class);
     private static ThrottlePolicyDeploymentManager instance;
-    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
     private Map<String, Environment> environments;
+    private GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClient();
 
     private ThrottlePolicyDeploymentManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         environments = config.getApiGatewayEnvironments();
+
     }
 
     public static synchronized ThrottlePolicyDeploymentManager getInstance() {
@@ -58,46 +56,37 @@ public class ThrottlePolicyDeploymentManager {
     }
 
     /**
-     * Deploy policy in the global even processor
-     * @param policy
+     * This method will be used to deploy policy to Global policy engine.
+     *
+     * @param policyName policy name of the policy to be deployed.
+     * @param policy     Policy string to be deployed.
      * @throws APIManagementException
      */
-    public void deployPolicyToGlobalCEP(String policy) throws APIManagementException {
+    public void deployPolicyToGlobalCEP(String policyName, String policy) throws APIManagementException {
         try {
-            OMElement element = AXIOMUtil.stringToOM(policy);
-            String elegibilityQuery = element.getFirstChildWithName(new QName(APIConstants.ELIGIBILITY_QUERY_ELEM))
-                    .getText();
-            String decisionQuery = element.getFirstChildWithName(new QName(APIConstants.DECISION_QUERY_ELEM))
-                    .getText();
-            String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
-            //deploy to cep
-            String policyQuery = elegibilityQuery + "\n" + decisionQuery;
-            if(log.isDebugEnabled()){
-                log.debug("deploy policy to global event processor : \n" + policyQuery );
-            }
-            throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg , e);
-            throw new APIManagementException(msg);
-        } catch (ThrottleConfigurationException e) {
-            String msg = "Error while deploying policy to global event processor: ";
-            log.error(msg , e);
-            throw new APIManagementException(msg);
+            globalThrottleEngineClient.deployExecutionPlan(policyName, policy);
+        } catch (Exception e) {
+            log.error("Error while deploying policy to global policy server." + e.getMessage());
         }
     }
-    
+
     /**
-     * Undeploy policy from global CEP. 
-     * @param policies names of the policy files.
+     * Undeploy policy from global CEP.
+     *
+     * @param policyName name of the policy file to be deleted.
      * @throws APIManagementException
      */
-    public void undeployPolicyFromGlobalCEP(List<String> policies) throws APIManagementException {
-        //TODO
+    public void undeployPolicyFromGlobalCEP(String policyName) throws APIManagementException {
+        try {
+            globalThrottleEngineClient.deleteExecutionPlan(policyName);
+        } catch (Exception e) {
+            log.error("Error while undeploying policy from global policy server." + e.getMessage());
+        }
     }
 
     /**
      * deploy policy in the gateway manager
+     *
      * @param policy
      * @throws APIManagementException
      */
@@ -107,24 +96,26 @@ public class ThrottlePolicyDeploymentManager {
             element = AXIOMUtil.stringToOM(policy);
             String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
             for (Map.Entry<String, Environment> environment : environments.entrySet()) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("deploy policy to gateway : " + environment.getValue().getName());
                 }
-                APIGatewayAdminClient client = new APIGatewayAdminClient(null , environment.getValue());
+                APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment.getValue());
                 client.deployPolicy(policy, fileName);
             }
-     
+
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
-            log.error(msg , e);
+            log.error(msg, e);
             throw new APIManagementException(msg);
         } catch (IOException e) {
             String msg = "Error while deploying the policy in gateway manager: ";
-            log.error(msg , e);
+            log.error(msg, e);
             throw new APIManagementException(msg);
         }
-        
+
     }
+
+    //TODO this method should never used and should be removed.
 
     /**
      * Undeploy policy from the gateway manager nodes

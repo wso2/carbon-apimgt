@@ -15,14 +15,10 @@ var tenantDomain = jagg.getTenantDomain();
             "pagePath":"/site/pages/sign-up.jag",
             "body":[
                 {
-                    "name":"layout/base",
+                    "name":"user/sign-up",
                     "inputs":{
                         "title":"Applications",
                         "top":[
-                            {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
                             {
                                 "name":"search/api-search",
                                 "inputs":null

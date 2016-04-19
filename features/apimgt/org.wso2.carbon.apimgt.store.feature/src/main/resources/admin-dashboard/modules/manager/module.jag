@@ -27,6 +27,10 @@ jagg.module("manager", {
 
     isGlobalCEPThrottlingEnabled:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isGlobalCEPThrottlingEnabled.apply(this, arguments);
-    }
+    },
+
+     getUsageClient:function () {
+       return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getUsageClient.apply(this, arguments);
+     }
  });
  %>

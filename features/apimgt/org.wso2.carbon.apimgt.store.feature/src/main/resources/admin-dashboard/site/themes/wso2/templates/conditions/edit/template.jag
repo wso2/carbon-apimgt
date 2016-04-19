@@ -1,0 +1,92 @@
+<% jagg.template("conditions/edit", function(inputs, outputs, jagg) { %>
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+	<div class="page-header">
+                <div class="page-title">
+                    <h1>ADD Condition</h1>
+                 </div>
+         </div>
+
+
+    <div class="content-section shadow-up">
+        <div class="content-data">
+            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+            <div class="row-fluid">
+                <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                    action="/admin-dashboard/site/blocks/conditions/edit/ajax/conditions-edit.jag">
+                        <div class="form-group" id="selected-type">
+                            <label class="col-sm-3 control-label">
+                                <span class="requiredAstrix">*</span>Select Condition Type</label>
+                           <div class="col-sm-9">
+                            <label class="radio">
+                                <input type="radio" name="select-option" value="API">
+                                <span class="helper">API</span>
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="select-option" value="APPLICATION">
+                                <span class="helper">APPLICATION</span>
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="select-option" value="IP">
+                                <span class="helper">IP Address</span>
+                            </label>
+                                <label class="radio">
+                                <input type="radio" name="select-option" value="USER">
+                                <span class="helper">USER</span>
+                            </label>
+                                <label class="radio">
+                                <input type="radio" name="select-option" value="CUSTOM">
+                                <span class="helper">CUSTOM</span>
+                            </label>
+                        </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Value :
+                            <span class="requiredAstrix">*</span></label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" id="value"/>
+                            </div>
+                        </div>
+                        </div>
+                                      	<br class="spacer">
+                    <div class="form-actions">
+                        <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
+                        <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addCondition(){
+        var conditionType = $('input[name=select-option]:checked').val();
+        var conditionValue = $('#value').val();
+ jagg.post("/site/blocks/conditions/edit/ajax/condition-edit.jag", {
+        action:"addCondition",
+        conditionType:conditionType,
+        conditionValue:conditionValue
+        }, function (result) {
+            if (result.error == false) {
+         location.href = "<%= jagg.url('/site/pages/conditions-manage.jag')%>";
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        },
+    "json");
+    }
+        $(document).ready(function(){
+        $('#cancel-condition-btn').on('click',function(){
+            location.href = "<%= jagg.url('/site/pages/conditions-manage.jag')%>";
+                });
+        });
+</script>
+
+<%});%>

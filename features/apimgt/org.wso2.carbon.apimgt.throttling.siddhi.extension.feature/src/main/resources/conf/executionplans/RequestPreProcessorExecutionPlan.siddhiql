@@ -1,0 +1,17 @@
+/* Enter a unique ExecutionPlan */
+@Plan:name('requestPreProcessorExecutionPlan')
+
+/* Enter a unique description for ExecutionPlan */
+@Plan:description('ExecutionPlan to perform some preprocessing eg:- convert properties json to map')
+
+/* define streams/tables and write queries here ... */
+
+@Import('org.wso2.throttle.request.stream:1.0.0')
+define stream PreRequestStream (messageID string, appKey string, appTier string, apiKey string, apiTier string, subscriptionKey string, subscriptionTier string, resourceKey string, resourceTier string, userId string, properties string);
+
+@Export('org.wso2.throttle.processed.request.stream:1.0.0')
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, propertiesMap string);
+
+FROM PreRequestStream
+SELECT messageID, appKey , appTier , subscriptionKey , apiKey , apiTier , subscriptionTier, resourceKey , resourceTier , userId , cast(map:createFromJSON(properties), 'string') as propertiesMap
+INSERT INTO RequestStream;

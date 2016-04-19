@@ -1,7 +1,7 @@
 <% jagg.template("policy/global/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="title-section">
-        <h2>Global Level Policy List</h2>
+        <h2>Custom Policy</h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -10,6 +10,7 @@
             <tr>
                 <th class="userSpecialCell"><%="Name"%></th>
                 <th class="appSpecialCell"><%="Description"%></th>
+                <th class="keyTempplate"><%="Key Template"%></th>
                 <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>

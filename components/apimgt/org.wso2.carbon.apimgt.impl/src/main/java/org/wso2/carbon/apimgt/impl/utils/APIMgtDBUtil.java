@@ -18,12 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.DBConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.naming.Context;
@@ -47,12 +45,6 @@ public final class APIMgtDBUtil {
     private static volatile DataSource dataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
-    private static final String DB_CONFIG = "Database.";
-    private static final String DB_DRIVER = DB_CONFIG + "Driver";
-    private static final String DB_URL = DB_CONFIG + "URL";
-    private static final String DB_USER = DB_CONFIG + "Username";
-    private static final String DB_PASSWORD = DB_CONFIG + "Password";
-
     private static final String DATA_SOURCE_NAME = "DataSourceName";
 
     /**
@@ -83,22 +75,7 @@ public final class APIMgtDBUtil {
                                 "source: " + dataSourceName, e);
                     }
                 } else {
-                    DBConfiguration configuration = getDBConfig(config);
-                    String dbUrl = configuration.getDbUrl();
-                    String driver = configuration.getDriverName();
-                    String username = configuration.getUserName();
-                    String password = configuration.getPassword();
-                    if (dbUrl == null || driver == null || username == null || password == null) {
-                        log.warn("Required DB configuration parameters unspecified. So API Store and API Publisher " +
-                                 "will not work as expected.");
-                    }
-
-                    BasicDataSource basicDataSource = new BasicDataSource();
-                    basicDataSource.setDriverClassName(driver);
-                    basicDataSource.setUrl(dbUrl);
-                    basicDataSource.setUsername(username);
-                    basicDataSource.setPassword(password);
-                    dataSource = basicDataSource;
+                    log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
                 }
             }
             setupAPIManagerDatabase();
@@ -198,21 +175,6 @@ public final class APIMgtDBUtil {
             }
         }
 
-    }
-
-    /**
-     * Return the DBConfiguration
-     *
-     * @param config APIManagerConfiguration containing the JDBC settings
-     * @return DBConfiguration
-     */
-    private static DBConfiguration getDBConfig(APIManagerConfiguration config) {
-        DBConfiguration dbConfiguration = new DBConfiguration();
-        dbConfiguration.setDbUrl(config.getFirstProperty(DB_URL));
-        dbConfiguration.setDriverName(config.getFirstProperty(DB_DRIVER));
-        dbConfiguration.setUserName(config.getFirstProperty(DB_USER));
-        dbConfiguration.setPassword(config.getFirstProperty(DB_PASSWORD));
-        return dbConfiguration;
     }
 
     /**

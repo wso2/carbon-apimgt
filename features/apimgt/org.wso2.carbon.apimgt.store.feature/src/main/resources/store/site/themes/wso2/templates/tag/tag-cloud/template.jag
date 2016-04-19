@@ -1,11 +1,8 @@
-<% 
-var tenant=request_tenant;
-var urlPrefix = jagg.getTenantURLPrefix();
-jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
+<% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
 
-<div id="tag-cloud" class="panel panel-default">
-  <div class="panel-heading"><%=i18n.localize("tags")%></div>
-  <div class="panel-body" id="tag-content" style="width:100%;">
+<div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style="display:none">
+  <div class="tag-title"> Tags</div>
+  <div class="tag-content" id="tag-content" style="width:100%;">
   </div>
 </div>
 
@@ -22,6 +19,8 @@ jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
               var words = [];
               if(result.tags.length == 0){
                 $("#tag-content").append('<span class="text-muted">No tags to display.</span>');                
+              } else {
+            	  $('#tagcloud').show();
               }
               for (var i = result.tags.length - 1; i >= 0; i--) {
                 var tag_name = result.tags[i].name;
@@ -32,7 +31,7 @@ jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
               };
               $.fn.tagcloud.defaults = {
                 size: {start: 14, end: 18, unit: 'pt'},
-                color: {start: '#cde', end: '#f52'}
+                color: {start: '#777', end: '#333'}
               };
 
               $(function () {

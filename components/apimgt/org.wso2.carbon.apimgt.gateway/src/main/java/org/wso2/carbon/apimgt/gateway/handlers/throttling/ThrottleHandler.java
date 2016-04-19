@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -48,8 +49,10 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfiguration
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
+import org.wso2.carbon.databridge.agent.util.DataPublisherUtil;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +67,7 @@ import java.util.Map;
 public class ThrottleHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
+    private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     private static volatile DataPublisher dataPublisher = null;
 
@@ -121,7 +125,7 @@ public class ThrottleHandler extends AbstractHandler {
         String applicationLevelThrottleKey;
         String subscriptionLevelThrottleKey;
         String resourceLevelThrottleKey;
-        String apiLevelThrottleKey;
+        String apiLevelThrottleKey = "";
 
         //Throttle Tiers
         String applicationLevelTier;
@@ -139,7 +143,9 @@ public class ThrottleHandler extends AbstractHandler {
         boolean isApplicationLevelThrottled = false;
         boolean isSubscriptionLevelThrottled = false;
         boolean isApiLevelThrottled = false;
-
+        boolean isBlockedRequest;
+        String ipLevelBlockingKey = null;
+        String appLevelBlockingKey = null;
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
@@ -148,109 +154,134 @@ public class ThrottleHandler extends AbstractHandler {
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
-            applicationLevelTier = authContext.getApplicationTier();
-            subscriptionLevelTier = authContext.getTier();
-            apiLevelTier = authContext.getApiTier();
+            applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
-            apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
-            VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
-            //If API level throttle policy is present then it will apply and no resource level policy will apply for it.
-            if (apiLevelTier != null && apiLevelTier.length() > 0) {
-                isThrottled = isApiLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                        isThrottled(apiLevelThrottleKey);
-            } else {
-                //If API level tier is not present only we should move to resource level tiers.
-                if (verbInfoDTO == null) {
-                    log.warn("Error while getting throttling information for resource and http verb");
-                    return false;
-                } else {
-                    //If verbInfo is present then only we will do resource level throttling
-                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
-                        //If unlimited tier throttling will not apply at resource level and pass it
-                        if (log.isDebugEnabled()) {
-                            log.debug("Resource level throttling set as unlimited and request will pass resource level");
-                        }
-                    } else {
-                        //If tier is not unlimited only throttling will apply.
-                        resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
-                        if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
-                            //Then we will apply resource level throttling
-                            resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
-                            for (String conditionString : resourceLevelThrottleConditions) {
-                                resourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
-                                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                        isThrottled(resourceLevelThrottleKey)) {
-                                    isResourceLevelThrottled = isThrottled = true;
-                                    break;
-                                }
-                            }
+            if ( (authContext.getThrottlingDataList() !=null) && (authContext.getThrottlingDataList().get(0) !=null)){
+                apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
+                //Check if request is blocked. If request is blocked then will not proceed further and
+                //inform to client.
+                //TODO handle blocked and throttled requests separately.
 
-                        } else {
-                            log.warn("Unable to find throttling information for resource and http verb. Throttling will " +
-                                    "not apply");
-                        }
-                    }
-
-                }
+                ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
+                appLevelBlockingKey = authContext.getSubscriber()+":"+authContext.getApplicationName();
             }
-            if (!isApiLevelThrottled) {
-                //Here check resource level throttled. If throttled then call handler throttled and pass.
-                //Else go for subscription level and application level throttling
-                //if resource level not throttled then move to subscription level
-                if (!isResourceLevelThrottled) {
-                    //Subscription Level Throttling
-                    subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
-                    isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                            isThrottled(subscriptionLevelThrottleKey);
+            isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
+                    apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
+            if (isBlockedRequest){
+                String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
+                        " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
+                synCtx.setProperty(APIThrottleConstants.BLOCKED_REASON,msg);
+                isThrottled = true;
+            } else {
+                //If request is not blocked then only we perform throttling.
+                VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
+                applicationLevelTier = authContext.getApplicationTier();
+                subscriptionLevelTier = authContext.getTier();
+                apiLevelTier = authContext.getApiTier();
+                //If API level throttle policy is present then it will apply and no resource level policy will apply
+                // for it
+                if (apiLevelTier != null && apiLevelTier.length() > 0 && apiLevelThrottleKey.length() > 0) {
+                    isThrottled = isApiLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                            isThrottled(apiLevelThrottleKey);
+                } else {
+                    //If API level tier is not present only we should move to resource level tiers.
+                    if (verbInfoDTO == null) {
+                        log.warn("Error while getting throttling information for resource and http verb");
+                        return false;
+                    } else {
+                        //If verbInfo is present then only we will do resource level throttling
+                        if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
+                            //If unlimited tier throttling will not apply at resource level and pass it
+                            if (log.isDebugEnabled()) {
+                                log.debug("Resource level throttling set as unlimited and request will pass " +
+                                        "resource level");
+                            }
+                        } else {
+                            //If tier is not unlimited only throttling will apply.
+                            resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
+                            if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
+                                //Then we will apply resource level throttling
+                                resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
+                                for (String conditionString : resourceLevelThrottleConditions) {
+                                    resourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
+                                    if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                            isThrottled(resourceLevelThrottleKey)) {
+                                        isResourceLevelThrottled = isThrottled = true;
+                                        break;
+                                    }
+                                }
 
-                    //if subscription level not throttled then move to application level
-                    //Stop on quata reach
-                    if (!isSubscriptionLevelThrottled) {
-                        //Application Level Throttling
-                        applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
-                        isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                isThrottled(applicationLevelThrottleKey);
+                            } else {
+                                log.warn("Unable to find throttling information for resource and http verb. Throttling "
+                                        + "will not apply");
+                            }
+                        }
 
-                        //if application level not throttled means it does not throttled at any level.
-                        if (!isApplicationLevelThrottled) {
-                            //Pass message context and continue to avaoid peformance issue.
-                            //Did not throttled at any level. So let message go and publish event.
-                            //publish event to Global Policy Server
-                            throttleDataPublisher.publishNonThrottledEvent(synCtx);
+                    }
+                }
+                if (!isApiLevelThrottled) {
+                    //Here check resource level throttled. If throttled then call handler throttled and pass.
+                    //Else go for subscription level and application level throttling
+                    //if resource level not throttled then move to subscription level
+                    if (!isResourceLevelThrottled) {
+                        //Subscription Level Throttling
+                        subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
+                                + apiVersion;
+                        isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                isThrottled(subscriptionLevelThrottleKey);
 
+                        //if subscription level not throttled then move to application level
+                        //Stop on quata reach
+                        if (!isSubscriptionLevelThrottled) {
+                            //Application Level Throttling
+                            isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                    isThrottled(applicationLevelThrottleKey);
+
+                            //if application level not throttled means it does not throttled at any level.
+                            if (!isApplicationLevelThrottled) {
+                                //Pass message context and continue to avaoid peformance issue.
+                                //Did not throttled at any level. So let message go and publish event.
+                                //publish event to Global Policy Server
+                                throttleDataPublisher.publishNonThrottledEvent(synCtx);
+
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Request throttled at application level for throttle key" +
+                                            applicationLevelThrottleKey);
+                                }
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                        APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
+                                isThrottled = isApplicationLevelThrottled = true;
+                            }
                         } else {
                             if (log.isDebugEnabled()) {
-                                log.debug("Request throttled at application level for throttle key" +
-                                        applicationLevelThrottleKey);
+                                log.debug("Request throttled at subscription level for throttle key" +
+                                        subscriptionLevelThrottleKey);
                             }
                             synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                    APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
-                            isThrottled = isApplicationLevelThrottled = true;
+                                    APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
+                            isThrottled = isSubscriptionLevelThrottled = true;
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Request throttled at subscription level for throttle key" +
-                                    subscriptionLevelThrottleKey);
+                            log.debug("Request throttled at resource level for throttle key" +
+                                    verbInfoDTO.getRequestKey());
                         }
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
-                        isThrottled = isSubscriptionLevelThrottled = true;
+                                APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
+                        //is throttled and resource level throttling
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Request throttled at resource level for throttle key" + verbInfoDTO.getRequestKey());
+                        log.debug("Request throttled at api level for throttle key" + apiLevelThrottleKey);
                     }
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                            APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
-                    //is throttled and resource level throttling
+                            APIThrottleConstants.API_LIMIT_EXCEEDED);
                 }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Request throttled at api level for throttle key" + apiLevelThrottleKey);
-                }
-                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                        APIThrottleConstants.API_LIMIT_EXCEEDED);
             }
         }
 
@@ -299,7 +330,10 @@ public class ThrottleHandler extends AbstractHandler {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
             ConfigurationContext cc = axis2MC.getConfigurationContext();
+            long start =System.nanoTime();
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
+            log.info("===============================================Time:"+ (System.nanoTime() - start));
+
         }
         if (isThrottled) {
             // return false;
@@ -413,5 +447,24 @@ public class ThrottleHandler extends AbstractHandler {
 
     public String gePolicyKeyResource() {
         return policyKeyResource;
+    }
+
+    private String getClientIp(MessageContext synCtx) {
+        String clientIp;
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
+        if (!StringUtils.isEmpty(xForwardForHeader)) {
+            clientIp = xForwardForHeader;
+            int idx = xForwardForHeader.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        } else {
+            clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+        }
+        return clientIp;
     }
 }

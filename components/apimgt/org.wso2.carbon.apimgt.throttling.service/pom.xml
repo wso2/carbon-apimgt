@@ -26,7 +26,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.throttle.service</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager Throttle Data Service</name>

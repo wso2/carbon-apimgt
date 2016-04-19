@@ -49,7 +49,7 @@ $(document).ready(function () {
                         window.location.reload(true);
                     }});
                 } else{
-                    window.location.reload(true);
+                    window.location = "/store/site/pages/application.jag?name="+application;
                 }
 
             } else {
@@ -72,13 +72,6 @@ $(document).ready(function () {
             }
         });*/
    
-    $('.help_popup').click(function()
-	    {
-	        $('#callback_help').toggle('fast', function()
-	        {
-	            $('#callback_help').html(i18n.t('info.callBackHelpMsg'));
-	        });
-	        return false;
-	    });
+
 });
 

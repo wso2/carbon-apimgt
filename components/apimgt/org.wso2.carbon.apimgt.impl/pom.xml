@@ -198,9 +198,20 @@
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
         </dependency>
         <dependency>
-            <artifactId>org.wso2.carbon.event.throttle.core</artifactId>
             <groupId>org.wso2.carbon.event-processing</groupId>
-            <version>2.0.13-SNAPSHOT</version>
+            <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -5,6 +5,8 @@
     var reqUrl = request.getRequestURI();
     var listUrl=jagg.url("/site/pages/index.jag");
     var listMappedUrl=jagg.url("/site/pages/index.jag");
+    var liveLogViewer=jagg.url("/log-viewer");
+    var loganalyzer =jagg.url("/log-analyzer");
     var subsUrl=jagg.url("/site/pages/index.jag");
     var subsMappedUrl=jagg.url("/site/pages/index.jag");
     var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
@@ -92,50 +94,88 @@
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-html"></i>
 							<%= i18n.localize("themeUpload") %></a></li>
+													<li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/alerts-domain-list") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("alerts") %></a></li>
+												<%
+                            var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                            var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                            if(isAnalyticsEnabled) {
+                            %>
+                            <li <%if (reqUrl.match("manage-alert-type")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/manage-alert-type") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i>
+							<%= i18n.localize("manageAlertTypes") %></a></li>
+							<% } %>
 
-					</ul>				
-				</li>
-				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%></a>
+</ul>
+</li>
+<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%></a>
 					<ul class="nav nav-pills secondary-nav collapse in">
-						
+
 					    <%
-					    if(!mod.isGlobalCEPThrottlingEnabled()){
+					    if(!APIUtil.isAdvanceThrottlingEnabled()){
 					    %>
 						<li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/tier-manage") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-					    <%}
-					    else if(mod.isGlobalCEPThrottlingEnabled()){
-					    %>
-					    	<li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/site/pages/policy-list.jag") %>"
+							<%= i18n.localize("tierManagement") %></a></li>
+						<%}
+                        else if(APIUtil.isAdvanceThrottlingEnabled()){
+                            %>
+                                <li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/api-policy-list") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-							<%= i18n.localize("addAPI") %></a></li>
+							<%= "API Policies" %></a></li>
 
 					        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
-					        href="<%= jagg.url("/site/pages/app-policy-manage.jag") %>"
+					        href="<%= jagg.url("/app-policy-manage") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-					        <%= "App Level Policies" %></a></li>
-					        
-					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a 
-					        href="<%= jagg.url("/site/pages/subscription-policy-manage.jag") %>"
+					        <%= "App Policies" %></a></li>
+
+					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a
+					        href="<%= jagg.url("/subscription-policy-manage") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-					        <%= "Subscription Level Policies" %></a></li>
-					        
-					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a 
+					        <%= "Subscription Policies" %></a></li>
+
+					        <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-					        <%= "Global Level Policies" %></a></li>
+					        <%= "Global Policies" %></a></li>
+
+						<li <%if (reqUrl.match("conditions-manage")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/site/pages/conditions-manage.jag") %>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="fw fw-settings"></i><%=i18n.localize("conditionManagementTitle") %></a></li>
 
 					     <%}%>
 					</ul>				
 				</li>
-			</ul>
+				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
+                    <ul class="nav nav-pills secondary-nav collapse in">
+                         <li><a href="<%=loganalyzer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Dashboard</a></li>
+                         </li>
+                         <li><a href="<%=liveLogViewer%>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-task"></i>
+                              Live log viewer</a>
+                         </li>
+                    </ul>
+                 </li>
+            </ul>
+           </li>
+	      </ul>
 		</div>
 		</div>
 </div>

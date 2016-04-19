@@ -292,6 +292,7 @@
     "changeAPIStatusMsg": "changed the API status from",
     "noActiveSubscribersMsg": "No active subscribers",
     "noDocsMsg": "No documentation associated with the API",
+    "noDocsMsgDesc": "There are no documentation created for this API. You can add new documentation to this API by clicking \"Add New Document\" button.",
     "noSubsMsg": "No subscriptions yet.",
     "searchAPIHelpMsg1":"Search Options",
     "searchAPIHelpMsg2":"By API Name [Default]  or",
@@ -412,8 +413,7 @@
     "editSwaggerSource":"Edit Swagger Source",
     "addParameter":"Add Parameter",
     "apiListing":"API List",
-    "apiBrowse":"Browse API"
-
-
+    "apiBrowse":"Browse API",
+    "manageAlertTypes": "Manage alert types"
 
 }

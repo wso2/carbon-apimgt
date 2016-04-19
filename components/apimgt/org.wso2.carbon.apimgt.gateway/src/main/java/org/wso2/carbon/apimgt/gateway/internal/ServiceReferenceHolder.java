@@ -21,7 +21,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.event.throttle.core.ThrottlerService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 
@@ -31,11 +31,8 @@ public class ServiceReferenceHolder {
 
     private ConfigurationContextService cfgCtxService;
     private APIManagerConfigurationService amConfigService;
-    public ThrottlerService getThrottler() {
-        return throttler;
-    }
     public ThrottleDataHolder throttleDataHolder;
-
+    private ThrottleProperties throttleProperties;
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
     }
@@ -44,11 +41,6 @@ public class ServiceReferenceHolder {
         this.throttleDataHolder = throttleDataHolder;
     }
 
-    public void setThrottler(ThrottlerService throttler) {
-        this.throttler = throttler;
-    }
-
-    private ThrottlerService throttler;
     private ServiceReferenceHolder() {
 
     }
@@ -79,5 +71,13 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
+    }
+
+    public ThrottleProperties getThrottleProperties() {
+        return throttleProperties;
+    }
+
+    public void setThrottleProperties(ThrottleProperties throttleProperties) {
+        this.throttleProperties = throttleProperties;
     }
 }

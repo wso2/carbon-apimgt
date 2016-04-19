@@ -97,6 +97,7 @@ import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -308,23 +309,23 @@ public final class APIUtil {
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
-            
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+
+            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
-                
-               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+                //api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+            	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+            	api.setApiLevelPolicy(apiLevelTier);
+
+               Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -332,9 +333,9 @@ public final class APIUtil {
                        }
                    }
                }
-               
+
                api.setAvailableSubscriptionLevelPolicies(availablePolicy);
-                
+
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
@@ -354,7 +355,7 @@ public final class APIUtil {
                 api.addAvailableTiers(availableTier);
                 api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
             }
-            
+
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -532,19 +533,21 @@ public final class APIUtil {
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
-                
-               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+                //api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+            	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+            	api.setApiLevelPolicy(apiLevelTier);
+
+               Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -552,9 +555,9 @@ public final class APIUtil {
                        }
                    }
                }
-               
+
                api.setAvailableSubscriptionLevelPolicies(availablePolicy);
-                
+
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
@@ -705,23 +708,23 @@ public final class APIUtil {
                 //ignore
             }
             api.setCacheTimeout(cacheTimeout);
-            
-        
+
+
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
                 api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
-                
-               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+
+               Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -729,14 +732,14 @@ public final class APIUtil {
                        }
                    }
                }
-               
+
                api.setAvailableSubscriptionLevelPolicies(availablePolicy);
-                
+
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
                 String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-                if (tiers != null) {                
+                if (tiers != null) {
                     String[] tierNames = tiers.split("\\|\\|");
                     for (String tierName : tierNames) {
                         Tier tier = new Tier(tierName);
@@ -893,25 +896,25 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
-            
+
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-            
+            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+
             if(isGlobalThrottlingEnabled){
                 StringBuilder policyBuilder = new StringBuilder();
                 for (Policy policy : api.getAvailableSubscriptionLevelPolicies()) {
                     policyBuilder.append(policy.getPolicyName());
                     policyBuilder.append("||");
-                }           
-                
+                }
+
                 String policies = policyBuilder.toString();
 
                 if (!"".equals(policies)) {
                     policies = policies.substring(0, policies.length() - 2);
                     artifact.setAttribute(APIConstants.API_OVERVIEW_SUB_POLICY, policies);
                 }
-                
+
                 artifact.setAttribute(APIConstants.API_OVERVIEW_API_POLICY, api.getApiLevelPolicy());
             } else {
                 //deprecated tier policy method
@@ -919,8 +922,8 @@ public final class APIUtil {
                 for (Tier tier : api.getAvailableTiers()) {
                     tiersBuilder.append(tier.getName());
                     tiersBuilder.append("||");
-                }           
-                
+                }
+
                 String tiers = tiersBuilder.toString();
 
                 if (!"".equals(tiers)) {
@@ -928,7 +931,7 @@ public final class APIUtil {
                     artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
                 }
             }
-            
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -1932,9 +1935,7 @@ public final class APIUtil {
             }
         }
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
+        if (isEnabledUnlimitedTier()) {
             Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
             tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
             tier.setDisplayName(APIConstants.UNLIMITED_TIER);
@@ -2294,23 +2295,23 @@ public final class APIUtil {
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
-            
+
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
                 api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
-                
-               Set<Policy> availablePolicy = new HashSet<Policy>(); 
+
+               Set<Policy> availablePolicy = new HashSet<Policy>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
-                       if(definedPolicyNames.contains(policyName)){
+                       if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
                            Policy p = new Policy(policyName);
                            availablePolicy.add(p);
                        } else {
@@ -2318,9 +2319,9 @@ public final class APIUtil {
                        }
                    }
                }
-               
+
                api.setAvailableSubscriptionLevelPolicies(availablePolicy);
-                
+
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
@@ -2339,7 +2340,7 @@ public final class APIUtil {
                 }
                 api.addAvailableTiers(availableTier);
             }
-        
+
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
@@ -3420,7 +3421,7 @@ public final class APIUtil {
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+            String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
             return Boolean.parseBoolean(serviceURL);
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration"
@@ -3765,7 +3766,7 @@ public final class APIUtil {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS))) {
+        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(token), Charset.defaultCharset());
         }
         return token;
@@ -3779,7 +3780,7 @@ public final class APIUtil {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS))) {
+        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE))) {
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(token.getBytes(Charset.defaultCharset()));
         }
         return token;
@@ -5065,7 +5066,7 @@ public final class APIUtil {
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
             // Read scope whitelist from Configuration.
-            List<String> whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+            List<String> whitelist = configuration.getProperty(APIConstants.WHITELISTED_SCOPES);
 
             // If whitelist is null, default scopes will be put.
             if (whitelist == null) {
@@ -5272,7 +5273,51 @@ public final class APIUtil {
         }
         return api;
     }
-    
+
+    /**
+     * @param stakeHolder value "publisher" for publisher value "subscriber" for subscriber value "admin-dashboard" for admin
+     * Return all alert types.
+     * @return Hashmap of alert types.
+     * @throws APIManagementException
+     */
+    public static HashMap<Integer, String> getAllAlertTypeByStakeHolder(String stakeHolder) throws APIManagementException {
+        HashMap<Integer, String> map;
+        map = ApiMgtDAO.getInstance().getAllAlertTypesByStakeHolder(stakeHolder);
+        return map;
+    }
+
+    /**
+     *
+     * @param userName user name with tenant domain ex: admin@carbon.super
+     * @param stakeHolder value "p" for publisher value "s" for subscriber value "a" for admin
+     * @return map of saved values of alert types.
+     * @throws APIManagementException
+     */
+    public static List<Integer> getSavedAlertTypesIdsByUserNameAndStakeHolder(String userName, String stakeHolder) throws  APIManagementException{
+
+        List<Integer> list;
+        list = ApiMgtDAO.getInstance().getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, stakeHolder);
+        return  list;
+
+    }
+
+    /**
+     * This util method retrieves saved email list by user and stakeHolder name
+     * @param userName user name with tenant ID.
+     * @param stakeHolder if its publisher values should "p", if it is store value is "s" if admin dashboard value is "a"
+     * @return List of eamil list.
+     * @throws APIManagementException
+     */
+    public static List<String> retrieveSavedEmailList(String userName, String stakeHolder) throws APIManagementException{
+
+        List<String> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedEmailList(userName,stakeHolder);
+
+        return list;
+    }
+
+
+
     /**
      * check whether policy is content aware
      * @param policy
@@ -5300,16 +5345,16 @@ public final class APIUtil {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
             status = isDefaultQuotaPolicyContentAware(subPolicy);
         } else if (policy instanceof GlobalPolicy) {
-            status = false;          
+            status = false;
         }
         return status;
     }
-    
+
     private static boolean isDefaultQuotaPolicyContentAware(Policy policy){
         if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             return true;
         }
-        return false;  
+        return false;
     }
 
     public static void addDefaultAdvancedThrottlePoliciesToDB(int tenantId) throws APIManagementException {
@@ -5359,6 +5404,8 @@ public final class APIUtil {
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan("FREE");
                 apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
             }
         }
@@ -5385,6 +5432,34 @@ public final class APIUtil {
                 apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
                 apiMgtDAO.addAPIPolicy(apiPolicy);
             }
+        }
+    }
+
+    /**
+     * Used to get advence throttling is enable
+     *
+     * @return condition of advance throttling
+     */
+    public static boolean isAdvanceThrottlingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties().isEnabled();
+    }
+
+    /**
+     * Used to get unlimited throttling tier is enable
+     *
+     * @return condition of enable unlimited tier
+     */
+    public static boolean isEnabledUnlimitedTier() {
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties();
+        if (throttleProperties.isEnabled()) {
+            return throttleProperties.isEnableUnlimitedTier();
+        } else {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            return JavaUtils.isTrueExplicitly(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER));
         }
     }
 }

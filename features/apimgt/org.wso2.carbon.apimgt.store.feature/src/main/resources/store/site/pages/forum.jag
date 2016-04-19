@@ -50,11 +50,7 @@ include("header.jag");
                     "name":"layout/base",
                     "inputs":{
                         "title":"My Subscriptions",
-                        "top":[
-                            {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
+                        "top":[                            
                             {
                                 "name":"search/api-search",
                                 "inputs":null

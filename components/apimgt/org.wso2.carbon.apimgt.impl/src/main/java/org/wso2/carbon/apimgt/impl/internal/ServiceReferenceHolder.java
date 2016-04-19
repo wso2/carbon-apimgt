@@ -17,13 +17,12 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.event.throttle.core.ThrottlerService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class ServiceReferenceHolder {
 
@@ -34,7 +33,6 @@ public class ServiceReferenceHolder {
     private RealmService realmService;
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
-    private ThrottlerService throttler;
     private OutputEventAdapterService outputEventAdapterService;
 
     public static ConfigurationContextService getContextService() {
@@ -98,13 +96,5 @@ public class ServiceReferenceHolder {
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         this.outputEventAdapterService = outputEventAdapterService;
-    }
-
-    public ThrottlerService getThrottler() {
-        return throttler;
-    }
-
-    public void setThrottler(ThrottlerService throttler) {
-        this.throttler = throttler;
     }
 }

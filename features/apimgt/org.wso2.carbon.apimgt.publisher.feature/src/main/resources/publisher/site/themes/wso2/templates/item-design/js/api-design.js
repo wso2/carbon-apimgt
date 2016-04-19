@@ -9,6 +9,10 @@ var api_doc =
     }
 };
 
+var apiLevelPolicy = {
+    isAPILevel : false
+};
+
 Handlebars.registerHelper('countKeys', function(value){
     return Object.keys(value).length * 2 + 1;
 });
@@ -66,6 +70,7 @@ function APIDesigner(){
 
     this.api_doc = {};
     this.resources = [] ;
+    this.apiLevelPolicy = {isAPILevel : false};
 
     this.container = $( "#api_designer" );
 
@@ -542,6 +547,10 @@ APIDesigner.prototype.transform = function(api_doc){
     return swagger;
 }
 
+APIDesigner.prototype.setApiLevelPolicy = function(isAPILevel){
+    this.apiLevelPolicy.isAPILevel = isAPILevel;
+}
+
 APIDesigner.prototype.render_resources = function(){
     context = {
         "doc" : this.transform(this.api_doc),
@@ -556,7 +565,16 @@ APIDesigner.prototype.render_resources = function(){
         success : this.update_elements
     });
 
-    if(typeof(TIERS) !== 'undefined'){
+    if(typeof(TIERS) !== 'undefined'  && this.apiLevelPolicy.isAPILevel == true){
+        $('#resource_details').find('.throttling_select').editable({
+            emptytext: '+ Throttling',        
+            source: TIERS,
+            success : this.update_elements,
+            disabled : 'disabled'
+        });
+    }   
+
+     if(typeof(TIERS) !== 'undefined' && this.apiLevelPolicy.isAPILevel == false){
         $('#resource_details').find('.throttling_select').editable({
             emptytext: '+ Throttling',        
             source: TIERS,

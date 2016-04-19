@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
@@ -587,4 +586,40 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+
+    /**
+     *
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionId id of the condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionType
+     * @param conditionValue
+     * @return
+     * @throws APIManagementException
+     */
+    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
+     *
+     * @param conditionId
+     * @return
+     * @throws APIManagementException
+     */
+    boolean deleteBlockCondition(int conditionId) throws APIManagementException;
+
 }

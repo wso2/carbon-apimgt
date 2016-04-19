@@ -68,13 +68,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/default/templates/stats/apiCallType/images/statsThumb.png" alt="Smiley face"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Stats Disabled"></div>'));
                 }
             }
             else {
@@ -126,7 +126,7 @@ var drawTopUsersGraph = function(from,to){
                         });
                     }
                     drawChart('#userChart'+(k+1),k,chartData);
-                    $('#userTable'+(k+1)).dataTable({
+                    $('#userTable'+(k+1)).datatables_extended({
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$('#userTable'+(k+1)+'_length option:selected' ).val()
                           || $('#userTable'+(k+1)+'_length option:selected' ).val()==-1)
@@ -137,7 +137,7 @@ var drawTopUsersGraph = function(from,to){
                     $('#userTable'+(k+1)).show();
                 }
             }else{
-                $('#topUsersView').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
             }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -276,7 +276,9 @@ var drawRegisteredUserCountByApplications = function(from,to){
 
                         // CREATE VIS & GROUPS
 
-                        var vis = d3.select("#subsChart").append("svg:svg");
+                        var vis = d3.select("#subsChart").append("div:div").attr("class", "col-xs-12 col-sm-4 col-md-3 col-lg-2");
+                        
+                        vis = vis.append("svg:svg").style("height","200px");
 
                         vis.append("text").attr("class", "title_text")
                                .attr("x", 125)
@@ -502,6 +504,8 @@ var drawRegisteredUserCountByApplications = function(from,to){
 
                     update(0);
                 }
+            } else {
+            	$('#subsChart').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
             }
             } else {
                 if (json.message == "AuthenticateError") {

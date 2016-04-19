@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class Limit {
 
     private String timeUnit;
-    private int UnitTime;
+    private int unitTime;
 
     public String getTimeUnit() {
         return timeUnit;
@@ -32,16 +32,16 @@ public class Limit {
     }
 
     public int getUnitTime() {
-        return UnitTime;
+        return unitTime;
     }
 
     public void setUnitTime(int unitTime) {
-        UnitTime = unitTime;
+        this.unitTime = unitTime;
     }
 
     @Override
     public String toString() {
-        return "Limit [timeUnit=" + timeUnit + ", UnitTime=" + UnitTime + "]";
+        return "Limit [timeUnit=" + timeUnit + ", unitTime=" + unitTime + "]";
     }
     
 }

@@ -27,10 +27,10 @@
         var subscriptionPolicy = subscriptionPolicyArray[j];
         var policyName = subscriptionPolicy.getPolicyName();
         var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
-        if (defaultQuotaPolicy == "RequestCount"){
+        if (defaultQuotaPolicy == "requestCount"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
         }
-        else if (defaultQuotaPolicy == "Bandwidth"){
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
             var quota = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
         }
 

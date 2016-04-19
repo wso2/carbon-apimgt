@@ -66,9 +66,9 @@ public class PolicyConstants {
 
     public static final String END_QUERY = "'),'string')";
 
-    public static final String PER_USER =  "per user";
+    public static final String PER_USER =  "userLevel";
 
-    public static final String ACROSS_ALL = "across all";
+    public static final String ACROSS_ALL = "apiLevel";
     
     public static final String POLICY_LEVEL_API = "api";
     
