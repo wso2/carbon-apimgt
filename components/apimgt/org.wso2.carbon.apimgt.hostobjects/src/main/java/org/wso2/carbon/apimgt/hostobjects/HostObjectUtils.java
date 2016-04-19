@@ -16,7 +16,6 @@
 * under the License.
 */
 
-
 package org.wso2.carbon.apimgt.hostobjects;
 
 import java.util.Comparator;
@@ -48,7 +47,7 @@ public class HostObjectUtils {
     private static final Log log = LogFactory.getLog(APIProviderHostObject.class);
     private static ConfigurationContextService configContextService = null;
 
-     public static void setConfigContextService(ConfigurationContextService configContext) {
+    public static void setConfigContextService(ConfigurationContextService configContext) {
         HostObjectUtils.configContextService = configContext;
     }
 
@@ -128,7 +127,7 @@ public class HostObjectUtils {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
-    
+
     public static class RequiredUserFieldComparator implements Comparator<UserFieldDTO> {
 
         public int compare(UserFieldDTO filed1, UserFieldDTO filed2) {
@@ -139,15 +138,15 @@ public class HostObjectUtils {
             if (filed2.getDisplayOrder() == 0) {
                 filed2.setDisplayOrder(Integer.MAX_VALUE);
             }
-            
+
             if (!filed1.getRequired() && filed2.getRequired()){
             	return 1;
             }
-            
+
             if (filed1.getRequired() && filed2.getRequired()){
             	return 0;
             }
-            
+
             if (filed1.getRequired() && !filed2.getRequired()){
             	return -1;
             }
@@ -166,7 +165,7 @@ public class HostObjectUtils {
             if (filed2.getDisplayOrder() == 0) {
                 filed2.setDisplayOrder(Integer.MAX_VALUE);
             }
-            
+
             if (filed1.getDisplayOrder() < filed2.getDisplayOrder()) {
                 return -1;
             }
@@ -199,7 +198,7 @@ public class HostObjectUtils {
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
             boolean isRecentlyAddedAPICacheEnabled =
                   Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
-            
+
             if (username != null && isRecentlyAddedAPICacheEnabled) {
                 String tenantDomainFromUserName = MultitenantUtils.getTenantDomain(username);
                 if (tenantDomainFromUserName != null &&

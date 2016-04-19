@@ -25,19 +25,43 @@ var saveAlertTypes = function (alertTypesIDs,emailList,checkedValues) {
 
 
 $( document ).ready(function() {
-    $( "#saveBtn" ).click(function() {
-        var notChecked = [], checked = [], checkedValues = [];
-        $(":checkbox").each(function() {
-            id=this.value;
-            values = this.id;
-            this.checked ? checked.push(id) : notChecked.push(id);
-            if(this.checked) {
-                checkedValues.push(values);
-            }
 
-        });
-        var emailList =  $("#emailListTextArea").val();
-        saveAlertTypes(checked,emailList,checkedValues);
+    $('#tokenfield').on('beforeItemAdd', function(event) {
+        /* Validate url */
+
+        var re = /\S+@\S+\.\S+/
+        var valid = re.test(event.item)
+
+        if (!valid)
+        {
+            event.cancel = true;
+        }
+        else
+        {
+            event.cancel = false;
+        }
+    });
+
+    $( "#saveBtn" ).click(function() {
+
+        if ($(".token").hasClass("invalid")) {
+            jagg.message({content:"Could not save. You have entered an invalid email address.", type:"error"});
+        }else {
+
+
+            var notChecked = [], checked = [], checkedValues = [];
+            $(":checkbox").each(function () {
+                id = this.value;
+                values = this.id;
+                this.checked ? checked.push(id) : notChecked.push(id);
+                if (this.checked) {
+                    checkedValues.push(values);
+                }
+
+            });
+            var emailList = $("#tokenfield").val();
+            saveAlertTypes(checked, emailList, checkedValues);
+        }
     });
 
 });
