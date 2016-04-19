@@ -59,7 +59,7 @@
                                 <%
                                     var savedEmailList ="";
                                     if(outputs.emailList.allSavedEmailListJson[0] != null){
-                                        var savedEmailList = outputs.emailList.allSavedEmailListJson[0];
+                                        var savedEmailList = outputs.emailList.allSavedEmailListJson.toString();
                                     }
                                 %>
                                 <div class="col-sm-10">
