@@ -57,7 +57,9 @@ public final class ThrottlingDBUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                String dataSourceName = "apimgt_throttle_ds";
+
+                //TODO : We need to add a config for this
+                String dataSourceName = "WSO2_THROTTLE_DB";
 
                 if (dataSourceName != null) {
                     try {
