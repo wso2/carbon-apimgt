@@ -828,7 +828,7 @@ public class ApiMgtDAO {
 
                 //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                 //TODO isContentAware
-                boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                boolean isContentAware = isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
 
 
                 infoDTO.setContentAware(isContentAware);
@@ -963,7 +963,7 @@ public class ApiMgtDAO {
                 }
 
                 if(quotaType == null || StringUtils.isEmpty(quotaType)){
-                	throw new APIManagementException(" Quata Type can not be null ");
+                	return false;
                 }
 
                 if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
