@@ -611,7 +611,7 @@ ul.product-tags {
 .search-wrap>.form-control::-webkit-input-placeholder {
     color: #fff;
     opacity: 0.9;
-    font-weight: 100;
+    font-weight: 400;
 }
 .page-actions-right{float: right;}
 
