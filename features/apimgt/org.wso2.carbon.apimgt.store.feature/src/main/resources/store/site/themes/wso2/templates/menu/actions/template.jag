@@ -91,14 +91,25 @@
 			                        <%=i18n.localize( 'forum.createNewTopic')%>
 			                    </a>
 		                	</li> 
-	            		<% } if(inputs.page == "api/api-info" || inputs.page == "api/api-listing-prototyped"){%>
+	            		<% } else if(inputs.page == "api/api-info" || inputs.page == "api/api-listing-prototyped"){%>
 	                        <li>
 	                            <a title="<%=i18n.localize("goBack")%>" href="<%= jagg.urlTenanted("/") %>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="Go Back"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="Go Back"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
 	                                </span>
 	                               <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li> 
+	                    <% } else if(inputs.page == "forum/forum-new" || inputs.page == "forum/forum-topic"){%>
+	                    <%var urlSuffix = jagg.getTenantURLPrefix(); %>
+	                        <li>
+	                            <a title="<%=i18n.localize("goBack")%>" href="<%=jagg.getAbsoluteUrl('/forum')+ '?' + urlSuffix%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("forum.topic.list")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("forum.topic.list")%>"></i>
+	                                </span>
+	                               <%=i18n.localize("forum.topic.list")%>
 	                            </a>
 	                        </li> 
 	                    <% } %>            

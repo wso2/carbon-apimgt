@@ -239,8 +239,10 @@
     "forum" : "Forum",
     "forum.searchForum" : "Search Forum",
     "forum.noTopicsFound" : "No topics found.",
+    "forum.noTopicsFound.description" : "There are no forum topic available.",
     "forum.createNewTopic" : "Create New Topic",
     "forum.topic" : "Topic",
+    "forum.topic.list" : "Topic List",
     "forum.replies" : "Replies",
     "forum.by" : "By",
     
