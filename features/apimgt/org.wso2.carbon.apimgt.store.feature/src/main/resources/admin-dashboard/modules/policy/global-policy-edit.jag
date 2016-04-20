@@ -1,13 +1,13 @@
 <%
 var log = new Log();
 
-var saveGlobalPolicy = function (action, policyName, description, siddhiQuery) {
+var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, keyTemplate) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
-        var policy = constructPolicyObject(provider, policyName, description, siddhiQuery);
+        var policy = constructPolicyObject(provider, policyName, description, siddhiQuery, keyTemplate);
 
         if (action == "add") {
             apiProvider.addPolicy(policy);
@@ -28,7 +28,7 @@ var saveGlobalPolicy = function (action, policyName, description, siddhiQuery) {
     }
 };
 
-var constructPolicyObject = function (userName, policyName, description, siddhiQuery) {
+var constructPolicyObject = function (userName, policyName, description, siddhiQuery, keyTemplate) {
     var GlobalPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -36,7 +36,7 @@ var constructPolicyObject = function (userName, policyName, description, siddhiQ
 
     globalPolicy.setPolicyName(policyName);
     globalPolicy.setDescription(description);
-
+    globalPolicy.setKeyTemplate(keyTemplate);
     var tenantId = APIUtil.getTenantId(userName);
     globalPolicy.setTenantId(tenantId);
     globalPolicy.setSiddhiQuery(siddhiQuery);

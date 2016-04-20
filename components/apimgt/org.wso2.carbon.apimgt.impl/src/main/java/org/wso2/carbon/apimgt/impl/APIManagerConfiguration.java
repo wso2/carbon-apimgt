@@ -568,6 +568,14 @@ public class APIManagerConfiguration {
                     globalEngineWSConnection.setPassword(APIUtil.replaceSystemProperty
                             (globalEngineWSConnectionServicePassword));
                     globalEngineWSConnection.setEnabled(true);
+                    OMElement globalEngineWSConnectionInitialDelayElement = globalEngineWSConnectionElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .BLOCK_CONDITION_RETRIEVER_INIT_DELAY));
+                    if (globalEngineWSConnectionInitialDelayElement != null) {
+                        globalEngineWSConnection.setInitialDelay(Long.parseLong
+                                (globalEngineWSConnectionInitialDelayElement
+                                        .getText()));
+                    }
                 }
                 throttleProperties.setGlobalEngineWSConnection(globalEngineWSConnection);
 
@@ -658,6 +666,14 @@ public class APIManagerConfiguration {
                             jmsTaskManagerProperties.setJobQueueSize(Integer.parseInt(jobQueueSizeElement.getText()));
                         }
                         jmsConnectionProperties.setJmsTaskManagerProperties(jmsTaskManagerProperties);
+                    }
+                    OMElement jmsConnectionInitialDelayElement = jmsConnectionDetailElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .BLOCK_CONDITION_RETRIEVER_INIT_DELAY));
+                    if (jmsConnectionInitialDelayElement != null) {
+                        jmsConnectionProperties.setInitialDelay(Long.parseLong
+                                (jmsConnectionInitialDelayElement
+                                        .getText()));
                     }
                     throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 }

@@ -2130,7 +2130,7 @@ public class SQLConstants {
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
             "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
-            "VALUES (?,?,?,?,?)";
+            "VALUES (?,?,?,?,?,?)";
 
     public static final String GET_APP_POLICY_NAMES =
             " SELECT " +
@@ -2233,9 +2233,9 @@ public class SQLConstants {
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
-                    "RATE_LIMIT_TIME_UNIT = ? " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =

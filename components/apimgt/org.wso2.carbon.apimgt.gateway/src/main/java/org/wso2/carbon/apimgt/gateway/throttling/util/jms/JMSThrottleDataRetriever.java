@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import java.io.IOException;
 import java.util.*;
 
-public class JMSThrottleDataRetriever implements Runnable {
+public class JMSThrottleDataRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(JMSThrottleDataRetriever.class);
     private static final ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
             ServiceReferenceHolder.getInstance().getThrottleProperties().getJmsConnectionProperties();
@@ -85,6 +85,7 @@ public class JMSThrottleDataRetriever implements Runnable {
     }
 
     public void startJMSThrottleDataRetriever() {
-        new Thread(this).start();
+        new Timer().schedule(this, ServiceReferenceHolder.getInstance().getThrottleProperties()
+                .getJmsConnectionProperties().getInitialDelay());
     }
 }

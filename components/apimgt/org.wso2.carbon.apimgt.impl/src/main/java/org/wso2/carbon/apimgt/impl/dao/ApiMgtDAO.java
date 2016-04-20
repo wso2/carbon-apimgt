@@ -8613,8 +8613,8 @@ public class ApiMgtDAO {
             String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
             policyStatement = conn.prepareStatement(addQuery);
             policyStatement.setString(1, policy.getPolicyName());
-            policyStatement.setString(2, policy.getKeyTemplate());
-            policyStatement.setInt(3, policy.getTenantId());
+            policyStatement.setInt(2, policy.getTenantId());
+            policyStatement.setString(3, policy.getKeyTemplate());
             policyStatement.setString(4, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
@@ -8827,6 +8827,7 @@ public class ApiMgtDAO {
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
 
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
@@ -8963,8 +8964,10 @@ public class ApiMgtDAO {
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
-                byte[] customAttrib = blob.getBytes(1,(int)blob.length());
-                policy.setCustomAttributes(customAttrib);
+                if (blob != null) {
+                    byte[] customAttrib = blob.getBytes(1, (int) blob.length());
+                    policy.setCustomAttributes(customAttrib);
+                }
             } else {
                 handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
