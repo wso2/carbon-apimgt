@@ -76,8 +76,7 @@ public class ThrottleHandler extends AbstractHandler {
 
     private String policyKeyApplication = null;
 
-    //TODO load this from configuration
-    private boolean subscriptionLevelSpikeArrestEnabled = true;
+    private boolean subscriptionLevelSpikeArrestEnabled;
     /**
      * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
      */
@@ -108,6 +107,8 @@ public class ThrottleHandler extends AbstractHandler {
 
     //Throttle Handler rename
     public ThrottleHandler() {
+        subscriptionLevelSpikeArrestEnabled = ServiceReferenceHolder.getInstance().getThrottleProperties()
+                .isEnabledSubscriptionLevelSpikeArrest();
         if (log.isDebugEnabled()) {
             log.debug("Throttle Handler initialized");
         }
