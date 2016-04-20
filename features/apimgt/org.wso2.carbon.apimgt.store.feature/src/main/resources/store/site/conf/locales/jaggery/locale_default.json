@@ -41,6 +41,7 @@
     "billing":"Billing & Metering",
     "tiers" : "Tiers",
     "subscribe" : "Subscribe",
+    "unSubscribe" : "Unsubscribe",
     "goToSubscribe" : "Visit Publisher Store",
 
     "overview.title" : "Overview",

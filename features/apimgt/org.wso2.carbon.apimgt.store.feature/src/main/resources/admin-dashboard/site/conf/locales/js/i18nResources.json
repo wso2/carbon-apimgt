@@ -1,6 +1,9 @@
 {
     "errorMsgs":{
-        "login":"Unable to log you in!"
+        "login":"Unable to log you in!",
+        "invalidEmailEntered": "Could not save. You have entered an invalid email address.",
+        "atleastOneEmailNeeded" : "Please enter at least one email address",
+        "atLeastOneAlertTypeNeeded" : "Please select at least one alert type"
     },
     "analyticsConfigSaving" : {
         "inProgress" : "Saving Configurations...",
@@ -10,5 +13,8 @@
     "confirmMsgs":{
         "tierDeleteTitle" : "Confirm Deletion",
         "tierDeleteConfirmMsg" : "Tier deletion might affect current subscriptions. Are you sure you want to delete?"
-  }
+  },
+    "info": {
+        "successfullySaved": "Successfully saved"
+    }
 }
