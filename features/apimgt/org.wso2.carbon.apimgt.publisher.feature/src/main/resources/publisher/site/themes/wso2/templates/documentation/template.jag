@@ -102,7 +102,7 @@
 											onclick="javascript:$('#otherTypeDiv').toggle('slow')" /><%=i18n.localize("other")%>
 									</label></li>
 								</ul>
-								<div id="otherTypeDiv" class="controls" style="display: none;">
+								<div id="otherTypeDiv" class="controls form-group" style="display: none;">
 									<span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
 										class="required form-control" id="specifyBox"
 										style="width: 98%;" />
