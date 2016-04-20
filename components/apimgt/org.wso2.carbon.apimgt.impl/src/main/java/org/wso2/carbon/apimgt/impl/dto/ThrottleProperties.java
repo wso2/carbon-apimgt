@@ -186,6 +186,15 @@ public class ThrottleProperties {
         private String serviceUrl;
         private String username;
         private String password;
+        private long initialDelay = 60000;
+
+        public long getInitialDelay() {
+            return initialDelay;
+        }
+
+        public void setInitialDelay(long initialDelay) {
+            this.initialDelay = initialDelay;
+        }
 
         public String getDataSource() {
             return dataSource;
@@ -233,8 +242,17 @@ public class ThrottleProperties {
         private String serviceUrl;
         private String username;
         private String password;
+        private long initialDelay = 60000;
         private Properties jmsConnectionProperties;
         private JMSTaskManagerProperties jmsTaskManagerProperties;
+
+        public long getInitialDelay() {
+            return initialDelay;
+        }
+
+        public void setInitialDelay(long initialDelay) {
+            this.initialDelay = initialDelay;
+        }
 
         public String getDestination() {
             return destination;
