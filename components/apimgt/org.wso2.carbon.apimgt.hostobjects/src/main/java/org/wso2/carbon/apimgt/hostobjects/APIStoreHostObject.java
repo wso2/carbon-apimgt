@@ -541,7 +541,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 String keyType = (String) apiData.get("keytype", apiData);
 
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,keyType);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -640,9 +640,9 @@ public class APIStoreHostObject extends ScriptableObject {
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 isSuperTenant = true;
+            } else {
+                usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
             }
-            usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
-
             boolean authorized =
                     APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
             boolean displayPublishUrlFromStore = false;
