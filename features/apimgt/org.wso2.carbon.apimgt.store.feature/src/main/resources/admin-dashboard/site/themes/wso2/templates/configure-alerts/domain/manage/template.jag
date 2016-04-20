@@ -1,6 +1,7 @@
 <% jagg.template("configure-alerts/domain/manage", function(inputs, outputs, jagg) { %>
 <%
     var configurations = outputs.configurationInfo;
+    var templates = outputs.templates;
     var domainName = request.getParameter("domainName");
 %>
 
@@ -24,20 +25,20 @@
         </div>
         <div class="row">
             <div class="container col-md-12 marg-top-20">
-                <div class="action-container">
+                <!--div class="action-container">
 
 
                     <button id="" type="button"
                             onclick= "location.href = '<%=jagg.url('/alerts-domain-edit?domainName='+domainName)%>';"
                             class="btn btn-default btn-add col-md-3 col-xs-12 pull-left">Add Configuration
                     </button>
-                </div>
-                <br class="c-both"/>
+                </div-->
+                <!--br class="c-both"/-->
                 <br class="c-both"/>
 
 
-                <%
-                    if (configurations != null && configurations.length > 0) {
+                 <%
+                    if (templates != null && templates.length > 0) {
                 %>
 
                 <table class="table table-bordered" id="tblConfigs">
@@ -46,31 +47,58 @@
                     <tr>                      
                         <th><%=i18n.localize("domainTableColumnName")%></th>
                         <th><%=i18n.localize("domainTableColumnDescription")%></th>
-                        <th><%=i18n.localize("templateType")%></th>
+                        <th><%=i18n.localize("templateStatus")%></th>
                         <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
 
                     </tr>
                     </thead>
                     <tbody>
                     <%
-                        for (var i in configurations) {
+                        for (var i in templates) {
                     %>
                     <tr>
                         <td>
-                            <%=configurations[i].getName()%>
+                            <%=templates[i].getName()%>
                         </td>
-                        <td><%=configurations[i].getDescription()%>
+                        <td><%=templates[i].getDescription()%>
                         </td>
-                        <td><%=configurations[i].getType()%>
+<%
+var existingConfig = null;
+
+
+for (var j in configurations) {
+
+    if (configurations[j].getType().trim() == templates[i].getName().trim()) {
+        existingConfig = configurations[j];
+        break;
+    }
+}
+
+if (existingConfig) {
+
+%>
+
+                        <td><%=i18n.localize("templateStatusActive")%></td>
                         <td class="tcenter">
-                            <a onclick="deleteConfiguration('<%=configurations[i].getFrom()%>','<%=configurations[i].getName()%>')">
+                            <a onclick="deleteConfiguration('<%=existingConfig.getFrom()%>','<%=existingConfig.getName()%>')">
                                 <i class="glyphicon glyphicon-remove"></i>
-                                <%=i18n.localize("common.button.delete")%></a></td>
-                        
-                        <td class="tcenter">
-                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+configurations[i].getFrom()+"&configurationName="+configurations[i].getName()+"&templateType="+configurations[i].getType()+"&mode=edit")%>">
-                                <i class="glyphicon glyphicon-cog"></i>
+                                <%=i18n.localize("deactivate")%></a>
+                        &nbsp; &nbsp; 
+ 
+                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getFrom()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
+                                <i class="fw fw-edit"></i>
                                 <%=i18n.localize("common.button.edit")%></a></td>
+
+                        <% } else { %>
+                        <!--  need to show configuration and activate -->
+                       <td><%=i18n.localize("templateStatusInactive")%></td>
+                       <td class="tcenter">
+                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getName() +"&templateType="+templates[i].getName()+"&mode=edit")%>">
+                                <i class="fw fw-key"></i>
+                                <%=i18n.localize("activate")%></a></td>
+
+                        <% } %>
+                       
                     </tr>
                     <%
                         }
