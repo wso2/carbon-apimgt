@@ -470,17 +470,21 @@
             <ServiceURL>http://localhost:9763/throttle/data/v1/block</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
+            <!--InitDelay>300000</InitDelay>
+            <Period>3600000</Period-->
         </BlockCondition>
         <GlobalPolicyEngineWSConnectionDetails>
             <ServiceURL>http://localhost:9763/throttle/data/v1/throttleAsString</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
+            <!--InitDelay>300000</InitDelay-->
         </GlobalPolicyEngineWSConnectionDetails>
         <JMSConnectionDetails>
-            <ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
+            <!--ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
             <Destination>throttleData</Destination>
+            <InitDelay>300000</InitDelay-->
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
                 <transport.jms.DestinationType>topic</transport.jms.DestinationType>
@@ -495,6 +499,7 @@
             </JMSTaskManager>
         </JMSConnectionDetails>
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
+        <EnableSubscriptionSpikeArrest>false</EnableSubscriptionSpikeArrest>
     </ThrottlingConfigurations>
 
     <SwaggerCodegen>

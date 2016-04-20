@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.util.Properties;
 
 public class ThrottleProperties {
-
+    private boolean enabledSubscriptionLevelSpikeArrest;
     private boolean enabled;
     private DataPublisher dataPublisher;
     private GlobalEngineWSConnection globalEngineWSConnection;
@@ -30,6 +30,14 @@ public class ThrottleProperties {
     private String throttleDataSourceName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
+
+    public boolean isEnabledSubscriptionLevelSpikeArrest() {
+        return enabledSubscriptionLevelSpikeArrest;
+    }
+
+    public void setEnabledSubscriptionLevelSpikeArrest(boolean enabledSubscriptionLevelSpikeArrest) {
+        this.enabledSubscriptionLevelSpikeArrest = enabledSubscriptionLevelSpikeArrest;
+    }
 
     public DataPublisherThreadPool getDataPublisherThreadPool() {
         return dataPublisherThreadPool;

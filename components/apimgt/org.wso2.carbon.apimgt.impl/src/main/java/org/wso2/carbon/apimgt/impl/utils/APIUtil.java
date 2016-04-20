@@ -5461,4 +5461,15 @@ public final class APIUtil {
             return JavaUtils.isTrueExplicitly(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER));
         }
     }
+
+    /**
+     * Used to get subscription Spike arrest Enable
+     * @return condition of Subscription Spike arrest configuration
+     */
+    public static boolean isEnabledSubscriptionSpikeArrest() {
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties();
+       return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
+    }
 }

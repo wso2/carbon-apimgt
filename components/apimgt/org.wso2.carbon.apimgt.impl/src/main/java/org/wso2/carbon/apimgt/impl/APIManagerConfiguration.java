@@ -429,6 +429,15 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableUnlimitedTier(JavaUtils.isTrueExplicitly(enableUnlimitedTierElement
                         .getText()));
             }
+
+            OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .ENABLE_SUBSCRIPTION_SPIKE_ARREST));
+            if (enabledSubscriptionLevelSpikeArrestElement != null) {
+                throttleProperties.setEnabledSubscriptionLevelSpikeArrest(JavaUtils.isTrueExplicitly
+                        (enabledSubscriptionLevelSpikeArrestElement
+                        .getText()));
+            }
             if (throttleProperties.isEnabled()) {
 
                 ThrottleProperties.DataPublisher dataPublisher = new ThrottleProperties.DataPublisher();
