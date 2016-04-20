@@ -430,10 +430,10 @@ var drawAPIUsage = function () {
                     //paginator
                     var items = $("svg");
                     var numItems = items.length;
-                    if (numItems<=6){
+                    if (numItems<=10){
                         $('#pagination').hide();
                     }else{
-                    var perPage = 6;
+                    var perPage = 10;
                     items.slice(perPage).hide();
 
                     $("#pagination").pagination({
