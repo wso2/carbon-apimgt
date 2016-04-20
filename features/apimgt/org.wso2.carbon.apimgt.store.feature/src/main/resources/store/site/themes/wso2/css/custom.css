@@ -523,6 +523,11 @@ ul.product-tags {
 .app-data h4{
     margin-bottom: 0px
 }
+.app-data h4 a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
 .app-data h5,.launch-app-data h5{
     margin-top: 0px;
 }
