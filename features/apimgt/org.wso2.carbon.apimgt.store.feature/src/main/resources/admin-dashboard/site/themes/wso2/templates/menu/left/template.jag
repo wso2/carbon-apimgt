@@ -94,8 +94,8 @@
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-html"></i>
 							<%= i18n.localize("themeUpload") %></a></li>
-													<li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/alerts-domain-list") %>"
+						<li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+							href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 							<%= i18n.localize("alerts") %></a></li>
@@ -157,7 +157,7 @@
 							<i class="fw fw-settings"></i><%=i18n.localize("conditionManagementTitle") %></a></li>
 
 					     <%}%>
-					</ul>				
+					</ul>
 				</li>
 				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
                     <ul class="nav nav-pills secondary-nav collapse in">
