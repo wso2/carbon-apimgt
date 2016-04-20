@@ -640,9 +640,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 isSuperTenant = true;
-            } else {
-                usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
             }
+            usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
 
             boolean authorized =
                     APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
@@ -1372,6 +1371,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 row.put("apiOwner", row, apiOwner);
                 row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                row.put("rates", row, api.getRating());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -1487,6 +1487,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
                     row.put("apiBusinessOwner", row, api.getBusinessOwner());
+                    row.put("rates", row, api.getRating());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();

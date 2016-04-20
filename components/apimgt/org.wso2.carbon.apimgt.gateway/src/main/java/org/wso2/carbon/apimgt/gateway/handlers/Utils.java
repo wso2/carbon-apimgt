@@ -88,7 +88,10 @@ public class Utils {
         messageContext.getEnvelope().getBody().addChild(payload);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
+        //If an Accept header has been provided.
+        if(!StringUtils.isEmpty(acceptType) && !"*/*".equals(acceptType)){
+            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
+        }
     }
     
     public static void setSOAPFault(MessageContext messageContext, String code, 
