@@ -1,8 +1,8 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('sub_gold')
+@Plan:name('resource_Plus_default')
 
 /* Enter a unique description for ExecutionPlan */
-@Plan:description('ExecutionPlan for sub_gold')
+@Plan:description('ExecutionPlan for resource_plus')
 
 /* define streams/tables and write queries here ... */
 
@@ -13,7 +13,7 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
 FROM RequestStream
-SELECT messageID, ( subscriptionTier == 'Gold') AS isEligible, subscriptionKey AS throttleKey
+SELECT messageID, ( resourceTier == 'Plus') AS isEligible, resourceKey AS throttleKey
 INSERT INTO EligibilityStream;
 
 FROM EligibilityStream[isEligible==true]#window.time(1 min) 

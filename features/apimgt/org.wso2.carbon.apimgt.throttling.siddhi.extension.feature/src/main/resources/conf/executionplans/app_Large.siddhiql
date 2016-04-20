@@ -1,5 +1,5 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('app_large')
+@Plan:name('app_Large')
 
 /* Enter a unique description for ExecutionPlan */
 @Plan:description('ExecutionPlan for app_large')
