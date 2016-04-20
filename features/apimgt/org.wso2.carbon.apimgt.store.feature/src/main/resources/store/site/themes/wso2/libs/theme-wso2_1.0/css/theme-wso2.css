@@ -7843,6 +7843,8 @@ footer a, footer a:hover {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
+  margin: 0px;
+  padding: 0px;
 }
 
 .dropdown-menu.arrow:before, .dropdown-menu.arrow.arrow-top-left:before {
