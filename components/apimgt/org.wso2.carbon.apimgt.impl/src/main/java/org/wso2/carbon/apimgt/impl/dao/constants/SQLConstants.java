@@ -2114,7 +2114,7 @@ public class SQLConstants {
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
             "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
-            "VALUES (?,?,?,?,?)";
+            "VALUES (?,?,?,?,?,?)";
 
     public static final String GET_APP_POLICY_NAMES =
             " SELECT " +

@@ -24,10 +24,12 @@
         var globalPolicy = globalPolicyArray[j];
         var policyName = globalPolicy.getPolicyName();
         var description = globalPolicy.getDescription();
+        var keyTemplate = globalPolicy.getKeyTemplate();
         %>
                 <tr>
                     <td><%=policyName%></td>
                     <td><%=description%></td>
+                    <td><%=keyTemplate%></td>
                     <td>
                         <a id="editButton<%=count%>" onClick="editGlobalPolicy('<%=policyName%>')">
                             <i class="icon-edit"></i>

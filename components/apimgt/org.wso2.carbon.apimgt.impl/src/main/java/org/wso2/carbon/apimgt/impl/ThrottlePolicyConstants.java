@@ -86,6 +86,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_SIDDHI_QUERY = "SIDDHI_QUERY";
 
+    public static final String COLUMN_KEY_TEMPLATE  = "KEY_TEMPLATE";
+
     public static final String COLUMN_DEPLOYED = "IS_DEPLOYED";
     
     public static final String COLUMN_WITHIN_IP_RANGE = "WITHIN_IP_RANGE";
