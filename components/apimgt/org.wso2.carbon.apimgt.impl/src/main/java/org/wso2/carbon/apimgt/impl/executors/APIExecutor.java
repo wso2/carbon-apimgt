@@ -115,11 +115,7 @@ public class APIExecutor implements Execution {
 
             APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
-            
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-            
+
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 
                                    //custom state to default api state

@@ -1690,7 +1690,6 @@ public class APIStoreHostObject extends ScriptableObject {
                                 }
                             }
                         } else {
-                            NativeArray policyArr = new NativeArray(0);
                             Set<Tier> policySet = api.getAvailableTiers();
                             if (policySet != null) {
                                 Iterator it = policySet.iterator();
@@ -1699,12 +1698,12 @@ public class APIStoreHostObject extends ScriptableObject {
                                 while (it.hasNext()) {
                                     NativeObject policyObj = new NativeObject();
                                     Object policyObject = it.next();
-                                    Policy policy = (Policy) policyObject;
-                                    policyObj.put("tierName", policyObj, policy.getPolicyName());
-                                    policyObj.put("tierDisplayName", policyObj, policy.getPolicyName());
+                                    Tier policy = (Tier) policyObject;
+                                    policyObj.put("tierName", policyObj, policy.getName());
+                                    policyObj.put("tierDisplayName", policyObj, policy.getName() != null ? policy.getName() : "");
                                     policyObj.put("tierDescription", policyObj,
                                             policy.getDescription() != null ? policy.getDescription() : "");
-                                    policyArr.put(j, policyArr, policyObj);
+                                    tierArr.put(j, tierArr, policyObj);
                                     j++;
 
                                 }

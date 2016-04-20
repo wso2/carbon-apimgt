@@ -335,6 +335,7 @@ public final class APIUtil {
                }
 
                api.addAvailableTiers(availablePolicy);
+               api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
             } else {
                 //deprecated throttling method
@@ -541,9 +542,9 @@ public final class APIUtil {
             	api.setApiLevelPolicy(apiLevelTier);
 
                Set<Tier> availablePolicy = new HashSet<Tier>();
-               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
-               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
@@ -718,9 +719,9 @@ public final class APIUtil {
                 api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
 
                Set<Tier> availablePolicy = new HashSet<Tier>();
-               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
+               String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
-               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
@@ -734,7 +735,8 @@ public final class APIUtil {
                }
 
                api.addAvailableTiers(availablePolicy);
-
+               String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+               api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
