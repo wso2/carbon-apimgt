@@ -1658,59 +1658,61 @@ public class APIStoreHostObject extends ScriptableObject {
                             row.put("userRate", row, userRate);
                         }
                         row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
+
                         NativeArray tierArr = new NativeArray(0);
-                        Set<Tier> tierSet = api.getAvailableTiers();
-                        if (tierSet != null) {
-                            Iterator it = tierSet.iterator();
-                            int j = 0;
+                        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                            Set<Tier> tierSet = api.getAvailableTiers();
+                            if (tierSet != null) {
+                                Iterator it = tierSet.iterator();
+                                int j = 0;
 
-                            while (it.hasNext()) {
-                                NativeObject tierObj = new NativeObject();
-                                Object tierObject = it.next();
-                                Tier tier = (Tier) tierObject;
-                                tierObj.put("tierName", tierObj, tier.getName());
-                                tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
-                                tierObj.put("tierDescription", tierObj,
-                                        tier.getDescription() != null ? tier.getDescription() : "");
-                                if (tier.getTierAttributes() != null) {
-                                    Map<String, Object> attributes;
-                                    attributes = tier.getTierAttributes();
-                                    StringBuilder attributesListBuilder = new StringBuilder();
-                                    for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                                        attributesListBuilder.append(attribute.getKey()).append("::").append(
-                                                attribute.getValue()).append(",");
+                                while (it.hasNext()) {
+                                    NativeObject tierObj = new NativeObject();
+                                    Object tierObject = it.next();
+                                    Tier tier = (Tier) tierObject;
+                                    tierObj.put("tierName", tierObj, tier.getName());
+                                    tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
+                                    tierObj.put("tierDescription", tierObj,
+                                            tier.getDescription() != null ? tier.getDescription() : "");
+                                    if (tier.getTierAttributes() != null) {
+                                        Map<String, Object> attributes;
+                                        attributes = tier.getTierAttributes();
+                                        StringBuilder attributesListBuilder = new StringBuilder();
+                                        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                            attributesListBuilder.append(attribute.getKey()).append("::").append(
+                                                    attribute.getValue()).append(",");
+                                        }
+                                        tierObj.put("tierAttributes", tierObj, attributesListBuilder.toString());
                                     }
-                                    tierObj.put("tierAttributes", tierObj, attributesListBuilder.toString());
+                                    tierArr.put(j, tierArr, tierObj);
+                                    j++;
+
                                 }
-                                tierArr.put(j, tierArr, tierObj);
-                                j++;
+                            }
+                        } else {
+                            NativeArray policyArr = new NativeArray(0);
+                            Set<Tier> policySet = api.getAvailableTiers();
+                            if (policySet != null) {
+                                Iterator it = policySet.iterator();
+                                int j = 0;
 
+                                while (it.hasNext()) {
+                                    NativeObject policyObj = new NativeObject();
+                                    Object policyObject = it.next();
+                                    Policy policy = (Policy) policyObject;
+                                    policyObj.put("tierName", policyObj, policy.getPolicyName());
+                                    policyObj.put("tierDisplayName", policyObj, policy.getPolicyName());
+                                    policyObj.put("tierDescription", policyObj,
+                                            policy.getDescription() != null ? policy.getDescription() : "");
+                                    policyArr.put(j, policyArr, policyObj);
+                                    j++;
+
+                                }
                             }
                         }
+
                         row.put("tiers", row, tierArr);
-                       
-                        NativeArray policyArr = new NativeArray(0);
-                        Set<Policy> policySet = api.getAvailableSubscriptionLevelPolicies();
-                        if (policySet != null) {
-                            Iterator it = policySet.iterator();
-                            int j = 0;
 
-                            while (it.hasNext()) {
-                                NativeObject policyObj = new NativeObject();
-                                Object policyObject = it.next();
-                                Policy policy = (Policy) policyObject;
-                                policyObj.put("policyName", policyObj, policy.getPolicyName());
-                                policyObj.put("policyDisplayName", policyObj, policy.getPolicyName());
-                                policyObj.put("policyDescription", policyObj,
-                                        policy.getDescription() != null ? policy.getDescription() : "");
-                                
-                                policyArr.put(j, policyArr, policyObj);
-                                j++;
-
-                            }
-                        }
-                        row.put("policies", row, policyArr);
-                                              
                         row.put("subscribed", row, isSubscribed);
                         if (api.getThumbnailUrl() == null) {
                             row.put("thumbnailurl", row, "images/api-default.png");
@@ -2026,16 +2028,16 @@ public class APIStoreHostObject extends ScriptableObject {
             API api = apiConsumer.getAPI(apiIdentifier);
             
             if(isGlobalThrottlingEnabled){
-                Set<Policy> policies = api.getAvailableSubscriptionLevelPolicies();
-                Iterator<Policy> iterator = policies.iterator();
+                Set<Tier> policies = api.getAvailableTiers();
+                Iterator<Tier> iterator = policies.iterator();
                 boolean isPolicyAllowed = false;
                 List<String> allowedPolicyList = new ArrayList<String>();
                 while (iterator.hasNext()) {
-                    Policy policy = iterator.next();
-                    if (policy.getPolicyName() != null && (policy.getPolicyName()).equals(tier)) {
+                    Tier policy = iterator.next();
+                    if (policy.getName() != null && (policy.getName()).equals(tier)) {
                         isPolicyAllowed = true;
                     }
-                    allowedPolicyList.add(policy.getPolicyName());
+                    allowedPolicyList.add(policy.getName());
                 }
                 if (!isPolicyAllowed) {
                     throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "

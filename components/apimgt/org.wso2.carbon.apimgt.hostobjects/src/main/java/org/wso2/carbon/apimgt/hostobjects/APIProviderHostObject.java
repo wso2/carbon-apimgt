@@ -458,16 +458,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.addAvailableTiers(availableTier);
         }
         
-        Set<Policy> availablesubScripPolicy = new HashSet<Policy>();
-        if (subscriptionLevelPolicy != null) {
-            String[] policyNames = subscriptionLevelPolicy.split(",");
-            for (String policyName : policyNames) {
-                availablesubScripPolicy.add(new Policy(policyName));
-            }
-            api.removeAllPolicies();
-            api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
-        }
-        
         if (apiLevelPolicy != null){          
             if("none".equals(apiLevelPolicy)){
                 api.setApiLevelPolicy(null);
@@ -1706,7 +1696,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
-        String subscriptionLevelPolicy = (String) apiData.get("subsLevelPolicy", apiData);
+        String subscriptionLevelPolicy = (String) apiData.get("tier", apiData);
         String contextVal = (String) apiData.get("context", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
@@ -1871,15 +1861,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 availableTier.add(new Tier(tierName));
             }
             api.addAvailableTiers(availableTier);
-        }
-        
-        Set<Policy> availablesubScripPolicy = new HashSet<Policy>();
-        if (subscriptionLevelPolicy != null) {
-            String[] policyNames = subscriptionLevelPolicy.split(",");
-            for (String policyName : policyNames) {
-                availablesubScripPolicy.add(new Policy(policyName));
-            }
-            api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
         }
         
         if (apiLevelPolicy != null){          
@@ -2557,18 +2538,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(49, myn, corsJson);
                 
                 StringBuilder policiesSet = new StringBuilder("");
-                Set<Policy> policySet = api.getAvailableSubscriptionLevelPolicies();
-                it = policySet.iterator();
-                j = 0;
-                while (it.hasNext()) {
-                    Object policyObject = it.next();
-                    Policy policy = (Policy) policyObject;
-                    policiesSet.append(policy.getPolicyName());          
-                    if (j != policySet.size() - 1) {
-                        policiesSet.append(",");                     
-                    }
-                    j++;
-                }
 
                 myn.put(50, myn, checkValue(policiesSet.toString()));
                 myn.put(51, myn, checkValue(api.getApiLevelPolicy()));

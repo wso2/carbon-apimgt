@@ -126,22 +126,12 @@ public class APIExecutor implements Execution {
                 if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
                         && APIStatus.PUBLISHED.equals(newStatus)) {
                     Set<Tier> tiers = api.getAvailableTiers();
-                    Set<Policy> subPolicies = api.getAvailableSubscriptionLevelPolicies();
-                    String apiLevelPolicy = api.getApiLevelPolicy();
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
-                        if(isGlobalThrottlingEnabled){
-                            if(subPolicies == null || subPolicies.isEmpty()){
-                                throw new APIManagementException("Failed to publish service to API store while executing " +
-                                        "APIExecutor. No policy selected");
-                            } 
-                        } else {
-                            if (tiers == null || tiers.size() <= 0) {
+                        if (tiers == null || tiers.size() <= 0) {
                                 throw new APIManagementException("Failed to publish service to API store while executing " +
                                                                  "APIExecutor. No Tiers selected");
-                            }
                         }
-                        
                     } else {
                         throw new APIManagementException("Failed to publish service to API store while executing"
                                 + " APIExecutor. No endpoint selected");

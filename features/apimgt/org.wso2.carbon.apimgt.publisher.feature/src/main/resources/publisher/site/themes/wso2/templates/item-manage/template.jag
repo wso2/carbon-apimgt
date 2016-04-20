@@ -201,7 +201,7 @@
                         </label>
 
                     <div class="controls col-sm-8 tierSelect">
-                        <select id="subPolicy" name="subPolicy"  class="form-control multiselect selected required" multiple="multiple">
+                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
                         <%
         for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
 

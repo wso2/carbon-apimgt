@@ -318,7 +318,7 @@ public final class APIUtil {
             	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             	api.setApiLevelPolicy(apiLevelTier);
 
-               Set<Policy> availablePolicy = new HashSet<Policy>();
+               Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
@@ -326,7 +326,7 @@ public final class APIUtil {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
                        if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
-                           Policy p = new Policy(policyName);
+                           Tier p = new Tier(policyName);
                            availablePolicy.add(p);
                        } else {
                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
@@ -334,7 +334,7 @@ public final class APIUtil {
                    }
                }
 
-               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+               api.addAvailableTiers(availablePolicy);
 
             } else {
                 //deprecated throttling method
@@ -540,7 +540,7 @@ public final class APIUtil {
             	String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             	api.setApiLevelPolicy(apiLevelTier);
 
-               Set<Policy> availablePolicy = new HashSet<Policy>();
+               Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
@@ -548,7 +548,7 @@ public final class APIUtil {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
                        if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
-                           Policy p = new Policy(policyName);
+                           Tier p = new Tier(policyName);
                            availablePolicy.add(p);
                        } else {
                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
@@ -556,7 +556,7 @@ public final class APIUtil {
                    }
                }
 
-               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+               api.addAvailableTiers(availablePolicy);
 
             } else {
                 //deprecated throttling method
@@ -717,7 +717,7 @@ public final class APIUtil {
             if(isGlobalThrottlingEnabled){
                 api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
 
-               Set<Policy> availablePolicy = new HashSet<Policy>();
+               Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
@@ -725,7 +725,7 @@ public final class APIUtil {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
                        if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
-                           Policy p = new Policy(policyName);
+                           Tier p = new Tier(policyName);
                            availablePolicy.add(p);
                        } else {
                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
@@ -733,7 +733,7 @@ public final class APIUtil {
                    }
                }
 
-               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
+               api.addAvailableTiers(availablePolicy);
 
             } else {
                 //deprecated throttling method
@@ -901,35 +901,34 @@ public final class APIUtil {
                     .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
+            StringBuilder policyBuilder = new StringBuilder();
+            for (Tier tier : api.getAvailableTiers()) {
+                policyBuilder.append(tier.getName());
+                policyBuilder.append("||");
+            }
+
+            String policies = policyBuilder.toString();
+
+            if (!"".equals(policies)) {
+                policies = policies.substring(0, policies.length() - 2);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
+            }
+
+            StringBuilder tiersBuilder = new StringBuilder();
+            for (Tier tier : api.getAvailableTiers()) {
+                tiersBuilder.append(tier.getName());
+                tiersBuilder.append("||");
+            }
+
+            String tiers = tiersBuilder.toString();
+
+            if (!"".equals(tiers)) {
+                tiers = tiers.substring(0, tiers.length() - 2);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
+            }
+
             if(isGlobalThrottlingEnabled){
-                StringBuilder policyBuilder = new StringBuilder();
-                for (Policy policy : api.getAvailableSubscriptionLevelPolicies()) {
-                    policyBuilder.append(policy.getPolicyName());
-                    policyBuilder.append("||");
-                }
-
-                String policies = policyBuilder.toString();
-
-                if (!"".equals(policies)) {
-                    policies = policies.substring(0, policies.length() - 2);
-                    artifact.setAttribute(APIConstants.API_OVERVIEW_SUB_POLICY, policies);
-                }
-
                 artifact.setAttribute(APIConstants.API_OVERVIEW_API_POLICY, api.getApiLevelPolicy());
-            } else {
-                //deprecated tier policy method
-                StringBuilder tiersBuilder = new StringBuilder();
-                for (Tier tier : api.getAvailableTiers()) {
-                    tiersBuilder.append(tier.getName());
-                    tiersBuilder.append("||");
-                }
-
-                String tiers = tiersBuilder.toString();
-
-                if (!"".equals(tiers)) {
-                    tiers = tiers.substring(0, tiers.length() - 2);
-                    artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
-                }
             }
 
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
@@ -2304,24 +2303,22 @@ public final class APIUtil {
             if(isGlobalThrottlingEnabled){
                 api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
 
-               Set<Policy> availablePolicy = new HashSet<Policy>();
+               Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
-               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_SUB_POLICY);
+               String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
                        if(definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)){
-                           Policy p = new Policy(policyName);
+                           Tier p = new Tier(policyName);
                            availablePolicy.add(p);
                        } else {
                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
                        }
                    }
                }
-
-               api.setAvailableSubscriptionLevelPolicies(availablePolicy);
-
+               api.addAvailableTiers(availablePolicy);
             } else {
                 //deprecated throttling method
                 Set<Tier> availableTier = new HashSet<Tier>();
