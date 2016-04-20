@@ -40,6 +40,7 @@
     "billing":"Billing & Metering",
     "tiers" : "Tiers",
     "subscribe" : "Subscribe",
+    "unSubscribe" : "Unsubscribe",
     "goToSubscribe" : "Visit Publisher Store",
 
     "overview.title" : "Overview",
@@ -232,6 +233,7 @@
 	"forum" : "Forum",
 	"forum.searchForum" : "Search Forum",
     "forum.noTopicsFound" : "No topics found.",
+    "forum.noTopicsFound.description" : "There are no forum topic available.",
 	"forum.createNewTopic" : "Create New Topic",
 	"forum.topic" : "Topic",
 	"forum.replies" : "Replies",
