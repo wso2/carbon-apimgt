@@ -8964,8 +8964,10 @@ public class ApiMgtDAO {
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
-                byte[] customAttrib = blob.getBytes(1,(int)blob.length());
-                policy.setCustomAttributes(customAttrib);
+                if (blob != null) {
+                    byte[] customAttrib = blob.getBytes(1, (int) blob.length());
+                    policy.setCustomAttributes(customAttrib);
+                }
             } else {
                 handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
                         new APIManagementException(""));
