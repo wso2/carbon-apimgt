@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -93,7 +94,7 @@ public class APIManagerConfiguration {
             return;
         }
         InputStream in = null;
-        int offset = CarbonUtils.getPortFromServerConfig(CARBON_CONFIG_PORT_OFFSET_NODE);
+        int offset = getPortOffset();
         int receiverPort = 9611 + offset;
         int authUrlPort = 9711 + offset;
         int jmsPort = 5672 + offset;
@@ -811,7 +812,20 @@ public class APIManagerConfiguration {
             throttleProperties.setEnabled(false);
         }
     }
-
+    private int getPortOffset() {
+        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        String portOffset = System.getProperty("portOffset",
+                carbonConfig.getFirstProperty("Ports.Offset"));
+        try {
+            if ((portOffset != null)) {
+                return Integer.parseInt(portOffset.trim());
+            } else {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
