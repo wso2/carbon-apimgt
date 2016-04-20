@@ -19,12 +19,6 @@ if (jagg.isCSRFTokenValid())
             if (action === "saveAlertTypes" && request.getMethod() == 'POST') {
 
                 var userName = jagg.getUser().username;
-                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                var tenantDomain = MultitenantUtils.getTenantDomain(userName);
-
-                if ("carbon.super" == tenantDomain) {
-                    userName = userName + "@carbon.super";
-                }
 
                 mod = jagg.module("manage-alerts");
                 var checkedAlertList = request.getParameter("checkedList");
