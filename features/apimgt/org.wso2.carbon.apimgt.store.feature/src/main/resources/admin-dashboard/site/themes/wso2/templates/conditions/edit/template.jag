@@ -24,7 +24,7 @@
                                 <span class="requiredAstrix">*</span>Select Condition Type</label>
                            <div class="col-sm-9">
                             <label class="radio">
-                                <input type="radio" name="select-option" value="API">
+                                <input type="radio" name="select-option" value="API" checked>
                                 <span class="helper">API</span>
                             </label>
                             <label class="radio">
@@ -49,7 +49,9 @@
                             <label class="col-sm-3 control-label">Value :
                             <span class="requiredAstrix">*</span></label>
                             <div class="col-sm-3">
-                                <input class="form-control" type="text" id="value"/>
+                                <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                                <input class="form-control  required validInput noSpace" type="text" id="value"/>
                             </div>
                         </div>
                         </div>
@@ -68,11 +70,18 @@
 <script>
     function addCondition(){
         var conditionType = $('input[name=select-option]:checked').val();
-        var conditionValue = $('#value').val();
+        var conditionValue = $('#value');
+        var requiredMsg = $('#errorMsgRequired').val();
+        var conditionValueTxt = conditionValue.val();
+        var requiredMsg = $('#errorMsgRequired').val();
+       if(!validateInput(conditionValueTxt,conditionValue,requiredMsg)){
+            return false;
+        }
+
  jagg.post("/site/blocks/conditions/edit/ajax/condition-edit.jag", {
         action:"addCondition",
         conditionType:conditionType,
-        conditionValue:conditionValue
+        conditionValue:conditionValueTxt
         }, function (result) {
             if (result.error == false) {
          location.href = "<%= jagg.url('/site/pages/conditions-manage.jag')%>";
@@ -82,6 +91,20 @@
         },
     "json");
     }
+    function validateInput(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text == ""){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
         $(document).ready(function(){
         $('#cancel-condition-btn').on('click',function(){
             location.href = "<%= jagg.url('/site/pages/conditions-manage.jag')%>";
