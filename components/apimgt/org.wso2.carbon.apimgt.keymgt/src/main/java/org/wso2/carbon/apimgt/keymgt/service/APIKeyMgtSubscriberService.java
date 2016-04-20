@@ -148,6 +148,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+            //set username to avoid issues with email user name login
+            oAuthConsumerAppDTO.setUsername(userName);
 
             String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
             // CallbackURL is needed for authorization_code and implicit grant types. If CallbackURL is empty,
