@@ -1172,6 +1172,7 @@ public final class APIConstants {
         public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME = "KeepAliveTime";
         public static final String BLOCK_CONDITION_RETRIEVER_INIT_DELAY =  "InitDelay";
         public static final String BLOCK_CONDITION_RETRIEVER_PERIOD =  "Period";
+        public static final String ENABLE_SUBSCRIPTION_SPIKE_ARREST = "EnableSubscriptionSpikeArrest";
 
     }
 }
