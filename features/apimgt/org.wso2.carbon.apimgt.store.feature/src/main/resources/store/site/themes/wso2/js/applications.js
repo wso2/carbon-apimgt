@@ -94,7 +94,6 @@
                 var scopes = this.element.find(".scope_select").val().join(" ");
             else
                 var scopes = "";
-            console.log(scopes);
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
                 application:this.app.name,
@@ -169,7 +168,6 @@ $("#subscription-actions").each(function(){
         "columns": [
             { "data": "apiName", 
               "render": function ( data, type, rec, meta ) {
-                  console.log(rec);
                   return subscription_api_name(rec);
               }
 			},
@@ -186,19 +184,31 @@ $("#subscription-actions").each(function(){
     $('#subscription-table').on( 'click', 'a.deleteApp', function () {
         var row = sub_list.row( $(this).parents('tr') );
         var record = row.data();
-        jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
-            action:"removeSubscription",
-            name: record.apiName,
-            version: record.apiVersion,
-            provider:record.apiProvider,
-            applicationId: $("#subscription-table").attr('data-appid')
-           }, function (result) {
-            if (!result.error) {
-                row.remove().draw();
-            } else {
-                jagg.message({content:result.message,type:"error"});
-            }
-        }, "json"); 
+        $('#messageModal').html($('#confirmation-data').html());
+        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+        $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.unsubscribeMsg') +'<b>"' + record.apiName + '-' + record.apiVersion + '</b>"?');
+        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
+        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal a.btn-primary').click(function() {
+	        jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
+	            action:"removeSubscription",
+	            name: record.apiName,
+	            version: record.apiVersion,
+	            provider:record.apiProvider,
+	            applicationId: $("#subscription-table").attr('data-appid')
+	           }, function (result) {
+	            if (!result.error) {
+	            	window.location.reload(true);
+	            	urlPrefix = "name=" + $("#subscription-table").attr('data-app') + "&" + urlPrefix;
+                    location.href = "../../site/pages/application.jag?" + urlPrefix+"#subscription";
+	            } else {
+	                jagg.message({content:result.message,type:"error"});
+	            }
+	        }, "json"); });
+        $('#messageModal a.btn-other').click(function() {
+            return;
+        });
+        $('#messageModal').modal();
     });        
 });    
 
@@ -257,10 +267,37 @@ $("#application-actions").each(function(){
     });
 
     $('#application-table').on( 'click', 'a.deleteApp', function () {
-        app_list
-        .row( $(this).parents('tr') )
-        .remove()
-        .draw();
+    	var appName = $(this).parents('tr').find("td:nth-child(1)").text();
+    	var apiCount = $(this).parents('tr').find("td:nth-child(4)").text();
+    	$('#messageModal').html($('#confirmation-data').html());
+        if(apiCount > 0){
+            $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+            $('#messageModal div.modal-body').text('\n\n' +i18n.t('confirm.deleteSubsMsg1')
+                + apiCount + i18n.t('confirm.deleteSubsMsg2') +i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+        } else {
+            $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+            $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '" ?');
+        }
+        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
+        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal a.btn-primary').click(function() {
+            jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
+                action:"removeApplication",
+                application:appName
+            }, function (result) {
+                if (!result.error) {
+                	window.location.reload(true);
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }, "json");
+        });
+        $('#messageModal a.btn-other').click(function() {
+            window.location.reload(true);
+        });
+        $('#messageModal').modal();
+        
+        
     });    
 });
 

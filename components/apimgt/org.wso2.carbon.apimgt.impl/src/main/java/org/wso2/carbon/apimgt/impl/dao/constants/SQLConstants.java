@@ -484,6 +484,7 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.TENANT_ID = ? " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";

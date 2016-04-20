@@ -29,7 +29,7 @@
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-delete fw-stack-1x"></i>
       </span>
-      <span class="hidden-xs">Delete</span>
+      <span class="hidden-xs"><%=i18n.localize("unSubscribe")%></span>
   </a>
 </script>
 

@@ -53,7 +53,10 @@ var reqUrl = request.getRequestURI();
     <div class="row">
       <div class="col-md-12">
         <div id="forum_topics_list" style="display:none"></div>
-        <div id="forum_no_topics" style="display:none" class="alert alert-info"><%=i18n.localize('forum.noTopicsFound')%></div>
+        <div id="forum_no_topics" style="display:none" class="message message-info">
+			<h4><i class="icon fw fw-info"></i><%=i18n.localize('forum.noTopicsFound')%></h4>
+			<p><%=i18n.localize('forum.noTopicsFound.description')%></p>
+		</div>
       </div>
     </div>
 </div>
