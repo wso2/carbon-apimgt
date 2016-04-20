@@ -31,8 +31,10 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class WebServiceThrottleDataRetriever implements Runnable {
+public class WebServiceThrottleDataRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(WebServiceThrottleDataRetriever.class);
 
     @Override
@@ -96,6 +98,8 @@ public class WebServiceThrottleDataRetriever implements Runnable {
     }
 
     public void startWebServiceThrottleDataRetriever() {
-        new Thread(this).start();
+
+        new Timer().schedule(this, ServiceReferenceHolder.getInstance().getThrottleProperties()
+                .getGlobalEngineWSConnection().getInitialDelay());
     }
 }
