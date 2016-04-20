@@ -764,7 +764,7 @@ ul.product-tags {
     font-size: 10px;
 }
 .navbar.affix{
-    width:auto;
+    width:inherit;
 }
 .navbar-search .navbar-default .navbar-toggle .icon-bar{
     background-color:#fff;
