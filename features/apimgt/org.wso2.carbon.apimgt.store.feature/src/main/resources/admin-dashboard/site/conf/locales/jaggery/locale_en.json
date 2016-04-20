@@ -98,6 +98,12 @@
      "schedulerConfiguration":"Scheduler Configuration",
     "cronExpression":"Cron Expression",
     "domains":"Domains",
+    "deactivate":"Deactivate",
+    "activate":"Activate",
+    "templateStatus":"Status",
+    "templateStatusActive":"Active",
+    "templateStatusInactive":"Inactive",
+    
     "abnormalBackendTime_Desc": "This alert type should get triggered if there is a sudden increase of the backend time corresponds to a particular API resource. These alerts could be treated as an indication of a slow backend.In technical terms, if the backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a tenant, lies outside the Xth percentile value, we will send an alert out. Default percentile value is 95%. Here, we safely assume that the corresponding backend time of an API resource follows a normal distribution. Percentile value gets calculated daily by default. ",
 
     "abnormalResponseTime_Desc":"This alert type should get triggered if there is a sudden increase of the response time of a particular API resource. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend. ",
