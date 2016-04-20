@@ -24,12 +24,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.auth.AUTH;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
@@ -61,7 +63,10 @@ public class APIManagerConfiguration {
     private static final String EMAIL_LOGIN = "EmailLogin";
     private static final String PRIMARY_LOGIN = "primary";
     private static final String CLAIM_URI = "ClaimUri";
-
+    public static final  String RECEIVER_URL_PORT = "receiver.url.port";
+    public static final String  AUTH_URL_PORT = "auth.url.port";
+    public static final String  JMS_PORT = "jms.port";
+    public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
 
     private SecretResolver secretResolver;
@@ -88,6 +93,13 @@ public class APIManagerConfiguration {
             return;
         }
         InputStream in = null;
+        int offset = CarbonUtils.getPortFromServerConfig(CARBON_CONFIG_PORT_OFFSET_NODE);
+        int receiverPort = 9611 + offset;
+        int authUrlPort = 9711 + offset;
+        int jmsPort = 5672 + offset;
+        System.setProperty(RECEIVER_URL_PORT, "" + receiverPort);
+        System.setProperty(AUTH_URL_PORT, "" + authUrlPort);
+        System.setProperty(JMS_PORT, "" + jmsPort);
         try {
             in = FileUtils.openInputStream(new File(filePath));
             StAXOMBuilder builder = new StAXOMBuilder(in);
@@ -446,18 +458,18 @@ public class APIManagerConfiguration {
                 OMElement receiverUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new QName
                         (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP));
                 if (receiverUrlGroupElement != null) {
-                    dataPublisher.setReceiverUrlGroup(receiverUrlGroupElement.getText());
+                    dataPublisher.setReceiverUrlGroup(APIUtil.replaceSystemProperty(receiverUrlGroupElement.getText()));
                 }
                 OMElement authUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new QName
                         (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP));
                 if (authUrlGroupElement != null) {
-                    dataPublisher.setAuthUrlGroup(authUrlGroupElement.getText());
+                    dataPublisher.setAuthUrlGroup(APIUtil.replaceSystemProperty(authUrlGroupElement.getText()));
                 }
                 OMElement dataPublisherUsernameElement = dataPublisherConfigurationElement.getFirstChildWithName(new
                         QName
                         (APIConstants.AdvancedThrottleConstants.USERNAME));
                 if (dataPublisherUsernameElement != null) {
-                    dataPublisher.setUsername(dataPublisherUsernameElement.getText());
+                    dataPublisher.setUsername(APIUtil.replaceSystemProperty(dataPublisherUsernameElement.getText()));
                 }
                 OMElement dataPublisherTypeElement = dataPublisherConfigurationElement.getFirstChildWithName(new
                         QName
@@ -552,13 +564,15 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
                     if (globalEngineWSConnectionServiceUrlElement != null) {
-                        globalEngineWSConnection.setServiceUrl(globalEngineWSConnectionServiceUrlElement.getText());
+                        globalEngineWSConnection.setServiceUrl(APIUtil.replaceSystemProperty
+                                (globalEngineWSConnectionServiceUrlElement.getText()));
                     }
                     OMElement globalEngineWSConnectionServiceUsernameElement = globalEngineWSConnectionElement
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.USERNAME));
                     if (globalEngineWSConnectionServiceUsernameElement != null) {
-                        globalEngineWSConnection.setUsername(globalEngineWSConnectionServiceUsernameElement.getText());
+                        globalEngineWSConnection.setUsername(APIUtil.replaceSystemProperty
+                                (globalEngineWSConnectionServiceUsernameElement.getText()));
                     }
                     String globalEngineWSConnectionServicePassword;
                     String globalEngineWSConnectionServicePasswordKey = APIConstants.AdvancedThrottleConstants
@@ -602,13 +616,15 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
                     if (jmsConnectionUrlElement != null) {
-                        jmsConnectionProperties.setServiceUrl(jmsConnectionUrlElement.getText());
+                        jmsConnectionProperties.setServiceUrl(APIUtil.replaceSystemProperty(jmsConnectionUrlElement
+                                .getText()));
                     }
                     OMElement jmsConnectionUserElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.USERNAME));
                     if (jmsConnectionUserElement != null) {
-                        jmsConnectionProperties.setUsername(jmsConnectionUserElement.getText());
+                        jmsConnectionProperties.setUsername(APIUtil.replaceSystemProperty(jmsConnectionUserElement
+                                .getText()));
                     }
                     OMElement jmsConnectionDestinationElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName
@@ -698,13 +714,15 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
                     if (policyDeployerServiceUrlElement != null) {
-                        policyDeployerConfiguration.setServiceUrl(policyDeployerServiceUrlElement.getText());
+                        policyDeployerConfiguration.setServiceUrl(APIUtil.replaceSystemProperty
+                                (policyDeployerServiceUrlElement.getText()));
                     }
                     OMElement policyDeployerServiceServiceUsernameElement = policyDeployerConnectionElement
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.USERNAME));
                     if (policyDeployerServiceServiceUsernameElement != null) {
-                        policyDeployerConfiguration.setUsername(policyDeployerServiceServiceUsernameElement.getText());
+                        policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty
+                                (policyDeployerServiceServiceUsernameElement.getText()));
                     }
                     String policyDeployerServicePassword;
                     String policyDeployerServicePasswordKey = APIConstants.AdvancedThrottleConstants
@@ -743,7 +761,8 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
                     if (blockConditionRetrieverServiceUsernameElement != null) {
                         blockConditionRetrieverConfiguration.setUsername
-                                (blockConditionRetrieverServiceUsernameElement.getText());
+                                (APIUtil.replaceSystemProperty(blockConditionRetrieverServiceUsernameElement.getText
+                                        ()));
                     }
                     OMElement blockConditionRetrieverThreadPoolSizeElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants

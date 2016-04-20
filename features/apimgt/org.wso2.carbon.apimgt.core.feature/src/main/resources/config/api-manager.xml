@@ -447,10 +447,10 @@
         <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
         <DataPublisher>
             <Type>Binary</Type>
-            <ReceiverUrlGroup>tcp://localhost:9611</ReceiverUrlGroup>
-            <AuthUrlGroup>ssl://localhost:9711</AuthUrlGroup>
-            <Username>admin</Username>
-            <Password>admin</Password>
+            <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
+            <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
             <DataPublisherPool>
                 <MaxIdle>1000</MaxIdle>
                 <InitIdleCapacity>200</InitIdleCapacity>
@@ -462,34 +462,34 @@
             </DataPublisherThreadPool>
         </DataPublisher>
         <PolicyDeployer>
-            <ServiceURL>https://localhost:9443/services/</ServiceURL>
-            <Username>admin</Username>
-            <Password>admin</Password>
+            <ServiceURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
-            <ServiceURL>http://localhost:9763/throttle/data/v1/block</ServiceURL>
-            <Username>admin</Username>
-            <Password>admin</Password>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1/block</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->
         </BlockCondition>
         <GlobalPolicyEngineWSConnectionDetails>
-            <ServiceURL>http://localhost:9763/throttle/data/v1/throttleAsString</ServiceURL>
-            <Username>admin</Username>
-            <Password>admin</Password>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1/throttleAsString</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
             <!--InitDelay>300000</InitDelay-->
         </GlobalPolicyEngineWSConnectionDetails>
         <JMSConnectionDetails>
-            <!--ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
+            <ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
             <Username>admin</Username>
             <Password>admin</Password>
             <Destination>throttleData</Destination>
-            <InitDelay>300000</InitDelay-->
+            <InitDelay>300000</InitDelay>
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
                 <transport.jms.DestinationType>topic</transport.jms.DestinationType>
                 <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
-                <connectionfactory.TopicConnectionFactory>amqp://admin:admin@clientid/carbon?brokerlist='tcp://localhost:5672'</connectionfactory.TopicConnectionFactory>
+                <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
             </JMSConnectionParameters>
             <JMSTaskManager>
                 <MinThreadPoolSize>100</MinThreadPoolSize>
