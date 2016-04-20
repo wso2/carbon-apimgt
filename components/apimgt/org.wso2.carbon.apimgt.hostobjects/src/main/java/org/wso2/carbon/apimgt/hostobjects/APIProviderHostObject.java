@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.hostobjects.util.Json;
@@ -363,7 +364,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
-        String subscriptionLevelPolicy = (String) apiData.get("subsLevelPolicy", apiData);
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -456,16 +456,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	}
             api.removeAllTiers();
         	api.addAvailableTiers(availableTier);
-        }
-        
-        Set<Policy> availablesubScripPolicy = new HashSet<Policy>();
-        if (subscriptionLevelPolicy != null) {
-            String[] policyNames = subscriptionLevelPolicy.split(",");
-            for (String policyName : policyNames) {
-                availablesubScripPolicy.add(new Policy(policyName));
-            }
-            api.removeAllPolicies();
-            api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
         }
         
         if (apiLevelPolicy != null){          
@@ -1378,21 +1368,40 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            for (String tierName : tierNames) {
-                boolean isTierValid =  false;
-                for (Tier definedTier : definedTiers) {
-                    if (tierName.equals(definedTier.getName())) {
-                        isTierValid = true;
-                        break;
+            if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                Set<Tier> definedTiers = apiProvider.getTiers();
+                for (String tierName : tierNames) {
+                    boolean isTierValid = false;
+                    for (Tier definedTier : definedTiers) {
+                        if (tierName.equals(definedTier.getName())) {
+                            isTierValid = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!isTierValid) {
-                    handleException("Specified tier " + tierName + " does not exist");
+                    if (!isTierValid) {
+                        handleException("Specified tier " + tierName + " does not exist");
+                    }
+                    availableTier.add(new Tier(tierName));
                 }
-                availableTier.add(new Tier(tierName));
+            } else {
+                Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
+                for (String tierName : tierNames) {
+                    boolean isTierValid = false;
+                    for (Policy definedTier : definedTiers) {
+                        if (tierName.equals(definedTier.getPolicyName())) {
+                            isTierValid = true;
+                            break;
+                        }
+                    }
+
+                    if (!isTierValid) {
+                        handleException("Specified tier " + tierName + " does not exist");
+                    }
+                    availableTier.add(new Tier(tierName));
+                }
             }
+
             api.addAvailableTiers(availableTier);
         }
         api.setStatus(APIStatus.CREATED);
@@ -1706,7 +1715,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
-        String subscriptionLevelPolicy = (String) apiData.get("subsLevelPolicy", apiData);
+        String subscriptionLevelPolicy = (String) apiData.get("tier", apiData);
         String contextVal = (String) apiData.get("context", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
@@ -1871,15 +1880,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 availableTier.add(new Tier(tierName));
             }
             api.addAvailableTiers(availableTier);
-        }
-        
-        Set<Policy> availablesubScripPolicy = new HashSet<Policy>();
-        if (subscriptionLevelPolicy != null) {
-            String[] policyNames = subscriptionLevelPolicy.split(",");
-            for (String policyName : policyNames) {
-                availablesubScripPolicy.add(new Policy(policyName));
-            }
-            api.setAvailableSubscriptionLevelPolicies(availablesubScripPolicy);
         }
         
         if (apiLevelPolicy != null){          
@@ -2557,18 +2557,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(49, myn, corsJson);
                 
                 StringBuilder policiesSet = new StringBuilder("");
-                Set<Policy> policySet = api.getAvailableSubscriptionLevelPolicies();
-                it = policySet.iterator();
-                j = 0;
-                while (it.hasNext()) {
-                    Object policyObject = it.next();
-                    Policy policy = (Policy) policyObject;
-                    policiesSet.append(policy.getPolicyName());          
-                    if (j != policySet.size() - 1) {
-                        policiesSet.append(",");                     
-                    }
-                    j++;
-                }
 
                 myn.put(50, myn, checkValue(policiesSet.toString()));
                 myn.put(51, myn, checkValue(api.getApiLevelPolicy()));

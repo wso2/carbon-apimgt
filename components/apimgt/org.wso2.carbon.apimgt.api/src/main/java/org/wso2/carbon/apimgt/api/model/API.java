@@ -654,14 +654,6 @@ public class API implements Serializable{
 
     public void setMonetizationCategory(String monetizationCategory) { this.monetizationCategory = monetizationCategory; }
 
-    public Set<Policy> getAvailableSubscriptionLevelPolicies() {
-        return availableSubscriptionLevelPolicies;
-    }
-
-    public void setAvailableSubscriptionLevelPolicies(Set<Policy> availableSubscriptionLevelPolicies) {
-        this.availableSubscriptionLevelPolicies = availableSubscriptionLevelPolicies;
-    }
-
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }

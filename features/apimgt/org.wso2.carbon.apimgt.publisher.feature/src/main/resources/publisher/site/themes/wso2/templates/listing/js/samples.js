@@ -149,7 +149,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                     function (result) {
                         jagg.post(urlDesign, {action: "manage", name: "PizzaShackAPI",
                             provider: username, version: "1.0.0", default_version_checked: " ",
-                            tier: defaultTier, tiersCollection: defaultTier, subPolicyCollection:"Platinum",
+                            tier: defaultTier, tiersCollection: defaultTier,
                             transport_http: "http", transport_https: "https",
                             swagger: _this.sample_swagger},
                             function (result) {

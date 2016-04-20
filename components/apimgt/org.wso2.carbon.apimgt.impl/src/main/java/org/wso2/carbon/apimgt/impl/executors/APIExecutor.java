@@ -115,33 +115,19 @@ public class APIExecutor implements Execution {
 
             APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
-            
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
-            
+
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 
                                    //custom state to default api state
                 if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
                         && APIStatus.PUBLISHED.equals(newStatus)) {
                     Set<Tier> tiers = api.getAvailableTiers();
-                    Set<Policy> subPolicies = api.getAvailableSubscriptionLevelPolicies();
-                    String apiLevelPolicy = api.getApiLevelPolicy();
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
-                        if(isGlobalThrottlingEnabled){
-                            if(subPolicies == null || subPolicies.isEmpty()){
-                                throw new APIManagementException("Failed to publish service to API store while executing " +
-                                        "APIExecutor. No policy selected");
-                            } 
-                        } else {
-                            if (tiers == null || tiers.size() <= 0) {
+                        if (tiers == null || tiers.size() <= 0) {
                                 throw new APIManagementException("Failed to publish service to API store while executing " +
                                                                  "APIExecutor. No Tiers selected");
-                            }
                         }
-                        
                     } else {
                         throw new APIManagementException("Failed to publish service to API store while executing"
                                 + " APIExecutor. No endpoint selected");
