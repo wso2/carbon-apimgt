@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.impl.template;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
@@ -160,9 +161,13 @@ public class ThrottlePolicyTemplateBuilder {
             StringWriter writer;
             VelocityContext context;
 
-            for(Pipeline pipeline : policy.getPipelines()) {
-                String conditionString = getPolicyCondition(pipeline.getConditions());
-                conditionsSet.add(conditionString);
+            List<Pipeline> pipelines = policy.getPipelines();
+
+            if (pipelines != null) {
+                for (Pipeline pipeline : pipelines) {
+                    String conditionString = getPolicyCondition(pipeline.getConditions());
+                    conditionsSet.add(conditionString);
+                }
             }
 
             // for default one
@@ -174,7 +179,12 @@ public class ThrottlePolicyTemplateBuilder {
             context.put("policy", policy);
 
             context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
-            context.put("condition", " AND " + getConditionForDefault(conditionsSet));
+            String conditionSetString = getConditionForDefault(conditionsSet);
+            if(!StringUtils.isEmpty(conditionSetString)) {
+                context.put("condition", " AND " + conditionSetString);
+            } else {
+                context.put("condition", "");
+            }
             writer = new StringWriter();
             template.merge(context, writer);
             if (log.isDebugEnabled()) {
@@ -385,7 +395,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      */
     private static String getConditionForDefault(Set<String> conditionsSet) {
-        String conditionString = null;
+        String conditionString = "";
         int i = 0;
         for (String condition : conditionsSet) {
             if (i == 0) {
@@ -396,7 +406,10 @@ public class ThrottlePolicyTemplateBuilder {
             i++;
         }
 
-        conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
+        if(!StringUtils.isEmpty(conditionString)) {
+            conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
+        }
+
         return conditionString;
     }
     

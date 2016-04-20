@@ -71,7 +71,9 @@ public class PolicyConstants {
     public static final String ACROSS_ALL = "apiLevel";
     
     public static final String POLICY_LEVEL_API = "api";
-    
+
+    public static final String POLICY_LEVEL_RESOURCE = "resource";
+
     public static final String POLICY_LEVEL_SUB = "sub";
     
     public static final String POLICY_LEVEL_GLOBAL = "global";

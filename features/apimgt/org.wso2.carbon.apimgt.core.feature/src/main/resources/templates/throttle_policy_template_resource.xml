@@ -10,7 +10,7 @@ str:concat(resourceKey, '_', userId , '_${pipeline}')##
 #end
 ###generate rule
 #macro( getRule $policy)
-api_${policy.getPolicyName()}_${pipeline}##
+resource_${policy.getPolicyName()}_${pipeline}##
 #end
 
 @Plan:name('#getRule($policy)')

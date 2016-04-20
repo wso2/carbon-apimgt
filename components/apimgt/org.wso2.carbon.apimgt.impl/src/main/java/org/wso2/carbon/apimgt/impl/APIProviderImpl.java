@@ -3715,8 +3715,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 //TODO Need to fix appropriately
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                executionFlows.add(defaultPolicy);
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
-                String policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName;
+                //TODO rename level to  resource or appropriate name
+                String policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
                 //add default policy file name
                 policiesToUndeploy.add(policyFile + "_default");
                 for (int i = 0; i < existingPolicy.getPipelines().size(); i++) {
@@ -3761,7 +3764,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /* If single pipeline fails to deploy then whole deployment should fail.
              * Therefore for loop is wrapped inside a try catch block
              */
-            if(PolicyConstants.POLICY_LEVEL_GLOBAL.equalsIgnoreCase(policyLevel)) {
+            if(PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
                 for (String flowName : policiesToUndeploy) {
                     deploymentManager.undeployPolicyFromGlobalCEP(flowName);
                 }
