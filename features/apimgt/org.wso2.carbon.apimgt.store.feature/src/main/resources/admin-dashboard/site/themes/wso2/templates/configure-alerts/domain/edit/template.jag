@@ -64,7 +64,7 @@
             <label class="control-label col-md-5"><%=i18n.localize("templateName")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
-                <select id="cBoxTemplates"
+                <select disabled id="cBoxTemplates"
                         onchange="document.location.href=document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].value">
                     <%
 
@@ -82,6 +82,7 @@
                     <%}%>
                 </select>
 
+
                 <div class="sectionHelp"><%=currentTemplate.getDescription()%>
                 </div>
             </div>
@@ -90,8 +91,11 @@
                 if (isExistingConfig) {
                     configurationName = configurationDTO.getName().trim();
                     saveButtonText = "template.update.button.text";
+                } else {
+                    configurationName = currentTemplate.getName().replace(" ", "");
                 }
             %>
+            <br><br>
             <label class="control-label col-md-5"><%=i18n.localize("configName")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
@@ -106,8 +110,11 @@
             <%
                 if (isExistingConfig) {
                     description = configurationDTO.getDescription().trim();
+                } else {
+                    description = currentTemplate.getDescription().trim();
                 }
             %>
+            <br>
             <label class="control-label col-md-5"><%=i18n.localize("description")%></label>
 
             <div class="input-control input-full-width col-md-7 text">
@@ -141,7 +148,7 @@
                     }
 
             %>
-
+            <br>
 
             <label class="control-label col-md-5"><%
                 if (parameterDTOs[i].getDisplayName() == null) {
@@ -231,7 +238,7 @@ if (isExistingConfig && (configurationDTO.getExecutionParameters() != null)) {
                 } else {
                 %>
  <input type="text" id="cronExpressionValue"
-                       value=""/>
+                       value="0 0 23 * * ?"/>
 
 <%
 }

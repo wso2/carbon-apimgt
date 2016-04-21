@@ -28,9 +28,7 @@ var retrieveSavedAlertsTypes = function () {
         if ("carbon.super" == tenantDomain) {
             userName = userName + "@carbon.super";
         }
-
-
-        //pass "p" param because we need to fetch publisher data
+        
         var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, agent);
         var allSavedAlertTypesJsonObj = JSON.parse(gson.toJson(allSavedAlertTypes));
 

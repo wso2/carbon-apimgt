@@ -24,7 +24,8 @@
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
         "cancelSubs":"Cancel Subscription",
-        "clieGenHelpMsg":"This will generate the client side SDK for the selected application. Select the language you prefer."
+        "clieGenHelpMsg":"This will generate the client side SDK for the selected application. Select the language you prefer.",
+        "successfullySaved": "Successfully saved"
 
     },
     "confirm": {
@@ -81,7 +82,10 @@
         "cannotEditForumReply" : "Cannot edit the reply. ",
         "topicSubjectCannotBeEmpty" : "Topic subject cannot be empty.",
         "topicDescriptionCannotBeEmpty" : "Topic description cannot be empty.",
-        "replyCannotBeEmpty" : "Reply cannot be empty."
+        "replyCannotBeEmpty" : "Reply cannot be empty.",
+        "invalidEmailEntered": "Could not save. You have entered an invalid email address.",
+        "atleastOneEmailNeeded" : "Please enter at least one email address",
+        "atLeastOneAlertTypeNeeded" : "Please select at least one alert type"
     }
 
 }
