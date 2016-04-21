@@ -49,6 +49,11 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
 
         try {
             APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
+            //TODO adding only the policies to data wouldn't be sufficient. Need to figure out approach after tenant story has finalized
+            //Add default set of policies to database
+            if(APIUtil.isAdvanceThrottlingEnabled()) {
+                APIUtil.addDefaultAdvancedThrottlePoliciesToDB(tenantId);
+            }
         } catch (Exception e) {
             log.error("Failed to load tiers.xml to tenant's registry", e);
         }
