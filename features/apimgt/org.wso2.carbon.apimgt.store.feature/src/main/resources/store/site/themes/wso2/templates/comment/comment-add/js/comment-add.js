@@ -10,6 +10,14 @@ $(document).ready(function () {
             jagg.message({content:result.message,type:"error"});
         }
     }, "json");
+
+    $("#comment-text").on('keypress', function() {
+        if($("#comment-text").val().trim()==""){
+            $("#comment-add-button").attr('disabled', 'disabled');
+        }else{
+            $("#comment-add-button").removeAttr('disabled');
+        }
+    });
 	
     $("#comment-add-button").click(function () {
         jagg.sessionAwareJS({redirect:'site/pages/index.jag'});
@@ -41,4 +49,5 @@ $(document).ready(function () {
 		});
     $("#comment-text").val('');
     $("#comment-text").prev().addClass('counter').removeClass('warning').html(i18n.t('Characters left: ')+'450');
+    $("#comment-add-button").attr('disabled', 'disabled');
 });
