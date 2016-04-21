@@ -252,26 +252,20 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_TIER," +
-            "   API.API_PROVIDER," +
-            "   APS.RATE_LIMIT_COUNT," +
-            "   APS.RATE_LIMIT_TIME_UNIT," +
-            "   APS.STOP_ON_QUOTA_REACH" +
+            "   API.API_PROVIDER " +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
             "   AM_APPLICATION APP," +
             "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   AM_POLICY_SUBSCRIPTION APS" +
+            "   AM_API API " +
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND (APS.NAME = SUB.TIER_ID OR SUB.TIER_ID = 'Unlimited')";
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
     public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
@@ -283,18 +277,13 @@ public class SQLConstants {
             "   APP.APPLICATION_TIER," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_TIER," +
-            "   API.API_PROVIDER," +
-            "   APS.RATE_LIMIT_COUNT," +
-            "   APS.RATE_LIMIT_TIME_UNIT," +
-            "   APS.STOP_ON_QUOTA_REACH" +
+            "   API.API_PROVIDER" +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
             "   AM_APPLICATION APP," +
             "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   AM_POLICY_SUBSCRIPTION APS" +
+            "   AM_API API" +
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
@@ -302,8 +291,70 @@ public class SQLConstants {
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND (APS.NAME = SUB.TIER_ID OR SUB.TIER_ID = 'Unlimited')";
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+
+    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
+            " SELECT " +
+                    "   SUB.TIER_ID," +
+                    "   SUBS.USER_ID," +
+                    "   SUB.SUB_STATUS," +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   AKM.KEY_TYPE," +
+                    "   API.API_NAME," +
+                    "   API.API_TIER," +
+                    "   API.API_PROVIDER," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.STOP_ON_QUOTA_REACH" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUB," +
+                    "   AM_SUBSCRIBER SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_API API," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " WHERE " +
+                    "   API.CONTEXT = ? " +
+                    "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUB.API_ID" +
+                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+                    "   AND APS.NAME = SUB.TIER_ID";
+
+    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
+            " SELECT " +
+                    "   SUB.TIER_ID," +
+                    "   SUBS.USER_ID," +
+                    "   SUB.SUB_STATUS," +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   AKM.KEY_TYPE," +
+                    "   API.API_NAME," +
+                    "   API.API_TIER," +
+                    "   API.API_PROVIDER," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.STOP_ON_QUOTA_REACH" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUB," +
+                    "   AM_SUBSCRIBER SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_API API," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " WHERE " +
+                    "   API.CONTEXT = ? " +
+                    "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUB.API_ID" +
+                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+                    "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -1517,7 +1568,12 @@ public class SQLConstants {
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
     public static final String GET_ALL_URL_TEMPLATES_SQL =
-            " SELECT    AUM.HTTP_METHOD,   AUM.AUTH_SCHEME,   AUM.URL_PATTERN,   AUM.THROTTLING_TIER,   AUM.MEDIATION_SCRIPT " +
+            " SELECT    " +
+            "   AUM.HTTP_METHOD," +
+            "   AUM.AUTH_SCHEME," +
+            "   AUM.URL_PATTERN," +
+            "   AUM.THROTTLING_TIER," +
+            "   AUM.MEDIATION_SCRIPT " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM, " +
             "   AM_API API " +
@@ -1534,7 +1590,7 @@ public class SQLConstants {
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
             "   UPDATED_TIME = ?, " +
-                    "   API_TIER = ? " +
+            "   API_TIER = ? " +
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
