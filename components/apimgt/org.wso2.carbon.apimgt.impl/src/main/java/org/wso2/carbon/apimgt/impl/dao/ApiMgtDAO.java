@@ -768,7 +768,6 @@ public class ApiMgtDAO {
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
         boolean defaultVersionInvoked = false;
-        boolean isAPILevelTier = false;
 
         //Check if the api version has been prefixed with _default_
         if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
@@ -777,10 +776,18 @@ public class ApiMgtDAO {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
         String sql;
-        if (defaultVersionInvoked) {
-            sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
         } else {
-            sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
         }
 
         Connection conn = null;
@@ -814,8 +821,6 @@ public class ApiMgtDAO {
                     infoDTO.setAuthorized(false);
                     return false;
                 }
-                
-                String tier = rs.getString("API_TIER");
 
                 infoDTO.setTier(rs.getString("TIER_ID"));
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
@@ -826,30 +831,31 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
 
-                //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
-                //TODO isContentAware
-                boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                //Advanced Level Throttling Related Properties
+                if(APIUtil.isAdvanceThrottlingEnabled()) {
+                    String tier = rs.getString("API_TIER");
+                    //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                    //TODO isContentAware
+                    boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                    infoDTO.setContentAware(isContentAware);
 
-
-                infoDTO.setContentAware(isContentAware);
-
-                //TODO this must implement as a part of throttling implementation.
-                String apiLevelThrottlingKey = "api_level_throttling_key";
-                String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
-                String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
-                List<String> list = new ArrayList<String>();
-                list.add(apiLevelThrottlingKey);
-                list.add(spikeArrest);
-                list.add(spikeArrestUnit);
-                list.add(stopOnQuotaReach);
-                if(tier != null && tier.trim().length() > 0 ){
-                	infoDTO.setApiTier(tier);
+                    //TODO this must implement as a part of throttling implementation.
+                    String apiLevelThrottlingKey = "api_level_throttling_key";
+                    String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                    String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    List<String> list = new ArrayList<String>();
+                    list.add(apiLevelThrottlingKey);
+                    list.add(spikeArrest);
+                    list.add(spikeArrestUnit);
+                    list.add(stopOnQuotaReach);
+                    if (tier != null && tier.trim().length() > 0) {
+                        infoDTO.setApiTier(tier);
+                    }
+                    //We also need to set throttling data list associated with given API. This need to have policy id and
+                    // condition id list for all throttling tiers associated with this API.
+                    infoDTO.setThrottlingDataList(list);
                 }
-                //infoDTO.setApiTier("API_LEVEL_TIER");
-                //We also need to set throttling data list associated with given API. This need to have policy id and
-                // condition id list for all throttling tiers associated with this API.
-                infoDTO.setThrottlingDataList(list);
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -861,58 +867,6 @@ public class ApiMgtDAO {
         }
         return false;
     }
-    
-    
-
-    /*private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
-            String subPolicy) throws APIManagementException {
-        boolean isAnyContentAware = false;
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled = Boolean
-                .parseBoolean(config.getFirstProperty(APIConstants.API_GLOBAL_CEP_ENABLE));
-        //only check if using CEP based throttling.
-        if(isGlobalThrottlingEnabled){
-
-            ResultSet resultSet = null;
-            PreparedStatement ps = null;
-            String sqlQuery;
-            if(apiPolicy == null){
-                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
-            } else {
-                sqlQuery = SQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
-            }
-
-            try {
-
-                ps = conn.prepareStatement(sqlQuery);
-
-                ps.setInt(1, APIUtil.getTenantId(userName));
-                ps.setString(2, appPolicy);
-                ps.setString(3, subPolicy);
-
-                if(apiPolicy != null) {
-                    ps.setString(4, apiPolicy);
-                }
-
-                resultSet = ps.executeQuery();
-                // We only expect one result if all are not content aware.
-                if (resultSet.next()) {
-                    isAnyContentAware = false;
-                } else {
-                    isAnyContentAware = true;
-                }
-            } catch (SQLException e) {
-                handleException("Failed to get content awareness of the policies ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-            }
-
-        }
-
-        return isAnyContentAware;
-    }*/
 
     private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
             String subPolicy) throws APIManagementException {
@@ -5711,7 +5665,54 @@ public class ApiMgtDAO {
     /**
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
-	public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
+    public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
+        if(APIUtil.isAdvanceThrottlingEnabled()) {
+            return getAllURITemplatesAdvancedThrottle(apiContext, version);
+        } else {
+            return getAllURITemplatesOldThrottle(apiContext, version);
+        }
+    }
+
+    public ArrayList<URITemplate> getAllURITemplatesOldThrottle(String apiContext, String version) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+
+        //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
+        String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiContext);
+            prepStmt.setString(2, version);
+
+            rs = prepStmt.executeQuery();
+
+            URITemplate uriTemplate;
+            while (rs.next()) {
+                uriTemplate = new URITemplate();
+                String script = null;
+                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                if (mediationScriptBlob != null) {
+                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                }
+                uriTemplate.setMediationScript(script);
+                uriTemplates.add(uriTemplate);
+            }
+        } catch (SQLException e) {
+            handleException("Error while fetching all URL Templates", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return uriTemplates;
+    }
+
+	public ArrayList<URITemplate> getAllURITemplatesAdvancedThrottle(String apiContext, String version) throws APIManagementException {
 		Connection connection = null;
 		PreparedStatement prepStmt = null;
 		ResultSet rs = null;
@@ -5822,10 +5823,10 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                               prepStmt.setString(5, api.getApiLevelPolicy());
-                                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                                prepStmt.setString(7, api.getId().getApiName());
-                                prepStmt.setString(8, api.getId().getVersion());
+                prepStmt.setString(5, api.getApiLevelPolicy());
+                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(7, api.getId().getApiName());
+                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
             //}
 

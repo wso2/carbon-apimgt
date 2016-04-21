@@ -1112,30 +1112,38 @@ public final class APIConstants {
     public static final String DEFAULT_APP_POLICY_LARGE = "Large";
     public static final String DEFAULT_APP_POLICY_MEDIUM = "Medium";
     public static final String DEFAULT_APP_POLICY_SMALL = "Small";
+    public static final String DEFAULT_APP_POLICY_UNLIMITED = "Unlimited";
 
 
     public static final String DEFAULT_APP_POLICY_LARGE_DESC = "Large tier";
     public static final String DEFAULT_APP_POLICY_MEDIUM_DESC = "Medium tier";
     public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Small tier";
+    public static final String DEFAULT_APP_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
     public static final String DEFAULT_SUB_POLICY_LARGE = "Gold";
     public static final String DEFAULT_SUB_POLICY_MEDIUM = "Silver";
     public static final String DEFAULT_SUB_POLICY_SMALL = "Platinum";
+    public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
 
     public static final String DEFAULT_SUB_POLICY_LARGE_DESC = "Gold tier";
     public static final String DEFAULT_SUB_POLICY_MEDIUM_DESC = "Silver tier";
     public static final String DEFAULT_SUB_POLICY_SMALL_DESC = "Platinum tier";
+    public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
     public static final String DEFAULT_API_POLICY_LARGE = "Ultimate";
     public static final String DEFAULT_API_POLICY_MEDIUM = "Plus";
     public static final String DEFAULT_API_POLICY_SMALL = "Basic";
+    public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
 
     public static final String DEFAULT_API_POLICY_LARGE_DESC = "Ultimate tier";
     public static final String DEFAULT_API_POLICY_MEDIUM_DESC = "Plus tier";
     public static final String DEFAULT_API_POLICY_SMALL_DESC = "Basic tier";
+    public static final String DEFAULT_API_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
     public static final String API_POLICY_USER_LEVEL = "userLevel";
     public static final String API_POLICY_API_LEVEL = "apiLevel";
+
+    public static final String BILLING_PLAN_FREE = "FREE";
 
 
     public static class AdvancedThrottleConstants {

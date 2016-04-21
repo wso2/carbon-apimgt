@@ -5357,12 +5357,12 @@ public final class APIUtil {
     }
 
     public static void addDefaultAdvancedThrottlePoliciesToDB(int tenantId) throws APIManagementException {
-        int[] requestCount = new int[] {20, 5, 1};
+        int[] requestCount = new int[] {20, 5, 1, -1};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE, APIConstants.DEFAULT_APP_POLICY_MEDIUM,
-                                            APIConstants.DEFAULT_APP_POLICY_SMALL};
+                                            APIConstants.DEFAULT_APP_POLICY_SMALL, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
         String[] appPolicyDecs = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE_DESC, APIConstants.DEFAULT_APP_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_APP_POLICY_SMALL_DESC};
+                APIConstants.DEFAULT_APP_POLICY_SMALL_DESC, APIConstants.DEFAULT_APP_POLICY_UNLIMITED_DESC};
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String policyName;
         //Add application level throttle policies
@@ -5386,9 +5386,9 @@ public final class APIUtil {
 
         //Adding Subscription level policies
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE, APIConstants.DEFAULT_SUB_POLICY_MEDIUM,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL};
+                APIConstants.DEFAULT_SUB_POLICY_SMALL, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE_DESC, APIConstants.DEFAULT_SUB_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_SMALL_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < subPolicies.length ; i++) {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
@@ -5404,16 +5404,16 @@ public final class APIUtil {
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
                 subscriptionPolicy.setStopOnQuotaReach(true);
-                subscriptionPolicy.setBillingPlan("FREE");
+                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
                 apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
             }
         }
 
         //Adding Resource level policies
         String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE, APIConstants.DEFAULT_API_POLICY_MEDIUM,
-                APIConstants.DEFAULT_API_POLICY_SMALL};
+                APIConstants.DEFAULT_API_POLICY_SMALL, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
         String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE_DESC, APIConstants.DEFAULT_API_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_API_POLICY_SMALL_DESC};
+                APIConstants.DEFAULT_API_POLICY_SMALL_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < apiPolicies.length ; i++) {
             policyName = apiPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {
