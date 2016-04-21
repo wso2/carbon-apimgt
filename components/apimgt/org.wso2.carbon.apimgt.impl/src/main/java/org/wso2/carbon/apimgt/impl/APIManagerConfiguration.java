@@ -653,7 +653,7 @@ public class APIManagerConfiguration {
                         Properties properties = new Properties();
                         while (jmsProperties.hasNext()) {
                             OMElement property = (OMElement) jmsProperties.next();
-                            properties.put(property.getLocalName(), property.getText());
+                            properties.put(property.getLocalName(), APIUtil.replaceSystemProperty(property.getText()));
                         }
                         jmsConnectionProperties.setJmsConnectionProperties(properties);
                     }
