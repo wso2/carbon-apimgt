@@ -71,6 +71,8 @@ if(jagg.isCSRFTokenValid())
             apiData.productionTps = request.getParameter("productionTps","UTF-8");
             apiData.sandboxTps = request.getParameter("sandboxTps","UTF-8");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
+            apiData.apiPolicy = request.getParameter("apiTier");
+
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
             var provider = request.getParameter("provider","UTF-8");

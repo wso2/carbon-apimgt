@@ -363,7 +363,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
-        String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
+        String apiLevelPolicy = null;
+        if(APIUtil.isAdvanceThrottlingEnabled()) {
+            apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
+        }
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -1715,7 +1718,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
         String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
-        String subscriptionLevelPolicy = (String) apiData.get("tier", apiData);
         String contextVal = (String) apiData.get("context", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
