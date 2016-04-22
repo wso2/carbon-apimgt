@@ -484,7 +484,7 @@
             <Username>admin</Username>
             <Password>admin</Password>
             <Destination>throttleData</Destination>
-            <InitDelay>300000</InitDelay>
+            <!--InitDelay>300000</InitDelay-->
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
                 <transport.jms.DestinationType>topic</transport.jms.DestinationType>
