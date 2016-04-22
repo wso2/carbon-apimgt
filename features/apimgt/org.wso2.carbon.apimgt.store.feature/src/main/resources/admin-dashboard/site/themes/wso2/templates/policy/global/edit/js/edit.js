@@ -30,6 +30,11 @@ function validateInputs(){
     var policyName = $('#policyName');
     var policyNameTxt = policyName.val();
 
+    keyTemplateValidated = $('#keyTemplateValidated').val();
+    if(keyTemplateValidated === 'false'){
+        return false;
+    }
+
     if(!validateInput(policyNameTxt,policyName,requiredMsg)){
         return false;
     }
