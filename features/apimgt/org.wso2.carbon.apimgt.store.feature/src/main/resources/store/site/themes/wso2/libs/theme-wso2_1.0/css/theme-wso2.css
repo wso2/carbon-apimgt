@@ -3091,7 +3091,7 @@ header.header-default {
   background: #1f1f1f;
   color: #fff;
 }
-header a {
+header a, header a:hover {
   color: #fff;
   text-decoration: none;
 }
@@ -3118,6 +3118,10 @@ header .nav > li > a {
   height: 50px;
 }
 header .nav > li > a:hover {
+  background: #2c2c2c;
+}
+header .nav > li > a:focus {
+  color: #fff;
   background: #2c2c2c;
 }
 header .nav .open > a,
@@ -3707,6 +3711,7 @@ tbody.collapse.in {
   margin-bottom: -1px;
 }
 .nav-tabs > li > a {
+  color: #222;
   margin-right: 2px;
   line-height: 1.42857;
   border: 1px solid transparent;
@@ -7125,13 +7130,15 @@ html {
 body {
   min-height: 100%;
   color: #222;
-  padding-bottom: 40px;
   font-weight: 300;
   width: 100%;
   overflow: hidden;
   position: relative;
 }
 
+body.sticky-footer {
+  padding-bottom: 40px;
+}
 body > .page-content-wrapper > .container,
 body > .page-content-wrapper > .container-fluid {
   padding: 0;
@@ -7152,7 +7159,6 @@ body.inverse {
 
 a, a:hover, a:focus, a:active {
   text-decoration: none;
-  color: inherit;
   cursor: pointer;
 }
 
@@ -7289,6 +7295,7 @@ body.inverse .fade-edge:after {
  * ======================================================================== */
 .navbar-wrapper {
   min-height: 50px;
+  width:100%;
 }
 
 .navbar.affix, .navbar.affix-bottom {
@@ -7836,6 +7843,8 @@ footer a, footer a:hover {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
+  margin: 0px;
+  padding: 0px;
 }
 
 .dropdown-menu.arrow:before, .dropdown-menu.arrow.arrow-top-left:before {

@@ -27,8 +27,7 @@
 
 %>
 
-<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/bootstrap.min.css"))%>" rel="stylesheet">
-<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/common.css"))%>" rel="stylesheet">
+
 <link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">
 
 

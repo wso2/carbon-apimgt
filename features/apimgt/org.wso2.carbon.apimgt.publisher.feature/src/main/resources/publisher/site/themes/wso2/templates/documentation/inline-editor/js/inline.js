@@ -1,16 +1,14 @@
 $(document).ready(function() {
     tinyMCE.init({
-                     mode : "textareas",
-                     theme : "advanced",
-                     plugins : "inlinepopups",
-                     theme_advanced_buttons1 : "newdocument,|,bold,italic,underline,link,unlink,|,justifyleft,justifycenter,justifyright,fontselect,fontsizeselect,formatselect",
-                     theme_advanced_buttons2 : "cut,copy,paste,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,forecolor,backcolor",
-                     theme_advanced_buttons3 : "insertdate,inserttime,|,spellchecker,advhr,,removeformat,|,sub,sup,|,charmap,emotions",
-                     theme_advanced_toolbar_location : "top",
-                     theme_advanced_toolbar_align : "left",
-                     theme_advanced_resizing : true
-
-                 });
+    	selector: 'textarea',
+	    plugins: [
+				'advlist autolink lists link image charmap print preview anchor',
+				'searchreplace visualblocks code fullscreen spellchecker',
+				'insertdatetime media table contextmenu paste code'
+		      ],
+		toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
+		toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
+    });
 });
 
 
