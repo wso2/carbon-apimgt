@@ -91,7 +91,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -5385,10 +5384,10 @@ public final class APIUtil {
         }
 
         //Adding Subscription level policies
-        String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE, APIConstants.DEFAULT_SUB_POLICY_MEDIUM,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
-        String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE_DESC, APIConstants.DEFAULT_SUB_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
+        String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+        String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < subPolicies.length ; i++) {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
@@ -5410,10 +5409,10 @@ public final class APIUtil {
         }
 
         //Adding Resource level policies
-        String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE, APIConstants.DEFAULT_API_POLICY_MEDIUM,
-                APIConstants.DEFAULT_API_POLICY_SMALL, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
-        String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE_DESC, APIConstants.DEFAULT_API_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_API_POLICY_SMALL_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
+        String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE, APIConstants.DEFAULT_API_POLICY_PLUS,
+                APIConstants.DEFAULT_API_POLICY_BASIC, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
+        String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE_DESC, APIConstants.DEFAULT_API_POLICY_PLUS_DESC,
+                APIConstants.DEFAULT_API_POLICY_BASIC_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < apiPolicies.length ; i++) {
             policyName = apiPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {
