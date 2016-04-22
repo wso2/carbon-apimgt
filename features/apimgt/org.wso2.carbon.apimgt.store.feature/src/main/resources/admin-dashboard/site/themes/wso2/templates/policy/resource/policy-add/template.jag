@@ -36,16 +36,18 @@
 	<div id="general-details">
 
         <div class="page-header">
-            <h2><%=nameFieldDisableStatus%></h2>
             <p class="lead">General Details</p>
         </div>
 
 
         <form class="form-horizontal" method="" id="" action="">
             <div class="form-group">
-                <label class="control-label col-sm-3" for="policy-name">Policy Name:
+                <label class="control-label col-sm-3" for="policy-name"><%=i18n.localize("tierName")%>:
                     <span class="requiredAstrix">*</span>
-                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                    <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom"
+                                            data-original-title="" title="">
+                        <i class="fa fa-question-circle" data-original-title="" title=""></i>
+                    </a>
                     <p id="name_help" class="hide">Name of the throttle policy.</p></label>
                 </label>
                 <div class="col-sm-9">
@@ -53,7 +55,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-3" for="policy-description">Policy Description:
+                <label class="control-label col-sm-3" for="policy-description"><%=i18n.localize("tierDesc")%>:
                     <span class="requiredAstrix">*</span>
                     <a class="help_popup" help_data="desc_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
                     <p id="desc_help" class="hide">Description of the throttle policy.</p>

@@ -59,7 +59,7 @@ public class WebServiceThrottleDataRetriever extends TimerTask {
         try {
             ThrottleProperties.GlobalEngineWSConnection globalEngineWSConnection = ServiceReferenceHolder
                     .getInstance().getThrottleProperties().getGlobalEngineWSConnection();
-            String url = globalEngineWSConnection.getServiceUrl();
+            String url = globalEngineWSConnection.getServiceUrl()+"/throttleAsString";
             byte[] credentials = Base64.encodeBase64((globalEngineWSConnection.getUsername() + ":" +
                     globalEngineWSConnection.getPassword()).getBytes
                     (StandardCharsets.UTF_8));
@@ -97,6 +97,7 @@ public class WebServiceThrottleDataRetriever extends TimerTask {
         if (throttleKeyArray != null && throttleKeyArray.length > 0) {
             for (String throttleKey : throttleKeyArray) {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+
                         getThrottleDataMap().put(throttleKey, "throttled");
             }
         }
