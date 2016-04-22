@@ -69,8 +69,13 @@
     "tierPermissions":"Tier Permissions",
     "tiers":"Tier",
     "permissions":"Permissions",
-    "allow":"Allow",
+     "allow":"Allow",
+    "allowed":"Allowed",
     "deny":"Deny",
+    "denied":"Denied",
+    "tierPermissionMessagePart1":"This tier is ",
+    "tierPermissionMessagePart2":" for above roles.",
+    
 
     "RequestPatternChanged":"Abnormal Resource Access Pattern",
     "UnusualIPAccessAlert":"Unseen Source IP Address",
