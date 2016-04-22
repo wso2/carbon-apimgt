@@ -1,7 +1,7 @@
 <% jagg.template("policy/global/edit", function(inputs, outputs, jagg) { %>
 <%
     var policyName = request.getParameter("policyName");
-    var pageTitle = "Add Custom Policy";
+    var pageTitle = i18n.localize("addCustomRule");
     var nameFieldDisableStatus = "";
     var streamParameters = "api,version,context,provider,user";
 
@@ -72,9 +72,9 @@
                     </fieldset>
 
                     <div class="form-actions">
-                        <input id="add-tier-btn" onclick="saveGlobalPolicy()" name="save-tier-btn" type="button"
-                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
-                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                        <input id="add-custom-rule-btn" onclick="saveGlobalPolicy()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("applyRule")%>'/>
+                        <input id="cancel-add-custom-rule-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
                     </div>
                 </form>
             </div>
