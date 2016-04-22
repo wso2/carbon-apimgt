@@ -47,6 +47,9 @@ public class DataProcessAndPublishingAgent implements Runnable{
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, MessageContext messageContext){
+        if(resourceLevelTier==null && apiLevelTier!=null){
+            resourceLevelTier = apiLevelTier;
+        }
         this.messageContext =messageContext;
         this.applicationLevelThrottleKey =applicationLevelThrottleKey;
         this.applicationLevelTier = applicationLevelTier;
