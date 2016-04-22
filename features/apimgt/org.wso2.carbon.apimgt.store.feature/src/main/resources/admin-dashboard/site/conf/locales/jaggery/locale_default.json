@@ -87,5 +87,8 @@
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
     "conditionValueHead":"Condition Value",
-    "conditionManagementTitle":"Condition Management"
+    "conditionManagementTitle":"Condition Management",
+    "save":"Save",
+    "update":"Update",
+    "defaultLimits": "Default Limits"
 }
