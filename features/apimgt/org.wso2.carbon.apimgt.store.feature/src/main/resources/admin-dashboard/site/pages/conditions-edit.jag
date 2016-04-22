@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"ADD Condition",
+            "title":"Select Condition",
             "header":{
                 "name":"menu/primary"
             },
