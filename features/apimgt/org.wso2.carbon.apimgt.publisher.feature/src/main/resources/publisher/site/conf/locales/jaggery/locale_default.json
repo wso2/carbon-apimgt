@@ -170,6 +170,11 @@
     "apiUsage" : "API Usage",
     "apiResponseTimes" : "API Response Times",
     "apiLastAccessTimes" : "API Last Access Times",
+
+    "applicationsOverTime" : "Applications Time",
+    "userSubscriptionsOverTime" : "Subscriptions Time",
+    "developersOverTime" : "Developers Time",
+
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "usageResourcePath" : "Usage by Resource Path",
     "apiLatencyTime" : "API Latency Time",

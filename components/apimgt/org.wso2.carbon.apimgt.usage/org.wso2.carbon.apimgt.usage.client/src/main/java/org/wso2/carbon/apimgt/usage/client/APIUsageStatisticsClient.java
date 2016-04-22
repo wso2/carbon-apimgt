@@ -76,7 +76,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                              String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * This method gets the app users stat for invoking APIs
@@ -90,7 +90,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                     String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * @param subscriberName subscriber name
@@ -102,7 +102,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                           String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * @param subscriberName subscriber name
@@ -114,7 +114,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                               String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Returns a list of APIUsageByUserDTO objects that contain information related to
@@ -141,7 +141,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                                       String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Returns a list of APIVersionLastAccessTimeDTO objects for all the APIs belonging to the
@@ -156,7 +156,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName,
-            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                                                          String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Returns a list of APIVersionUsageDTO objects that contain information related to a
@@ -170,7 +170,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException;
+                                                                            String toDate) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Gets a list of APIDestinationUsageDTO objects containing information related to APIs belonging
@@ -183,7 +183,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException;
+                                                                          String toDate) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Returns a list of APIUsageDTO objects that contain information related to APIs that
@@ -200,7 +200,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException;
+                                                          int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Gets a list of APIResponseFaultCountDTO objects containing information related to APIs belonging
@@ -213,7 +213,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException;
+                                                                            String toDate) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Given API name and Application, returns throttling request counts over time for a given time span
@@ -228,7 +228,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
-            String appName, String fromDate, String toDate, String groupBy)
+                                                                                      String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException;
 
     /**
@@ -243,7 +243,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
-            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
+                                                                                String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Get APIs of the provider that consist of throttle data
@@ -279,7 +279,7 @@ public abstract class APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException
      */
     public abstract List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException;
+                                                                   String toDate) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * Return the First access date according to the REST API table data
@@ -547,10 +547,11 @@ public abstract class APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public abstract List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
-            String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException;
+                                                                   String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException;
 
     /**
      * return a string to indicate type of statistics client
+     *
      * @return String
      */
     public abstract String getClientType();
@@ -558,17 +559,17 @@ public abstract class APIUsageStatisticsClient {
     /**
      * Return list of Latency time for given api and its version
      *
-     * @param apiName - Name of th API
-     * @param version - Version of the API
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
      * @param tenantDomain - TenantDomain
-     * @param fromDate - Start date of the time span
-     * @param toDate - End date of time span
-     * @param drillDown - Type of data
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
      * @return List of latency Times
      * @throws APIMgtUsageQueryServiceClientException
      */
 
-     public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+    public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
                                                                                  String tenantDomain, String fromDate,
                                                                                  String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException;
@@ -576,12 +577,12 @@ public abstract class APIUsageStatisticsClient {
     /**
      * Return list of Latency time for given api and its version
      *
-     * @param apiName - Name of th API
-     * @param version - Version of the API
-     * @param tenantDomain - TenantDomain
-     * @param fromDate - Start date of the time span
-     * @param toDate - End date of time span
-     * @param drillDown - Type of data
+     * @param apiName       - Name of th API
+     * @param version       - Version of the API
+     * @param tenantDomain  - TenantDomain
+     * @param fromDate      - Start date of the time span
+     * @param toDate        - End date of time span
+     * @param drillDown     - Type of data
      * @param mediationType - type of mediation
      * @return List of latency Times
      * @throws APIMgtUsageQueryServiceClientException
@@ -595,7 +596,8 @@ public abstract class APIUsageStatisticsClient {
 
 
     /**
-     *  Used to get long value of String date.
+     * Used to get long value of String date.
+     *
      * @param date Date string
      * @return long value of given date
      * @throws ParseException on Error
@@ -606,6 +608,7 @@ public abstract class APIUsageStatisticsClient {
         Long lDate = fDate.getTime();
         return lDate;
     }
+
     /**
      * Use to handle exception of common type in single step
      *
@@ -619,20 +622,19 @@ public abstract class APIUsageStatisticsClient {
     }
 
     /**
-     *
      * @param drillDown selected type of data
      * @return Table name for view
      */
-    protected  String getExecutionTimeTableByView(String drillDown){
+    protected String getExecutionTimeTableByView(String drillDown) {
         String tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
         if ("DAY".equals(drillDown)) {
-            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
-        }else if ("HOUR".equals(drillDown)){
-            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_HOUR_SUMMARY;
-        }else if ("MINUTES".equals(drillDown)){
-            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
-        }else if ("SECONDS".equals(drillDown)){
-            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_SECONDS_SUMMARY;
+            tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
+        } else if ("HOUR".equals(drillDown)) {
+            tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_HOUR_SUMMARY;
+        } else if ("MINUTES".equals(drillDown)) {
+            tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
+        } else if ("SECONDS".equals(drillDown)) {
+            tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_SECONDS_SUMMARY;
         }
         return tableName;
     }
@@ -685,14 +687,14 @@ public abstract class APIUsageStatisticsClient {
             checkedDate.setTime(date);
             boolean status = false;
             for (Result<ExecutionTimeOfAPIValues> executionTimeOfAPIValuesResult : resultList) {
-                    int year = executionTimeOfAPIValuesResult.getValues().getYear();
-                    int month = executionTimeOfAPIValuesResult.getValues().getMonth();
-                    int day = executionTimeOfAPIValuesResult.getValues().getDay();
-                    int hour = executionTimeOfAPIValuesResult.getValues().getHour();
-                    int minute = executionTimeOfAPIValuesResult.getValues().getMinutes();
-                    int seconds = executionTimeOfAPIValuesResult.getValues().getSeconds();
+                int year = executionTimeOfAPIValuesResult.getValues().getYear();
+                int month = executionTimeOfAPIValuesResult.getValues().getMonth();
+                int day = executionTimeOfAPIValuesResult.getValues().getDay();
+                int hour = executionTimeOfAPIValuesResult.getValues().getHour();
+                int minute = executionTimeOfAPIValuesResult.getValues().getMinutes();
+                int seconds = executionTimeOfAPIValuesResult.getValues().getSeconds();
                 mediationTypes.add(executionTimeOfAPIValuesResult.getValues().getMediationName());
-                if (checkedDate.get(Calendar.YEAR) == year && checkedDate.get(Calendar.MONTH) +1 ==
+                if (checkedDate.get(Calendar.YEAR) == year && checkedDate.get(Calendar.MONTH) + 1 ==
                         month) {
                     if (field == Calendar.DATE && checkedDate.get(field) == day) {
                         status = true;
@@ -706,8 +708,8 @@ public abstract class APIUsageStatisticsClient {
                             checkedDate.get(field) == minute) {
                         status = true;
                         break;
-                    }else if (field == Calendar.SECOND && checkedDate.get(Calendar.DATE) == day
-                            && checkedDate.get(Calendar.HOUR_OF_DAY) == hour&& checkedDate.get(Calendar
+                    } else if (field == Calendar.SECOND && checkedDate.get(Calendar.DATE) == day
+                            && checkedDate.get(Calendar.HOUR_OF_DAY) == hour && checkedDate.get(Calendar
                             .MINUTE) == minute && checkedDate.get(field) == seconds) {
                         status = true;
                         break;
@@ -715,11 +717,11 @@ public abstract class APIUsageStatisticsClient {
                 }
             }
             if (!status) {
-                int hour,minutes = 0,seconds = 0;
+                int hour, minutes = 0, seconds = 0;
                 if (field == Calendar.HOUR_OF_DAY) {
-                   hour=checkedDate.get(Calendar.HOUR_OF_DAY);
+                    hour = checkedDate.get(Calendar.HOUR_OF_DAY);
                 } else if (field == Calendar.MINUTE) {
-                    hour=checkedDate.get(Calendar.HOUR_OF_DAY);
+                    hour = checkedDate.get(Calendar.HOUR_OF_DAY);
                     minutes = checkedDate.get(Calendar.MINUTE);
                 } else {
                     hour = checkedDate.get(Calendar.HOUR_OF_DAY);
@@ -743,15 +745,16 @@ public abstract class APIUsageStatisticsClient {
         }
         resultList.addAll(tempList);
     }
+
     /**
      * Return list of GeoLocation Usage for given api and its version
      *
-     * @param apiName - Name of th API
-     * @param version - Version of the API
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
      * @param tenantDomain - TenantDomain
-     * @param fromDate - Start date of the time span
-     * @param toDate - End date of time span
-     * @param drillDown - Type of data
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
      * @return List of Geolocation  usage
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -761,24 +764,339 @@ public abstract class APIUsageStatisticsClient {
                                                                                 String toDate, String drillDown)
             throws
             APIMgtUsageQueryServiceClientException;
+
     /**
      * Return list of UserAgent count for given api and its version
      *
-     * @param apiName - Name of th API
-     * @param version - Version of the API
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
      * @param tenantDomain - TenantDomain
-     * @param fromDate - Start date of the time span
-     * @param toDate - End date of time span
-     * @param drillDown - Type of data
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
      * @return List of count per user Agent
      * @throws APIMgtUsageQueryServiceClientException
      */
-
     public abstract List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version,
                                                                              String tenantDomain, String fromDate,
                                                                              String toDate, String drillDown)
             throws
             APIMgtUsageQueryServiceClientException;
+
+    /**
+     * Return list of developer sign ups over time
+     *
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
+     * @param provider     - Provider of the API
+     * @return List of count per user Agent
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<DevelopersByTimeDTO> getDeveloperSignUpsOverTime(String apiName, String version,
+                                                                 String tenantDomain, String fromDate,
+                                                                 String toDate, String drillDown,
+                                                                 String provider, int limit) throws APIMgtUsageQueryServiceClientException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String allDeveloper = "select count(distinct sub.subscriber_id) as y, " +
+                    "CONCAT(CAST(sub.created_time as char), '000') as x from AM_SUBSCRIBER sub";
+            String groupBy = " group by sub.created_time";
+            String whereByDateRange = " sub.created_time between '" + fromDate + "' and '" + toDate + "'";
+
+            String fromDeveloper = " ,AM_API as api, AM_SUBSCRIPTION as subc, AM_APPLICATION app";
+            String whereDeveloper = " app.subscriber_id=sub.subscriber_id and app.application_id=subc.application_id " +
+                    "and api.api_id = subc.api_id and api.api_name = '" + apiName + "'";
+
+            String query;
+            fromDate=null;
+            toDate=null;
+
+            if (apiName != null) {
+                query = allDeveloper + fromDeveloper + " where " + whereDeveloper;
+                if (fromDate != null && toDate != null) {
+                    query = query + " and " + whereByDateRange;
+                }
+            } else {
+                query = allDeveloper;
+                if (fromDate != null && toDate != null) {
+                    query = query + " where " + whereByDateRange;
+                }
+            }
+            query = query + groupBy;
+            statement = connection.prepareStatement(query);
+
+            //execute
+            rs = statement.executeQuery();
+
+            List<DevelopersByTimeDTO> list = new ArrayList<DevelopersByTimeDTO>();
+            long x, y = 0;
+            //iterate over the results
+            while (rs.next()) {
+                x = rs.getTimestamp("x").getTime();
+                y += rs.getLong("y");
+                list.add(new DevelopersByTimeDTO(x, y));
+            }
+            return list;
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Return list of developer Application Regitrations over time
+     *
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
+     * @param provider     - Provider of the API
+     * @param limit        limot of the results
+     * @return List of count per user Agent
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<AppRegistrationDTO> getApplicationRegistrationOverTime(String apiName, String version,
+                                                                       String tenantDomain, String fromDate,
+                                                                       String toDate, String drillDown,
+                                                                       String provider, int limit,
+                                                                       String developer) throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            //get the connection
+            connection = APIMgtDBUtil.getConnection();
+
+            String allApplications = "SELECT count(distinct app.application_id) as y, app.created_time as x from AM_APPLICATION AS app, AM_API AS api";
+
+            String groupBy = " group by app.created_time";
+            String whereWithapi = " api.api_name= '" + apiName + "'";
+            String whereWithProvider = " api.api_provider = '" + provider + "'";
+            String whereWithdateRange = " app.created_time between CAST('" + fromDate + "' AS DATE) and CAST('" + toDate + "' AS DATE)";
+
+            String fromDeveloper = " , AM_SUBSCRIPTION as subc, AM_SUBSCRIBER sub";
+            String whereDeveloper = " where app.application_id=subc.application_id and sub.subscriber_id=app.subscriber_id and sub.user_id = '" + developer + "'";
+
+            String query;
+            query = allApplications;
+
+            if (provider != null) {
+                if (developer != null) {
+                    query = query + fromDeveloper + whereDeveloper + " and " + whereWithProvider;
+                } else {
+                    query = query + " where " + whereWithProvider;
+                }
+
+                if (apiName != null) {
+                    query = query + " and " + whereWithapi;
+                }
+
+                if (fromDate != null && toDate != null) {
+                    query = query + " and " + whereWithdateRange;
+                }
+
+            } else if (apiName != null) {
+                if (developer != null) {
+                    query = query + fromDeveloper + whereDeveloper + " and " + whereWithapi;
+                } else {
+                    query = query + " where " + whereWithapi;
+                }
+
+                if (fromDate != null && toDate != null) {
+                    query = query + " and " + whereWithdateRange;
+                }
+            } else if (developer != null) {
+                query = query + fromDeveloper + whereDeveloper;
+
+                if (fromDate != null && toDate != null) {
+                    query = query + " and " + whereWithdateRange;
+                }
+            } else {
+                if (fromDate != null && toDate != null) {
+                    query = query + " where " + whereWithdateRange;
+                }
+            }
+            query = query + groupBy;
+            statement = connection.prepareStatement(query);
+
+            //execute
+            rs = statement.executeQuery();
+
+            List<AppRegistrationDTO> list = new ArrayList<AppRegistrationDTO>();
+            long x, y = 0;
+            //iterate over the results
+            while (rs.next()) {
+                x = rs.getTimestamp("x").getTime();
+                y += rs.getLong("y");
+                list.add(new AppRegistrationDTO(x, y));
+            }
+            return list;
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Return list of API Subscriptions per applications over time
+     *
+     * @param apiName      - Name of th API
+     * @param version      - Version of the API
+     * @param tenantDomain - TenantDomain
+     * @param fromDate     - Start date of the time span
+     * @param toDate       - End date of time span
+     * @param drillDown    - Type of data
+     * @param limit        - limit of the results
+     * @return List of count per user Agent
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<SubscriptionOverTimeDTO> getAPISubscriptionsPerApp(String apiName, String version,
+                                                                   String tenantDomain, String fromDate,
+                                                                   String toDate, String drillDown,
+                                                                   int limit, String provider) throws SQLException, APIMgtUsageQueryServiceClientException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+
+        try {
+            //get the connection
+            connection = APIMgtDBUtil.getConnection();
+
+            String query;
+            String allSubscriptions = "SELECT count(sub.subscription_id) as subscription_count, sub.created_time, api.api_name, api.api_version from AM_SUBSCRIPTION AS sub, AM_API as api where sub.api_id=api.api_id";
+
+            String apiSubscriptions = "SELECT api.api_name, api.api_version, api.api_provider , count(sub.subscription_id) as"
+                    + " subscription_count, sub.created_time from AM_SUBSCRIPTION AS sub, AM_API as api";
+
+
+            String whereClause = " where sub.api_id=api.api_id";
+            String allSubGroupBy = " group by sub.created_time, api.api_name, api.api_version";
+            String groupBy = " group by sub.created_time, api.api_version";
+            String wherewWithapi = " and api.api_name= '" + apiName + "'";
+            String whereWithProvider = " and api.api_provider = '" + provider + "'";
+            String whereWithDateRange = " and sub.created_time between '" + fromDate + "' and '" + toDate + "'";
+
+            query = allSubscriptions;
+
+            if (provider == null && apiName == null) {
+                query = allSubscriptions;
+                if (fromDate != null && toDate != null) {
+                    query = query + whereWithDateRange;
+                }
+                query = query + allSubGroupBy;
+            } else {
+                query = apiSubscriptions + whereClause;
+
+                if (provider != null) {
+                    query = query + whereWithProvider;
+                }
+
+                if (apiName != null) {
+                    query = query + wherewWithapi;
+                }
+
+                if (fromDate != null && toDate != null) {
+                    query = query + whereWithDateRange;
+                }
+                query = query + groupBy;
+            }
+
+            query = query + groupBy;
+            statement = connection.prepareStatement(query);
+
+
+            //execute
+            rs = statement.executeQuery();
+
+            List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
+            long x, y = 0;
+            //iterate over the results
+            while (rs.next()) {
+                x = rs.getTimestamp("x").getTime();
+                y += rs.getLong("y");
+                list.add(new SubscriptionOverTimeDTO(x, y));
+            }
+            return list;
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+
+    }
 
     public List<ApisByTimeDTO> getApisByTime(String api, String version, String provider, String developer,
             String tenantDomain, String fromDate, String toDate, int limit)

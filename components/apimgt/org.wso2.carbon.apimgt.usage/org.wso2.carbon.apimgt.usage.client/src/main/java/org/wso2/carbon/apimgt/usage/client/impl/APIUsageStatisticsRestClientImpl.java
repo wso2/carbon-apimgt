@@ -2532,8 +2532,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override
-    public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String
-            tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
+    public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String tenantDomain,
+                                                                    String fromDate, String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
+
+
         StringBuilder query = new StringBuilder("api:" + apiName);
         int aggregateLevel = 0;
         if (version != null && !"ALL".equals(version)) {
