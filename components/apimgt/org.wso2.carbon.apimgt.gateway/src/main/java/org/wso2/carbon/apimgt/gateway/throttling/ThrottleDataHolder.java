@@ -100,8 +100,17 @@ public class ThrottleDataHolder {
         Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap();
         Map<String, String> blockedCustomConditionsMap = new ConcurrentHashMap();
     Map<String, String> blockedIpConditionsMap = new ConcurrentHashMap();
+    Map<String, String> keyTemplateMap = new ConcurrentHashMap();
 
-        Map<String, String> throttleDataMap = new ConcurrentHashMap();
+    public Map<String, String> getKeyTemplateMap() {
+        return keyTemplateMap;
+    }
+
+    public void setKeyTemplateMap(Map<String, String> keyTemplateMap) {
+        this.keyTemplateMap = keyTemplateMap;
+    }
+
+    Map<String, String> throttleDataMap = new ConcurrentHashMap();
 
         /**
          * This method will check given key in throttle data Map. Throttle data map need to be update from topic

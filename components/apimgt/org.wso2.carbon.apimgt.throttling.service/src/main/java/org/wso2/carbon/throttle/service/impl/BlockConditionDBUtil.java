@@ -28,9 +28,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +38,7 @@ public final class BlockConditionDBUtil {
 
     private static volatile DataSource dataSource = null;
     private  static BlockConditionsDTO blockConditionsDTO = null;
+    private  static Set<String> keyTemplates;
     private static long lastAccessed;
     private static long timeBetweenUpdates = 10000;
     private static final String GET_GLOBAL_POLICY_KEY_TEMPLATES =" SELECT KEY_TEMPLATE FROM AM_POLICY_GLOBAL";
@@ -229,6 +228,7 @@ public final class BlockConditionDBUtil {
 
         private void processCommand() {
                 BlockConditionDBUtil.getBlockConditions();
+            BlockConditionDBUtil.getGlobalPolicyKeyTemplates();
         }
         @Override
         public String toString(){
@@ -242,15 +242,20 @@ public final class BlockConditionDBUtil {
         }
         return blockConditionsDTO;
     }
-
+    public static Set<String> getKeyTemplates() {
+        if (keyTemplates == null) {
+            getGlobalPolicyKeyTemplates();
+        }
+        return keyTemplates;
+    }
     /**
      * Retrieves global policy key templates for the given tenantID
      *
      * @return list of KeyTemplates
      */
-    public static List<String> getGlobalPolicyKeyTemplates() {
+    public static Set<String> getGlobalPolicyKeyTemplates() {
 
-        List<String> keyTemplates = new ArrayList<>();
+        keyTemplates = new HashSet<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

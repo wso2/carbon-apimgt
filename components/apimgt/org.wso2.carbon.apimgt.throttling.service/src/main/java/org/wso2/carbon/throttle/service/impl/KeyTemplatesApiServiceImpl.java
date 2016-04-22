@@ -7,6 +7,6 @@ import javax.ws.rs.core.Response;
 public class KeyTemplatesApiServiceImpl extends KeyTemplatesApiService {
     @Override
     public Response keyTemplatesGet(){
-        return Response.ok().entity(BlockConditionDBUtil.getGlobalPolicyKeyTemplates()).build();
+        return Response.ok().entity(BlockConditionDBUtil.getKeyTemplates()).build();
     }
 }
