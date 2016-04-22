@@ -184,6 +184,9 @@
     "applicationThrottledCounts" : "App Throttled Out Requests",
     "applicationThrottledRequests" : "App Throttled Requests",
 
+    "apiTime" : "PUBLISHED APIS OVER TIME",
+    "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
+
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",
     "apiGeoLocationUsageTitle" : "API Usage Across Geo Locations",
