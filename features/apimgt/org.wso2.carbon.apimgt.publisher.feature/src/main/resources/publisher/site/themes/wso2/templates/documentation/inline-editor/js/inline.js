@@ -4,10 +4,10 @@ $(document).ready(function() {
 	    plugins: [
 				'advlist autolink lists link image charmap print preview anchor',
 				'searchreplace visualblocks code fullscreen spellchecker',
-				'insertdatetime media table contextmenu paste code emoticons'
+				'insertdatetime media table contextmenu paste code'
 		      ],
 		toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
-		toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview emoticons',
+		toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
     });
 });
 
