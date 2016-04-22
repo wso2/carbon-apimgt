@@ -32,9 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +42,7 @@ public final class ThrottlingDBUtil {
 
     private static volatile DataSource dataSource = null;
     private  static volatile ThrottledEventDTO[] throttledEventDTOs = null;
-    private static volatile String throttledEvents = "";
+    private static volatile Set<String> throttledEvents ;
     private static long lastAccessed;
     private static long timeBetweenUpdates = 10000;
 
@@ -136,19 +134,17 @@ public final class ThrottlingDBUtil {
     }
 
 
-    public static String getThrottledEventsAsString(String query) {
-        if (throttledEvents.length() > 1) {
-            //log.info("================================return from local cache");
+    public static Set<String> getThrottledEventsAsString(String query) {
+        if (throttledEvents != null && !throttledEvents.isEmpty()) {
             return throttledEvents;
-        }
-        else {
+        } else {
             return getThrottledEventsAsStringFromDB(query);
         }
     }
 
 
-    public static String getThrottledEventsAsStringFromDB(String query) {
-            String throttledEventString = "";
+    public static Set<String> getThrottledEventsAsStringFromDB(String query) {
+            Set<String> throttledEventString = new HashSet<>();
             Connection conn = null;
             PreparedStatement ps = null;
             ResultSet rs = null;
@@ -159,19 +155,9 @@ public final class ThrottlingDBUtil {
                 rs = ps.executeQuery();
                 while (rs.next()) {
                     String throttleKey = rs.getString("THROTTLEKEY");
-                    if (throttledEventString.length() > 1) {
-                        throttledEventString = throttledEventString + "," + throttleKey;
-                    } else {
-                        throttledEventString = throttleKey;
-                    }
+                    throttledEventString.add(throttleKey);
                 }
                 int count = 1;
-                if (query != null && query.length() > 0) {
-                    count = Integer.parseInt(query);
-                    for (int i = 0; i < count; i++) {
-                        throttledEventString = throttledEventString + "," + "key_" + i;
-                    }
-                }
             } catch (SQLException e) {
                 log.error("Error while executing SQL", e);
             } finally {
@@ -285,7 +271,7 @@ public final class ThrottlingDBUtil {
                     try {
                         Thread.sleep(timeBetweenUpdates);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        log.warn("Worker Thread got interrupted",e);
                     }
                 }
             }

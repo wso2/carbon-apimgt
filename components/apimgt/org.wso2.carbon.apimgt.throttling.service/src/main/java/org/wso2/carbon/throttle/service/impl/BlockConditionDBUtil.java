@@ -224,7 +224,7 @@ public final class BlockConditionDBUtil {
                     try {
                         Thread.sleep(timeBetweenUpdates);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        log.warn("Worker Thread got interrupted",e);
                     }
                 }
             }

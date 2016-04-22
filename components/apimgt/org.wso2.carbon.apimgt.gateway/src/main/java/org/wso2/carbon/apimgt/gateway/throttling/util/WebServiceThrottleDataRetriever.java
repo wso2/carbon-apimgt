@@ -26,6 +26,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
@@ -62,16 +65,18 @@ public class WebServiceThrottleDataRetriever extends TimerTask {
                     (StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+            method.setHeader("Accept","application/json");
             HttpClient httpClient = HttpClientBuilder.create().build();
             HttpResponse httpResponse = httpClient.execute(method);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-            if (responseString != null && !responseString.isEmpty()) {
-                return responseString.split(",");
-            }
-
+            JSONParser jsonParser = new JSONParser();
+            JSONArray responseArray = (JSONArray) jsonParser.parse(responseString);
+            return (String[]) responseArray.toArray(new String[responseArray.size()]);
         } catch (IOException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         return null;
