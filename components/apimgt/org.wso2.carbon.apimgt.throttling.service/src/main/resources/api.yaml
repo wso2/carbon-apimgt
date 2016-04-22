@@ -116,6 +116,23 @@ paths:
             type: object
             additionalProperties:
               $ref: "#/definitions/BlockConditions"
+
+  /keyTemplates:
+     get:
+       summary: An Array of key templates according to custom policies
+       description: |
+         This will provide access to key templates define in custom policies
+       responses:
+         200:
+           description: An array of shops around you
+           schema:
+             type: array
+             items:
+              type: string
+         default:
+           description: Unexpected error
+           schema:
+             $ref: '#/definitions/Error'
 definitions:
   ThrottledEvent:
     properties:

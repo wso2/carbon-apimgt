@@ -1,22 +1,12 @@
 package org.wso2.carbon.throttle.service.impl;
 
-import org.wso2.carbon.throttle.service.*;
-import org.wso2.carbon.throttle.service.dto.*;
-
-
-import org.wso2.carbon.throttle.service.dto.ErrorDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.throttle.service.KeyTemplatesApiService;
 
 import javax.ws.rs.core.Response;
 
 public class KeyTemplatesApiServiceImpl extends KeyTemplatesApiService {
     @Override
     public Response keyTemplatesGet(){
-
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, )).build();
+        return Response.ok().entity(BlockConditionDBUtil.getGlobalPolicyKeyTemplates()).build();
     }
 }
