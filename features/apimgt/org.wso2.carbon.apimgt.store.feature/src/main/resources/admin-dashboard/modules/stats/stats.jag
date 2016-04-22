@@ -1,8 +1,8 @@
 <%
 
 log = new Log(),
-usageClient = jagg.module("manager").getUsageClient(),
-user = jagg.getUser();
+        usageClient = jagg.module("manager").getUsageClient(),
+        user = jagg.getUser();
 var gson = com.google.gson.Gson();
 
 function isDataPublishingEnabled(providerName, server) {
@@ -34,5 +34,21 @@ function isDataPublishingEnabled(providerName, server) {
         };
     }
 }
+
+var getDataFromTable = function (tableName, searchEntry, startIndex,count, sortableColumn,isAscending) {
+
+    if (searchEntry == "") {
+        return usageClient.searchTable(tableName,"*:*", startIndex, count, sortableColumn, isAscending);
+    } else {
+        return usageClient.searchTable(tableName, searchEntry, startIndex, count, sortableColumn, isAscending);
+    }
+};
+
+var getCountFromTable = function (tableName, searchEntry) {
+    if (searchEntry == "null") {
+        searchEntry = null;
+    }
+    return usageClient.searchCount(tableName,searchEntry);
+};
 
 %>

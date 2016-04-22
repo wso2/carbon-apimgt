@@ -1,9 +1,5 @@
 <%
 include("/jagg/jagg.jag");
-var i18n = require("i18n");
-
-var localeResourcesBasePath = "/site/conf/locales/jaggery/";
-i18n.init(request,localeResourcesBasePath);
 
 (function () {
 
@@ -43,10 +39,11 @@ i18n.init(request,localeResourcesBasePath);
             var provider = jagg.getUser().username;
             var draw = request.getParameter("draw");
             var startindex =  parseInt(request.getParameter("start"));
-            var tableName = request.getParameter("tableName");
             var count = parseInt(request.getParameter("entriesPerPage"));
             var searchEntry = request.getParameter("search[value]");
             var sortOrder = (request.getParameter("order[0][dir]"));
+
+            var tableName = "ORG_WSO2_ANALYTICS_APIM_APIAVAILABILITY"
 
             var sortOrderBool = false;;
             if(sortOrder == "asc") {
@@ -58,13 +55,13 @@ i18n.init(request,localeResourcesBasePath);
             if (searchEntry != "") {
                 var lucenePrefix = "";
                 if(searchEntry.indexOf(":") == -1){
-                    lucenePrefix = "msg:";
+                    lucenePrefix = "api_version:";
                 }
                 searchEntry = lucenePrefix+searchEntry;
             }
 
 
-            dataResult = mod.getDataFromTable(tableName, searchEntry, startindex, count, "alertTimestamp", sortOrderBool);
+            dataResult = mod.getDataFromTable(tableName, searchEntry, startindex, count, null, sortOrderBool);
             countResult = result = mod.getCountFromTable(tableName, searchEntry);
 
             parsedDataResult = JSON.parse(dataResult);
@@ -77,40 +74,14 @@ i18n.init(request,localeResourcesBasePath);
                     "data" : []
                 };
             } else {
-                var type = null;
-                if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
-                    type = "Unseen Source IP Address";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") {
-                    type = "Abnormal Request Count";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
-                    type = "Abnormal Response Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
-                    type = "Abnormal API Usage";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTOKENREFRESH") {
-                    type = "Abnormal Renewal of Access Tokens";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
-                    type = "Tier Crossing";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
-                    type = "Abnormal Backend Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
-                    type = "Availability of APIs";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
-                    type = "Abnormal Resource Access Pattern";
-                }
 
                 var arr = new Array(parsedDataResult.length);
                 for (i=0; i<parsedDataResult.length ;i++) {
 
                     arr[i] = new Array(3);
 
-                    arr[i][1] = (new Date(parsedDataResult[i]["values"]["alertTimestamp"])).toString();
-                    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
-                        type = i18n.localize(parsedDataResult[i]["values"]["type"]);
-                        arr[i][2] = '<a class="alertTypeLink">'+type+'</a>';
-                    } else {
-                        arr[i][2] = type;
-                    }
-                    arr[i][3] = parsedDataResult[i]["values"]["msg"];
+                    arr[i][1] = parsedDataResult[i]["values"]["api_version"];
+                    arr[i][2] = parsedDataResult[i]["values"]["status"];
 
                 }
 

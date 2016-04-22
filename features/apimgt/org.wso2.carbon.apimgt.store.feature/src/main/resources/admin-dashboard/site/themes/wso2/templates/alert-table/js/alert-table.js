@@ -109,7 +109,7 @@ $( document ).ready(function() {
                             "url" : "site/blocks/alert-table/ajax/alert-table.jag",
                             "type": "POST",
                             "data" : function (d) {
-                                d.action = "getDataFromAlertTable",
+                                d.action = "getDataFromTable";
                                 d.tableName = tableName;
                                 d.searchQuery = null;
                                 d.entriesPerPage = $("#alertHistoryTable_length option:selected" ).val();
