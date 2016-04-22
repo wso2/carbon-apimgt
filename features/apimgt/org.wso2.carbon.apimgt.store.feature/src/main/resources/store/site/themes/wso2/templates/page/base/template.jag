@@ -67,7 +67,7 @@
         var siteRoot = '<%=jagg.getAbsoluteUrl("/site/themes/"+jagg.getUserTheme().base)%>';
     </script>
 </head>
-<body>
+<body class="sticky-footer">
 
 <% jagg.includeBlocks(outputs.body); %>
 

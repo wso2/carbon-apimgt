@@ -541,7 +541,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 String keyType = (String) apiData.get("keytype", apiData);
 
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,keyType);
+                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -643,7 +643,6 @@ public class APIStoreHostObject extends ScriptableObject {
             } else {
                 usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
             }
-
             boolean authorized =
                     APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_SUBSCRIBE);
             boolean displayPublishUrlFromStore = false;
@@ -1372,6 +1371,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
                 row.put("apiOwner", row, apiOwner);
                 row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                row.put("rates", row, api.getRating());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -1487,6 +1487,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("apiOwner", row, apiOwner);
                     row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
                     row.put("apiBusinessOwner", row, api.getBusinessOwner());
+                    row.put("rates", row, api.getRating());
                     
                     NativeArray tierArr = new NativeArray(0);
                     Set<Tier> tierSet = api.getAvailableTiers();

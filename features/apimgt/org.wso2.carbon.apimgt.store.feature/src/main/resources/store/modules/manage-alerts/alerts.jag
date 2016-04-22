@@ -1,5 +1,5 @@
 <%
-var agent = "s";
+var agent = "subscriber";
 var retrieveSavedAlertsTypes = function () {
     var i,api,apis,length, log = new Log();
 
@@ -8,21 +8,13 @@ var retrieveSavedAlertsTypes = function () {
 
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-        var allAlertTypes = APIUtil.getAllAlertTypeByAgent(agent);
+        var allAlertTypes = APIUtil.getAllAlertTypeByStakeHolder(agent);
 
         var allAlertTypesJson = JSON.parse(gson.toJson(allAlertTypes));
 
         var userName = jagg.getUser().username;
-        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-        var tenantDomain = MultitenantUtils.getTenantDomain(userName);
 
-        if ("carbon.super" == tenantDomain) {
-            userName = userName + "@carbon.super";
-        }
-
-
-        //pass "p" param because we need to fetch publisher data
-        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndAgent(userName, agent);
+        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, agent);
         var allSavedAlertTypesJsonObj = JSON.parse(gson.toJson(allSavedAlertTypes));
 
         return {
@@ -87,13 +79,6 @@ var retrieveSavedEmailList = function () {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
         var userName = jagg.getUser().username;
-        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-        var tenantDomain = MultitenantUtils.getTenantDomain(userName);
-
-        if ("carbon.super" == tenantDomain) {
-            userName = userName + "@carbon.super";
-        }
-
 
         var allSavedEmailList = APIUtil.retrieveSavedEmailList(userName,agent);
 

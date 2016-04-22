@@ -1,28 +1,19 @@
 <% jagg.template("manage-alerts", function(inputs, outputs, jagg) { %>
 
-
-
 		<div id="col-sm-12">
         <div id="manageAlerts">
 			<div class="page-header">
 				<h2><%=i18n.localize("manageAlertTypes")%></h2>
 			</div>
-
-
 			<div class="control-group">
-
                <%
                 var error = outputs.alertTypesInformations.error;
-
-
                 if(error == false){
-
                     var allAlertType = outputs.alertTypesInformations.allAlertTypeJson;
                     var savedAlertTypes = outputs.alertTypesInformations.savedAlertTypeJson;
-
-
-
-
+                    %>
+                        <form class="form-horizontal">
+                    <%
                     for (var key in allAlertType) {
                         if (allAlertType.hasOwnProperty(key)) {
                             var isChecked;
@@ -37,55 +28,46 @@
                                     }
                                 }
                             }
-
                            %>
-                            <div class="checkbox">
-                                <label><input type="checkbox"  id="<%=allAlertType[key]%>"  value="<%=key%>" <%=isChecked%>><%= i18n.localize(allAlertType[key]) %></label>
+                            <div class="form-group">
+                                <label class="col-sm-1"><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>></label>
+                                <div class="col-sm-10">
+                                  <p class=""><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></p>
+                                  <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
+                                </div>
                             </div>
                            <%
-
-                            //print(key + " -> " + allAlertType[key]);
                         }
                     }
                     %>
-                    <div class="control-group">
+                        <div class="form-group">
+                                <label class="col-sm-1 email"><p class=""><strong>Email</strong></p></label>
+                                <%
+                                    var savedEmailList ="";
+                                    if(outputs.emailList.allSavedEmailListJson[0] != null){
+                                        var savedEmailList = outputs.emailList.allSavedEmailListJson.toString();
+                                    }
 
-                        <label class="control-label emailList" for="inputEmail">Email list</label>
-                        <div class="controls">
-                            <%
-                                var savedEmailList ="";
-                                if(outputs.emailList.allSavedEmailListJson[0] != null){
-                                    var savedEmailList = outputs.emailList.allSavedEmailListJson[0];
-                                }
-                            %>
-                            <textarea id="emailListTextArea" placeholder="Enter email ids comma separated. Eg: abc@wso2.com,xyz@wso2.com"><%=savedEmailList%></textarea>
+                                %>
+                                <div class="col-sm-10">
+                                    <input id="tokenfield" type="text" value="<%=encode.forHtml(savedEmailList)%>" data-role="tagsinput" />
+                                </div>
                         </div>
-                    </div>
-                    <div class="control-group">
-                        <div class="form-actions" id="saveButtons">
-                            <button type="submit" class="btn btn-primary " id="saveBtn" >Save</button>
-                            <!--<button type="submit" class="btn btn-primary " id="cancle" >Cancle</button>-->
-                        </div>
-                    </div>
-
+                        </form>
+                            <div class="" id="saveButtons">
+                                <button type="submit" class="btn btn-primary " id="saveBtn" >Save</button>
+                                <button type="submit" class="btn btn-primary " id="cancelBtn" >Cancel</button>
+                            </div>
                     <%
-
                 }else{
                     %>
                     <div class="alert alert-danger" id="loginError">
-                        <span id="loginErrorSpan"><%=outputs.alertTypesInformations.message%></span>
+                        <span id="loginErrorSpan"><%=encode.forHtml(outputs.alertTypesInformations.message) %></span>
                     </div>
                     <%
                 }
-
                 %>
-
         </div>
-
-
-
     </div>
     </div>
-
-
 <%});%>

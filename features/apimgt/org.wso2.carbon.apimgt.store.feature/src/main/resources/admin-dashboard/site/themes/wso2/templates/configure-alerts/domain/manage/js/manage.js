@@ -1,7 +1,7 @@
 var deleteConfiguration = function (domainName, configurationName) {
     jagg.message({
-        content:'Are you sure you want to delete this domain configuration? ',
-        title:'Confirm Deletion',
+        content:'Are you sure you want to deactivate this configuration? ',
+        title:'Confirm Deactivation',
         type:'confirm',
         anotherDialog:true,
         okCallback:function(){

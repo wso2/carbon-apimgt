@@ -239,10 +239,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             	isSuperTenant = true;
-            }else {
-                usernameWithDomain = usernameWithDomain+"@"+tenantDomain;
+            } else {
+                usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
             }
-
             boolean   authorized =
                     APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_CREATE) ||
                             APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_PUBLISH);

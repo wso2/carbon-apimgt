@@ -1,5 +1,5 @@
 <%
-var agent = "a";
+var agent = "admin-dashboard";
 var retrieveSavedAlertsTypes = function () {
     var i,api,apis,length, log = new Log();
 
@@ -18,8 +18,7 @@ var retrieveSavedAlertsTypes = function () {
 
         }
 
-        var allAlertTypes = APIUtil.getAllAlertTypeByAgent(agent);
-
+        var allAlertTypes = APIUtil.getAllAlertTypeByStakeHolder(agent);
         var allAlertTypesJson = JSON.parse(gson.toJson(allAlertTypes));
 
         var userName = jagg.getUser().username;
@@ -29,10 +28,8 @@ var retrieveSavedAlertsTypes = function () {
         if ("carbon.super" == tenantDomain) {
             userName = userName + "@carbon.super";
         }
-
-
-        //pass "p" param because we need to fetch publisher data
-        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndAgent(userName, agent);
+        
+        var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, agent);
         var allSavedAlertTypesJsonObj = JSON.parse(gson.toJson(allSavedAlertTypes));
 
         return {

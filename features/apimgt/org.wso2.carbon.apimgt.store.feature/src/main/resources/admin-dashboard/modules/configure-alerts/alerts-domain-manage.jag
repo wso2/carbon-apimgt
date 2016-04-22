@@ -40,6 +40,49 @@ var getDomainSpecificConfigurationsInfo = function (domainName) {
     }
 };
 
+
+
+var getDomainTemplates = function (domainName) {
+        try {
+        var carbon = require('carbon');
+        var process = require('process');
+        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
+                buildRealmConfigurationFromFile();
+        var username = "admin";
+        var password = "admin";
+
+        var carbon = require('carbon'),
+        conf = carbon.server.loadConfig('api-manager.xml'),
+        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
+        username = conf.*::['Analytics'].*::['DASUsername'].text();
+        password = conf.*::['Analytics'].*::['DASPassword'].text();
+
+
+        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+
+        var client = stub._getServiceClient();
+        var options = client.getOptions();
+        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
+        authenticator.setUsername(username);
+        authenticator.setPassword(password);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+        var domainTemplates = stub.getDomain(domainName).getTemplateDTOs();
+        return domainTemplates;
+
+    } catch (ex) {
+        var message = "Error occurred while Retrieving Domain template DTO (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+};
+
+
+
 var deleteConfiguration = function (domainName, configurationName) {
         try {
         var carbon = require('carbon');
