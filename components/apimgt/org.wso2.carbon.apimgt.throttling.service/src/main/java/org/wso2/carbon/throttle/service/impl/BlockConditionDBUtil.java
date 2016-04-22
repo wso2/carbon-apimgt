@@ -31,9 +31,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,9 +41,10 @@ public final class BlockConditionDBUtil {
 
     private static volatile DataSource dataSource = null;
     private  static BlockConditionsDTO blockConditionsDTO = null;
+    private  static Set<String> keyTemplates;
     private static long lastAccessed;
     private static long timeBetweenUpdates = 10000;
-
+    private static final String GET_GLOBAL_POLICY_KEY_TEMPLATES =" SELECT KEY_TEMPLATE FROM AM_POLICY_GLOBAL";
     public static void initialize() throws Exception {
         if (dataSource != null) {
             return;
@@ -232,6 +231,7 @@ public final class BlockConditionDBUtil {
 
         private void processCommand() {
                 BlockConditionDBUtil.getBlockConditions();
+            BlockConditionDBUtil.getGlobalPolicyKeyTemplates();
         }
         @Override
         public String toString(){
@@ -244,5 +244,40 @@ public final class BlockConditionDBUtil {
             getBlockConditions();
         }
         return blockConditionsDTO;
+    }
+    public static Set<String> getKeyTemplates() {
+        if (keyTemplates == null) {
+            getGlobalPolicyKeyTemplates();
+        }
+        return keyTemplates;
+    }
+    /**
+     * Retrieves global policy key templates for the given tenantID
+     *
+     * @return list of KeyTemplates
+     */
+    public static Set<String> getGlobalPolicyKeyTemplates() {
+
+        keyTemplates = new HashSet<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = BlockConditionDBUtil.getConnection();
+
+            String sqlQuery = GET_GLOBAL_POLICY_KEY_TEMPLATES;
+
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                keyTemplates.add(rs.getString("KEY_TEMPLATE"));
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            BlockConditionDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return keyTemplates;
     }
 }

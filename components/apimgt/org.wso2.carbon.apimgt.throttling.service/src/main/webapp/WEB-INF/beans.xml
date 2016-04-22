@@ -10,6 +10,7 @@
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.throttle.service.ThrottleAsStringApi"/>
+            <bean class="org.wso2.carbon.throttle.service.KeyTemplatesApi"/>
             <bean class="org.wso2.carbon.throttle.service.ThrottleApi"/>
             <bean class="org.wso2.carbon.throttle.service.IsThrottledApi"/>
             <bean class="org.wso2.carbon.throttle.service.BlockApi"/>

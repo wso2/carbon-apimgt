@@ -27,15 +27,17 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.governance.lcm.beans.LifecycleStateBean;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class WebServiceBlockConditionsRetriever implements Runnable {
@@ -60,7 +62,7 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
         try {
             ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
                     .getInstance().getThrottleProperties().getBlockCondition();
-            String url = blockConditionRetrieverConfiguration.getServiceUrl();
+            String url = blockConditionRetrieverConfiguration.getServiceUrl()+"/block";
             byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
                     blockConditionRetrieverConfiguration.getPassword()).getBytes
                     (StandardCharsets.UTF_8));
@@ -78,10 +80,37 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
         }
         return null;
     }
+    private String[] retrieveKeyTemplateData() {
+
+        try {
+            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
+                    .getInstance().getThrottleProperties().getBlockCondition();
+            String url = blockConditionRetrieverConfiguration.getServiceUrl()+"/keyTemplates";
+            byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
+                    blockConditionRetrieverConfiguration.getPassword()).getBytes
+                    (StandardCharsets.UTF_8));
+            HttpGet method = new HttpGet(url);
+            method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            HttpResponse httpResponse = httpClient.execute(method);
+
+            String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+            if (responseString != null && !responseString.isEmpty()) {
+                JSONArray jsonArray = (JSONArray) new JSONParser().parse(responseString);
+                return (String[]) jsonArray.toArray(new String[jsonArray.size()]);
+            }
+        } catch (IOException e) {
+            log.error("Exception when retrieving throttling data from remote endpoint ", e);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     public void loadBlockConditionsFromWebService() {
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
+        List keyListMap = Arrays.asList(retrieveKeyTemplateData());
         if (blockConditionsDTO != null) {
             //TODO if possible try to get data as map since this can cause performance issue.
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().clear();
@@ -99,6 +128,9 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
                     generateMap(blockConditionsDTO.getCustom()));
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().putAll(
                     generateMap(blockConditionsDTO.getIp()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().putAll(
+                    generateMap(keyListMap));
+
         }
     }
 
