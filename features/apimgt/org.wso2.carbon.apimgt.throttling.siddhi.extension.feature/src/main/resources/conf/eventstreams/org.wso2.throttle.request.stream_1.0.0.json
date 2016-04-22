@@ -1,35 +1,51 @@
 {
   "name": "org.wso2.throttle.request.stream",
   "version": "1.0.0",
-  "nickName": "org.wso2.throttle.request.stream",
-  "description": "org.wso2.throttle.request.stream",
-  "metaData": [
+  "nickName": "",
+  "description": "",
+  "payloadData": [
     {
       "name": "messageID",
       "type": "STRING"
     },
     {
-      "name": "app_key",
+      "name": "appKey",
       "type": "STRING"
     },
     {
-      "name": "api_key",
+      "name": "appTier",
       "type": "STRING"
     },
     {
-      "name": "app_tier",
+      "name": "apiKey",
       "type": "STRING"
     },
     {
-      "name": "api_tier",
+      "name": "apiTier",
       "type": "STRING"
     },
     {
-      "name": "user_id",
+      "name": "subscriptionKey",
       "type": "STRING"
     },
     {
-      "name": "object",
+      "name": "subscriptionTier",
+      "type": "STRING"
+    },
+    {
+      "name": "resourceKey",
+      "type": "STRING"
+    },
+    {
+      "name": "resourceTier",
+      "type": "STRING"
+    },
+    {
+      "name": "userId",
+      "type": "STRING"
+    },
+    {
+      "name": "properties",
       "type": "STRING"
     }
   ]
