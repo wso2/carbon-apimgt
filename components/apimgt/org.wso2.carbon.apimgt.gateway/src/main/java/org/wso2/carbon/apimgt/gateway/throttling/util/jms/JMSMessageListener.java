@@ -56,7 +56,7 @@ public class JMSMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
 
-                    String throttleKey = map.get("throttle_key").toString();
+                    String throttleKey = map.get("throttleKey").toString();
                     String throttleState = map.get("isThrottled").toString();
                     if (throttleState.equals("true")) {
                         this.throttleDataHolder.getThrottleDataMap().put(throttleKey, throttleState);

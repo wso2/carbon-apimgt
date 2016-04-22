@@ -67,7 +67,7 @@ public class ThrottleDataPublisherPool {
     }
 
     public void release(DataProcessAndPublishingAgent client) throws Exception {
-        client.setDataReference(null);
+        //client.setDataReference(null);
         clientPool.returnObject(client);
     }
 
