@@ -2974,7 +2974,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 int i = 0;
                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                    API api = apiConsumer.getAPI(subscribedAPI.getApiId());
+                    API api = apiConsumer.getLightweightAPI(subscribedAPI.getApiId());
                     NativeObject row = new NativeObject();
                     row.put("apiName", row, subscribedAPI.getApiId().getApiName());
                     row.put("apiVersion", row, subscribedAPI.getApiId().getVersion());
@@ -2983,6 +2983,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("subscribedTier", row, subscribedAPI.getTier().getName());
                     row.put("status", row, api.getStatus().getStatus());
                     row.put("subStatus", row, subscribedAPI.getSubStatus());
+                    row.put("thumburl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                     myn.put(i, myn, row);
                     i++;
                 }
