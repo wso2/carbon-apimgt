@@ -1120,24 +1120,24 @@ public final class APIConstants {
     public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Small tier";
     public static final String DEFAULT_APP_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
-    public static final String DEFAULT_SUB_POLICY_LARGE = "Gold";
-    public static final String DEFAULT_SUB_POLICY_MEDIUM = "Silver";
-    public static final String DEFAULT_SUB_POLICY_SMALL = "Platinum";
+    public static final String DEFAULT_SUB_POLICY_GOLD = "Gold";
+    public static final String DEFAULT_SUB_POLICY_SILVER = "Silver";
+    public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
 
-    public static final String DEFAULT_SUB_POLICY_LARGE_DESC = "Gold tier";
-    public static final String DEFAULT_SUB_POLICY_MEDIUM_DESC = "Silver tier";
-    public static final String DEFAULT_SUB_POLICY_SMALL_DESC = "Platinum tier";
+    public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Gold tier";
+    public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Silver tier";
+    public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Bronze tier";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
-    public static final String DEFAULT_API_POLICY_LARGE = "Ultimate";
-    public static final String DEFAULT_API_POLICY_MEDIUM = "Plus";
-    public static final String DEFAULT_API_POLICY_SMALL = "Basic";
+    public static final String DEFAULT_API_POLICY_ULTIMATE = "Ultimate";
+    public static final String DEFAULT_API_POLICY_PLUS = "Plus";
+    public static final String DEFAULT_API_POLICY_BASIC = "Basic";
     public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
 
-    public static final String DEFAULT_API_POLICY_LARGE_DESC = "Ultimate tier";
-    public static final String DEFAULT_API_POLICY_MEDIUM_DESC = "Plus tier";
-    public static final String DEFAULT_API_POLICY_SMALL_DESC = "Basic tier";
+    public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Ultimate tier";
+    public static final String DEFAULT_API_POLICY_PLUS_DESC = "Plus tier";
+    public static final String DEFAULT_API_POLICY_BASIC_DESC = "Basic tier";
     public static final String DEFAULT_API_POLICY_UNLIMITED_DESC = "Unlimited tier";
 
     public static final String API_POLICY_USER_LEVEL = "userLevel";
