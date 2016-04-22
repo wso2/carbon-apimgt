@@ -18,13 +18,6 @@
         }
     }
 
-    var subscriptionLevelPolicies;
-    var apiLevelPolicies;
-    if(mod.isGlobalCEPThrottlingEnabled()){
-        subscriptionLevelPolicies = mod.getSubsriptionLevelPolicies().policies;
-        apiLevelPolicies = mod.getAPILevelPolicies().policies;
-    }
-
     var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
 
