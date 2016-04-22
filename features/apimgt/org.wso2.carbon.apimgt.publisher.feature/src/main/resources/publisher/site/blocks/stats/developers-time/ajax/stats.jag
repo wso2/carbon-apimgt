@@ -34,7 +34,7 @@ include("/jagg/jagg.jag");
                     usage: result.usage
                 }
             }
-            print(obj);
+            print({ data: [{ "key": "Developers", "values": result.usage }] , error: false });
              
     }
 }());

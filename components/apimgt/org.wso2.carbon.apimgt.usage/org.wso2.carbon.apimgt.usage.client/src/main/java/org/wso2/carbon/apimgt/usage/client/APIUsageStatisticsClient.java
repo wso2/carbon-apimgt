@@ -1054,7 +1054,6 @@ public abstract class APIUsageStatisticsClient {
                 query = query + groupBy;
             }
 
-            query = query + groupBy;
             statement = connection.prepareStatement(query);
 
 
@@ -1062,12 +1061,15 @@ public abstract class APIUsageStatisticsClient {
             rs = statement.executeQuery();
 
             List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
-            long x, y = 0;
+            long x;
+            int subscription_count = 0;
             //iterate over the results
             while (rs.next()) {
-                x = rs.getTimestamp("x").getTime();
-                y += rs.getLong("y");
-                list.add(new SubscriptionOverTimeDTO(x, y));
+                subscription_count+=rs.getInt("subscription_count");
+                long created_time=rs.getTimestamp("created_time").getTime();
+                String api_name=rs.getString("api_name");
+                String api_version=rs.getString("api_version");
+                list.add(new SubscriptionOverTimeDTO(subscription_count,created_time,api_name,api_version));
             }
             return list;
         } catch (Exception e) {
