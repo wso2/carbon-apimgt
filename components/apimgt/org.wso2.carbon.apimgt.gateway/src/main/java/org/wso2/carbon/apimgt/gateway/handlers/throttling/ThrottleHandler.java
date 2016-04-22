@@ -183,9 +183,8 @@ public class ThrottleHandler extends AbstractHandler {
                 ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
             //}
-            isBlockedRequest = false;
-            // isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-            //       apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
+            isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
+                   apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
             if (isBlockedRequest) {
                 String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
                         " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
