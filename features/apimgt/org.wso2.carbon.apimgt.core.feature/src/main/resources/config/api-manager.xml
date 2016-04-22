@@ -492,8 +492,8 @@
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
             </JMSConnectionParameters>
             <JMSTaskManager>
-                <MinThreadPoolSize>100</MinThreadPoolSize>
-                <MaxThreadPoolSize>20</MaxThreadPoolSize>
+                <MinThreadPoolSize>20</MinThreadPoolSize>
+                <MaxThreadPoolSize>100</MaxThreadPoolSize>
                 <KeepAliveTimeInMillis>1000</KeepAliveTimeInMillis>
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
