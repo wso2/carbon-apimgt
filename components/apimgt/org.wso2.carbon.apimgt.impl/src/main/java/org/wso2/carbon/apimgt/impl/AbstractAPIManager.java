@@ -1268,7 +1268,19 @@ public abstract class AbstractAPIManager implements APIManager {
         } else {
             tierMap = new HashMap<String, Tier>();
             int tenantIdFromUsername = APIUtil.getTenantId(username);
-            Policy[] policies = apiMgtDAO.getSubscriptionPolicies(tenantIdFromUsername);
+            Policy[] policies;
+            if (tierType == APIConstants.TIER_API_TYPE) {
+                policies = apiMgtDAO.getSubscriptionPolicies(tenantIdFromUsername);
+            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                policies = apiMgtDAO.getAPIPolicies(tenantIdFromUsername);
+            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                policies = apiMgtDAO.getApplicationPolicies(tenantIdFromUsername);
+            } else {
+                throw new APIManagementException("No such a tier type : " + tierType);
+            }
+
+            apiMgtDAO.getSubscriptionPolicies(tenantIdFromUsername);
+
             for(Policy policy : policies) {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
                     Tier tier = new Tier(policy.getPolicyName());
