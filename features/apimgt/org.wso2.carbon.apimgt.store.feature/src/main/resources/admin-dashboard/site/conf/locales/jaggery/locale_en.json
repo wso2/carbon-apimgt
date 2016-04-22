@@ -152,5 +152,8 @@
     "applyRule": "Apply Rule",
     "defineNewRule": "Define Rule",
     "subsTierList": "Subscription Tier List",
-    "addTier": "Add Tier"
+    "addTier": "Add Tier",
+    "apiResTierList": "API Resource Tier List",
+    "tierName": "Tier Name",
+    "tierDesc": "Tier Description"
 }
