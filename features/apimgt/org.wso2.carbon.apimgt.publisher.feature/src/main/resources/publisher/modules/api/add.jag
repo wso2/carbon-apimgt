@@ -367,12 +367,14 @@ var getResourceTiers = function () {
             var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_API);
 
             for(i = 0; i < policies.length; i++) {
-                tier = {};
-                tier.tierName = policies[i].getPolicyName();
-                tier.tierDisplayName = policies[i].getPolicyName()
-                tier.tierDescription = policies[i].getDescription() != null ? policies[i].getDescription() : "";
-                tier.defaultTier = (i == 0);
-                tierArray[i] = tier;
+                if(APIConstants.UNLIMITED_TIER != tier.tierName) {
+                    tier = {};
+                    tier.tierName = policies[i].getPolicyName();
+                    tier.tierDisplayName = policies[i].getPolicyName()
+                    tier.tierDescription = policies[i].getDescription() != null ? policies[i].getDescription() : "";
+                    tier.defaultTier = (i == 0);
+                    tierArray[i] = tier;
+                }
             }
           if(isUnlimitedTierEnabled){
             var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;

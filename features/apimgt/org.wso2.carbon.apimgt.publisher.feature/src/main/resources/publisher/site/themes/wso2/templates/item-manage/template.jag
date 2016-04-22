@@ -168,10 +168,9 @@
                             <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                         </label>
 <div class="controls col-sm-8 tierSelect">
-                            <select id="apiTier" name="apiTier"  class="form-control multiselect selected required" multiple="multiple">
+                            <select id="apiTier" name="apiTier"  class="form-control selected required">
                             <%
-                            var log = new Log();
-                          
+
                             for (var i = 0; i < resourceTiers.length; i++) {
                                 var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
                                 var isSelected = false;
@@ -203,12 +202,11 @@
                     <div class="controls col-sm-8 tierSelect">
                         <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
                         <%
-        for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
-
-            var isSelected = api.availableSubscriptionPolicy.indexOf(subscriptionLevelPolicies[i].getPolicyName()) > -1;
-            %><option value="<%= subscriptionLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= subscriptionLevelPolicies[i].getPolicyName() %></option>%%><%
-        }
-        %>
+                        for (var i = 0; i < tiers.length; i++) {
+                        var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+                        }
+                        %>
         </select>
         <script type="text/javascript">
 
