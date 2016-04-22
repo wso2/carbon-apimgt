@@ -1,7 +1,6 @@
 <% jagg.template("subscription/subscribed-apis", function(inputs, outputs, jagg) { 
 //@todo api should have image and provider
 //@todo api status should be displayed in 
-//@todo confirmation for subscription delete
 %>
 
 
@@ -36,9 +35,9 @@
 <script id="subscription-api-name" type="text/x-handlebars-template">
   <div class="thumbnail icon pull-left" style="width:80px; margin-right:10px">
 		<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
-        <div class="square-element">
-          <img class="" src="/registry/resource/_system/governance/apimgt/applicationdata/icons/admin/{{apiName}}/{{apiVersion}}/icon" alt="S">
-        </div>         
+        	<div class="square-element">
+          		<img class="" src="{{thumburl}}" alt="S">
+        	</div>         
 		</a>      
   </div>
   <h4>{{apiName}} - {{apiVersion}}</h4>
