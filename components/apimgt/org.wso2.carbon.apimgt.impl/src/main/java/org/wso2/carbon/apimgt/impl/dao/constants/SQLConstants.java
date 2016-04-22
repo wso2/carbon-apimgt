@@ -2315,7 +2315,8 @@ public class SQLConstants {
             "UPDATE AM_POLICY_GLOBAL " +
             "SET " +
                     "DESCRIPTION = ?, " +
-                    "SIDDHI_QUERY = ? " +
+                    "SIDDHI_QUERY = ?, " +
+                    "KEY_TEMPLATE = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =

@@ -3,6 +3,7 @@
     var policyName = request.getParameter("policyName");
     var pageTitle = "Add Custom Policy";
     var nameFieldDisableStatus = "";
+    var streamParameters = "api,version,context,provider,user";
 
     if(policyName != null) {
         pageTitle = "Edit Custom Policy";
@@ -58,6 +59,8 @@
                             <label class="control-label cnl-label">Key Template</label>
                             <div class="controls cnls">
                                 <input type="text" id="keyTemplate" name="keyTemplate" value=""/>
+                                <input type="hidden" id="keyTemplateValidated" name="keyTemplateValidated"
+                                value="true"/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
@@ -81,6 +84,7 @@
  
 <script>
 var isNewPolicy = true;
+
     $(document).ready(function(){
         $('#cancel-tier-btn').on('click',function(){
              location.reload(true);
@@ -95,6 +99,34 @@ var isNewPolicy = true;
           $('#keyTemplate').val("<%=keyTemplate%>");
           $('#siddhiQuery').val("<%=siddhiQuery%>");
         }
+
+      
+      var parameterArray = ("<%=streamParameters%>").split(',');
+      jQuery('input#keyTemplate').bind('input propertychange', function() {
+
+        var text = jQuery(this).val();
+        var arr = text.split(":");
+        var validated = true ;
+
+        $.each( arr, function( key, value ) {
+            value = value.replace(/\$|{|}/gi, ""); 
+            //alert("valueeeee :- "+$.inArray( value, parameterArray ) );
+            if($.inArray( value, parameterArray ) == -1 ){
+                // alert(parameterArray);
+                validated = false ; 
+            }
+        });
+
+        if(validated){
+            jQuery(this).css({ 'color': 'green', 'font-size': '1 px' });
+            jQuery('button.validate').prop("disabled",false);
+            $('#keyTemplateValidated').val("true");
+          }else{
+            jQuery(this).css({  'color': 'red', 'font-size': '1 px' });
+            jQuery('button.validate').prop("disabled",true);
+            $('#keyTemplateValidated').val("false");
+          }
+       });
     });
 </script>
 
