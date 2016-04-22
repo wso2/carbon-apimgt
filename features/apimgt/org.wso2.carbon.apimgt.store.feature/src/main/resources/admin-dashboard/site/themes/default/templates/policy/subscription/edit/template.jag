@@ -1,11 +1,11 @@
 <% jagg.template("policy/subscription/edit", function(inputs, outputs, jagg) { %>
 <%
     var policyName = request.getParameter("policyName");
-    var pageTitle = "Add subscription Level Policy";
+    var pageTitle = i18n.localize("addSubsTier");
     var nameFieldDisableStatus = "";
 
     if(policyName != null){
-        pageTitle = "Edit Subscription Level Policy";
+        pageTitle = i18n.localize("editSubsTier");
         nameFieldDisableStatus = "readonly";
         var subscriptionPolicies = session.get("subscriptionPolicies");
         var subscriptionPolicy;
@@ -118,7 +118,7 @@
                         </div>
 
                         <div id="rateLimitingDiv" class="control-group cnl-group">
-                             <legend>Rate Limiting</legend>
+                             <legend><%=i18n.localize("rateLimitHeader")%></legend>
                              <label class="control-label cnl-label">Request Count  </label>
                              <div class="controls cnls">
                                  <input type="text" id="rateLimitCount" name="rateLimitCount" />

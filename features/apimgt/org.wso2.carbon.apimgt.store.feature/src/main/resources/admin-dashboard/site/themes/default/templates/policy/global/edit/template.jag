@@ -62,9 +62,9 @@
                     </fieldset>
 
                     <div class="form-actions">
-                        <input id="add-tier-btn" onclick="saveGlobalPolicy()" name="save-tier-btn" type="button"
-                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
-                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                        <input id="edit-custom-rule-btn" onclick="saveGlobalPolicy()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("applyRule")%>'/>
+                        <input id="cancel-edit-custom-rule-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
                     </div>
                 </form>
             </div>

@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Add Subscription Level Policy",
+            "title":"Add Subscription Tier",
             "header":{
                 "name":"menu/primary"
             },

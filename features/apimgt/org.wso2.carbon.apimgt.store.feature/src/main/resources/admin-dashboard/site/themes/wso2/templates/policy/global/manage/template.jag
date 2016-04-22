@@ -1,7 +1,7 @@
 <% jagg.template("policy/global/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="title-section">
-        <h2>Custom Policy</h2>
+        <h2><%=i18n.localize("customRules")%></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -51,7 +51,7 @@
 
 </div>
 <div class='form-actions'>
-<input id="add-policy-btn" type='button' class='btn btn-primary' value='Add New Policy' />
+<input id="add-policy-btn" type='button' class='btn btn-primary' value='<%=i18n.localize("defineNewRule")%>' />
 </div>
 </div>
 
