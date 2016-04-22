@@ -1,7 +1,7 @@
 <% jagg.template("policy/resource/policy-list", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="title-section">
-        <h2>API Level Policy List</h2>
+        <h2><%=i18n.localize("apiResTierList")%></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -59,13 +59,15 @@
 </div>
 
 </div>
-<div class="content-section shadow-up">
-                    <div class="form-actions" id="saveButtons">
-                    	<button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="window.location='<%= jagg.url( "/api-policy-edit")%>'" class="btn btn-primary has-spinner"><%=i18n.localize("addThrottlePolicy")%>
-                        </button>
-                    </div>
-                </div>
+    <div class="content-section shadow-up">
+        <div class="form-actions" id="saveButtons">
+            <button type="submit" id="addNewAPIButton" name="addNewAPIButton"
+                onclick="window.location='<%= jagg.url( "/api-policy-edit")%>'" class="btn btn-primary has-spinner">
+                <%=i18n.localize("addTier")%>
+            </button>
         </div>
+    </div>
+</div>
 </div>
 
 <script>
