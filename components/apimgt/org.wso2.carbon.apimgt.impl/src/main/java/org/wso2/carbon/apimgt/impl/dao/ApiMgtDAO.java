@@ -8642,6 +8642,41 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves global policy key templates for the given tenantID
+     *
+     * @param tenantID tenantid
+     * @return list of KeyTemplates
+     * @throws APIManagementException
+     */
+    public List<String> getGlobalPolicyKeyTemplates(int tenantID) throws APIManagementException {
+
+        List<String> keyTemplates = new ArrayList<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATES;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                keyTemplates.add(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATES", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return keyTemplates;
+    }
+
+    /**
      * Removes a throttling policy from the database
      *
      * @param policyLevel level of the policy to be deleted
