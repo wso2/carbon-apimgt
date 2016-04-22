@@ -11,7 +11,7 @@ $(document).ready(function () {
         }
     }, "json");
 
-    $("#comment-text").on('keypress', function() {
+    $("#comment-text").on('keyup', function() {
         if($("#comment-text").val().trim()==""){
             $("#comment-add-button").attr('disabled', 'disabled');
         }else{
