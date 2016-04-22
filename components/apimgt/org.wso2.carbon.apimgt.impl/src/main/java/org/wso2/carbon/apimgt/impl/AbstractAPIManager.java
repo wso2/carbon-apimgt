@@ -72,6 +72,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1170,15 +1171,36 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
         Map<String, Tier> tierMap;
-        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getTiers();
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                tierMap = APIUtil.getTiers();
+            } else {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+                tierMap = APIUtil.getTiers(tenantId);
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+            tiers.addAll(tierMap.values());
         } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
+            tierMap = new HashMap<String, Tier>();
+            Policy[] policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+            for(Policy policy : policies) {
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getPolicyName());
+                    tierMap.put(policy.getPolicyName(), tier);
+                } else {
+                    if(APIUtil.isEnabledUnlimitedTier()) {
+                        Tier tier = new Tier(policy.getPolicyName());
+                        tier.setDescription(policy.getDescription());
+                        tier.setDisplayName(policy.getPolicyName());
+                        tierMap.put(policy.getPolicyName(), tier);
+                    }
+                }
+            }
+            tiers.addAll(tierMap.values());
         }
-        tiers.addAll(tierMap.values());
 
         return tiers;
     }
@@ -1189,20 +1211,41 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return Set<Tier>
      */
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
+        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
-                || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getTiers();
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
+                    || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                tierMap = APIUtil.getTiers();
+            } else {
+                tierMap = APIUtil.getTiers(requestedTenantId);
+            }
+            tiers.addAll(tierMap.values());
+            PrivilegedCarbonContext.endTenantFlow();
         } else {
-            tierMap = APIUtil.getTiers(requestedTenantId);
+            tierMap = new HashMap<String, Tier>();
+            Policy[] policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+            for(Policy policy : policies) {
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getPolicyName());
+                    tierMap.put(policy.getPolicyName(), tier);
+                } else {
+                    if(APIUtil.isEnabledUnlimitedTier()) {
+                        Tier tier = new Tier(policy.getPolicyName());
+                        tier.setDescription(policy.getDescription());
+                        tier.setDisplayName(policy.getPolicyName());
+                        tierMap.put(policy.getPolicyName(), tier);
+                    }
+                }
+            }
+            tiers.addAll(tierMap.values());
         }
-        tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
         return tiers;
     }
 
@@ -1218,9 +1261,43 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        Map<String, Tier> tierMap = APIUtil.getTiers(tierType, tenantDomain);
+        Map<String, Tier> tierMap;
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            tierMap = APIUtil.getTiers(tierType, tenantDomain);
+            tiers.addAll(tierMap.values());
+        } else {
+            tierMap = new HashMap<String, Tier>();
+            int tenantIdFromUsername = APIUtil.getTenantId(username);
+            Policy[] policies;
+            if (tierType == APIConstants.TIER_API_TYPE) {
+                policies = apiMgtDAO.getSubscriptionPolicies(tenantIdFromUsername);
+            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                policies = apiMgtDAO.getAPIPolicies(tenantIdFromUsername);
+            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                policies = apiMgtDAO.getApplicationPolicies(tenantIdFromUsername);
+            } else {
+                throw new APIManagementException("No such a tier type : " + tierType);
+            }
 
-        tiers.addAll(tierMap.values());
+            apiMgtDAO.getSubscriptionPolicies(tenantIdFromUsername);
+
+            for(Policy policy : policies) {
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getPolicyName());
+                    tierMap.put(policy.getPolicyName(), tier);
+                } else {
+                    if(APIUtil.isEnabledUnlimitedTier()) {
+                        Tier tier = new Tier(policy.getPolicyName());
+                        tier.setDescription(policy.getDescription());
+                        tier.setDisplayName(policy.getPolicyName());
+                        tierMap.put(policy.getPolicyName(), tier);
+                    }
+                }
+            }
+            tiers.addAll(tierMap.values());
+        }
 
         return tiers;
     }

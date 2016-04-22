@@ -78,7 +78,7 @@
 
             <div class="page-header">
                 <h2><br/></h2>
-                <p class="lead">Default Policy</p>
+                <p class="lead"><%=i18n.localize("defaultLimits")%></p>
             </div>
 
             <div class="form-group">
@@ -102,8 +102,8 @@
                 <div class="col-sm-9">
                     <input type="text" class="form-control required validInput noSpace" id="request-count" name="request-count" autofocus="autofocus" value="<%=defaultRequestCount%>">
                 </div>
-
-                <label class="control-label col-sm-3" for="request-count">Time:
+                <br class="spacer"/>
+                <label class="control-label col-sm-3" for="request-unit-time-count">Time:
                     <span class="requiredAstrix">*</span>
                     <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
                     <p id="name_help" class="hide">Time Configuration.</p>
@@ -161,32 +161,33 @@
         <h2><br/></h2>
         <p class="lead"><%=i18n.localize("executionFlows")%></p>
     </div>
-    <div id="throttle-policies-pipeline-content">
+    <div id="throttle-policies-pipeline-content" class="form-group">
         <button class="btn btn-primary" type="button" onclick="addPolicy()">
-            <span class="icon fw-stack">
+            <span class="icon fw-stack form-group">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
                 </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
         </button>
-        <div id="pipeline-content"></div>
+        <div id="pipeline-content" class="form-group"></div>
     </div>
-    <div id="add-policy-button">
-        <button type="button" id="addNewAPIButton" name="addNeWThrottleButton" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner">
-            <span class="icon fw-stack">
+    <br class="spacer"/>
+    <div id="add-policy-button" class="form-group">
+        <button type="button" id="addThrottleBtn" name="addThrottleBtn" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner">
+            <span>
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
                 <% if (action == "new") {%>
-                 </span>&nbsp;<%=i18n.localize("addThrottlePolicy")%>
+                 </span>&nbsp;<%=i18n.localize("save")%>
                  <% } else { %>
-                </span>&nbsp;<%=i18n.localize("editThrottlePolicy")%>
+                </span>&nbsp;<%=i18n.localize("update")%>
                 <% } %>
         </button>
     </div>
 </div>
 
 <script id="designer-policy-template" type="text/x-handlebars-template">
-
-<div id="accordion2" class="panel-group" role="tablist" aria-multiselectable="true">
+<br class="spacer" style="display: inline;"/>
+<div id="accordion2" class="panel-group form-group" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="collapse-{{executionFlow.id}}" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}">
             <h4 class="panel-title">

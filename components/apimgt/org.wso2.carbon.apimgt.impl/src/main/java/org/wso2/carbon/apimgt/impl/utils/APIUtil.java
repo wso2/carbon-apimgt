@@ -91,7 +91,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1762,6 +1761,45 @@ public final class APIUtil {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         }
+    }
+
+    /**
+     * Returns a map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAdvancedSubsriptionTiers() throws APIManagementException {
+        return getAdvancedSubsriptionTiers(MultitenantConstants.SUPER_TENANT_ID);
+    }
+
+    /**
+     * Returns a map of API subscription tiers of the tenant as defined in database
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAdvancedSubsriptionTiers(int tenantId) throws APIManagementException {
+        Map<String, Tier> tierMap = new HashMap<String, Tier>();
+        Policy[] policies = ApiMgtDAO.getInstance().getSubscriptionPolicies(tenantId);
+        for(Policy policy : policies) {
+            if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                Tier tier = new Tier(policy.getPolicyName());
+                tier.setDescription(policy.getDescription());
+                tier.setDisplayName(policy.getPolicyName());
+                tierMap.put(policy.getPolicyName(), tier);
+            } else {
+                if(APIUtil.isEnabledUnlimitedTier()) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getPolicyName());
+                    tierMap.put(policy.getPolicyName(), tier);
+                }
+            }
+        }
+        return tierMap;
     }
 
     /**
@@ -4849,12 +4887,19 @@ public final class APIUtil {
                 tierMap = (Map<String, Tier>) getTiersCache().get(tierName);
             } else {
                 int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                if (requestedTenantId == 0) {
-                    tierMap = APIUtil.getTiers();
+                if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                    if (requestedTenantId == 0) {
+                        tierMap = APIUtil.getTiers();
+                    } else {
+                        tierMap = APIUtil.getTiers(requestedTenantId);
+                    }
                 } else {
-                    tierMap = APIUtil.getTiers(requestedTenantId);
+                    if (requestedTenantId == 0) {
+                        tierMap = APIUtil.getAdvancedSubsriptionTiers();
+                    } else {
+                        tierMap = APIUtil.getAdvancedSubsriptionTiers(requestedTenantId);
+                    }
                 }
-
                 getTiersCache().put(tierName, tierMap);
             }
         } finally {
@@ -5385,10 +5430,10 @@ public final class APIUtil {
         }
 
         //Adding Subscription level policies
-        String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE, APIConstants.DEFAULT_SUB_POLICY_MEDIUM,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
-        String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_LARGE_DESC, APIConstants.DEFAULT_SUB_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_SMALL_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
+        String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+        String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < subPolicies.length ; i++) {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
@@ -5410,10 +5455,10 @@ public final class APIUtil {
         }
 
         //Adding Resource level policies
-        String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE, APIConstants.DEFAULT_API_POLICY_MEDIUM,
-                APIConstants.DEFAULT_API_POLICY_SMALL, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
-        String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_LARGE_DESC, APIConstants.DEFAULT_API_POLICY_MEDIUM_DESC,
-                APIConstants.DEFAULT_API_POLICY_SMALL_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
+        String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE, APIConstants.DEFAULT_API_POLICY_PLUS,
+                APIConstants.DEFAULT_API_POLICY_BASIC, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
+        String[] apiPolicyDecs = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE_DESC, APIConstants.DEFAULT_API_POLICY_PLUS_DESC,
+                APIConstants.DEFAULT_API_POLICY_BASIC_DESC, APIConstants.DEFAULT_API_POLICY_UNLIMITED_DESC};
         for(int i = 0; i < apiPolicies.length ; i++) {
             policyName = apiPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {

@@ -48,7 +48,11 @@
     "tiers":"Tier",
     "permissions":"Permissions",
     "allow":"Allow",
+    "allowed":"Allowed",
     "deny":"Deny",
+    "denied":"Denied",
+    "tierPermissionMessagePart1":"This tier is ",
+    "tierPermissionMessagePart2":" for above roles.",
     "alerts":"Configure Alerts",
     "templateName":"Template Name",
     "configName":"Configuration Name",
@@ -83,5 +87,14 @@
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
     "conditionValueHead":"Condition Value",
-    "conditionManagementTitle":"Condition Management"
+    "conditionManagementTitle":"Blocking Entities",
+    "save":"Save",
+    "update":"Update",
+    "defaultLimits": "Default Limits",
+    "apiTiers": "API Resource Tiers",
+    "applicationTiers": "Application Tiers",
+    "subscriptionTiers": "Subscription Tiers",
+    "customRules": "Custom Rules",
+    "selectBlockingEntity": "Select Entity to Block",
+    "block": "Block"
 }
