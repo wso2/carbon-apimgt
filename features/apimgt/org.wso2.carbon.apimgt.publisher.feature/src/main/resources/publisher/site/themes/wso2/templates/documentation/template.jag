@@ -50,7 +50,7 @@
 
 		        <div class="control-group">
 		            <label class="control-label"><%=i18n.localize("summary")%><span class="requiredAstrix">*</span></label>
-		            <div class="controls">
+		            <div class="controls form-group">
 		                <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
 		            </div>
 		        </div>
@@ -102,7 +102,7 @@
 											onclick="javascript:$('#otherTypeDiv').toggle('slow')" /><%=i18n.localize("other")%>
 									</label></li>
 								</ul>
-								<div id="otherTypeDiv" class="controls" style="display: none;">
+								<div id="otherTypeDiv" class="controls form-group" style="display: none;">
 									<span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
 										class="required form-control" id="specifyBox"
 										style="width: 98%;" />

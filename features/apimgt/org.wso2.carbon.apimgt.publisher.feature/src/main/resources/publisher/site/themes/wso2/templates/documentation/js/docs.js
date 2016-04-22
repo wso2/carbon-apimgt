@@ -19,9 +19,17 @@ $(document).ready(function() {
     var docId = $("#docName");
     docId.change(function () {
         var apiName = $("#docAPIName").val();
-        //Check the doc name is duplicated
-        var errorCondition = isAvailableDoc(apiName + "-" + docId.val());
-        validInput(docId, 'Duplicate Document Name.', errorCondition);
+
+        //check for illegal characters in doc name
+        var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
+        var illegalCharsCondition = illegalChars.test(docId.val());
+        validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
+
+        if(!illegalCharsCondition) {
+            //Check the doc name is duplicated
+            var errorCondition = isAvailableDoc(apiName + "-" + docId.val());
+            validInput(docId, 'Duplicate Document Name.', errorCondition);
+        }
 
     });
     
@@ -201,25 +209,31 @@ var submitDoc = function() {
 var saveDoc=function(){
     var sourceType = getRadioValue($('input[name=optionsRadios1]:radio:checked'));
     var docId = $("#docName");
+    var summaryDiv = $("#summary");
     var docUrlDiv = $("#docUrl");
     var fileDiv = $("#docLocation");
     var apiName = $("#docAPIName").val();
     var errCondition = docUrlDiv.val() == "";
     var isFilePathEmpty = fileDiv.val() == "";
+    var isSummaryEmpty = summaryDiv.val().trim() == "";
     var isOtherTypeNameEmpty = $('#specifyBox').val() == null || $('#specifyBox').val() == '';
     var docType = getRadioValue($('input[name=optionsRadios]:radio:checked'));
     var docVisibility=$("#docVisibility option:selected").val();
     var docName = $("#docName").val();
     var errorCondition = false;
-    var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;
+    var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
     var illegalCharsCondition = illegalChars.test(docId.val());
+
+    if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
+        return;
+    }
     if($('#saveDocBtn').val() != "Update"){
         errorCondition = isAvailableDoc(apiName + "-" + docId.val());
     }
     if (apiName && !validInput(docId, 'Duplicate Document Name.', errorCondition)) {
         return;
-    } else if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
-	return;
+    } else if (!validInput(summaryDiv, 'This field is required.', isSummaryEmpty)) {
+        return;
     } else if (sourceType == 'url' && !validInput(docUrlDiv, 'This field is required.', errCondition)) {
         return;
     } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
