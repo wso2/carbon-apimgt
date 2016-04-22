@@ -92,6 +92,7 @@ public class WebServiceThrottleDataRetriever extends TimerTask {
         if (throttleKeyArray != null && throttleKeyArray.length > 0) {
             for (String throttleKey : throttleKeyArray) {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+
                         getThrottleDataMap().put(throttleKey, "throttled");
             }
         }

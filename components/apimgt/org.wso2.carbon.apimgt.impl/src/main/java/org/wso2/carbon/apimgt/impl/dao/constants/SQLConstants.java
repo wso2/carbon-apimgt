@@ -2185,6 +2185,11 @@ public class SQLConstants {
             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
+    public static final String INSERT_HARD_THROTTLE_POLICY_SQL =
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?,?)";
+
+
     public static final String INSERT_GLOBAL_POLICY_SQL =
             "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
             "VALUES (?,?,?,?,?,?)";

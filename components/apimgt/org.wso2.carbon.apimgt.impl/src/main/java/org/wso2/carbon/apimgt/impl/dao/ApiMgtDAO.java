@@ -8599,6 +8599,44 @@ public class ApiMgtDAO {
         }
     }
 
+
+    /**
+     * Add a Hard throttling policy to database
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    public void addHardThrottlingPolicy(HardThrottlingPolicy policy) throws APIManagementException {
+            Connection conn = null;
+            PreparedStatement policyStatement = null;
+            try {
+
+                conn = APIMgtDBUtil.getConnection();
+                conn.setAutoCommit(false);
+                String addQuery = SQLConstants.INSERT_HARD_THROTTLE_POLICY_SQL;
+
+                policyStatement = conn.prepareStatement(addQuery);
+                setCommonParametersForPolicy(policyStatement, policy);
+                policyStatement.executeUpdate();
+
+                conn.commit();
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+
+                        // Rollback failed. Exception will be thrown later for upper exception
+                        log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
+                    }
+                }
+                handleException("Failed to add Application Policy: " + policy, e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+            }
+
+    }
+
     /**
      * Add a Global level throttling policy to database
      *
