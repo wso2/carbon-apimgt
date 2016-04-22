@@ -8828,6 +8828,41 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get Hard Throttling polices
+     *
+     * @param tenantID polices are selected only belong to specific tenantID
+     * @return Hard Throttling policy List
+     */
+    public HardThrottlingPolicy[] getHardThrottlePolicies(int tenantID) throws APIManagementException {
+        List<HardThrottlingPolicy> policies = new ArrayList<HardThrottlingPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                HardThrottlingPolicy appPolicy = new HardThrottlingPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(appPolicy, rs);
+                policies.add(appPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new HardThrottlingPolicy[policies.size()]);
+    }
+
+    /**
      * Get all subscription level policeis belongs to specific tenant
      *
      * @param tenantID tenantID filters the polices belongs to specific tenant
@@ -9590,6 +9625,8 @@ public class ApiMgtDAO {
                 sqlQuery = SQLConstants.GET_SUB_POLICY_NAMES;
             } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
                 sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_HARD.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
             }
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantID);

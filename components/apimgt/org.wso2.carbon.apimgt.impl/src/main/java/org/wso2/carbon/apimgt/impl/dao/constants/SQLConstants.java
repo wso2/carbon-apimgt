@@ -2186,8 +2186,9 @@ public class SQLConstants {
 
 
     public static final String INSERT_HARD_THROTTLE_POLICY_SQL =
-            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
-            "VALUES (?,?,?,?,?,?)";
+            "INSERT INTO AM_POLICY_HARD_THROTTLING (NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+            " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2233,6 +2234,16 @@ public class SQLConstants {
                     "   AM_POLICY_APPLICATION " +
                     " WHERE" +
                     "   TENANT_ID =?";
+
+
+    public static final String GET_HARD_THROTTLING_POLICIES =
+            " SELECT "+
+            "   * " +
+            "FROM " +
+            "   AM_POLICY_HARD_THROTTLING " +
+            " WHERE" +
+            "   TENANT_ID =?";
+
     public static final String GET_SUBSCRIPTION_POLICIES =
             " SELECT " +
                     "   * " +

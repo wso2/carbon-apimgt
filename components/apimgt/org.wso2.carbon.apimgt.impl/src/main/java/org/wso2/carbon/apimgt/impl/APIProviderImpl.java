@@ -3685,7 +3685,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 //executionFlows.add(policyString);
                 hardThrottlingPolicy.setDeployed(true);
                 apiMgtDAO.addHardThrottlingPolicy(hardThrottlingPolicy);
-                policyLevel = PolicyConstants.POLICY_LEVEL_HARD;
+               //policyLevel = PolicyConstants.POLICY_LEVEL_HARD;
+                return;
             } else {
                 String msg = "Policy type " + policy.getClass().getName() + " is not supported";
                 log.error(msg);
