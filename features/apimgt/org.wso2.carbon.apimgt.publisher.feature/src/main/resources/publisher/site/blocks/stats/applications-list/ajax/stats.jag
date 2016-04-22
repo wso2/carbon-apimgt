@@ -1,0 +1,58 @@
+<%
+include("/jagg/jagg.jag");
+response.contentType = "application/json; charset=UTF-8";
+var site = require("/site/conf/site.json");
+var msg = require("/site/conf/ui-messages.jag");
+var log = new Log();
+
+
+(function () {
+    /* Filters */
+    
+    /*Date range for app creation*/
+    var from = request.getParameter("from");
+    var to = request.getParameter("to");
+    
+    /*subscription related filters*/
+    var api = request.getParameter("api");
+    var version = request.getParameter("version");
+    var provider = request.getParameter("provider");
+    var fromDate = request.getParameter("fromDate");
+    var toDate = request.getParameter("toDate");
+    var user = request.getParameter("user");
+    var groupId = request.getParameter("groupId");
+    var withSubscriptions = request.getParameter("withSubscriptions");
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    }
+    else{
+
+        mod = jagg.module("statistics");
+        var currentLocation = request.getParameter("currentLocation");
+        var apiFilter = request.getParameter("apiFilter");
+        //var tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
+        var limit = 0;
+        var tenantDomain = null;
+        result = mod.getApplicationList(api, version, user, groupId, withSubscriptions, provider, from, to, tenantDomain, fromDate, toDate, limit);
+
+        if (result.error == "true") {
+          obj = {
+              error: result.error,
+              message: msg.error.backendError(action)
+          };
+        } else {
+          obj = {
+              error: false,
+              data: result.usage
+          }
+        }
+        print(obj);
+       
+    }
+
+}());
+%>

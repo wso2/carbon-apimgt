@@ -134,6 +134,13 @@
                               onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                               <i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiUserAgentUsage")%>"></i>
                               <%=i18n.localize("apiUserAgentUsage")%></a></li>
+
+							<li <% if(page == "apis-time"){ %>
+							class="active" <% } %>><a class="substats" "<%=i18n.localize("apiTime")%>"
+							href="<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiTime")%>"></i>
+							<%=i18n.localize("apiTime")%></a></li>
 						</ul>
 
 </li>

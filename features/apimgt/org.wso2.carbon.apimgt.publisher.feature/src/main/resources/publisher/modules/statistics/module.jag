@@ -51,6 +51,12 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getGeolocationUsageByAPI.apply(this, arguments);
     },getUserAgentUsageByAPI:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getUserAgentUsageByAPI.apply(this, arguments);
+    },getApisByTime:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApisByTime.apply(this, arguments);
+    },getDeveloperList:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getDeveloperList.apply(this, arguments);
+    },getApplicationList:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApplicationList.apply(this, arguments);
     }
 });
 %>

@@ -767,4 +767,91 @@ function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,dri
         };
     }
 }
+
+function getDeveloperList(apiName, provider, fromDate, toDate, tenantDomain, limit) {
+    var usage;
+    try {
+        usage = usageClient.getDeveloperList(apiName, provider, tenantDomain, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit) {
+    var usage;
+    try {
+        usage = usageClient.getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getApplicationList(apiName, version, user, groupId, withSubscriptions, provider, from, to, tenantDomain, fromDate, toDate, limit) {
+    var usage;
+    try {
+        usage = usageClient.getApplicationList(apiName, version, user, groupId, withSubscriptions, provider, from, to, tenantDomain, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>
