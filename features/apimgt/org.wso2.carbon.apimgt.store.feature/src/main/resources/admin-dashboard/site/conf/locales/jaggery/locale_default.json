@@ -87,8 +87,14 @@
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
     "conditionValueHead":"Condition Value",
-    "conditionManagementTitle":"Condition Management",
+    "conditionManagementTitle":"Blocking Entities",
     "save":"Save",
     "update":"Update",
-    "defaultLimits": "Default Limits"
+    "defaultLimits": "Default Limits",
+    "apiTiers": "API Resource Tiers",
+    "applicationTiers": "Application Tiers",
+    "subscriptionTiers": "Subscription Tiers",
+    "customRules": "Custom Rules",
+    "selectBlockingEntity": "Select Entity to Block",
+    "block": "Block"
 }
