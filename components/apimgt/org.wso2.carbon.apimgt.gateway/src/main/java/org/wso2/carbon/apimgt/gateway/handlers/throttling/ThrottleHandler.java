@@ -174,15 +174,15 @@ public class ThrottleHandler extends AbstractHandler {
             applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
-            if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
-                apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
+            //if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
+                apiLevelThrottleKey = apiContext + ":" +apiVersion; //authContext.getApiTier();
                 //Check if request is blocked. If request is blocked then will not proceed further and
                 //inform to client.
                 //TODO handle blocked and throttled requests separately.
 
                 ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
-            }
+            //}
             isBlockedRequest = false;
             // isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
             //       apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
@@ -199,6 +199,7 @@ public class ThrottleHandler extends AbstractHandler {
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
                 applicationLevelTier = authContext.getApplicationTier();
                 subscriptionLevelTier = authContext.getTier();
+                resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                 apiLevelTier = authContext.getApiTier();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply
                 // for it
