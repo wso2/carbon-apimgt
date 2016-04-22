@@ -30,6 +30,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
@@ -108,6 +111,7 @@ public class OAuthAuthenticator implements Authenticator {
         //If the matching resource does not require authentication
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
+        VerbInfoDTO verbInfoDTO = (VerbInfoDTO)synCtx.getProperty(APIConstants.VERB_INFO_DTO);
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
 
             if(log.isDebugEnabled()){
@@ -186,8 +190,10 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
             authContext.setConsumerKey(info.getConsumerKey());
+            authContext.setApiTier(info.getApiTier());
+            authContext.setThrottlingDataList(info.getThrottlingDataList());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
-            
+
             /* Synapse properties required for BAM Mediator*/
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());

@@ -155,7 +155,7 @@ $(document).ready(function(){
     $("#prototyped_api").click(function(e){
         $("body").on("prototype_saved", function(e){
             $("body").unbind("prototype_saved");
-                var designer = APIDesigner();            
+                var designer = APIDesigner();
                 $.ajax({
                     type: "POST",
                     url: jagg.site.context + "/site/blocks/life-cycles/ajax/life-cycles.jag",

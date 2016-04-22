@@ -46,7 +46,7 @@
     }
 
     var manage_wlabel = "";
-    if(api && api.availableTiers !=""){
+    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
         manage_wlabel = "completed";      
     }else{
         var manage_w_link = '#';        

@@ -31,6 +31,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>
         </dependency>
@@ -203,7 +207,7 @@
                             org.apache.http.*,
                             org.apache.commons.*,
                             org.apache.synapse.*,
-                            org.apache.thrift.*,
+                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*; version="2.0.4.wso2v4",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.throttle.core.*; version="${imp.pkg.version.carbon.throttle}",

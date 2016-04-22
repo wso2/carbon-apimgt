@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -1657,36 +1658,60 @@ public class APIStoreHostObject extends ScriptableObject {
                             row.put("userRate", row, userRate);
                         }
                         row.put("serverURL", row, getEnvironmentsOfAPI(api).toJSONString());
+
                         NativeArray tierArr = new NativeArray(0);
-                        Set<Tier> tierSet = api.getAvailableTiers();
-                        if (tierSet != null) {
-                            Iterator it = tierSet.iterator();
-                            int j = 0;
+                        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                            Set<Tier> tierSet = api.getAvailableTiers();
+                            if (tierSet != null) {
+                                Iterator it = tierSet.iterator();
+                                int j = 0;
 
-                            while (it.hasNext()) {
-                                NativeObject tierObj = new NativeObject();
-                                Object tierObject = it.next();
-                                Tier tier = (Tier) tierObject;
-                                tierObj.put("tierName", tierObj, tier.getName());
-                                tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
-                                tierObj.put("tierDescription", tierObj,
-                                        tier.getDescription() != null ? tier.getDescription() : "");
-                                if (tier.getTierAttributes() != null) {
-                                    Map<String, Object> attributes;
-                                    attributes = tier.getTierAttributes();
-                                    StringBuilder attributesListBuilder = new StringBuilder();
-                                    for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                                        attributesListBuilder.append(attribute.getKey()).append("::").append(
-                                                attribute.getValue()).append(",");
+                                while (it.hasNext()) {
+                                    NativeObject tierObj = new NativeObject();
+                                    Object tierObject = it.next();
+                                    Tier tier = (Tier) tierObject;
+                                    tierObj.put("tierName", tierObj, tier.getName());
+                                    tierObj.put("tierDisplayName", tierObj, tier.getDisplayName());
+                                    tierObj.put("tierDescription", tierObj,
+                                            tier.getDescription() != null ? tier.getDescription() : "");
+                                    if (tier.getTierAttributes() != null) {
+                                        Map<String, Object> attributes;
+                                        attributes = tier.getTierAttributes();
+                                        StringBuilder attributesListBuilder = new StringBuilder();
+                                        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                            attributesListBuilder.append(attribute.getKey()).append("::").append(
+                                                    attribute.getValue()).append(",");
+                                        }
+                                        tierObj.put("tierAttributes", tierObj, attributesListBuilder.toString());
                                     }
-                                    tierObj.put("tierAttributes", tierObj, attributesListBuilder.toString());
-                                }
-                                tierArr.put(j, tierArr, tierObj);
-                                j++;
+                                    tierArr.put(j, tierArr, tierObj);
+                                    j++;
 
+                                }
+                            }
+                        } else {
+                            Set<Tier> policySet = api.getAvailableTiers();
+                            if (policySet != null) {
+                                Iterator it = policySet.iterator();
+                                int j = 0;
+
+                                while (it.hasNext()) {
+                                    NativeObject policyObj = new NativeObject();
+                                    Object policyObject = it.next();
+                                    Tier policy = (Tier) policyObject;
+                                    policyObj.put("tierName", policyObj, policy.getName());
+                                    policyObj.put("tierDisplayName", policyObj, policy.getName() != null ? policy.getName() : "");
+                                    policyObj.put("tierDescription", policyObj,
+                                            policy.getDescription() != null ? policy.getDescription() : "");
+                                    tierArr.put(j, tierArr, policyObj);
+                                    j++;
+
+                                }
                             }
                         }
+
                         row.put("tiers", row, tierArr);
+
                         row.put("subscribed", row, isSubscribed);
                         if (api.getThumbnailUrl() == null) {
                             row.put("thumbnailurl", row, "images/api-default.png");
@@ -1984,6 +2009,11 @@ public class APIStoreHostObject extends ScriptableObject {
         int applicationId = ((Number) args[4]).intValue();
         String userId = (String) args[5];
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+        
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
@@ -1995,25 +2025,50 @@ public class APIStoreHostObject extends ScriptableObject {
 
 	        /* Validation for allowed throttling tiers*/
             API api = apiConsumer.getAPI(apiIdentifier);
-            Set<Tier> tiers = api.getAvailableTiers();
-
-            Iterator<Tier> iterator = tiers.iterator();
-            boolean isTierAllowed = false;
-            List<String> allowedTierList = new ArrayList<String>();
-            while (iterator.hasNext()) {
-                Tier t = iterator.next();
-                if (t.getName() != null && (t.getName()).equals(tier)) {
-                    isTierAllowed = true;
+            
+            if(isGlobalThrottlingEnabled){
+                Set<Tier> policies = api.getAvailableTiers();
+                Iterator<Tier> iterator = policies.iterator();
+                boolean isPolicyAllowed = false;
+                List<String> allowedPolicyList = new ArrayList<String>();
+                while (iterator.hasNext()) {
+                    Tier policy = iterator.next();
+                    if (policy.getName() != null && (policy.getName()).equals(tier)) {
+                        isPolicyAllowed = true;
+                    }
+                    allowedPolicyList.add(policy.getName());
                 }
-                allowedTierList.add(t.getName());
+                if (!isPolicyAllowed) {
+                    throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "
+                            + Arrays.toString(allowedPolicyList.toArray()) + " Tiers are alllowed.");
+                }
+                //TODO policy tier permission??
+                /*
+                if (apiConsumer.isTierDeneid(tier)) {
+                    throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
+                }*/
+            } else {
+                Set<Tier> tiers = api.getAvailableTiers();
+
+                Iterator<Tier> iterator = tiers.iterator();
+                boolean isTierAllowed = false;
+                List<String> allowedTierList = new ArrayList<String>();
+                while (iterator.hasNext()) {
+                    Tier t = iterator.next();
+                    if (t.getName() != null && (t.getName()).equals(tier)) {
+                        isTierAllowed = true;
+                    }
+                    allowedTierList.add(t.getName());
+                }
+                if (!isTierAllowed) {
+                    throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "
+                            + Arrays.toString(allowedTierList.toArray()) + " Tiers are alllowed.");
+                }
+                if (apiConsumer.isTierDeneid(tier)) {
+                    throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
+                }
             }
-            if (!isTierAllowed) {
-                throw new APIManagementException("Tier " + tier + " is not allowed for API " + apiName + "-" + version + ". Only "
-                        + Arrays.toString(allowedTierList.toArray()) + " Tiers are alllowed.");
-            }
-            if (apiConsumer.isTierDeneid(tier)) {
-                throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
-            }
+            
 	    	/* Tenant based validation for subscription*/
             String userDomain = MultitenantUtils.getTenantDomain(userId);
             boolean subscriptionAllowed = false;

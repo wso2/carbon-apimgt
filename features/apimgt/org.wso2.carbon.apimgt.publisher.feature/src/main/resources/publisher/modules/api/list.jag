@@ -63,7 +63,9 @@ var getAPI = function (api) {
             endpointAuthTypeDigest:result[48],
             corsConfiguration:result[49],
             hasDefaultVersion:hasDefaultVersion,
-            currentDefaultVersion:defaultVersion
+            currentDefaultVersion:defaultVersion,
+            availableSubscriptionPolicy:result[50],
+            apiLevelPolicy:result[51]
         };
         return {
             error:false,

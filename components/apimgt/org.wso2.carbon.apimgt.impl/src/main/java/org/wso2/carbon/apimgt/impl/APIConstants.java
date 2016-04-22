@@ -208,6 +208,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_THUMBNAIL_URL="overview_thumbnail";
     public static final String API_OVERVIEW_STATUS="overview_status";
     public static final String API_OVERVIEW_TIER="overview_tier";
+    public static final String API_OVERVIEW_SUB_POLICY="overview_subPolicy";
+    public static final String API_OVERVIEW_API_POLICY="overview_apiPolicy";
     public static final String API_OVERVIEW_IS_LATEST ="overview_isLatest";
     public static final String API_URI_TEMPLATES ="uriTemplates_entry";
     public static final String API_OVERVIEW_TEC_OWNER ="overview_technicalOwner";
@@ -595,13 +597,14 @@ public final class APIConstants {
     public static final String API_USAGE_THROTTLE_OUT_PROPERTY_KEY = "isThrottleOutIgnored";
 
     public static final String THROTTLE_OUT_REASON_KEY = "THROTTLED_OUT_REASON";
-
-// The following properties describes the reason for the throttle out.
+    public static final String BLOCKED_REASON_KEY = "BLOCKED_REASON";
+    // The following properties describes the reason for the throttle out.
     public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED = "API_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
@@ -942,6 +945,31 @@ public final class APIConstants {
         OPTIONS
     }
 
+    public enum SupportedCustomPolicyKeys {
+        APP_ID("APP_ID"),
+        IP("IP"),
+        STARTING_IP("STARTING_IP"),
+        END_IP("END_IP"),
+        ACCESS_TOKEN("ACCESS_TOKEN"),
+        USERNAME("APP_ID"),
+        QUERY_PARAM("QUERY_PARAM"),
+        HEADER("HEADER"),
+        BANDWIDTH("BANDWIDTH"),
+        JWT_CLAIM("JWT_CLAIM"),
+        CONTEXT("CONTEXT"),
+        VERSION("VERSION");
+
+        private final String name;
+
+        SupportedCustomPolicyKeys(String s) {
+            name = s;
+        }
+
+        public String getValue() {
+            return this.name;
+        }
+    }
+
     public static class ConfigParameters {
         public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
         private ConfigParameters() {
@@ -1062,4 +1090,97 @@ public final class APIConstants {
     public static final String CLIENT_CODEGEN_MODAL_PACKAGE = "SwaggerCodegen.ClientGeneration.ModelPackage";
     public static final String CLIENT_CODEGEN_API_PACKAGE = "SwaggerCodegen.ClientGeneration.ApiPackage";
 
+    //Starts CEP based throttling policy implementation related constants
+    public static final String CPS_SERVER_URL = "CPSServerUrl";
+    public static final String CPS_SERVER_USERNAME = "CPSServerUsername";
+    public static final String CPS_SERVER_PASSWORD = "CPSServerPassword";
+    public static final String POLICY_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
+            "server" + File.separator + "throttle-config";
+    public static final String POLICY_FILE_LOCATION = POLICY_FILE_FOLDER + File.separator;
+
+    public static final String ELIGIBILITY_QUERY_ELEM= "eligibilityQuery";
+    public static final String POLICY_NAME_ELEM = "name";
+    public static final String DECISION_QUERY_ELEM = "decisionQuery";
+    public static final String XML_EXTENSION= ".xml";
+
+    //Advanced throttling related constants
+    public static final String TIME_UNIT_SECOND = "sec";
+    public static final String TIME_UNIT_MINUTE = "min";
+    public static final String TIME_UNIT_HOUR = "hour";
+    public static final String TIME_UNIT_DAY = "day";
+
+    public static final String DEFAULT_APP_POLICY_LARGE = "Large";
+    public static final String DEFAULT_APP_POLICY_MEDIUM = "Medium";
+    public static final String DEFAULT_APP_POLICY_SMALL = "Small";
+    public static final String DEFAULT_APP_POLICY_UNLIMITED = "Unlimited";
+
+
+    public static final String DEFAULT_APP_POLICY_LARGE_DESC = "Large tier";
+    public static final String DEFAULT_APP_POLICY_MEDIUM_DESC = "Medium tier";
+    public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Small tier";
+    public static final String DEFAULT_APP_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
+
+    public static final String DEFAULT_SUB_POLICY_GOLD = "Gold";
+    public static final String DEFAULT_SUB_POLICY_SILVER = "Silver";
+    public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
+    public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
+
+    public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 20 request(s) per minute.";
+    public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 5 request(s) per minute.";
+    public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1 request(s) per minute.";
+    public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
+
+    public static final String DEFAULT_API_POLICY_ULTIMATE = "Ultimate";
+    public static final String DEFAULT_API_POLICY_PLUS = "Plus";
+    public static final String DEFAULT_API_POLICY_BASIC = "Basic";
+    public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
+
+    public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Ultimate tier";
+    public static final String DEFAULT_API_POLICY_PLUS_DESC = "Plus tier";
+    public static final String DEFAULT_API_POLICY_BASIC_DESC = "Basic tier";
+    public static final String DEFAULT_API_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
+
+    public static final String API_POLICY_USER_LEVEL = "userLevel";
+    public static final String API_POLICY_API_LEVEL = "apiLevel";
+
+    public static final String BILLING_PLAN_FREE = "FREE";
+
+
+    public static class AdvancedThrottleConstants {
+        public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
+        public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
+
+        public static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
+        public static final String DATA_PUBLISHER_CONFIGURAION_TYPE = "Type";
+        public static final String DATA_PUBLISHER_CONFIGURAION_REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String DATA_PUBLISHER_CONFIGURAION_AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+
+        public static final String DATA_PUBLISHER_POOL_CONFIGURATION = "DataPublisherPool";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_MAX_IDLE ="MaxIdle";
+        public static final String DATA_PUBLISHER_POOL_CONFIGURAION_INIT_IDLE = "InitIdleCapacity";
+
+        public static final String GLOBAL_POLICY_ENGINE_WS_CONFIGURATION = "GlobalPolicyEngineWSConnectionDetails";
+        public static final String SERVICE_URL ="ServiceURL";
+        public static final String JMS_CONNECTION_DESTINATION = "Destination";
+        public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
+        public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String JMS_TASK_MANAGER = "JMSTaskManager";
+        public static final String MIN_THREAD_POOL_SIZE = "MinThreadPoolSize";
+        public static final String MAX_THREAD_POOL_SIZE = "MaxThreadPoolSize";
+        public static final String KEEP_ALIVE_TIME_IN_MILLIS = "KeepAliveTimeInMillis";
+        public static final String JOB_QUEUE_SIZE = "JobQueueSize";
+        public static final String ENABLE_UNLIMITED_TIER = "EnableUnlimitedTier";
+        public static final String POLICY_DEPLOYER_CONFIGURATION = "PolicyDeployer";
+        public static final String BLOCK_CONDITION_RETRIEVER_CONFIGURATION = "BlockCondition";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION = "DataPublisherThreadPool";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE = "CorePoolSize";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_MAXMIMUM_POOL_SIZE = "MaxmimumPoolSize";
+        public static final String DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_KEEP_ALIVE_TIME = "KeepAliveTime";
+        public static final String BLOCK_CONDITION_RETRIEVER_INIT_DELAY =  "InitDelay";
+        public static final String BLOCK_CONDITION_RETRIEVER_PERIOD =  "Period";
+        public static final String ENABLE_SUBSCRIPTION_SPIKE_ARREST = "EnableSubscriptionSpikeArrest";
+
+    }
 }

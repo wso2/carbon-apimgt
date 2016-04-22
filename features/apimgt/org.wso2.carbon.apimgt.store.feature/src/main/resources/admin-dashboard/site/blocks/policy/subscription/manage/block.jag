@@ -1,0 +1,28 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("policy/subscription/manage", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {
+
+        }
+    },
+
+    getOutputs:function (inputs) {
+        var subscriptionPolicies, result;
+        result = jagg.module("policy").getAllSubscriptionPolicies();
+        subscriptionPolicies = result.subscriptionPolicies;
+
+        // we put results to the session.
+        session.put("subscriptionPolicies", subscriptionPolicies);
+        return {
+            "subscriptionPolicies":subscriptionPolicies
+        };
+    }
+});
+%>
+
+
+

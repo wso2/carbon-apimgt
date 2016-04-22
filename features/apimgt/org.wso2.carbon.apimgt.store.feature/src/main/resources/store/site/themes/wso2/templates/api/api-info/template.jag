@@ -9,7 +9,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 
 %>
 <%if(api!=null){
-    
+
     var displayOwner = api.provider;
     if(api.isAdvertiseOnly && api.apiOwner != null) {
     	displayOwner = api.apiOwner;
@@ -181,10 +181,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                                                    <%
 		                                                    	var tiersList = api.tiers, denied = false, tiersAvailable = false;
                             									var existingFirstTierDesc = [];
-
+																var log = new Log();
                             									for(var j=0;j<tiersList.length;j++){
+																	log.info(tiersList[j].tierName);
+																	log.info("+=====================================");
                                 									for (var k=0;k<deniedTiers.length;k++) {
-									                                    if (tiersList[j].tierName == deniedTiers[k].tierName) {
+																		log.info(deniedTiers[j].tierName);
+																		if (tiersList[j].tierName == deniedTiers[k].tierName) {
 									                                        denied = true;
 									                                    }
                                 									}

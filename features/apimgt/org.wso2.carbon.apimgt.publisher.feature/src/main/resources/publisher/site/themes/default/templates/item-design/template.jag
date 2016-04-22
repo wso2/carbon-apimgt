@@ -2,7 +2,7 @@
     var api = outputs.api;
     var site = require("/site/conf/site.json");
     var enableRestrictByRoles = site.enableRestrictByRoles;
-    
+    var mod = jagg.module("api");
     if(api){
         var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
         var _description = encode.forHtml(api.description);
@@ -46,11 +46,20 @@
     }
 
     var manage_wlabel = "";
-    if(api && api.availableTiers !=""){
-        manage_wlabel = "wizard-done";      
-    }else{
-        var manage_w_link = '#';        
-    }         
+    if(mod.isGlobalCEPThrottlingEnabled()){
+         if( api != null && api.availableSubscriptionPolicy !="" ){
+            manage_wlabel = "wizard-done";      
+        } else {
+            var manage_w_link = '#';        
+        }
+    } else {
+        
+        if( api.availableTiers !="" ){
+            manage_wlabel = "wizard-done";      
+        } else {
+            var manage_w_link = '#';        
+        }
+    } 
 %>
 <center>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">

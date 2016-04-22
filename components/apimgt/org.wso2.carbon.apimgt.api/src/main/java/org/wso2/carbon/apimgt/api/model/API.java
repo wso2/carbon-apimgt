@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.api.model;
 import java.io.Serializable;
 import java.util.*;
 
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+
 /**
  * Provider's & system's view of API
  */
@@ -45,6 +47,8 @@ public class API implements Serializable{
     private String httpVerb;
     private Date lastUpdated;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
+    private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
 
@@ -346,6 +350,13 @@ public class API implements Serializable{
     public void removeAllTiers(){
         availableTiers.clear();
     }
+    
+    /**
+     * Removes all Policies from the API object.
+     */
+    public void removeAllPolicies(){
+        availableSubscriptionLevelPolicies.clear();
+    }
 
     public void removeAvailableTiers(Set<Tier> availableTiers) {
         this.availableTiers.removeAll(availableTiers);
@@ -642,4 +653,14 @@ public class API implements Serializable{
     public String getMonetizationCategory() { return this.monetizationCategory; }
 
     public void setMonetizationCategory(String monetizationCategory) { this.monetizationCategory = monetizationCategory; }
+
+    public String getApiLevelPolicy() {
+        return apiLevelPolicy;
+    }
+
+    public void setApiLevelPolicy(String apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
+    }
+    
+    
 }

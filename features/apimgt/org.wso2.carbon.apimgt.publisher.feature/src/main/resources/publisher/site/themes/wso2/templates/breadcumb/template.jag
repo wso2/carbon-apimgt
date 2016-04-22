@@ -40,7 +40,7 @@
                 
                 var inlineEditorUrl = jagg.getAbsoluteUrl("/site/pages/inline-editor.jag") + urlPrefix;
                 var inlineEditorMappedUrl = jagg.getMappedUrl("/site/pages/inline-editor.jag") + urlPrefix;
-                
+
                 var page = request.getParameter("page");
             %>
 	    <div class="breadcrumb-wrapper">

@@ -38,8 +38,17 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.HardThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -53,7 +62,14 @@ import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -69,7 +85,12 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -90,8 +111,20 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1510,20 +1543,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                            Collections.<String,String>emptyMap());
 
             Map<String, String> properties = new HashMap<String, String>();
-            properties.put("id", "A");
-            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
 
-            if(api.getProductionMaxTps() != null){
-                properties.put("productionMaxCount",api.getProductionMaxTps());
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+
+            if(isGlobalThrottlingEnabled){
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler",
+                        Collections.<String, String> emptyMap());
+            } else {
+                properties.put("id", "A");
+                properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+                properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+                properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
+                if(api.getProductionMaxTps() != null){
+                    properties.put("productionMaxCount",api.getProductionMaxTps());
+                }
+
+                if(api.getSandboxMaxTps() != null){
+                    properties.put("sandboxMaxCount",api.getSandboxMaxTps());
+                }
+
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
             }
-
-            if(api.getSandboxMaxTps() != null){
-                properties.put("sandboxMaxCount",api.getSandboxMaxTps());
-            }
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
 
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler", Collections.<String,String>emptyMap());
 
@@ -3600,5 +3643,243 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return true;
     }
 
+    /**
+     * Deploy policy to global CEP and persist the policy object
+     *
+     * @param policy policy object
+     */
+    public void addPolicy(Policy policy) throws APIManagementException {
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        List<String> executionFlows = new ArrayList<String>();
+        String policyLevel = null;
 
+        try {
+            if (policy instanceof APIPolicy) {
+                APIPolicy apiPolicy = (APIPolicy) policy;
+                apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
+                executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                executionFlows.add(defaultPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_API;
+            } else if (policy instanceof ApplicationPolicy) {
+                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.addApplicationPolicy(appPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
+            } else if (policy instanceof SubscriptionPolicy) {
+                SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.addSubscriptionPolicy(subPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
+            } else if (policy instanceof GlobalPolicy) {
+                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.addGlobalPolicy(globalPolicy);
+                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
+            } else if (policy instanceof HardThrottlingPolicy) {
+                HardThrottlingPolicy hardThrottlingPolicy = (HardThrottlingPolicy) policy;
+                //String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+                //executionFlows.add(policyString);
+                hardThrottlingPolicy.setDeployed(true);
+                apiMgtDAO.addHardThrottlingPolicy(hardThrottlingPolicy);
+               //policyLevel = PolicyConstants.POLICY_LEVEL_HARD;
+                return;
+            } else {
+                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+                log.error(msg);
+                throw new UnsupportedPolicyTypeException(msg);
+            }
+        } catch (APITemplateException e) {
+            handleException("Error while generating policy", e);
+        }
+
+        // deploy in global cep and gateway manager
+        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
+        try {
+            for (String flowString : executionFlows) {
+                manager.deployPolicyToGlobalCEP(policy.getPolicyName(), flowString);
+            }
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
+        } catch (APIManagementException e) {
+            String msg = "Error while deploying policy";
+            // Add deployment fail flag to database and throw the exception
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
+            throw new PolicyDeploymentFailureException(msg, e);
+        }
+    }
+
+    public void updatePolicy(Policy policy) throws APIManagementException {
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        List<String> executionFlows = new ArrayList<String>();
+        String policyLevel = null;
+        String policyName = policy.getPolicyName();
+        List<String> policiesToUndeploy = new ArrayList<String>();
+        try {
+            if (policy instanceof APIPolicy) {
+                APIPolicy apiPolicy = (APIPolicy) policy;
+                //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
+                //TODO Need to fix appropriately
+                apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
+                executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                executionFlows.add(defaultPolicy);
+                APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
+                //TODO rename level to  resource or appropriate name
+                String policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
+                //add default policy file name
+                policiesToUndeploy.add(policyFile + "_default");
+                for (int i = 0; i < existingPolicy.getPipelines().size(); i++) {
+                    policiesToUndeploy.add(policyFile + "_condition_" +  existingPolicy.getPipelines().get(i).getId());
+                }
+                policyLevel = PolicyConstants.POLICY_LEVEL_API;
+            } else if (policy instanceof ApplicationPolicy) {
+                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.updateApplicationPolicy(appPolicy);
+                String policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+                policiesToUndeploy.add(policyFile);
+                policyLevel = PolicyConstants.POLICY_LEVEL_APP;
+            } else if (policy instanceof SubscriptionPolicy) {
+                SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+                String policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
+                policiesToUndeploy.add(policyFile);
+                policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
+            } else if (policy instanceof GlobalPolicy) {
+                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+                executionFlows.add(policyString);
+                apiMgtDAO.updateGlobalPolicy(globalPolicy);
+                String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
+                policiesToUndeploy.add(policyFile);
+                policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
+            } else {
+                String msg = "Policy type " + policy.getClass().getName() + " is not supported";
+                log.error(msg);
+                throw new UnsupportedPolicyTypeException(msg);
+            }
+        } catch (APITemplateException e) {
+            handleException("Error while generating policy for update");
+        }
+        // Deploy in global cep and gateway manager
+        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
+        try {
+            /* If single pipeline fails to deploy then whole deployment should fail.
+             * Therefore for loop is wrapped inside a try catch block
+             */
+            if(PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+                for (String flowName : policiesToUndeploy) {
+                    deploymentManager.undeployPolicyFromGlobalCEP(flowName);
+                }
+            }
+
+            for (String flowString : executionFlows) {
+                    deploymentManager.deployPolicyToGlobalCEP(policyLevel + "_"+policy.getPolicyName(), flowString);
+            }
+
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
+        } catch (APIManagementException e) {
+            String msg = "Error while deploying policy to gateway";
+            // Add deployment fail flag to database and throw the exception
+            apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
+            throw new PolicyDeploymentFailureException(msg, e);
+        }
+    }
+
+    /**
+     *
+     * @param username username to recognize tenant
+     * @param level policy level to be applied
+     * @return
+     * @throws APIManagementException
+     */
+    public String[] getPolicyNames(String username, String level) throws APIManagementException {
+        String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
+        return policyNames;
+    }
+
+    /**
+     * @param username    username to recognize the tenant
+     * @param policyLevel policy level
+     * @param policyName  name of the policy to be deleted
+     * @throws APIManagementException
+     */
+    public void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException {
+        int tenantID = APIUtil.getTenantId(username);
+        List<String> policyFileNames = new ArrayList<String>();
+        String policyFile = null;
+        if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            //need to load whole policy object to get the pipelines
+            APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+            policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName;
+            //add default policy file name
+            policyFileNames.add(policyFile + "_default");
+            for (int i = 0; i < policy.getPipelines().size(); i++) {
+                policyFileNames.add(policyFile + "_condition_" + i);
+            }
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+            policyFileNames.add(policyFile);
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
+            policyFileNames.add(policyFile);
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
+            policyFileNames.add(policyFile);
+        }
+
+        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
+        try {
+            //Application and subscription policies can remove straight way as they have single
+            //execution flow.
+            if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
+                manager.undeployPolicyFromGlobalCEP("app_"+policyName);
+            } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
+                manager.undeployPolicyFromGlobalCEP("sub_"+policyName);
+            } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
+                manager.undeployPolicyFromGlobalCEP("global_"+policyName);
+            } else {
+                manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
+            }
+        } catch (Exception e) {
+            String msg = "Error while undeploying policy: ";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        }
+
+        //remove from database
+        apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
+    }
+
+    @Override
+    public List<BlockConditionsDTO> getBlockConditions() throws APIManagementException {
+        return apiMgtDAO.getBlockConditions(tenantDomain);
+    }
+
+    @Override
+    public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
+        return apiMgtDAO.updateBlockConditionState(conditionId,state);
+    }
+
+    @Override
+    public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
+        return apiMgtDAO.addBlockConditions(conditionType,conditionValue,tenantDomain);
+    }
+
+    @Override
+    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
+        return apiMgtDAO.deleteBlockCondition(conditionId);
+    }
+
+
+    public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
+        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+        return policy;
+    }
 }

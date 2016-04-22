@@ -1,0 +1,26 @@
+/* Enter a unique ExecutionPlan */
+@Plan:name('sub_Silver')
+
+/* Enter a unique description for ExecutionPlan */
+@Plan:description('ExecutionPlan for sub_silver')
+
+/* define streams/tables and write queries here ... */
+
+@Import('org.wso2.throttle.processed.request.stream:1.0.0')
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, propertiesMap string);
+
+@Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
+define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
+
+FROM RequestStream
+SELECT messageID, ( subscriptionTier == 'Silver') AS isEligible, subscriptionKey AS throttleKey
+INSERT INTO EligibilityStream;
+
+FROM EligibilityStream[isEligible==true]#window.time(1 min) 
+select throttleKey, (count(messageID) >= 5) as isThrottled 
+group by throttleKey 
+INSERT ALL EVENTS into ResultStream;
+
+from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)
+select *
+insert into GlobalThrottleStream;

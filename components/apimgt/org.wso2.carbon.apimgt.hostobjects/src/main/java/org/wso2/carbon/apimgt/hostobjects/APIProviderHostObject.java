@@ -56,6 +56,8 @@ import org.mozilla.javascript.*;
 import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.hostobjects.util.Json;
@@ -361,7 +363,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
-
+        String apiLevelPolicy = null;
+        if(APIUtil.isAdvanceThrottlingEnabled()) {
+            apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
+        }
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -455,6 +460,15 @@ public class APIProviderHostObject extends ScriptableObject {
             api.removeAllTiers();
         	api.addAvailableTiers(availableTier);
         }
+        
+        if (apiLevelPolicy != null){          
+            if("none".equals(apiLevelPolicy)){
+                api.setApiLevelPolicy(null);
+            } else {
+                api.setApiLevelPolicy(apiLevelPolicy);
+            }
+        }
+        
         api.setLastUpdated(new Date());
 
         if (apiData.get("swagger", apiData) != null) {
@@ -1357,21 +1371,40 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            for (String tierName : tierNames) {
-                boolean isTierValid =  false;
-                for (Tier definedTier : definedTiers) {
-                    if (tierName.equals(definedTier.getName())) {
-                        isTierValid = true;
-                        break;
+            if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                Set<Tier> definedTiers = apiProvider.getTiers();
+                for (String tierName : tierNames) {
+                    boolean isTierValid = false;
+                    for (Tier definedTier : definedTiers) {
+                        if (tierName.equals(definedTier.getName())) {
+                            isTierValid = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!isTierValid) {
-                    handleException("Specified tier " + tierName + " does not exist");
+                    if (!isTierValid) {
+                        handleException("Specified tier " + tierName + " does not exist");
+                    }
+                    availableTier.add(new Tier(tierName));
                 }
-                availableTier.add(new Tier(tierName));
+            } else {
+                Policy[] definedTiers = apiProvider.getPolicies(provider, PolicyConstants.POLICY_LEVEL_SUB);
+                for (String tierName : tierNames) {
+                    boolean isTierValid = false;
+                    for (Policy definedTier : definedTiers) {
+                        if (tierName.equals(definedTier.getPolicyName())) {
+                            isTierValid = true;
+                            break;
+                        }
+                    }
+
+                    if (!isTierValid) {
+                        handleException("Specified tier " + tierName + " does not exist");
+                    }
+                    availableTier.add(new Tier(tierName));
+                }
             }
+
             api.addAvailableTiers(availableTier);
         }
         api.setStatus(APIStatus.CREATED);
@@ -1684,6 +1717,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
+        String apiLevelPolicy = (String) apiData.get("apiPolicy", apiData);
         String contextVal = (String) apiData.get("context", apiData);
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain=MultitenantUtils.getTenantDomain(String.valueOf(apiData.get("provider", apiData)));
@@ -1849,6 +1883,16 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             api.addAvailableTiers(availableTier);
         }
+        
+        if (apiLevelPolicy != null){          
+            if("none".equals(apiLevelPolicy)){
+                api.setApiLevelPolicy(null);
+            } else {
+                api.setApiLevelPolicy(apiLevelPolicy);
+            }
+        }
+        
+        
         api.setStatus(oldApi.getStatus());
         api.setWsdlUrl(wsdl);
         api.setWadlUrl(wadl);
@@ -2513,6 +2557,11 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
                 String corsJson = APIUtil.getCorsConfigurationJsonFromDto(corsConfigurationDto);
                 myn.put(49, myn, corsJson);
+                
+                StringBuilder policiesSet = new StringBuilder("");
+
+                myn.put(50, myn, checkValue(policiesSet.toString()));
+                myn.put(51, myn, checkValue(api.getApiLevelPolicy()));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +

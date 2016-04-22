@@ -17,9 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -132,7 +132,22 @@ public interface APIProvider extends APIManager {
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
-    
+
+    void addPolicy(Policy policy) throws APIManagementException;
+
+    /**
+     * Updates throttle policy in global CEP, gateway and database.
+     * <p>
+     * Database transactions and deployements are not rolledback on failiure.
+     * A flag will be inserted into the database whether the operation was
+     * successfull or not.
+     * </p>
+     *
+     * @param policy updated {@link Policy} object
+     * @throws APIManagementException
+     */
+    void updatePolicy(Policy policy) throws APIManagementException;
+
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
@@ -552,5 +567,59 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
+    
+    
+    /**
+     * Get a policy names for given policy level and user name
+     * @param username
+     * @param level
+     * @return
+     * @throws APIManagementException
+     */
+    String[] getPolicyNames(String username, String level) throws APIManagementException;
+
+    /**
+     * Delete throttling policy
+     * @param username
+     * @param policyLevel
+     * @param policyName
+     * @throws APIManagementException
+     */
+    void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+
+    /**
+     *
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionId id of the condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
+
+
+    /**
+     *
+     * @param conditionType
+     * @param conditionValue
+     * @return
+     * @throws APIManagementException
+     */
+    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
+     *
+     * @param conditionId
+     * @return
+     * @throws APIManagementException
+     */
+    boolean deleteBlockCondition(int conditionId) throws APIManagementException;
 
 }

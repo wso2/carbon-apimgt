@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import java.util.List;
+
 /**
  * Contains some context information related to an authenticated request. This can be used
  * to access API keys and tier information related to already authenticated requests.
@@ -26,6 +28,8 @@ public class AuthenticationContext {
     private String username;
     private String applicationTier;
     private String tier;
+    private String apiTier;
+    private boolean isContentAwareTierPresent;
     private String apiKey;
     private String keyType;
     private String callerToken;
@@ -34,6 +38,32 @@ public class AuthenticationContext {
     private String consumerKey;
     private String subscriber;
 
+    public List<String> getThrottlingDataList() {
+        return throttlingDataList;
+    }
+
+    public void setThrottlingDataList(List<String> throttlingDataList) {
+        this.throttlingDataList = throttlingDataList;
+    }
+    //Following throttle data list can be use to hold throttle data and api level throttle key
+    //should be its first element.
+    private List<String> throttlingDataList;
+
+    public boolean isContentAwareTierPresent() {
+        return isContentAwareTierPresent;
+    }
+
+    public void setIsContentAware(boolean isContentAware) {
+        this.isContentAwareTierPresent = isContentAware;
+    }
+
+    public String getApiTier() {
+        return apiTier;
+    }
+
+    public void setApiTier(String apiTier) {
+        this.apiTier = apiTier;
+    }
 
     public String getSubscriber() {
         return subscriber;

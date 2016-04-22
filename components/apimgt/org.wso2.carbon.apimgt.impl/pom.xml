@@ -198,6 +198,10 @@
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.event-processing</groupId>
+            <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
@@ -303,7 +307,7 @@
                             org.wso2.carbon.registry.indexing.*; version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${orbit.version.pdfbox}",
                             org.apache.poi.*,
-                            org.apache.thrift.*,
+                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,
@@ -338,6 +342,7 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.databridge.commons.exception; version="${carbon.commons.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

@@ -10,7 +10,7 @@
     <!-- This parameter is used to enable the securevault support when try to publish endpoint secured APIs. Values should be "true" or "false".
     By default secure vault is disabled.-->
     <EnableSecureVault>false</EnableSecureVault>
-     
+
     <!-- Authentication manager configuration for API publisher and API store. This is
          a required configuration for both web applications as their user authentication
          logic relies on this. -->
@@ -29,7 +29,7 @@
     <JWTConfiguration>
         <!-- Enable/Disable JWT generation. Default is false. -->
         <!-- EnableJWTGeneration>false</EnableJWTGeneration-->
-        
+
         <!-- Name of the security context header to be added to the validated requests. -->
         <JWTHeader>X-JWT-Assertion</JWTHeader>
 
@@ -47,7 +47,7 @@
 
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <!--SignatureAlgorithm>SHA256withRSA</SignatureAlgorithm-->
-        
+
         <!-- This parameter specifies which implementation should be used for generating the Token. JWTGenerator is the
 	     default implementation provided. -->
         <JWTGeneratorImpl>org.wso2.carbon.apimgt.impl.token.JWTGenerator</JWTGeneratorImpl>
@@ -133,7 +133,7 @@
              Groups are delimited by curly braces whereas receivers are delimited by commas.
              Ex - Multiple Receivers within a single group
              tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
-             
+
              Ex - Multiple Receiver Groups with two receivers each
              {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/} -->
         <DASServerURL>{tcp://localhost:7612}</DASServerURL>
@@ -216,7 +216,7 @@
         <Username>${admin.username}</Username>
         <!-- Admin password for API key manager. -->
         <Password>${admin.password}</Password>
-        
+
         <!-- Configurations related to enable thrift support for key-management related communication.
              If you want to switch back to Web Service Client, change the value of "KeyValidatorClientType" to "WSClient".
              In a distributed environment;
@@ -229,7 +229,7 @@
         <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
         <ThriftServerPort>10397</ThriftServerPort>
         <!--ThriftServerHost>localhost</ThriftServerHost-->
-        <EnableThriftServer>true</EnableThriftServer>        
+        <EnableThriftServer>true</EnableThriftServer>
 
         <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a 
              custom KeyValidation Handler -->
@@ -443,6 +443,64 @@
             </WhiteListedURI>
         </WhiteListedURIs>
     </RESTAPI>
+    <ThrottlingConfigurations>
+        <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
+        <DataPublisher>
+            <Type>Binary</Type>
+            <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
+            <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
+            <DataPublisherPool>
+                <MaxIdle>1000</MaxIdle>
+                <InitIdleCapacity>200</InitIdleCapacity>
+            </DataPublisherPool>
+            <DataPublisherThreadPool>
+                <CorePoolSize>1000</CorePoolSize>
+                <MaxmimumPoolSize>200</MaxmimumPoolSize>
+                <KeepAliveTime>200</KeepAliveTime>
+            </DataPublisherThreadPool>
+        </DataPublisher>
+        <PolicyDeployer>
+            <ServiceURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
+        </PolicyDeployer>
+        <BlockCondition>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
+            <!--InitDelay>300000</InitDelay>
+            <Period>3600000</Period-->
+        </BlockCondition>
+        <GlobalPolicyEngineWSConnectionDetails>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
+            <Username>${admin.username}</Username>
+            <Password>${admin.password}</Password>
+            <!--InitDelay>300000</InitDelay-->
+        </GlobalPolicyEngineWSConnectionDetails>
+        <JMSConnectionDetails>
+            <ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
+            <Username>admin</Username>
+            <Password>admin</Password>
+            <Destination>throttleData</Destination>
+            <!--InitDelay>300000</InitDelay-->
+            <JMSConnectionParameters>
+                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+                <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+            </JMSConnectionParameters>
+            <JMSTaskManager>
+                <MinThreadPoolSize>20</MinThreadPoolSize>
+                <MaxThreadPoolSize>100</MaxThreadPoolSize>
+                <KeepAliveTimeInMillis>1000</KeepAliveTimeInMillis>
+                <JobQueueSize>10</JobQueueSize>
+            </JMSTaskManager>
+        </JMSConnectionDetails>
+        <EnableUnlimitedTier>true</EnableUnlimitedTier>
+        <EnableSubscriptionSpikeArrest>false</EnableSubscriptionSpikeArrest>
+    </ThrottlingConfigurations>
 
     <SwaggerCodegen>
         <ClientGeneration>

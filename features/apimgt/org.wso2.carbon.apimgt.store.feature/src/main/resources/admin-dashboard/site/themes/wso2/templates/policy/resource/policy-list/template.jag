@@ -1,0 +1,85 @@
+<% jagg.template("policy/resource/policy-list", function(inputs, outputs, jagg) {%>
+    <div id="listing">
+    <div class="title-section">
+        <h2><%=i18n.localize("apiResTierList")%></h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th class="userSpecialCell"><%="Name"%></th>
+                <th class="appSpecialCell"><%="Quota Policy"%></th>
+                <th class="appSpecialCell"><%="Quota"%></th>
+                <th class="appSpecialCell"><%="Unit Time"%></th>
+                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
+            </tr>
+        </thead>
+
+        <%
+
+    var apiPolicyArray = outputs.apiPolicies;
+    var count = 0;
+
+    for(j = 0; j < apiPolicyArray.length; j++) {
+        var apiPolicy = apiPolicyArray[j];
+        var policyName = apiPolicy.getPolicyName();
+        var defaultQuotaPolicy = apiPolicy.getDefaultQuotaPolicy().getType();
+        if (defaultQuotaPolicy == "requestCount"){
+            var quota = apiPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
+        }
+        else if (defaultQuotaPolicy == "bandwidthVolume"){
+            var quota = apiPolicy.getDefaultQuotaPolicy().getLimit().getDataAmount()+" "+apiPolicy.getDefaultQuotaPolicy().getLimit().getDataUnit();
+        }
+
+        var unitTime = apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime()+" "+apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
+        %>
+                <tr>
+                    <td><%=policyName%></td>
+                    <td><%=defaultQuotaPolicy%></td>
+                    <td><%=quota%></td>
+                    <td><%=unitTime%></td>
+                    <td>
+                        <a id="editButton<%=count%>" onClick="editApiPolicy('<%=policyName%>')">
+                            <i class="icon-edit"></i>
+                                Edit
+                        </a>
+                        <a id="deleteButton<%=count%>" onclick="deleteAPIPolicy('<%=policyName%>')">
+                            <i class="icon-trash"></i>
+                            Delete
+                        </a>
+                    </td>
+
+                </tr>
+            <%
+        count++;
+    }
+    %>
+</table>
+</div>
+
+</div>
+    <div class="content-section shadow-up">
+        <div class="form-actions" id="saveButtons">
+            <button type="submit" id="addNewAPIButton" name="addNewAPIButton"
+                onclick="window.location='<%= jagg.url( "/api-policy-edit")%>'" class="btn btn-primary has-spinner">
+                <%=i18n.localize("addTier")%>
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    function editApiPolicy(policyName){
+            console.log(policyName);
+            location.href = "<%= jagg.url('/api-policy-edit')%>?policyName="+policyName;
+    }
+    $(document).ready(function(){
+        $('#add-policy-btn').on('click',function(){
+            location.href = "<%= jagg.url('/app-policy-edit')%>";
+                });
+        });
+</script>
+
+<% }); %>

@@ -26,32 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
@@ -80,6 +61,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -794,10 +776,18 @@ public class ApiMgtDAO {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
         String sql;
-        if (defaultVersionInvoked) {
-            sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
         } else {
-            sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            if (defaultVersionInvoked) {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
+            } else {
+                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
+            }
         }
 
         Connection conn = null;
@@ -840,6 +830,32 @@ public class ApiMgtDAO {
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
                 infoDTO.setType(type);
+
+                //Advanced Level Throttling Related Properties
+                if(APIUtil.isAdvanceThrottlingEnabled()) {
+                    String tier = rs.getString("API_TIER");
+                    //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                    //TODO isContentAware
+                    boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
+                    infoDTO.setContentAware(isContentAware);
+
+                    //TODO this must implement as a part of throttling implementation.
+                    String apiLevelThrottlingKey = "api_level_throttling_key";
+                    String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                    String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    List<String> list = new ArrayList<String>();
+                    list.add(apiLevelThrottlingKey);
+                    list.add(spikeArrest);
+                    list.add(spikeArrestUnit);
+                    list.add(stopOnQuotaReach);
+                    if (tier != null && tier.trim().length() > 0) {
+                        infoDTO.setApiTier(tier);
+                    }
+                    //We also need to set throttling data list associated with given API. This need to have policy id and
+                    // condition id list for all throttling tiers associated with this API.
+                    infoDTO.setThrottlingDataList(list);
+                }
                 return true;
             }
             infoDTO.setAuthorized(false);
@@ -851,6 +867,79 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
+            String subPolicy) throws APIManagementException {
+        boolean isAnyContentAware = false;
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+        //only check if using CEP based throttling.
+        if(isGlobalThrottlingEnabled){
+
+            ResultSet resultSet = null;
+            PreparedStatement ps = null;
+            String sqlQuery;
+            if(apiPolicy == null){
+            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
+
+            } else {
+            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+            }
+
+            try {
+
+                ps = conn.prepareStatement(sqlQuery);
+
+                ps.setInt(1, APIUtil.getTenantId(userName));
+                ps.setString(2, appPolicy);
+                ps.setString(3, subPolicy);
+
+                if(apiPolicy != null) {
+                    ps.setString(4, apiPolicy);
+                }
+
+                resultSet = ps.executeQuery();
+                // We only expect one result if all are not content aware.
+                if(resultSet == null){
+                	throw new APIManagementException(" Result set Null");
+                }
+
+                String quotaType = null;
+
+                if (resultSet.next()) {
+                	if(apiPolicy == null){
+                		quotaType = resultSet.getString("QUOTA_TYPE");
+                	}else{
+                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");
+                	}
+                }
+
+                if(quotaType == null || StringUtils.isEmpty(quotaType)){
+                	return false;
+                }
+
+                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
+                	isAnyContentAware = true;
+                }
+
+                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_REQUESTCOUNT)){
+                	isAnyContentAware = false;
+                }
+
+            } catch (SQLException e) {
+                handleException("Failed to get content awareness of the policies ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+            }
+
+        }
+
+        return isAnyContentAware;
+    }
+
+
 
     private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
             throws APIManagementException {
@@ -5577,6 +5666,14 @@ public class ApiMgtDAO {
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
     public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
+        if(APIUtil.isAdvanceThrottlingEnabled()) {
+            return getAllURITemplatesAdvancedThrottle(apiContext, version);
+        } else {
+            return getAllURITemplatesOldThrottle(apiContext, version);
+        }
+    }
+
+    public ArrayList<URITemplate> getAllURITemplatesOldThrottle(String apiContext, String version) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5615,6 +5712,89 @@ public class ApiMgtDAO {
         return uriTemplates;
     }
 
+	public ArrayList<URITemplate> getAllURITemplatesAdvancedThrottle(String apiContext, String version) throws APIManagementException {
+		Connection connection = null;
+		PreparedStatement prepStmt = null;
+		ResultSet rs = null;
+		ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+
+		// TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
+		String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_SQL;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			prepStmt = connection.prepareStatement(query);
+			prepStmt.setString(1, apiContext);
+			prepStmt.setString(2, version);
+
+			rs = prepStmt.executeQuery();
+
+			// THROTTLING_TIER == POLICY_NAME
+			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
+			// HashMap<String,URITemplate>();
+			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
+
+			while (rs != null && rs.next()) {
+
+				String httpVerb = rs.getString("HTTP_METHOD");
+				String authType = rs.getString("AUTH_SCHEME");
+				String urlPattern = rs.getString("URL_PATTERN");
+				String policyName = rs.getString("THROTTLING_TIER");
+				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+				String policyConditionGroupId = policyName + ":" + conditionGroupId;
+
+				String key = httpVerb + ":" + urlPattern;
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+						continue;
+					}
+					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+				} else {
+					String script = null;
+					URITemplate uriTemplate = new URITemplate();
+					uriTemplate.setThrottlingTier(policyName);
+					uriTemplate.setAuthType(authType);
+					uriTemplate.setHTTPVerb(httpVerb);
+					uriTemplate.setUriTemplate(urlPattern);
+
+					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+					if (mediationScriptBlob != null) {
+						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+					}
+					uriTemplate.setMediationScript(script);
+
+					Set<String> conditionGroupIdSet = new HashSet<String>();
+					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
+					uriTemplates.add(uriTemplate);
+					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+						continue;
+					}
+					conditionGroupIdSet.add(policyConditionGroupId);
+				}
+
+			}
+
+			for (URITemplate uriTemplate : uriTemplates) {
+				String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
+						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+					}
+
+				}
+
+				if (uriTemplate.getThrottlingConditions().isEmpty()) {
+					uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier() + ":" + "default");
+				}
+
+			}
+		} catch (SQLException e) {
+			handleException("Error while fetching all URL Templates", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+		}
+		return uriTemplates;
+	}
+
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
         Connection connection = null;
@@ -5626,8 +5806,10 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-
-            if (api.isApiHeaderChanged()) {
+            //Header change check not required here as we update API level throttling tier
+            //from same call.
+            //TODO review and run tier update as separate query if need.
+            //if (api.isApiHeaderChanged()) {
                 prepStmt = connection.prepareStatement(query);
                 prepStmt.setString(1, api.getContext());
                 String contextTemplate = api.getContextTemplate();
@@ -5641,11 +5823,12 @@ public class ApiMgtDAO {
                 //TODO Need to find who exactly does this update.
                 prepStmt.setString(3, null);
                 prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-                prepStmt.setString(5, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                prepStmt.setString(6, api.getId().getApiName());
-                prepStmt.setString(7, api.getId().getVersion());
+                prepStmt.setString(5, api.getApiLevelPolicy());
+                prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                prepStmt.setString(7, api.getId().getApiName());
+                prepStmt.setString(8, api.getId().getVersion());
                 prepStmt.execute();
-            }
+            //}
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
                 // happen
@@ -8065,5 +8248,1812 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 
         }
+    }
+
+    /**
+     * Add a Application level throttling policy to database
+     *
+     * @param policy policy object defining the throttle policy
+     * @throws APIManagementException
+     */
+    public void addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement policyStatement = null;
+        boolean hasCustomAttrib = false;
+        try {
+        	 if(policy.getCustomAttributes() != null){
+        		 hasCustomAttrib = true;
+             }
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addQuery = SQLConstants.INSERT_APPLICATION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	addQuery = SQLConstants.INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
+            }
+            policyStatement = conn.prepareStatement(addQuery);
+            setCommonParametersForPolicy(policyStatement, policy);
+            if(hasCustomAttrib){
+            	policyStatement.setBlob(10, new ByteArrayInputStream(policy.getCustomAttributes()));
+            }
+            policyStatement.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to add Application Policy: " + policy, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+        }
+    }
+
+    /**
+     * Add a Subscription level throttling policy to database
+     *
+     * @param policy policy object defining the throttle policy
+     * @throws APIManagementException
+     */
+    public void addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement policyStatement = null;
+        boolean hasCustomAttrib = false;
+
+        try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
+            }
+            policyStatement = conn.prepareStatement(addQuery);
+            setCommonParametersForPolicy(policyStatement, policy);
+            policyStatement.setInt(10, policy.getRateLimitCount());
+            policyStatement.setString(11, policy.getRateLimitTimeUnit());
+            policyStatement.setBoolean(12, policy.isStopOnQuotaReach());
+            policyStatement.setString(13, policy.getBillingPlan());
+            if(hasCustomAttrib){
+            	policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
+            }
+            policyStatement.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Subscription Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to add Subscription Policy: " + policy, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+        }
+    }
+
+    /**
+     * Wrapper method for {@link #addAPIPolicy(APIPolicy, Connection)} to add
+     * API Policy without managing the database connection manually.
+     *
+     * @param policy policy object to add
+     * @throws APIManagementException
+     */
+    public APIPolicy addAPIPolicy(APIPolicy policy) throws APIManagementException {
+        Connection connection = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            addAPIPolicy(policy, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to add Api Policy: " + policy, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+        return policy;
+    }
+
+    /**
+     * Add a API level throttling policy to database.
+     * <p>
+     * If valid policy Id (not -1) is present in the <code>policy</code> object,
+     * policy will be inserted with that policy Id.
+     * Otherwise policy Id will be auto incremented.
+     * </p>
+     *
+     * @param policy policy object defining the throttle policy
+     * @throws SQLException
+     */
+    private void addAPIPolicy(APIPolicy policy, Connection conn) throws SQLException {
+        ResultSet resultSet = null;
+        PreparedStatement policyStatement = null;
+        String addQuery;
+        int policyId = policy.getPolicyId();
+
+        try {
+
+            // Valid policyId is available means policy should be inserted with 'policyId'. (Policy update request)
+            if (policyId == -1) {
+                addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_SQL;
+            } else {
+                addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_WITH_ID_SQL;
+            }
+
+            policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
+            setCommonParametersForPolicy(policyStatement, policy);
+            policyStatement.setString(10, policy.getUserLevel());
+            if (policyId != -1) {
+
+                // Assume policy is deployed if update request is recieved
+                policyStatement.setBoolean(9, true);
+                policyStatement.setInt(11, policyId);
+            }
+            policyStatement.executeUpdate();
+            resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
+
+            // Returns only single row
+            if (resultSet.next()) {
+
+                /*Not sure about below comment :-) (Dhanuka)
+                 *  H2 doesn't return generated keys when key is provided (not generated).
+                   Therefore policyId should be policy parameter's policyId when it is provided.
+                 */
+                if (policyId == -1) {
+                    policyId = resultSet.getInt(1);
+                }
+                List<Pipeline> pipelines = policy.getPipelines();
+                if(pipelines != null) {
+                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                        addPipeline(pipeline, policyId, conn);
+                    }
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(policyStatement, null, resultSet);
+        }
+    }
+
+    /**
+     * Add throttling policy pipeline to database
+     *
+     * @param pipeline condition pipeline
+     * @param policyID id of the policy to add pipeline
+     * @param conn     database connection. This should be provided inorder to rollback transaction
+     * @throws SQLException
+     */
+	private void addPipeline(Pipeline pipeline, int policyID, Connection conn) throws SQLException {
+		PreparedStatement conditionStatement = null;
+		ResultSet rs = null;
+
+		try {
+			String sqlAddQuery = SQLConstants.ThrottleSQLConstants.INSERT_CONDITION_GROUP_SQL;
+			List<Condition> conditionList = pipeline.getConditions();
+
+			// Add data to the AM_CONDITION table
+			conditionStatement = conn.prepareStatement(sqlAddQuery, PreparedStatement.RETURN_GENERATED_KEYS);
+			conditionStatement.
+                    setInt(1, policyID);
+			conditionStatement.setString(2, pipeline.getQuotaPolicy().getType());
+
+			if (PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+				conditionStatement.setLong(3,
+						((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
+				conditionStatement.setString(4, null);
+			} else if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
+				BandwidthLimit limit = (BandwidthLimit) pipeline.getQuotaPolicy().getLimit();
+				conditionStatement.setLong(3, limit.getDataAmount());
+				conditionStatement.setString(4, limit.getDataUnit());
+			}
+
+			conditionStatement.setLong(5, pipeline.getQuotaPolicy().getLimit().getUnitTime());
+			conditionStatement.setString(6, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+			conditionStatement.executeUpdate();
+			rs = conditionStatement.getGeneratedKeys();
+
+			// Add Throttling parameters which have multiple entries
+			if (rs != null && rs.next()) {
+				int pipelineId = rs.getInt(1); // Get the inserted
+												// CONDITION_GROUP_ID (auto
+												// incremented value)
+                pipeline.setId(pipelineId);
+				for (Condition condition : conditionList) {
+					if (condition == null) {
+						continue;
+					}
+					String type = condition.getType();
+					if (PolicyConstants.IP_RANGE_TYPE.equals(type) || PolicyConstants.IP_SPECIFIC_TYPE.equals(type)) {
+						IPCondition ipCondition = (IPCondition) condition;
+						addIPCondition(ipCondition, pipelineId, conn);
+					}
+
+					if (PolicyConstants.HEADER_TYPE.equals(type)) {
+						addHeaderCondition((HeaderCondition) condition, pipelineId, conn);
+					} else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(type)) {
+						addQueryParameterCondition((QueryParameterCondition) condition, pipelineId, conn);
+					} else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(type)) {
+						addJWTClaimsCondition((JWTClaimsCondition) condition, pipelineId, conn);
+					}
+				}
+			}
+		} finally {
+			APIMgtDBUtil.closeAllConnections(conditionStatement, null, rs);
+		}
+	}
+
+    /**
+     * Add HEADER throttling condition to AM_HEADER_FIELD_CONDITION table
+     *
+     * @param headerCondition {@link HeaderCondition} with header fieled and value
+     * @param pipelineId      id of the pipeline which this condition belongs to
+     * @param conn            database connection. This should be provided inorder to rollback transaction
+     * @throws SQLException
+     */
+    private void addHeaderCondition(HeaderCondition headerCondition, int pipelineId, Connection conn)
+            throws SQLException {
+        PreparedStatement psHeaderCondition = null;
+
+        try {
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
+            psHeaderCondition = conn.prepareStatement(sqlQuery);
+            psHeaderCondition.setInt(1, pipelineId);
+            psHeaderCondition.setString(2, headerCondition.getHeaderName());
+            psHeaderCondition.setString(3, headerCondition.getValue());
+            psHeaderCondition.setBoolean(4, headerCondition.isInvertCondition());
+            psHeaderCondition.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psHeaderCondition, null, null);
+        }
+    }
+
+    /**
+     * Add QUERY throttling condition to AM_QUERY_PARAMETER_CONDITION table
+     *
+     * @param queryParameterCondition {@link QueryParameterCondition} with parameter name and value
+     * @param pipelineId              id of the pipeline which this condition belongs to
+     * @param conn                    database connection. This should be provided inorder to rollback transaction
+     * @throws SQLException
+     */
+    private void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int pipelineId,
+            Connection conn) throws SQLException {
+        PreparedStatement psQueryParameterCondition = null;
+
+        try {
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
+            psQueryParameterCondition = conn.prepareStatement(sqlQuery);
+            psQueryParameterCondition.setInt(1, pipelineId);
+            psQueryParameterCondition.setString(2, queryParameterCondition.getParameter());
+            psQueryParameterCondition.setString(3, queryParameterCondition.getValue());
+            psQueryParameterCondition.setBoolean(4, queryParameterCondition.isInvertCondition());
+            psQueryParameterCondition.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psQueryParameterCondition, null, null);
+        }
+    }
+
+	private void addIPCondition(IPCondition ipCondition, int pipelineId, Connection conn) throws SQLException {
+		PreparedStatement statementIPCondition = null;
+
+		try {
+			String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_IP_CONDITION_SQL;
+
+			statementIPCondition = conn.prepareStatement(sqlQuery);
+			String startingIP = ipCondition.getStartingIP();
+			String endingIP = ipCondition.getEndingIP();
+			String specificIP = ipCondition.getSpecificIP();
+
+			statementIPCondition.setString(1, startingIP);
+			statementIPCondition.setString(2, endingIP);
+			statementIPCondition.setString(3, specificIP);
+			statementIPCondition.setBoolean(4, ipCondition.isInvertCondition());
+			statementIPCondition.setInt(5, pipelineId);
+			statementIPCondition.executeUpdate();
+		} finally {
+			APIMgtDBUtil.closeAllConnections(statementIPCondition, null, null);
+		}
+	}
+
+    /**
+     * Add JWTCLAIMS throttling condition to AM_JWT_CLAIM_CONDITION table
+     *
+     * @param jwtClaimsCondition {@link JWTClaimsCondition} with claim url and claim attribute
+     * @param pipelineId         id of the pipeline which this condition belongs to
+     * @param conn               database connection. This should be provided inorder to rollback transaction
+     * @throws SQLException
+     */
+    private void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int pipelineId, Connection conn)
+            throws SQLException {
+        PreparedStatement psJWTClaimsCondition = null;
+
+        try {
+            String sqlQuery = SQLConstants.ThrottleSQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
+            psJWTClaimsCondition = conn.prepareStatement(sqlQuery);
+            psJWTClaimsCondition.setInt(1, pipelineId);
+            psJWTClaimsCondition.setString(2, jwtClaimsCondition.getClaimUrl());
+            psJWTClaimsCondition.setString(3, jwtClaimsCondition.getAttribute());
+            psJWTClaimsCondition.setBoolean(4, jwtClaimsCondition.isInvertCondition());
+            psJWTClaimsCondition.executeUpdate();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psJWTClaimsCondition, null, null);
+        }
+    }
+
+
+    /**
+     * Add a Hard throttling policy to database
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    public void addHardThrottlingPolicy(HardThrottlingPolicy policy) throws APIManagementException {
+            Connection conn = null;
+            PreparedStatement policyStatement = null;
+            try {
+
+                conn = APIMgtDBUtil.getConnection();
+                conn.setAutoCommit(false);
+                String addQuery = SQLConstants.INSERT_HARD_THROTTLE_POLICY_SQL;
+
+                policyStatement = conn.prepareStatement(addQuery);
+                setCommonParametersForPolicy(policyStatement, policy);
+                policyStatement.executeUpdate();
+
+                conn.commit();
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+
+                        // Rollback failed. Exception will be thrown later for upper exception
+                        log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
+                    }
+                }
+                handleException("Failed to add Application Policy: " + policy, e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+            }
+
+    }
+
+    /**
+     * Add a Global level throttling policy to database
+     *
+     * @param policy
+     * @throws APIManagementException
+     */
+    public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement policyStatement = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addQuery = SQLConstants.INSERT_GLOBAL_POLICY_SQL;
+            policyStatement = conn.prepareStatement(addQuery);
+            policyStatement.setString(1, policy.getPolicyName());
+            policyStatement.setInt(2, policy.getTenantId());
+            policyStatement.setString(3, policy.getKeyTemplate());
+            policyStatement.setString(4, policy.getDescription());
+
+            InputStream siddhiQueryInputStream;
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            policyStatement.setBinaryStream(5, siddhiQueryInputStream);
+            policyStatement.setBoolean(6, false);
+            policyStatement.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+
+                    // rollback failed. exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Global Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to add Global Policy: " + policy, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+        }
+    }
+
+    /**
+     * Retrieves global policy key templates for the given tenantID
+     *
+     * @param tenantID tenantid
+     * @return list of KeyTemplates
+     * @throws APIManagementException
+     */
+    public List<String> getGlobalPolicyKeyTemplates(int tenantID) throws APIManagementException {
+
+        List<String> keyTemplates = new ArrayList<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATES;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                keyTemplates.add(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATES", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return keyTemplates;
+    }
+
+    /**
+     * Removes a throttling policy from the database
+     *
+     * @param policyLevel level of the policy to be deleted
+     * @param policyName  name of the policy
+     * @param tenantId    used to get the tenant id
+     * @throws APIManagementException
+     */
+    public void removeThrottlePolicy(String policyLevel, String policyName, int tenantId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteStatement = null;
+        String query = null;
+
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            query = SQLConstants.DELETE_APPLICATION_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            query = SQLConstants.DELETE_SUBSCRIPTION_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            query = SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            query = SQLConstants.DELETE_GLOBAL_POLICY_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteStatement = connection.prepareStatement(query);
+            deleteStatement.setInt(1, tenantId);
+            deleteStatement.setString(2, policyName);
+            deleteStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to remove policy " + policyLevel + '-' + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteStatement, connection, null);
+        }
+    }
+
+    /**
+     * Get API level policies. Result only contains basic details of the policy,
+     * it doesn't contain pipeline information.
+     *
+     * @param tenantID policies are selected using tenantID
+     * @return APIPolicy ArrayList
+     * @throws APIManagementException
+     */
+    public APIPolicy[] getAPIPolicies(int tenantID) throws APIManagementException {
+        List<APIPolicy> policies = new ArrayList<APIPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICIES;
+
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APIPolicy apiPolicy = new APIPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(apiPolicy, rs);
+                apiPolicy.setUserLevel(rs.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+
+                policies.add(apiPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new APIPolicy[policies.size()]);
+    }
+
+    /**
+     * Get application level polices
+     *
+     * @param tenantID polices are selected only belong to specific tenantID
+     * @return AppilicationPolicy array list
+     */
+    public ApplicationPolicy[] getApplicationPolicies(int tenantID) throws APIManagementException {
+        List<ApplicationPolicy> policies = new ArrayList<ApplicationPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_APP_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APP_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(appPolicy, rs);
+                policies.add(appPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new ApplicationPolicy[policies.size()]);
+    }
+
+    /**
+     * Get Hard Throttling polices
+     *
+     * @param tenantID polices are selected only belong to specific tenantID
+     * @return Hard Throttling policy List
+     */
+    public HardThrottlingPolicy[] getHardThrottlePolicies(int tenantID) throws APIManagementException {
+        List<HardThrottlingPolicy> policies = new ArrayList<HardThrottlingPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                HardThrottlingPolicy appPolicy = new HardThrottlingPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(appPolicy, rs);
+                policies.add(appPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new HardThrottlingPolicy[policies.size()]);
+    }
+
+    /**
+     * Get all subscription level policeis belongs to specific tenant
+     *
+     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @return subscriptionPolicy array list
+     */
+    public SubscriptionPolicy[] getSubscriptionPolicies(int tenantID) throws APIManagementException {
+        List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(
+                        rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(subPolicy, rs);
+                subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(blob != null){
+                    byte[] customAttrib = blob.getBytes(1,(int)blob.length());
+                    subPolicy.setCustomAttributes(customAttrib);
+                }
+                policies.add(subPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new SubscriptionPolicy[policies.size()]);
+    }
+
+    /**
+     * Get all Global level policeis belongs to specific tenant
+     *
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    public GlobalPolicy[] getGlobalPolicies(int tenantID) throws APIManagementException {
+        List<GlobalPolicy> policies = new ArrayList<GlobalPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String siddhiQuery = null;
+                GlobalPolicy globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+
+                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicy.setSiddhiQuery(siddhiQuery);
+                policies.add(globalPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new GlobalPolicy[policies.size()]);
+    }
+
+    /**
+     * Retrieves {@link APIPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
+     * <p>This will retrieve complete details about the APIPolicy with all pipelins and conditions.</p>
+     *
+     * @param policyName name of the policy to retrieve from the database
+     * @param tenantId   tenantId of the policy
+     * @return {@link APIPolicy}
+     * @throws APIManagementException
+     */
+    public APIPolicy getAPIPolicy(String policyName, int tenantId) throws APIManagementException {
+        APIPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, policyName);
+            selectStatement.setInt(2, tenantId);
+
+            // Should return only single result
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new APIPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+                policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                policy.setPipelines(getPipelines(policy.getPolicyId()));
+            } else {
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
+                        new APIManagementException(""));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get api policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    /**
+     * Retrieves {@link ApplicationPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
+     *
+     * @param policyName name of the policy to retrieve from the database
+     * @param tenantId   tenantId of the policy
+     * @return {@link ApplicationPolicy}
+     * @throws APIManagementException
+     */
+    public ApplicationPolicy getApplicationPolicy(String policyName, int tenantId) throws APIManagementException {
+        ApplicationPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.GET_APPLICATION_POLICY_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APPLICATION_POLICY_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, policyName);
+            selectStatement.setInt(2, tenantId);
+
+            // Should return only single row
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+            } else {
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
+                        new APIManagementException(""));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    /**
+     * Retrieves {@link SubscriptionPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
+     *
+     * @param policyName name of the policy to retrieve from the database
+     * @param tenantId   tenantId of the policy
+     * @return {@link SubscriptionPolicy}
+     * @throws APIManagementException
+     */
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName, int tenantId) throws APIManagementException {
+        SubscriptionPolicy policy = null;
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICY_SQL;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICY_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            selectStatement = connection.prepareStatement(sqlQuery);
+            selectStatement.setString(1, policyName);
+            selectStatement.setInt(2, tenantId);
+
+            // Should return only single row
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                policy = new SubscriptionPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(policy, resultSet);
+                policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if (blob != null) {
+                    byte[] customAttrib = blob.getBytes(1, (int) blob.length());
+                    policy.setCustomAttributes(customAttrib);
+                }
+            } else {
+                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
+                        new APIManagementException(""));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+        }
+        return policy;
+    }
+
+    /**
+     * Retrieves list of pipelines for the policy with policy Id: <code>policyId</code>
+     *
+     * @param policyId policy id of the pipelines
+     * @return list of pipelines
+     * @throws APIManagementException
+     */
+    private ArrayList<Pipeline> getPipelines(int policyId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement pipelinesStatement = null;
+        ResultSet resultSet = null;
+        ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            pipelinesStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_PIPELINES_SQL);
+            int unitTime = 0;
+            int quota = 0;
+            int pipelineId = -1;
+            String timeUnit = null;
+            String quotaUnit = null;
+
+            pipelinesStatement.setInt(1, policyId);
+            resultSet = pipelinesStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Pipeline pipeline = new Pipeline();
+                ArrayList<Condition> conditions = null;
+                QuotaPolicy quotaPolicy = new QuotaPolicy();
+                quotaPolicy.setType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                timeUnit = resultSet.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT);
+                quotaUnit = resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_UNIT);
+                unitTime = resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME);
+                quota = resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA);
+                pipelineId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
+
+                if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
+                    RequestCountLimit requestCountLimit = new RequestCountLimit();
+                    requestCountLimit.setUnitTime(unitTime);
+                    requestCountLimit.setTimeUnit(timeUnit);
+                    requestCountLimit.setRequestCount(quota);
+                    quotaPolicy.setLimit(requestCountLimit);
+                } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
+                    BandwidthLimit bandwidthLimit = new BandwidthLimit();
+                    bandwidthLimit.setUnitTime(unitTime);
+                    bandwidthLimit.setTimeUnit(timeUnit);
+                    bandwidthLimit.setDataUnit(quotaUnit);
+                    bandwidthLimit.setDataAmount(quota);
+                    quotaPolicy.setLimit(bandwidthLimit);
+                }
+
+                conditions = getConditions(pipelineId);
+                pipeline.setConditions(conditions);
+                pipeline.setQuotaPolicy(quotaPolicy);
+                pipelines.add(pipeline);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get pipelines for policyId: " + policyId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(pipelinesStatement, connection, resultSet);
+        }
+        return pipelines;
+    }
+
+    /**
+     * Retrieves list of Conditions for a pipeline specified by <code>pipelineId</code>
+     *
+     * @param pipelineId pipeline Id with conditions to retrieve
+     * @return list of Conditions for a pipeline
+     * @throws APIManagementException
+     */
+    private ArrayList<Condition> getConditions(int pipelineId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement conditionsStatement = null;
+        ResultSet resultSet = null;
+        ArrayList<Condition> conditions = new ArrayList<Condition>();
+        String startingIP = null;
+        String endingIP = null;
+        String specificIP = null;
+        boolean withinRange = true;
+        /*String httpVerb = null;
+        String startingDate = null;
+        String endingDate = null;
+        String specificDate = null;*/
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_IP_CONDITIONS_SQL);
+            conditionsStatement.setInt(1, pipelineId);
+            resultSet = conditionsStatement.executeQuery();
+
+            while (resultSet.next()) {
+                /*startingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_DATE);
+                endingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_DATE);
+                specificDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_DATE);
+                httpVerb = resultSet.getString(ThrottlePolicyConstants.COLUMN_HTTP_VERB);
+                */
+                startingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_IP);
+                endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
+                specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
+                withinRange = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
+
+
+                if (specificIP != null && !"".equals(specificIP)) {
+                    IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+                    ipCondition.setSpecificIP(specificIP);
+                    conditions.add(ipCondition);
+                } else if (startingIP != null && !"".equals(startingIP)) {
+
+                        /* Assumes availability of starting ip means ip range is enforced.
+                       Therefore availability of ending ip is not checked.
+                    */
+                	IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+                    ipRangeCondition.setStartingIP(startingIP);
+                    ipRangeCondition.setEndingIP(endingIP);
+                    conditions.add(ipRangeCondition);
+                }
+
+                /*if (specificDate != null && !"".equals(specificDate)) {
+                    DateCondition dateCondition = new DateCondition();
+                    dateCondition.setSpecificDate(specificDate);
+                    conditions.add(dateCondition);
+                } else if (startingDate != null && !"".equals(specificDate)) {
+
+                     Assumes availability of starting date means date range is enforced.
+                       Therefore availability of ending date is not checked.
+
+                    DateRangeCondition dateRangeCondition = new DateRangeCondition();
+                    dateRangeCondition.setStartingDate(startingDate);
+                    dateRangeCondition.setEndingDate(endingDate);
+                    conditions.add(dateRangeCondition);
+                }*/
+
+               /* if (httpVerb != null && !"".equals(httpVerb)) {
+                    HTTPVerbCondition httpVerbCondition = new HTTPVerbCondition();
+                    httpVerbCondition.setHttpVerb(httpVerb);
+                    conditions.add(httpVerbCondition);
+                }*/
+
+                setHeaderConditions(pipelineId, conditions);
+                setQueryParameterConditions(pipelineId, conditions);
+                setJWTClaimConditions(pipelineId, conditions);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get conditions for pipelineId: " + pipelineId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
+        }
+        return conditions;
+    }
+
+    /**
+     * Add Header conditions of pipeline with pipeline Id: <code>pipelineId</code> to a
+     * provided {@link Condition} array
+     *
+     * @param pipelineId Id of the pipeline
+     * @param conditions condition array to populate
+     * @throws APIManagementException
+     */
+    private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement conditionsStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_HEADER_CONDITIONS_SQL);
+            conditionsStatement.setInt(1, pipelineId);
+            resultSet = conditionsStatement.executeQuery();
+
+            while (resultSet.next()) {
+                HeaderCondition headerCondition = new HeaderCondition();
+                headerCondition.setHeader(resultSet.getString(ThrottlePolicyConstants.COLUMN_HEADER_FIELD_NAME));
+                headerCondition.setValue(resultSet.getString(ThrottlePolicyConstants.COLUMN_HEADER_FIELD_VALUE));
+                headerCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_HEADER_FIELD_MAPPING));
+                conditions.add(headerCondition);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get header conditions for pipelineId: " + pipelineId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
+        }
+    }
+
+    /**
+     * Add Query parameter conditions of pipeline with pipeline Id: <code>pipelineId</code> to a
+     * provided {@link Condition} array
+     *
+     * @param pipelineId Id of the pipeline
+     * @param conditions condition array to populate
+     * @throws APIManagementException
+     */
+    private void setQueryParameterConditions(int pipelineId, ArrayList<Condition> conditions)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement conditionsStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_QUERY_PARAMETER_CONDITIONS_SQL);
+            conditionsStatement.setInt(1, pipelineId);
+            resultSet = conditionsStatement.executeQuery();
+
+            while (resultSet.next()) {
+                QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
+                queryParameterCondition
+                        .setParameter(resultSet.getString(ThrottlePolicyConstants.COLUMN_PARAMETER_NAME));
+                queryParameterCondition.setValue(resultSet.getString(ThrottlePolicyConstants.COLUMN_PARAMETER_VALUE));
+                queryParameterCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_PARAM_MAPPING));
+                conditions.add(queryParameterCondition);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get query parameter conditions for pipelineId: " + pipelineId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
+        }
+    }
+
+    /**
+     * Add JWT claim conditions of pipeline with pipeline Id: <code>pipelineId</code> to a
+     * provided {@link Condition} array
+     *
+     * @param pipelineId Id of the pipeline
+     * @param conditions condition array to populate
+     * @throws APIManagementException
+     */
+    private void setJWTClaimConditions(int pipelineId, ArrayList<Condition> conditions) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement conditionsStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_JWT_CLAIM_CONDITIONS_SQL);
+            conditionsStatement.setInt(1, pipelineId);
+            resultSet = conditionsStatement.executeQuery();
+
+            while (resultSet.next()) {
+                JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
+                jwtClaimsCondition.setClaimUrl(resultSet.getString(ThrottlePolicyConstants.COLUMN_CLAIM_URI));
+                jwtClaimsCondition.setAttribute(resultSet.getString(ThrottlePolicyConstants.COLUMN_CLAIM_ATTRIBUTE));
+                jwtClaimsCondition.setInvertCondition(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_IS_CLAIM_MAPPING));
+                conditions.add(jwtClaimsCondition);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get jwt claim conditions for pipelineId: " + pipelineId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(conditionsStatement, connection, resultSet);
+        }
+    }
+
+    /**
+     * Updates API level policy.
+     * <p>policy name and tenant id should be specified in <code>policy</code></p>
+     * <p>
+     * Exsisting policy will be deleted and new policy will be inserted to the database
+     * with old POLICY_ID. Uses {@link #addAPIPolicy(APIPolicy) addAPIPolicy}
+     * to create new policy.
+     * </p>
+     *
+     * @param policy updated policy object
+     * @throws APIManagementException
+     */
+    public APIPolicy updateAPIPolicy(APIPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectStatement = null;
+        PreparedStatement deleteStatement = null;
+        ResultSet resultSet = null;
+        int oldPolicyId = 0;
+
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            selectStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL);
+            selectStatement.setString(1, policy.getPolicyName());
+            selectStatement.setInt(2, policy.getTenantId());
+
+            // Should return only single row
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next()) {
+                oldPolicyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
+            }
+
+            deleteStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.DELETE_API_POLICY_SQL);
+            deleteStatement.setInt(1, policy.getTenantId());
+            deleteStatement.setString(2, policy.getPolicyName());
+            deleteStatement.executeUpdate();
+            policy.setPolicyId(oldPolicyId);
+            addAPIPolicy(policy, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to update api policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
+            APIMgtDBUtil.closeAllConnections(deleteStatement, null, null);
+        }
+        return policy;
+    }
+
+    /**
+     * Updates Application level policy.
+     * <p>policy name and tenant id should be specified in <code>policy</code></p>
+     *
+     * @param policy updated policy object
+     * @throws APIManagementException
+     */
+    public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        boolean hasCustomAttrib = false;
+
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+
+        try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            String updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_SQL;
+            if(hasCustomAttrib){
+            	updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
+            }
+            updateStatement = connection.prepareStatement(updateQuery);
+            updateStatement.setString(1, policy.getDescription());
+            updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
+
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(3, limit.getRequestCount());
+                updateStatement.setString(4, null);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(3, limit.getDataAmount());
+                updateStatement.setString(4, limit.getDataUnit());
+            }
+            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+
+            if(hasCustomAttrib){
+            	updateStatement.setBlob(7, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(8, policy.getPolicyName());
+                updateStatement.setInt(9, policy.getTenantId());
+            }else{
+            	updateStatement.setString(7, policy.getPolicyName());
+                updateStatement.setInt(8, policy.getTenantId());
+            }
+            updateStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Application Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException(
+                    "Failed to update application policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+    }
+
+    /**
+     * Updates Subscription level policy.
+     * <p>policy name and tenant id should be specified in <code>policy</code></p>
+     *
+     * @param policy updated policy object
+     * @throws APIManagementException
+     */
+    public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        boolean hasCustomAttrib = false;
+
+        if (policy.getTenantId() == -1 || StringUtils.isEmpty(policy.getPolicyName())) {
+            String errorMsg = "Policy object doesn't contain mandatory parameters. Name: " + policy.getPolicyName() +
+                    ", Tenant Id: " + policy.getTenantId();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
+        }
+
+        try {
+        	if(policy.getCustomAttributes() != null){
+       		 hasCustomAttrib = true;
+            }
+        	String updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL;
+        	 if(hasCustomAttrib){
+             	updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
+             }
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateStatement = connection.prepareStatement(updateQuery);
+            updateStatement.setString(1, policy.getDescription());
+            updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
+
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(3, limit.getRequestCount());
+                updateStatement.setString(4, null);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(3, limit.getDataAmount());
+                updateStatement.setString(4, limit.getDataUnit());
+            }
+
+            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(7, policy.getRateLimitCount());
+            updateStatement.setString(8, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(9, policy.isStopOnQuotaReach());
+            updateStatement.setString(10, policy.getBillingPlan());
+
+            if(hasCustomAttrib){
+            	updateStatement.setBlob(11, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(12, policy.getPolicyName());
+                updateStatement.setInt(13, policy.getTenantId());
+            }else{
+            	updateStatement.setString(11, policy.getPolicyName());
+                updateStatement.setInt(12, policy.getTenantId());
+            }
+            updateStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Subscription Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException(
+                    "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+    }
+
+    /**
+     * Updates global throttle policy in database
+     *
+     * @param policy updated policy obejct
+     * @throws APIManagementException
+     */
+    public void updateGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateStatement = null;
+        InputStream siddhiQueryInputStream;
+
+        try {
+            siddhiQueryInputStream = new ByteArrayInputStream(
+                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
+
+            updateStatement.setString(1, policy.getDescription());
+            updateStatement.setBinaryStream(2, siddhiQueryInputStream);
+            updateStatement.setString(3, policy.getKeyTemplate());
+            updateStatement.setString(4, policy.getPolicyName());
+            updateStatement.setInt(5, policy.getTenantId());
+            updateStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the update Global Policy: " + policy.toString(), ex);
+                }
+            }
+            handleException("Failed to update global policy: " + policy.getPolicyName() + '-' + policy.getTenantId(),
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+        }
+    }
+
+    /**
+     * Retrieves list of available policy names under <code>policyLevel</code>
+     * and user <code>username</code>'s tenant
+     *
+     * @param policyLevel policY level to filter policies
+     * @param username    username will be used to get the tenant
+     * @return array of policy names
+     * @throws APIManagementException
+     */
+    public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
+
+        List<String> names = new ArrayList<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        int tenantID = APIUtil.getTenantId(username);
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+                sqlQuery = SQLConstants.ThrottleSQLConstants.GET_API_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_APP_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_SUB_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
+            } else if (PolicyConstants.POLICY_LEVEL_HARD.equals(policyLevel)) {
+                sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
+            }
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                names.add(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return names.toArray(new String[names.size()]);
+    }
+
+    /**
+     * Sets deployment status vaule of a policy in database.
+     *
+     * @param policyLevel policy level
+     * @param policyName  name of the policy
+     * @param tenantId    tenant id of the policy
+     * @param isDeployed  deployment status. <code>true</code> if deployment successful, <code>false</code> if not
+     * @throws APIManagementException
+     */
+    public void setPolicyDeploymentStatus(String policyLevel, String policyName, int tenantId, boolean isDeployed)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement statusStatement = null;
+        String query = null;
+
+        if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_APPLICATION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            query = SQLConstants.ThrottleSQLConstants.UPDATE_API_POLICY_STATUS_SQL;
+        } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
+            query = SQLConstants.UPDATE_GLOBAL_POLICY_STATUS_SQL;
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            statusStatement = connection.prepareStatement(query);
+            statusStatement.setBoolean(1, isDeployed);
+            statusStatement.setString(2, policyName);
+            statusStatement.setInt(3, tenantId);
+            statusStatement.executeUpdate();
+
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback setting isDeployed flag: " + policyName + '-' + tenantId, ex);
+                }
+            }
+            handleException("Failed to set deployment status to the policy: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(statusStatement, connection, null);
+        }
+    }
+
+    /**
+     * Populates common attribute data of the <code>policy</code> to <code>policyStatement</code>
+     *
+     * @param policyStatement prepared statement initialized of policy operation
+     * @param policy          <code>Policy</code> object with data
+     * @throws SQLException
+     */
+    private void setCommonParametersForPolicy(PreparedStatement policyStatement, Policy policy) throws SQLException {
+        policyStatement.setString(1, policy.getPolicyName());
+        policyStatement.setInt(2, policy.getTenantId());
+        policyStatement.setString(3, policy.getDescription());
+        policyStatement.setString(4, policy.getDefaultQuotaPolicy().getType());
+
+        //TODO use requestCount in same format in all places
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+            policyStatement.setLong(5, limit.getRequestCount());
+            policyStatement.setString(6, null);
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+            policyStatement.setLong(5, limit.getDataAmount());
+            policyStatement.setString(6, limit.getDataUnit());
+        }
+
+        policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        //policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
+        policyStatement.setBoolean(9, policy.isDeployed());
+
+    }
+
+    /**
+     * Populated common attributes of policy type objects to <code>policy</code>
+     * from <code>resultSet</code>
+     *
+     * @param policy    initiallized {@link Policy} object to populate
+     * @param resultSet {@link ResultSet} with data to populate <code>policy</code>
+     * @throws SQLException
+     */
+    private void setCommonPolicyDetails(Policy policy, ResultSet resultSet) throws SQLException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
+
+        if (policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
+        }
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.REQUEST_COUNT_TYPE)) {
+            RequestCountLimit reqLimit = new RequestCountLimit();
+            reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(reqLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
+            BandwidthLimit bandLimit = new BandwidthLimit();
+            bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+            quotaPolicy.setLimit(bandLimit);
+        }
+
+        policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+        policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+        policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+        policy.setDefaultQuotaPolicy(quotaPolicy);
+        policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
+    }
+
+    public boolean isPolicyExist(String policyType,int tenantId, String policyName ) throws APIManagementException{
+    	Connection connection = null;
+        PreparedStatement isExistStatement = null;
+
+    	boolean isExist = false;
+    	String policyTable = null;
+    	if(PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyType)){
+    		policyTable = PolicyConstants.API_THROTTLE_POLICY_TABLE;
+    	}else if(PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyType)){
+    		policyTable = PolicyConstants.POLICY_APPLICATION_TABLE;
+    	}else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equalsIgnoreCase(policyType)){
+    		policyTable = PolicyConstants.POLICY_GLOBAL_TABLE;
+    	}else if(PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyType)){
+    		policyTable = PolicyConstants.POLICY_SUBSCRIPTION_TABLE;
+    	}
+    	try{
+    		String query = "SELECT " +PolicyConstants.POLICY_ID + " FROM "+policyTable + " WHERE TENANT_ID =? AND NAME = ? ";
+        	connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            isExistStatement = connection.prepareStatement(query);
+            isExistStatement.setInt(1, tenantId);
+            isExistStatement.setString(2, policyName);
+            ResultSet result = isExistStatement.executeQuery();
+            if(result != null && result.next()){
+            	int id = result.getInt(PolicyConstants.POLICY_ID);
+            	isExist = true;
+            }
+    	}catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to check is exist: " + policyName + '-' + tenantId, ex);
+                }
+            }
+            handleException("Failed to check is exist: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
+        }
+
+
+
+    	return isExist;
+    }
+
+    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+            APIManagementException {
+        Connection connection = null;
+        PreparedStatement insertPreparedStatement = null;
+        boolean status = false;
+        boolean valid = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
+            if ("API".equals(conditionType)) {
+                String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
+                if (extractedTenantDomain == null) {
+                    extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+                if (tenantDomain.equals(extractedTenantDomain) && isValidContext(conditionValue)) {
+                    valid = true;
+                } else {
+                    throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
+                            conditionValue);
+                }
+            } else if ("APPLICATION".equals(conditionType)) {
+                String appArray[] = conditionValue.split(":");
+                if (appArray.length > 1) {
+                    String appOwner = appArray[0];
+                    String appName = appArray[1];
+
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
+                            (appOwner,
+                            appName)) {
+                        valid = true;
+                    }else{
+                        throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
+                                "name " + appName + "from Application " +
+                                "Owner " + appOwner);
+                    }
+                }
+            } else if ("USER".equals(conditionType)) {
+                if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
+                    valid = true;
+                }else{
+                    throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
+                }
+            } else {
+                valid = true;
+            }
+            if (valid) {
+                connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
+                insertPreparedStatement = connection.prepareStatement(query);
+                insertPreparedStatement.setString(1, conditionType);
+                insertPreparedStatement.setString(2, conditionValue);
+                insertPreparedStatement.setString(4, tenantDomain);
+                insertPreparedStatement.setString(3, "TRUE");
+                status = insertPreparedStatement.execute();
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<BlockConditionsDTO>();
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setString(1, tenantDomain);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+                blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
+                blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
+                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockConditionsDTOList.add(blockConditionsDTO);
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to get Block condition", e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockConditionsDTOList;
+    }
+    public boolean updateBlockConditionState(int conditionId,String state) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
+            updateBlockConditionPreparedStatement.setString(1,state.toUpperCase());
+            updateBlockConditionPreparedStatement.setInt(2, conditionId);
+            updateBlockConditionPreparedStatement.executeUpdate();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                     connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to update Block condition with condition id "+conditionId, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+    public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.DELETE_BLOCK_CONDITION_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
+            deleteBlockConditionPreparedStatement.setInt(1, conditionId);
+            status = deleteBlockConditionPreparedStatement.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to delete Block condition with condition id"+conditionId, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+    private boolean isValidContext(String context) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement validateContextPreparedStatement = null;
+        ResultSet resultSet = null;
+        boolean status = false;
+        try {
+            String query = "select count(*) COUNT from AM_API where CONTEXT=?";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            validateContextPreparedStatement = connection.prepareStatement(query);
+            validateContextPreparedStatement.setString(1, context);
+            resultSet = validateContextPreparedStatement.executeQuery();
+            connection.commit();
+            if (resultSet.next() && resultSet.getInt("COUNT") > 0) {
+                status = true;
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to check Block condition with context "+context, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
+        }
+        return status;
+    }
+    private boolean isValidApplication(String appOwner, String appName) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement validateContextPreparedStatement = null;
+        ResultSet resultSet = null;
+        boolean status = false;
+        try {
+            String query = "SELECT * FROM AM_APPLICATION App,AM_SUBSCRIBER SUB  WHERE App.NAME=? AND App" +
+                    ".SUBSCRIBER_ID=SUB.SUBSCRIBER_ID AND SUB.USER_ID=?";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            validateContextPreparedStatement = connection.prepareStatement(query);
+            validateContextPreparedStatement.setString(1,appName);
+            validateContextPreparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(appOwner));
+            resultSet = validateContextPreparedStatement.executeQuery();
+            connection.commit();
+            if (resultSet.next()){
+                status = true;
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to check Block condition with Application Name " + appName + " with " +
+                            "Application Owner" + appOwner, e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
+        }
+        return status;
+    }
+    public String getAPILevelTier(int id) throws APIManagementException{
+    	 Connection connection = null;
+         PreparedStatement selectPreparedStatement = null;
+         ResultSet resultSet = null;
+         String apiLevelTier = null;
+         try {
+             String query = SQLConstants.GET_API_DETAILS_SQL;
+             connection = APIMgtDBUtil.getConnection();
+             connection.setAutoCommit(true);
+             selectPreparedStatement = connection.prepareStatement(query + " WHERE API_ID = ?");
+             selectPreparedStatement.setInt(1, id);
+             resultSet = selectPreparedStatement.executeQuery();
+             while (resultSet.next()) {
+            	 apiLevelTier = resultSet.getString("API_TIER");
+             }
+         } catch (SQLException e) {
+             if (connection != null) {
+                 try {
+                     connection.rollback();
+                 } catch (SQLException ex) {
+                     handleException("Failed to get API Details", e);
+                 }
+             }
+         } finally {
+             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+         }
+         return apiLevelTier;
     }
 }

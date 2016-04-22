@@ -16,6 +16,14 @@
             break;
         }
     }
+
+    var subscriptionLevelPolicies;
+    var apiLevelPolicies;
+    if(mod.isGlobalCEPThrottlingEnabled()){
+        subscriptionLevelPolicies = mod.getSubsriptionLevelPolicies().policies;    
+        apiLevelPolicies = mod.getAPILevelPolicies().policies;
+    }
+
     var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
 
@@ -130,6 +138,52 @@
                     
             </div>
 
+
+                <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+
+                 <div class="control-group">
+                    <label class="control-label" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">                   
+                        <select id="apiPolicy" name="apiPolicy"  class="select required">
+                        <%
+                        for (var i = 0; i < apiLevelPolicies.length; i++) {
+                            var isSelected = false;
+                            if(apiLevelPolicies[i].getPolicyName() == api.apiLevelPolicy){
+                                isSelected = true;
+                            }                          
+                            %><option value="<%= apiLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= apiLevelPolicies[i].getPolicyName() %></option>%%><%
+                        }
+                        %>
+                        </select>
+                        <script type="text/javascript">
+
+                        </script> 
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="subPolicy"><%=i18n.localize("subPolicy")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">                   
+                        <select id="subPolicy" name="subPolicy"  class="multiselect selected hide required" multiple="multiple">
+                        <%
+                        for (var i = 0; i < subscriptionLevelPolicies.length; i++) {
+
+                            var isSelected = api.availableSubscriptionPolicy.indexOf(subscriptionLevelPolicies[i].getPolicyName()) > -1;
+                            //%><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+                           // var isSelected = false;
+                            %><option value="<%= subscriptionLevelPolicies[i].getPolicyName() %>" <%if(isSelected){%>selected="selected"<%}%>><%= subscriptionLevelPolicies[i].getPolicyName() %></option>%%><%
+                        }
+                        %>
+                        </select>
+                        <script type="text/javascript">
+
+                        </script> 
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                    </div>
+                </div>
+                 <% } else {%>
                 <div class="control-group">
                     <label class="control-label" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">                   
@@ -148,7 +202,8 @@
                         <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
                 </div>
-
+                  <% }%>
+  
                 <div class="control-group transport-styles">
                 <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
@@ -362,7 +417,20 @@
                     </div>
                  </div>
             </fieldset>
-
+<fieldset>
+	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("apiThrottlePolicy")%>
+	     <i class="icon-chevron-right icon-keys"></i>
+	</legend>
+         <div style="display: none">
+            <!--legend>Business Information</legend-->
+            <div class="control-group">
+            <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+            </div>
+         </div>
+    </div>
+</fieldset>
                 <div id="api_designer">
                     <div id ="apidoc_details"></div>
                     <legend>Resources</legend>

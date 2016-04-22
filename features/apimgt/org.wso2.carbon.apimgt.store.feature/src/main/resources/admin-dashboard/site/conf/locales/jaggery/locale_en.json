@@ -87,7 +87,7 @@
     "AbnormalTierUsage":"Abnormal API Usage",
     "FrequentTierHittingAlert":"Tier Crossing",
 
-    
+
     "alerts":"Configure Alerts",
     "templateName":"Template Name",
     "configName":"Configuration Name",
@@ -125,9 +125,35 @@
 
     "AbnormalTierUsage_Desc":"This alert should get triggered if there is a drastic reduction in API usage for a given API for a given user. These type of alerts should be treated as an indication of a failure of the application which is using the altered API.",
 
-    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600"
+    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600",
 
-
-
-
+    "tier" : "Tier Availability" ,
+    "addAPI":"API Level Policies",
+    "user":"User",
+    "subsPendingApproval":"Subscription is pending approval",
+    "tiers":"Tier",
+    "blockedEntities":"Blocked Entities",
+    "blockNew":"Block Entity",
+    "conditionIdHead":"Condition Id",
+    "conditionTypeHead":"Condition Type",
+    "conditionValueHead":"Condition Value",
+    "conditionManagementTitle":"Blocking Entities",
+    "apiTiers": "API Resource Tiers",
+    "applicationTiers": "Application Tiers",
+    "subscriptionTiers": "Subscription Tiers",
+    "customRules": "Custom Rules",
+    "selectBlockingEntity": "Select Entity to Block",
+    "block": "Block",
+    "addSubsTier": "Add Subscription Tier",
+    "editSubsTier": "Edit Subscription Tier",
+    "rateLimitHeader": "Rate Limiting (Spike Arrest Limit)",
+    "customRules": "Custom Rules",
+    "addCustomRule": "Add Custom Rule",
+    "applyRule": "Apply Rule",
+    "defineNewRule": "Define Rule",
+    "subsTierList": "Subscription Tier List",
+    "addTier": "Add Tier",
+    "apiResTierList": "API Resource Tier List",
+    "tierName": "Tier Name",
+    "tierDesc": "Tier Description"
 }

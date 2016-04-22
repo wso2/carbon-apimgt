@@ -135,6 +135,15 @@ jagg.module("api", {
     },
     getAPILCStatus:function () {
         return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").getAPILCStatus.apply(this, arguments);
+    },
+    getAPILevelPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getAPILevelPolicies.apply(this, arguments);
+    },
+    getHardThrottlingPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getHardThrottlingPolicies.apply(this, arguments);
+    },
+    isGlobalCEPThrottlingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").isGlobalCEPThrottlingEnabled.apply(this, arguments);
     }
 });
 %>

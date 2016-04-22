@@ -17,12 +17,12 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class ServiceReferenceHolder {
 

@@ -1,0 +1,28 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("policy/global/manage", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {
+
+        }
+    },
+
+    getOutputs:function (inputs) {
+        var globalPolicies, result;
+        result = jagg.module("policy").getAllGlobalPolicies();
+        globalPolicies = result.globalPolicies;
+
+        // we put results to the session.
+        session.put("globalPolicies", globalPolicies);
+        return {
+            "globalPolicies":globalPolicies
+        };
+    }
+});
+%>
+
+
+

@@ -148,6 +148,8 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                         thriftKeyValidationInfoDTO.setIssuedTime(keyValidationInfoDTO.getIssuedTime());
                         thriftKeyValidationInfoDTO.setValidityPeriod(keyValidationInfoDTO.getValidityPeriod());
                         thriftKeyValidationInfoDTO.setAuthorizedDomains(keyValidationInfoDTO.getAuthorizedDomains());
+                        thriftKeyValidationInfoDTO.setIsContentAware(keyValidationInfoDTO.isContentAware());
+                        thriftKeyValidationInfoDTO.setApiTier(keyValidationInfoDTO.getApiTier());
                     } finally {
                          PrivilegedCarbonContext.endTenantFlow();
                     }
@@ -243,6 +245,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions(dto.getThrottlingConditions());
         return template;
     }
 

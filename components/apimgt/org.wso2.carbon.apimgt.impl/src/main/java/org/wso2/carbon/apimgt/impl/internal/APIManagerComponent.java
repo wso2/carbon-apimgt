@@ -34,8 +34,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
@@ -65,7 +65,6 @@ import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.listener.UserStoreManagerListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -74,7 +73,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -212,6 +210,11 @@ public class APIManagerComponent {
                 APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
                         .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
                         .SUPER_TENANT_ID);
+            }
+            //Adding default throttle policies
+            boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+            if(advancedThrottlingEnabled) {
+                addDefaultAdvancedThrottlePolicies();
             }
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
@@ -514,7 +517,11 @@ public class APIManagerComponent {
         }
 
     }
-    
+
+    private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
+        APIUtil.addDefaultAdvancedThrottlePoliciesToDB(MultitenantConstants.SUPER_TENANT_ID);
+   }
+
    protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
     }
@@ -535,7 +542,6 @@ public class APIManagerComponent {
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
     }
-
 
     /**
      * Initialize the Output EventAdapter Service dependency

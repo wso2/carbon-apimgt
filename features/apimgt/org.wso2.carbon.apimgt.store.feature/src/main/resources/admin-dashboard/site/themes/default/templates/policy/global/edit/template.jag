@@ -1,0 +1,93 @@
+<% jagg.template("policy/global/edit", function(inputs, outputs, jagg) { %>
+<%
+    var policyName = request.getParameter("policyName");
+    var pageTitle = "Add Global Level Policy";
+    var nameFieldDisableStatus = "";
+
+    if(policyName != null) {
+        pageTitle = "Edit Global Level Policy";
+        nameFieldDisableStatus = "readonly";
+        var globalPolicies = session.get("globalPolicies");
+        var globalPolicy;
+        // globalPolicies contains an array that was returned. Hence we need to get the correct policy and proceed
+        for (j = 0; j < globalPolicies.length; j++) {
+            if (policyName.equalsIgnoreCase(globalPolicies[j].getPolicyName())) {
+                globalPolicy = globalPolicies[j];
+                break;
+            }
+        }
+        var description = globalPolicy.getDescription() == null ? "" : globalPolicy.getDescription();
+        var siddhiQuery = globalPolicy.getSiddhiQuery() == null ? "" : globalPolicy.getSiddhiQuery();
+    }
+%>
+
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+    <div class="title-section">
+        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+    </div>
+
+    <div class="content-section shadow-up">
+        <div class="content-data">
+            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+            <div class="row-fluid">
+                <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                    action="/admin-dashboard/site/blocks/policy/global/edit/ajax/global-policy-edit.jag">
+
+                    <fieldset>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%="Name"%></label>
+                            <div class="controls cnls">
+                                <input type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>//>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
+                            <div class="controls cnls">
+                                <textarea id="description" class="text" cols="40" rows ="2" name="description">
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="control-group cnl-group">
+                            <label class="control-label cnl-label">Siddhi Query</label>
+                            <div class="controls cnls">
+                                    <textarea id="siddhiQuery" class="text"  name="siddhiQuery" style="width:99%;height:200px"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-actions">
+                        <input id="edit-custom-rule-btn" onclick="saveGlobalPolicy()" name="save-tier-btn" type="button"
+                            class="btn btn-primary" value='<%=i18n.localize("applyRule")%>'/>
+                        <input id="cancel-edit-custom-rule-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var isNewPolicy = true;
+    $(document).ready(function(){
+        $('#cancel-tier-btn').on('click',function(){
+             location.reload(true);
+        });
+
+        if('<%=policyName%>' != 'null'){
+            isNewPolicy = false;
+        }
+        if(!isNewPolicy){
+          $('#policyName').val("<%=policyName%>");
+          $('#description').val("<%=description%>");
+          $('#siddhiQuery').val("<%=siddhiQuery%>");
+        }
+    });
+</script>
+
+<%});%>

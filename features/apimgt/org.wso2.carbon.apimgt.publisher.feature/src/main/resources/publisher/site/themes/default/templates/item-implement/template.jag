@@ -38,11 +38,21 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 
     var manage_wlabel = "";
-    if( api.availableTiers !=""){
-        manage_wlabel = "wizard-done";      
+    if(mod.isGlobalCEPThrottlingEnabled()){
+         if( api.availableSubscriptionPolicy !="" ){
+            manage_wlabel = "wizard-done";
+        } else {
+            var manage_w_link = '#';
+        }
     } else {
-        var manage_w_link = '#';        
-    } 
+
+        if( api.availableTiers !="" ){
+            manage_wlabel = "wizard-done";
+        } else {
+            var manage_w_link = '#';
+        }
+    }
+
 %>
 <center>
 <ul class="new-sub-menu-wizard" style="margin:0 auto">

@@ -111,6 +111,7 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setScopes(thriftDTO.getScopes());
         apiKeyValidationInfoDTO.setIssuedTime(thriftDTO.getIssuedTime());
         apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
+        apiKeyValidationInfoDTO.setApiTier(thriftDTO.getApiTier());
 
         return apiKeyValidationInfoDTO;
     }
@@ -151,6 +152,7 @@ public class ThriftKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions(dto.getThrottlingConditions());
         return template;
     }
 

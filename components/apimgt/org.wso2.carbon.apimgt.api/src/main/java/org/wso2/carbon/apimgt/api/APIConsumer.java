@@ -579,4 +579,5 @@ public interface APIConsumer extends APIManager {
 	JSONObject resumeWorkflow(Object[] args);
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
+
 }
