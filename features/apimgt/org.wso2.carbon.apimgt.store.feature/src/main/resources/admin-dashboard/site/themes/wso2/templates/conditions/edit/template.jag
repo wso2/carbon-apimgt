@@ -3,7 +3,7 @@
 
 	<div class="page-header">
                 <div class="page-title">
-                    <h1>ADD Condition</h1>
+                    <h1><%=i18n.localize("selectBlockingEntity")%></h1>
                  </div>
          </div>
 
@@ -39,10 +39,6 @@
                                 <input type="radio" name="select-option" value="USER">
                                 <span class="helper">USER</span>
                             </label>
-                                <label class="radio">
-                                <input type="radio" name="select-option" value="CUSTOM">
-                                <span class="helper">CUSTOM</span>
-                            </label>
                         </div>
                         </div>
                         <div class="form-group">
@@ -58,7 +54,7 @@
                                       	<br class="spacer">
                     <div class="form-actions">
                         <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
-                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
+                            class="btn btn-primary" value='<%=i18n.localize("block")%>'/>
                         <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
                     </div>
                 </form>
