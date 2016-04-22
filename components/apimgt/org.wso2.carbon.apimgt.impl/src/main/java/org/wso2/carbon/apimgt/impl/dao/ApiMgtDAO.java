@@ -9466,8 +9466,9 @@ public class ApiMgtDAO {
 
             updateStatement.setString(1, policy.getDescription());
             updateStatement.setBinaryStream(2, siddhiQueryInputStream);
-            updateStatement.setString(3, policy.getPolicyName());
-            updateStatement.setInt(4, policy.getTenantId());
+            updateStatement.setString(3, policy.getKeyTemplate());
+            updateStatement.setString(4, policy.getPolicyName());
+            updateStatement.setInt(5, policy.getTenantId());
             updateStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
