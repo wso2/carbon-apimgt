@@ -177,6 +177,11 @@
     "apiUsage" : "API Usage",
     "apiResponseTimes" : "API Response Times",
     "apiLastAccessTimes" : "API Last Access Times",
+
+    "applicationsOverTime" : "Applications Time",
+    "userSubscriptionsOverTime" : "Subscriptions Time",
+    "developersOverTime" : "Developers Time",
+
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "usageResourcePath" : "Usage by Resource Path",
     "apiLatencyTime" : "API Latency Time",
@@ -190,6 +195,9 @@
     "apiThrottledRequests" : "API Throttled Requests",
     "applicationThrottledCounts" : "App Throttled Out Requests",
     "applicationThrottledRequests" : "App Throttled Requests",
+
+    "apiTime" : "PUBLISHED APIS OVER TIME",
+    "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",
