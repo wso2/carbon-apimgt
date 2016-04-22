@@ -4,7 +4,7 @@ var log = new Log();
 var saveHardPolicy = function (action, policyName, description, defaultRequestCount, defaultUnitTime, defaultTimeUnit) {
     try {
 
-    log.info("Inside method saveHardPolicy inside modules/policy");
+    
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
@@ -16,7 +16,7 @@ var saveHardPolicy = function (action, policyName, description, defaultRequestCo
         } else if (action == "update") {
             apiProvider.updatePolicy(policy);
         }
-        log.info(policy.toString());
+    
         return {
             error: false
         };
