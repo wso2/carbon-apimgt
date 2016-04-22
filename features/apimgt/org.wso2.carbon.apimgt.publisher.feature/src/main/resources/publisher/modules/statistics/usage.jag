@@ -772,7 +772,7 @@ function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,dri
 function getDeveloperSignUpsOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit) {
     var usage;
     try {
-              usage = usageClient.getDeveloperSignUpsOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit);
+        usage = usageClient.getDeveloperSignUpsOverTime(null, version, tenantDomain, null, null, null, null, 0);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -801,7 +801,7 @@ function getDeveloperSignUpsOverTime(apiName, version, tenantDomain, fromDate, t
 function getApplicationRegistrationOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit, developer) {
     var usage;
     try {
-              usage = usageClient.getApplicationRegistrationOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit, developer);
+        usage = usageClient.getApplicationRegistrationOverTime(null, version, tenantDomain, null, null, null, null, 0, null);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -830,7 +830,7 @@ function getApplicationRegistrationOverTime(apiName, version, tenantDomain, from
 function getAPISubscriptionsPerApp(apiName, version,tenantDomain, fromDate, toDate, drillDown, limit, provider) {
     var usage;
     try {
-              usage = usageClient.getAPISubscriptionsPerApp(apiName, version,tenantDomain, fromDate, toDate, drillDown, limit, provider);
+        usage = usageClient.getAPISubscriptionsPerApp(null, version,tenantDomain, null, null, null, 0, null);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
