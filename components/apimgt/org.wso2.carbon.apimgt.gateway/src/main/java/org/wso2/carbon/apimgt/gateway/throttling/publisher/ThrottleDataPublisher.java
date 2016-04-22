@@ -99,7 +99,12 @@ public class ThrottleDataPublisher {
      *
      * @param messageContext is message context object that holds
      */
-    public void publishNonThrottledEvent(MessageContext messageContext) {
+    public void publishNonThrottledEvent(
+            String applicationLevelThrottleKey, String applicationLevelTier,
+            String apiLevelThrottleKey, String apiLevelTier,
+            String subscriptionLevelThrottleKey, String subscriptionLevelTier,
+            String resourceLevelThrottleKey, String resourceLevelTier,
+            String authorizedUser, MessageContext messageContext) {
         //DataProcessAndPublishingAgent agent = null;
         //long start = System.currentTimeMillis();
         //String remoteIP = "127.0.0.1";
@@ -139,7 +144,11 @@ public class ThrottleDataPublisher {
         //log.info("##########################################Publishing event");
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
-            agent.setDataReference(messageContext);
+            agent.setDataReference( applicationLevelThrottleKey,  applicationLevelTier,
+                     apiLevelThrottleKey,  apiLevelTier,
+                     subscriptionLevelThrottleKey,  subscriptionLevelTier,
+                     resourceLevelThrottleKey,  resourceLevelTier,
+                     authorizedUser,  messageContext);
             executor.execute(agent);
             //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
 
@@ -169,7 +178,7 @@ public class ThrottleDataPublisher {
         protected void afterExecute(java.lang.Runnable r, java.lang.Throwable t) {
             try {
                 DataProcessAndPublishingAgent agent = (DataProcessAndPublishingAgent) r;
-                agent.setDataReference(null);
+                //agent.setDataReference(null);
                 ThrottleDataPublisher.dataPublisherPool.release(agent);
             } catch (Exception e) {
                 log.error("Error while returning Throttle data publishing agent back to pool" + e.getMessage());
