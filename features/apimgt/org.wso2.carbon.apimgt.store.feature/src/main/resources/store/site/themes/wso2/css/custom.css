@@ -793,9 +793,26 @@ ul.product-tags {
 .dropdown-menu-right .divider{
     background-color:#1f1f1f;
 }
+
+.dropdown-menu .divider{
+    background-color:#c5c5c5;
+    margin:0px;
+}
+.dropdown-menu > li > a{
+    padding:7px 20px;
+}
+.dropdown-menu > li:not(.divider){
+    border-bottom:1px solid #f3f3f3;
+}
+.dropdown-menu > li.dropdown-header,.dropdown-menu > li:first-child{
+    border-bottom:none;
+}
 .dropdown-menu-right .dropdown-header{
     font-size:inherit;
     color:#cbcbcb;
+}
+header .nav .dropdown-menu > li:not(.divider){
+    border-bottom:1px solid #444;
 }
 @media (min-width: 768px){
     .visible-side-pane{
@@ -857,11 +874,6 @@ ul.nav.nav-tabs {
 .input-group-btn>.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
     color: #fff;
     background-color: #1A78D8;
-}
-.btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
-    color: #fff;
-    background-color: #444444;
-    border: 1px solid #444444;
 }
 
 .navbar > .container .appm-breadcrumb a, .navbar > .container-fluid .appm-breadcrumb a,
