@@ -139,13 +139,13 @@ public class ThrottleHandler extends AbstractHandler {
         //Throttle Keys
         String applicationLevelThrottleKey;
         String subscriptionLevelThrottleKey;
-        String resourceLevelThrottleKey;
+        String resourceLevelThrottleKey="";
         String apiLevelThrottleKey = "";
 
         //Throttle Tiers
         String applicationLevelTier;
         String subscriptionLevelTier;
-        String resourceLevelTier;
+        String resourceLevelTier ="";
         String apiLevelTier;
 
         //Other Relevant parameters
@@ -226,6 +226,7 @@ public class ThrottleHandler extends AbstractHandler {
                                 resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                                 for (String conditionString : resourceLevelThrottleConditions) {
                                     resourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
+                                    resourceLevelTier = verbInfoDTO.getThrottling();
                                     if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                             isThrottled(resourceLevelThrottleKey)) {
                                         isResourceLevelThrottled = isThrottled = true;
@@ -266,7 +267,12 @@ public class ThrottleHandler extends AbstractHandler {
                                 //Pass message context and continue to avaoid peformance issue.
                                 //Did not throttled at any level. So let message go and publish event.
                                 //publish event to Global Policy Server
-                                throttleDataPublisher.publishNonThrottledEvent(synCtx);
+                                throttleDataPublisher.publishNonThrottledEvent(
+                                        applicationLevelThrottleKey, applicationLevelTier,
+                                        apiLevelThrottleKey, apiLevelTier,
+                                        subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                        resourceLevelThrottleKey, resourceLevelTier,
+                                        authorizedUser, synCtx);
 
                             } else {
                                 if (log.isDebugEnabled()) {
@@ -363,7 +369,9 @@ public class ThrottleHandler extends AbstractHandler {
 
         }
         if (isThrottled) {
-            // return false;
+
+            handleThrottleOut(messageContext);
+            return false;
         }
         long end = System.currentTimeMillis();
         //log.info("Total-Time:" + (end - start));
