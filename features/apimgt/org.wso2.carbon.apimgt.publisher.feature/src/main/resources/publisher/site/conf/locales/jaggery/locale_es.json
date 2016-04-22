@@ -243,7 +243,12 @@
     "demote to prototyped" : "Degradar a Prototipado",
     "deprecate" : "desaprobar",
     "re-publish" : "Volver a publicar",
-    "retire" : "Retirarse"
+    "retire" : "Retirarse",
+
+    "applicationsOverTime" : "Applications Time",
+    "userSubscriptionsOverTime" : "Subscriptions Time",
+    "developersOverTime" : "Developers Time"
+
     
     
 

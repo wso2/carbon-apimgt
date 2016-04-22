@@ -96,6 +96,20 @@ var log = new Log();
         var output = new Packages.java.lang.String(data.content);
         var jsonObj = JSON.parse(output);
 
+        //Delete security element from resource definitiotns
+        for (var key in jsonObj) {
+            for (var path in jsonObj[key]) {
+                for (var method in jsonObj[key][path]) {
+                    for (var  element in jsonObj[key][path][method]) {
+                        if (element == "security") {
+                        	delete jsonObj[key][path][method][element];
+                        }
+                    }                    
+                }                
+            }
+        }
+        
+	
         var basePathValue = jsonObj.basePath;
         var username=null;
         result = jagg.module("api").getAPIDescription({

@@ -1,0 +1,8 @@
+<%
+jagg.block("stats/subscriptions-time", {
+    initializer:function (data) {
+
+    }
+
+});
+%>

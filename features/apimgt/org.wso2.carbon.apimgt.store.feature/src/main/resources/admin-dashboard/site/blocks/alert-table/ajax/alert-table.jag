@@ -6,7 +6,7 @@ var localeResourcesBasePath = "/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
 (function () {
-    
+
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result,
             action = request.getParameter("action"),
@@ -22,7 +22,7 @@ i18n.init(request,localeResourcesBasePath);
         if (action === "isDataPublishingEnabled") {
             mod = jagg.module("stats");
             result = mod.isDataPublishingEnabled();
-            
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,
@@ -38,8 +38,8 @@ i18n.init(request,localeResourcesBasePath);
 
         }
 
-        else if (action === "getDataFromAlertTable") {
-            mod = jagg.module("alerts");
+        else if (action === "getDataFromTable") {
+            mod = jagg.module("stats");
             var provider = jagg.getUser().username;
             var draw = request.getParameter("draw");
             var startindex =  parseInt(request.getParameter("start"));
@@ -60,22 +60,22 @@ i18n.init(request,localeResourcesBasePath);
                 if(searchEntry.indexOf(":") == -1){
                     lucenePrefix = "msg:";
                 }
-                 searchEntry = lucenePrefix+searchEntry;
-            } 
-          
-                           
-            dataResult = mod.getDataFromAlertTable(tableName, searchEntry, startindex, count, sortOrderBool);
-            countResult = result = mod.getCountFromAlertTable(tableName, searchEntry);
+                searchEntry = lucenePrefix+searchEntry;
+            }
+
+
+            dataResult = mod.getDataFromTable(tableName, searchEntry, startindex, count, "alertTimestamp", sortOrderBool);
+            countResult = result = mod.getCountFromTable(tableName, searchEntry);
 
             parsedDataResult = JSON.parse(dataResult);
-           
+
             if (parsedDataResult["status"] == "failed") {
-                    obj = {
-                       "draw":draw,
-                        "recordsTotal": countResult,
-                        "recordsFiltered": countResult,
-                        "data" : []
-                    };
+                obj = {
+                    "draw":draw,
+                    "recordsTotal": countResult,
+                    "recordsFiltered": countResult,
+                    "data" : []
+                };
             } else {
                 var type = null;
                 if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
@@ -96,13 +96,13 @@ i18n.init(request,localeResourcesBasePath);
                     type = "Availability of APIs";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
                     type = "Abnormal Resource Access Pattern";
-                } 
+                }
 
                 var arr = new Array(parsedDataResult.length);
                 for (i=0; i<parsedDataResult.length ;i++) {
-                    
+
                     arr[i] = new Array(3);
-                   
+
                     arr[i][1] = (new Date(parsedDataResult[i]["values"]["alertTimestamp"])).toString();
                     if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
                         type = i18n.localize(parsedDataResult[i]["values"]["type"]);
@@ -111,26 +111,26 @@ i18n.init(request,localeResourcesBasePath);
                         arr[i][2] = type;
                     }
                     arr[i][3] = parsedDataResult[i]["values"]["msg"];
-                    
+
                 }
-        
+
                 obj = {
                     "draw":draw,
                     "recordsTotal": countResult,
                     "recordsFiltered": countResult,
-                    "data" : 
-                        arr                
+                    "data" :
+                    arr
                 }
                 print(obj);
             }
 
-           
+
         }  else {
-                print({
-                    error: true,
-                    message: msg.error.invalidAction(action)
-                });
-            }
+            print({
+                error: true,
+                message: msg.error.invalidAction(action)
+            });
+        }
     }
 }());
 %>

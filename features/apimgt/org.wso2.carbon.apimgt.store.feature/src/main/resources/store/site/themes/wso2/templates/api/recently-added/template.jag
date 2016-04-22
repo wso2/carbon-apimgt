@@ -4,6 +4,7 @@
    var theme = jagg.getUserTheme().base;
    var themePath = jagg.url('/site/themes/'+theme+"/");
    var registryPath = jagg.getRegistryPath("");
+   var urlPrefix = jagg.getTenantURLPrefix("&");
 %>
 
 <div class="page-header">
@@ -30,7 +31,7 @@
 											</div>
 										</div> 
 									{{/if}}
-									<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" title="<%=i18n.localize("browse.title")%>">
+									<a href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>" title="<%=i18n.localize("browse.title")%>">
                                     	<div class="after">                                        
                                     		<span class="fw-stack fw-lg">
                                     			<i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -40,7 +41,7 @@
 									</a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}">{{ name }}-{{ version }}</a></h4>
+                                    <h4><a href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
                                     <h5>{{ displayOwner }}</h5>
 									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
                                 </div>
