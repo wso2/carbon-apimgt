@@ -5474,8 +5474,8 @@ public final class APIUtil {
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount[i]);
-                requestCountLimit.setUnitTime(60);
-                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                requestCountLimit.setUnitTime(1);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -5501,8 +5501,8 @@ public final class APIUtil {
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount[i]);
-                requestCountLimit.setUnitTime(60);
-                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                requestCountLimit.setUnitTime(1);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
