@@ -20,13 +20,11 @@ var serverUrl = "https://"+location.hostname +":"+ gatewayPort+"/LogAnalyzerRest
 var client = new AnalyticsClient().init(null, null, serverUrl);
 var dataM = [];
 var filterdMessage;
-var template1 = "<ul class='template3'>{{#arr}}<li class='class'>{{class}}</li>{{/arr}}</ul>";
-
-
+var template1 = "<ul class='template3' style='list-style-type:none' >{{#arr}}<li class='class'>{{class}}</li>{{/arr}}</ul>";
 
 $(document).ready(function () {
     fetch();
-var interval = setInterval(fetch, 5000);
+    var interval = setInterval(fetch, 5000);
 });
 
 function fetch() {
@@ -42,7 +40,7 @@ function fetch() {
                     {
                         field : "_timestamp",
                         sortType : "DESC", // This can be ASC, DESC
-                        reversed : "false" //optional
+                        reversed : "true" //optional
                     }
                 ]
         }
@@ -53,10 +51,16 @@ function fetch() {
         if (d["status"] === "success") {
 
             for (var i = 0; i < obj.length; i++) {
-            var tempDay = new Date(parseInt(obj[i].values._eventTimeStamp)).toUTCString()
+           var tempDay = new Date(parseInt(obj[i].values._eventTimeStamp)).toUTCString();
+            var logLine;
+            if(obj[i].values._trace == null){
+                logLine = tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content;
+            }else{
+                logLine = tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace;
+            }
 
-                dataM.push([{
-                    class: tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace
+            dataM.push([{
+                    class: logLine
                 }]);
             }
             writeToLogViewer();
@@ -70,8 +74,6 @@ function writeToLogViewer() {
     $("#logViewer").empty();
     for (var i=0;i<dataM.length;i++)
     {
-   
             $('#logViewer').append(Mustache.to_html(template1, {arr:dataM[i]}));
-
     }
 }
