@@ -685,10 +685,12 @@ public class ThrottleHandler extends AbstractHandler {
                 key.replaceAll("$resourceKey", resourceKey);
                 key.replaceAll("$userId", userID);
                 key.replaceAll("$apiKey", apiKey);
-                return ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                        getThrottleDataMap().containsKey(key);
+                if(ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                        getThrottleDataMap().containsKey(key)){
+                    return true;
+                }
             }
         }
-        return true;
+        return false;
     }
 }
