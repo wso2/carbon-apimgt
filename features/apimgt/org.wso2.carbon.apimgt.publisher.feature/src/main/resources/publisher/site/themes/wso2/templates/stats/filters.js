@@ -43,7 +43,7 @@ $(document).ready(function(){
             var  apiName = '';
 
                 for ( var i=0; i< json.data.length ; i++){
-                    apiName += '<option>'+ json.data[i].API_NAME+'</option>'
+                    apiName += '<option>'+ json.data[i].apiName+'</option>'
                 }
 
                 $('#apiSelect')
