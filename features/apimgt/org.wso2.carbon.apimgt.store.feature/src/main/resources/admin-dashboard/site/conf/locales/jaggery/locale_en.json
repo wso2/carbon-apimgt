@@ -125,7 +125,7 @@
 
     "AbnormalTierUsage_Desc":"This alert should get triggered if there is a drastic reduction in API usage for a given API for a given user. These type of alerts should be treated as an indication of a failure of the application which is using the altered API.",
 
-    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600",
+    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)"
 
     "tier" : "Tier Availability" ,
     "addAPI":"API Level Policies",
