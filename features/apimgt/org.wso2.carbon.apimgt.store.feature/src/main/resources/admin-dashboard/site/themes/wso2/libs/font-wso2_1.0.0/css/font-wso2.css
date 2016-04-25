@@ -17,12 +17,13 @@
 
 @font-face {
 	font-family:"font-wso2";
-	src:local("font-wso2"), url("../fonts/font-wso2.eot?da6b3eebe240a78c9faa99e03425e31c");
+	src:local("font-wso2"), url("../fonts/font-wso2.eot?bb4c4f28be64d2ab2f5a1456d239d054");
 	src:local("font-wso2"),
         url("../fonts/font-wso2.eot?#iefix") format("embedded-opentype"),
-		url("../fonts/font-wso2.woff?da6b3eebe240a78c9faa99e03425e31c") format("woff"),
-		url("../fonts/font-wso2.ttf?da6b3eebe240a78c9faa99e03425e31c") format("truetype"),
-		url("../fonts/font-wso2.svg?da6b3eebe240a78c9faa99e03425e31c#font-wso2") format("svg");
+		url("../fonts/font-wso2.woff2?bb4c4f28be64d2ab2f5a1456d239d054") format("woff2"),
+		url("../fonts/font-wso2.woff?bb4c4f28be64d2ab2f5a1456d239d054") format("woff"),
+		url("../fonts/font-wso2.ttf?bb4c4f28be64d2ab2f5a1456d239d054") format("truetype"),
+		url("../fonts/font-wso2.svg?bb4c4f28be64d2ab2f5a1456d239d054#font-wso2") format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
@@ -258,6 +259,10 @@
  * font icons
  * ======================================================================== */
 
+.fw-activate:before {
+    content:"\e6cf";
+}
+
 .fw-add:before {
     content:"\e615";
 }
@@ -346,6 +351,10 @@
     content:"\e618";
 }
 
+.fw-carbon:before {
+    content:"\e6c5";
+}
+
 .fw-chat:before {
     content:"\e65b";
 }
@@ -414,8 +423,16 @@
     content:"\e624";
 }
 
+.fw-depend:before {
+    content:"\e6c6";
+}
+
 .fw-deploy:before {
     content:"\e625";
+}
+
+.fw-deprecate:before {
+    content:"\e6cb";
 }
 
 .fw-dial-up:before {
@@ -590,6 +607,10 @@
     content:"\e645";
 }
 
+.fw-jaxws:before {
+    content:"\e6c7";
+}
+
 .fw-jquery:before {
     content:"\e646";
 }
@@ -674,6 +695,10 @@
     content:"\e635";
 }
 
+.fw-micro-services:before {
+    content:"\e6ce";
+}
+
 .fw-minus:before {
     content:"\e616";
 }
@@ -702,6 +727,10 @@
     content:"\e6ac";
 }
 
+.fw-own:before {
+    content:"\e6c8";
+}
+
 .fw-pages:before {
     content:"\e6c0";
 }
@@ -714,12 +743,20 @@
     content:"\e659";
 }
 
+.fw-php:before {
+    content:"\e6c9";
+}
+
 .fw-pie-chart:before {
     content:"\e65a";
 }
 
 .fw-policy:before {
     content:"\e67d";
+}
+
+.fw-prototype:before {
+    content:"\e6cc";
 }
 
 .fw-proxy:before {
@@ -764,6 +801,10 @@
 
 .fw-rest-service:before {
     content:"\e662";
+}
+
+.fw-retire:before {
+    content:"\e6cd";
 }
 
 .fw-retweet:before {
@@ -838,12 +879,12 @@
     content:"\e670";
 }
 
-.fw-sign-out:before {
-    content:"\e6b8";
+.fw-sign-in:before {
+    content:"\e671";
 }
 
-.fw-sign-up:before {
-    content:"\e671";
+.fw-sign-out:before {
+    content:"\e6b8";
 }
 
 .fw-soap:before {
@@ -956,6 +997,10 @@
 
 .fw-usb-drive:before {
     content:"\e68e";
+}
+
+.fw-use:before {
+    content:"\e6ca";
 }
 
 .fw-user:before {
