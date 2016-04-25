@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.*;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -55,8 +56,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is Handling new throttling check. This class will use inside each API as throttle handler.
@@ -265,15 +269,27 @@ public class ThrottleHandler extends AbstractHandler {
 
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
-                                //Pass message context and continue to avaoid peformance issue.
-                                //Did not throttled at any level. So let message go and publish event.
-                                //publish event to Global Policy Server
-                                throttleDataPublisher.publishNonThrottledEvent(
-                                        applicationLevelThrottleKey, applicationLevelTier,
-                                        apiLevelThrottleKey, apiLevelTier,
-                                        subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                        resourceLevelThrottleKey, resourceLevelTier,
-                                        authorizedUser, synCtx);
+                                if(!validateCustomPolicy(authorizedUser,applicationLevelThrottleKey,
+                                        resourceLevelThrottleKey, apiLevelThrottleKey)) {
+                                    //Pass message context and continue to avaoid peformance issue.
+                                    //Did not throttled at any level. So let message go and publish event.
+                                    //publish event to Global Policy Server
+                                    throttleDataPublisher.publishNonThrottledEvent(
+                                            applicationLevelThrottleKey, applicationLevelTier,
+                                            apiLevelThrottleKey, apiLevelTier,
+                                            subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                            resourceLevelThrottleKey, resourceLevelTier,
+                                            authorizedUser, synCtx);
+                                }
+                                else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Request throttled at custom throttling");
+                                    }
+                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                            "Custom Policy Defined by admin");
+                                    isThrottled = true;
+
+                                }
 
                             } else {
                                 if (log.isDebugEnabled()) {
@@ -649,6 +665,29 @@ public class ThrottleHandler extends AbstractHandler {
                     "based throttling", e);
             synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validate custom policy is handle by this method. This method call is an expensive operation
+     * and should not enabled by default. If we enabled this policy then all APIs available in system
+     * will have to go through this check.
+     * @param messageContext
+     * @return
+     */
+    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey,String apiKey ){
+        Map<String, String> keyTemplateMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                getKeyTemplateMap();
+        if(keyTemplateMap != null && keyTemplateMap.size() >0){
+            for(String key : keyTemplateMap.keySet()){
+                key.replaceAll("$appKey", appKey);
+                key.replaceAll("$resourceKey", resourceKey);
+                key.replaceAll("$userId", userID);
+                key.replaceAll("$apiKey", apiKey);
+                return ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                        getThrottleDataMap().containsKey(key);
+            }
         }
         return true;
     }
