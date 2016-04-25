@@ -156,5 +156,8 @@
     "apiResTierList": "API Resource Tier List",
     "tierName": "Tier Name",
     "tierDesc": "Tier Description",
-    "keyTemplate": "keys should be separated by colon.  <B>eg:-</B> api:version:provide:qp_name:qp_age  <br> <b>Allowed keys</b><br>"
+    "keyTemplate": "keys should be separated by colon.  <B>eg:-</B> api:version:provide:qp_name:qp_age  <br> <b>Allowed keys</b><br>",
+    "endpointTiers": "Endpoint Tiers",
+    "endpointTierList": "Endpoint Tier List",
+    "addEndpointTier": "Add Endpoint Tier"
 }
