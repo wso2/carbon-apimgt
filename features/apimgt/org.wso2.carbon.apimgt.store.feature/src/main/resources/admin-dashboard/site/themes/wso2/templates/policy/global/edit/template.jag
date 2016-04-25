@@ -119,6 +119,7 @@ var isNewPolicy = true;
         var validated = true ;
 
         $.each( arr, function( key, value ) {
+            value = value.replace(/\$|{|}/gi, "");
             if($.inArray( value, parameterArray ) == -1 ){
                 validated = false; 
             }
