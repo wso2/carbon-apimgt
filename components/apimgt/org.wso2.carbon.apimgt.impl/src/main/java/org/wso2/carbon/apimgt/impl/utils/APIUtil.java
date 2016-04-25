@@ -5439,7 +5439,7 @@ public final class APIUtil {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
                 SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
-                subscriptionPolicy.setDescription(appPolicyDecs[i]);
+                subscriptionPolicy.setDescription(subPolicyDecs[i]);
                 subscriptionPolicy.setTenantId(tenantId);
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
