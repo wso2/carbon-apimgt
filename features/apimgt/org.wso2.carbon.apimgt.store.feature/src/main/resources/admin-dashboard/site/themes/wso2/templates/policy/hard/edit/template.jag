@@ -2,7 +2,7 @@
 <%
     var policyName = request.getParameter("policyName");
     var policyAction = request.getParameter("action");
-    var pageTitle = "Add Hard Throttling Policy";
+    var pageTitle = i18n.localize("addEndpointTier");
     var nameFieldDisableStatus = "";
 
     if(policyName != null){
