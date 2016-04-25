@@ -1188,13 +1188,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
                     Tier tier = new Tier(policy.getPolicyName());
                     tier.setDescription(policy.getDescription());
-                    tier.setDisplayName(policy.getPolicyName());
+                    tier.setDisplayName(policy.getDisplayName());
                     tierMap.put(policy.getPolicyName(), tier);
                 } else {
                     if(APIUtil.isEnabledUnlimitedTier()) {
                         Tier tier = new Tier(policy.getPolicyName());
                         tier.setDescription(policy.getDescription());
-                        tier.setDisplayName(policy.getPolicyName());
+                        tier.setDisplayName(policy.getDisplayName());
                         tierMap.put(policy.getPolicyName(), tier);
                     }
                 }
@@ -1233,13 +1233,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
                     Tier tier = new Tier(policy.getPolicyName());
                     tier.setDescription(policy.getDescription());
-                    tier.setDisplayName(policy.getPolicyName());
+                    tier.setDisplayName(policy.getDisplayName());
                     tierMap.put(policy.getPolicyName(), tier);
                 } else {
                     if(APIUtil.isEnabledUnlimitedTier()) {
                         Tier tier = new Tier(policy.getPolicyName());
                         tier.setDescription(policy.getDescription());
-                        tier.setDisplayName(policy.getPolicyName());
+                        tier.setDisplayName(policy.getDisplayName());
                         tierMap.put(policy.getPolicyName(), tier);
                     }
                 }
@@ -1285,13 +1285,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
                     Tier tier = new Tier(policy.getPolicyName());
                     tier.setDescription(policy.getDescription());
-                    tier.setDisplayName(policy.getPolicyName());
+                    tier.setDisplayName(policy.getDisplayName());
                     tierMap.put(policy.getPolicyName(), tier);
                 } else {
                     if(APIUtil.isEnabledUnlimitedTier()) {
                         Tier tier = new Tier(policy.getPolicyName());
                         tier.setDescription(policy.getDescription());
-                        tier.setDisplayName(policy.getPolicyName());
+                        tier.setDisplayName(policy.getDisplayName());
                         tierMap.put(policy.getPolicyName(), tier);
                     }
                 }
