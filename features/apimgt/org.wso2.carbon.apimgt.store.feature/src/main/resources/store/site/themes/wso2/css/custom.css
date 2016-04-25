@@ -552,7 +552,9 @@ ul.product-tags {
     z-index: 500;
     padding-bottom: 7px;
 }
-
+.help_popup{
+    display: block;
+}
 
 /*========================*/
 
