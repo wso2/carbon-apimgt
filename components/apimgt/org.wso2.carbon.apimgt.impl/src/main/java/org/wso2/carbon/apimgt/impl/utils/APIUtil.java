@@ -544,12 +544,13 @@ public final class APIUtil {
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Map<String, Tier> definedTiers = getTiers(tenantId);
                if (policies != null && !"".equals(policies)) {
                    String[] policyNames = policies.split("\\|\\|");
                    for (String policyName : policyNames) {
                        if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
-                           Tier p = new Tier(policyName);
-                           availablePolicy.add(p);
+                           Tier definedTier = definedTiers.get(policyName);
+                           availablePolicy.add(definedTier);
                        } else {
                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
                        }
