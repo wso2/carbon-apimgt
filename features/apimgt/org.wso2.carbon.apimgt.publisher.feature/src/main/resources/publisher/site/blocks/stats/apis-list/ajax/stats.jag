@@ -16,6 +16,8 @@ var log = new Log();
     var user = request.getParameter("user");
     var groupId = request.getParameter("groupId");
     var appName = request.getParameter("app");
+    var fromDate = request.getParameter("fromDate");
+    var toDate = request.getParameter("toDate");
 
     if (jagg.getUser() == null) {
         print({
@@ -24,86 +26,25 @@ var log = new Log();
         });
     }
     else{
-       var db = new Database("jdbc:h2:" + org.wso2.carbon.base.CarbonBaseUtils.getCarbonHome() + "/repository/database/WSO2AM_DB", "wso2carbon", "wso2carbon");
-       var query;
-       
-       var allAPIs = "select api.api_name, api.api_version, api.api_provider from AM_API api";
-       var whereWithDateRange = " and api.created_time between '" + fromDate + "' and '" + toDate + "'";
-       var whereWithDate = " and api.created_time < '" + toDate + "'";
-       
-       var allSubscribedAPIs = "select api.api_name, api.api_version, api.api_provider from AM_SUBSCRIPTION as sub, " +
-       		"AM_APPLICATION as app, AM_SUBSCRIBER subc, AM_API api where app.application_id=sub.application_id and " +
-       		"app.subscriber_id=subc.subscriber_id and sub.api_id = api.api_id";
-       var whereByUser = " and subc.user_id = '" + user + "'";
-       var whereByGroup = " and app.group_id = '" +groupId+ "' or (app.group_id = '' and subc.user_id = '" + user + "')";  
-       var whereByAppName = " and app.name = '" + appName  + "'";           
-       
-       if (!withSubscriptions) {
-       		query = allAPIs;
-       		if (fromDate && toDate) { 
-       			query = query + whereWithDateRange;
-	       	} else if (toDate) {
-	       		query = query + whereWithDate;
-	       	} 	       	
-	       	
-	       	var result = db.query(query);
-	       	
-	       	for (var i =0; i < result.length; i++) {
-	       		var api = result[i];
-	       		var subscriptionCountQuery = "select count(SUBSCRIPTION_ID) as sub_count from AM_SUBSCRIPTION sub, AM_API api where "
-	       									+ " sub.api_id=api.api_id and api.api_name = '" + api.api_name +
-	       									"' and api.api_version= '" + api.api_version + "' and api.api_provider= '" +
-	       									 api.api_provider + "'";
-       		
-       			if (db.query(subscriptionCountQuery) && db.query(subscriptionCountQuery).length > 0) {
-	       			api.sub_count = (db.query(subscriptionCountQuery)[0]).sub_count;
-	       			}
-	       	}
-	       
-	   		print({ "data" : result });   
-       
-       } else {
-       		query = allSubscribedAPIs;
-       		if (fromDate && toDate) { 
-       			query = query + whereWithDateRange;
-	       	} else if (toDate) {
-	       		query = query + whereWithDate;
-	       	} 
-	       	
-	       	
-	       	if (appName && user) {
-	       		query = query + whereByAppName;
-	       		if (groupId) {
-	       			query = query + whereByGroup;
-	       		} else {
-	       			query = query + whereByUser;
-	       		}
-	       	}
-	       	
-	       	if (groupId) {
-	       			query = query + whereByGroup;
-	       	} else if (user) {
-	       			query = query + whereByUser;
-	       	}
-	       	
-	       	var result = db.query(query);
-	       	
-	       	for (var i =0; i < result.length; i++) {
-	       		var api = result[i];
-	       		var subscriptionCountQuery = "select count(SUBSCRIPTION_ID) as sub_count from AM_SUBSCRIPTION sub, AM_API api where "
-	       									+ " sub.api_id=api.api_id and api.api_name = '" + api.api_name +
-	       									"' and api.api_version= '" + api.api_version + "' and api.api_provider= '" +
-	       									 api.api_provider + "'";
-       		
-       			if (db.query(subscriptionCountQuery) && db.query(subscriptionCountQuery).length > 0) {
-	       			api.sub_count = (db.query(subscriptionCountQuery)[0]).sub_count;
-	       			}
-	       	}
-	       	
-	   		print({ "data": result });   
-       
-       }       
-       
+		mod = jagg.module("statistics");
+		var currentLocation = request.getParameter("currentLocation");
+		var apiFilter = request.getParameter("apiFilter");
+	   	var tenantDomain = null;//org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
+		var limit = 0;
+		result = mod.getApisList(null, null, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit);
+
+		if (result.error == "true") {
+			obj = {
+				error: result.error,
+				message: msg.error.backendError(action)
+			};
+		} else {
+			obj = {
+				error: false,
+				data: result.usage
+			}
+		}
+		   print(obj);
     }
 
 }());

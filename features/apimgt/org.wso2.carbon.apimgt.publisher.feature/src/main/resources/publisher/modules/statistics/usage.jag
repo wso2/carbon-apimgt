@@ -944,4 +944,33 @@ function getApplicationList(apiName, version, user, groupId, withSubscriptions, 
         };
     }
 }
+
+function getApisList(user, provider, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit) {
+    var usage;
+    try {
+        usage = usageClient.getApisList(user, provider, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>
