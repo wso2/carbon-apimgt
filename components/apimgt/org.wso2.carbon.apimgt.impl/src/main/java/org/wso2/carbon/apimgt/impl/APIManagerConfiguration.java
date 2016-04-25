@@ -755,8 +755,9 @@ public class APIManagerConfiguration {
                     OMElement blockConditionRetrieverServiceUrlElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
                     if (blockConditionRetrieverServiceUrlElement != null) {
-                        blockConditionRetrieverConfiguration.setServiceUrl(blockConditionRetrieverServiceUrlElement
-                                .getText());
+                        blockConditionRetrieverConfiguration.setServiceUrl(APIUtil
+                                .replaceSystemProperty(blockConditionRetrieverServiceUrlElement
+                                .getText()));
                     }
                     OMElement blockConditionRetrieverServiceUsernameElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
