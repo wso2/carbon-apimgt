@@ -171,7 +171,7 @@
         <p class="lead"><%=i18n.localize("executionFlows")%></p>
     </div>
     <div id="throttle-policies-pipeline-content" class="form-group">
-        <button class="btn btn-primary" type="button" onclick="addPolicy()">
+        <button class="btn btn-secondary" type="button" onclick="addPolicy()">
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -179,17 +179,20 @@
         </button>
     </div>
     <div id="pipeline-content" class="form-group"></div>
+    <div class="page-header">
+        <h2><br/></h2>
+    </div>
     <div id="add-policy-button" class="form-group">
         <button type="button" id="addThrottleBtn" name="addThrottleBtn" onclick="addPolicyToBackend()" class="btn btn-primary has-spinner">
-            <span>
-                <i class="fw fw-add fw-stack-1x"></i>
+            <span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-                <% if (action == "new") {%>
-                 &nbsp;<%=i18n.localize("save")%>
-                 <% } else { %>
-                &nbsp;<%=i18n.localize("update")%>
-                <% } %>
             </span>
+            <% if (action == "new") {%>
+             &nbsp;<%=i18n.localize("save")%>
+             <% } else { %>
+            &nbsp;<%=i18n.localize("update")%>
+            <% } %>
         </button>
     </div>
 </div>

@@ -208,7 +208,11 @@ div.image-container {
 #accordion1 h4 a i,#accordion2 h4 a i{
     margin-top:-4px;
 }
-
+#accordion1 .radio .fw-number,#accordion2 .radio .fw-number{
+    font-family: "Roboto";
+    font-weight: 400;
+    line-height:1.9em;
+}
 
 /* ========================================
  * Form Styles 
@@ -793,4 +797,8 @@ body.login-bg {
     content: " ";
     display: block;
     height: 0;
+}
+
+#pipeline-content .panel-group{
+    margin-bottom:0px;
 }
