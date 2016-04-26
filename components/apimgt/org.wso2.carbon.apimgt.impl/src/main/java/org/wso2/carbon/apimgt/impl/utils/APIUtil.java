@@ -929,15 +929,6 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
-            if(APIUtil.isAdvanceThrottlingEnabled()) {
-                int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
-                if (apiId == -1) {
-                    return null;
-                }
-                String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
-                api.setApiLevelPolicy(apiLevelTier);
-            }
-
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -2307,7 +2298,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(oldId, null);
             if (apiId == -1) {
                 return null;
             }
