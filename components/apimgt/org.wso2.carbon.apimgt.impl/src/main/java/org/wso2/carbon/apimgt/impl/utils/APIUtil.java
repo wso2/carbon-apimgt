@@ -322,7 +322,7 @@ public final class APIUtil {
 
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             Map<String, Tier> definedTiers = getTiers(tenantId);
-            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName;
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
             api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
 
@@ -513,7 +513,7 @@ public final class APIUtil {
 
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             Map<String, Tier> definedTiers = getTiers(tenantId);
-            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName;
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
 
             // This contains the resolved context
@@ -2291,7 +2291,7 @@ public final class APIUtil {
 
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             Map<String, Tier> definedTiers = getTiers(tenantId);
-            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName;
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
 
 
