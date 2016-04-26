@@ -589,6 +589,9 @@ body.login-bg {
 	background-color : #efefef
 }
 
+.popover {
+    word-wrap: break-word;
+}
 
 
 

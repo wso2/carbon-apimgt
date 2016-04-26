@@ -841,9 +841,16 @@ public class ApiMgtDAO {
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
-                    String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
-                    String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    String spikeArrest = "0";
+                    if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
+                        spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                    }
+                    String spikeArrestUnit = "0";
+                    if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
+                        spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                    }
+                    String stopOnQuotaReach = "0";
+                    String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
                     list.add(spikeArrest);
@@ -8677,6 +8684,43 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns true if the keytemplate exist in DB
+     *
+     * @param tenantID
+     * @param keyTemplate
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, policy.getTenantId());
+            ps.setString(2, policy.getKeyTemplate());
+            ps.setString(3, policy.getPolicyName());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATE", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return false;
+    }
+
+    /**
      * Removes a throttling policy from the database
      *
      * @param policyLevel level of the policy to be deleted
@@ -9070,6 +9114,7 @@ public class ApiMgtDAO {
                 conditions = getConditions(pipelineId);
                 pipeline.setConditions(conditions);
                 pipeline.setQuotaPolicy(quotaPolicy);
+                pipeline.setId(pipelineId);
                 pipelines.add(pipeline);
             }
         } catch (SQLException e) {
