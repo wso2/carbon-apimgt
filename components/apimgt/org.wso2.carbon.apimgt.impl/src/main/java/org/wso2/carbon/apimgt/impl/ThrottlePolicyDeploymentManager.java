@@ -127,4 +127,14 @@ public class ThrottlePolicyDeploymentManager {
                 globalThrottleEngineClient.deleteExecutionPlan(policyName);
             }
     }
+
+    /**
+     * Returns true if the passed execution plan is valid
+     *
+     * @param executionPlan
+     * @return boolean
+     */
+    public boolean validateExecutionPlan(String executionPlan){
+        return globalThrottleEngineClient.validateExecutionPlan(executionPlan);
+    }
 }
