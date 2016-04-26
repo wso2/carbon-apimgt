@@ -3647,6 +3647,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param policy policy object
      */
     public void addPolicy(Policy policy) throws APIManagementException {
+
+        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> executionFlows = new ArrayList<String>();
         String policyLevel = null;
@@ -3674,6 +3676,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+
+                // validating custom execution plan
+                if(!manager.validateExecutionPlan(policyString)){
+                    throw new APIManagementException("Invalid Execution Plan");
+                }
+
+                // checking if keytemplate already exist
+                if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
+                    throw new APIManagementException("Key Template Already Exist");
+                }
                 executionFlows.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
@@ -3687,7 +3699,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // deploy in global cep and gateway manager
-        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         try {
             for (String flowString : executionFlows) {
                 manager.deployPolicyToGlobalCEP(policy.getPolicyName(), flowString);
@@ -3702,6 +3713,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void updatePolicy(Policy policy) throws APIManagementException {
+
+        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> executionFlows = new ArrayList<String>();
         String policyLevel = null;
@@ -3744,6 +3757,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+
+                // validating custom execution plan
+                if(!deploymentManager.validateExecutionPlan(policyString)){
+                    throw new APIManagementException("Invalid Execution Plan");
+                }
+                // checking if keytemplate already exist for another policy
+                if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
+                    throw new APIManagementException("Key Template Already Exist");
+                }
                 executionFlows.add(policyString);
                 apiMgtDAO.updateGlobalPolicy(globalPolicy);
                 String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
@@ -3758,7 +3780,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while generating policy for update");
         }
         // Deploy in global cep and gateway manager
-        ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
         try {
             /* If single pipeline fails to deploy then whole deployment should fail.
              * Therefore for loop is wrapped inside a try catch block
@@ -3872,4 +3893,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
         return policy;
     }
+
 }
