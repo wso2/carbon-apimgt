@@ -37,10 +37,10 @@ var log = new Log();
         } else {
             obj = {
                 error: false,
-                data: result.usage
+                data: [{ "key": "Developers", "values": result.usage }]
             }
         }
-        print(obj);
+        print({ "data": result.usage });
     }
 
 }());

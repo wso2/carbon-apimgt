@@ -29,13 +29,8 @@ include("/jagg/jagg.jag");
                     message: msg.error.backendError(action)
                 };
             } else {
-                obj = {
-                    error: false,
-                    data: [{ "key": "Developers", "values": result.usage }]
-                }
+                print(result.usage);
             }
-            print(obj);
-             
     }
 }());
 %>               

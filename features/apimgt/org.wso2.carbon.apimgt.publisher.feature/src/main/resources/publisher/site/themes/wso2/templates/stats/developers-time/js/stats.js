@@ -85,7 +85,7 @@ $(document).ready(function(){
         chartData.transition().duration(500).call(chart);
 
         nv.utils.windowResize(chart.update);
-        
+        $("body").trigger("update_chart");
         return chart;
     });
 
@@ -108,6 +108,4 @@ $(document).ready(function(){
             }
         }, "json");
     });
-
-    $("body").trigger("update_chart");
 });

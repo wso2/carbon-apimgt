@@ -1054,7 +1054,6 @@ public abstract class APIUsageStatisticsClient {
                 query = query + groupBy;
             }
 
-            query = query + groupBy;
             statement = connection.prepareStatement(query);
 
 
@@ -1062,12 +1061,15 @@ public abstract class APIUsageStatisticsClient {
             rs = statement.executeQuery();
 
             List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
-            long x, y = 0;
+            long x;
+            int subscription_count = 0;
             //iterate over the results
             while (rs.next()) {
-                x = rs.getTimestamp("x").getTime();
-                y += rs.getLong("y");
-                list.add(new SubscriptionOverTimeDTO(x, y));
+                subscription_count+=rs.getInt("subscription_count");
+                long created_time=rs.getTimestamp("created_time").getTime();
+                String api_name=rs.getString("api_name");
+                String api_version=rs.getString("api_version");
+                list.add(new SubscriptionOverTimeDTO(subscription_count,created_time,api_name,api_version));
             }
             return list;
         } catch (Exception e) {
@@ -1256,12 +1258,60 @@ public abstract class APIUsageStatisticsClient {
         }
     }
 
-    //todo: need to implement
-    /*public List<DeveloperListDTO> getApisList(String user, String provider, String appName, String groupId,
+    public List<APIListDTO> getApisList(String user, String provider, String appName, String groupId,
             String withSubscriptions, String tenantDomain, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            //get the connection
+            connection = APIMgtDBUtil.getConnection();
+            String query = "select count(SUBSCRIPTION_ID) as count, api.API_ID, api.api_name, api.api_version, "
+                    + "api.api_provider from AM_API api join AM_SUBSCRIPTION sub where api.api_id = sub.api_id group "
+                    + "by api.API_ID";
+
+            statement = connection.prepareStatement(query);
+            //execute
+            rs = statement.executeQuery();
+            List<APIListDTO> list = new ArrayList<APIListDTO>();
+
+            //iterate over the results
+            while (rs.next()) {//name, app.created_by, app.created_time
+                int count = rs.getInt("count");
+                String apiName = rs.getString("api_name");
+                String version = rs.getString("api_version");
+                String apiProvider = rs.getString("api_provider");
+                list.add(new APIListDTO(count, apiName, version, apiProvider));
             }
-    }*/
+            return list;
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
 
     public List<ApplicationListDTO> getApplicationList(String api, String version, String user, String groupId,
             String withSubscriptions, String provider, String from, String to, String tenantDomain, String fromDate,

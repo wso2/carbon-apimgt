@@ -11,9 +11,16 @@ var tenant = jagg.getTenantDomain();
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
           <i class="fw fw-search" aria-hidden="true"></i>
         </button> 
-      </div>     
-        
-      <div id="apiSearchHelp" class="hide help-popover-content" >
+      </div>
+      <div class="input-group-btn">
+        <a class="help_popup" rel="popover" data-popover-content="#apiSearchTips"  data-placement="bottom">
+            <span class="icon fw-stack fw-lg add-margin-left-1x" style="font-size:10px">
+                <i class="fw fw-circle fw-stack-2x"></i>
+                <i class="fw fw-question fw-stack-1x fw-inverse"></i>
+            </span>
+        </a>
+      </div>
+       <div id="apiSearchTips" class="hide help-popover-content" >
             <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
                 <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
@@ -39,7 +46,7 @@ var tenant = jagg.getTenantDomain();
           <span class="input-group-btn">
             <button class="btn btn-primary search_apis" type="submit"><i class="fa fa-search"></i>Search</button>
           </span>
-        </div>         
+        </div>
         <div id="apiSearchHelp" class="hide help-popover-content" >
             <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>

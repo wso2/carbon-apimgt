@@ -22,31 +22,47 @@ package org.wso2.carbon.apimgt.usage.client;
  */
 public class SubscriptionOverTimeDTO {
 
-    private long x;
-    private long y;
+    private int subscription_count;
+    private long created_time;
+    private String api_name;
+    private String api_version;
 
-    public long getY() {
-        return y;
+    public SubscriptionOverTimeDTO(int subscription_count, long created_time, String api_name, String api_version) {
+        this.subscription_count = subscription_count;
+        this.created_time = created_time;
+        this.api_name = api_name;
+        this.api_version = api_version;
     }
 
-    public void setY(long y) {
-        this.y = y;
+    public int getSubscription_count() {
+        return subscription_count;
     }
 
-
-
-    SubscriptionOverTimeDTO(long x, long y){
-
-        this.x = x;
-        this.y = y;
+    public void setSubscription_count(int subscription_count) {
+        this.subscription_count = subscription_count;
     }
 
-
-    public long getX() {
-        return x;
+    public long getCreated_time() {
+        return created_time;
     }
 
-    public void setX(long x) {
-        this.x = x;
+    public void setCreated_time(long created_time) {
+        this.created_time = created_time;
+    }
+
+    public String getApi_name() {
+        return api_name;
+    }
+
+    public void setApi_name(String api_name) {
+        this.api_name = api_name;
+    }
+
+    public String getApi_version() {
+        return api_version;
+    }
+
+    public void setApi_version(String api_version) {
+        this.api_version = api_version;
     }
 }

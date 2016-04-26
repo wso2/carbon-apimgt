@@ -10,7 +10,7 @@ $(document).ready(function(){
             if (!json.error) {
             var developerName = '';
                 for (var i = 0; i < json.data.length; i++) {
-                    developerName += '<option>'+ json.data[i].user_id+'</option>'
+                    developerName += '<option>'+ json.data[i].userId+'</option>'
                 }
                 $('#developerSelect')
                    .append(developerName)
@@ -43,7 +43,7 @@ $(document).ready(function(){
             var  apiName = '';
 
                 for ( var i=0; i< json.data.length ; i++){
-                    apiName += '<option>'+ json.data[i].api_name+'</option>'
+                    apiName += '<option>'+ json.data[i].apiName+'</option>'
                 }
 
                 $('#apiSelect')

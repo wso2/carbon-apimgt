@@ -14,6 +14,13 @@ var retrieveSavedAlertsTypes = function () {
 
         var userName = jagg.getUser().username;
 
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        if ("carbon.super" == tenantDomain) {
+            userName = userName + "@carbon.super";
+        }
+
         var allSavedAlertTypes = APIUtil.getSavedAlertTypesIdsByUserNameAndStakeHolder(userName, agent);
         var allSavedAlertTypesJsonObj = JSON.parse(gson.toJson(allSavedAlertTypes));
 
@@ -79,6 +86,13 @@ var retrieveSavedEmailList = function () {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
         var userName = jagg.getUser().username;
+
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        if ("carbon.super" == tenantDomain) {
+            userName = userName + "@carbon.super";
+        }
 
         var allSavedEmailList = APIUtil.retrieveSavedEmailList(userName,agent);
 
