@@ -713,13 +713,11 @@ public final class APIUtil {
             }
             api.setCacheTimeout(cacheTimeout);
 
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+                String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+                api.setApiLevelPolicy(apiLevelTier);
 
                Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, replaceEmailDomainBack(providerName));
@@ -2345,14 +2343,9 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
-                api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
-
                Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
