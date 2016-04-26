@@ -28,6 +28,7 @@ struct APIKeyValidationInfoDTO {
     17: optional i64 issuedTime;
     18: optional bool isContentAware;
     19: optional string apiTier;
+    20: optional list<string> throttlingDataList;
 }
 
 struct URITemplate {
