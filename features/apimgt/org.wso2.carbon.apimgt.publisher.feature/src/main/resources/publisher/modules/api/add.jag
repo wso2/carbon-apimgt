@@ -275,42 +275,6 @@ var getTiers = function () {
     }
 };
 
-
-var getHardThrottlingPolicies = function () {
-    var log = new Log();
-
-    var username = user.username;
-
-    try {
-        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
-        var policies = apiProvider.getPolicyNames(username,org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_HARD);
-        
-      if(isUnlimitedTierEnabled){
-        
-            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
-            var policy = new java.lang.String(APIConstants.UNLIMITED_TIER);
-            var length = policies.length;
-            var unlimitedArr = [policy];
-            policies.splice(policy);
-            }
-        if (log.isDebugEnabled()) {
-            log.debug("get Hard Throttling Policies " +  " : " + stringify(policies));
-        }
-
-        return {
-            error:false,
-            policies:policies
-        };
-    } catch (e) {
-        log.error("get Hard Throttling Policies" + e.message);
-        return {
-            error:e,
-            policies:null
-        };
-    }
-};
-
-
 var getAPILevelPolicies = function () {
     var log = new Log();
 
