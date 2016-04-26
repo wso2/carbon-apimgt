@@ -78,6 +78,7 @@ var api = outputs.api;%>
 <script language="javascript">
 $(document).ready(function(){
 
+	$('.env_name').selectpicker();
   var change_token = function(){
     $(".notoken").hide();
     var option = $("#sub_app_list option:selected");
@@ -92,23 +93,24 @@ $(document).ready(function(){
     $("#access_token").trigger("change");
   };
 var show_environments = function(){
-    var type = $("#key_type").val();
-    $("#environment_name").children('option').hide();
-    $("#environment_name").children("option[class='" + type + "']").show();
-	$("#environment_name").children("option[class='hybrid']").show();
-    var options = $("#environment_name").children("option[class='"+ type + "']");
+    var type = $(".keytype").val();
+    $(".env_name").children('option').hide();
+    $(".env_name").children("option[class='" + type + "']").show();
+	$(".env_name").children("option[class='hybrid']").show();
+    var options = $(".env_name").children("option[class='"+ type + "']");
       if (options.length <= 1) {
-        $("#environment_name").hide();
+    	  console.log("ssssss");
+        $(".env_name").hide();
          $("#OnEnvironment").hide();
       }
     if(options.length > 1){
      $("#OnEnvironment").show(); 
-     $("#environment_name").show();
+     $(".env_name").show();
     	options[0].selected=true;
-    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
-	    $("#environment_name").children("option[class='hybrid']")[0].selected = true; 
+    } else if ($(".env_name").children("option[class='hybrid']").length > 0) {
+	    $(".env_name").children("option[class='hybrid']")[0].selected = true; 
     }else{
-      $("#environment_name").hide();
+      $(".env_name").hide();
       $("#OnEnvironment").hide();
     }
     select_environment();
@@ -134,9 +136,9 @@ var select_environment = function(){
     }
   });
 
-  $("#sub_app_list").change(change_token);
-  $("#key_type").change(show_environments);
-  $("#environment_name").change(select_environment);
+  $(".subapp").change(change_token);
+  $(".keytype").change(show_environments);
+  $(".env_name").change(select_environment);
   show_environments();
 });
 
@@ -150,38 +152,51 @@ function checkOnKeyPress(e) {
     <form class="form-horizontal">
 <% if(subscriptions != null && subscriptions.length > 0) { %>
       <div class="form-group">
-        <label class="col-sm-2 control-label"><label for="">Try</label></label>
-        <div class="col-sm-10">
-          <select id="sub_app_list" class="inline">
-          <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-            <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
-                 <%= encode.forHtml(subscriptions[i].application)%>
-            </option>
-          <% } %>
-          </select>
-          <label> Using </label>
-          <select id="key_type">
-            <option value="production">Production</option>
-            <option value="sandbox">Sandbox</option>
-          </select>
-          <label> Key </label>
-          <label id="OnEnvironment"> On Environment</label>
+        <div class="col-sm-12">
+		        <div class="input-group input-wrap res-wrap">
+		        		<div class="input-group-btn">	
+				         	 <label class="control-label">Try</label>
+				         </div>
+		        		<select id="sub_app_list" class="form-control subapp">
+				          <% for(var i = 0 ;subscriptions.length > i;i++){ %>
+				            <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
+				                 <%= encode.forHtml(subscriptions[i].application)%>
+				            </option>
+				          <% } %>
+				         </select>
+				         <div class="input-group-btn">	
+				         	 <label class="control-label">Using</label>
+				         </div>
 
-          <select id="environment_name">
-          <%
-          var envir = JSON.parse(api.serverURL);
-          for(var types in envir){
-            var endpointType=envir[types];
-            for(var endpoint in endpointType){
-                if(endpointType[endpoint]["showInConsole"]){
-                %>
-                   <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
-                <% }
-            }
-          }
-          %>
-            </select>
-          <!--label> Environment. </label-->
+				        <select id="key_type" class="form-control keytype">
+					            <option value="production">Production</option>
+					            <option value="sandbox">Sandbox</option>
+					    </select>
+
+				         <div class="input-group-btn">	
+				         	 <label class="control-label">Key</label>
+				         </div>
+				         <div class="input-group-btn">	
+				         	 <label class="control-label OnEnvironment">On Environment</label>
+				         </div>
+				         <div class="input-group-btn">	
+				         	 <select id="environment_name" class="env_name">
+						          <%
+						          var envir = JSON.parse(api.serverURL);
+						          for(var types in envir){
+						            var endpointType=envir[types];
+						            for(var endpoint in endpointType){
+						                if(endpointType[endpoint]["showInConsole"]){
+						                %>
+						                   <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+						                <% }
+						            }
+						          }
+						          %>
+				            </select>
+				         </div>
+		        </div>
+
         </div>
       </div>
 <!--
@@ -203,7 +218,6 @@ function checkOnKeyPress(e) {
   </div>
 </div>
 
->>>>>>>>>>>
 -->
 <% }else if(jagg.getUser() != null){ %>
     <div class="alert alert-info" style="margin-bottom:10px">
@@ -225,8 +239,8 @@ function checkOnKeyPress(e) {
 
 
       <div class="form-group">
-        <label class="col-sm-2 control-label">Set Request Header</label>
-        <div class=" col-sm-10">
+        <label class="col-sm-3 control-label">Set Request Header</label>
+        <div class=" col-sm-9">
         <div class="input-group">
           <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
           <input type="text" id="access_token" name="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
