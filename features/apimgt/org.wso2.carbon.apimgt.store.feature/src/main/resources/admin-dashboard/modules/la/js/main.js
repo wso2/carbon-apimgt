@@ -64,6 +64,7 @@ function fetch() {
                 }]);
             }
             writeToLogViewer();
+            window.scrollTo(0,document.body.scrollHeight);
         }
     }, function (error) {
         console.log("error occured: " + error);
