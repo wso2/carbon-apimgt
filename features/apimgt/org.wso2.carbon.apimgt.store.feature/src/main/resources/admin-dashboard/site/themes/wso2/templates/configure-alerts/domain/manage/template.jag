@@ -15,7 +15,7 @@
            
 
             <div class="container col-md-12">
-            <h2><%=(request.getParameter("domainName"))%></h2>
+            <h2>Alert Configurations</h2>
                 <!--ul >
                     <li class="title-section"><h2>Alert Configurations</h2>
                     </li>
