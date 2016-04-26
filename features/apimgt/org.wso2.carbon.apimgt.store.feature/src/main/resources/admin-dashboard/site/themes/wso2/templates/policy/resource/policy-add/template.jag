@@ -281,52 +281,71 @@
                                             <i class="icon fw fw-error"></i><span></span>
                                         </div>
 
-                                        <label class="control-label" for="ip-condition-type">IP Condition Type:<span class="requiredAstrix">*</span></label>
-                                        <select  onchange="onIpConditionChange('{{../../executionFlow.id}}', this);" class="select required valid" id="ip-condition-type-{{../../executionFlow.id}}" name="ip-condition-type-{{../../executionFlow.id}}">
+                                        <div class="form-horizontal">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="ip-condition-type">IP Condition Type:<span class="requiredAstrix">*</span></label>
+                                                <div class="col-sm-9">
+                                                    <select  onchange="onIpConditionChange('{{../../executionFlow.id}}', this);" class="form-control select required valid" id="ip-condition-type-{{../../executionFlow.id}}" name="ip-condition-type-{{../../executionFlow.id}}">
+                                                        {{#if_eq ../ipType "specific"}}
+                                                            <option value="specificIp" selected>Specific IP</option>
+                                                            <option value="IPRange">IP Range</option>
+                                                        {{else}}
+                                                            <option value="specificIp">Specific IP</option>
+                                                            <option value="IPRange" selected>IP Range</option>
+                                                        {{/if_eq}}
+                                                    </select>
+                                                </div>
+                                            </div>
                                             {{#if_eq ../ipType "specific"}}
-                                                <option value="specificIp" selected>Specific IP</option>
-                                                <option value="IPRange">IP Range</option>
-                                            {{else}}
-                                                <option value="specificIp">Specific IP</option>
-                                                <option value="IPRange" selected>IP Range</option>
-                                            {{/if_eq}}
-                                        </select>
-
-                                            {{#if_eq ../ipType "specific"}}
-                                                <div class="control-group" style="display:block" id="specific-ip-block-{{../../../executionFlow.id}}">
-                                                    <label class="control-label" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificIP}}">
+                                                <div class="form-group" style="display:block" id="specific-ip-block-{{../../../executionFlow.id}}">
+                                                    <label class="control-label col-sm-3" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../specificIP}}">
+                                                    </div>
                                                 </div>
 
-                                                <div class="control-group" style="display:none" id="ip-range-block-{{../../../executionFlow.id}}">
-                                                    <label class="control-label" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                <div class="form-group" style="display:none" id="ip-range-block-{{../../../executionFlow.id}}">
+                                                    <label class="control-label col-sm-3" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                    </div>
 
-
-                                                    <label class="control-label" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                    <label class="control-label col-sm-3" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                    </div>
                                                 </div>
                                             {{else}}
-                                                    <div class="control-group" style="display:none" id="specific-ip-block-{{../../../executionFlow.id}}">
-                                                    <label class="control-label" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                <div class="form-group" style="display:none" id="specific-ip-block-{{../../../executionFlow.id}}">
+                                                    <label class="control-label col-sm-3" for="request-count">IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control required validInput" id="specific-ip-address-input-{{../../../executionFlow.id}}" name="specific-ip-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="">
+                                                    </div>
                                                 </div>
 
-                                                <div class="control-group" style="display:block" id="ip-range-block-{{../../../executionFlow.id}}">
-                                                    <label class="control-label" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../startingIP}}">
+                                                <div class="form-group" style="display:block" id="ip-range-block-{{../../../executionFlow.id}}">
+                                                    <label class="control-label col-sm-3" for="request-count">Start IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-start-address-input-{{../../../executionFlow.id}}" name="ip-range-start-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../startingIP}}">
+                                                    </div>
 
-
-                                                    <label class="control-label" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
-                                                    <input type="text" class="input-xlarge required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../endingIP}}">
+                                                    <label class="control-label col-sm-3" for="request-count">End IP Address:<span class="requiredAstrix">*</span></label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control required validInput" id="ip-range-end-address-input-{{../../../executionFlow.id}}" name="ip-range-end-address-input-{{../../../executionFlow.id}}" autofocus="autofocus" value="{{../../endingIP}}">
+                                                    </div>
                                                 </div>
                                             {{/if_eq}}
-                                         <label class="control-label" for="ip-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
-                                         <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
-                                                <input id="ip-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
-                                                <span class="helper"></span>
-                                                <span class="text"></span>
-                                         </label>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="ip-invert-condition">Invert Condition:<span class="requiredAstrix">*</span></label>
+                                                <div class="col-sm-9">
+                                                    <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch">
+                                                        <input id="ip-condition-invert-{{../../executionFlow.id}}" {{#if ../invertCondition}}checked{{/if}} type="checkbox" />
+                                                        <span class="helper"></span>
+                                                        <span class="text"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -583,68 +602,70 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}style="display:block"{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}style="display:block"{{else}}style="display:none"{{/if_eq}}{{/if_eq}} id="execution-flow-request-count-block-{{executionFlow.id}}">
-                                                    <label class="control-label col-sm-3" for="execution-flow-request-count-{{executionFlow.id}}">Request Count:
-                                                        <span class="requiredAstrix">*</span>
-                                                        <a class="help_popup" help_data="execution-flow-name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                                        <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
-                                                    </label>
-                                                    <div class="col-sm-9">
-                                                        <input type="text" class="form-control noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
+                                                <div {{#if_eq executionFlow.quotaPolicy.type "requestCount"}}style="display:block"{{else}}{{#if_eq executionFlow.quotaPolicy.type ""}}style="display:block"{{else}}style="display:none"{{/if_eq}}{{/if_eq}} id="execution-flow-request-count-block-{{executionFlow.id}}">
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="execution-flow-request-count-{{executionFlow.id}}">Request Count:
+                                                            <span class="requiredAstrix">*</span>
+                                                            <a class="help_popup" help_data="execution-flow-name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                                            <p id="execution-flow-name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" class="form-control noSpace" id="execution-flow-request-count-{{executionFlow.id}}" name="execution-flow-request-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.requestCount}}">
+                                                        </div>
                                                     </div>
-
-                                                    <label class="control-label col-sm-3" for="request-count">Time:
-                                                        <span class="requiredAstrix">*</span>
-                                                        <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                                        <p id="name_help" class="hide">Time Configuration.</p>
-                                                    </label>
-
-                                                    <div class="col-sm-6">
-                                                        <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
-                                                    </div>
-
-                                                    <div class="col-sm-3">
-                                                        <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                                            <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                                            <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                                            <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                                            <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
-                                                        </select>
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="request-count">Time:
+                                                            <span class="requiredAstrix">*</span>
+                                                            <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                                            <p id="name_help" class="hide">Time Configuration.</p>
+                                                        </label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control" id="execution-flow-request-count-request-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                                                <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                                                <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                                                <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group" {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}style="display:block"{{else}}style="display:none"{{/if_eq}} id="execution-flow-bandwidth-block-{{executionFlow.id}}">
-                                                    <label class="control-label col-sm-3" for="request-count">Bandwidth:
-                                                        <span class="requiredAstrix">*</span>
-                                                        <a class="help_popup" help_data="name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                                        <p id="name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
-                                                    </label>
-                                                    <div class="col-sm-6">
-                                                        <input type="text" class="form-control required noSpace" id="execution-flow-bandwidth-{{executionFlow.id}}" name="execution-flow-bandwidth-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.dataAmount}}">
+                                                <div {{#if_eq executionFlow.quotaPolicy.type "bandwidth"}}style="display:block"{{else}}style="display:none"{{/if_eq}} id="execution-flow-bandwidth-block-{{executionFlow.id}}">
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="request-count">Bandwidth:
+                                                            <span class="requiredAstrix">*</span>
+                                                            <a class="help_popup" help_data="name_help-{{executionFlow.id}}" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                                            <p id="name_help-{{executionFlow.id}}" class="hide"><strong>Request Count :</strong> Throttle based on request count .<br><strong> Bandwidth :</strong>  Throttle Based on bandwidth.<br><strong></p>
+                                                        </label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control required noSpace" id="execution-flow-bandwidth-{{executionFlow.id}}" name="execution-flow-bandwidth-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.dataAmount}}">
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
+                                                                <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
+                                                                <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                    <div class="col-sm-3">
-                                                        <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
-                                                            <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
-                                                            <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <label class="control-label col-sm-3" for="request-count">Time:
-                                                        <span class="requiredAstrix">*</span>
-                                                        <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
-                                                        <p id="name_help" class="hide">Time Configuration.</p>
-                                                    </label>
-
-                                                    <div class="col-sm-6">
-                                                        <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
-                                                    </div>
-
-                                                    <div class="col-sm-3">
-                                                        <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                                            <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                                            <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                                            <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                                            <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
-                                                        </select>
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="request-count">Time:
+                                                            <span class="requiredAstrix">*</span>
+                                                            <a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" data-original-title="" title=""><i class="fa fa-question-circle" data-original-title="" title=""></i></a>
+                                                            <p id="name_help" class="hide">Time Configuration.</p>
+                                                        </label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control" id="execution-flow-request-count-bandwidth-unit-time-{{executionFlow.id}}" name="execution-flow-unit-time-count-{{executionFlow.id}}" autofocus="autofocus" value="{{executionFlow.quotaPolicy.limit.unitTime}}">
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
+                                                                <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
+                                                                <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
+                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
+                                                                <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
