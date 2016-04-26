@@ -1,9 +1,9 @@
 $(document).ready(function(){
 
-    $('[rel="popover"]').popover({
+    $('a[rel="popover"]').popover({
         container: 'body',
         html: true,
-        trigger:'focus',
+        trigger:'hover',
         content: function () {
             var clone = $($(this).data('popover-content')).clone(true).removeClass('hide');
             return clone;
@@ -11,6 +11,7 @@ $(document).ready(function(){
     }).click(function(e) {
         e.preventDefault();
     });
+
 
     $('select').selectpicker();
 

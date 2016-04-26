@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.HardThrottlingPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -3679,14 +3678,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
-            } else if (policy instanceof HardThrottlingPolicy) {
-                HardThrottlingPolicy hardThrottlingPolicy = (HardThrottlingPolicy) policy;
-                //String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
-                //executionFlows.add(policyString);
-                hardThrottlingPolicy.setDeployed(true);
-                apiMgtDAO.addHardThrottlingPolicy(hardThrottlingPolicy);
-               //policyLevel = PolicyConstants.POLICY_LEVEL_HARD;
-                return;
             } else {
                 String msg = "Policy type " + policy.getClass().getName() + " is not supported";
                 log.error(msg);

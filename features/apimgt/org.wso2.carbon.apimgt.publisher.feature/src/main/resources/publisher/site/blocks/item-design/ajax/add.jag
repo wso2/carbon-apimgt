@@ -239,11 +239,11 @@ if(jagg.isCSRFTokenValid())
             apiData.sandboxTps = request.getParameter("sandboxTps");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
             var errorMsg = null;
-            if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps) && !mod.isGlobalCEPThrottlingEnabled()){
+            if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps)){
                 errorMsg = "Invalid input for Production TPS";
             }
 
-            if(apiData.sandboxTps != null && apiData.sandboxTps != "" && !isPositiveInteger(apiData.sandboxTps) && !mod.isGlobalCEPThrottlingEnabled()){
+            if(apiData.sandboxTps != null && apiData.sandboxTps != "" && !isPositiveInteger(apiData.sandboxTps)){
                 errorMsg = "Invalid input for Sandbox TPS";
             }
 
