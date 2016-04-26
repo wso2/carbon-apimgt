@@ -224,7 +224,7 @@
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 IP Condition
-                                <span id="ip-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+                                <span id="ip-condition-policy-configured" class="has-configured status-icon"><i class="fw fw-circle-outline"></i></span>
                                 <span id="ip-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
                                 <span id="ip-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
                             </a>
@@ -234,7 +234,7 @@
                                 </span>
                                 Header Condition
                                 <span id="header-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="header-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
+                                <span id="header-ok" class="has-success status-icon"><i class="fw fw-check"></i></span>
                                 <span id="header-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
                             </a>
                             <a href="javascript:void(0)" onclick="showAdvanceOperation('query-param-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
@@ -244,14 +244,14 @@
                                 Query Param Condition
                                 <span id="query-param-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
                                 <span id="query-param-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="query-param-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+                                <span id="query-param-condition-policy-error" class="has-error status-icon"><i class="fw fw-cancel"></i></span>
                             </a>
                             <a href="javascript:void(0)" onclick="showAdvanceOperation('jwt-claim-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 JWT Claim Condition
-                                <span id="jwt-claim-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
+                                <span id="jwt-claim-condition-policy-configured" class="has-configured status-icon"><i class="fw fw-circle-outline"></i></span>
                                 <span id="jwt-claim-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
                                 <span id="jwt-claim-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
                             </a>
