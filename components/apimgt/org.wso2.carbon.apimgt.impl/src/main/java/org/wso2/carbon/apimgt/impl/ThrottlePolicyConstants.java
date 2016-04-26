@@ -28,6 +28,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
 
+    public static final String COLUMN_DISPLAY_NAME = "DISPLAY_NAME";
+
     public static final String COLUMN_TENANT_ID = "TENANT_ID";
 
     public static final String COLUMN_RATE_LIMIT_COUNT = "RATE_LIMIT_COUNT";
