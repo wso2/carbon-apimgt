@@ -8676,16 +8676,6 @@ public class ApiMgtDAO {
         return keyTemplates;
     }
 
-
-    /**
-     * Retrieves global policy key templates for the given tenantID
-     *
-     * @param tenantID tenantid
-     * @return boolean `
-     * @throws APIManagementException
-     */
-
-
     /**
      * Returns true if the keytemplate exist in DB
      *
