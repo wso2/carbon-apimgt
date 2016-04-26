@@ -1889,7 +1889,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int subscriptionId;
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                    APIConstants.SubscriptionStatus.ON_HOLD, userId);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2116,7 +2116,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId);
+        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
     }
 
     @Override
