@@ -8694,7 +8694,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException
      */
-    public boolean isKeyTemplatesExist(int tenantID,String keyTemplate) throws APIManagementException {
+    public boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8707,8 +8707,9 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
-            ps.setString(2, keyTemplate);
+            ps.setInt(1, policy.getTenantId());
+            ps.setString(2, policy.getKeyTemplate());
+            ps.setString(3, policy.getPolicyName());
             rs = ps.executeQuery();
             while (rs.next()) {
                 return true;
