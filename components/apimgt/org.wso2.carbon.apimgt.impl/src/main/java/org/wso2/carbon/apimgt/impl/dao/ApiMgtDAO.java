@@ -841,9 +841,16 @@ public class ApiMgtDAO {
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
-                    String spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
-                    String spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    String spikeArrest = "0";
+                    if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
+                        spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                    }
+                    String spikeArrestUnit = "0";
+                    if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
+                        spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
+                    }
+                    String stopOnQuotaReach = "0";
+                    String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
                     list.add(spikeArrest);
