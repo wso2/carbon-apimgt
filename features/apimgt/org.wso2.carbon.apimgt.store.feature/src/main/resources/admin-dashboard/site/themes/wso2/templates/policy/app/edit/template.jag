@@ -128,8 +128,8 @@
 
 <script>
     $(document).ready(function(){
-        $('#cancel-tier-btn').on('click',function(){
-             location.reload(true);
+        $('#cancel-tier-btn').on('click',function(){          
+             location.href = "<%= jagg.url('/app-policy-manage')%>";
         });
 
         var isNewPolicy = true;

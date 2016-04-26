@@ -184,6 +184,12 @@
                 </span>&nbsp;<%=i18n.localize("update")%>
                 <% } %>
         </button>
+        <button type="button" onclick="location.href = '<%= jagg.url('/api-policy-list')%>';" class="btn btn-primary has-spinner">
+            <span>
+                <i class="fw fw-add fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span><%=i18n.localize("cancelTier")%>
+        </button>
     </div>
 </div>
 

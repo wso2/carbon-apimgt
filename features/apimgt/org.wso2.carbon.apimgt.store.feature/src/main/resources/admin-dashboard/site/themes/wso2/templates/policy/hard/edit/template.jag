@@ -118,7 +118,7 @@
 <script>
     $(document).ready(function(){
         $('#cancel-tier-btn').on('click',function(){
-             location.reload(true);
+             location.href = "<%= jagg.url('/hard-policy-list')%>";
         });
 
         var isNewPolicy = true;
