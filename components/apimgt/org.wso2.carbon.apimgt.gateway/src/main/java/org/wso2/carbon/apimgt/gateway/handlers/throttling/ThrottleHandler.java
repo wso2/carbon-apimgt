@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.*;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -58,11 +57,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * This class is Handling new throttling check. This class will use inside each API as throttle handler.
@@ -273,7 +270,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             if (!isApplicationLevelThrottled) {
                                 if (!validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
                                         resourceLevelThrottleKey, apiLevelThrottleKey)) {
-                                    //Pass message context and continue to avaoid peformance issue.
+                                    //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
                                     if (isHardLimitThrottled(synCtx)) {
@@ -693,10 +690,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 resourceLevelSpikeArrestThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 info = roleBasedAccessController.canAccess(resourceLevelSpikeArrestThrottleContext, throttleKey,
                         throttleKey);
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getLocalCounter());
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getGlobalCounter());
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getRoleId());
-                System.out.println(info.isAccessAllowed() + "     " + info.getFaultReason());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getLocalCounter());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getGlobalCounter());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getRoleId());
+//                System.out.println(info.isAccessAllowed() + "     " + info.getFaultReason());
                 if (log.isDebugEnabled()) {
                     log.debug("Throttle by hard limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
@@ -737,7 +734,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$apiKey", apiKey);
                 if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                         getThrottleDataMap().containsKey(key)) {
-                    return false;
+                    return true;
                 }
             }
         }

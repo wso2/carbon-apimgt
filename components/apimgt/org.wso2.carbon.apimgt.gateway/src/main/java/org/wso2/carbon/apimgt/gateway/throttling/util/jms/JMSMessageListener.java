@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 
 
@@ -34,10 +35,8 @@ import java.util.Map;
 public class JMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(JMSMessageListener.class);
-    ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
 
     public JMSMessageListener(ThrottleDataHolder throttleDataHolder) {
-        this.throttleDataHolder = throttleDataHolder;
     }
 
     public void onMessage(Message message) {
@@ -59,9 +58,11 @@ public class JMSMessageListener implements MessageListener {
                     String throttleKey = map.get("throttleKey").toString();
                     String throttleState = map.get("isThrottled").toString();
                     if (throttleState.equals("true")) {
-                        this.throttleDataHolder.getThrottleDataMap().put(throttleKey, throttleState);
+                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                getThrottleDataMap().put(throttleKey, throttleState);
                     } else {
-                        this.throttleDataHolder.getThrottleDataMap().remove(throttleKey);
+                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                getThrottleDataMap().remove(throttleKey);
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
