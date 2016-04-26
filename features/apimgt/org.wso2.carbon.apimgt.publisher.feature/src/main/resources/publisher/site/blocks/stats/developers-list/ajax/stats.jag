@@ -19,15 +19,9 @@ var log = new Log();
         });
     }
     else{
-
         mod = jagg.module("statistics");
         var provider = jagg.getUser().username;
-        var currentLocation = request.getParameter("currentLocation");
-        var api = request.getParameter("api");
-        var fromDate = request.getParameter("fromDate");
-        var toDate = request.getParameter("toDate");
-
-       result = mod.getDeveloperList(api, null, fromDate, toDate, null, 0);
+        result = mod.getDeveloperList(provider, 50);
 
         if (result.error == "true") {
             obj = {
@@ -42,6 +36,5 @@ var log = new Log();
         }
         print({ "data": result.usage });
     }
-
 }());
 %>

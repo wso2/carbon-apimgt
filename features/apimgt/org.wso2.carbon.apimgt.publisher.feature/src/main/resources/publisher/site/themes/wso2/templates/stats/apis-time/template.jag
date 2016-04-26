@@ -4,6 +4,16 @@
     <div class="title-section"> <h2>Published APIs</h2> </div>
     <div class="col-md-12">
     <br />
+
+<div class="row">
+    <div class="form-group col-sm-2">
+        <select class="select form-control" id="apiFilter" name="apiFilter">
+            <option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
+            <option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+        </select>
+    </div>
+</div>
+
 <form class="form-inline">
   <div class="form-group">
     <label class="control-label">API Subscribed by&nbsp;&nbsp;</label>

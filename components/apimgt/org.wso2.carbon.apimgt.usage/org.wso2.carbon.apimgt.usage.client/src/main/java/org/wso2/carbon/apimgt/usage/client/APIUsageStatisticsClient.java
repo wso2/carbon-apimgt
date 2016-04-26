@@ -21,9 +21,13 @@ package org.wso2.carbon.apimgt.usage.client;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
@@ -33,9 +37,6 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
-import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
-import org.wso2.carbon.base.CarbonBaseConstants;
-import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.sql.*;
@@ -1100,10 +1101,20 @@ public abstract class APIUsageStatisticsClient {
 
     }
 
-    public List<ApisByTimeDTO> getApisByTime(String api, String version, String provider, String developer,
-            String tenantDomain, String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
-
+    /**
+     * get published api accumulated count over time
+     *
+     * @param provider  logged publisher
+     * @param developer application developer
+     * @param apiFilter api filter state
+     * @param fromDate  starting date of the results
+     * @param toDate    ending date of the results
+     * @param limit     limit of the result
+     * @return list of api count over time
+     * @throws APIMgtUsageQueryServiceClientException throws if any db exception occured
+     */
+    public List<ApisByTimeDTO> getApisByTime(String provider, String developer, String apiFilter, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -1111,50 +1122,37 @@ public abstract class APIUsageStatisticsClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
 
-            String allAPIs = "select count(distinct api.api_id) as y, api.created_time as x from AM_API as api";
-            String groupBy = " group by api.created_time order by api.created_time asc";
-            String whereClause = " where ";
-            String whereWithAPI = " api.api_name = '" + api + "' and api.version = '" + version + "'";
-            String whereWithProvider = " api.api_provider = '" + provider + "'";
-            String whereWithDateRange = " api.created_time between '" + fromDate + "' and '" + toDate + "'";
+            String query = "select count(api.api_id) as y, api.created_time as x from AM_API as api, AM_APPLICATION "
+                    + "as app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
+            String group = "group by api.created_time,api.api_id ";
+            String order = " order by api.created_time asc ";
+            String where = "where api.api_id=subc.api_id and app.application_id=subc.application_id and "
+                    + "sub.subscriber_id=app.subscriber_id and api.created_time between '" + fromDate + "' and '" +
+                    toDate + "' ";
 
-            String subscribedAPIs =
-                    "select count(distinct api.api_id) as y, api.created_time as x from AM_API as api, AM_APPLICATION as app,"
-                            + " AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc where api.api_id=subc.api_id and " +
-                            "app.application_id=subc.application_id and sub.subscriber_id=app.subscriber_id"
-                            + " and sub.user_id = '" + developer + "'";
-
-            String query;
-            query = allAPIs;
-            if (api != null && version != null) {
-                query = query + whereClause + whereWithAPI;
-                if (provider != null) {
-                    query = query + " and " + whereWithProvider;
-                }
-                if (fromDate != null && toDate != null) {
-                    query = query + " and " + whereWithDateRange;
-                }
-            } else if (developer != null) {
-                query = subscribedAPIs;
-                if (fromDate != null && toDate != null) {
-                    query = query + " and " + whereWithDateRange;
-                }
-            } else if (provider != null) {
-                query = query + whereClause + whereWithProvider;
-                if (fromDate != null && toDate != null) {
-                    query = query + " and " + whereWithDateRange;
-                }
-            } else {
-                if (fromDate != null && toDate != null) {
-                    query = query + whereClause + whereWithDateRange;
-                }
+            if (!"All".equals(developer)) {
+                where += " and subc.created_by = '" + developer + "' ";
             }
-            query = query + groupBy;
-            statement = connection.prepareStatement(query);
+            if (!"allAPIs".equals(apiFilter)) {
+                where += " and api.api_provider = '" + provider + "' ";
+            } else {
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
+                List<API> apiList = apiProvider.getAllAPIs();
+                StringBuilder apis = new StringBuilder(" and api.context in (");
+                if (apiList.size() > 0) {
+                    apis.append("'").append(apiList.get(0).getId().getApiName()).append("'");
+                }
+                for (int i = 1; i < apiList.size(); i++) {
+                    apis.append(", '").append(apiList.get(i).getContext()).append("' ");
+                }
+                apis.append(") ");
+                where += apis.toString();
+            }
 
+            query = query + where + group + order;
+            statement = connection.prepareStatement(query);
             //execute
             rs = statement.executeQuery();
-
             List<ApisByTimeDTO> list = new ArrayList<ApisByTimeDTO>();
             long x, y = 0;
             //iterate over the results
@@ -1164,7 +1162,6 @@ public abstract class APIUsageStatisticsClient {
                 list.add(new ApisByTimeDTO(x, y));
             }
             return list;
-
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
@@ -1192,8 +1189,16 @@ public abstract class APIUsageStatisticsClient {
         }
     }
 
-    public List<DeveloperListDTO> getDeveloperList(String api, String provider, String tenantDomain, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+    /**
+     * List set of subscribers in the current logged user tenant domain
+     *
+     * @param provider logged user
+     * @param limit    result limit
+     * @return list of subscribers
+     * @throws APIMgtUsageQueryServiceClientException throws if db exception occur
+     */
+    public List<DeveloperListDTO> getDeveloperList(String provider, int limit)
+            throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1201,26 +1206,13 @@ public abstract class APIUsageStatisticsClient {
         try {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
-
-            String query;
-
-            String allDevelopers = "select subc.user_id as id, subc.email_address as email, subc.created_time as time from AM_SUBSCRIBER subc";
-            String whereWithDateRange = " where subc.created_time between '" + fromDate + "' and '" + toDate + "'";
-            String whereWithDate = " where subc.created_time < '" + toDate + "'";
-
-            query = allDevelopers;
-            if (fromDate != null && toDate != null) {
-                query = query + whereWithDateRange;
-            } else if (toDate != null) {
-                query = query + whereWithDate;
-            }
+            int tenantId = APIUtil.getTenantId(provider);
+            String query = "select subc.user_id as id, subc.email_address as email, subc.created_time as time from "
+                    + "AM_SUBSCRIBER subc where TENANT_ID=" + tenantId;
             statement = connection.prepareStatement(query);
-
             //execute
             rs = statement.executeQuery();
-
             List<DeveloperListDTO> list = new ArrayList<DeveloperListDTO>();
-
             //iterate over the results
             while (rs.next()) {
                 String id = rs.getString("id");

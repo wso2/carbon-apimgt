@@ -856,12 +856,10 @@ function getAPISubscriptionsPerApp(apiName, version,tenantDomain, fromDate, toDa
     }
 }
 
-
-
-function getDeveloperList(apiName, provider, fromDate, toDate, tenantDomain, limit) {
+function getDeveloperList(provider, limit) {
     var usage;
     try {
-        usage = usageClient.getDeveloperList(apiName, provider, tenantDomain, fromDate, toDate, limit);
+        usage = usageClient.getDeveloperList(provider, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -887,10 +885,10 @@ function getDeveloperList(apiName, provider, fromDate, toDate, tenantDomain, lim
     }
 }
 
-function getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit) {
+function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
-        usage = usageClient.getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit);
+        usage = usageClient.getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
