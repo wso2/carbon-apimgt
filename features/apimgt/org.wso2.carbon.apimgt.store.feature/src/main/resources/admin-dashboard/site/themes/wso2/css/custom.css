@@ -605,7 +605,15 @@ body.login-bg {
 }
 #accordion1 .wr-hidden-operation .panel-heading .panel-title, #accordion2 .wr-hidden-operation .panel-heading .panel-title{
     height:auto;
+    font-weight:bold;
+    color:#064973;
 }
+#accordion1 .wr-hidden-operation .panel-heading .panel-title label, #accordion2 .wr-hidden-operation .panel-heading .panel-title label,
+#accordion1 .wr-hidden-operation .panel-heading .panel-title .panel-title-description, #accordion2 .wr-hidden-operation .panel-heading .panel-title .panel-title-description{
+    font-weight:normal;
+    color:#222;
+}
+
 .wr-advance-operations .row:first-child {
     height: 100%;
 }
