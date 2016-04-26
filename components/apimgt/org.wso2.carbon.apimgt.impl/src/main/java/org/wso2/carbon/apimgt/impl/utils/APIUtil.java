@@ -2296,8 +2296,7 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            api = new API(apiIdentifier);
+            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
             int apiId = ApiMgtDAO.getInstance().getAPIID(oldId, null);
             if (apiId == -1) {
                 return null;
