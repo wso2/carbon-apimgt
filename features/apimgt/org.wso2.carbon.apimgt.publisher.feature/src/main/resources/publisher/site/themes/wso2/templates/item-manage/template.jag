@@ -264,7 +264,7 @@
                     </label>
                     <label class="checkbox">
                             <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                            <span class="helper"><%=i18n.localize("httpTransport")%></span>
                     </label>                    
                 </div>
              </div>

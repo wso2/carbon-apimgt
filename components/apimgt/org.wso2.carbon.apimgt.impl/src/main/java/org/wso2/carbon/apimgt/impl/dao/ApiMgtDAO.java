@@ -8414,7 +8414,7 @@ public class ApiMgtDAO {
             if (policyId != -1) {
 
                 // Assume policy is deployed if update request is recieved
-                policyStatement.setBoolean(9, true);
+                policyStatement.setBoolean(10, true);
                 policyStatement.setInt(12, policyId);
             }
             policyStatement.executeUpdate();

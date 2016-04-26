@@ -79,7 +79,9 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -1795,24 +1797,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAdvancedSubsriptionTiers(int tenantId) throws APIManagementException {
-        Map<String, Tier> tierMap = new HashMap<String, Tier>();
-        Policy[] policies = ApiMgtDAO.getInstance().getSubscriptionPolicies(tenantId);
-        for(Policy policy : policies) {
-            if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
-                Tier tier = new Tier(policy.getPolicyName());
-                tier.setDescription(policy.getDescription());
-                tier.setDisplayName(policy.getPolicyName());
-                tierMap.put(policy.getPolicyName(), tier);
-            } else {
-                if(APIUtil.isEnabledUnlimitedTier()) {
-                    Tier tier = new Tier(policy.getPolicyName());
-                    tier.setDescription(policy.getDescription());
-                    tier.setDisplayName(policy.getPolicyName());
-                    tierMap.put(policy.getPolicyName(), tier);
-                }
-            }
-        }
-        return tierMap;
+        return APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
     }
 
     /**
@@ -5569,12 +5554,21 @@ public final class APIUtil {
                 Tier tier = new Tier(policy.getPolicyName());
                 tier.setDescription(policy.getDescription());
                 tier.setDisplayName(policy.getDisplayName());
+                Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                if(limit instanceof RequestCountLimit) {
+                    RequestCountLimit countLimit = (RequestCountLimit) limit;
+                    tier.setRequestsPerMin(countLimit.getRequestCount());
+                } else {
+                    BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
+                    tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
+                }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
                 if (APIUtil.isEnabledUnlimitedTier()) {
                     Tier tier = new Tier(policy.getPolicyName());
                     tier.setDescription(policy.getDescription());
                     tier.setDisplayName(policy.getDisplayName());
+                    tier.setRequestsPerMin(Integer.MAX_VALUE);
                     tierMap.put(policy.getPolicyName(), tier);
                 }
             }
