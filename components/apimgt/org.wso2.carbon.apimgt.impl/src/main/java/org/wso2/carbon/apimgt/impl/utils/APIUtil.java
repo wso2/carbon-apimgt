@@ -5431,7 +5431,7 @@ public final class APIUtil {
     }
 
     public static void addDefaultAdvancedThrottlePoliciesToDB(int tenantId) throws APIManagementException {
-        long[] requestCount = new long[] {20, 5, 1, Long.MAX_VALUE};
+        long[] requestCount = new long[] {20, 5, 1, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE, APIConstants.DEFAULT_APP_POLICY_MEDIUM,
                                             APIConstants.DEFAULT_APP_POLICY_SMALL, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
