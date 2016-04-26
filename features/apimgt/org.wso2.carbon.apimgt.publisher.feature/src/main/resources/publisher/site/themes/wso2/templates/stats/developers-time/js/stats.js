@@ -1,5 +1,7 @@
 var chart;
 var chartData;
+var apiFilter = "allAPIs";
+var subscribedApi = "All";
 
 function update_chart(data) {
     // Update the SVG with the new data and call chart
@@ -55,6 +57,11 @@ $(document).ready(function(){
         $("body").trigger("update_chart");
     });
 
+    $("#apiFilter").change(function (e) {
+        apiFilter = this.value;
+        $("body").trigger("update_chart");
+    });
+
     nv.addGraph(function () {
         chart = nv.models.lineChart()
             .margin({right: 30, left: 75})
@@ -88,6 +95,35 @@ $(document).ready(function(){
         $("body").trigger("update_chart");
         return chart;
     });
+
+    function apiFilterList(){
+        jagg.post("/site/blocks/stats/apis-list/ajax/stats.jag", { },
+            function (json) {
+                if (!json.error) {
+                    var  apiName = '';
+                    for ( var i=0; i< json.data.length ; i++){
+                        apiName += '<option>'+ json.data[i].apiName+'</option>'
+                    }
+                    $('#apiSelect')
+                       .append(apiName)
+                       .selectpicker('refresh');
+
+                    $('#apiSelect').on('change', function() {
+                        subscribedApi = this.value;//selected value
+                        $("body").trigger("update_chart");
+                    });
+                }
+            else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+             }
+        }, "json");
+    }
+    //update api list
+    apiFilterList();
 
     $("body").on("update_chart",function(){
         jagg.post("/site/blocks/stats/developers-time/ajax/stats.jag" + window.location.search, 

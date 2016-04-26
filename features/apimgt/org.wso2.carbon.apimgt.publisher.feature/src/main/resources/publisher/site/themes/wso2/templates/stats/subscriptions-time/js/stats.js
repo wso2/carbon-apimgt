@@ -1,6 +1,6 @@
 var currentLocation;
-//var statsEnabled = isDataPublishingEnabled();
-
+var apiFilter = "allAPIs";
+var subscribedApi = "All";
 //setting default date
 var to = new Date();
 var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
@@ -69,6 +69,11 @@ $(document).ready(function(){
         $('body').on('click', '.btn-group button', function (e) {
             $(this).addClass('active');
             $(this).siblings().removeClass('active');
+        });
+
+        $("#apiFilter").change(function (e) {
+            apiFilter = this.value;
+            $("body").trigger("update_chart");
         });
 });
 
@@ -260,22 +265,6 @@ var drawSubscriptionTime = function (from, to) {
             }
         }, "json");
 }
-
-//function isDataPublishingEnabled(){
-//    jagg.post("/site/blocks/stats/subscriptions-time/ajax/stats.jag",
-//        function (json) {
-//            if (!json.error) {
-//                statsEnabled = json;
-//                return statsEnabled;
-//            } else {
-//                if (json.message == "AuthenticateError") {
-//                    jagg.showLogin();
-//                } else {
-//                    jagg.message({content: json.message, type: "error"});
-//                }
-//            }
-//        }, "json");
-//}
 
 var convertTimeString = function(date){
     var d = new Date(date);
