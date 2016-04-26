@@ -1,7 +1,0 @@
-<%
-jagg.initializer("tier/edit", {
-    preInitialize:function () {
-        jagg.addHeaderJS("tier/edit", "jagg", "templates/tier/edit/js/edit.js");
-    }
-});
-%>
