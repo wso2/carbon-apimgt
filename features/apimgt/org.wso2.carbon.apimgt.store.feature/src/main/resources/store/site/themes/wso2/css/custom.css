@@ -523,6 +523,11 @@ ul.product-tags {
 .app-data h4{
     margin-bottom: 0px
 }
+.app-data h4 a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
 .app-data h5,.launch-app-data h5{
     margin-top: 0px;
 }
@@ -547,7 +552,9 @@ ul.product-tags {
     z-index: 500;
     padding-bottom: 7px;
 }
-
+.help_popup{
+    display: block;
+}
 
 /*========================*/
 
@@ -611,7 +618,7 @@ ul.product-tags {
 .search-wrap>.form-control::-webkit-input-placeholder {
     color: #fff;
     opacity: 0.9;
-    font-weight: 100;
+    font-weight: 400;
 }
 .page-actions-right{float: right;}
 
@@ -764,7 +771,7 @@ ul.product-tags {
     font-size: 10px;
 }
 .navbar.affix{
-    width:auto;
+    width:inherit;
 }
 .navbar-search .navbar-default .navbar-toggle .icon-bar{
     background-color:#fff;

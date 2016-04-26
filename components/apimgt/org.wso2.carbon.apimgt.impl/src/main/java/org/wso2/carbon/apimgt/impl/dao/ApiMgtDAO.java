@@ -8315,12 +8315,12 @@ public class ApiMgtDAO {
             }
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(10, policy.getRateLimitCount());
-            policyStatement.setString(11, policy.getRateLimitTimeUnit());
-            policyStatement.setBoolean(12, policy.isStopOnQuotaReach());
-            policyStatement.setString(13, policy.getBillingPlan());
+            policyStatement.setInt(11, policy.getRateLimitCount());
+            policyStatement.setString(12, policy.getRateLimitTimeUnit());
+            policyStatement.setBoolean(13, policy.isStopOnQuotaReach());
+            policyStatement.setString(14, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBlob(15, new ByteArrayInputStream(policy.getCustomAttributes()));
             }
             policyStatement.executeUpdate();
 
@@ -8401,12 +8401,12 @@ public class ApiMgtDAO {
 
             policyStatement = conn.prepareStatement(addQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setString(10, policy.getUserLevel());
+            policyStatement.setString(11, policy.getUserLevel());
             if (policyId != -1) {
 
                 // Assume policy is deployed if update request is recieved
-                policyStatement.setBoolean(9, true);
-                policyStatement.setInt(11, policyId);
+                policyStatement.setBoolean(10, true);
+                policyStatement.setInt(12, policyId);
             }
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
@@ -8597,44 +8597,6 @@ public class ApiMgtDAO {
         }
     }
 
-
-    /**
-     * Add a Hard throttling policy to database
-     *
-     * @param policy
-     * @throws APIManagementException
-     */
-    public void addHardThrottlingPolicy(HardThrottlingPolicy policy) throws APIManagementException {
-            Connection conn = null;
-            PreparedStatement policyStatement = null;
-            try {
-
-                conn = APIMgtDBUtil.getConnection();
-                conn.setAutoCommit(false);
-                String addQuery = SQLConstants.INSERT_HARD_THROTTLE_POLICY_SQL;
-
-                policyStatement = conn.prepareStatement(addQuery);
-                setCommonParametersForPolicy(policyStatement, policy);
-                policyStatement.executeUpdate();
-
-                conn.commit();
-            } catch (SQLException e) {
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException ex) {
-
-                        // Rollback failed. Exception will be thrown later for upper exception
-                        log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
-                    }
-                }
-                handleException("Failed to add Application Policy: " + policy, e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
-            }
-
-    }
-
     /**
      * Add a Global level throttling policy to database
      *
@@ -8823,41 +8785,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new ApplicationPolicy[policies.size()]);
-    }
-
-    /**
-     * Get Hard Throttling polices
-     *
-     * @param tenantID polices are selected only belong to specific tenantID
-     * @return Hard Throttling policy List
-     */
-    public HardThrottlingPolicy[] getHardThrottlePolicies(int tenantID) throws APIManagementException {
-        List<HardThrottlingPolicy> policies = new ArrayList<HardThrottlingPolicy>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
-        }
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, tenantID);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                HardThrottlingPolicy appPolicy = new HardThrottlingPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                setCommonPolicyDetails(appPolicy, rs);
-                policies.add(appPolicy);
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return policies.toArray(new HardThrottlingPolicy[policies.size()]);
     }
 
     /**
@@ -9433,28 +9360,29 @@ public class ApiMgtDAO {
             	updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
             }
             updateStatement = connection.prepareStatement(updateQuery);
-            updateStatement.setString(1, policy.getDescription());
-            updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
+            updateStatement.setString(1, policy.getDisplayName());
+            updateStatement.setString(2, policy.getDescription());
+            updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
 
             if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(3, limit.getRequestCount());
-                updateStatement.setString(4, null);
+                updateStatement.setLong(4, limit.getRequestCount());
+                updateStatement.setString(5, null);
             } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(3, limit.getDataAmount());
-                updateStatement.setString(4, limit.getDataUnit());
+                updateStatement.setLong(4, limit.getDataAmount());
+                updateStatement.setString(5, limit.getDataUnit());
             }
-            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(7, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setBlob(8, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(9, policy.getPolicyName());
+                updateStatement.setInt(10, policy.getTenantId());
+            }else{
             	updateStatement.setString(8, policy.getPolicyName());
                 updateStatement.setInt(9, policy.getTenantId());
-            }else{
-            	updateStatement.setString(7, policy.getPolicyName());
-                updateStatement.setInt(8, policy.getTenantId());
             }
             updateStatement.executeUpdate();
             connection.commit();
@@ -9505,33 +9433,34 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(updateQuery);
-            updateStatement.setString(1, policy.getDescription());
-            updateStatement.setString(2, policy.getDefaultQuotaPolicy().getType());
+            updateStatement.setString(1, policy.getDisplayName());
+            updateStatement.setString(2, policy.getDescription());
+            updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
 
             if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(3, limit.getRequestCount());
-                updateStatement.setString(4, null);
+                updateStatement.setLong(4, limit.getRequestCount());
+                updateStatement.setString(5, null);
             } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
-                updateStatement.setLong(3, limit.getDataAmount());
-                updateStatement.setString(4, limit.getDataUnit());
+                updateStatement.setLong(4, limit.getDataAmount());
+                updateStatement.setString(5, limit.getDataUnit());
             }
 
-            updateStatement.setLong(5, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(6, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(7, policy.getRateLimitCount());
-            updateStatement.setString(8, policy.getRateLimitTimeUnit());
-            updateStatement.setBoolean(9, policy.isStopOnQuotaReach());
-            updateStatement.setString(10, policy.getBillingPlan());
+            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(8, policy.getRateLimitCount());
+            updateStatement.setString(9, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(10, policy.isStopOnQuotaReach());
+            updateStatement.setString(11, policy.getBillingPlan());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(11, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	updateStatement.setString(13, policy.getPolicyName());
+                updateStatement.setInt(14, policy.getTenantId());
+            }else{
             	updateStatement.setString(12, policy.getPolicyName());
                 updateStatement.setInt(13, policy.getTenantId());
-            }else{
-            	updateStatement.setString(11, policy.getPolicyName());
-                updateStatement.setInt(12, policy.getTenantId());
             }
             updateStatement.executeUpdate();
             connection.commit();
@@ -9623,8 +9552,6 @@ public class ApiMgtDAO {
                 sqlQuery = SQLConstants.GET_SUB_POLICY_NAMES;
             } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
                 sqlQuery = SQLConstants.GET_GLOBAL_POLICY_NAMES;
-            } else if (PolicyConstants.POLICY_LEVEL_HARD.equals(policyLevel)) {
-                sqlQuery = SQLConstants.GET_HARD_THROTTLING_POLICIES;
             }
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantID);
@@ -9701,25 +9628,26 @@ public class ApiMgtDAO {
      */
     private void setCommonParametersForPolicy(PreparedStatement policyStatement, Policy policy) throws SQLException {
         policyStatement.setString(1, policy.getPolicyName());
-        policyStatement.setInt(2, policy.getTenantId());
-        policyStatement.setString(3, policy.getDescription());
-        policyStatement.setString(4, policy.getDefaultQuotaPolicy().getType());
+        policyStatement.setString(2, policy.getDisplayName());
+        policyStatement.setInt(3, policy.getTenantId());
+        policyStatement.setString(4, policy.getDescription());
+        policyStatement.setString(5, policy.getDefaultQuotaPolicy().getType());
 
         //TODO use requestCount in same format in all places
         if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
-            policyStatement.setLong(5, limit.getRequestCount());
-            policyStatement.setString(6, null);
+            policyStatement.setLong(6, limit.getRequestCount());
+            policyStatement.setString(7, null);
         } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
-            policyStatement.setLong(5, limit.getDataAmount());
-            policyStatement.setString(6, limit.getDataUnit());
+            policyStatement.setLong(6, limit.getDataAmount());
+            policyStatement.setString(7, limit.getDataUnit());
         }
 
-        policyStatement.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-        policyStatement.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        policyStatement.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        policyStatement.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
         //policyStatement.setBoolean(9, APIUtil.isContentAwarePolicy(policy));
-        policyStatement.setBoolean(9, policy.isDeployed());
+        policyStatement.setBoolean(10, policy.isDeployed());
 
     }
 
@@ -9758,6 +9686,7 @@ public class ApiMgtDAO {
         }
 
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+        policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
         policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
         policy.setDefaultQuotaPolicy(quotaPolicy);

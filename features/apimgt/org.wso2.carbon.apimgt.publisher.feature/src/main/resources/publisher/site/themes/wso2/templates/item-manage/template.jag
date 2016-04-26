@@ -10,16 +10,7 @@
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
     var resourceTiers = mod.getResourceTiers().tiers;
-    var hardThrottling = mod.getHardThrottlingPolicies();
-    var hardPolicies = null;
-    
-    if(hardThrottling != null){
-      hardPolicies = hardThrottling.policies;
-    }
-
-    
     var default_tier = tiers[tiers.length -1].tierName;
-
     for (var i = 0; i < tiers.length; i++){
         if(tiers[i].defaultTier){
             default_tier = tiers[i].tierName;
@@ -164,12 +155,21 @@
 
           <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
 
-<div class="form-group">
-                        <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("apiPolicy")%>:<span class="requiredAstrix">*</span>
-                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
-                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                        <div class="form-group">
+                        <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("enableApiLevelPolicy")%>:
+                            <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
+	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
+									<i class="fw fw-circle fw-stack-2x"></i>
+									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+								</span>
+	                        </a>
+	                        <p id="api_policy_help" class="hide"><%=i18n.localize("enableApiLevelPolicyHelpMsg")%></p>
                         </label>
-<div class="controls col-sm-8 tierSelect">
+                        <label class="checkbox">
+	                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
+	                            <span class="helper"></span>
+	                    </label>
+	                   <div class="controls col-sm-8" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
                             <select id="apiTier" name="apiTier"  class="form-control selected required">
                             <%
 
@@ -187,7 +187,7 @@
                             </select>
                             <a class=" help_popup" help_data="tier_help"></a>
                             <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-</div>
+                        </div>
 </div>
 <%  }%>
 
@@ -264,7 +264,7 @@
                     </label>
                     <label class="checkbox">
                             <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                            <span class="helper"><%=i18n.localize("httpTransport")%></span>
                     </label>                    
                 </div>
              </div>
@@ -297,29 +297,7 @@
                                             <%=i18n.localize("prodLimit")%>
                                         </td>
                                         <td>
-                                        <%
-                                        if(mod.isGlobalCEPThrottlingEnabled()){%>
-                                            <div class="controls col-sm-8">
-                                                <select id="productionTps" name="productionTps"  class="form-control selected">
-                                                <%
-                                                if(api.productionTps == null || api.productionTps == ""){%>
-                                                    <option value="" selected="selected"></option>
-                                                <%}
-                                                for (var i = 0; i < hardPolicies.length; i++) {
-                                                var hardTierName = hardPolicies[i];
-                                                var isSelected = hardTierName.equals(api.productionTps);
-                                                %><option value="<%= hardTierName %>" <%if(isSelected){%>selected="selected"<%}%>><%=hardTierName%></option>
-                                                <%
-                                                }
-                                                %>
-                                                </select>
-                                                <a class=" help_popup" help_data="tier_help"></a>
-                                                <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                                            </div>   
-                                             <% }else{ %>        
-                                             <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
-                                             <%}%>
-
+                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
                                         </td>
                                     </tr>
                                     <tr>
@@ -327,29 +305,7 @@
                                             <%=i18n.localize("sandLimit")%>
                                         </td>
                                         <td>
-                                        <%
-                                        if(mod.isGlobalCEPThrottlingEnabled()){%>
-                                            <div class="controls col-sm-8">
-                                                <select id="sandboxTps" name="sandboxTps"  class="form-control selected">
-                                                <%
-                                                if(api.sandboxTps == null || api.sandboxTps == ""){%>
-                                                    <option value="" selected="selected"></option>
-                                                <%}
-                                                for (var i = 0; i < hardPolicies.length; i++) {
-                                                var hardTierName = hardPolicies[i];
-                                                var isSelected = hardTierName.equals(api.sandboxTps);
-                                                %>
-                                                    <option value="<%=tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%=hardTierName %></option>
-                                                
-                                                <%}%>
-
-                                                </select>
-                                                <a class=" help_popup" help_data="tier_help"></a>
-                                                <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                                            </div>   
-                                             <% }else{ %>        
-                                             <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
-                                             <%}%>
+                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
                                         </td>
                                     </tr>
                                 </table>

@@ -652,7 +652,7 @@ public class APIMgtDAOTest extends TestCase {
 
     private Policy getApplicationPolicy(){
         ApplicationPolicy policy = new ApplicationPolicy("Bronze");
-
+        policy.setDescription("Bronze");
         policy.setDescription("Application policy Description");
         policy.setTenantId(4);
 
@@ -672,7 +672,7 @@ public class APIMgtDAOTest extends TestCase {
 
     private Policy getSubscriptionPolicy(){
         SubscriptionPolicy policy = new SubscriptionPolicy("Silver");
-
+        policy.setDisplayName("Silver");
         policy.setDescription("Subscription policy Description");
         policy.setTenantId(6);
         policy.setBillingPlan("FREE");

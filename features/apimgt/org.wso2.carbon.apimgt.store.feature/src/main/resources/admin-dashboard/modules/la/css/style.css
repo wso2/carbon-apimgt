@@ -31,14 +31,14 @@
 
 .template3{
     background: Black;
-    border-left-width:10px;
+    border-left-width:5px;
     border-left-style:solid;
     border-left-color:#2ecc71;
- font-weight: bold;
-font-size: 20px;
- font-family: Arial;
-color:Green;
+    font-size: 15px;
+    font-family: Ubuntu Mono;
+    color:#00FF00;
 }
+
 
 .template4{
     background: #FCF9D6;

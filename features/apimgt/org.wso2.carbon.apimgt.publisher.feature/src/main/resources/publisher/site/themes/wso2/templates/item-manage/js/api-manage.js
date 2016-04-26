@@ -161,6 +161,16 @@ $("#toggleThrottle").change(function(e){
     }
 });
 
+$('#api_level_policy').change(function(){
+    if($(this).prop("checked")) {
+        validateAPITier()
+        $('#api-level-policy-section').show();
+    } else {
+        validateAPITier()
+        $('#api-level-policy-section').hide();
+    }
+});
+
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
@@ -174,9 +184,9 @@ function validate_Transports(){
 }
 
 function validateAPITier(){
-     var apiTier = $( "#apiTier option:selected" ).text();
+     var apiTier = $( "#api_level_policy").prop('checked');
         var designer = APIDesigner();
-        if(apiTier != ''){
+        if(apiTier){
             designer.setApiLevelPolicy(true);
             designer.render_resources();
         }else{
