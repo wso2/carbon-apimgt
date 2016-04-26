@@ -49,7 +49,7 @@ $(document).ready(function () {
                         window.location.reload(true);
                     }});
                 } else{
-                    window.location = "/store/site/pages/application.jag?name="+application;
+                    window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
                 }
 
             } else {

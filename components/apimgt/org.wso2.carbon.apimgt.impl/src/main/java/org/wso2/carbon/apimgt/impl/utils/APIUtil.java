@@ -930,6 +930,10 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
+            if(isGlobalThrottlingEnabled){
+                artifact.setAttribute(APIConstants.API_OVERVIEW_API_POLICY, api.getApiLevelPolicy());
+            }
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }

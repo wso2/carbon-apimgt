@@ -96,8 +96,8 @@
 var isNewPolicy = true;
 
     $(document).ready(function(){
-        $('#cancel-tier-btn').on('click',function(){
-             location.reload(true);
+        $('#cancel-add-custom-rule-btn').on('click',function(){         
+             location.href = "<%= jagg.url('/global-policy-manage')%>";
         });
 
         if('<%=policyName%>' != 'null'){

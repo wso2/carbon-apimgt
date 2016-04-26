@@ -1546,23 +1546,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
             boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+            if (api.getProductionMaxTps() != null) {
+                properties.put("productionMaxCount", api.getProductionMaxTps());
+            }
+
+            if (api.getSandboxMaxTps() != null) {
+                properties.put("sandboxMaxCount", api.getSandboxMaxTps());
+            }
 
             if(isGlobalThrottlingEnabled){
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler",
-                        Collections.<String, String> emptyMap());
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler", properties);
             } else {
                 properties.put("id", "A");
                 properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
                 properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
                 properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
-
-                if(api.getProductionMaxTps() != null){
-                    properties.put("productionMaxCount",api.getProductionMaxTps());
-                }
-
-                if(api.getSandboxMaxTps() != null){
-                    properties.put("sandboxMaxCount",api.getSandboxMaxTps());
-                }
 
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
             }

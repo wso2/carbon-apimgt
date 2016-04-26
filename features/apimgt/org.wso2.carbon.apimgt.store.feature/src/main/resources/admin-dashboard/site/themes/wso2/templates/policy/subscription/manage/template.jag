@@ -35,8 +35,8 @@
         }
 
         var unitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime()+" "+subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
-        var rateLimitCount = subscriptionPolicy.getRateLimitCount() < 0 ? "NA" : subscriptionPolicy.getRateLimitCount();
-        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
+    	var rateLimitCount = subscriptionPolicy.getRateLimitCount() <= 0 ? "NA" : subscriptionPolicy.getRateLimitCount();
+        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitCount() <= 0 ? "NA" : subscriptionPolicy.getRateLimitTimeUnit(); 
         %>
                 <tr>
                     <td><%=policyName%></td>

@@ -841,13 +841,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           case 7: // THROTTLING_CONDITIONS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
-                struct.throttlingConditions = new ArrayList<String>(_list16.size);
-                for (int _i17 = 0; _i17 < _list16.size; ++_i17)
+                org.apache.thrift.protocol.TList _list24 = iprot.readListBegin();
+                struct.throttlingConditions = new ArrayList<String>(_list24.size);
+                for (int _i25 = 0; _i25 < _list24.size; ++_i25)
                 {
-                  String _elem18; // required
-                  _elem18 = iprot.readString();
-                  struct.throttlingConditions.add(_elem18);
+                  String _elem26; // required
+                  _elem26 = iprot.readString();
+                  struct.throttlingConditions.add(_elem26);
                 }
                 iprot.readListEnd();
               }
@@ -918,9 +918,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           oprot.writeFieldBegin(THROTTLING_CONDITIONS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.throttlingConditions.size()));
-            for (String _iter19 : struct.throttlingConditions)
+            for (String _iter27 : struct.throttlingConditions)
             {
-              oprot.writeString(_iter19);
+              oprot.writeString(_iter27);
             }
             oprot.writeListEnd();
           }
@@ -988,9 +988,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (struct.isSetThrottlingConditions()) {
         {
           oprot.writeI32(struct.throttlingConditions.size());
-          for (String _iter20 : struct.throttlingConditions)
+          for (String _iter28 : struct.throttlingConditions)
           {
-            oprot.writeString(_iter20);
+            oprot.writeString(_iter28);
           }
         }
       }
@@ -1026,13 +1026,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       if (incoming.get(6)) {
         {
-          org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-          struct.throttlingConditions = new ArrayList<String>(_list21.size);
-          for (int _i22 = 0; _i22 < _list21.size; ++_i22)
+          org.apache.thrift.protocol.TList _list29 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.throttlingConditions = new ArrayList<String>(_list29.size);
+          for (int _i30 = 0; _i30 < _list29.size; ++_i30)
           {
-            String _elem23; // required
-            _elem23 = iprot.readString();
-            struct.throttlingConditions.add(_elem23);
+            String _elem31; // required
+            _elem31 = iprot.readString();
+            struct.throttlingConditions.add(_elem31);
           }
         }
         struct.setThrottlingConditionsIsSet(true);
