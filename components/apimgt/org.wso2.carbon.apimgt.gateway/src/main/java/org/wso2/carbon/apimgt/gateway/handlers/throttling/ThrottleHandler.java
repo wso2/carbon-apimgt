@@ -30,11 +30,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.neethi.PolicyEngine;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.throttle.core.*;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -68,7 +70,7 @@ import java.util.regex.Pattern;
  * To execute this handler requests must go through authentication handler and auth context should be present
  * in message context.
  */
-public class ThrottleHandler extends AbstractHandler {
+public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
@@ -274,12 +276,17 @@ public class ThrottleHandler extends AbstractHandler {
                                     //Pass message context and continue to avaoid peformance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
-                                    throttleDataPublisher.publishNonThrottledEvent(
-                                            applicationLevelThrottleKey, applicationLevelTier,
-                                            apiLevelThrottleKey, apiLevelTier,
-                                            subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                            resourceLevelThrottleKey, resourceLevelTier,
-                                            authorizedUser, synCtx);
+                                    if (isHardLimitThrottled(synCtx)){
+                                         isThrottled = true;
+
+                                    }else{
+                                        throttleDataPublisher.publishNonThrottledEvent(
+                                                applicationLevelThrottleKey, applicationLevelTier,
+                                                apiLevelThrottleKey, apiLevelTier,
+                                                subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                                resourceLevelThrottleKey, resourceLevelTier,
+                                                authorizedUser, synCtx);
+                                    }
                                 }
                                 else {
                                     if (log.isDebugEnabled()) {
@@ -326,9 +333,7 @@ public class ThrottleHandler extends AbstractHandler {
                             APIThrottleConstants.API_LIMIT_EXCEEDED);
                 }
             }
-            if (isHardLimitThrottled(synCtx)){
-                isThrottled = true;
-            }
+
         }
 
         //if we need to publish throttled level or some other information we can do it here. Just before return.
@@ -378,7 +383,6 @@ public class ThrottleHandler extends AbstractHandler {
         if (subscriptionLevelSpikeArrestEnabled) {
             initThrottleForSubscriptionLevelSpikeArrest(messageContext);
         }
-        initThrottleForHardLimitThrottling();
         boolean isThrottled = false;
 
         if (!messageContext.isResponse()) {
@@ -644,8 +648,11 @@ public class ThrottleHandler extends AbstractHandler {
                 ThrottleContext hardThrottling = ThrottleContextFactory.createThrottleContext(ThrottleConstants
                                 .ROLE_BASE,
                         newThrottleConfig);
-                throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
-
+                if (throttle != null){
+                    throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
+                }else{
+                 throttle = tempThrottle;
+                }
             } catch (ThrottleException e) {
                 log.error("Error occurred while creating policy file for Hard Throttling.", e);
             }
@@ -723,7 +730,7 @@ public class ThrottleHandler extends AbstractHandler {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private OMElement createHardThrottlingPolicy() {
@@ -857,5 +864,13 @@ public class ThrottleHandler extends AbstractHandler {
 
     public void setProductionUnitTime(String productionUnitTime) {
         this.productionUnitTime = productionUnitTime;
+    }
+
+    public void init(SynapseEnvironment synapseEnvironment) {
+        initThrottleForHardLimitThrottling();
+    }
+
+    public void destroy() {
+
     }
 }
