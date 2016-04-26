@@ -17,21 +17,14 @@
             <div class="container col-md-12">
             <h2><%=(request.getParameter("domainName"))%></h2>
                 <!--ul >
-                    <li class="title-section"><h2><%=(request.getParameter("domainName"))%></h2>
+                    <li class="title-section"><h2>Alert Configurations</h2>
                     </li>
                 </ul-->
             </div>
         </div>
         <div class="row">
             <div class="container col-md-12 marg-top-20">
-                <!--div class="action-container">
-
-
-                    <button id="" type="button"
-                            onclick= "location.href = '<%=jagg.url('/alerts-domain-edit?domainName='+domainName)%>';"
-                            class="btn btn-default btn-add col-md-3 col-xs-12 pull-left">Add Configuration
-                    </button>
-                </div-->
+                
                 <!--br class="c-both"/-->
                 <br class="c-both"/>
 

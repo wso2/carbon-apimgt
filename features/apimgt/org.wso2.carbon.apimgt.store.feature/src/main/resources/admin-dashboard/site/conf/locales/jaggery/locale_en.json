@@ -93,7 +93,7 @@
     "configName":"Configuration Name",
     "description":"Description",
     "addConfiguration":"Add Configuration",
-    "editConfigurations":"Edit Configurations",
+    "editConfigurations":"Edit Alert Configuration",
     "domainTableColumnName":"Configuration Name",
     "domainTableColumnDescription":"Description",
     "templateType":"Template Type",
@@ -108,6 +108,7 @@
     "templateStatus":"Status",
     "templateStatusActive":"Active",
     "templateStatusInactive":"Inactive",
+    "saveConfiguration":"Save Configuration",
     
     "abnormalBackendTime_Desc": "This alert type should get triggered if there is a sudden increase of the backend time corresponds to a particular API resource. These alerts could be treated as an indication of a slow backend.In technical terms, if the backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a tenant, lies outside the Xth percentile value, we will send an alert out. Default percentile value is 95%. Here, we safely assume that the corresponding backend time of an API resource follows a normal distribution. Percentile value gets calculated daily by default. ",
 
@@ -125,7 +126,7 @@
 
     "AbnormalTierUsage_Desc":"This alert should get triggered if there is a drastic reduction in API usage for a given API for a given user. These type of alerts should be treated as an indication of a failure of the application which is using the altered API.",
 
-    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)",
+    "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied;  Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600",
 
     "tier" : "Tier Availability" ,
     "addAPI":"API Level Policies",
@@ -155,9 +156,5 @@
     "addTier": "Add Tier",
     "apiResTierList": "API Resource Tier List",
     "tierName": "Tier Name",
-    "tierDesc": "Tier Description",
-    "keyTemplate": "keys should be separated by colon.  <B>eg:-</B> api:version:provide:qp_name:qp_age  <br> <b>Allowed keys</b><br>",
-    "endpointTiers": "Endpoint Tiers",
-    "endpointTierList": "Endpoint Tier List",
-    "addEndpointTier": "Add Endpoint Tier"
+    "tierDesc": "Tier Description"
 }
