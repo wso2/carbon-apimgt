@@ -19,15 +19,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
-
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -35,11 +26,17 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -55,6 +52,8 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
@@ -155,7 +154,10 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import javax.cache.*;
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -163,7 +165,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1709,17 +1710,21 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            try {
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry();
 
-            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+                return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+            } catch (XMLStreamException e) {
+                log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            }
+        } else {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
         }
     }
 
@@ -1731,17 +1736,21 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            try {
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry(tenantId);
 
-            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } catch (XMLStreamException e) {           
-            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+                return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+            } catch (XMLStreamException e) {
+                log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            }
+        } else {
+                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
         }
     }
 
@@ -1753,15 +1762,18 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-
-            return getTiers(registry, APIConstants.API_TIER_LOCATION);
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        }
+            if(!APIUtil.isAdvanceThrottlingEnabled()) {
+                try {
+                    Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry();
+                    return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                } catch (RegistryException e) {
+                    log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                    throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+                }
+            } else {
+                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, MultitenantConstants.SUPER_TENANT_ID);
+            }
     }
 
     /**
@@ -1811,14 +1823,17 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers(int tenantId) throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-
-            return getTiers(registry, APIConstants.API_TIER_LOCATION);
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
+            try {
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry(tenantId);
+                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+            }
+        } else {
+            return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
         }
     }
 
@@ -1830,32 +1845,45 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
-        boolean isTenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
+        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+            boolean isTenantFlowStarted = false;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
 
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry(tenantId);
+
+                if (tierType == APIConstants.TIER_API_TYPE) {
+                    return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                    return getTiers(registry, APIConstants.RES_TIER_LOCATION);
+                } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                    return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+                } else {
+                    throw new APIManagementException("No such a tier type : " + tierType);
+                }
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        } else {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-
             if (tierType == APIConstants.TIER_API_TYPE) {
-                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
             } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-                return getTiers(registry, APIConstants.RES_TIER_LOCATION);
+                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
             } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-                return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
             } else {
                 throw new APIManagementException("No such a tier type : " + tierType);
-            }
-        } catch (RegistryException e) {
-            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
-            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }
@@ -5403,7 +5431,7 @@ public final class APIUtil {
     }
 
     public static void addDefaultAdvancedThrottlePoliciesToDB(int tenantId) throws APIManagementException {
-        int[] requestCount = new int[] {20, 5, 1, -1};
+        long[] requestCount = new long[] {20, 5, 1, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE, APIConstants.DEFAULT_APP_POLICY_MEDIUM,
                                             APIConstants.DEFAULT_APP_POLICY_SMALL, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
@@ -5416,13 +5444,14 @@ public final class APIUtil {
             policyName = appPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, policyName)) {
                 ApplicationPolicy applicationPolicy = new ApplicationPolicy(policyName);
+                applicationPolicy.setDisplayName(policyName);
                 applicationPolicy.setDescription(appPolicyDecs[i]);
                 applicationPolicy.setTenantId(tenantId);
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount[i]);
-                requestCountLimit.setUnitTime(60);
-                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                requestCountLimit.setUnitTime(1);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -5439,13 +5468,14 @@ public final class APIUtil {
             policyName = subPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
                 SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDisplayName(policyName);
                 subscriptionPolicy.setDescription(subPolicyDecs[i]);
                 subscriptionPolicy.setTenantId(tenantId);
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount[i]);
-                requestCountLimit.setUnitTime(60);
-                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                requestCountLimit.setUnitTime(1);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -5464,14 +5494,15 @@ public final class APIUtil {
             policyName = apiPolicies[i];
             if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_API, tenantId, policyName)) {
                 APIPolicy apiPolicy = new APIPolicy(policyName);
+                apiPolicy.setDisplayName(policyName);
                 apiPolicy.setDescription(apiPolicyDecs[i]);
                 apiPolicy.setTenantId(tenantId);
                 apiPolicy.setUserLevel(APIConstants.API_POLICY_API_LEVEL);
                 QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
                 RequestCountLimit requestCountLimit = new RequestCountLimit();
                 requestCountLimit.setRequestCount(requestCount[i]);
-                requestCountLimit.setUnitTime(60);
-                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_SECOND);
+                requestCountLimit.setUnitTime(1);
+                requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
                 defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -5518,4 +5549,37 @@ public final class APIUtil {
                 .getThrottleProperties();
        return throttleProperties.isEnabledSubscriptionLevelSpikeArrest();
     }
+
+    public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
+        Map<String, Tier> tierMap = new HashMap<String, Tier>();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Policy[] policies;
+        if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getAPIPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+        } else {
+            throw new APIManagementException("No such a policy type : " + policyLevel);
+        }
+
+        for (Policy policy : policies) {
+            if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                Tier tier = new Tier(policy.getPolicyName());
+                tier.setDescription(policy.getDescription());
+                tier.setDisplayName(policy.getDisplayName());
+                tierMap.put(policy.getPolicyName(), tier);
+            } else {
+                if (APIUtil.isEnabledUnlimitedTier()) {
+                    Tier tier = new Tier(policy.getPolicyName());
+                    tier.setDescription(policy.getDescription());
+                    tier.setDisplayName(policy.getDisplayName());
+                    tierMap.put(policy.getPolicyName(), tier);
+                }
+            }
+        }
+        return tierMap;
+    }
+
 }

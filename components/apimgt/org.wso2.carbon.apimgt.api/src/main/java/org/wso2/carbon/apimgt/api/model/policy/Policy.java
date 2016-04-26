@@ -25,6 +25,7 @@ import java.util.List;
 public class Policy implements Serializable {
     private int policyId;
     private String policyName;
+    private String displayName;
     private String description;
     private QuotaPolicy defaultQuotaPolicy;
     private int tenantId;
@@ -94,5 +95,13 @@ public class Policy implements Serializable {
                 ", description='" + description + '\'' +
                 ", tenantId=" + tenantId +
                 '}';
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }
