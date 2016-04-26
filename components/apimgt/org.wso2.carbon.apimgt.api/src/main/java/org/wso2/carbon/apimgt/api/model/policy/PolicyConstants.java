@@ -90,5 +90,7 @@ public class PolicyConstants {
     
     public static final String POLICY_ID = "POLICY_ID";
 
-    public static final String POLICY_LEVEL_HARD = "hard";
+    
+    
+    
 }

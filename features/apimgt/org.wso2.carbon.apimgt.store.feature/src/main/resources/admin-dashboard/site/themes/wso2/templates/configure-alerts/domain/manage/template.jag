@@ -93,7 +93,7 @@ if (existingConfig) {
                        <td><%=i18n.localize("templateStatusInactive")%></td>
                        <td class="tcenter">
                             <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getName() +"&templateType="+templates[i].getName()+"&mode=edit")%>">
-                                <i class="fw fw-key"></i>
+                                <i class="fw fw-activate"></i>
                                 <%=i18n.localize("activate")%></a></td>
 
                         <% } %>
