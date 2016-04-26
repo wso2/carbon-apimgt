@@ -902,7 +902,6 @@ public final class APIUtil {
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -930,8 +929,13 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
-            if(isGlobalThrottlingEnabled){
-                artifact.setAttribute(APIConstants.API_OVERVIEW_API_POLICY, api.getApiLevelPolicy());
+            if(APIUtil.isAdvanceThrottlingEnabled()) {
+                int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
+                if (apiId == -1) {
+                    return null;
+                }
+                String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+                api.setApiLevelPolicy(apiLevelTier);
             }
 
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
@@ -2301,7 +2305,12 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(api.getId(), null);
+            if (apiId == -1) {
+                return null;
+            }
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             BigDecimal bigDecimal = BigDecimal.valueOf(registry.getAverageRating(artifactPath));
@@ -2350,6 +2359,9 @@ public final class APIUtil {
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
 
             if(isGlobalThrottlingEnabled){
+               //api.setApiLevelPolicy(artifact.getAttribute(APIConstants.API_OVERVIEW_API_POLICY));
+               String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+               api.setApiLevelPolicy(apiLevelTier);
                Set<Tier> availablePolicy = new HashSet<Tier>();
                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, providerName);
                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
