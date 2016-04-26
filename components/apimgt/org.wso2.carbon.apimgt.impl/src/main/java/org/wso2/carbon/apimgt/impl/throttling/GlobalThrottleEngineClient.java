@@ -58,6 +58,46 @@ public class GlobalThrottleEngineClient {
         return sessionCookie;
     }
 
+
+    /**
+     * Checks the validity of a execution plan
+     *
+     * @param executionPlan execution query plan
+     */
+    public boolean validateExecutionPlan(String executionPlan){
+
+        ServiceClient serviceClient;
+        Options options;
+        String result = null;
+        try {
+            String sessionCookie = login();
+            EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
+                    (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+
+            serviceClient = eventProcessorAdminServiceStub._getServiceClient();
+            options = serviceClient.getOptions();
+            options.setManageSession(true);
+            options.setProperty(HTTPConstants.COOKIE_STRING, sessionCookie);
+
+            result = eventProcessorAdminServiceStub.validateExecutionPlan(executionPlan);
+
+        } catch (RemoteException e) {
+            return false;
+        } catch (MalformedURLException e) {
+            return false;
+        } catch (LoginAuthenticationExceptionException e) {
+            return false;
+        }
+
+        if("success".equalsIgnoreCase(result)){
+            return true;
+        }
+        return false;
+    }
+
+
+
+
     /**
      * 1. Check validity of execution plan
      * 2. If execution plan exist with same name edit it

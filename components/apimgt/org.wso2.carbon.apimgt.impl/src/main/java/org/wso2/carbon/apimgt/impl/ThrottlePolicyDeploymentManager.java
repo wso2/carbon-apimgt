@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Map;
 
 public class ThrottlePolicyDeploymentManager {
@@ -126,5 +127,15 @@ public class ThrottlePolicyDeploymentManager {
             for(String policyName : policyNames) {
                 globalThrottleEngineClient.deleteExecutionPlan(policyName);
             }
+    }
+
+    /**
+     * Returns true if the passed execution plan is valid
+     *
+     * @param executionPlan
+     * @return boolean
+     */
+    public boolean validateExecutionPlan(String executionPlan){
+        return globalThrottleEngineClient.validateExecutionPlan(executionPlan);
     }
 }
