@@ -5,10 +5,6 @@ jagg.module("policy", {
         return jagg.require(jagg.getModulesDir() + "policy/app-policy-edit.jag").saveAppPolicy.apply(this, arguments);
     },
 
-    addHardPolicy:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/hard-policy-edit.jag").saveHardPolicy.apply(this, arguments);
-    },
-
     addSubscriptionPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").saveSubscriptionPolicy.apply(this, arguments);
     },
@@ -19,10 +15,6 @@ jagg.module("policy", {
 
     getAllAppPolicies:function () {
         return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").getAllAppPolicies.apply(this, arguments);
-    },
-
-    getAllHardPolicies:function () {
-        return jagg.require(jagg.getModulesDir() + "policy/hard-policy-manage.jag").getAllHardPolicies.apply(this, arguments);
     },
 
     deleteSubscriptionPolicy:function () {

@@ -128,13 +128,6 @@
 							<i class="fw fw-settings"></i>
 					        <%= i18n.localize("applicationTiers") %></a></li>
 
-
-					        <li <%if (reqUrl.match("hard-policy-list")){%>class="active"<% } %>><a
-					        href="<%= jagg.url("/hard-policy-list") %>"
-					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-					        <%= "Hard Throttling Policies" %></a></li>
-
 					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/subscription-policy-manage") %>"
 					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">

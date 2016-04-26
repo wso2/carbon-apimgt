@@ -158,7 +158,7 @@ public class ThrottleHandler extends AbstractHandler {
         boolean isApplicationLevelThrottled = false;
         boolean isSubscriptionLevelThrottled = false;
         boolean isApiLevelThrottled = false;
-        boolean isBlockedRequest = false;
+        boolean isBlockedRequest;
         String ipLevelBlockingKey = null;
         String appLevelBlockingKey = null;
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
@@ -186,7 +186,6 @@ public class ThrottleHandler extends AbstractHandler {
             isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
                    apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
             if (isBlockedRequest) {
-
                 String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
                         " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
                 if (log.isDebugEnabled()) {

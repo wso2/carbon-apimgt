@@ -10,16 +10,7 @@
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
     var resourceTiers = mod.getResourceTiers().tiers;
-    var hardThrottling = mod.getHardThrottlingPolicies();
-    var hardPolicies = null;
-    
-    if(hardThrottling != null){
-      hardPolicies = hardThrottling.policies;
-    }
-
-    
     var default_tier = tiers[tiers.length -1].tierName;
-
     for (var i = 0; i < tiers.length; i++){
         if(tiers[i].defaultTier){
             default_tier = tiers[i].tierName;
@@ -297,29 +288,7 @@
                                             <%=i18n.localize("prodLimit")%>
                                         </td>
                                         <td>
-                                        <%
-                                        if(mod.isGlobalCEPThrottlingEnabled()){%>
-                                            <div class="controls col-sm-8">
-                                                <select id="productionTps" name="productionTps"  class="form-control selected">
-                                                <%
-                                                if(api.productionTps == null || api.productionTps == ""){%>
-                                                    <option value="" selected="selected"></option>
-                                                <%}
-                                                for (var i = 0; i < hardPolicies.length; i++) {
-                                                var hardTierName = hardPolicies[i];
-                                                var isSelected = hardTierName.equals(api.productionTps);
-                                                %><option value="<%= hardTierName %>" <%if(isSelected){%>selected="selected"<%}%>><%=hardTierName%></option>
-                                                <%
-                                                }
-                                                %>
-                                                </select>
-                                                <a class=" help_popup" help_data="tier_help"></a>
-                                                <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                                            </div>   
-                                             <% }else{ %>        
-                                             <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
-                                             <%}%>
-
+                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
                                         </td>
                                     </tr>
                                     <tr>
@@ -327,29 +296,7 @@
                                             <%=i18n.localize("sandLimit")%>
                                         </td>
                                         <td>
-                                        <%
-                                        if(mod.isGlobalCEPThrottlingEnabled()){%>
-                                            <div class="controls col-sm-8">
-                                                <select id="sandboxTps" name="sandboxTps"  class="form-control selected">
-                                                <%
-                                                if(api.sandboxTps == null || api.sandboxTps == ""){%>
-                                                    <option value="" selected="selected"></option>
-                                                <%}
-                                                for (var i = 0; i < hardPolicies.length; i++) {
-                                                var hardTierName = hardPolicies[i];
-                                                var isSelected = hardTierName.equals(api.sandboxTps);
-                                                %>
-                                                    <option value="<%=tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%=hardTierName %></option>
-                                                
-                                                <%}%>
-
-                                                </select>
-                                                <a class=" help_popup" help_data="tier_help"></a>
-                                                <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                                            </div>   
-                                             <% }else{ %>        
-                                             <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
-                                             <%}%>
+                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
                                         </td>
                                     </tr>
                                 </table>

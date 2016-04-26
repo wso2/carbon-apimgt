@@ -1336,8 +1336,6 @@ public abstract class AbstractAPIManager implements APIManager {
             policies = apiMgtDAO.getSubscriptionPolicies(tenantID);
         } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(level)){
             policies = apiMgtDAO.getGlobalPolicies(tenantID);
-        } else if(PolicyConstants.POLICY_LEVEL_HARD.equals(level)){
-            policies = apiMgtDAO.getHardThrottlePolicies(tenantID);
         }
         return policies;
     }
