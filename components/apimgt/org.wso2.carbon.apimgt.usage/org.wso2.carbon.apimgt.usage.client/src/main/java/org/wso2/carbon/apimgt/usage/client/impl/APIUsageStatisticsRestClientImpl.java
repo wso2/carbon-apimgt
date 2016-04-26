@@ -227,8 +227,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -341,8 +341,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -455,8 +455,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -569,8 +569,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + ')';
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + ')';
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
