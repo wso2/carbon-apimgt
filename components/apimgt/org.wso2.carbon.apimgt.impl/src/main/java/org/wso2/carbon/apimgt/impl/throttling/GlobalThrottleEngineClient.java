@@ -58,11 +58,11 @@ public class GlobalThrottleEngineClient {
         return sessionCookie;
     }
 
-
     /**
      * Checks the validity of a execution plan
      *
-     * @param executionPlan execution query plan
+     * @param executionPlan
+     * @return boolean
      */
     public boolean validateExecutionPlan(String executionPlan){
 
@@ -94,10 +94,7 @@ public class GlobalThrottleEngineClient {
         }
         return false;
     }
-
-
-
-
+    
     /**
      * 1. Check validity of execution plan
      * 2. If execution plan exist with same name edit it

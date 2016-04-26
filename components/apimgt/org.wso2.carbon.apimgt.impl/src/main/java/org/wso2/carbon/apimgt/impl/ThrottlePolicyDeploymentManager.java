@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Map;
 
 public class ThrottlePolicyDeploymentManager {
