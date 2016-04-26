@@ -1797,9 +1797,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAdvancedSubsriptionTiers(int tenantId) throws APIManagementException {
-        Map<String, Tier> tierMap;
-        tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
-        return tierMap;
+        return APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
     }
 
     /**
