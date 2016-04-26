@@ -2221,6 +2221,15 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =?";
 
+    public static final String GET_GLOBAL_POLICY_KEY_TEMPLATE =
+            " SELECT " +
+                    "   KEY_TEMPLATE " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =? AND" +
+                    "   KEY_TEMPLATE =?";
+
     public static final String GET_APP_POLICIES =
             " SELECT "+
                     "   * " +

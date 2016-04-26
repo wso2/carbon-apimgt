@@ -3682,6 +3682,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(!manager.validateExecutionPlan(policyString)){
                     throw new APIManagementException("Invalid Execution Plan");
                 }
+
+                if(!apiMgtDAO.isKeyTemplatesExist(tenantId,globalPolicy.getKeyTemplate())){
+                    throw new APIManagementException("Key Template Already Exist");
+                }
                 executionFlows.add(policyString);
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;

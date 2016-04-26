@@ -8676,6 +8676,52 @@ public class ApiMgtDAO {
         return keyTemplates;
     }
 
+
+    /**
+     * Retrieves global policy key templates for the given tenantID
+     *
+     * @param tenantID tenantid
+     * @return boolean `
+     * @throws APIManagementException
+     */
+
+
+    /**
+     * Returns true if the keytemplate exist in DB
+     *
+     * @param tenantID
+     * @param keyTemplate
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean isKeyTemplatesExist(int tenantID,String keyTemplate) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            sqlQuery = SQLConstants.GET_GLOBAL_POLICY_KEY_TEMPLATE;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantID);
+            ps.setString(2, keyTemplate);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while executing SQL to get GLOBAL_POLICY_KEY_TEMPLATE", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return false;
+    }
+
     /**
      * Removes a throttling policy from the database
      *
