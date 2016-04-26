@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
@@ -3808,11 +3809,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-            policyFile = PolicyConstants.POLICY_LEVEL_API + "_" + policyName;
+            policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
             //add default policy file name
-            policyFileNames.add(policyFile + "_default");
-            for (int i = 0; i < policy.getPipelines().size(); i++) {
-                policyFileNames.add(policyFile + "_condition_" + i);
+            policyFileNames.add(policyFile + "_default");           
+            for (Pipeline pipeline : policy.getPipelines()) {
+                policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
             }
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;

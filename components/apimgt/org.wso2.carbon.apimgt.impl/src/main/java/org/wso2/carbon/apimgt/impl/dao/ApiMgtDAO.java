@@ -9070,6 +9070,7 @@ public class ApiMgtDAO {
                 conditions = getConditions(pipelineId);
                 pipeline.setConditions(conditions);
                 pipeline.setQuotaPolicy(quotaPolicy);
+                pipeline.setId(pipelineId);
                 pipelines.add(pipeline);
             }
         } catch (SQLException e) {
