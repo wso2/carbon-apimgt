@@ -112,7 +112,6 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setIssuedTime(thriftDTO.getIssuedTime());
         apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
         apiKeyValidationInfoDTO.setApiTier(thriftDTO.getApiTier());
-        apiKeyValidationInfoDTO.setThrottlingDataList(thriftDTO.getThrottlingDataList());
 
         return apiKeyValidationInfoDTO;
     }
