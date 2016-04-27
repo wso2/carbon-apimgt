@@ -65,6 +65,10 @@
       "type": "STRING"
     },
     {
+      "name": "apiName",
+      "type": "STRING"
+    },
+    {
       "name": "properties",
       "type": "STRING"
     }

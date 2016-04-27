@@ -24,7 +24,7 @@ not to do any configuration without proper guidance.
 
 	<!--Request stream definition. This is the contract between throttling engine and client on what information should be sent across. -->
 	<RequestStream>
-		define stream RequestStream (messageID string, app_key string, api_key string, app_tier string, api_tier string, user_id string, apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, properties object);
+		define stream RequestStream (messageID string, app_key string, api_key string, app_tier string, api_tier string, user_id string, apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, properties object);
 	</RequestStream>
 	<RequestStreamID>org.wso2.throttle.request.stream:1.0.0</RequestStreamID>
 
@@ -36,7 +36,7 @@ not to do any configuration without proper guidance.
 	<ThrottleStreamID>GlobalThrottleStream:1.0.0</ThrottleStreamID>
 
 	<PreRequestStream>
-		define stream PreRequestStream (messageID string, app_key string, api_key string, app_tier string, api_tier string, user_id string, apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, properties string);
+		define stream PreRequestStream (messageID string, app_key string, api_key string, app_tier string, api_tier string, user_id string, apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, properties string);
 	</PreRequestStream>
 
 	<!--Event table definition. This section can be used to configure event table. For more information refer Siddhi documentation.
@@ -79,7 +79,7 @@ not to do any configuration without proper guidance.
 
 	<StreamConversionQuery>
 		From PreRequestStream
-		select messageID, appKey, apiKey, appTier, apiTier, userId, apiContext, apiVersion, appTenant, apiTenant, appId, map:createFromJSON(properties) as propertiesMap
+		select messageID, appKey, apiKey, appTier, apiTier, userId, apiContext, apiVersion, appTenant, apiTenant, appId, apiName, map:createFromJSON(properties) as propertiesMap
 		insert into RequestStream;
 	</StreamConversionQuery>
 </CommonConfig>

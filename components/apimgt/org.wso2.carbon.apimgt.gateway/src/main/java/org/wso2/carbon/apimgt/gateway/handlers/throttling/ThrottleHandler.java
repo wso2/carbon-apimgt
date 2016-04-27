@@ -157,12 +157,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         apiContext = apiContext != null ? apiContext : "";
         apiVersion = apiVersion != null ? apiVersion : "";
 
+        String subscriberTenantDomain = "";
         List<String> resourceLevelThrottleConditions;
-
+        String applicationId = authContext.getApplicationId();
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
-            applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;
+            //TODO This is wrong you have to get the tenant domain from remote as gatway we don't share the configs
+            subscriberTenantDomain = MultitenantUtils.getTenantDomain(authContext.getUsername());
+            applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
             //if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
@@ -269,7 +272,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                 apiLevelThrottleKey, apiLevelTier,
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                 resourceLevelThrottleKey, resourceLevelTier,
-                                                authorizedUser, synCtx);
+                                                authorizedUser, apiContext, apiVersion, subscriberTenantDomain, applicationId, synCtx);
                                     }
                                 } else {
                                     if (log.isDebugEnabled()) {

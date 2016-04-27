@@ -104,7 +104,8 @@ public class ThrottleDataPublisher {
             String apiLevelThrottleKey, String apiLevelTier,
             String subscriptionLevelThrottleKey, String subscriptionLevelTier,
             String resourceLevelThrottleKey, String resourceLevelTier,
-            String authorizedUser, MessageContext messageContext) {
+            String authorizedUser, String apiContext, String apiVersion, String appTenant,
+            String appId, MessageContext messageContext) {
         //DataProcessAndPublishingAgent agent = null;
         //long start = System.currentTimeMillis();
         //String remoteIP = "127.0.0.1";
@@ -148,7 +149,7 @@ public class ThrottleDataPublisher {
                      apiLevelThrottleKey,  apiLevelTier,
                      subscriptionLevelThrottleKey,  subscriptionLevelTier,
                      resourceLevelThrottleKey,  resourceLevelTier,
-                     authorizedUser,  messageContext);
+                     authorizedUser,  apiContext, apiVersion, appTenant, appId, messageContext);
             executor.execute(agent);
             //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
 

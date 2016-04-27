@@ -27,8 +27,12 @@ public class DataProcessAndPublishingAgent implements Runnable{
     String subscriptionLevelThrottleKey;
     String subscriptionLevelTier;
     String resourceLevelThrottleKey;
-    String resourceLevelTier;
     String authorizedUser;
+    String resourceLevelTier;
+    String apiContext;
+    String apiVersion;
+    String appTenant;
+    String appId;
 
 
     public DataProcessAndPublishingAgent() {
@@ -39,11 +43,12 @@ public class DataProcessAndPublishingAgent implements Runnable{
      * This method will use to set message context.
      * @param messageContext
      */
-    public void setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
+    public void     setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
                                  String apiLevelThrottleKey, String apiLevelTier,
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
-                                 String authorizedUser, MessageContext messageContext){
+                                 String authorizedUser, String apiContext, String apiVersion, String appTenant,
+                                 String appId, MessageContext messageContext){
         if(resourceLevelTier==null && apiLevelTier!=null){
             resourceLevelTier = apiLevelTier;
         }
@@ -57,6 +62,10 @@ public class DataProcessAndPublishingAgent implements Runnable{
         this.resourceLevelThrottleKey = resourceLevelThrottleKey;
         this.resourceLevelTier =resourceLevelTier;
         this.authorizedUser = authorizedUser;
+        this.apiContext = apiContext;
+        this.apiVersion = apiVersion;
+        this.appTenant = appTenant;
+        this.appId = appId;
     }
 
     public void run() {
