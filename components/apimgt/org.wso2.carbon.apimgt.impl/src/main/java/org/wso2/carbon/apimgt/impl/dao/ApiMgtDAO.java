@@ -5139,6 +5139,7 @@ public class ApiMgtDAO {
             prepStmt.setString(5, contextTemplate);
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -9407,7 +9408,11 @@ public class ApiMgtDAO {
             	updateQuery = SQLConstants.UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
             }
             updateStatement = connection.prepareStatement(updateQuery);
-            updateStatement.setString(1, policy.getDisplayName());
+            if(!StringUtils.isEmpty(policy.getDisplayName())) {
+                updateStatement.setString(1, policy.getDisplayName());
+            } else {
+                updateStatement.setString(1, policy.getPolicyName());
+            }
             updateStatement.setString(2, policy.getDescription());
             updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
 
@@ -9480,7 +9485,11 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(updateQuery);
-            updateStatement.setString(1, policy.getDisplayName());
+            if(!StringUtils.isEmpty(policy.getDisplayName())) {
+                updateStatement.setString(1, policy.getDisplayName());
+            } else {
+                updateStatement.setString(1, policy.getPolicyName());
+            }
             updateStatement.setString(2, policy.getDescription());
             updateStatement.setString(3, policy.getDefaultQuotaPolicy().getType());
 
@@ -9675,7 +9684,11 @@ public class ApiMgtDAO {
      */
     private void setCommonParametersForPolicy(PreparedStatement policyStatement, Policy policy) throws SQLException {
         policyStatement.setString(1, policy.getPolicyName());
-        policyStatement.setString(2, policy.getDisplayName());
+        if(!StringUtils.isEmpty(policy.getDisplayName())) {
+            policyStatement.setString(2, policy.getDisplayName());
+        } else {
+            policyStatement.setString(2, policy.getPolicyName());
+        }
         policyStatement.setInt(3, policy.getTenantId());
         policyStatement.setString(4, policy.getDescription());
         policyStatement.setString(5, policy.getDefaultQuotaPolicy().getType());
@@ -10002,6 +10015,7 @@ public class ApiMgtDAO {
         }
         return status;
     }
+
     public String getAPILevelTier(int id) throws APIManagementException{
     	 Connection connection = null;
          PreparedStatement selectPreparedStatement = null;
