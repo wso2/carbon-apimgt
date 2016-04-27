@@ -11,6 +11,9 @@ var addApiPolicy = function (policy) {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantId = APIUtil.getTenantId(provider);
         apiPolicy.setTenantId(tenantId);
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        apiPolicy.setTenantDomain(tenantDomain);
         apiProvider.addPolicy(apiPolicy);
         return {
             error: false
@@ -130,6 +133,9 @@ var updateApiPolicy = function (policy) {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var tenantId = APIUtil.getTenantId(provider);
         updatedPolicy.setTenantId(tenantId);
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        updatedPolicy.setTenantDomain(tenantDomain);
         apiProvider.updatePolicy(updatedPolicy);
         return {
             error: false

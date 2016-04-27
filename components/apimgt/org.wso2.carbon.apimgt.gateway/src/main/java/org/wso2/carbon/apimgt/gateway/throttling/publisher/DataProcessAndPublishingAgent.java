@@ -34,9 +34,6 @@ public class DataProcessAndPublishingAgent implements Runnable{
     public DataProcessAndPublishingAgent() {
 
     }
-    public void processAndPublishEvent(){
-
-    }
 
     /**
      * This method will use to set message context.
@@ -62,21 +59,9 @@ public class DataProcessAndPublishingAgent implements Runnable{
         this.authorizedUser = authorizedUser;
     }
 
-    @Override
     public void run() {
         //TODO implement logic to get message details from message context
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        String authorizedUser = authContext.getUsername();
-        String applicationLevelThrottleKey = authContext.getApplicationId() + ":" + authorizedUser;;
-        String applicationLevelThrottleTier = authContext.getApplicationTier();
-        String apiLevelThrottleKey = "";//authContext.getThrottlingDataList().get(0);
-        if(authContext.getThrottlingDataList() != null && authContext.getThrottlingDataList().get(0) !=null){
-            apiLevelThrottleKey = authContext.getThrottlingDataList().get(0);
-        }
-        else {
-            apiLevelThrottleKey="";
-        }
-        String apiLevelThrottleTier = authContext.getApiTier();
         String propertiesMap = "{\n" +
                 "  \"name\": \"org.wso2.throttle.request.stream\",\n" +
                 "  \"version\": \"1.0.0\"}";
@@ -90,7 +75,6 @@ public class DataProcessAndPublishingAgent implements Runnable{
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, objects);
         dataPublisher.tryPublish(event);
-
     }
 
 }

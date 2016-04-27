@@ -15,7 +15,6 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -50,11 +49,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-
-import org.wso2.carbon.databridge.agent.DataPublisher;
-
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import javax.xml.stream.XMLStreamException;
 
 import java.util.List;
@@ -72,13 +67,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     private volatile Throttle throttle;
-
-    private static volatile DataPublisher dataPublisher = null;
-
     private static volatile ThrottleDataPublisher throttleDataPublisher = null;
-
     private String policyKeyApplication = null;
-
     private boolean subscriptionLevelSpikeArrestEnabled;
     /**
      * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
@@ -100,16 +90,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * Created throttle handler object.
      */
     private String sandboxUnitTime = "1000";
-
     private String productionUnitTime = "60000";
-
     private String sandboxMaxCount;
-
-    private String maxCount;
     private String productionMaxCount;
     private RoleBasedAccessRateController roleBasedAccessController;
 
-    //Throttle Handler rename
     public ThrottleHandler() {
         subscriptionLevelSpikeArrestEnabled = ServiceReferenceHolder.getInstance().getThrottleProperties()
                 .isEnabledSubscriptionLevelSpikeArrest();
@@ -143,8 +128,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //Throttle Keys
         String applicationLevelThrottleKey;
         String subscriptionLevelThrottleKey;
-        String resourceLevelThrottleKey = "";
-        String apiLevelThrottleKey = "";
+        String resourceLevelThrottleKey;
+        String apiLevelThrottleKey;
 
         //Throttle Tiers
         String applicationLevelTier;
@@ -159,18 +144,20 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //Throttled decisions
         boolean isThrottled = false;
         boolean isResourceLevelThrottled = false;
-        boolean isApplicationLevelThrottled = false;
-        boolean isSubscriptionLevelThrottled = false;
+        boolean isApplicationLevelThrottled;
+        boolean isSubscriptionLevelThrottled;
         boolean isApiLevelThrottled = false;
         boolean isBlockedRequest;
-        String ipLevelBlockingKey = null;
-        String appLevelBlockingKey = null;
+
+        String ipLevelBlockingKey;
+        String appLevelBlockingKey;
+
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
         apiVersion = apiVersion != null ? apiVersion : "";
-        List<String> resourceLevelThrottleConditions;
 
+        List<String> resourceLevelThrottleConditions;
 
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
@@ -359,7 +346,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * false to notify error with handler
      */
     public boolean handleResponse(MessageContext messageContext) {
-        return true;//return doThrottle(messageContext);
+        return true;
     }
 
 

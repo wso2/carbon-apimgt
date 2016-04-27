@@ -45,6 +45,26 @@
       "type": "STRING"
     },
     {
+      "name": "apiContext",
+      "type": "STRING"
+    },
+    {
+      "name": "apiVersion",
+      "type": "STRING"
+    },
+    {
+      "name": "appTenant",
+      "type": "STRING"
+    },
+    {
+      "name": "apiTenant",
+      "type": "STRING"
+    },
+    {
+      "name": "appId",
+      "type": "STRING"
+    },
+    {
       "name": "propertiesMap",
       "type": "STRING"
     }
