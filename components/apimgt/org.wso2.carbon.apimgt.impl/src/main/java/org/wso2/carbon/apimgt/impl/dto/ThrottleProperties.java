@@ -382,10 +382,10 @@ public class ThrottleProperties {
         private String username;
         private String password;
         private int corePoolSize = 1;
-        // by Default 5 mins
-        private long initDelay = 300000;
-        // by default per hour
-        private long period = 3600000;
+        // by Default 1 mins
+        private long initDelay = 60000;
+        // by default per 5 min
+        private long period = 300000;
 
         public long getPeriod() {
             return period;
