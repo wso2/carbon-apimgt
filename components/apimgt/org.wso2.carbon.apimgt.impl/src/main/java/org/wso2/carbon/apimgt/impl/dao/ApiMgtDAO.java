@@ -1082,8 +1082,8 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public int addSubscription(APIIdentifier identifier, String context, int applicationId, String status)
-            throws APIManagementException {
+    public int addSubscription(APIIdentifier identifier, String context, int applicationId, String status,
+            String subscriber) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -1149,8 +1149,7 @@ public class ApiMgtDAO {
             preparedStForInsert.setInt(3, applicationId);
             preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            //TODO Need to find logged in user who perform this subscription
-            preparedStForInsert.setString(6, null);
+            preparedStForInsert.setString(6, subscriber);
             preparedStForInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             preparedStForInsert.setString(8, UUID.randomUUID().toString());
 
@@ -2963,9 +2962,9 @@ public class ApiMgtDAO {
      * @param applicationId Application id
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
      */
-    public void updateSubscriptions(APIIdentifier identifier, String context, int applicationId)
+    public void updateSubscriptions(APIIdentifier identifier, String context, int applicationId, String subscriber)
             throws APIManagementException {
-        addSubscription(identifier, context, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED);
+        addSubscription(identifier, context, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, subscriber);
     }
 
     /**
@@ -3018,8 +3017,7 @@ public class ApiMgtDAO {
             //Updating data to the AM_SUBSCRIPTION table
             updatePs = conn.prepareStatement(sqlQuery);
             updatePs.setString(1, subStatus);
-            //TODO Need to find logged in user who does this update.
-            updatePs.setString(2, null);
+            updatePs.setString(2, identifier.getProviderName());
             updatePs.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             updatePs.setInt(4, apiId);
             updatePs.setInt(5, applicationId);
@@ -5057,7 +5055,7 @@ public class ApiMgtDAO {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
                         int subscriptionId = addSubscription(apiId, context, info.applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED);
+                                .SubscriptionStatus.UNBLOCKED, provider);
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiName +
                                          ":v" + newVersion;
@@ -5095,7 +5093,7 @@ public class ApiMgtDAO {
                     apiId.setTier(rs.getString("TIER_ID"));
                     try {
                         addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED);
+                                .SubscriptionStatus.UNBLOCKED, provider);
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {

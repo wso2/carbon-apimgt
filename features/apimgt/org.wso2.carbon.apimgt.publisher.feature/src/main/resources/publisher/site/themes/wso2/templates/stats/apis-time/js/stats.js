@@ -1,6 +1,7 @@
 var chart;
 var chartData;
-
+var apiFilter = "allAPIs";
+var selectedDeveloper = "All";
 function update_chart(data) {
     // Update the SVG with the new data and call chart
     chartData.datum(data).transition().duration(500).call(chart);
@@ -55,6 +56,11 @@ $(document).ready(function(){
         $("body").trigger("update_chart");
     });
 
+    $("#apiFilter").change(function (e) {
+        apiFilter = this.value;
+        $("body").trigger("update_chart");
+    });
+
     nv.addGraph(function () {
         chart = nv.models.lineChart()
             .margin({right: 40, left: 75})
@@ -89,11 +95,43 @@ $(document).ready(function(){
         return chart;
     });
 
+    function developerFilter(){
+        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag", { },
+            function (json) {
+            if (!json.error) {
+            var developerName = '';
+                for (var i = 0; i < json.data.length; i++) {
+                    developerName += '<option>'+ json.data[i].userId+'</option>'
+                }
+                $('#developerSelect')
+                   .append(developerName)
+                   .selectpicker('refresh');
+
+                $('#developerSelect').on('change', function() {
+                    selectedDeveloper = this.value;//selected value
+                    $("body").trigger("update_chart");
+                });
+            }
+            else {
+                    if (json.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content: json.message, type: "error"});
+                    }
+                 }
+        }, "json");
+    }
+
+    //update developer list
+    developerFilter();
+
     $("body").on("update_chart",function(){
         jagg.post("/site/blocks/stats/apis-time/ajax/stats.jag" + window.location.search,
             {
                "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD'),
-               "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD')
+               "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD'),
+               "developer": selectedDeveloper,
+               "apiFilter": apiFilter
             },
             function (json) {
             if (!json.error) {
@@ -107,8 +145,6 @@ $(document).ready(function(){
                 }
             }
         }, "json");
-
-
     });
 });
 

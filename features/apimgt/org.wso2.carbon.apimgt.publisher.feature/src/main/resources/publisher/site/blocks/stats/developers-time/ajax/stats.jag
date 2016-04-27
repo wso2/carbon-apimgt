@@ -16,12 +16,12 @@ include("/jagg/jagg.jag");
     } else {
             mod = jagg.module("statistics");
             var provider = jagg.getUser().username;
-            var currentLocation = request.getParameter("currentLocation");
-            var from = request.getParameter("fromDate");
-            var to = request.getParameter("toDate");
+            var fromDate = request.getParameter("fromDate");
+            var apiName = request.getParameter("subscribedApi");
+            var toDate = request.getParameter("toDate");
             var apiFilter = request.getParameter("apiFilter");
-            
-            result = mod.getDeveloperSignUpsOverTime(provider, from, to);
+            var limit = 50;
+            result = mod.getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit);
             
             if (result.error == "true") {
                 obj = {

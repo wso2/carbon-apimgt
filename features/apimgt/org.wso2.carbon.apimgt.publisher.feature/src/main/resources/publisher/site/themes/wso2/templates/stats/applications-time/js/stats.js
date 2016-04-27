@@ -1,5 +1,8 @@
 var chart;
 var chartData;
+var apiFilter = "allAPIs";
+var selectedDeveloper = "All";
+var subscribedApi = "All";
 
 function update_chart(data) {
     // Update the SVG with the new data and call chart
@@ -16,7 +19,7 @@ $(document).ready(function(){
         timePickerIncrement: 30,
         format: 'YYYY-MM-DD h:mm',
         startDate: moment().subtract(1, 'month'),
-        endDate: moment().format('YYYY-MM-DD  h:mm'),
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD  h:mm'),
         opens: 'left',
     });
 
@@ -55,6 +58,12 @@ $(document).ready(function(){
         $("body").trigger("update_chart");
     });
 
+    $("#apiFilter").change(function (e) {
+        apiFilter = this.value;
+        apiFilterList();
+        $("body").trigger("update_chart");
+    });
+
     nv.addGraph(function () {
         chart = nv.models.lineChart()
             .margin({right: 30, left: 75})
@@ -90,11 +99,75 @@ $(document).ready(function(){
         return chart;
     });
 
+    function developerFilter(){
+        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag", { },
+            function (json) {
+            if (!json.error) {
+            var developerName = '';
+                for (var i = 0; i < json.data.length; i++) {
+                    developerName += '<option>'+ json.data[i].userId+'</option>'
+                }
+                $('#developerSelect')
+                   .append(developerName)
+                   .selectpicker('refresh');
+
+                $('#developerSelect').on('change', function() {
+                    selectedDeveloper = this.value;//selected value
+                    $("body").trigger("update_chart");
+                });
+            }
+            else {
+                    if (json.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({content: json.message, type: "error"});
+                    }
+                 }
+        }, "json");
+    }
+    //update developer list
+    developerFilter();
+
+    function apiFilterList(){
+        jagg.post("/site/blocks/stats/apis-list/ajax/stats.jag",
+            {
+                "apiFilter" : apiFilter
+            },
+            function (json) {
+                if (!json.error) {
+                    var  apiName = '';
+                    for ( var i=0; i< json.data.length ; i++){
+                        apiName += '<option>'+ json.data[i].apiName+'</option>'
+                    }
+                    $('#apiSelect')
+                       .append(apiName)
+                       .selectpicker('refresh');
+
+                    $('#apiSelect').on('change', function() {
+                        subscribedApi = this.value;//selected value
+                        $("body").trigger("update_chart");
+                    });
+                }
+            else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+             }
+        }, "json");
+    }
+    //update api list
+    apiFilterList();
+
     $("body").on("update_chart",function(){
         jagg.post("/site/blocks/stats/applications-time/ajax/stats.jag" + window.location.search, 
             { 
                 "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD H:m:s'),
-                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD H:m:s')
+                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD H:m:s'),
+                "developer": selectedDeveloper,
+                "subscribedApi": subscribedApi,
+                "apiFilter": apiFilter
             },
             function (json) {
             if (!json.error) {

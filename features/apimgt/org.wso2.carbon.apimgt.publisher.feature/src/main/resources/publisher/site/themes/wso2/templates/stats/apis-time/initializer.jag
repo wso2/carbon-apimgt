@@ -11,7 +11,6 @@ jagg.initializer("stats/apis-time", {
         jagg.addHeaderJS("stats", "dimple","libs/nvd3/js/nv.d3.js");
         jagg.addHeaderJS("stats", "moment", "libs/datepicker/js/moment.js");
         jagg.addHeaderJS("stats", "datepicker", "libs/datepicker/js/daterangepicker.js");
-        jagg.addHeaderJS("stats", "filter", "templates/stats/filters.js");
         jagg.addHeaderJS("stats", "jplot", "templates/stats/apis-time/js/stats.js");
     }
 });

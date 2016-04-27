@@ -7,17 +7,8 @@ var log = new Log();
 
 (function () {
     /* Filters */
-    
-    var fromDate = request.getParameter("fromDate");
-    var toDate = request.getParameter("toDate");
-    
-    /*subscription filters*/
-    var withSubscriptions = request.getParameter("withSubscriptions");
-    var user = request.getParameter("user");
-    var groupId = request.getParameter("groupId");
-    var appName = request.getParameter("app");
-    var fromDate = request.getParameter("fromDate");
-    var toDate = request.getParameter("toDate");
+    var provider = jagg.getUser().username;
+    var apiFilter = request.getParameter("apiFilter");
 
     if (jagg.getUser() == null) {
         print({
@@ -27,11 +18,8 @@ var log = new Log();
     }
     else{
 		mod = jagg.module("statistics");
-		var currentLocation = request.getParameter("currentLocation");
-		var apiFilter = request.getParameter("apiFilter");
-	   	var tenantDomain = null;//org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
-		var limit = 0;
-		result = mod.getApisList(null, null, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit);
+		var limit = 50;
+		result = mod.getApisList(provider, apiFilter, limit);
 
 		if (result.error == "true") {
 			obj = {
