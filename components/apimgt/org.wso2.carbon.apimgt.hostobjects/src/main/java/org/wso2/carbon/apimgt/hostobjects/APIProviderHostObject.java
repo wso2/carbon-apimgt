@@ -461,12 +461,14 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.addAvailableTiers(availableTier);
         }
         
-        if (apiLevelPolicy != null){          
+        if (apiLevelPolicy != null) {
             if("none".equals(apiLevelPolicy)){
                 api.setApiLevelPolicy(null);
             } else {
                 api.setApiLevelPolicy(apiLevelPolicy);
             }
+        } else {
+                api.setApiLevelPolicy(null);
         }
         
         api.setLastUpdated(new Date());

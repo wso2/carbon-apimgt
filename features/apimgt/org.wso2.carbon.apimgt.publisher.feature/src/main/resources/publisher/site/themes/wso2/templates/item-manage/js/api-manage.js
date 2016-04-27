@@ -163,10 +163,12 @@ $("#toggleThrottle").change(function(e){
 
 $('#api_level_policy').change(function(){
     if($(this).prop("checked")) {
-        validateAPITier()
+        validateAPITier();
+        $('#enableApiLevelPolicy').val("true");
         $('#api-level-policy-section').show();
     } else {
-        validateAPITier()
+        validateAPITier();
+        $('#enableApiLevelPolicy').val("false");
         $('#api-level-policy-section').hide();
     }
 });
