@@ -19,7 +19,7 @@ $(document).ready(function(){
         timePickerIncrement: 30,
         format: 'YYYY-MM-DD h:mm',
         startDate: moment().subtract(1, 'month'),
-        endDate: moment().format('YYYY-MM-DD  h:mm'),
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD  h:mm'),
         opens: 'left',
     });
 
@@ -60,6 +60,7 @@ $(document).ready(function(){
 
     $("#apiFilter").change(function (e) {
         apiFilter = this.value;
+        apiFilterList();
         $("body").trigger("update_chart");
     });
 
@@ -128,7 +129,10 @@ $(document).ready(function(){
     developerFilter();
 
     function apiFilterList(){
-        jagg.post("/site/blocks/stats/apis-list/ajax/stats.jag", { },
+        jagg.post("/site/blocks/stats/apis-list/ajax/stats.jag",
+            {
+                "apiFilter" : apiFilter
+            },
             function (json) {
                 if (!json.error) {
                     var  apiName = '';
@@ -160,7 +164,10 @@ $(document).ready(function(){
         jagg.post("/site/blocks/stats/applications-time/ajax/stats.jag" + window.location.search, 
             { 
                 "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD H:m:s'),
-                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD H:m:s')
+                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD H:m:s'),
+                "developer": selectedDeveloper,
+                "subscribedApi": subscribedApi,
+                "apiFilter": apiFilter
             },
             function (json) {
             if (!json.error) {
