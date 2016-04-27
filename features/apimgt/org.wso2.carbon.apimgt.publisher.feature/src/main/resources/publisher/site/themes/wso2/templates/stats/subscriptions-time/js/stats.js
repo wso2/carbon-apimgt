@@ -113,7 +113,8 @@ var drawSubscriptionTime = function () {
                         var graph_data = [];
 
                         for(var i=0; i<origin_json.length; i++){
-
+                        var d = new Date(origin_json[i].created_time);
+                        var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate());
                         	graph_data.push(
                         		{
                                 "api_name": origin_json[i].api_name,
@@ -121,7 +122,7 @@ var drawSubscriptionTime = function () {
                                         {	"version": origin_json[i].api_version ,
                                             "time": [
                                                     {	"subscription_count": origin_json[i].subscription_count,
-                                                        "created_time": origin_json[i].created_time
+                                                        "created_time": formattedDate
                                                     }
                                                 ]
                                         }],
