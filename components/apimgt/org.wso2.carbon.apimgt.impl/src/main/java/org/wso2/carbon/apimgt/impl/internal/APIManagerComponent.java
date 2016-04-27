@@ -28,6 +28,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -220,6 +221,8 @@ public class APIManagerComponent {
             KeyManagerHolder.initializeKeyManager(configuration);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
+        } catch (APIManagerDatabaseException e) {
+            log.fatal("Error while Creating the database",e);
         }
     }
 
