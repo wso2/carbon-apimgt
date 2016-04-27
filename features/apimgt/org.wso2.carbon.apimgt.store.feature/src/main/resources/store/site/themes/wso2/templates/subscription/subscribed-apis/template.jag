@@ -35,9 +35,18 @@
 <script id="subscription-api-name" type="text/x-handlebars-template">
   <div class="thumbnail icon pull-left" style="width:80px; margin-right:10px">
 		<a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
-        	<div class="square-element">
-          		<img class="" src="{{thumburl}}" alt="S">
-        	</div>         
+			{{#if thumburl}}
+				<div class="square-element">
+					<img class="" src="{{ thumburl }}" alt="<%=i18n.localize("apiThumb")%>">
+                </div>										                               		
+			{{else}}     
+                <div class="square-element setbgcolor">
+					<div class="api-name-icon"></div>
+					<div style="display: none">
+						<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ apiName }}</a>
+					</div>
+				</div> 
+			{{/if}}        
 		</a>      
   </div>
   <h4>{{apiName}} - {{apiVersion}}</h4>
