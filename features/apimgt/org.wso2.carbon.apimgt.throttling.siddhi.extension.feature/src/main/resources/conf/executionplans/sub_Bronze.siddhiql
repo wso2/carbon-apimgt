@@ -13,7 +13,7 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
 FROM RequestStream
-SELECT messageID, ( subscriptionTier == 'Bronze') AS isEligible, subscriptionKey AS throttleKey
+SELECT messageID, ( apiTenant == 'carbon.super' and subscriptionTier == 'Bronze') AS isEligible, subscriptionKey AS throttleKey
 INSERT INTO EligibilityStream;
 
 FROM EligibilityStream[isEligible==true]#window.time(1 min) 
