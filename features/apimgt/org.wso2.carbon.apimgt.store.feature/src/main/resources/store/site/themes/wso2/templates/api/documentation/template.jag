@@ -52,7 +52,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                     <%=i18n.localize("viewDoc")%></a></p>
                     <%}}else if(doc.filePath && doc.filePath!=""){%>
 
-                    <p><a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + doc.filePath) %>" class="doc-content" target="_blank" title="<%=i18n.localize("docdownload")%>" download><%=i18n.localize("download")%></a></p>
+                    <p><a href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + doc.filePath))%>" class="doc-content" target="_blank" title="<%=i18n.localize("docdownload")%>" download><%=i18n.localize("download")%></a></p>
 
                     <%}else{
                     %>

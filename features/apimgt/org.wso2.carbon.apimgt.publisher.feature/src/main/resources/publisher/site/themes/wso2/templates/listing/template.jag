@@ -59,7 +59,7 @@
 		<%
         var i, api,path,mode=outputs.mode,apis = outputs.apis,length;
         var reqUrl = request.getRequestURI();
-        var docViewMappedUrl = jagg.getMappedUrl("site/pages/doc-viewer.jag") + urlPrefix;
+        var docViewMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
         
         length = outputs.totalLength;
         var itemsPerPage = 12; //reduce this number to preview the pagination

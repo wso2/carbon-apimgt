@@ -4050,6 +4050,7 @@ public final class APIUtil {
         Map<Documentation, API> apiDocMap = new HashMap<Documentation, API>();
 
         try {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry,
