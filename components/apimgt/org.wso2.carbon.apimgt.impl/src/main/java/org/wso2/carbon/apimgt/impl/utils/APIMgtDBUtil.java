@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -52,7 +53,7 @@ public final class APIMgtDBUtil {
      *
      * @throws APIManagementException if an error occurs while loading DB configuration
      */
-    public static void initialize() throws Exception {
+    public static void initialize() throws APIManagerDatabaseException {
         if (dataSource != null) {
             return;
         }
@@ -71,7 +72,7 @@ public final class APIMgtDBUtil {
                         Context ctx = new InitialContext();
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
-                        throw new APIManagementException("Error while looking up the data " +
+                        throw new APIManagerDatabaseException("Error while looking up the data " +
                                 "source: " + dataSourceName, e);
                     }
                 } else {
@@ -87,7 +88,7 @@ public final class APIMgtDBUtil {
      *
      * @throws Exception if an error occurs while creating the APIManagerDatabase.
      */
-    private static void setupAPIManagerDatabase() throws Exception {
+    private static void setupAPIManagerDatabase() throws APIManagerDatabaseException {
 
         String value = System.getProperty("setup");
         if (value != null) {
@@ -100,7 +101,8 @@ public final class APIMgtDBUtil {
                 }
             } catch (Exception e) {
                 String msg = "Error in creating the APIManager database";
-                throw new Exception(msg, e);
+                log.fatal(msg,e);
+                throw new APIManagerDatabaseException(msg, e);
             }
         }
     }

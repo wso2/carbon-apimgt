@@ -118,6 +118,7 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().clear();
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().clear();
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().clear();
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().clear();
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
                     generateMap(blockConditionsDTO.getApi()));
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().putAll(
