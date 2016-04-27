@@ -38,6 +38,9 @@
                 var addImplementUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
                 var addManageUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
                 
+                var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+                var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+                
                 isCreatePermitted = jagg.getCreatePermitted().permitted;
                 isPublishPermitted = jagg.getPublishPermitted().permitted;
             %>
@@ -134,6 +137,17 @@
 	                        </li>
                         <%} %>
                         <% if(reqUrl.indexOf(addDesignUrl) >= 0 || reqUrl.indexOf(addImplementUrl) >= 0 || reqUrl.indexOf(addManageUrl) >= 0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goToOverView")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                        <% if(reqUrl.indexOf(docViewerMappedUrl) >= 0 || reqUrl.indexOf(docViewerUrl) >= 0){ %>
                         	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
 	                      <li>
 	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
