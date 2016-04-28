@@ -387,8 +387,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //ConfigurationContext cc = axis2MC.getConfigurationContext();
             long start = System.nanoTime();
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
-            log.info("===============================================Time:" + (System.nanoTime() - start));
-
         }
         if (isThrottled) {
 
