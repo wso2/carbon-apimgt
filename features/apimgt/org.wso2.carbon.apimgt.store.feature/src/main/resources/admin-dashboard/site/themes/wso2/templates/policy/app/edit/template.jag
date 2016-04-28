@@ -32,99 +32,117 @@
     }
 %>
 
-<div id='tier-add-container' class="row-fluid"  style="display:inline">
-    <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
 
-    <div class="title-section">
-        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+<div id='tier-add-container'>
+    <div class="page-header">
+        <h2 id="tierTopic"><%=pageTitle%></h2>
+        <p class="lead"></p>
     </div>
 
-    <div class="content-section shadow-up">
-        <div class="content-data">
-            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
-                value='<%=i18n.localize("errorMsgRequired")%>'/>
-                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
-                value='<%=i18n.localize("errorMessageInvalid")%>'/>
-                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
-                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
-            <div class="row-fluid">
-                <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
-                    action="/admin-dashboard/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
+    <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
+    <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
+    <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("errorMessageInvalid")%>'/>
+    <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
 
-                    <fieldset>
-                        <legend>General Details</legend>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%="Name"%></label>
-                            <div class="controls cnls">
-                                <input type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>/>
-                            </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
-                            <div class="controls cnls">
-                                <textarea id="description" class="text" cols="40" rows ="2" name="description">
-                                </textarea>
-                            </div>
-                        </div>
-                        <legend>Quota</legend>
-                        <div id="quotaTypeRadioDev" class="control-group cnl-group form-inline">
-
-                            <label class="checkbox-inline radio">
-                                <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
-                                Request Count
-                            </label>
-                            <label class="checkbox-inline radio">
-                                <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
-                                Request Bandwidth
-                            </label>
-		                </div>
-                        <div id="defaultRequestCountBasedDiv">
-                            <div class="control-group cnl-group">
-                                <label class="control-label cnl-label">Request Count </label>
-                                <div class="controls cnls">
-                                    <input type="text" id="defaultRequestCount" name="defaultRequestCount" />
-                                </div>
-                            </div>
-                        </div>
-                        <div id="defaultBandwidthBasedDiv">
-                             <div class="control-group cnl-group" >
-                                <label class="control-label cnl-label">Data Bandwidth </label>
-                                <div class="controls cnls">
-                                   <input type="text" id="defaultBandwidth" name="defaultBandwidth" />
-                                      <select class="select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit" style="width:15%">
-                                         <option value="KB" >KB</option>
-                                         <option value="MB" selected="true" >MB</option>
-                                         <option value="GB">GB</option>
-                                      </select>
-                                </div>
-                             </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                             <label class="control-label cnl-label">Unit Time </label>
-                             <div class="controls cnls">
-                                 <input type="text" id="defaultUnitTime" name="defaultUnitTime" />
-                                 <select class="select required" id="defaultTimeUnit" name="defaultTimeUnit" style="width:15%">
-                                    <option value="sec" selected="true">Second(s)</option>
-                                    <option value="min">Minute(s)</option>
-                                    <option value="hour">Hour(s)</option>
-                                    <option value="days">Day(s)</option>
-                                    <option value="months">Month(s)</option>
-                                 </select>
-                                </div>
-                        </div>
-
-                    </fieldset>
-
-                    <div class="form-actions">
-                        <input id="add-tier-btn" onclick="addAppPolicy()" name="save-tier-btn" type="button"
-                            class="btn btn-primary" value='<%=i18n.localize("saveTier")%>'/>
-                        <input id="cancel-tier-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
-                    </div>
-                </form>
+    <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data" action="/admin-dashboard/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
+        <div class="page-header">
+            <h2><br></h2>
+            <p class="lead">General Details</p>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3"><%="Name"%></label>
+            <div class="col-md-9">
+                <input class="form-control" type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>/>
             </div>
         </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3"><%=i18n.localize("description")%></label>
+            <div class="col-md-9">
+                <textarea class="form-control" id="description" class="text" cols="40" rows ="2" name="description">
+                </textarea>
+            </div>
+        </div>
+        <div class="page-header">
+            <h2><br></h2>
+            <p class="lead">Quota</p>
+        </div>
+        <div id="quotaTypeRadioDev">
+            <div class="form-group">
+                <label class="control-label col-sm-3"></label>
+                <div class="radio">
+                    <label class="checkbox-inline">
+                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                        Request Count
+                    </label>
+                </div>
+                <div class="radio">
+                    <label class="checkbox-inline">
+                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
+                        Request Bandwidth
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div id="defaultRequestCountBasedDiv">
+            <div class="form-group">
+                <label class="control-label col-sm-3">Request Count </label>
+                <div class="col-sm-9">
+                    <input class="form-control" type="text" id="defaultRequestCount" name="defaultRequestCount" />
+                </div>
+            </div>
+        </div>
+        <div id="defaultBandwidthBasedDiv">
+            <div class="form-group">
+                <label class="control-label col-sm-3">Data Bandwidth </label>
+                <div class="col-sm-6">
+                   <input class="form-control" type="text" id="defaultBandwidth" name="defaultBandwidth" />
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit">
+                        <option value="KB" >KB</option>
+                        <option value="MB" selected="true" >MB</option>
+                        <option value="GB">GB</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3">Unit Time </label>
+            <div class="col-sm-6">
+                <input class="form-control" type="text" id="defaultUnitTime" name="defaultUnitTime" />
+            </div>
+            <div class="col-sm-3">
+                <select class="form-control select required" id="defaultTimeUnit" name="defaultTimeUnit">
+                    <option value="sec" selected="true">Second(s)</option>
+                    <option value="min">Minute(s)</option>
+                    <option value="hour">Hour(s)</option>
+                    <option value="days">Day(s)</option>
+                    <option value="months">Month(s)</option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <div class="page-header">
+        <h2><br></h2>
+    </div>
+    <div class="form-group">
+        <button type="button" id="add-tier-btn" onclick="addAppPolicy()" name="save-tier-btn" class="btn btn-primary has-spinner">
+            <span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            <%=i18n.localize("saveTier")%>
+        </button>
+        <button type="button" id="cancel-tier-btn" class="btn btn-secondary">
+            <span class="icon fw-stack">
+                <i class="fw fw-cancel fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            <%=i18n.localize("cancelTier")%>
+        </button>
     </div>
 </div>
+
 
 <script>
     $(document).ready(function(){
