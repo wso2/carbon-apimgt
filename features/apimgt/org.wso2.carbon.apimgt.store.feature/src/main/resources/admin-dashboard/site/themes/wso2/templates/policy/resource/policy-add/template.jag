@@ -404,22 +404,24 @@
                                                 </div>
                                             </div>
                                             <div {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="header-value-table-{{../../executionFlow.id}}">
-                                                <table class="table table-striped" id="header-value-table-content-{{../../executionFlow.id}}">
+                                                <table class="table table-striped table-condensed" id="header-value-table-content-{{../../executionFlow.id}}">
                                                     <thead>
                                                         <tr>
-                                                            <th>Header</th>
-                                                            <th>Value</th>
-                                                            <th>Action</th>
+                                                            <th class="col-md-5">Header</th>
+                                                            <th class="col-md-5">Value</th>
+                                                            <th class="col-md-2">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                                {{#each keyValPairs}}
-                                                                        <tr>
-                                                                            <td>{{name}}</td>
-                                                                            <td>{{value}}</td>
-                                                                            <td><button type="button" class="btn btn-primary has-spinner" onclick="removeHeaderRow(this, {{../../../executionFlow.id}})">Delete</button></td>
-                                                                        </tr>
-                                                                {{/each}}
+                                                        {{#each keyValPairs}}
+                                                            <tr>
+                                                                <td>{{name}}</td>
+                                                                <td>{{value}}</td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-primary has-spinner" onclick="removeHeaderRow(this, {{../../../executionFlow.id}})">Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        {{/each}}
                                                      </tbody>
                                                 </table>
                                             </div>
@@ -490,20 +492,20 @@
                                             </div>
 
                                             <div {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="query-param-value-table-{{../../executionFlow.id}}">
-                                                <table class="table table-striped" id="query-param-value-table-content-{{../../executionFlow.id}}">
+                                                <table class="table table-striped table-condensed" id="query-param-value-table-content-{{../../executionFlow.id}}">
                                                     <thead>
                                                         <tr>
-                                                            <th>Query Param</th>
-                                                            <th>Value</th>
-                                                            <th>Action</th>
+                                                            <th class="col-md-5">Query Param</th>
+                                                            <th class="col-md-5">Value</th>
+                                                            <th class="col-md-2">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                        {{#each keyValPairs}}
                                                               <tr>
-                                                                <td>{{name}}</td>
-                                                                <td>{{value}}</td>
-                                                                <td><button type="button" class="btn btn-primary has-spinner" onclick="removeQueryParamRow(this, {{../../../executionFlow.id}})">Delete</button></td>
+                                                                <td class="col-md-5">{{name}}</td>
+                                                                <td class="col-md-5">{{value}}</td>
+                                                                <td class="col-md-2"><button type="button" class="btn btn-primary has-spinner" onclick="removeQueryParamRow(this, {{../../../executionFlow.id}})">Delete</button></td>
                                                               </tr>
                                                        {{/each}}
                                                      </tbody>
@@ -575,12 +577,12 @@
                                                 </div>
                                             </div>
                                             <div {{#if keyValPairs.length}}style="display:block"{{else}}style="display:none"{{/if}} id="jwt-claim-value-table-{{../../executionFlow.id}}">
-                                                <table class="table table-striped" id="jwt-claim-value-table-content-{{../../executionFlow.id}}">
+                                                <table class="table table-striped table-condensed" id="jwt-claim-value-table-content-{{../../executionFlow.id}}">
                                                     <thead>
                                                         <tr>
-                                                            <th>Claim</th>
-                                                            <th>Value</th>
-                                                            <th>Action</th>
+                                                            <th class="col-md-5">Claim</th>
+                                                            <th class="col-md-5">Value</th>
+                                                            <th class="col-md-2">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
