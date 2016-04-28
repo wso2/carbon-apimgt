@@ -104,7 +104,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
 	                  <span class="icon fw-stack fw-lg">
 	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                  <i class="fw fw-sign-up fw-stack-1x"></i>
+	                  <i class="fw fw-register fw-stack-1x"></i>
 	                  </span>
 	                    <span class="hidden-xs"> <%=i18n.localize("signup")%></span>
 	                </a>
@@ -114,7 +114,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 	                <a id="login-link">
 	                  <span class="icon fw-stack fw-lg">
 	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
-	                  <i class="fw fw-user fw-stack-1x"></i>
+	                  <i class="fw fw-sign-in fw-stack-1x"></i>
 	                  </span>
 	                    <span class="hidden-xs"><%=i18n.localize("login")%></span>
 	                </a>
