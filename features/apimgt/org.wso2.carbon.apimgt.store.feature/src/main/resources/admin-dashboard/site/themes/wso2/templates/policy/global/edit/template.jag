@@ -59,7 +59,7 @@
                             <label class="control-label cnl-label">Key Template</label>
                             <div class="controls cnls">
                                 <input type="text" id="keyTemplate" name="keyTemplate" value=""/>
-                                <input type="hidden" id="keyTemplateValidated" name="keyTemplateValidated"
+                                <input type="hidden" id="formValidated" name="formValidated"
                                 value="true"/>
 
                                 <a class="help_popup" help_data="keytemplate_help" data-trigger="hover" data-placement="bottom">
@@ -69,14 +69,20 @@
 
                                     </span>
                                 </a>
-                                <p id="keytemplate_help" class="hide"  style="font-size:9px"> <%=i18n.localize("keyTemplate")%> <%=streamParameters%> </p></label>
-
+                                <span id="invalidKeyTemplate" style="color:red;display:none"><%=i18n.localize("InvalidKeyTemplateMessage")%></span>
+                                <p id="keytemplate_help" class="hide"  style="font-size:9px"> <%=i18n.localize("keyTemplateToolTip")%> <%=streamParameters%> </p></label>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label">Siddhi Query</label>
-                            <div class="controls cnls">
-                                    <textarea id="siddhiQuery" class="text"  name="siddhiQuery" style="width:99%;height:200px"></textarea>
+                    
+                            <textarea id="siddhiQuery" class="text"  name="siddhiQuery" style="width:99%;height:200px" spellcheck='false'></textarea>
+                            <span id="invalidSiddhiQuery" style="color:red;display:none"><%=i18n.localize("invalidSiddhiQueryMessage")%></span>
+                            <br>
+                            <a href="#credits" class="toggle btn btn-primary pull-right">Show Sample</a>
+                            <br><br>
+                            <div id="credits" class="well hidden">
+                                <%=i18n.localize("sampleSiddhiQuery")%>
                             </div>
                         </div>
                     </fieldset>
@@ -119,8 +125,12 @@ var isNewPolicy = true;
         var validated = true ;
 
         $.each( arr, function( key, value ) {
-            value = value.replace(/\$|{|}/gi, "");
-            if($.inArray( value, parameterArray ) == -1 ){
+            if (value.indexOf("\$") == 0) {
+                value = value.replace(/\$/gi, "");
+                if($.inArray( value, parameterArray ) == -1 ){
+                    validated = false; 
+                }
+            }else{
                 validated = false; 
             }
         });
@@ -128,14 +138,60 @@ var isNewPolicy = true;
         if(validated){
             jQuery(this).css({ 'color': 'green', 'font-size': '1 px' });
             jQuery('button.validate').prop("disabled",false);
-            $('#keyTemplateValidated').val("true");
+            $('#formValidated').val("true");
+            $('#invalidKeyTemplate').hide();
           }else{
             jQuery(this).css({  'color': 'red', 'font-size': '1 px' });
             jQuery('button.validate').prop("disabled",true);
-            $('#keyTemplateValidated').val("false");
+            $('#formValidated').val("false");
+            $('#invalidKeyTemplate').show();
+          }
+       });
+
+       jQuery('#siddhiQuery').bind('input propertychange', function() {
+
+        var siddhiQuery = jQuery(this).val();
+        var validated = true ;
+
+        if (siddhiQuery.indexOf("\"") > -1) {
+            validated = false;
+        }
+
+        if(validated){
+            jQuery(this).css({ 'color': 'green', 'font-size': '1 px' });
+
+            jQuery(this).removeClass('has-error').addClass('has-success'); 
+
+            jQuery('button.validate').prop("disabled",false);
+            $('#formValidated').val("true");
+            $('#invalidSiddhiQuery').hide();
+          }else{
+            jQuery(this).removeClass('has-success').addClass('has-error'); 
+            jQuery(this).css({  'color': 'red', 'font-size': '1 px' });
+            jQuery('button.validate').prop("disabled",true);
+            $('#formValidated').val("false");
+            $('#invalidSiddhiQuery').show();
           }
        });
     });
+
+    $(function () {
+
+        $('.toggle').click(function (event) {
+            event.preventDefault();
+            var target = $(this).attr('href');
+            $(target).toggleClass('hidden show');
+
+            if ($(this).text() == 'Show Sample'){
+                $(this).text('Hide Sample');
+            }
+            else{
+                $(this).text('Show Sample');
+            }
+        });
+
+    });
+
 </script>
 
 <%});%>
