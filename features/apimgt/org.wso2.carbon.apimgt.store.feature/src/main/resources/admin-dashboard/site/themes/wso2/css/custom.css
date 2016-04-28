@@ -617,7 +617,7 @@ body.login-bg {
 }
 #accordion1 .wr-hidden-operation .panel-heading .panel-title label, #accordion2 .wr-hidden-operation .panel-heading .panel-title label,
 #accordion1 .wr-hidden-operation .panel-heading .panel-title .panel-title-description, #accordion2 .wr-hidden-operation .panel-heading .panel-title .panel-title-description{
-    font-weight:normal;
+    font-weight:200;
     color:#999;
 }
 
@@ -709,7 +709,6 @@ body.login-bg {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-    background: #ffffff;
 }
 
 .wr-hidden-operations-content::-webkit-scrollbar {
@@ -729,7 +728,7 @@ body.login-bg {
 }
 
 #accordion1 .wr-hidden-operations-content .panel-body,#accordion2 .wr-hidden-operations-content .panel-body {
-    margin: 20px;
+    margin: 0px;
     background: #ffffff;
 }
 
@@ -743,7 +742,7 @@ body.login-bg {
 
 .wr-hidden-operations-content .panel-title {
     /*border: 1px solid #e8e8e8;*/
-    padding: 20px;
+    padding: 20px 0px;
     background: #ffffff;
     color: #555;
 }
