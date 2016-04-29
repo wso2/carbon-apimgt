@@ -3,6 +3,12 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.util.Map;
 
+/**
+ * This class is used to hold throttling data before publish them to
+ * global policy engine side. We decided to maintain this in impl as
+ * this can be used by other components such as usage publisher.
+ * In future we may consider adding all properties to this class.
+ */
 public class ThrottleDataDTO {
     String clientIP;
     String messageSizeInBytes;

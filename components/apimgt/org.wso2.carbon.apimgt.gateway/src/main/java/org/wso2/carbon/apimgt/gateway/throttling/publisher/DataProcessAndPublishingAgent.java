@@ -18,6 +18,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -112,12 +113,12 @@ public class DataProcessAndPublishingAgent implements Runnable {
         if(remoteIP !=null && remoteIP.length()>0) {
             throttleDataDTO.setClientIP(remoteIP);
         }
-        /**java.util.Set<String> transportHeaderMap = ((TreeMap) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).keySet();
-        for(Object key: transportHeaderMap){
-            throttleDataDTO.getTransportHeaders().put(key, )
 
-        }**/
+        TreeMap transportHeaderMap = ((TreeMap)((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        if(transportHeaderMap!=null && transportHeaderMap.size()>0) {
+            throttleDataDTO.setTransportHeaders((Map<String, String>)transportHeaderMap);
+        }
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
