@@ -45,32 +45,17 @@ public class GlobalThrottleEngineClient {
             .getPolicyDeployer();
 
     private String login() throws RemoteException, LoginAuthenticationExceptionException, MalformedURLException {
-        String serverURL = policyDeployerConfiguration.getServiceUrl();
-        if (serverURL == null || policyDeployerConfiguration.getUsername() == null || policyDeployerConfiguration.getPassword() == null) {
-            throw new AxisFault("Required admin configuration unspecified");
-        }
+        authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
+                "AuthenticationAdmin");
+        String sessionCookie = null;
 
-        String host;
-        try {
-            host = new URL(serverURL).getHost();
-        } catch (MalformedURLException e) {
-            throw new AxisFault("Server URL is malformed", e);
+        if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(),
+                new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
+            ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
+                    .getServiceContext();
+            sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         }
-
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
-        ServiceClient client = authAdminStub._getServiceClient();
-        Options options = client.getOptions();
-        options.setManageSession(true);
-        try {
-            authAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(), host);
-            ServiceContext serviceContext = authAdminStub.
-                    _getServiceClient().getLastOperationContext().getServiceContext();
-            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-        } catch (RemoteException e) {
-            throw new AxisFault("Error while contacting the authentication admin services", e);
-        } catch (LoginAuthenticationExceptionException e) {
-            throw new AxisFault("Error while authenticating ", e);
-        }
+        return sessionCookie;
     }
 
     /**
