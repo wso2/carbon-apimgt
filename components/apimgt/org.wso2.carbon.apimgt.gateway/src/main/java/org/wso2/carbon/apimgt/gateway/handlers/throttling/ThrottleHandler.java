@@ -282,7 +282,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                 apiLevelThrottleKey, apiLevelTier,
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                 resourceLevelThrottleKey, resourceLevelTier,
-                                                authorizedUser, synCtx);
+                                                authorizedUser, synCtx, authContext);
                                     }
                                 } else {
                                     if (log.isDebugEnabled()) {
