@@ -1,4 +1,4 @@
-        @Plan:name('app_${policy.getPolicyName()}')
+        @Plan:name('${policy.getTenantDomain()}_app_${policy.getPolicyName()}')
         @Plan:description('ExecutionPlan for app_${policy.getPolicyName()}')
 
         @Import('org.wso2.throttle.processed.request.stream:1.0.0')

@@ -1,5 +1,5 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('resource_Ultimate_default')
+@Plan:name('carbon.super_resource_Ultimate_default')
 
 /* Enter a unique description for ExecutionPlan */
 @Plan:description('ExecutionPlan for resource_ultimate')

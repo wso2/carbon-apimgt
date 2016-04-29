@@ -519,7 +519,7 @@ public class APIManagerComponent {
     }
 
     private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
-        APIUtil.addDefaultAdvancedThrottlePoliciesToDB(MultitenantConstants.SUPER_TENANT_ID);
+        APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
    }
 
    protected void setConfigurationContextService(ConfigurationContextService contextService) {

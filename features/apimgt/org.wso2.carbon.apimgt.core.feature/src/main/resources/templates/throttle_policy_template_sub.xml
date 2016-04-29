@@ -1,4 +1,4 @@
-		@Plan:name('sub_${policy.getPolicyName()}')
+		@Plan:name('${policy.getTenantDomain()}_sub_${policy.getPolicyName()}')
 
 		@Plan:description('ExecutionPlan for sub_${policy.getPolicyName()}')
 

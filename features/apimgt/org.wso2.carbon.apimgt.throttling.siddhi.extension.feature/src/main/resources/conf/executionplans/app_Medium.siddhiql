@@ -1,5 +1,5 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('app_Medium')
+@Plan:name('carbon.super_app_Medium')
 
 /* Enter a unique description for ExecutionPlan */
 @Plan:description('ExecutionPlan for app_medium')

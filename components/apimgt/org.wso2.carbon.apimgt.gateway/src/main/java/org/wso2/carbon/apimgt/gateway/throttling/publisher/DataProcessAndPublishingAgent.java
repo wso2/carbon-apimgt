@@ -4,9 +4,13 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.RESTUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
@@ -32,6 +36,8 @@ public class DataProcessAndPublishingAgent implements Runnable{
     String apiContext;
     String apiVersion;
     String appTenant;
+    String apiTenant;
+    String apiName;
     String appId;
 
 
@@ -43,7 +49,7 @@ public class DataProcessAndPublishingAgent implements Runnable{
      * This method will use to set message context.
      * @param messageContext
      */
-    public void     setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
+    public void setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
                                  String apiLevelThrottleKey, String apiLevelTier,
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
@@ -65,7 +71,11 @@ public class DataProcessAndPublishingAgent implements Runnable{
         this.apiContext = apiContext;
         this.apiVersion = apiVersion;
         this.appTenant = appTenant;
+        this.apiTenant = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
+                (messageContext)); //TODO this may be efficient hence double check
         this.appId = appId;
+        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
     }
 
     public void run() {
@@ -79,7 +89,7 @@ public class DataProcessAndPublishingAgent implements Runnable{
                 this.apiLevelThrottleKey, this.apiLevelTier,
                 this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
                 this.resourceLevelThrottleKey, this.resourceLevelTier,
-                this.authorizedUser, propertiesMap};
+                this.authorizedUser, this.apiContext, this.apiVersion, this.appTenant, this.apiTenant, this.appId ,this.apiName ,propertiesMap};
 
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, objects);

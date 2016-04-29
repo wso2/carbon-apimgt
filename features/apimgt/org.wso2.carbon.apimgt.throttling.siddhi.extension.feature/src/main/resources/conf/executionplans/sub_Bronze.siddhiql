@@ -1,5 +1,5 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('sub_Bronze')
+@Plan:name('carbon.super_sub_Bronze')
 
 /* Enter a unique description for ExecutionPlan */
 @Plan:description('ExecutionPlan for sub_bronze')

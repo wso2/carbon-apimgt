@@ -10,7 +10,7 @@ str:concat(resourceKey, '_', userId , '_default')##
 #end
 ###generate rule
 #macro( getRule $policy)
-resource_${policy.getPolicyName()}_default##
+${policy.getTenantDomain()}_resource_${policy.getPolicyName()}_default##
 #end
 
 @Plan:name('#getRule($policy)')
