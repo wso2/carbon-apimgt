@@ -58,8 +58,7 @@
         <div class="form-group">
             <label class="control-label col-sm-3"><%=i18n.localize("description")%></label>
             <div class="col-md-9">
-                <textarea class="form-control" id="description" class="text" cols="40" rows ="2" name="description">
-                </textarea>
+                <textarea class="form-control" id="description" class="text" cols="40" rows ="2" name="description"></textarea>
             </div>
         </div>
         <div class="page-header">
@@ -69,17 +68,15 @@
         <div id="quotaTypeRadioDev">
             <div class="form-group">
                 <label class="control-label col-sm-3"></label>
-                <div class="radio">
-                    <label class="checkbox-inline">
-                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
-                        Request Count
-                    </label>
-                </div>
-                <div class="radio">
-                    <label class="checkbox-inline">
-                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
-                        Request Bandwidth
-                    </label>
+                <div class="col-sm-9">
+                <label class="radio">
+                    <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                    <span class="helper">Request Count</span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
+                    <span class="helper">Request Bandwidth</span>
+                </label>
                 </div>
             </div>
         </div>
