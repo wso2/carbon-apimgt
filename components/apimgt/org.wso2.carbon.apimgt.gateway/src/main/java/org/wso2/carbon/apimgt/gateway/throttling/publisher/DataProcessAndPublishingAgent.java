@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 
 
 import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -58,8 +59,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, MessageContext messageContext,
                                  AuthenticationContext authenticationContext) {
-        if (resourceLevelTier == null && apiLevelTier != null) {
+        if(StringUtils.isEmpty(resourceLevelTier) && apiLevelTier!=null){
             resourceLevelTier = apiLevelTier;
+            resourceLevelThrottleKey = apiLevelThrottleKey;
         }
         this.authenticationContext = authenticationContext;
         this.messageContext = messageContext;
