@@ -211,16 +211,16 @@ function drawGraphInArea(rdata){
         color:["#f7f7f7"],
         padding: {"top": padding_top, "left": padding_horizontal, "bottom": padding_horizontal, "right": padding_horizontal}
     };
-      var configUsa = {
+var configUsa = {
         type: "map",
         x : "Country",
         renderer : "canvas",
         charts : [{type: "map",  y : "Count", mapType : "usa"}],
-        width: width,
-        height: height,
+        width: width*1.5,
+        height: height*1.5,
         colorScale:["#99ccff","#193366"],
         color:["#f7f7f7"],
-        padding: {"top":padding_top, "left": padding_horizontal, "bottom": padding_horizontal, "right": padding_horizontal}
+        padding: {"top":padding_top/100, "left": padding_horizontal/100, "bottom": padding_horizontal*5, "right": padding_horizontal*8}
     };
     var callbackmethod = function(event, item) { 
 

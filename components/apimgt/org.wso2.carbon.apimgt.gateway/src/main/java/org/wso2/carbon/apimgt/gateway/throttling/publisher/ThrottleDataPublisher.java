@@ -110,7 +110,7 @@ public class ThrottleDataPublisher {
             String apiLevelThrottleKey, String apiLevelTier,
             String subscriptionLevelThrottleKey, String subscriptionLevelTier,
             String resourceLevelThrottleKey, String resourceLevelTier,
-            String authorizedUser, MessageContext messageContext,
+            String authorizedUser, String apiContext, String apiVersion, String appTenant, String appId, MessageContext messageContext,
             AuthenticationContext authenticationContext) {
         //log.info("##########################################Publishing event");
         try {

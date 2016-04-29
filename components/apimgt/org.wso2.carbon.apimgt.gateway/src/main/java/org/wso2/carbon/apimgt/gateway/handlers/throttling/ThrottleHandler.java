@@ -198,7 +198,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 // for it
                 if (apiLevelTier != null && apiLevelTier.length() > 0 && apiLevelThrottleKey.length() > 0) {
                     isThrottled = isApiLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                            isThrottled(apiLevelThrottleKey);
+                            isThrottled(apiLevelThrottleKey) || ServiceReferenceHolder.getInstance()
+                            .getThrottleDataHolder().
+                            isThrottled(apiLevelThrottleKey+"_default");
                 } else {
                     //If API level tier is not present only we should move to resource level tiers.
                     if (verbInfoDTO == null) {
