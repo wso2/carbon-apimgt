@@ -109,30 +109,40 @@ public class WebServiceBlockConditionsRetriever implements Runnable {
 
 
     public void loadBlockConditionsFromWebService() {
-        BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
-        List keyListMap = Arrays.asList(retrieveKeyTemplateData());
-        if (blockConditionsDTO != null) {
-            //TODO if possible try to get data as map since this can cause performance issue.
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getApi()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getApplication()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getUser()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getCustom()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().putAll(
-                    generateMap(blockConditionsDTO.getIp()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().putAll(
-                    generateMap(keyListMap));
+        new Thread(new Runnable() {
+            public void run() {
+                List keyListMap = Arrays.asList(retrieveKeyTemplateData());
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().clear();
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().putAll(
+                        generateMap(keyListMap));
+            }
+        }).start();
 
-        }
+        new Thread(new Runnable() {
+            public void run() {
+                BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
+                if (blockConditionsDTO != null) {
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().clear();
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
+                            .clear();
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().clear();
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().clear();
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap()
+                            .clear();
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
+                            generateMap(blockConditionsDTO.getApi()));
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
+                            .putAll(
+                            generateMap(blockConditionsDTO.getApplication()));
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().putAll(
+                            generateMap(blockConditionsDTO.getUser()));
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().putAll(
+                            generateMap(blockConditionsDTO.getCustom()));
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().putAll(
+                            generateMap(blockConditionsDTO.getIp()));
+                }
+            }
+        }).start();
     }
 
     public void startWebServiceBlockConditionDataRetriever() {
