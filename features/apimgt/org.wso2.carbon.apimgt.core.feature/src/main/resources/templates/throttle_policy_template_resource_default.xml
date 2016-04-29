@@ -10,20 +10,20 @@ str:concat(resourceKey, '_', userId , '_default')##
 #end
 ###generate rule
 #macro( getRule $policy)
-resource_${policy.getPolicyName()}_default##
+${policy.getTenantDomain()}_resource_${policy.getPolicyName()}_default##
 #end
 
 @Plan:name('#getRule($policy)')
 @Plan:description('ExecutionPlan for #getRule($policy)')
 
 @Import('org.wso2.throttle.processed.request.stream:1.0.0')
-define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, propertiesMap string);
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
 
 @Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
 FROM RequestStream
-SELECT messageID, ( resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey
+SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey
 INSERT INTO EligibilityStream;
 
 #if($quotaPolicy != "")

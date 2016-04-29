@@ -82,6 +82,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         
         policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
+        policy.setTenantDomain("carbon.super");
        // policy.setPolicyLevel("api");
        
         RequestCountLimit defaultLimit = new RequestCountLimit();
@@ -164,6 +165,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");    
         //policy.setPolicyLevel("api");
+        policy.setTenantDomain("carbon.super");
 
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
@@ -222,7 +224,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
        // policy.setUserLevel(PolicyConstants.ACROSS_ALL); 
         policy.setDescription("Description");    
        // policy.setPolicyLevel("app");
-       
+        policy.setTenantDomain("carbon.super");
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(5);

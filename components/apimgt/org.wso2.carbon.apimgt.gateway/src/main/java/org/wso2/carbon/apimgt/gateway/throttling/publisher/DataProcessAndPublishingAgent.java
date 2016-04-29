@@ -6,11 +6,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleDataDTO;
 import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,15 +40,17 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String subscriptionLevelThrottleKey;
     String subscriptionLevelTier;
     String resourceLevelThrottleKey;
-    String resourceLevelTier;
     String authorizedUser;
+    String resourceLevelTier;
+    String apiContext;
+    String apiVersion;
+    String appTenant;
+    String apiTenant;
+    String apiName;
+    String appId;
     private AuthenticationContext authenticationContext;
 
     public DataProcessAndPublishingAgent() {
-
-    }
-
-    public void processAndPublishEvent() {
 
     }
 
@@ -56,9 +62,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String apiLevelThrottleKey, String apiLevelTier,
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
-                                 String authorizedUser, MessageContext messageContext,
-                                 AuthenticationContext authenticationContext) {
-        if(StringUtils.isEmpty(resourceLevelTier) && apiLevelTier!=null){
+                                 String authorizedUser, String apiContext, String apiVersion, String appTenant,
+                                 String appId, MessageContext messageContext, AuthenticationContext authenticationContext){
+        if(resourceLevelTier==null && apiLevelTier!=null){
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
         }
@@ -73,10 +79,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.resourceLevelThrottleKey = resourceLevelThrottleKey;
         this.resourceLevelTier = resourceLevelTier;
         this.authorizedUser = authorizedUser;
-        this.authenticationContext = authenticationContext;
+        this.apiContext = apiContext;
+        this.apiVersion = apiVersion;
+        this.appTenant = appTenant;
+        this.apiTenant = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
+                (messageContext)); //TODO this may be efficient hence double check
+        this.appId = appId;
+        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
     }
 
-    @Override
     public void run() {
         //TODO implement logic to get message details from message context
         ThrottleDataDTO throttleDataDTO = new ThrottleDataDTO();
@@ -132,12 +144,11 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 this.apiLevelThrottleKey, this.apiLevelTier,
                 this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
                 this.resourceLevelThrottleKey, this.resourceLevelTier,
-                this.authorizedUser, propertiesMap};
+                this.authorizedUser, this.apiContext, this.apiVersion, this.appTenant, this.apiTenant, this.appId ,this.apiName ,propertiesMap};
 
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, objects);
         dataPublisher.tryPublish(event);
-
     }
 
 }

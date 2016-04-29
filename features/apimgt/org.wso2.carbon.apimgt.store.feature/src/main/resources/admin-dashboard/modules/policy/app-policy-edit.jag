@@ -46,6 +46,10 @@ var constructPolicyObject = function (userName, policyName, description, default
     var tenantId = APIUtil.getTenantId(userName);
     appPolicy.setTenantId(tenantId);
 
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+    appPolicy.setTenantDomain(tenantDomain);
+
     var default_quotaPolicy = new QuotaPolicy();
 
     if (defaultQuotaPolicy == "requestCount") {
