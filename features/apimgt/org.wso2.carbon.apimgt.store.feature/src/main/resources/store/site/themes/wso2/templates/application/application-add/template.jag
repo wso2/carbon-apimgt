@@ -10,9 +10,11 @@
  var mod = jagg.module("manager");
  var httpsUrl= mod.getHTTPsURL();
  var i=0, tiers = outputs.tiers;
+
  %>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
+ var urlPrefix = '<%=jagg.getTenantURLPrefix("&") %>';
  </script>
 
 <div class="page-header" id="Message">

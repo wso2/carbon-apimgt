@@ -30,11 +30,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.neethi.PolicyEngine;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.throttle.core.*;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -44,7 +46,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.*;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -56,11 +57,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * This class is Handling new throttling check. This class will use inside each API as throttle handler.
@@ -68,7 +67,7 @@ import java.util.regex.Pattern;
  * To execute this handler requests must go through authentication handler and auth context should be present
  * in message context.
  */
-public class ThrottleHandler extends AbstractHandler {
+public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(ThrottleHandler.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
@@ -107,6 +106,7 @@ public class ThrottleHandler extends AbstractHandler {
     private String sandboxMaxCount;
 
     private String maxCount;
+    private String productionMaxCount;
     private RoleBasedAccessRateController roleBasedAccessController;
 
     //Throttle Handler rename
@@ -143,13 +143,13 @@ public class ThrottleHandler extends AbstractHandler {
         //Throttle Keys
         String applicationLevelThrottleKey;
         String subscriptionLevelThrottleKey;
-        String resourceLevelThrottleKey="";
+        String resourceLevelThrottleKey = "";
         String apiLevelThrottleKey = "";
 
         //Throttle Tiers
         String applicationLevelTier;
         String subscriptionLevelTier;
-        String resourceLevelTier ="";
+        String resourceLevelTier = "";
         String apiLevelTier;
 
         //Other Relevant parameters
@@ -179,16 +179,16 @@ public class ThrottleHandler extends AbstractHandler {
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
             //if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
-                apiLevelThrottleKey = apiContext + ":" +apiVersion; //authContext.getApiTier();
-                //Check if request is blocked. If request is blocked then will not proceed further and
-                //inform to client.
-                //TODO handle blocked and throttled requests separately.
+            apiLevelThrottleKey = apiContext + ":" + apiVersion; //authContext.getApiTier();
+            //Check if request is blocked. If request is blocked then will not proceed further and
+            //inform to client.
+            //TODO handle blocked and throttled requests separately.
 
-                ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
-                appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+            ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
+            appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
             //}
             isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                   apiContext, appLevelBlockingKey, authorizedUser,ipLevelBlockingKey);
+                    apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
             if (isBlockedRequest) {
                 String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
                         " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
@@ -268,19 +268,23 @@ public class ThrottleHandler extends AbstractHandler {
 
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
-                                if(!validateCustomPolicy(authorizedUser,applicationLevelThrottleKey,
+                                if (!validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
                                         resourceLevelThrottleKey, apiLevelThrottleKey)) {
-                                    //Pass message context and continue to avaoid peformance issue.
+                                    //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
-                                    throttleDataPublisher.publishNonThrottledEvent(
-                                            applicationLevelThrottleKey, applicationLevelTier,
-                                            apiLevelThrottleKey, apiLevelTier,
-                                            subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                            resourceLevelThrottleKey, resourceLevelTier,
-                                            authorizedUser, synCtx);
-                                }
-                                else {
+                                    if (isHardLimitThrottled(synCtx)) {
+                                        isThrottled = true;
+
+                                    } else {
+                                        throttleDataPublisher.publishNonThrottledEvent(
+                                                applicationLevelThrottleKey, applicationLevelTier,
+                                                apiLevelThrottleKey, apiLevelTier,
+                                                subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                                resourceLevelThrottleKey, resourceLevelTier,
+                                                authorizedUser, synCtx);
+                                    }
+                                } else {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Request throttled at custom throttling");
                                     }
@@ -325,6 +329,7 @@ public class ThrottleHandler extends AbstractHandler {
                             APIThrottleConstants.API_LIMIT_EXCEEDED);
                 }
             }
+
         }
 
         //if we need to publish throttled level or some other information we can do it here. Just before return.
@@ -375,14 +380,13 @@ public class ThrottleHandler extends AbstractHandler {
             initThrottleForSubscriptionLevelSpikeArrest(messageContext);
         }
         boolean isThrottled = false;
+
         if (!messageContext.isResponse()) {
             //org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
             //      getAxis2MessageContext();
             //ConfigurationContext cc = axis2MC.getConfigurationContext();
             long start = System.nanoTime();
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
-            log.info("===============================================Time:" + (System.nanoTime() - start));
-
         }
         if (isThrottled) {
 
@@ -583,40 +587,81 @@ public class ThrottleHandler extends AbstractHandler {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
-        String unitTime = "30000";
-        String maxRequestCount = "5";
-        try {
-            synchronized (this) {
-                if (throttle == null) {
-                    OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
-                            subscriptionLevelThrottleKey, maxRequestCount, unitTime);
-                    if (spikeArrestSubscriptionLevelPolicy != null) {
-                        throttle = ThrottleFactory.createMediatorThrottle(
-                                PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
-                    }
-                } else {
-                    if (throttle.getThrottleContext(subscriptionLevelThrottleKey) == null) {
-                        OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
-                                subscriptionLevelThrottleKey, maxRequestCount, unitTime);
-                        if (spikeArrestSubscriptionLevelPolicy != null) {
-                            Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
-                                    PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
-                            ThrottleConfiguration newThrottleConfig = tempThrottle.
-                                    getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
-                            ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
-                                    createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
-                            throttle.addThrottleContext(subscriptionLevelThrottleKey, subscriptionLevelSpikeThrottle);
+        String unitTime = null;
+        String maxRequestCount = null;
+        List<String> throttlingDataList = authContext.getThrottlingDataList();
+        if (throttlingDataList != null && throttlingDataList.size() > 0) {
+            unitTime = throttlingDataList.get(2);
+            if (unitTime.equalsIgnoreCase("min")) {
+                unitTime = "60000";
+            } else {
+                unitTime = "1000";
+            }
+            maxRequestCount = throttlingDataList.get(1);
+            if (unitTime != null && unitTime.length() > 0 && maxRequestCount != null && maxRequestCount.length() > 0) {
+                try {
+                    synchronized (this) {
+                        if (throttle == null) {
+                            OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
+                                    subscriptionLevelThrottleKey, maxRequestCount, unitTime);
+                            if (spikeArrestSubscriptionLevelPolicy != null) {
+                                throttle = ThrottleFactory.createMediatorThrottle(
+                                        PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
+                            }
+                        } else {
+                            if (throttle.getThrottleContext(subscriptionLevelThrottleKey) == null) {
+                                OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
+                                        subscriptionLevelThrottleKey, maxRequestCount, unitTime);
+                                if (spikeArrestSubscriptionLevelPolicy != null) {
+                                    Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
+                                            PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
+                                    ThrottleConfiguration newThrottleConfig = tempThrottle.
+                                            getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                                    ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
+                                            createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
+                                    throttle.addThrottleContext(subscriptionLevelThrottleKey, subscriptionLevelSpikeThrottle);
+                                }
+                            }
                         }
                     }
-
-
+                } catch (ThrottleException e) {
+                    log.error("Error while initializing throttling object for subscription level spike arrest policy" +
+                            e.getMessage());
                 }
             }
-        } catch (ThrottleException e) {
-            log.error("Error while initializing throttling object for subscription level spike arrest policy"
-                    +e.getMessage());
+
         }
 
+    }
+
+    /**
+     * This method will intialize subscription level throttling context and throttle object.
+     * This method need to be called for each and every request of spike arrest is enabled.
+     * If throttle context for incoming message is already created method will do nothing. Else
+     * it will create throttle object and context.
+     */
+    private void initThrottleForHardLimitThrottling() {
+        OMElement hardThrottlingPolicy = createHardThrottlingPolicy();
+        if (hardThrottlingPolicy != null) {
+            Throttle tempThrottle;
+            try {
+                tempThrottle = ThrottleFactory.createMediatorThrottle(
+                        PolicyEngine.getPolicy(hardThrottlingPolicy));
+                ThrottleConfiguration newThrottleConfig = tempThrottle.getThrottleConfiguration(ThrottleConstants
+                        .ROLE_BASED_THROTTLE_KEY);
+                ThrottleContext hardThrottling = ThrottleContextFactory.createThrottleContext(ThrottleConstants
+                                .ROLE_BASE,
+                        newThrottleConfig);
+                tempThrottle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
+                if (throttle != null) {
+                    throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
+                } else {
+                    throttle = tempThrottle;
+                }
+            } catch (ThrottleException e) {
+                log.error("Error occurred while creating policy file for Hard Throttling.", e);
+            }
+        }
     }
 
     /**
@@ -643,10 +688,10 @@ public class ThrottleHandler extends AbstractHandler {
                 resourceLevelSpikeArrestThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 info = roleBasedAccessController.canAccess(resourceLevelSpikeArrestThrottleContext, throttleKey,
                         throttleKey);
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getLocalCounter());
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getGlobalCounter());
-                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getRoleId());
-                System.out.println(info.isAccessAllowed() + "     " + info.getFaultReason());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getLocalCounter());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getGlobalCounter());
+//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getRoleId());
+//                System.out.println(info.isAccessAllowed() + "     " + info.getFaultReason());
                 if (log.isDebugEnabled()) {
                     log.debug("Throttle by hard limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
@@ -655,7 +700,7 @@ public class ThrottleHandler extends AbstractHandler {
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
                     log.info("Hard Throttling limit exceeded.");
-                    return false;
+                    return true;
                 }
             }
 
@@ -665,31 +710,175 @@ public class ThrottleHandler extends AbstractHandler {
             synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return false;
         }
-        return true;
+        return false;
     }
 
     /**
      * Validate custom policy is handle by this method. This method call is an expensive operation
      * and should not enabled by default. If we enabled this policy then all APIs available in system
      * will have to go through this check.
+     *
      * @param messageContext
      * @return
      */
-    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey,String apiKey ){
+    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey) {
         Map<String, String> keyTemplateMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                 getKeyTemplateMap();
-        if(keyTemplateMap != null && keyTemplateMap.size() >0){
-            for(String key : keyTemplateMap.keySet()){
-                key.replaceAll("$appKey", appKey);
-                key.replaceAll("$resourceKey", resourceKey);
-                key.replaceAll("$userId", userID);
-                key.replaceAll("$apiKey", apiKey);
-                if(ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                        getThrottleDataMap().containsKey(key)){
-                    return false;
+        if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
+            for (String key : keyTemplateMap.keySet()) {
+                key = key.replaceAll("\\$appKey", appKey);
+                key = key.replaceAll("\\$resourceKey", resourceKey);
+                key = key.replaceAll("\\$userId", userID);
+                key = key.replaceAll("\\$apiKey", apiKey);
+                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                        getThrottleDataMap().containsKey(key)) {
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    private OMElement createHardThrottlingPolicy() {
+
+        if (productionMaxCount == null &&
+                sandboxMaxCount == null) {
+            return null;
+        }
+
+        OMElement parsedPolicy = null;
+
+        StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
+                ".org/ws/2004/09/policy\" " +
+                "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
+                "    <throttle:MediatorThrottleAssertion>\n");
+
+        if (productionMaxCount != null && productionUnitTime != null) {
+            policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT, productionUnitTime,
+                    productionMaxCount));
+        }
+
+        if (sandboxMaxCount != null && sandboxUnitTime != null) {
+            policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT, sandboxUnitTime,
+                    sandboxMaxCount));
+        }
+
+        policy.append("    </throttle:MediatorThrottleAssertion>\n" +
+                "</wsp:Policy>");
+        try {
+            parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
+        } catch (XMLStreamException e) {
+            log.error("Error occurred while creating policy file for Hard Throttling.", e);
+        }
+        return parsedPolicy;
+    }
+
+    private String createPolicyForRole(String roleId, String unitTime, String maxCount) {
+        return "<wsp:Policy>\n" +
+                "     <throttle:ID throttle:type=\"ROLE\">" + roleId + "</throttle:ID>\n" +
+                "            <wsp:Policy>\n" +
+                "                <throttle:Control>\n" +
+                "                    <wsp:Policy>\n" +
+                "                        <throttle:MaximumCount>" + maxCount + "</throttle:MaximumCount>\n" +
+                "                        <throttle:UnitTime>" + unitTime + "</throttle:UnitTime>\n" +
+                "                    </wsp:Policy>\n" +
+                "                </throttle:Control>\n" +
+                "            </wsp:Policy>\n" +
+                " </wsp:Policy>\n";
+    }
+
+    private boolean isHardLimitThrottled(MessageContext synCtx) {
+        boolean status = false;
+        if (StringUtils.isNotEmpty(sandboxMaxCount) || StringUtils.isNotEmpty(productionMaxCount)) {
+            ThrottleContext hardThrottleContext = throttle.getThrottleContext(
+                    APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
+            try {
+                String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+                String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
+                        getAxis2MessageContext();
+                ConfigurationContext cc = axis2MC.getConfigurationContext();
+                apiContext = apiContext != null ? apiContext : "";
+                apiVersion = apiVersion != null ? apiVersion : "";
+                AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+
+                if (hardThrottleContext != null && authContext.getKeyType() != null) {
+                    String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();
+                    AccessInformation info = null;
+                    if (GatewayUtils.isClusteringEnabled()) {
+                        hardThrottleContext.setConfigurationContext(cc);
+                    }
+
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
+                        hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
+                        info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                APIThrottleConstants.PRODUCTION_HARD_LIMIT);
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                        hardThrottleContext.setThrottleId(id + APIThrottleConstants.SANDBOX_HARD_LIMIT);
+                        info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                APIThrottleConstants.SANDBOX_HARD_LIMIT);
+                    }
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Throttle by hard limit " + throttleKey);
+                        log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
+                    }
+
+                    if (info != null && !info.isAccessAllowed()) {
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants
+                                .HARD_LIMIT_EXCEEDED);
+                        log.info("Hard Throttling limit exceeded.");
+                        status = true;
+                    }
+                }
+
+            } catch (ThrottleException e) {
+                log.warn("Exception occurred while performing role " +
+                        "based throttling", e);
+                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+                status = true;
+            }
+        }
+        return status;
+    }
+
+    public String getSandboxMaxCount() {
+        return sandboxMaxCount;
+    }
+
+    public void setSandboxMaxCount(String sandboxMaxCount) {
+        this.sandboxMaxCount = sandboxMaxCount;
+    }
+
+    public String getProductionMaxCount() {
+        return productionMaxCount;
+    }
+
+    public void setProductionMaxCount(String productionMaxCount) {
+        this.productionMaxCount = productionMaxCount;
+    }
+
+    public String getSandboxUnitTime() {
+        return sandboxUnitTime;
+    }
+
+    public void setSandboxUnitTime(String sandboxUnitTime) {
+        this.sandboxUnitTime = sandboxUnitTime;
+    }
+
+    public String getProductionUnitTime() {
+        return productionUnitTime;
+    }
+
+    public void setProductionUnitTime(String productionUnitTime) {
+        this.productionUnitTime = productionUnitTime;
+    }
+
+    public void init(SynapseEnvironment synapseEnvironment) {
+        initThrottleForHardLimitThrottling();
+    }
+
+    public void destroy() {
+
     }
 }

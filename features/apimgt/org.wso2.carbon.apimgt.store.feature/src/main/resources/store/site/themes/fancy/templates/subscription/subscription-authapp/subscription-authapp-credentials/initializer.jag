@@ -1,8 +1,0 @@
-<%
-jagg.initializer("subscription/subscription-authapp/subscription-authapp-credentials", {
-
-    preInitialize:function () {
-
-    }
-});
-%>

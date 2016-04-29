@@ -93,7 +93,7 @@
     "configName":"Configuration Name",
     "description":"Description",
     "addConfiguration":"Add Configuration",
-    "editConfigurations":"Edit Configurations",
+    "editConfigurations":"Edit Configuration",
     "domainTableColumnName":"Configuration Name",
     "domainTableColumnDescription":"Description",
     "templateType":"Template Type",
@@ -108,6 +108,7 @@
     "templateStatus":"Status",
     "templateStatusActive":"Active",
     "templateStatusInactive":"Inactive",
+    "saveConfiguration":"Save Configuration",
     
     "abnormalBackendTime_Desc": "This alert type should get triggered if there is a sudden increase of the backend time corresponds to a particular API resource. These alerts could be treated as an indication of a slow backend.In technical terms, if the backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a tenant, lies outside the Xth percentile value, we will send an alert out. Default percentile value is 95%. Here, we safely assume that the corresponding backend time of an API resource follows a normal distribution. Percentile value gets calculated daily by default. ",
 
@@ -156,8 +157,14 @@
     "apiResTierList": "API Resource Tier List",
     "tierName": "Tier Name",
     "tierDesc": "Tier Description",
-    "keyTemplate": "keys should be separated by colon.  <B>eg:-</B> api:version:provide:qp_name:qp_age  <br> <b>Allowed keys</b><br>",
     "endpointTiers": "Endpoint Tiers",
     "endpointTierList": "Endpoint Tier List",
-    "addEndpointTier": "Add Endpoint Tier"
+    "addEndpointTier": "Add Endpoint Tier",
+    "keyTemplateToolTip": "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $api:$version:$provide <br> <b>Allowed keys</b><br>",
+    "sampleSiddhiQuery": "Following query will allow 5 request per minute for Admin user <br>Key Template : <b>$userId</b><br>Siddhi Query : <code><p>FROM RequestStream<br>SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey<br>  INSERT INTO EligibilityStream; <br><br>FROM EligibilityStream[isEligible==true]#window.time(1 min) <br> SELECT throttleKey, (count(userId) >= 5) as isThrottled group by throttleKey <br> INSERT ALL EVENTS into ResultStream;</p></code>",
+    "invalidSiddhiQueryMessage": "Siddhi Query Contains Invalid Characters",
+    "InvalidKeyTemplateMessage": "Invalid Key Template",
+    "keyTemplateAlreadyExist": "Key Template Already Exist. Add a new Key Template",
+    "invalidExecutionPlan": "Siddhi Query deployment failed due to Siddhi syntax errors",
+    "globalPolicyErrorMessage": "Error occurred while saving policy (Cause:"
 }

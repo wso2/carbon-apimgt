@@ -148,13 +148,13 @@
 							    <% } %>><a class="substats" title="<%=i18n.localize("apiLatencyTime")%>"
 							    href="<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>" 
 							    onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-stack-chart" title="<%=i18n.localize("apiLatencyTime")%>"></i>
+								<i class="icon fw fw-statistics" title="<%=i18n.localize("apiLatencyTime")%>"></i>
 							    <%=i18n.localize("apiLatencyTime")%></a></li>
                              <li <% if(page == "api-geolocation-usage"){ %>
                               class="active" <% } %>><a class="substats" title="<%=i18n.localize("apiGeoLocationUsage")%>"
                               href="<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>" 
                               onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="icon fw fw-map-chart" title="<%=i18n.localize("apiGeoLocationUsage")%>"></i>
+                              <i class="icon fw fw-globe" title="<%=i18n.localize("apiGeoLocationUsage")%>"></i>
                               <%=i18n.localize("apiGeoLocationUsage")%></a></li>
                              <li <% if(page == "api-user-agent-usage"){ %>
                               class="active" <% } %>><a class="substats" "<%=i18n.localize("apiUserAgentUsage")%>"

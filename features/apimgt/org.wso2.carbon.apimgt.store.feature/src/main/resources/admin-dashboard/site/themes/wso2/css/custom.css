@@ -1,37 +1,37 @@
 .api-wrapper {
-	background-color: #EFEFEF;
-	position: relative;
+    background-color: #EFEFEF;
+    position: relative;
 }
 
 .apim-form {
-	max-width: 100% !important;
+    max-width: 100% !important;
 }
 
 div.image-container {
-	width: auto;
-	height: 100%;
-	overflow: hidden;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
 }
 
 .app-data h5, .launch-app-data h5 {
-	margin-top: 0px;
+    margin-top: 0px;
 }
 
 .app-data h4 {
-	margin-bottom: 0px;
+    margin-bottom: 0px;
 }
 
 .launch-app-data h4 {
-	margin-top: 0px;
+    margin-top: 0px;
 }
 
 .api-name-icon {
-	color: #fff;
-	width: 100%;
-	font-size: 8em;
-	text-align: center;
-	font-weight: 200;
-	text-transform: capitalize;
+    color: #fff;
+    width: 100%;
+    font-size: 8em;
+    text-align: center;
+    font-weight: 200;
+    text-transform: capitalize;
 }
 .body-wrapper a:hover {
     text-decoration: none;
@@ -78,11 +78,11 @@ div.image-container {
 
 
 .tab-content {
-	border-width: 0px 1px 1px 1px;
-	border-style: solid;
-	border-color: #ddd;
-	padding: 20px;
-	min-height: 300px
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #ddd;
+    padding: 20px;
+    min-height: 300px
 }
 
 .center-wrapper{
@@ -586,9 +586,12 @@ div.image-container {
 }
 
 body.login-bg {
-	background-color : #efefef
+    background-color : #efefef
 }
 
+.popover {
+    word-wrap: break-word;
+}
 
 
 
@@ -614,7 +617,7 @@ body.login-bg {
 }
 #accordion1 .wr-hidden-operation .panel-heading .panel-title label, #accordion2 .wr-hidden-operation .panel-heading .panel-title label,
 #accordion1 .wr-hidden-operation .panel-heading .panel-title .panel-title-description, #accordion2 .wr-hidden-operation .panel-heading .panel-title .panel-title-description{
-    font-weight:normal;
+    font-weight:200;
     color:#999;
 }
 
@@ -706,7 +709,6 @@ body.login-bg {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-    background: #ffffff;
 }
 
 .wr-hidden-operations-content::-webkit-scrollbar {
@@ -726,7 +728,7 @@ body.login-bg {
 }
 
 #accordion1 .wr-hidden-operations-content .panel-body,#accordion2 .wr-hidden-operations-content .panel-body {
-    margin: 20px;
+    margin: 0px;
     background: #ffffff;
 }
 
@@ -740,7 +742,7 @@ body.login-bg {
 
 .wr-hidden-operations-content .panel-title {
     /*border: 1px solid #e8e8e8;*/
-    padding: 20px;
+    padding: 20px 0px;
     background: #ffffff;
     color: #555;
 }
@@ -801,4 +803,8 @@ body.login-bg {
 
 #pipeline-content .panel-group{
     margin-bottom:0px;
+}
+
+table.table-bordered th:last-child, table.table-bordered td:last-child {
+    border-right-width: 1px;
 }

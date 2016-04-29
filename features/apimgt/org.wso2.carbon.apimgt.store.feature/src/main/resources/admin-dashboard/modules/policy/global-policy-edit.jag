@@ -1,5 +1,8 @@
 <%
 var log = new Log();
+var i18n = require("i18n");
+var localeResourcesBasePath = "/site/conf/locales/jaggery/";
+i18n.init(request, localeResourcesBasePath);
 
 var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, keyTemplate) {
     try {
@@ -19,8 +22,15 @@ var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, k
             error: false
         };
     }catch (ex) {
-        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
+        var errorMessage = i18n.localize("globalPolicyErrorMessage")+ ex.message + ")";
         log.error(errorMessage);
+
+        if(errorMessage.indexOf("Invalid Execution Plan") > -1){
+            errorMessage = i18n.localize("invalidExecutionPlan")
+        }else if(errorMessage.indexOf("Key Template Already Exis") > -1){
+            errorMessage = i18n.localize("keyTemplateAlreadyExist");
+        }
+
         return {
             error: true,
             message: errorMessage

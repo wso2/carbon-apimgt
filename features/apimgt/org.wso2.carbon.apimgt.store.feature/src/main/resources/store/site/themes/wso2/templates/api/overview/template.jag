@@ -70,13 +70,13 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>        
     <p>
-        <a title="<%=i18n.localize("wsdl")%>" href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl)%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
+        <a title="<%=i18n.localize("wsdl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl))%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
         <h4><%=i18n.localize("wadl")%>:</h4>
     <p>
-        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl)%>" target="_blank"><%=api.wadl%></a>
+        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=api.wadl%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>

@@ -169,6 +169,7 @@
 	                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
 	                            <span class="helper"></span>
 	                    </label>
+	                    <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
 	                   <div class="controls col-sm-8" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
                             <select id="apiTier" name="apiTier"  class="form-control selected required">
                             <%
