@@ -1,9 +1,9 @@
 var currentLocation;
-//var statsEnabled = isDataPublishingEnabled();
-
+var apiFilter = "allAPIs";
+var subscribedApi = "All";
 //setting default date
-var to = new Date();
-var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+var fromDate;
+var toDate;
 
 currentLocation = window.location.pathname;
 
@@ -15,22 +15,30 @@ $(document).ready(function(){
 
         //day picker
         $('#today-btn').on('click',function(){
-            getDateTime(currentDay,currentDay-86400000);
+            fromDate = convertTimeString(currentDay);
+            toDate = convertTimeString(currentDay-86400000);
+            drawSubscriptionTime();
         });
 
         //hour picker
         $('#hour-btn').on('click',function(){
-            getDateTime(currentDay,currentDay-3600000);
+            fromDate = convertTimeString(currentDay);
+            toDate = convertTimeString(currentDay-3600000);
+            drawSubscriptionTime();
         })
 
         //week picker
         $('#week-btn').on('click',function(){
-            getDateTime(currentDay,currentDay-604800000);
+            fromDate = convertTimeString(currentDay);
+            toDate = convertTimeString(currentDay-604800000);
+            drawSubscriptionTime();
         })
 
         //month picker
         $('#month-btn').on('click',function(){
-            getDateTime(currentDay,currentDay-(604800000*4));
+            fromDate = convertTimeString(currentDay);
+            toDate = convertTimeString(currentDay-(604800000*4));
+            drawSubscriptionTime();
         });
 
         $('#date-range').click(function(){
@@ -42,8 +50,13 @@ $(document).ready(function(){
               timePicker: true,
               timePickerIncrement: 30,
               format: 'YYYY-MM-DD h:mm',
+              startDate: moment().subtract(1, 'month'),
+              endDate: moment().add(1, 'day').format('YYYY-MM-DD  h:mm'),
               opens: 'left',
         });
+
+        fromDate = $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+        toDate = $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD');
 
         $('#date-range').on('apply.daterangepicker', function(ev, picker) {
            btnActiveToggle(this);
@@ -53,14 +66,10 @@ $(document).ready(function(){
            var toStr = to.split(" ");
            var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
            $("#date-range span").html(dateStr);
-           drawSubscriptionTime(from,to);
+           drawSubscriptionTime();
         });
 
-        //setting default date
-        var to = new Date();
-        var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
-
-        getDateTime(to,from);
+        drawSubscriptionTime();
 
         $('#date-range').click(function (event) {
         event.stopPropagation();
@@ -70,12 +79,21 @@ $(document).ready(function(){
             $(this).addClass('active');
             $(this).siblings().removeClass('active');
         });
+
+        $("#apiFilter").change(function (e) {
+            apiFilter = this.value;
+            drawSubscriptionTime();
+        });
 });
 
-var drawSubscriptionTime = function (from, to) {
-    var fromDate = from;
-    var toDate = to;
-    jagg.post("/site/blocks/stats/subscriptions-time/ajax/stats.jag", { currentLocation: currentLocation, fromDate: fromDate, toDate: toDate },
+var drawSubscriptionTime = function () {
+    jagg.post("/site/blocks/stats/subscriptions-time/ajax/stats.jag",
+        {
+            currentLocation: currentLocation,
+            apiFilter: apiFilter,
+            fromDate: fromDate,
+            toDate: toDate
+        },
 
         function (json) {
             $('#spinner').hide();
@@ -261,22 +279,6 @@ var drawSubscriptionTime = function (from, to) {
         }, "json");
 }
 
-//function isDataPublishingEnabled(){
-//    jagg.post("/site/blocks/stats/subscriptions-time/ajax/stats.jag",
-//        function (json) {
-//            if (!json.error) {
-//                statsEnabled = json;
-//                return statsEnabled;
-//            } else {
-//                if (json.message == "AuthenticateError") {
-//                    jagg.showLogin();
-//                } else {
-//                    jagg.message({content: json.message, type: "error"});
-//                }
-//            }
-//        }, "json");
-//}
-
 var convertTimeString = function(date){
     var d = new Date(date);
     var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
@@ -301,15 +303,4 @@ function btnActiveToggle(button){
     $(button).addClass('active');
 }
 
-function getDateTime(currentDay,fromDay){
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
-    var toDate = to.split(" ");
-    var fromDate = from.split(" ");
-    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range span").html(dateStr);
-    $('#date-range').data('daterangepicker').setStartDate(from);
-    $('#date-range').data('daterangepicker').setEndDate(to);
-    drawSubscriptionTime(from,to);
-}
 

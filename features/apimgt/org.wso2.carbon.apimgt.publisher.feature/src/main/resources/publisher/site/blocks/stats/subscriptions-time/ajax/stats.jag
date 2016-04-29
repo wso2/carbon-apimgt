@@ -15,13 +15,13 @@ include("/jagg/jagg.jag");
         });
     } else {
             mod = jagg.module("statistics");
+            var apiName = request.getParameter("subscribedApi");
             var provider = jagg.getUser().username;
-            var currentLocation = request.getParameter("currentLocation");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
             var apiFilter = request.getParameter("apiFilter");
-            
-            result = mod.getAPISubscriptionsPerApp(provider, from, to);
+            var limit = 50;
+            result = mod.getAPISubscriptionsPerApp(apiName, provider, apiFilter, from, to, limit);
             
             if (result.error == "true") {
                 obj = {

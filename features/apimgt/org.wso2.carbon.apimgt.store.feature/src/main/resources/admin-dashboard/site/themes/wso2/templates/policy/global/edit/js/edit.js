@@ -29,11 +29,10 @@ function validateInputs(){
     var illegalChars = $('#errorMessageIllegalChar').val();
     var policyName = $('#policyName');
     var policyNameTxt = policyName.val();
-
-    keyTemplateValidated = $('#keyTemplateValidated').val();
-    if(keyTemplateValidated === 'false'){
-        return false;
-    }
+    var keyTemplate = $('#keyTemplate');
+    var keyTemplateTxt = keyTemplate.val();
+    var keyTemplate = $('#keyTemplate');
+    var keyTemplateTxt = keyTemplate.val();
 
     if(!validateInput(policyNameTxt,policyName,requiredMsg)){
         return false;
@@ -42,6 +41,16 @@ function validateInputs(){
     if(!validateInputCharactors(policyNameTxt,policyName,illegalChars)){
         return false;
     }
+
+    if(!validateInput(keyTemplateTxt,keyTemplate,requiredMsg)){
+        return false;
+    }
+
+    formValidated = $('#formValidated').val();
+    if(formValidated === 'false'){
+        return false;
+    }
+
     return true;
 };
 

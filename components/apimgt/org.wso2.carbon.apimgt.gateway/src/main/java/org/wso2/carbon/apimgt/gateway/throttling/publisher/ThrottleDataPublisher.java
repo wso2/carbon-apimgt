@@ -22,6 +22,9 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -32,6 +35,9 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationExcep
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.*;
 
 /**
@@ -104,44 +110,8 @@ public class ThrottleDataPublisher {
             String apiLevelThrottleKey, String apiLevelTier,
             String subscriptionLevelThrottleKey, String subscriptionLevelTier,
             String resourceLevelThrottleKey, String resourceLevelTier,
-            String authorizedUser, String apiContext, String apiVersion, String appTenant,
-            String appId, MessageContext messageContext) {
-        //DataProcessAndPublishingAgent agent = null;
-        //long start = System.currentTimeMillis();
-        //String remoteIP = "127.0.0.1";
-        //(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
-        //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-        //if (remoteIP != null && !remoteIP.isEmpty()) {
-        //    if (remoteIP.indexOf(",") > 0) {
-        //        remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
-        //    }
-        //} else {
-        //    remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        // }
-
-        //todo Added some dummy parameters
-        //Map propertiesMap = new HashMap<String, String>();
-        //propertiesMap.put("remoteIp", remoteIP);
-        //propertiesMap.put("roleID", subscriptionLevelTier);
-
-        //this parameter will be used to capture message size and pass it to calculation logic
-                        /*int messageSizeInBytes = 0;
-                        //getThrottleData.isContentAwareTierPresent
-                        if (authContext.isContentAwareTierPresent()) {
-                            //this request can match with with bandwidth policy. So we need to get message size.
-                            httpVerb = verbInfoDTO.getHttpVerb();
-                            Object obj = ((TreeMap) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                                    getProperty("TRANSPORT_HEADERS")).get("Content-Length");
-                            if (obj != null) {
-                                messageSizeInBytes = Integer.parseInt(obj.toString());
-                            }
-
-                        }*/
-
-                        /*Object[] objects = new Object[]{synCtx.getMessageID(), applicationLevelThrottleKey,
-                                subscriptionLevelThrottleKey, applicationLevelTier, subscriptionLevelTier,
-                                authorizedUser, propertiesMap};
-                        *///After publishing events return true
+            String authorizedUser, MessageContext messageContext,
+            AuthenticationContext authenticationContext) {
         //log.info("##########################################Publishing event");
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
@@ -149,7 +119,7 @@ public class ThrottleDataPublisher {
                      apiLevelThrottleKey,  apiLevelTier,
                      subscriptionLevelThrottleKey,  subscriptionLevelTier,
                      resourceLevelThrottleKey,  resourceLevelTier,
-                     authorizedUser,  apiContext, apiVersion, appTenant, appId, messageContext);
+                     authorizedUser,  apiContext, apiVersion, appTenant, appId, messageContext, authenticationContext);
             executor.execute(agent);
             //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
 

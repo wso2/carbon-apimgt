@@ -272,7 +272,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                 apiLevelThrottleKey, apiLevelTier,
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                 resourceLevelThrottleKey, resourceLevelTier,
-                                                authorizedUser, apiContext, apiVersion, subscriberTenantDomain, applicationId, synCtx);
+                                                authorizedUser, apiContext, apiVersion, subscriberTenantDomain, applicationId, synCtx, authContext);
                                     }
                                 } else {
                                     if (log.isDebugEnabled()) {
@@ -377,8 +377,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //ConfigurationContext cc = axis2MC.getConfigurationContext();
             long start = System.nanoTime();
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
-            log.info("===============================================Time:" + (System.nanoTime() - start));
-
         }
         if (isThrottled) {
 

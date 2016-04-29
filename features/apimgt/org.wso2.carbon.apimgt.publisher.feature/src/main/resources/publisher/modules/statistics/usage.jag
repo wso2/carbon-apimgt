@@ -769,10 +769,10 @@ function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,dri
 }
 
 //Adding new graps from the analytics app
-function getDeveloperSignUpsOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit) {
+function getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
-        usage = usageClient.getDeveloperSignUpsOverTime(null, version, tenantDomain, null, null, null, null, 0);
+        usage = usageClient.getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -798,10 +798,10 @@ function getDeveloperSignUpsOverTime(apiName, version, tenantDomain, fromDate, t
     }
 }
 
-function getApplicationRegistrationOverTime(apiName, version, tenantDomain, fromDate, toDate, drillDown, provider, limit, developer) {
+function getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
-        usage = usageClient.getApplicationRegistrationOverTime(null, version, tenantDomain, null, null, null, null, 0, null);
+        usage = usageClient.getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -827,10 +827,10 @@ function getApplicationRegistrationOverTime(apiName, version, tenantDomain, from
     }
 }
 
-function getAPISubscriptionsPerApp(apiName, version,tenantDomain, fromDate, toDate, drillDown, limit, provider) {
+function getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
-        usage = usageClient.getAPISubscriptionsPerApp(null, version,tenantDomain, null, null, null, 0, null);
+        usage = usageClient.getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -856,12 +856,10 @@ function getAPISubscriptionsPerApp(apiName, version,tenantDomain, fromDate, toDa
     }
 }
 
-
-
-function getDeveloperList(apiName, provider, fromDate, toDate, tenantDomain, limit) {
+function getDeveloperList(provider, limit) {
     var usage;
     try {
-        usage = usageClient.getDeveloperList(apiName, provider, tenantDomain, fromDate, toDate, limit);
+        usage = usageClient.getDeveloperList(provider, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -887,10 +885,10 @@ function getDeveloperList(apiName, provider, fromDate, toDate, tenantDomain, lim
     }
 }
 
-function getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit) {
+function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
-        usage = usageClient.getApisByTime(apiName, version, provider, developer, tenantDomain, fromDate, toDate, limit);
+        usage = usageClient.getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }
@@ -916,39 +914,10 @@ function getApisByTime(apiName, version, provider, developer, tenantDomain, from
     }
 }
 
-function getApplicationList(apiName, version, user, groupId, withSubscriptions, provider, from, to, tenantDomain, fromDate, toDate, limit) {
+function getApisList(provider, apiFilter, limit) {
     var usage;
     try {
-        usage = usageClient.getApplicationList(apiName, version, user, groupId, withSubscriptions, provider, from, to, tenantDomain, fromDate, toDate, limit);
-        if (log.isDebugEnabled()) {
-            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
-        }
-        if (usage == null) {
-            return {
-                error:true
-            };
-
-        } else {
-            usage = JSON.parse(gson.toJson(usage));
-            return {
-                error:false,
-                usage:usage
-            };
-        }
-    } catch (e) {
-        log.error(e.message);
-        return {
-            error:e,
-            usage:null
-
-        };
-    }
-}
-
-function getApisList(user, provider, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit) {
-    var usage;
-    try {
-        usage = usageClient.getApisList(user, provider, appName, groupId, withSubscriptions, tenantDomain, fromDate, toDate, limit);
+        usage = usageClient.getApisList(provider, apiFilter, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }

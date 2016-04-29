@@ -213,7 +213,7 @@ public class APIMgtDAOTest extends TestCase {
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
         API api = new API(apiIdentifier);
-        apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED");
+        apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED", "admin");
     }
 
 	/*

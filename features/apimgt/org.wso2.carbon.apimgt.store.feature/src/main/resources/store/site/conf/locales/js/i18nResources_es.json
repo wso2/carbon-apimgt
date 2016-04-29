@@ -3,7 +3,7 @@
         "appSelect": "Selecciona por favor una aplicaci�n antes de suscribirse",
         "wait": "Espera por favor..." ,
         "subscription": "Suscripci�n realizada con exito" ,
-        "subscriptionSuccess": "�Felicitaciones! Te has suscrito con exito a la API. Vaya por favor a la p�gina 'Mis suscripciones' para revisar su suscripci�n y generar los Access Key.",
+        "subscriptionSuccess": "�Felicitaciones! Te has suscrito con exito a la API.",
         "subscriptionPending": "Congratulations! Your subscription request has been submitted and is now awaiting approval.",
         "gotoSubsPage": "Ir a Mis Suscripciones",
         "stayPage": "Permanecer en esta p�gina",
