@@ -24,7 +24,16 @@ $( document ).ready(function() {
             $('.content-data').empty();
             $('.content-data').append('<h2> Stats are disabled.</h2>');
          } 
-    })
+    });
+
+    $('#alertHistoryTable_filter input').unbind();
+    $('#alertHistoryTable_filter input').bind('keyup', function(e) {
+        if(e.keyCode == 13) {
+            table.search( this.value ).draw();
+        }
+    });
+
+
     
 
     function changeActiveTableName() {
