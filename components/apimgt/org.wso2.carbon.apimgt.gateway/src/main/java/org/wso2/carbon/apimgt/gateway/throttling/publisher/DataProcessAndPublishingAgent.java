@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,11 +10,13 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleDataDTO;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.xsd.Set;
 
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
@@ -77,13 +80,17 @@ public class DataProcessAndPublishingAgent implements Runnable {
     @Override
     public void run() {
         //TODO implement logic to get message details from message context
+        ThrottleDataDTO throttleDataDTO = new ThrottleDataDTO();
+
         String propertiesMap = "{\n" +
                 "  \"name\": \"org.wso2.throttle.request.stream\",\n" +
                 "  \"version\": \"1.0.0\"}";
+        String remoteIP = null;
+        Object object = messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if(object!=null){
+             remoteIP= (String) ((TreeMap) object).get(APIMgtGatewayConstants.X_FORWARDED_FOR) ;
+        }
 
-        String remoteIP = (String) ((TreeMap) messageContext.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).
-                get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null && !remoteIP.isEmpty()) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
@@ -92,9 +99,24 @@ public class DataProcessAndPublishingAgent implements Runnable {
             remoteIP = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
+        if(remoteIP !=null && remoteIP.length()>0) {
+            throttleDataDTO.setClientIP(remoteIP);
+        }
+        /**java.util.Set<String> transportHeaderMap = ((TreeMap) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).keySet();
+        for(Object key: transportHeaderMap){
+            throttleDataDTO.getTransportHeaders().put(key, )
+            
+        }**/
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
         //todo Added some parameters
-        //Map propertiesMap = new HashMap<String, String>();
-        //propertiesMap.put("remoteIp", remoteIP);
+        Map otherPrameters = new HashMap<String, String>();
+        otherPrameters.put("remoteIp", remoteIP);
+        throttleDataDTO.setQueryParameters(otherPrameters);
+        Gson gson = new Gson();
+        propertiesMap = gson.toJson(throttleDataDTO);
 
         //this parameter will be used to capture message size and pass it to calculation logic
         int messageSizeInBytes = 0;
