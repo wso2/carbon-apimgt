@@ -63,7 +63,8 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
-                                 String appId, MessageContext messageContext, AuthenticationContext authenticationContext){
+                                 String apiTenant, String appId, MessageContext messageContext,
+                                 AuthenticationContext authenticationContext){
         if(resourceLevelTier==null && apiLevelTier!=null){
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -82,8 +83,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiContext = apiContext;
         this.apiVersion = apiVersion;
         this.appTenant = appTenant;
-        this.apiTenant = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
-                (messageContext)); //TODO this may be efficient hence double check
+        this.apiTenant = apiTenant;
         this.appId = appId;
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
@@ -140,6 +140,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
             }
 
         }
+
         Object[] objects = new Object[]{messageContext.getMessageID(), this.applicationLevelThrottleKey, this.applicationLevelTier,
                 this.apiLevelThrottleKey, this.apiLevelTier,
                 this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
