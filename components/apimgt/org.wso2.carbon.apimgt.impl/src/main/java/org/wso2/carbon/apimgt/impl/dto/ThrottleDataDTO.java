@@ -47,4 +47,14 @@ public class ThrottleDataDTO {
         this.messageSizeInBytes = messageSizeInBytes;
     }
 
+    /**
+     * Cleaning DTO by setting null reference for all it instance variables.
+     */
+    public void cleanDTO(){
+        this.clientIP = null;
+        this.messageSizeInBytes =null;
+        this.transportHeaders =null;
+        this.queryParameters =null;
+    }
+
 }

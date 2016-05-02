@@ -105,21 +105,25 @@ public class ThrottleDataPublisher {
      * @param messageContext is message context object that holds
      */
     public void publishNonThrottledEvent(
-        String applicationLevelThrottleKey, String applicationLevelTier,
-        String apiLevelThrottleKey, String apiLevelTier,
-        String subscriptionLevelThrottleKey, String subscriptionLevelTier,
-        String resourceLevelThrottleKey, String resourceLevelTier,
-        String authorizedUser, String apiContext, String apiVersion, String appTenant,
-        String appId, MessageContext messageContext,
-        AuthenticationContext authenticationContext) {
+            String applicationLevelThrottleKey, String applicationLevelTier,
+            String apiLevelThrottleKey, String apiLevelTier,
+            String subscriptionLevelThrottleKey, String subscriptionLevelTier,
+            String resourceLevelThrottleKey, String resourceLevelTier,
+            String authorizedUser, String apiContext, String apiVersion, String appTenant, String apiTenant,
+            String appId, MessageContext messageContext,
+            AuthenticationContext authenticationContext) {
+        //log.info("##########################################Publishing event");
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
             agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
-                    apiLevelThrottleKey, apiLevelTier,
-                    subscriptionLevelThrottleKey, subscriptionLevelTier,
-                    resourceLevelThrottleKey, resourceLevelTier,
-                    authorizedUser, apiContext, apiVersion, appTenant, appId, messageContext, authenticationContext);
+                                   apiLevelThrottleKey, apiLevelTier,
+                                   subscriptionLevelThrottleKey, subscriptionLevelTier,
+                                   resourceLevelThrottleKey, resourceLevelTier,
+                                   authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
+                                   authenticationContext);
             executor.execute(agent);
+            //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
+
         } catch (Exception e) {
             throw new ThrottlingRunTimeException("Error while publishing throttling events to global policy server");
         }

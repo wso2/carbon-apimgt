@@ -61,15 +61,40 @@ public class DataProcessAndPublishingAgent implements Runnable {
     }
 
     /**
+     * This method will clean data references. This method should call whenever we return data process and publish
+     * agent back to pool. Every time when we add new property we need to implement cleaning logic as well.
+     */
+    public void clearDataReference() {
+        this.authenticationContext = null;
+        this.messageContext = null;
+        this.applicationLevelThrottleKey = null;
+        this.applicationLevelTier = null;
+        this.apiLevelThrottleKey = null;
+        this.applicationLevelTier = null;
+        this.subscriptionLevelThrottleKey = null;
+        this.subscriptionLevelTier = null;
+        this.resourceLevelThrottleKey = null;
+        this.resourceLevelTier = null;
+        this.authorizedUser = null;
+        this.apiContext = null;
+        this.apiVersion = null;
+        this.appTenant = null;
+        this.apiTenant = null;
+        this.appId = null;
+        this.apiName = null;
+        this.throttleDataDTO.cleanDTO();
+    }
+
+    /**
      * This method will use to set message context.
-     *
      */
     public void setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
                                  String apiLevelThrottleKey, String apiLevelTier,
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
-                                 String appId, MessageContext messageContext, AuthenticationContext authenticationContext){
+                                 String apiTenant, String appId, MessageContext messageContext,
+                                 AuthenticationContext authenticationContext){
         if(resourceLevelTier==null && apiLevelTier!=null){
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -88,8 +113,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiContext = apiContext;
         this.apiVersion = apiVersion;
         this.appTenant = appTenant;
-        this.apiTenant = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
-                (messageContext)); //TODO this may be efficient hence double check
+        this.apiTenant = apiTenant;
         this.appId = appId;
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);

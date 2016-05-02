@@ -851,8 +851,7 @@ public class ApiMgtDAO {
                     if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
                         spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
                     }
-                    String stopOnQuotaReach = "0";
-                    String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
                     list.add(spikeArrest);
@@ -8630,9 +8629,10 @@ public class ApiMgtDAO {
             policyStatement.setString(4, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
-            siddhiQueryInputStream = new ByteArrayInputStream(
-                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
-            policyStatement.setBinaryStream(5, siddhiQueryInputStream);
+            byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+            int lengthOfBytes = byteArray.length;
+            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
+            policyStatement.setBinaryStream(5, siddhiQueryInputStream,lengthOfBytes);
             policyStatement.setBoolean(6, false);
             policyStatement.executeUpdate();
             conn.commit();
@@ -9552,14 +9552,15 @@ public class ApiMgtDAO {
         InputStream siddhiQueryInputStream;
 
         try {
-            siddhiQueryInputStream = new ByteArrayInputStream(
-                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+        	byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+        	int lengthOfBytes = byteArray.length;
+            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
 
             updateStatement.setString(1, policy.getDescription());
-            updateStatement.setBinaryStream(2, siddhiQueryInputStream);
+            updateStatement.setBinaryStream(2, siddhiQueryInputStream, lengthOfBytes);
             updateStatement.setString(3, policy.getKeyTemplate());
             updateStatement.setString(4, policy.getPolicyName());
             updateStatement.setInt(5, policy.getTenantId());

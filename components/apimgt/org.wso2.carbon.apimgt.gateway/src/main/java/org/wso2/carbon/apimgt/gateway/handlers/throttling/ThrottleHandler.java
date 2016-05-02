@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.xml.stream.XMLStreamException;
 
@@ -275,6 +276,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                 resourceLevelThrottleKey, resourceLevelTier,
                                                 authorizedUser, apiContext, apiVersion, subscriberTenantDomain,
+                                                CarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
                                                 applicationId, synCtx, authContext);
                                     }
                                 } else {
