@@ -22,8 +22,6 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
@@ -35,10 +33,11 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationExcep
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Throttle data publisher class is here to publish throttle data to global policy engine.
@@ -106,23 +105,21 @@ public class ThrottleDataPublisher {
      * @param messageContext is message context object that holds
      */
     public void publishNonThrottledEvent(
-            String applicationLevelThrottleKey, String applicationLevelTier,
-            String apiLevelThrottleKey, String apiLevelTier,
-            String subscriptionLevelThrottleKey, String subscriptionLevelTier,
-            String resourceLevelThrottleKey, String resourceLevelTier,
-            String authorizedUser, String apiContext, String apiVersion, String appTenant, String appId, MessageContext messageContext,
-            AuthenticationContext authenticationContext) {
-        //log.info("##########################################Publishing event");
+        String applicationLevelThrottleKey, String applicationLevelTier,
+        String apiLevelThrottleKey, String apiLevelTier,
+        String subscriptionLevelThrottleKey, String subscriptionLevelTier,
+        String resourceLevelThrottleKey, String resourceLevelTier,
+        String authorizedUser, String apiContext, String apiVersion, String appTenant,
+        String appId, MessageContext messageContext,
+        AuthenticationContext authenticationContext) {
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
-            agent.setDataReference( applicationLevelThrottleKey,  applicationLevelTier,
-                     apiLevelThrottleKey,  apiLevelTier,
-                     subscriptionLevelThrottleKey,  subscriptionLevelTier,
-                     resourceLevelThrottleKey,  resourceLevelTier,
-                     authorizedUser,  apiContext, apiVersion, appTenant, appId, messageContext, authenticationContext);
+            agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
+                    apiLevelThrottleKey, apiLevelTier,
+                    subscriptionLevelThrottleKey, subscriptionLevelTier,
+                    resourceLevelThrottleKey, resourceLevelTier,
+                    authorizedUser, apiContext, apiVersion, appTenant, appId, messageContext, authenticationContext);
             executor.execute(agent);
-            //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
-
         } catch (Exception e) {
             throw new ThrottlingRunTimeException("Error while publishing throttling events to global policy server");
         }
