@@ -52,6 +52,9 @@ $( document ).ready(function() {
                     d.action = "getDataFromTable";
                     d.searchQuery = null;
                     d.entriesPerPage = $("#apiAvailabilityTable_length option:selected" ).val();
+                },
+                error:function(xhr,status,error){
+                    console.log('Error while trying to connect to the DAS endpoint');
                 }
             },
             "drawCallback": function(){

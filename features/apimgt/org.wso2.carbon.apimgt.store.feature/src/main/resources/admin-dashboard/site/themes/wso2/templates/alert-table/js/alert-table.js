@@ -122,10 +122,12 @@ $( document ).ready(function() {
                                 d.tableName = tableName;
                                 d.searchQuery = null;
                                 d.entriesPerPage = $("#alertHistoryTable_length option:selected" ).val();
+                            },
+                            error:function(xhr,status,error){
+                                console.log('Error while trying to connect to the DAS endpoint');
                             }
                         },
                         "drawCallback": function(){
-                                //$("thead").addClass("tableHead");
                                 $('.alertTypeLink').click(function(){
                                     changeSelectedAlertType(this.text);
                                 });
