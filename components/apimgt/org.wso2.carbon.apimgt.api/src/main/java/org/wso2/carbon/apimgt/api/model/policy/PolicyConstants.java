@@ -90,6 +90,8 @@ public class PolicyConstants {
     
     public static final String POLICY_ID = "POLICY_ID";
 
+    public static final String POLICY_IS_DEPLOYED = "IS_DEPLOYED";
+
     
     
     

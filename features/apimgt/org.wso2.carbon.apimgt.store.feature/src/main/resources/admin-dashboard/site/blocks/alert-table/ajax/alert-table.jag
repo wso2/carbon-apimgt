@@ -56,13 +56,16 @@ i18n.init(request,localeResourcesBasePath);
             }
 
             if (searchEntry != "") {
-                var lucenePrefix = "";
+                var lucenePrefix = '';
                 if(searchEntry.indexOf(":") == -1){
-                    lucenePrefix = "msg:";
+                    lucenePrefix = 'msg:';
+                } else {
+                    var index = searchEntry.indexOf(":");
+                    lucenePrefix = searchEntry.substring(0,index+1);
+                    searchEntry = searchEntry.substring(index+1,searchEntry.length);
                 }
-                searchEntry = lucenePrefix+searchEntry;
+                searchEntry = lucenePrefix+ '"'  + searchEntry +'"';
             }
-
 
             dataResult = mod.getDataFromTable(tableName, searchEntry, startindex, count, "alertTimestamp", sortOrderBool);
             countResult = result = mod.getCountFromTable(tableName, searchEntry);

@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.eclipse.jetty.server.Authentication;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -111,7 +110,7 @@ public class ThrottleDataPublisher {
             String apiLevelThrottleKey, String apiLevelTier,
             String subscriptionLevelThrottleKey, String subscriptionLevelTier,
             String resourceLevelThrottleKey, String resourceLevelTier,
-            String authorizedUser, MessageContext messageContext,
+            String authorizedUser, String apiContext, String apiVersion, String appTenant, String appId, MessageContext messageContext,
             AuthenticationContext authenticationContext) {
         //log.info("##########################################Publishing event");
         try {
@@ -120,7 +119,7 @@ public class ThrottleDataPublisher {
                      apiLevelThrottleKey,  apiLevelTier,
                      subscriptionLevelThrottleKey,  subscriptionLevelTier,
                      resourceLevelThrottleKey,  resourceLevelTier,
-                     authorizedUser,  messageContext, authenticationContext);
+                     authorizedUser,  apiContext, apiVersion, appTenant, appId, messageContext, authenticationContext);
             executor.execute(agent);
             //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
 

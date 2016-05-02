@@ -226,6 +226,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement queryPs = null;
+        PreparedStatement appRegPs = null;
 
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
@@ -250,17 +251,16 @@ public class ApiMgtDAO {
             }
 
             if (!onlyKeyMappingEntry) {
-                ps = conn.prepareStatement(registrationEntry);
-                ps.setInt(1, subscriber.getId());
-                ps.setString(2, dto.getWorkflowReference());
-                ps.setInt(3, application.getId());
-                ps.setString(4, dto.getKeyType());
-                ps.setString(5, dto.getDomainList());
-                ps.setLong(6, dto.getValidityTime());
-                ps.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
-                ps.setString(8, jsonString);
-                ps.execute();
-                ps.close();
+                appRegPs = conn.prepareStatement(registrationEntry);
+                appRegPs.setInt(1, subscriber.getId());
+                appRegPs.setString(2, dto.getWorkflowReference());
+                appRegPs.setInt(3, application.getId());
+                appRegPs.setString(4, dto.getKeyType());
+                appRegPs.setString(5, dto.getDomainList());
+                appRegPs.setLong(6, dto.getValidityTime());
+                appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
+                appRegPs.setString(8, jsonString);
+                appRegPs.execute();
             }
 
             ps = conn.prepareStatement(keyMappingEntry);
@@ -281,7 +281,8 @@ public class ApiMgtDAO {
             handleException("Error occurred while creating an " +
                             "Application Registration Entry for Application : " + application.getName(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(queryPs, null, null);
+            APIMgtDBUtil.closeStatement(queryPs);
+            APIMgtDBUtil.closeStatement(appRegPs);
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
@@ -9779,27 +9780,48 @@ public class ApiMgtDAO {
             isExistStatement.setString(2, policyName);
             ResultSet result = isExistStatement.executeQuery();
             if(result != null && result.next()){
-            	int id = result.getInt(PolicyConstants.POLICY_ID);
             	isExist = true;
             }
-    	}catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-
-                    // Rollback failed. Exception will be thrown later for upper exception
-                    log.error("Failed to check is exist: " + policyName + '-' + tenantId, ex);
-                }
-            }
+    	} catch (SQLException e) {
             handleException("Failed to check is exist: " + policyName + '-' + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
         }
-
-
-
     	return isExist;
+    }
+
+    public boolean isPolicyDeployed(String policyType,int tenantId, String policyName ) throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement isExistStatement = null;
+
+        boolean isDeployed = false;
+        String policyTable = null;
+        if(PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyType)){
+            policyTable = PolicyConstants.API_THROTTLE_POLICY_TABLE;
+        }else if(PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyType)){
+            policyTable = PolicyConstants.POLICY_APPLICATION_TABLE;
+        }else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equalsIgnoreCase(policyType)){
+            policyTable = PolicyConstants.POLICY_GLOBAL_TABLE;
+        }else if(PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyType)){
+            policyTable = PolicyConstants.POLICY_SUBSCRIPTION_TABLE;
+        }
+        try{
+            String query = "SELECT " +PolicyConstants.POLICY_IS_DEPLOYED + " FROM "+policyTable + " WHERE TENANT_ID =? AND NAME = ? ";
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            isExistStatement = connection.prepareStatement(query);
+            isExistStatement.setInt(1, tenantId);
+            isExistStatement.setString(2, policyName);
+            ResultSet result = isExistStatement.executeQuery();
+            if(result != null && result.next()){
+                isDeployed = result.getBoolean(PolicyConstants.POLICY_IS_DEPLOYED);
+            }
+        }catch (SQLException e) {
+            handleException("Failed to check is exist: " + policyName + '-' + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(isExistStatement, connection, null);
+        }
+        return isDeployed;
     }
 
     public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
