@@ -48,23 +48,51 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiTenant;
     String apiName;
     String appId;
+    private ThrottleDataDTO throttleDataDTO;
+    Gson gson;
     private AuthenticationContext authenticationContext;
 
     public DataProcessAndPublishingAgent() {
+        this.throttleDataDTO = new ThrottleDataDTO();
+        this.gson = new Gson();
 
     }
 
     /**
+     * This method will clean data references. This method should call whenever we return data process and publish
+     * agent back to pool. Every time when we add new property we need to implement cleaning logic as well.
+     */
+    public void clearDataReference() {
+        this.authenticationContext = null;
+        this.messageContext = null;
+        this.applicationLevelThrottleKey = null;
+        this.applicationLevelTier = null;
+        this.apiLevelThrottleKey = null;
+        this.applicationLevelTier = null;
+        this.subscriptionLevelThrottleKey = null;
+        this.subscriptionLevelTier = null;
+        this.resourceLevelThrottleKey = null;
+        this.resourceLevelTier = null;
+        this.authorizedUser = null;
+        this.apiContext = null;
+        this.apiVersion = null;
+        this.appTenant = null;
+        this.apiTenant = null;
+        this.appId = null;
+        this.apiName = null;
+        this.throttleDataDTO.cleanDTO();
+    }
+
+    /**
      * This method will use to set message context.
-     *
      */
     public void setDataReference(String applicationLevelThrottleKey, String applicationLevelTier,
                                  String apiLevelThrottleKey, String apiLevelTier,
                                  String subscriptionLevelThrottleKey, String subscriptionLevelTier,
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
-                                 String appId, MessageContext messageContext, AuthenticationContext authenticationContext){
-        if(resourceLevelTier==null && apiLevelTier!=null){
+                                 String appId, MessageContext messageContext, AuthenticationContext authenticationContext) {
+        if (resourceLevelTier == null && apiLevelTier != null) {
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
         }
@@ -91,15 +119,14 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
     public void run() {
         //TODO implement logic to get message details from message context
-        ThrottleDataDTO throttleDataDTO = new ThrottleDataDTO();
 
         String propertiesMap = "{\n" +
                 "  \"name\": \"org.wso2.throttle.request.stream\",\n" +
                 "  \"version\": \"1.0.0\"}";
         String remoteIP = null;
         Object object = messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if(object!=null){
-             remoteIP= (String) ((TreeMap) object).get(APIMgtGatewayConstants.X_FORWARDED_FOR) ;
+        if (object != null) {
+            remoteIP = (String) ((TreeMap) object).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         }
 
         if (remoteIP != null && !remoteIP.isEmpty()) {
@@ -110,23 +137,24 @@ public class DataProcessAndPublishingAgent implements Runnable {
             remoteIP = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
-        if(remoteIP !=null && remoteIP.length()>0) {
+        if (remoteIP != null && remoteIP.length() > 0) {
             throttleDataDTO.setClientIP(remoteIP);
         }
 
-        TreeMap transportHeaderMap = ((TreeMap)((Axis2MessageContext) messageContext).getAxis2MessageContext().
+        TreeMap transportHeaderMap = ((TreeMap) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-        if(transportHeaderMap!=null && transportHeaderMap.size()>0) {
-            throttleDataDTO.setTransportHeaders((Map<String, String>)transportHeaderMap);
+        if (transportHeaderMap != null && transportHeaderMap.size() > 0) {
+            throttleDataDTO.setTransportHeaders((Map<String, String>) transportHeaderMap);
         }
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         //todo Added some parameters
-        Map otherPrameters = new HashMap<String, String>();
-        otherPrameters.put("remoteIp", remoteIP);
-        throttleDataDTO.setQueryParameters(otherPrameters);
-        Gson gson = new Gson();
+        //TODO get all query parameters and add it to throttleDataDTO
+        //Map queryParametersMap = new HashMap<String, String>();
+        //queryParametersMap.put("remoteIp", remoteIP);
+        //throttleDataDTO.setQueryParameters(queryParametersMap);
+
         propertiesMap = gson.toJson(throttleDataDTO);
 
         //this parameter will be used to capture message size and pass it to calculation logic
@@ -137,6 +165,8 @@ public class DataProcessAndPublishingAgent implements Runnable {
                     getProperty("TRANSPORT_HEADERS")).get("Content-Length");
             if (obj != null) {
                 messageSizeInBytes = Integer.parseInt(obj.toString());
+            } else {
+                //TODO write logic
             }
 
         }
@@ -144,7 +174,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 this.apiLevelThrottleKey, this.apiLevelTier,
                 this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
                 this.resourceLevelThrottleKey, this.resourceLevelTier,
-                this.authorizedUser, this.apiContext, this.apiVersion, this.appTenant, this.apiTenant, this.appId ,this.apiName ,propertiesMap};
+                this.authorizedUser, this.apiContext, this.apiVersion, this.appTenant, this.apiTenant, this.appId, this.apiName, propertiesMap};
 
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, objects);

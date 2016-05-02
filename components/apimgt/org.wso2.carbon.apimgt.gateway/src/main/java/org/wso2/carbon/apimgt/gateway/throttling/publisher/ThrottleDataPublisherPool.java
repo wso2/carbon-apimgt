@@ -67,7 +67,8 @@ public class ThrottleDataPublisherPool {
     }
 
     public void release(DataProcessAndPublishingAgent client) throws Exception {
-        //client.setDataReference(null);
+        //We must clean data references as it can caused to pass old data to global policy server.
+        client.clearDataReference();
         clientPool.returnObject(client);
     }
 
