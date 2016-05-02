@@ -772,6 +772,7 @@ function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,dri
 function getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
@@ -801,6 +802,7 @@ function getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toD
 function getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
@@ -830,6 +832,7 @@ function getApplicationRegistrationOverTime(subscribedApi, provider, developer, 
 function getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
@@ -859,6 +862,7 @@ function getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDat
 function getDeveloperList(provider, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getDeveloperList(provider, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
@@ -888,6 +892,7 @@ function getDeveloperList(provider, limit) {
 function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
@@ -917,6 +922,7 @@ function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) 
 function getApisList(provider, apiFilter, limit) {
     var usage;
     try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getApisList(provider, apiFilter, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
