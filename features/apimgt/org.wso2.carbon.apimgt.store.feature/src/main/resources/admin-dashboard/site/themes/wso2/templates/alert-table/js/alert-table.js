@@ -24,7 +24,16 @@ $( document ).ready(function() {
             $('.content-data').empty();
             $('.content-data').append('<h2> Stats are disabled.</h2>');
          } 
-    })
+    });
+
+    $('#alertHistoryTable_filter input').unbind();
+    $('#alertHistoryTable_filter input').bind('keyup', function(e) {
+        if(e.keyCode == 13) {
+            table.search( this.value ).draw();
+        }
+    });
+
+
     
 
     function changeActiveTableName() {
@@ -113,10 +122,12 @@ $( document ).ready(function() {
                                 d.tableName = tableName;
                                 d.searchQuery = null;
                                 d.entriesPerPage = $("#alertHistoryTable_length option:selected" ).val();
+                            },
+                            error:function(xhr,status,error){
+                                console.log('Error while trying to connect to the DAS endpoint');
                             }
                         },
                         "drawCallback": function(){
-                                //$("thead").addClass("tableHead");
                                 $('.alertTypeLink').click(function(){
                                     changeSelectedAlertType(this.text);
                                 });

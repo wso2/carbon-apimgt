@@ -28,6 +28,13 @@ $( document ).ready(function() {
         return isStatsEnabled;
     }
 
+    $('#apiAvailabilityTable_filter input').unbind();
+    $('#apiAvailabilityTable_filter input').bind('keyup', function(e) {
+        if(e.keyCode == 13) {
+            table.search( this.value ).draw();
+        }});
+
+
 
     function drawTable() {
 
@@ -35,7 +42,7 @@ $( document ).ready(function() {
             //"processing": true,
             "serverSide": true,
             "columns" : [
-                { title: "Api Version", "orderable": false},
+                { title: "Api Version"},
                 { title: "Status" , "orderable": false },
             ],
             ajax: {
@@ -45,6 +52,21 @@ $( document ).ready(function() {
                     d.action = "getDataFromTable";
                     d.searchQuery = null;
                     d.entriesPerPage = $("#apiAvailabilityTable_length option:selected" ).val();
+                },
+                error:function(xhr,status,error){
+                    console.log('Error while trying to connect to the DAS endpoint');
+                }
+            },
+            "drawCallback": function(){
+                var nodes = table.column(1).nodes();
+                var numOfRows = nodes.length;
+                for (i=0; i<numOfRows; i++) {
+                    cellValue = nodes[i].innerText;
+                    if(cellValue == 'Available'){
+                        $(nodes[i]).prepend('<i class="icon fw fw-success text-success add-margin-right-1x"></i>');
+                    } else {
+                        $(nodes[i]).prepend('<i class="icon fw fw-disabled text-muted add-margin-right-1x"></i>');
+                    }
                 }
             }
         });
