@@ -49,6 +49,9 @@ var constructPolicyObject = function (userName, policyName, description, siddhiQ
     globalPolicy.setKeyTemplate(keyTemplate);
     var tenantId = APIUtil.getTenantId(userName);
     globalPolicy.setTenantId(tenantId);
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+    globalPolicy.setTenantDomain(tenantDomain);
     globalPolicy.setSiddhiQuery(siddhiQuery);
 
     return globalPolicy;

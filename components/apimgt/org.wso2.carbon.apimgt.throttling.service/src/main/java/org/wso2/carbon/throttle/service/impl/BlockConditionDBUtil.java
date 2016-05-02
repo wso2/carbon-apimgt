@@ -230,8 +230,23 @@ public final class BlockConditionDBUtil {
         }
 
         private void processCommand() {
-                BlockConditionDBUtil.getBlockConditions();
-            BlockConditionDBUtil.getGlobalPolicyKeyTemplates();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (blockConditionsDTO){
+                        BlockConditionDBUtil.getBlockConditions();
+                    }
+                }
+            }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (keyTemplates){
+                        BlockConditionDBUtil.getGlobalPolicyKeyTemplates();
+                    }
+                }
+            }).start();
+
         }
         @Override
         public String toString(){
