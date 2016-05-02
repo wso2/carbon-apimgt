@@ -8630,9 +8630,10 @@ public class ApiMgtDAO {
             policyStatement.setString(4, policy.getDescription());
 
             InputStream siddhiQueryInputStream;
-            siddhiQueryInputStream = new ByteArrayInputStream(
-                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
-            policyStatement.setBinaryStream(5, siddhiQueryInputStream);
+            byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+            int lengthOfBytes = byteArray.length;
+            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
+            policyStatement.setBinaryStream(5, siddhiQueryInputStream,lengthOfBytes);
             policyStatement.setBoolean(6, false);
             policyStatement.executeUpdate();
             conn.commit();
@@ -9552,14 +9553,15 @@ public class ApiMgtDAO {
         InputStream siddhiQueryInputStream;
 
         try {
-            siddhiQueryInputStream = new ByteArrayInputStream(
-                    policy.getSiddhiQuery().getBytes(Charset.defaultCharset()));
+        	byte[] byteArray = policy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+        	int lengthOfBytes = byteArray.length;
+            siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             updateStatement = connection.prepareStatement(SQLConstants.UPDATE_GLOBAL_POLICY_SQL);
 
             updateStatement.setString(1, policy.getDescription());
-            updateStatement.setBinaryStream(2, siddhiQueryInputStream);
+            updateStatement.setBinaryStream(2, siddhiQueryInputStream, lengthOfBytes);
             updateStatement.setString(3, policy.getKeyTemplate());
             updateStatement.setString(4, policy.getPolicyName());
             updateStatement.setInt(5, policy.getTenantId());
