@@ -12,8 +12,9 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.json.JSONException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -139,7 +140,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
             }
         } else {
-            remoteIP = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            remoteIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
         if(remoteIP !=null && remoteIP.length()>0) {
@@ -153,7 +154,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         //Setting query parameters
-        String queryString = (String) messageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
+        String queryString = (String) axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if(!StringUtils.isEmpty(queryString)) {
             if (queryString.indexOf("?") > -1) {
                 queryString = queryString.substring(queryString.indexOf("?") + 1);
@@ -183,18 +184,17 @@ public class DataProcessAndPublishingAgent implements Runnable {
             try {
                 byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
                 String jwtHeader = new String(jwtByteArray, "UTF-8");
-                org.json.JSONObject jsonObject = new org.json.JSONObject(jwtHeader);
-                Iterator<?> keys = jsonObject.keys();
-                String key, value;
-                while( keys.hasNext() ) {
-                    key = (String)keys.next();
-                    value = (String) jsonObject.get(key);
-                    jsonObMap.put(key, value);
+                JSONParser parser = new JSONParser();
+                JSONObject jwtHeaderOb = (JSONObject) parser.parse(jwtHeader);
+                String claimName;
+                for(Iterator iterator = jwtHeaderOb.keySet().iterator(); iterator.hasNext();) {
+                    claimName = (String) iterator.next();
+                    jsonObMap.put(claimName, jwtHeaderOb.get(claimName));
                 }
             } catch (UnsupportedEncodingException e) {
                 log.info("Error while decoding jwt header", e);
-            } catch (JSONException e) {
-                log.info("Error while parsing jwt header", e);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
 
