@@ -226,6 +226,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement queryPs = null;
+        PreparedStatement appRegPs = null;
 
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
@@ -250,17 +251,16 @@ public class ApiMgtDAO {
             }
 
             if (!onlyKeyMappingEntry) {
-                ps = conn.prepareStatement(registrationEntry);
-                ps.setInt(1, subscriber.getId());
-                ps.setString(2, dto.getWorkflowReference());
-                ps.setInt(3, application.getId());
-                ps.setString(4, dto.getKeyType());
-                ps.setString(5, dto.getDomainList());
-                ps.setLong(6, dto.getValidityTime());
-                ps.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
-                ps.setString(8, jsonString);
-                ps.execute();
-                ps.close();
+                appRegPs = conn.prepareStatement(registrationEntry);
+                appRegPs.setInt(1, subscriber.getId());
+                appRegPs.setString(2, dto.getWorkflowReference());
+                appRegPs.setInt(3, application.getId());
+                appRegPs.setString(4, dto.getKeyType());
+                appRegPs.setString(5, dto.getDomainList());
+                appRegPs.setLong(6, dto.getValidityTime());
+                appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
+                appRegPs.setString(8, jsonString);
+                appRegPs.execute();
             }
 
             ps = conn.prepareStatement(keyMappingEntry);
@@ -281,7 +281,8 @@ public class ApiMgtDAO {
             handleException("Error occurred while creating an " +
                             "Application Registration Entry for Application : " + application.getName(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(queryPs, null, null);
+            APIMgtDBUtil.closeStatement(queryPs);
+            APIMgtDBUtil.closeStatement(appRegPs);
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
