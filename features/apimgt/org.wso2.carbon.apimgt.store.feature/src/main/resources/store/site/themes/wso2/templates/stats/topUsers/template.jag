@@ -1,0 +1,54 @@
+<% jagg.template("stats/topUsers", function(inputs, outputs, jagg) { %>
+
+<div id="topUsers-stat-page"  class="stat-page">
+
+	<div class="page-header">     
+    			<h1><%=i18n.localize("usersTitle")%></h1>   			 
+	</div>
+	
+    <div id="rangeSliderWrapper" >
+       <div id="dateRangePickerContainer" style="text-align:right">
+           <div class="btn-group" role="group">
+               <button id="hour-btn" type="button" class="btn btn-default ">Hour</button>
+               <button id="today-btn" type="button" class="btn btn-default ">Day
+               </button>
+               <button id="week-btn" type="button" class="btn btn-default">Week</button>
+               <button id="month-btn" type="button" class="btn btn-default  active">Month</button>
+               <button id="date-range" type="button" class="btn btn-default" >
+                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                 <span></span> <b class="caret"></b>
+               </button>
+           </div>
+       </div>
+    </div>
+    
+	    <div class="page-header">     
+	    			<h2><%=i18n.localize("registeredUseres")%></h2>   			 
+		</div>
+
+
+        <div id="registeredUseresSpinner" class="center-wrapper">
+            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+        </div>
+        <div class="col-md-12">
+            <div id="subsChart">
+            </div>
+        </div>
+        
+        <hr/>
+        
+        <div class="page-header">     
+    			<h2><%=i18n.localize("topUsersTitle")%></h2>   			 
+		</div>
+
+
+        <div id="topUsersSpinner" class="center-wrapper">
+            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+        </div>
+        <div class="col-md-12">
+            <div id="topUsersView"></div>
+        </div>
+</div>
+
+
+<% }); %>

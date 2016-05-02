@@ -26,6 +26,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -53,8 +54,6 @@ import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
-import org.wso2.carbon.bam.service.data.publisher.conf.RESTAPIConfigData;
-import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -72,6 +71,8 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.Collections.sort;
 
 /**
  * Usage statistics clas implementation for the APIUsageStatisticsClient.
@@ -98,7 +99,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
 
-            if (!apiManagerAnalyticsConfiguration.isAnalyticsEnabled()) {
+            if (!APIUtil.isAnalyticsEnabled()) {
                 throw new APIMgtUsageQueryServiceClientException("Analytics not enabled");
             }
 
@@ -141,21 +142,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     public void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         //get the config class
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        if (serviceDataPublisherAdmin != null) {
-
-            //check whether analytics enable
-            if (serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable()) {
-                //get REST API config data
-                RESTAPIConfigData restData = serviceDataPublisherAdmin.getRestAPIConfigData();
-
-                String url = restData.getUrl();
-                String user = restData.getUserName();
-                char[] pass = restData.getPassword().toCharArray();
-                //crete new restClient instance
-                restClient = new DASRestClient(url, user, pass);
-                //log.info("Initialised DASRestClient");
-            }
+        APIManagerAnalyticsConfiguration configs = APIManagerAnalyticsConfiguration.getInstance();
+        //check whether analytics enable
+        if (APIUtil.isAnalyticsEnabled()) {
+            //get REST API config data
+            String url = configs.getDasServerUrl();
+            String user = configs.getDasServerUser();
+            char[] pass = configs.getDasServerPassword().toCharArray();
+            //crete new restClient instance
+            restClient = new DASRestClient(url, user, pass);
         }
     }
 
@@ -232,8 +227,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -346,8 +341,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -460,8 +455,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -574,8 +569,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
-                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + ')';
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "] AND ( " + keyString + ')';
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -2023,7 +2018,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of PerUserAPIUsageDTO
      */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
+        sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
             public int compare(PerUserAPIUsageDTO o1, PerUserAPIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2052,7 +2047,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageDTO
      */
     private List<APIUsageDTO> getAPIUsageTopEntries(List<APIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIUsageDTO>() {
+        sort(usageData, new Comparator<APIUsageDTO>() {
             public int compare(APIUsageDTO o1, APIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2274,18 +2269,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Use to handle exception of common type in single step
-     *
-     * @param msg custom message
-     * @param e   throwable object of the exception
-     * @throws APIMgtUsageQueryServiceClientException
-     */
-    private static void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
-        log.error(msg, e);
-        throw new APIMgtUsageQueryServiceClientException(msg, e);
-    }
-
-    /**
      * sort the last access time data by last access time
      *
      * @param usageData list of data to sort
@@ -2317,7 +2300,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
+        sort(usageData, new Comparator<APIResponseTimeDTO>() {
             public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2340,7 +2323,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<Result<ThrottleDataOfAPIAndApplicationValue>> getThrottleDataOfAPIAndApplicationSortedData(
             List<Result<ThrottleDataOfAPIAndApplicationValue>> usageData) {
-        Collections.sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
+        sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
             public int compare(Result<ThrottleDataOfAPIAndApplicationValue> o1, Result<ThrottleDataOfAPIAndApplicationValue> o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2359,4 +2342,251 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public String getClientType() {
         return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
+
+    /**
+     * Search a DAS indexed table and get the json response.
+     *
+     * @param tableName name of the table
+     * @param query     lucene query
+     * @param start     start index of the result list
+     * @param count     number of results required
+     * @param sortField from which field the sorting should happen, null if you don't want it sorted
+     * @param ascending sorting ascending or not
+     * @return json string of the response
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchTable(String tableName, String query, int start, int count, String sortField, boolean ascending)
+            throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        List<Map<String, String>> sortBy = new ArrayList();
+        if (sortField != null) {
+            Map<String, String> sortFieldMap = new HashedMap();
+            sortFieldMap.put("field", sortField);
+            String sortType = (ascending) ? "ASC" : "DESC";
+            sortFieldMap.put("sortType", sortType);
+            sortBy.add(sortFieldMap);
+        }
+        //create the bean
+        RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
+        String result = null;
+        //do post and get the results
+        try {
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                        String tenantDomain, String fromDate,
+                                                                        String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
+        return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
+
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
+            APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        if (version != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TIME).append(": [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (mediationType != null && !"ALL".equals(mediationType)) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":\"").append
+                    (mediationType).append("\"");
+        }
+        RequestSearchBean request;
+        String tableName = getExecutionTimeTableByView(drillDown);
+        request = new RequestSearchBean(query.toString(), 0, 500, tableName);
+        Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
+        }.getType();
+
+        List<Result<ExecutionTimeOfAPIValues>> obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+        try {
+            obj = restClient.doPost(request, type);
+            if (obj.isEmpty()) {
+                obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+            }
+            insertZeroElementsAndSort(obj, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse the date", e);
+        }
+        return obj;
+    }
+
+    /**
+     * Provides the count for the search result.
+     *
+     * @param tableName name of the table
+     * @param query     search query
+     * @return count of the search results
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchCount(String tableName, String query) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        //create the bean
+        RequestSearchCountBean request = new RequestSearchCountBean(tableName, query);
+        String result = null;
+        //do post and get the results
+        try {
+            //restClient = new DASRestClient("https://localhost:9444", "admin",new char[]{'a','d','m','i','n'});
+            if (restClient == null) {
+                initializeDataSource();
+            }
+            result = restClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        int aggregateLevel = 0;
+        if (version != null && !"ALL".equals(version)) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND requestTime : [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (drillDown != null) {
+            if (!"ALL".equals(drillDown)) {
+                aggregateLevel = 1;
+                query.append(" AND _country :\"").append(drillDown).append("\"");
+            } else {
+                aggregateLevel = 0;
+            }
+        }
+        SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
+                APIUsageStatisticsClientConstants
+                        .COUNTRY_CITY_FACET, APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
+        fields.add(f);
+        request.setAggregateFields(fields);
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<PerGeoLocationUsageCount>>>() {
+        }.getType();
+
+        List<Result<PerGeoLocationUsageCount>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        if (obj == null) {
+            obj = Collections.emptyList();
+        }
+        return obj;
+    }
+
+    @Override
+    public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String tenantDomain,
+                                                                    String fromDate, String toDate, String drillDown)
+            throws APIMgtUsageQueryServiceClientException {
+
+
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        int aggregateLevel = 0;
+        if (version != null && !"ALL".equals(version)) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (tenantDomain != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(":").append
+                    (tenantDomain);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND requestTime : [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        if (drillDown != null) {
+            if (!"ALL".equals(drillDown)) {
+                aggregateLevel = 1;
+                query.append(" AND _os :\"").append(drillDown).append("\"");
+            } else {
+                aggregateLevel = 0;
+            }
+        }
+        SearchRequestBean request = new SearchRequestBean(query.toString(), aggregateLevel,
+                APIUsageStatisticsClientConstants
+                        .OS_BROWSER_FACET, APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
+        fields.add(f);
+        request.setAggregateFields(fields);
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<UserAgentUsageCount>>>() {
+        }.getType();
+
+        List<Result<UserAgentUsageCount>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        if (obj == null) {
+            obj = Collections.emptyList();
+        }
+        return obj;
+    }
 }
+

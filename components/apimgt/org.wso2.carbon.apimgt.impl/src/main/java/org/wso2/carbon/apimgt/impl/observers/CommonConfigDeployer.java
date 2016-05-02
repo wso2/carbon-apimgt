@@ -54,6 +54,16 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
+            //TODO adding only the policies to data wouldn't be sufficient. Need to figure out approach after tenant story has finalized
+            //Add default set of policies to database
+            if(APIUtil.isAdvanceThrottlingEnabled()) {
+                APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to load default policies to tenant" + tenantDomain, e);
+        }
+
+        try {
             //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -97,7 +107,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         try {
             APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-            boolean enabled = configuration.isAnalyticsEnabled();
+            boolean enabled = APIUtil.isAnalyticsEnabled();
             if (enabled) {
                 String bamServerURL = configuration.getBamServerUrlGroups();
                 String bamServerUser = configuration.getBamServerUser();

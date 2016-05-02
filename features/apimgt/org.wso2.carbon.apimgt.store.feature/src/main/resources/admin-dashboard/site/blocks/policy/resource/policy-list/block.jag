@@ -1,0 +1,28 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("policy/resource/policy-list", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {
+
+        }
+    },
+
+    getOutputs:function (inputs) {
+        var apiPolicies, result;
+        result = jagg.module("policy").getAllAPIPolicies();
+        apiPolicies = result.apiPolicies;
+
+        // we put results to the session.
+        session.put("apiPolicies", apiPolicies);
+        return {
+            "apiPolicies":apiPolicies
+        };
+    }
+});
+%>
+
+
+

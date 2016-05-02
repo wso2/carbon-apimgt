@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
             },
             "body":[
                 {
-                    "name":"layout/base",
+                    "name":"user/login",
                     "inputs":{
                         "top":null,
                         "left":null,

@@ -33,56 +33,17 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 /*
 * This is the class mediator which will handle publishing events upon throttle out events
 */
-public class APIMgtThrottleUsageHandler extends AbstractMediator {
+public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
 
-    private boolean enabled;
-
-    private boolean skipEventReceiverConnection;
-
-    private volatile APIMgtUsageDataPublisher publisher;
 
     public APIMgtThrottleUsageHandler() {
-        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            this.initializeDataPublisher();
-        }
+        super();
     }
 
-    private void initializeDataPublisher() {
 
-        enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
-        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
-        if (!enabled || skipEventReceiverConnection) {
-            return;
-        }
-        if (publisher == null) {
-            synchronized (this) {
-                if (publisher == null) {
-                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
-                            .getPublisherClass();
-                    try {
-                        log.debug("Instantiating Data Publisher");
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                        publisher.init();
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass, e);
-                    } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass, e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass, e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
-                }
-            }
-        }
-    }
 
     public boolean mediate(MessageContext messageContext) {
-
+        super.mediate(messageContext);
         if (publisher == null) {
             this.initializeDataPublisher();
         }

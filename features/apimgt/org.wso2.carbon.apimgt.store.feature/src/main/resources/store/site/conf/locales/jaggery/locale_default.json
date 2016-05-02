@@ -1,7 +1,8 @@
-{
+{   "apistoreHome":"APIStore Home",
     "rating" : "Rating",
     "context" : "Context",
     "version" : "Version",
+    "apiThumb": "API Thumbnail",
     "status" : "Status",
     "updated" : "Updated",
     "urls" : "URLs",
@@ -40,6 +41,7 @@
     "billing":"Billing & Metering",
     "tiers" : "Tiers",
     "subscribe" : "Subscribe",
+    "unSubscribe" : "Unsubscribe",
     "goToSubscribe" : "Visit Publisher Store",
 
     "overview.title" : "Overview",
@@ -48,16 +50,20 @@
     "browse.title" : "Browse APIs",
     "signupTitle" : "Sign - Up for a New Account",
 
+    "listAPIs" : "List APIs",
     "listAPI" : "List APIs By",
     "listAPI.newest" : "Newest",
     "listAPI.catog" : "By Category",
     "listAPI.app" : "By Application",
 
     "moreAPI" : "More APIs from",
-    "recentlyAdded" : "Recently Added",
+    "recentlyAdded" : "Recently Added APIs",
     "searchAPI" : "Search API",
 
     "docSum" : "Summary",
+    "docInline" : "Inline Documentation",
+    "docFile" : "File based Documentation",
+    "docContent" : "Document Content",
     "viewDoc" : "View Content",
     "download" : "Download",
 
@@ -109,18 +115,22 @@
     "apiName": "API Name",
     "api" : "API",
     "apiOwner" : "Owner",
+    "apiProvider" : "API Provider",
     "subscriptionStatus" : "Subscription Status",
     "subscription" : "Subscription",
     "appName" : "Application Name",
     "noOfAPICalls": "Number of API Calls",
     "faultCount" : "Faulty API Invocation Count",
     "faultyInvocationTitle" : "Faulty Invocations per Application",
-    "callType" : "API Usage from Resource Path per Application",
+    "faultyInvocations" : "Faulty Invocations",
+    "callType" : "Resource Usage",
     "callTypeTitle" : "API Usage from Resource Path",
     "registeredUseres" : "Registered Users For Applications",
     "topUsersTitle" : "Top Users For Applications",
-    "topUsersDropDown" : "Top Users per Application",
-    "apiUsage" : "API Usage per Application",
+    "usersTitle" : "Users For Applications",
+    "topUsersDropDown" : "Top Users",
+    "apiUsage" : "API Usage",
+    "apiUsageTitle" : "API Usage per Application",
     "subscriber": "Subscriber",
     "callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
 
@@ -210,6 +220,7 @@
     "throttlingLimit":"Throttling Limit",
     "multipleAPIStoresHeading":"API Stores available on this server" ,
     "storeNameSuffix":"/store",
+    "tenantStore":"Tenant Store",
     "timeWarn":"Enter a valid number",
     "noTiers":"You may not be entitled to any of the available tiers",
 
@@ -228,8 +239,10 @@
     "forum" : "Forum",
     "forum.searchForum" : "Search Forum",
     "forum.noTopicsFound" : "No topics found.",
+    "forum.noTopicsFound.description" : "There are no forum topic available.",
     "forum.createNewTopic" : "Create New Topic",
     "forum.topic" : "Topic",
+    "forum.topic.list" : "Topic List",
     "forum.replies" : "Replies",
     "forum.by" : "By",
     
@@ -252,7 +265,13 @@
 
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
     "provideAccessToken" : "If you already have an access token please provide it below.",
-    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token."
+    "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
+    
+    "goBack" : "Go Back",
+    "applicationList" : "Application List",
+    "addApplication" : "Add Application",
+    "activePage":"Active Page",
+    "pagination":"Pagination"
   
     
 }

@@ -24,14 +24,13 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -112,6 +111,7 @@ public class OAuthAuthenticator implements Authenticator {
         //If the matching resource does not require authentication
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
+        VerbInfoDTO verbInfoDTO = (VerbInfoDTO)synCtx.getProperty(APIConstants.VERB_INFO_DTO);
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
 
             if(log.isDebugEnabled()){
@@ -190,18 +190,15 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
             authContext.setConsumerKey(info.getConsumerKey());
+            authContext.setApiTier(info.getApiTier());
+            authContext.setThrottlingDataList(info.getThrottlingDataList());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
-            
+
             /* Synapse properties required for BAM Mediator*/
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
 
-            try {
-                APIUtil.checkClientDomainAuthorized(info, clientDomain);
-            } catch (APIManagementException e) {
-               throw new APISecurityException(info.getValidationStatus(), e.getMessage(), e);
-            }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");
             }
@@ -271,45 +268,13 @@ public class OAuthAuthenticator implements Authenticator {
 
     protected void initOAuthParams() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_OAUTH_HEADER);
-        if (value != null) {
-            securityHeader = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONSUMER_KEY_HEADER_SEGMENT);
-        if (value != null) {
-            consumerKeyHeaderSegment = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_OAUTH_HEADER_SPLITTER);
-        if (value != null) {
-            oauthHeaderSplitter = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONSUMER_KEY_SEGMENT_DELIMITER);
-        if (value != null) {
-            consumerKeySegmentDelimiter = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONTEXT_HEADER);
-        if (value != null) {
-            securityContextHeader = value;
-        }
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_REMOVE_OAUTH_HEADERS_FROM_OUT_MESSAGE);
+        String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
         if (value != null) {
             removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
         }
-
-        value = config.getFirstProperty
-                (APIConstants.API_GATEWAY_CLIENT_DOMAIN_HEADER);
+        value = config.getFirstProperty(APIConstants.JWT_HEADER);
         if (value != null) {
-            clientDomainHeader = value;
+            setSecurityContextHeader(value);
         }
     }
 

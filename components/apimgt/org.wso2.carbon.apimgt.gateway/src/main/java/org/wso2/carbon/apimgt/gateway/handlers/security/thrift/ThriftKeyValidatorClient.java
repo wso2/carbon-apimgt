@@ -107,11 +107,12 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setApiName(thriftDTO.getApiName());
         apiKeyValidationInfoDTO.setApiPublisher(thriftDTO.getApiPublisher());
         apiKeyValidationInfoDTO.setConsumerKey(thriftDTO.getConsumerKey());
-        apiKeyValidationInfoDTO.setAuthorizedDomains(thriftDTO.getAuthorizedDomains());
+        //apiKeyValidationInfoDTO.setAuthorizedDomains(thriftDTO.getAuthorizedDomains());
         apiKeyValidationInfoDTO.setScopes(thriftDTO.getScopes());
         apiKeyValidationInfoDTO.setIssuedTime(thriftDTO.getIssuedTime());
         apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
-
+        apiKeyValidationInfoDTO.setApiTier(thriftDTO.getApiTier());
+        apiKeyValidationInfoDTO.setThrottlingDataList(thriftDTO.getThrottlingDataList());
         return apiKeyValidationInfoDTO;
     }
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
@@ -151,6 +152,7 @@ public class ThriftKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions(dto.getThrottlingConditions());
         return template;
     }
 

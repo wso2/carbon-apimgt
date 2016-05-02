@@ -1,0 +1,281 @@
+<% jagg.template("configure-alerts/domain/edit", function(inputs, outputs, jagg) { %>
+<%
+    var domain = outputs.domainDto;
+    
+    var configurationDTO = outputs.domainConfiguration;
+
+    var domainName = request.getParameter("domainName");    
+    var isExistingConfig = false;
+    var currentTemplate = null;
+    var saveButtonText = "template.add.button.text";
+    var parameterString = "";
+    var configurationName = "";
+    var templateType = "";
+
+    if (request.getParameter("configurationName") != null) {
+        configurationName = request.getParameter("configurationName");
+    }
+
+    if (request.getParameter("templateType") != null) {
+        templateType = request.getParameter("templateType");
+    }
+
+    if (configurationDTO != null) {
+        isExistingConfig = true;
+    }
+
+
+%>
+
+
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">
+
+
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+
+<div class="container c-both">
+
+    <div class="row">
+        <div class="container col-md-12">
+            <div class="title-section"><h2><%=i18n.localize("editConfigurations")%></h2></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 form-horizontal">
+            <%
+                if (domain.getTemplateDTOs() != null && !templateType.equals("")) {
+                    var templateDTOs =  domain.getTemplateDTOs();
+                    for (var i in templateDTOs) {
+                        if (configurationName == null || templateDTOs[i].getName().equals(templateType)) {
+                            currentTemplate = templateDTOs[i];
+                            break;
+                        }
+                    }
+                } else if (domain.getTemplateDTOs() != null && domain.getTemplateDTOs().length > 0) {
+                    currentTemplate = domain.getTemplateDTOs()[0];
+                }
+
+                if (currentTemplate != null) {
+                    var parameterValue = "";
+                    var description = "";
+            %>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label" for="name"><%=i18n.localize("templateName")%>:</label>
+                <div class="col-md-9">
+                    <select disabled id="cBoxTemplates" class="form-control"
+                            onchange="document.location.href=document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].value">
+                        <%
+
+                            var templateDTOs = domain.getTemplateDTOs();
+                            for (var i in templateDTOs) {
+                                var selectedValue = "";
+                                if (templateDTOs[i].getName().trim().equals(currentTemplate.getName())) {
+                                    selectedValue = "selected=true";
+                                }
+                        %>
+                        <option <%=selectedValue%>
+                                value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+configurationName+"&templateType="+templateDTOs[i].getName())%>">
+                            <%=templateDTOs[i].getName()%>
+                        </option>
+                        <%}%>
+                    </select>
+                    <div class="sectionHelp"><%=currentTemplate.getDescription()%></div>      
+                </div>        
+            </div>
+
+            <%
+                if (isExistingConfig) {
+                    configurationName = configurationDTO.getName().trim();
+                    saveButtonText = "template.update.button.text";
+                } else {
+                    configurationName = currentTemplate.getName().replace(" ", "");
+                }
+            %>
+            
+            <div class="form-group">
+                <label class="control-label col-md-3"><%=i18n.localize("configName")%>:</label>
+                <div class="col-md-9">
+                    <input type="text" id="txtName" class="form-control"
+                           value="<%=configurationName%>"
+                            <% if (isExistingConfig) {
+                                print("readOnly");
+                            }%>/>
+                </div>
+            </div>
+
+            <%
+                if (isExistingConfig) {
+                    description = configurationDTO.getDescription().trim();
+                } else {
+                    description = currentTemplate.getDescription().trim();
+                }
+            %>
+
+            <div class="form-group">
+                <label class="control-label col-md-3"><%=i18n.localize("description")%></label>
+                <div class="col-md-9">
+                    <input type="text" id="txtDescription" class="form-control"
+                           value="<%=description%>"/>
+                </div>
+            </div>
+
+            <%
+                
+                var indexParam = 0;
+                var parameterDTOs = currentTemplate.getParameterDTOs();
+                if (parameterDTOs.length > 0 && (parameterDTOs[1])) {
+            %>
+            <h4>Parameter Configurations</h4>
+
+            <%
+                }
+
+                for (var i in parameterDTOs) {
+
+                    if (!parameterDTOs[i]) { 
+                        continue;
+                    }
+                    if (!isExistingConfig) {
+                        parameterValue = parameterDTOs[i].getDefaultValue().trim();
+                    } else if (configurationDTO.getParameterDTOs() != null) {
+                    	var configParameterDTOs = configurationDTO.getParameterDTOs();
+                        for (var j in configParameterDTOs) {
+                            if (configParameterDTOs[j].getName().equals(parameterDTOs[i].getName())) {
+                                parameterValue = configParameterDTOs[j].getValue().trim();
+                                break;
+                            }
+                        }
+                    }
+
+            %>
+
+            <div class="form-group">
+                <label class="control-label col-md-3"><%
+                    if (parameterDTOs[i].getDisplayName() == null) {
+                        print(parameterDTOs[i].getName());
+                    } else {
+                        print(parameterDTOs[i].getDisplayName());
+                    }
+                %></label>
+                <div class="col-md-9">
+                    <%
+                        if (parameterDTOs[i].getOptions() != null && !parameterDTOs[i].getOptions().trim().equals("")) {
+                    %>
+
+                    <select id="<%=parameterDTOs[i].getName()%>" class="form-control">
+                        <%
+                            var options = parameterDTOs[i].getOptions().split(",");
+                            for (var option in options) {
+
+                                var selectedValue = "";
+
+                                if (option.trim().equals(parameterValue)) {
+                                    selectedValue = "selected=true";
+                                }
+                        %>
+                        <option <%=selectedValue%> value=<%=option%>>
+                            <%=option%>
+                        </option>
+                        <%}%>
+                    </select>
+
+                    <%
+                    } else {
+                    %>
+
+                    <input type="text" id="<%=parameterDTOs[i].getName()%>" class="form-control"
+                           value="<%=parameterValue%>"/>
+                    <%
+                        }
+
+                        if (!parameterDTOs[i].getDescription().equals("")) {
+                    %>
+                        <div class="sectionHelp"><%=parameterDTOs[i].getDescription()%></div>
+                        <%}%>
+                </div>
+            </div>
+            <%
+                        parameterString += "'" + parameterDTOs[i].getName() +
+                                "::' + document.getElementById('"
+                                + parameterDTOs[i].getName() + "').value";
+
+                        indexParam++;
+                        if (indexParam < currentTemplate.getParameterDTOs().length) {
+                            parameterString += "+ ',' +";
+                        }
+
+                    }
+                }
+            %>
+
+            <hr class="wr-separate"/>
+
+
+<%
+
+var executionParamString = null;
+if ("batch".equals(currentTemplate.getExecutionType())) {
+%>
+           <h4><%=i18n.localize("schedulerConfiguration")%></h4>
+
+<div class="form-group">
+ <label class="control-label col-md-3">
+ <%=i18n.localize("cronExpression")%>
+ </label>
+ 
+ <div class="col-md-9">
+
+<%
+if (isExistingConfig && (configurationDTO.getExecutionParameters() != null)) {
+%>
+
+                    <input type="text" id="cronExpressionValue" class="form-control"
+                                           value="<%=configurationDTO.getExecutionParameters()%>"/>
+
+                    <%
+                } else {
+                %>
+ <input type="text" id="cronExpressionValue" class="form-control"
+                       value="0 0 23 * * ?"/>
+
+<%
+}
+%>
+               </div>
+
+<%
+ executionParamString =  "document.getElementById('cronExpressionValue').value";
+
+ if (parameterString.length < 1) {
+        parameterString = "''";
+ }
+ 
+}
+%>
+</div>
+
+
+
+            <div class="action-container form-group">
+
+                <button type="button" class="btn btn-default btn-add"
+                        onclick="saveConfiguration('<%=domainName%>',
+                                document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].text,
+                                document.getElementById('txtName').value, document.getElementById('txtDescription').value,
+                                <%=parameterString%>, <%=executionParamString%>)">
+                    <%=i18n.localize("saveConfiguration")%>
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+        
+
+</div>
+
+
+<%});%>

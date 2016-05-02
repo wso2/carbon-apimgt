@@ -9,22 +9,7 @@ jagg.block("layout/extended", {
     var tenantDomain=request.getParameter("tenant");
 
         var middle = inputs.middle;
-        if(!middle) {
-            middle = [{
-                "name":"breadcumb",
-                "inputs":{"tenant":tenantDomain}
-            }];
-        } else if(middle instanceof Array) {
-            middle.unshift({
-                "name":"breadcumb",
-                "inputs":{"tenant":tenantDomain}
-            });
-        } else {
-            middle = [{
-                "name":"breadcumb",
-                "inputs":{"tenant":tenantDomain}
-            }, middle];
-        }
+
 
         return {
             "title":inputs.title,
@@ -32,6 +17,10 @@ jagg.block("layout/extended", {
             "left":[{
                 "name":"menu/left",
                  "inputs":{"tenant":tenantDomain}
+            }],
+            "breadcrumb":[{
+                "name":"breadcumb",
+                "inputs":{"tenant":tenantDomain}
             }],
             "middle":middle,
             "right":null

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
@@ -264,7 +265,6 @@ public class SQLConstants {
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
     public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
@@ -291,8 +291,70 @@ public class SQLConstants {
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+
+    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
+            " SELECT " +
+                    "   SUB.TIER_ID," +
+                    "   SUBS.USER_ID," +
+                    "   SUB.SUB_STATUS," +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   AKM.KEY_TYPE," +
+                    "   API.API_NAME," +
+                    "   API.API_TIER," +
+                    "   API.API_PROVIDER," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.STOP_ON_QUOTA_REACH" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUB," +
+                    "   AM_SUBSCRIBER SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_API API," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " WHERE " +
+                    "   API.CONTEXT = ? " +
+                    "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUB.API_ID" +
+                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+                    "   AND APS.NAME = SUB.TIER_ID";
+
+    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
+            " SELECT " +
+                    "   SUB.TIER_ID," +
+                    "   SUBS.USER_ID," +
+                    "   SUB.SUB_STATUS," +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.APPLICATION_TIER," +
+                    "   AKM.KEY_TYPE," +
+                    "   API.API_NAME," +
+                    "   API.API_TIER," +
+                    "   API.API_PROVIDER," +
+                    "   APS.RATE_LIMIT_COUNT," +
+                    "   APS.RATE_LIMIT_TIME_UNIT," +
+                    "   APS.STOP_ON_QUOTA_REACH" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUB," +
+                    "   AM_SUBSCRIBER SUBS," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_API API," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " WHERE " +
+                    "   API.CONTEXT = ? " +
+                    "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                    "   AND API.API_ID = SUB.API_ID" +
+                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+                    "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -473,6 +535,7 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.TENANT_ID = ? " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND API.API_ID=SUBS.API_ID" +
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
@@ -795,6 +858,36 @@ public class SQLConstants {
             "   AND AKM.KEY_TYPE = 'SANDBOX' " +
             "   AND (IAT.TOKEN_STATE = 'ACTIVE' OR IAT.TOKEN_STATE = 'EXPIRED' OR IAT.TOKEN_STATE = 'REVOKED') " +
             " ORDER BY IAT.TIME_CREATED DESC ";
+
+    //--------------------New tier permission management
+
+    public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
+            " SELECT TIER_PERMISSIONS_ID " +
+            " FROM AM_TIER_PERMISSIONS " +
+            " WHERE TIER = ? AND " + "TENANT_ID = ?";
+
+    public static final String ADD_THROTTLE_TIER_PERMISSION_SQL =
+            " INSERT INTO" +
+            "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+            " VALUES(?, ?, ?, ?)";
+
+    public static final String UPDATE_THROTTLE_TIER_PERMISSION_SQL =
+            " UPDATE" +
+            "   AM_TIER_PERMISSIONS " +
+            " SET " +
+            "   TIER = ?, " +
+            "   PERMISSIONS_TYPE = ?," +
+            "   ROLES = ? " +
+            " WHERE " +
+            "   TIER_PERMISSIONS_ID = ? " +
+            "   AND TENANT_ID = ?";
+
+    public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
+            " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
+            " FROM AM_TIER_PERMISSIONS " +
+            " WHERE TENANT_ID = ?";
+
+  //--------------------
 
     public static final String GET_TIER_PERMISSION_ID_SQL =
             " SELECT TIER_PERMISSIONS_ID " +
@@ -1364,8 +1457,8 @@ public class SQLConstants {
             "   AND API.API_ID = SUB.API_ID";
 
     public static final String ADD_API_SQL =
-            " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME)" +
-            " VALUES (?,?,?,?,?,?,?)";
+            " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +
+            " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -1475,12 +1568,12 @@ public class SQLConstants {
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
     public static final String GET_ALL_URL_TEMPLATES_SQL =
-            " SELECT " +
+            " SELECT    " +
             "   AUM.HTTP_METHOD," +
-            "   AUTH_SCHEME," +
-            "   URL_PATTERN," +
-            "   THROTTLING_TIER," +
-            "   MEDIATION_SCRIPT " +
+            "   AUM.AUTH_SCHEME," +
+            "   AUM.URL_PATTERN," +
+            "   AUM.THROTTLING_TIER," +
+            "   AUM.MEDIATION_SCRIPT " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM, " +
             "   AM_API API " +
@@ -1496,7 +1589,8 @@ public class SQLConstants {
             "   CONTEXT = ?, " +
             "   CONTEXT_TEMPLATE = ?, " +
             "   UPDATED_BY = ?," +
-            "   UPDATED_TIME = ? " +
+            "   UPDATED_TIME = ?, " +
+            "   API_TIER = ? " +
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
@@ -1996,4 +2090,376 @@ public class SQLConstants {
             "   AND IOAT.TENANT_ID = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
             "   AND LOWER(IOAT.USER_DOMAIN) = ?";
+
+    public static final String GET_ALL_ALERT_TYPES =
+            "SELECT " +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  " +
+            " WHERE " +
+            "   STAKE_HOLDER   = ?";
+
+
+    public static final String GET_ALL_ALERT_TYPES_FOR_ADMIN =
+            "SELECT DISTINCT" +
+            "   AT.ALERT_TYPE_ID, " +
+            "   AT.ALERT_TYPE_NAME " +
+            " FROM " +
+            "   AM_ALERT_TYPES AT  ";
+
+    public static final String GET_SAVED_ALERT_TYPES_BY_USERNAME =
+            " SELECT " +
+            "   ALERT_TYPE_ID " +
+            " FROM " +
+            "   AM_ALERT_TYPES_VALUES " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND STAKE_HOLDER   = ? ";
+
+    public static final String GET_SAVED_ALERT_EMAILS =
+
+            " SELECT " +
+            "   EMAIL " +
+            " FROM " +
+            "   AM_ALERT_EMAILLIST , " +
+            "   AM_ALERT_EMAILLIST_DETAILS  " +
+            " WHERE " +
+            "   AM_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
+            "   AND USER_NAME = ? " +
+            "   AND STAKE_HOLDER  = ? ";
+
+
+    public static final String ADD_ALERT_TYPES_VALUES =
+            " INSERT INTO AM_ALERT_TYPES_VALUES (ALERT_TYPE_ID, USER_NAME , STAKE_HOLDER) " +
+            " VALUES(?,?,?)";
+
+    public static final String ADD_ALERT_EMAIL_LIST =
+            " INSERT INTO AM_ALERT_EMAILLIST  (USER_NAME, STAKE_HOLDER) " +
+            " VALUES(?,?)";
+
+    public static final String DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER  =
+            "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
+
+    public static final String DELETE_EMAILLIST_BY_EMAIL_LIST_ID  =
+            "DELETE FROM AM_ALERT_EMAILLIST_DETAILS   WHERE EMAIL_LIST_ID= ? ";
+
+    public static final String GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER =
+            " SELECT " +
+            "   EMAIL_LIST_ID " +
+            " FROM " +
+            "   AM_ALERT_EMAILLIST " +
+            " WHERE " +
+            "   USER_NAME = ? " +
+            "   AND STAKE_HOLDER  = ? ";
+
+    public static final String SAVE_EMAIL_LIST_DETAILS_QUERY =
+            " INSERT INTO AM_ALERT_EMAILLIST_DETAILS  (EMAIL_LIST_ID, EMAIL) " +
+            " VALUES(?,?)";
+
+    public static final String DELETE_ALERTTYPES_EMAILLISTS_BY_USERNAME_AND_STAKE_HOLDER  =
+            "DELETE FROM AM_ALERT_EMAILLIST  WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
+
+
+
+    public static final String INSERT_APPLICATION_POLICY_SQL =
+            "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
+            "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
+            "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN) \n" +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
+            "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+
+    public static final String INSERT_GLOBAL_POLICY_SQL =
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
+            "VALUES (?,?,?,?,?,?)";
+
+    public static final String GET_APP_POLICY_NAMES =
+            " SELECT " +
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_APPLICATION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_SUB_POLICY_NAMES =
+            " SELECT " +
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICY_NAMES =
+            " SELECT " +
+                    "   NAME " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICY_KEY_TEMPLATES =
+            " SELECT " +
+                    "   KEY_TEMPLATE " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICY_KEY_TEMPLATE =
+            " SELECT " +
+                    "   KEY_TEMPLATE " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =? AND" +
+                    "   KEY_TEMPLATE =? AND" +
+                    "   NAME !=?";
+
+    public static final String GET_APP_POLICIES =
+            " SELECT "+
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_APPLICATION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+    public static final String GET_SUBSCRIPTION_POLICIES =
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+    public static final String GET_GLOBAL_POLICIES =
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_GLOBAL " +
+                    " WHERE" +
+                    "   TENANT_ID =?";
+
+
+    public static final String GET_APPLICATION_POLICY_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_APPLICATION " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID =?";
+
+    public static final String GET_SUBSCRIPTION_POLICY_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_SUBSCRIPTION " +
+            "WHERE " +
+                    "NAME = ? AND " +
+                    "TENANT_ID =?";
+
+
+
+    public static final String UPDATE_APPLICATION_POLICY_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+            "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+            "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    " CUSTOM_ATTRIBUTES = ? "+
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+            "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ? "+
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+            "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
+                    " CUSTOM_ATTRIBUTES = ? "+
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_GLOBAL_POLICY_SQL =
+            "UPDATE AM_POLICY_GLOBAL " +
+            "SET " +
+                    "DESCRIPTION = ?, " +
+                    "SIDDHI_QUERY = ?, " +
+                    "KEY_TEMPLATE = ? " +
+            "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_GLOBAL_POLICY_STATUS_SQL =
+            "UPDATE AM_POLICY_GLOBAL SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String DELETE_APPLICATION_POLICY_SQL =
+            "DELETE FROM AM_POLICY_APPLICATION WHERE TENANT_ID = ? AND NAME = ?";
+
+    public static final String DELETE_SUBSCRIPTION_POLICY_SQL =
+            "DELETE FROM AM_POLICY_SUBSCRIPTION WHERE TENANT_ID = ? AND NAME = ?";
+
+    public static final String DELETE_GLOBAL_POLICY_SQL =
+            "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
+
+    public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
+
+    /** Throttle related constants**/
+
+    public static class ThrottleSQLConstants{
+
+    	public static final String QUOTA_TYPE_BANDWIDTH = PolicyConstants.BANDWIDTH_TYPE;
+
+    	public static final String QUOTA_TYPE_REQUESTCOUNT = PolicyConstants.REQUEST_COUNT_TYPE;
+
+		public static final String GET_POLICY_NAMES = " SELECT " + "   NAME " + "FROM " + "   AM_API_THROTTLE_POLICY"
+				+ " WHERE" + "   TYPE = ?" + "   AND TENANT_ID =?";
+
+		public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
+
+		public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, APPLICABLE_LEVEL) \n"
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+		public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+				+ " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
+				+ " IS_DEPLOYED, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+
+		public static final String UPDATE_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET " + "NAME = ?," + "DISPLAY_NAME = ?,"
+				+ " TYPE = ?," + "TENANT_ID = ?," + "APPLICABLE_LEVEL = ? ," + "DESCRIPTION = ? ,"
+				+ " DEFAULT_QUOTA_TYPE = ? ," + "DEFAULT_QUOTA = ?," + "DEFAULT_UNIT_TIME = ? " + " WHERE POLICY_ID = ?";
+
+		public static final String GET_API_POLICY_NAMES = " SELECT " + "   NAME " + "FROM "
+				+ "   AM_API_THROTTLE_POLICY " + " WHERE" + "   TENANT_ID =?";
+
+		public static final String GET_API_POLICIES = " SELECT " + "   * " + "FROM " + "   AM_API_THROTTLE_POLICY "
+				+ " WHERE" + "   TENANT_ID =?";
+
+		public static final String GET_API_POLICY_ID_SQL = "SELECT " + "POLICY_ID " + "FROM "
+				+ " AM_API_THROTTLE_POLICY " + "WHERE " + "NAME = ? AND " + "TENANT_ID = ?";
+
+		public static final String GET_API_POLICY_SQL = "SELECT " + "* " + "FROM " + "AM_API_THROTTLE_POLICY "
+				+ " WHERE " + "NAME = ? AND " + "TENANT_ID =?";
+
+		public static final String UPDATE_API_POLICY_STATUS_SQL = "UPDATE AM_API_THROTTLE_POLICY SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
+
+		public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE TENANT_ID = ? AND NAME = ?";
+
+
+
+		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n"
+															+ " VALUES (?,?,?,?,?,?)";
+
+		public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
+				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
+
+		public static final String GET_IP_CONDITIONS_SQL = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP, "
+				+ " WITHIN_IP_RANGE " + "FROM " + "AM_IP_CONDITION " + "WHERE " + "CONDITION_GROUP_ID = ? ";
+
+		public static final String GET_HEADER_CONDITIONS_SQL = "SELECT " + "HEADER_FIELD_NAME, " + "HEADER_FIELD_VALUE , IS_HEADER_FIELD_MAPPING "
+				+ " FROM " + "AM_HEADER_FIELD_CONDITION " + "WHERE " + "CONDITION_GROUP_ID =?";
+
+		public static final String GET_JWT_CLAIM_CONDITIONS_SQL = "SELECT " + "CLAIM_URI, " + "CLAIM_ATTRIB , IS_CLAIM_MAPPING " + "FROM "
+				+ " AM_JWT_CLAIM_CONDITION " + "WHERE " + "CONDITION_GROUP_ID =?";
+
+		public static final String GET_QUERY_PARAMETER_CONDITIONS_SQL = "SELECT " + "PARAMETER_NAME, "
+				+ " PARAMETER_VALUE , IS_PARAM_MAPPING " + "FROM " + "AM_QUERY_PARAMETER_CONDITION " + "WHERE " + "CONDITION_GROUP_ID =?";
+
+		public static final String INSERT_QUERY_PARAMETER_CONDITION_SQL = "INSERT INTO AM_QUERY_PARAMETER_CONDITION(CONDITION_GROUP_ID,PARAMETER_NAME,PARAMETER_VALUE, IS_PARAM_MAPPING) \n"
+				+ " VALUES (?,?,?,?)";
+
+		public static final String INSERT_HEADER_FIELD_CONDITION_SQL = "INSERT INTO AM_HEADER_FIELD_CONDITION(CONDITION_GROUP_ID,HEADER_FIELD_NAME,HEADER_FIELD_VALUE, IS_HEADER_FIELD_MAPPING) \n"
+				+ " VALUES (?,?,?,?)";
+
+		public static final String INSERT_JWT_CLAIM_CONDITION_SQL = "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_GROUP_ID,CLAIM_URI,CLAIM_ATTRIB,IS_CLAIM_MAPPING) \n"
+				+ " VALUES (?,?,?,?)";
+
+		public static final String INSERT_IP_CONDITION_SQL =
+	            " INSERT INTO AM_IP_CONDITION(STARTING_IP,ENDING_IP,SPECIFIC_IP,WITHIN_IP_RANGE,CONDITION_GROUP_ID ) \n" +
+	            " VALUES (?,?,?,?,?)";
+
+		public static final String IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL = "SELECT APPPOLICY.TENANT_ID, APPPOLICY.QUOTA_TYPE "
+				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
+				+ " WHERE APPPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
+
+		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "SELECT APIPOLICY.TENANT_ID, APIPOLICY.DEFAULT_QUOTA_TYPE "
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, " + "AM_POLICY_APPLICATION APPPOLICY, "
+				+ " AM_POLICY_SUBSCRIPTION SUBPOLICY " + "WHERE APIPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND "
+				+ " SUBPOLICY.NAME=? AND " + "APIPOLICY.NAME =?  ";
+
+		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, "
+				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID  "
+				+ " FROM AM_API_URL_MAPPING AUM"
+				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
+				+ " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
+				+ " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
+				+ " where API.CONTEXT= ? AND API.API_VERSION = ?"
+				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
+				+ " ORDER BY AUM.URL_MAPPING_ID";
+        public static final String ADD_BLOCK_CONDITIONS_SQL =
+                "INSERT INTO `AM_BLOCK_CONDITIONS` (`TYPE`,`VALUE`,`ENABLED`,`DOMAIN`) VALUES (?,?,?,?)";
+        public static final String GET_BLOCK_CONDITIONS_SQL =
+                "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+        public static final String UPDATE_BLOCK_CONDITION_STATE_SQL =
+                "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
+        public static final String DELETE_BLOCK_CONDITION_SQL =
+                "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `CONDITION_ID`=?";
+    }
 }

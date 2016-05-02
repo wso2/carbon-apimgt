@@ -19,6 +19,10 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +42,11 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
+import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -59,7 +67,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -104,7 +115,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private void readTagCacheConfigs() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
-        String enableTagCache = config.getFirstProperty(APIConstants.API_STORE_TAG_CACHE_DURATION);
+        String enableTagCache = config.getFirstProperty(APIConstants.STORE_TAG_CACHE_DURATION);
         if (enableTagCache == null) {
             isTagCacheEnabled = false;
             tagCacheValidityTime = 0;
@@ -620,15 +631,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Renewed Access Token.
      * @throws APIManagementException
      */
     @Override
     public AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret,
-                                            String validityTime, String[] accessAllowDomainsArray,String
-            requestedScopes[], String jsonInput) throws APIManagementException {
+                                            String validityTime, String
+                                                    requestedScopes[], String jsonInput) throws APIManagementException {
         // Create Token Request with parameters provided from UI.
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -1701,10 +1711,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
         apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
-        if(consumerKey != null){
-            apiMgtDAO.deleteAccessAllowDomains(consumerKey);
-        }
-
     }
 
     /**
@@ -1714,13 +1720,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
-     *@param allowedDomainArray @return
+     * @return
      * @throws APIManagementException
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                      String applicationName, String keyType,
-                                                      String[] allowedDomainArray) throws APIManagementException {
+                                                      String applicationName, String keyType)
+                                                                        throws APIManagementException {
 
         String callBackURL = null;
 
@@ -1743,7 +1749,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -1884,7 +1889,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int subscriptionId;
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                    APIConstants.SubscriptionStatus.ON_HOLD, userId);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2111,7 +2116,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId);
+        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
     }
 
     @Override
@@ -2712,18 +2717,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPISet;
     }
 
-    @Override
-    public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
-    }
-
-    @Override
-    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
-            throws APIManagementException {
-        apiMgtDAO.updateAccessAllowDomains(accessToken, accessAllowDomains);
-    }
-
     /**
      * Returns a list of tiers denied
      *
@@ -2924,7 +2917,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationId != null && tokenType != null) {
                 apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
                 apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
-                apiMgtDAO.deleteAccessAllowDomains(consumerKey);
             }
         }
     }
@@ -3038,4 +3030,5 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return false;
     }
+
 }

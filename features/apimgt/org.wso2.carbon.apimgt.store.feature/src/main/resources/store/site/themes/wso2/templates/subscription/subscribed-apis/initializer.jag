@@ -1,0 +1,8 @@
+<%
+jagg.initializer("subscription/subscribed-apis", {
+
+    preInitialize:function () {
+    jagg.addFooterJS("api/api-listing-all", "common-js", "js/common.js");
+    }
+});
+%>

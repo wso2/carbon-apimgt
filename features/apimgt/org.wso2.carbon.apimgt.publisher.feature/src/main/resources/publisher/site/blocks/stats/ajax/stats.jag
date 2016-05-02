@@ -1,0 +1,90 @@
+<%
+include("/jagg/jagg.jag");
+var log = new Log();
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+    action = request.getParameter("action"),
+    apiName = request.getParameter("apiName"),
+    apiVersion = request.getParameter("apiVersion"),    
+    site = require("/site/conf/site.json"),
+    msg = require("/site/conf/ui-messages.jag")
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'AuthenticateError'
+            });
+        } else {        
+            var provider = jagg.getUser().username;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+            var usageStatClient;
+                if (action === "isDataPublishingEnabled") {
+
+                        mod = jagg.module("statistics");
+                        result = mod.isDataPublishingEnabled();
+
+                        if (result.error == "true") {
+                            obj = {
+                                error: result.error,
+                                message: msg.error.backendError(action)
+                            };
+                            } else {
+                                obj = {
+                                    error: false,
+                                    usage: result.usage
+                                }
+                            }
+                            print(obj);
+
+                        }
+                        else if(action === "getAPIList"){
+                            var currentLocation = request.getParameter("currentLocation");
+                            var provider = jagg.getUser().username;
+                            var log = new Log();
+                            mod = jagg.module("api");
+                            result = mod.getAllAPIs();
+                            var apiNameVersionMap = {};
+                            var selectedApis =[];
+                            if (result.error == "true") {
+                                obj = {
+                                    error: result.error,
+                                    message: msg.error.backendError(action)
+                                      };
+                                } else {
+                                   var selectedApis =[];
+                                if (currentLocation != null && currentLocation == "allAPIs") {
+                                    selectedApis = result.apis;
+                                    }else{
+                                if (result.apis && result.apis.length>0) {
+                                    var apiList = result.apis;
+                                    for (var i in apiList) {
+                                        var apiProvider = apiList[i].provider;
+                                        if(apiProvider == provider){
+                                            selectedApis.push(apiList[i]);
+                                                }
+                                            }
+                                                }                                        
+                                            }
+                               if (selectedApis && selectedApis.length>0) {
+                                for (var i in selectedApis) {
+                                    var apiname = selectedApis[i].name;
+                                    var versionList = apiNameVersionMap[apiname];
+                                    if (!versionList) {
+                                        versionList = [];
+                                        }
+                                        versionList.push(selectedApis[i].version);
+                                        apiNameVersionMap[apiname]=versionList;
+                                    }
+                                    }
+                                    obj = {
+                                           error: false,
+                                           apiNameVersionMap: apiNameVersionMap
+                                           };
+                                        print(obj);
+                                          }
+                        };}
+                    }());
+%>

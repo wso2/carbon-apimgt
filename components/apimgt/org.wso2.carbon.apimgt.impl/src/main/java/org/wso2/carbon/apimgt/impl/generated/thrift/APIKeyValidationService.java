@@ -39,13 +39,9 @@ public class APIKeyValidationService {
 
   public interface AsyncIface {
 
-    public void validateKey(String context, String version, String accessToken, String sessionId,
-                            String requiredAuthenticationLevel, String clientDomain, String matchingResource,
-                            String httpVerb,
-                            org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
+    public void validateKey(String context, String version, String accessToken, String sessionId, String requiredAuthenticationLevel, String clientDomain, String matchingResource, String httpVerb, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.validateKey_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void getAllURITemplates(String context, String apiVersion, String sessionId,
-                                   org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
+    public void getAllURITemplates(String context, String apiVersion, String sessionId, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getAllURITemplates_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -2893,14 +2889,14 @@ public class APIKeyValidationService {
             case 0: // SUCCESS
               if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
                 {
-                  org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
-                  struct.success = new ArrayList<URITemplate>(_list16.size);
-                  for (int _i17 = 0; _i17 < _list16.size; ++_i17)
+                  org.apache.thrift.protocol.TList _list32 = iprot.readListBegin();
+                  struct.success = new ArrayList<URITemplate>(_list32.size);
+                  for (int _i33 = 0; _i33 < _list32.size; ++_i33)
                   {
-                    URITemplate _elem18; // required
-                    _elem18 = new URITemplate();
-                    _elem18.read(iprot);
-                    struct.success.add(_elem18);
+                    URITemplate _elem34; // required
+                    _elem34 = new URITemplate();
+                    _elem34.read(iprot);
+                    struct.success.add(_elem34);
                   }
                   iprot.readListEnd();
                 }
@@ -2946,9 +2942,9 @@ public class APIKeyValidationService {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
-            for (URITemplate _iter19 : struct.success)
+            for (URITemplate _iter35 : struct.success)
             {
-              _iter19.write(oprot);
+              _iter35.write(oprot);
             }
             oprot.writeListEnd();
           }
@@ -2995,9 +2991,9 @@ public class APIKeyValidationService {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (URITemplate _iter20 : struct.success)
+            for (URITemplate _iter36 : struct.success)
             {
-              _iter20.write(oprot);
+              _iter36.write(oprot);
             }
           }
         }
@@ -3015,14 +3011,14 @@ public class APIKeyValidationService {
         BitSet incoming = iprot.readBitSet(3);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-            struct.success = new ArrayList<URITemplate>(_list21.size);
-            for (int _i22 = 0; _i22 < _list21.size; ++_i22)
+            org.apache.thrift.protocol.TList _list37 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new ArrayList<URITemplate>(_list37.size);
+            for (int _i38 = 0; _i38 < _list37.size; ++_i38)
             {
-              URITemplate _elem23; // required
-              _elem23 = new URITemplate();
-              _elem23.read(iprot);
-              struct.success.add(_elem23);
+              URITemplate _elem39; // required
+              _elem39 = new URITemplate();
+              _elem39.read(iprot);
+              struct.success.add(_elem39);
             }
           }
           struct.setSuccessIsSet(true);

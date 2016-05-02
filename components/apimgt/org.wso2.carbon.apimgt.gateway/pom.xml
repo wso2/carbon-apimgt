@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>5.0.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,6 +30,10 @@
     <url>http://wso2.org</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>
@@ -203,7 +207,7 @@
                             org.apache.http.*,
                             org.apache.commons.*,
                             org.apache.synapse.*,
-                            org.apache.thrift.*,
+                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*; version="2.0.4.wso2v4",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.throttle.core.*; version="${imp.pkg.version.carbon.throttle}",
@@ -213,7 +217,6 @@
                             org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
                             org.osgi.framework.*,
-                            org.wso2.carbon.bam.service.data.publisher.*,
                             org.wso2.carbon.rest.api.stub.*,
                             org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.context,

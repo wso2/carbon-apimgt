@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -113,7 +115,7 @@ public class APIExecutor implements Execution {
 
             APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
-            
+
             if(newStatus != null){ //only allow the executor to be used with default LC states transition
                                    //check only the newStatus so this executor can be used for LC state change from 
                                    //custom state to default api state
@@ -123,8 +125,8 @@ public class APIExecutor implements Execution {
                     String endPoint = api.getEndpointConfig();
                     if (endPoint != null && endPoint.trim().length() > 0) {
                         if (tiers == null || tiers.size() <= 0) {
-                            throw new APIManagementException("Failed to publish service to API store while executing " +
-                                                             "APIExecutor. No Tiers selected");
+                                throw new APIManagementException("Failed to publish service to API store while executing " +
+                                                                 "APIExecutor. No Tiers selected");
                         }
                     } else {
                         throw new APIManagementException("Failed to publish service to API store while executing"

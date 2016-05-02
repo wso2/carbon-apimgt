@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.apimgt.usage.publisher;
 
+import org.apache.axis2.context.MessageContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.derby.iapi.util.StringUtil;
+import org.apache.http.HttpHeaders;
+import org.apache.woden.wsdl20.extensions.http.HTTPHeader;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -28,6 +33,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Map;
 
 public class DataPublisherUtil {
 
@@ -38,7 +44,7 @@ public class DataPublisherUtil {
     public static final String HOST_NAME = "HostName";
     private static final String UNKNOWN_HOST = "UNKNOWN_HOST";
     private static boolean isEnabledMetering=false;
-
+    private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     public static String getHostAddress() {
 
         if (hostAddress != null) {
@@ -57,6 +63,23 @@ public class DataPublisherUtil {
             return hostAddress;
         }
     }
+    public static String getClientIp( MessageContext axis2MsgContext){
+        String clientIp;
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
+        if (!StringUtils.isEmpty(xForwardForHeader)){
+            clientIp = xForwardForHeader;
+            int idx = xForwardForHeader.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        }else{
+         clientIp = (String) axis2MsgContext.getProperty(MessageContext.REMOTE_ADDR);
+        }
+        return clientIp;
+    }
+
 
     private static InetAddress getLocalAddress(){
         Enumeration<NetworkInterface> ifaces = null;

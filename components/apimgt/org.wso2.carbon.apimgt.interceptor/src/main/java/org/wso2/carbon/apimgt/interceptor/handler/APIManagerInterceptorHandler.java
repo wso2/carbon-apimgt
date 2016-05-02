@@ -121,7 +121,6 @@ public class APIManagerInterceptorHandler extends AbstractHandler {
 							APITokenAuthenticator authenticator = new APITokenAuthenticator();
 
 							String apiVersion = APIManagetInterceptorUtils.getAPIVersion(request);							
-							String domain = request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader());
 							String authLevel = authenticator.getResourceAuthenticationScheme(context,
                                                                            apiVersion,
                                                                            request.getRequestURI(),
@@ -132,7 +131,7 @@ public class APIManagerInterceptorHandler extends AbstractHandler {
 								return InvocationResponse.ABORT;
 							}
 							else{
-								interceptorOps.doAuthenticate(context, apiVersion,accessToken, authLevel,domain);
+								interceptorOps.doAuthenticate(context, apiVersion,accessToken, authLevel);
 							}
 						} catch (APIManagementException e) {
 							// ignore

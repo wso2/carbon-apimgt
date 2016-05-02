@@ -1,0 +1,141 @@
+<% jagg.template("configure-alerts/domain/manage", function(inputs, outputs, jagg) { %>
+<%
+    var configurations = outputs.configurationInfo;
+    var templates = outputs.templates;
+    var domainName = request.getParameter("domainName");
+%>
+
+
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+    
+  
+
+    <div class="row">
+           
+
+            <div class="container col-md-12">
+            <h2>Alert Configurations</h2>
+                <!--ul >
+                    <li class="title-section"><h2>Alert Configurations</h2>
+                    </li>
+                </ul-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="container col-md-12 marg-top-20">
+                
+                <!--br class="c-both"/-->
+                <br class="c-both"/>
+
+
+                 <%
+                    if (templates != null && templates.length > 0) {
+                %>
+
+                <table class="table table-bordered" id="tblConfigs">
+
+                    <thead>
+                    <tr>                      
+                        <th><%=i18n.localize("domainTableColumnName")%></th>
+                        <th><%=i18n.localize("domainTableColumnDescription")%></th>
+                        <th><%=i18n.localize("templateStatus")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                        for (var i in templates) {
+                    %>
+                    <tr>
+                        <td>
+                            <%=templates[i].getName()%>
+                        </td>
+                        <td><%=templates[i].getDescription()%>
+                        </td>
+<%
+var existingConfig = null;
+
+
+for (var j in configurations) {
+
+    if (configurations[j].getType().trim() == templates[i].getName().trim()) {
+        existingConfig = configurations[j];
+        break;
+    }
+}
+
+if (existingConfig) {
+
+%>
+
+                        <td><%=i18n.localize("templateStatusActive")%></td>
+                        <td class="tcenter">
+                            <a onclick="deleteConfiguration('<%=existingConfig.getFrom()%>','<%=existingConfig.getName()%>')">
+                                <i class="glyphicon glyphicon-remove"></i>
+                                <%=i18n.localize("deactivate")%></a>
+                        &nbsp; &nbsp; 
+ 
+                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getFrom()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
+                                <i class="fw fw-edit"></i>
+                                <%=i18n.localize("common.button.edit")%></a></td>
+
+                        <% } else { %>
+                        <!--  need to show configuration and activate -->
+                       <td><%=i18n.localize("templateStatusInactive")%></td>
+                       <td class="tcenter">
+                            <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getName() +"&templateType="+templates[i].getName()+"&mode=edit")%>">
+                                <i class="fw fw-activate"></i>
+                                <%=i18n.localize("activate")%></a></td>
+
+                        <% } %>
+                       
+                    </tr>
+                    <%
+                        }
+                    } else {
+
+                    %>
+
+                    <table class="styledLeft">
+                        <tbody>
+                        <tr>
+                            <td class="formRaw">
+                                <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
+                                    <tbody>
+                                    <tr>
+                                        <td class="leftCol-med" colspan="2">No Configurations to be listed
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+
+
+                    </table>
+                    <%
+                                }
+
+                    %>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="row pad-bot-50">
+            <div class="container col-md-8">
+                &nbsp;
+            </div>
+            <div class="container col-md-4">
+                &nbsp;
+            </div>
+            <br class="c-both "/>
+        </div>
+
+</div>
+
+
+<%});%>

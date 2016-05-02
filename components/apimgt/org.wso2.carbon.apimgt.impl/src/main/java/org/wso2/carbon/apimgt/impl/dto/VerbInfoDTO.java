@@ -3,6 +3,8 @@ package org.wso2.carbon.apimgt.impl.dto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VerbInfoDTO implements Serializable {
 
@@ -12,6 +14,7 @@ public class VerbInfoDTO implements Serializable {
 
     private String throttling;
 
+    private List<String> throttlingConditions = new ArrayList<String>();
 
     private String requestKey;
 
@@ -66,5 +69,14 @@ public class VerbInfoDTO implements Serializable {
     @Override
     public int hashCode() {
         return httpVerb != null ? httpVerb.hashCode() : 0;
+    }
+
+
+    public List<String> getThrottlingConditions() {
+        return throttlingConditions;
+    }
+
+    public void setThrottlingConditions(List<String> throttlingConditions) {
+        this.throttlingConditions = throttlingConditions;
     }
 }

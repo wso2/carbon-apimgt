@@ -175,7 +175,6 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (log.isDebugEnabled()) {
             log.debug("APIKeyValidationInfoDTO before returning : " + validationContext.getValidationInfoDTO());
         }
-
         return validationContext.getValidationInfoDTO();
     }
 

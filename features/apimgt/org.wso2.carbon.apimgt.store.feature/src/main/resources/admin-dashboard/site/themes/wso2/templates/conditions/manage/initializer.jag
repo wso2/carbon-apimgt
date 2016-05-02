@@ -1,0 +1,7 @@
+<%
+jagg.initializer("conditions/manage", {
+    preInitialize:function () {
+    	 jagg.addHeaderJS("conditions/manage", "jagg", "templates/conditions/manage/js/manage.js");
+    }
+});
+%>

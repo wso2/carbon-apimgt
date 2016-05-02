@@ -111,7 +111,7 @@ public class TenantManagerHostObject extends ScriptableObject {
             //create output directory if it is not exists
             File folder = new File(outputFolder);
             if(!folder.exists()){
-                if(!folder.mkdir()){
+                if(!folder.mkdirs()){
                     handleException("Unable to create tenant theme directory");
                 }
             }

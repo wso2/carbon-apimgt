@@ -1,0 +1,70 @@
+<% jagg.template("search/api-search", function(inputs, outputs, jagg) {
+var query=request.getParameter("query");
+var tenant = jagg.getTenantDomain();
+%>
+
+<form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
+  <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
+    <div class="input-group input-wrap search-wrap">
+      <input type="text" class="form-control appm-content-search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("searchAPI")%>...">
+      <div class="input-group-btn">
+        <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
+          <i class="fw fw-search" aria-hidden="true"></i>
+        </button> 
+      </div>
+      <div class="input-group-btn">
+        <a class="help_popup" rel="popover" data-popover-content="#apiSearchTips"  data-placement="bottom">
+            <span class="icon fw-stack fw-lg add-margin-left-1x" style="font-size:10px">
+                <i class="fw fw-circle fw-stack-2x"></i>
+                <i class="fw fw-question fw-stack-1x fw-inverse"></i>
+            </span>
+        </a>
+      </div>
+       <div id="apiSearchTips" class="hide help-popover-content" >
+            <ol>
+                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+            </ol>
+        </div>
+      <%if(tenant != null){ %>
+        <input type="hidden" class="span5" name="tenant" value="<%= tenant %>" />
+        <%}%> 
+    </div><!-- /input-group -->
+  </div>
+</form>
+<!-- div class="row">
+  <div class="col-md-6 api-search">
+    <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
+        <div class="input-group">
+          <input type="text" class="form-control" name="query" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%>
+                     placeholder="<%=i18n.localize("searchAPI")%>" />
+          <span class="input-group-btn">
+            <button class="btn btn-primary search_apis" type="submit"><i class="fa fa-search"></i>Search</button>
+          </span>
+        </div>
+        <div id="apiSearchHelp" class="hide help-popover-content" >
+            <ol>
+                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+            </ol>
+        </div>
+        <%if(tenant != null){ %>
+        <input type="hidden" class="span5" name="tenant" value="<%= tenant %>" />
+        <%}%>        
+    </form>
+  </div>
+  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> Search Options</a>
+</div>
+</div -->
+
+<% }); %>

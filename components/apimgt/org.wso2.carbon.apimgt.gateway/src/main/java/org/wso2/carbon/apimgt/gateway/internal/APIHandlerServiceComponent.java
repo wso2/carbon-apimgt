@@ -23,6 +23,10 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.util.WebServiceBlockConditionsRetriever;
+import org.wso2.carbon.apimgt.gateway.throttling.util.WebServiceThrottleDataRetriever;
+import org.wso2.carbon.apimgt.gateway.throttling.util.jms.JMSThrottleDataRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -42,7 +46,7 @@ import java.io.File;
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 public class APIHandlerServiceComponent {
-    
+
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
@@ -68,7 +72,32 @@ public class APIHandlerServiceComponent {
 			  TenantServiceCreator listener = new TenantServiceCreator();
 			  bundleContext.registerService(
 			          Axis2ConfigurationContextObserver.class.getName(), listener, null);
-			}
+
+                if (configuration.getThrottleProperties().isEnabled()) {
+                    ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+                    ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
+                    ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
+                            .getThrottleProperties());
+                    //First do web service call and update map.
+                    //Then init JMS listener to listen que and update it.
+                    //Following method will initialize JMS listnet and listen all updates and keep throttle data map
+                    // up to date
+                    //start web service throttle data retriever as separate thread and start it.
+                    WebServiceThrottleDataRetriever webServiceThrottleDataRetriever = new
+                            WebServiceThrottleDataRetriever();
+                    webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+
+                    //Get blocking details from web service call.
+                    WebServiceBlockConditionsRetriever webServiceBlockConditionsRetriever = new
+                            WebServiceBlockConditionsRetriever();
+                    webServiceBlockConditionsRetriever.startWebServiceBlockConditionDataRetriever();
+
+                    //start JMS throttle data retriever as separate thread and start it.
+                    JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
+                    jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
+
+                }
+            }
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}
@@ -109,4 +138,5 @@ public class APIHandlerServiceComponent {
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
+
 }

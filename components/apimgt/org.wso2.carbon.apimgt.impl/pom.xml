@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>5.0.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -22,6 +22,24 @@
     <name>WSO2 Carbon - API Management Implementation </name>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
+            <version>${carbon.analytics.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
+            <version>${carbon.analytics.common.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.output.adapter.sms</artifactId>
+            <version>${carbon.analytics.common.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.woden.wso2</groupId>
             <artifactId>woden</artifactId>
@@ -128,13 +146,27 @@
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
         </dependency>
+
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.um.ws.api.stub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>com.nimbusds.wso2</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.deployment</groupId>
-            <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -164,6 +196,22 @@
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.event-processing</groupId>
+            <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -259,7 +307,7 @@
                             org.wso2.carbon.registry.indexing.*; version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${orbit.version.pdfbox}",
                             org.apache.poi.*,
-                            org.apache.thrift.*,
+                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,
@@ -285,7 +333,6 @@
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.core.*;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.bam.service.data.publisher.*,
                             org.wso2.carbon.user.core.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.user.api;version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
@@ -295,6 +342,7 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.databridge.commons.exception; version="${carbon.commons.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

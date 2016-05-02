@@ -34,7 +34,9 @@ import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -48,6 +50,9 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class Utils {
     
@@ -175,35 +180,7 @@ public class Utils {
             messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
         }
     }
-
-    public static String getAllowedHeaders() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
-    }
-    
-    public static String getAllowedMethods() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
-    }
-
-    public static boolean isAllowCredentials() {
-        String allowCredentials = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
-        return Boolean.parseBoolean(allowCredentials);
-    }
-    
-    public static boolean isCORSEnabled() {
-    	String corsEnabled = config.
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
-    	    	    	
-    	return Boolean.parseBoolean(corsEnabled);
-    }
-
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
-    }
-
+//// moving methods to Util
     /**
      * validates if an accessToken has expired or not
      *
@@ -269,5 +246,41 @@ public class Utils {
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);
+    }
+
+    public static void publishExecutionTime(MessageContext messageContext, long executionStartTime, String
+            mediationType) {
+        long executionTime = System.currentTimeMillis() - executionStartTime;
+        ExecutionTimePublisherDTO executionTimePublisherDTO = new ExecutionTimePublisherDTO();
+        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
+                (messageContext));
+        executionTimePublisherDTO.setApiName(APIUtil.getAPINamefromRESTAPI(apiName));
+        if (executionStartTime == 0) {
+            executionTimePublisherDTO.setExecutionTime(0);
+        }
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        executionTimePublisherDTO.setExecutionTime(executionTime);
+        executionTimePublisherDTO.setMediationType(mediationType);
+        executionTimePublisherDTO.setVersion(apiVersion);
+        executionTimePublisherDTO.setContext(apiContext);
+        String provider = APIUtil.getAPIProviderFromRESTAPI(apiName, tenantDomain);
+        executionTimePublisherDTO.setProvider(provider);
+        executionTimePublisherDTO.setTenantDomain(tenantDomain);
+        executionTimePublisherDTO.setTenantId(APIUtil.getTenantId(provider));
+        Map executionTimeMap;
+        Object apiExecutionObject = messageContext.getProperty("api.execution.time");
+        if (apiExecutionObject != null && apiExecutionObject instanceof Map) {
+            executionTimeMap = (Map) apiExecutionObject;
+        } else {
+            executionTimeMap = new HashMap();
+        }
+        executionTimeMap.put(mediationType, executionTimePublisherDTO);
+        messageContext.setProperty("api.execution.time", executionTimeMap);
     }
 }
