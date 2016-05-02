@@ -851,8 +851,7 @@ public class ApiMgtDAO {
                     if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
                         spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
                     }
-                    String stopOnQuotaReach = "0";
-                    String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
                     list.add(spikeArrest);
