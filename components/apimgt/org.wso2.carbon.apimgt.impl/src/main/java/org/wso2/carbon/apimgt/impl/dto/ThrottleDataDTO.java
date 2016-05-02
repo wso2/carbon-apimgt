@@ -52,7 +52,7 @@ public class ThrottleDataDTO {
      */
     public void cleanDTO(){
         this.clientIP = null;
-        this.messageSizeInBytes =null;
+        this.messageSizeInBytes = 0;
         this.transportHeaders =null;
         this.queryParameters =null;
     }

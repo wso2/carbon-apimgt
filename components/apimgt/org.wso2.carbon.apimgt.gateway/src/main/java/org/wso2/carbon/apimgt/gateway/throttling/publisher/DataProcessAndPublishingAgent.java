@@ -1,31 +1,33 @@
 package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 
 
-import com.google.gson.Gson;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.json.JSONException;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleDataDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.json.simple.JSONObject;
+
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
@@ -82,7 +84,6 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiTenant = null;
         this.appId = null;
         this.apiName = null;
-        this.throttleDataDTO.cleanDTO();
     }
 
     /**
@@ -176,7 +177,25 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
         //Publish jwt claims
         if(authenticationContext.getCallerToken() != null) {
-
+            //take first part
+            String[] jwtTokenArray = authenticationContext.getCallerToken().split(Pattern.quote("."));
+            // decode  JWT part
+            try {
+                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
+                String jwtHeader = new String(jwtByteArray, "UTF-8");
+                org.json.JSONObject jsonObject = new org.json.JSONObject(jwtHeader);
+                Iterator<?> keys = jsonObject.keys();
+                String key, value;
+                while( keys.hasNext() ) {
+                    key = (String)keys.next();
+                    value = (String) jsonObject.get(key);
+                    jsonObMap.put(key, value);
+                }
+            } catch (UnsupportedEncodingException e) {
+                log.info("Error while decoding jwt header", e);
+            } catch (JSONException e) {
+                log.info("Error while parsing jwt header", e);
+            }
         }
 
         //this parameter will be used to capture message size and pass it to calculation logic
