@@ -19,3 +19,26 @@ var deleteAppPolicy = function (policyObject) {
         }
     });
 };
+
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#app-policy').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#app-policy_length option:selected" ).val()
+	     || $("#app-policy_length option:selected" ).val()==-1)
+	       $('#app-policy_paginate').hide();
+	       else $('#app-policy_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
+});

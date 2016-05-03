@@ -19,3 +19,24 @@ var deleteGlobalPolicy = function (policyObject) {
         }
     });
 };
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#global-policy').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#global-policy_length option:selected" ).val()
+	     || $("#global-policy_length option:selected" ).val()==-1)
+	       $('#global-policy_paginate').hide();
+	       else $('#app-policy_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
+});
