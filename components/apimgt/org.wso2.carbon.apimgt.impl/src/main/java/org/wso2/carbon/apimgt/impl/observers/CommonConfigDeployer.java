@@ -43,8 +43,8 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
 
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        final String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        final int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
 
         try {
@@ -57,7 +57,18 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
             //TODO adding only the policies to data wouldn't be sufficient. Need to figure out approach after tenant story has finalized
             //Add default set of policies to database
             if(APIUtil.isAdvanceThrottlingEnabled()) {
-                APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+                //This has schedule to separate thread due to issues arise when calling this method in same thread
+                //Also this will avoid tenant login overhead as well
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+                        } catch (APIManagementException e) {
+                            log.error("Error while deploying throttle policies", e);
+                        }
+                    }
+                });
+                t1.start();
             }
         } catch (Exception e) {
             log.error("Failed to load default policies to tenant" + tenantDomain, e);

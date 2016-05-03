@@ -5452,7 +5452,7 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAppLevel(applicationPolicy);
                     String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
-                    //deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
                             applicationPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5501,7 +5501,7 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
                     String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
                                                                                 "_" + subscriptionPolicy.getPolicyName();
-                    //deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
                                                                                           subscriptionPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5548,7 +5548,7 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
-                    //deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
                             apiPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5652,5 +5652,21 @@ public final class APIUtil {
             }
         }
         return availableTier;
+    }
+
+    public static long ipToLong(String ipAddress) {
+        long result = 0;
+        String[] ipAddressInArray = ipAddress.split("\\.");
+        for (int i = 3; i >= 0; i--) {
+            long ip = Long.parseLong(ipAddressInArray[3 - i]);
+            //left shifting 24,16,8,0 and bitwise OR
+            //1. 192 << 24
+            //1. 168 << 16
+            //1. 1   << 8
+            //1. 2   << 0
+            result |= ip << (i * 8);
+
+        }
+        return result;
     }
 }

@@ -442,7 +442,27 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableUnlimitedTier(JavaUtils.isTrueExplicitly(enableUnlimitedTierElement
                         .getText()));
             }
-
+            OMElement enableHeaderConditionsElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .ENABLE_HEADER_CONDITIONS));
+            if (enableHeaderConditionsElement != null) {
+                throttleProperties.setEnableHeaderConditions(JavaUtils.isTrueExplicitly(enableHeaderConditionsElement
+                        .getText()));
+            }
+            OMElement enableJwtElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .ENABLE_JWT_CLAIM_CONDITIONS));
+            if (enableJwtElement != null) {
+                throttleProperties.setEnableJwtConditions(JavaUtils.isTrueExplicitly(enableJwtElement
+                        .getText()));
+            }
+            OMElement enableQueryParamElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .ENABLE_QUERY_PARAM_CONDITIONS));
+            if (enableQueryParamElement != null) {
+                throttleProperties.setEnableQueryParamConditions(JavaUtils.isTrueExplicitly(enableQueryParamElement
+                        .getText()));
+            }
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_SUBSCRIPTION_SPIKE_ARREST));
