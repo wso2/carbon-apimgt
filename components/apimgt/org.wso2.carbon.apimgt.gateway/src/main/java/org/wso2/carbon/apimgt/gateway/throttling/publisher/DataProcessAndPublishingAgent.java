@@ -144,7 +144,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         if(remoteIP !=null && remoteIP.length()>0) {
-            jsonObMap.put("ip", remoteIP);
+            jsonObMap.put("ip", APIUtil.ipToLong(remoteIP));
         }
 
         if(transportHeaderMap!=null && transportHeaderMap.size()>0) {
