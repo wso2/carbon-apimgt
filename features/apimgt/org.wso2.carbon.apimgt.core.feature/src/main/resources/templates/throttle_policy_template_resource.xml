@@ -23,7 +23,7 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
 FROM RequestStream
-SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey
+SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap
 INSERT INTO EligibilityStream;
 
 #if($quotaPolicy != "")
