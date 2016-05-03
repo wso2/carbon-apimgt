@@ -1300,10 +1300,15 @@ a.remove_rating:hover{ color: #C00}
     position:absolute;
     bottom: -3px;
 }
-
 .ribbon-yellow:before {
     left: 0;
 }
 .ribbon-yellow:after {
     right: 0;
-}​
+}
+.counter-container{
+    display:inline-block;
+    text-align:right;
+    font-style: italic;
+    margin-top:4px;
+}
