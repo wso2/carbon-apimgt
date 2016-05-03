@@ -166,5 +166,8 @@
     "InvalidKeyTemplateMessage": "Invalid Key Template",
     "keyTemplateAlreadyExist": "Key Template Already Exist. Add a new Key Template",
     "invalidExecutionPlan": "Siddhi Query deployment failed due to Siddhi syntax errors",
-    "globalPolicyErrorMessage": "Error occurred while saving policy (Cause:"
+    "globalPolicyErrorMessage": "Error occurred while saving policy (Cause:",
+    "quotalimits":"Quota Limits",
+    "generalDetails":"General Details",
+    "policyFlags":"Policy Flags"
 }

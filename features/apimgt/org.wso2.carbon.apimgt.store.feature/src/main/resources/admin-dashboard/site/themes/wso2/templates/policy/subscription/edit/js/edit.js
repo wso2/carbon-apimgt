@@ -158,9 +158,10 @@ function addCustomAttribute(element, count){
     element.parent().append(
         '<tr id="attribute'+count+'">'+
             '<td><div class="clear"></div></td>'+
-            '<td><input type="text" id="attributeName'+count+'" name="attributeName'+count+'" placeholder="Attribute Name"/></td>'+
-            '<td><input type="text" id="attributeValue'+count+'" name="attributeValue'+count+'" placeholder="Value"/></td>'+
-            '<td class="delete_resource_td"><a  id="attributeDelete'+count+'"  href="javascript:removeCustomAttribute('+count+')"><i class="icon-trash"></i></a></td>'+
+            '<td><input type="text" class="form-control" id="attributeName'+count+'" name="attributeName'+count+'" placeholder="Attribute Name"/></td>'+
+            '<td><input type="text" class="form-control" id="attributeValue'+count+'" name="attributeValue'+count+'" placeholder="Value"/></td>'+
+            '<td class="delete_resource_td"><a  id="attributeDelete'+count+'"  href="javascript:removeCustomAttribute('+count+')">'+
+            '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td></a></td>'+
         '</tr>'
         );
 }
@@ -171,9 +172,10 @@ function addCustomAttributeInitially(element, count, name, value){
     element.parent().append(
         '<tr id="attribute'+count+'">'+
             '<td><div class="clear"></div></td>'+
-            '<td><input type="text" id="attributeName'+count+'" name="attributeName'+count+'" readonly/></td>'+
-            '<td><input type="text" id="attributeValue'+count+'" name="attributeValue'+count+'" readonly/></td>'+
-            '<td class="delete_resource_td "><a  id="attributeDelete'+count+'" href="javascript:removeCustomAttribute('+count+');"><i class="icon-trash"></i></a></td>'+
+            '<td><input type="text" class="form-control" id="attributeName'+count+'" name="attributeName'+count+'" readonly/></td>'+
+            '<td><input type="text" class="form-control" id="attributeValue'+count+'" name="attributeValue'+count+'" readonly/></td>'+
+            '<td class="delete_resource_td "><a  id="attributeDelete'+count+'" href="javascript:removeCustomAttribute('+count+');">'+
+            '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td></a></td>'+
         '</tr>'
         );
     
