@@ -5,14 +5,14 @@
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
-    <table class="table table-responsive table-striped" id="api-policy">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th class="userSpecialCell"><%="Name"%></th>
                 <th class="appSpecialCell"><%="Quota Policy"%></th>
                 <th class="appSpecialCell"><%="Quota"%></th>
                 <th class="appSpecialCell"><%="Unit Time"%></th>
-                <th class="userSpecialCell"></th>
+                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>
 
@@ -39,22 +39,17 @@
                     <td><%=defaultQuotaPolicy%></td>
                     <td><%=quota%></td>
                     <td><%=unitTime%></td>
-                    <td class="text-right">
-                        <a id="editButton<%=count%>" onClick="editApiPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
-                            <span class="fw-stack">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-edit fw-stack-1x"></i>
-                                </span>
-                                <span class="hidden-xs">Edit</span>
+                    <td>
+                        <a id="editButton<%=count%>" onClick="editApiPolicy('<%=policyName%>')">
+                            <i class="icon-edit"></i>
+                                Edit
                         </a>
-                        <a id="deleteButton<%=count%>" onclick="deleteAPIPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
-                            <span class="fw-stack">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-delete fw-stack-1x"></i>
-                                </span>
-                                <span class="hidden-xs">Delete</span>
+                        <a id="deleteButton<%=count%>" onclick="deleteAPIPolicy('<%=policyName%>')">
+                            <i class="icon-trash"></i>
+                            Delete
                         </a>
                     </td>
+
                 </tr>
             <%
         count++;

@@ -5,14 +5,13 @@
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
-    <%if(outputs.globalPolicies.length) { %>
-    <table class="table table-responsive table-striped" id="global-policy">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th class="userSpecialCell"><%="Name"%></th>
                 <th class="appSpecialCell"><%="Description"%></th>
                 <th class="keyTempplate"><%="Key Template"%></th>
-                <th class="userSpecialCell"></th>
+                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>
 
@@ -31,20 +30,14 @@
                     <td><%=policyName%></td>
                     <td><%=description%></td>
                     <td><%=keyTemplate%></td>
-                    <td class="text-right">
-                        <a id="editButton<%=count%>" onClick="editGlobalPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
-                            <span class="fw-stack">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-edit fw-stack-1x"></i>
-                                </span>
-                                <span class="hidden-xs">Edit</span>
+                    <td>
+                        <a id="editButton<%=count%>" onClick="editGlobalPolicy('<%=policyName%>')">
+                            <i class="icon-edit"></i>
+                                Edit
                         </a>
-                        <a id="deleteButton<%=count%>" onclick="deleteGlobalPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
-                             <span class="fw-stack">
-                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                    <i class="fw fw-delete fw-stack-1x"></i>
-                                </span>
-                                <span class="hidden-xs">Delete</span>
+                        <a id="deleteButton<%=count%>" onclick="deleteGlobalPolicy('<%=policyName%>')">
+                            <i class="icon-trash"></i>
+                            Delete
                         </a>
                     </td>
 
@@ -54,12 +47,6 @@
     }
     %>
 </table>
-<%} else { %>
-	<div class="message message-info">
-			<h4><i class="icon fw fw-info"></i><%=i18n.localize("noCustomRules")%></h4>
-			<p><%=i18n.localize("noCustomRulesDescription")%></p>
-		</div>
-<%} %>
 </div>
 
 </div>

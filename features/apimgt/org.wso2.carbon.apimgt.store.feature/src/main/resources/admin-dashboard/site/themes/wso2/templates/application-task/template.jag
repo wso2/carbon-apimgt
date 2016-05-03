@@ -39,7 +39,7 @@ if(tasks!=null && tasks!='null'){
     }
     if(tasks.length==0){%>
     <div class="message message-info">
-		<h4><i class="icon fw fw-info"></i><%=i18n.localize("noCustomRules")%></h4>
+		<h4><i class="icon fw fw-info"></i><%=i18n.localize("noTasksMsg")%></h4>
 	</div>
 
   <%}else if(currentPage > numberOfPages){
