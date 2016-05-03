@@ -293,7 +293,6 @@ public class ThrottlePolicyTemplateBuilder {
             throw new APITemplateException("Velocity Error", e);
         }
         String str = writer.toString();
-        log.info(str);
         return writer.toString();
     }
 
