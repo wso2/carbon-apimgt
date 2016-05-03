@@ -17,6 +17,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
@@ -147,54 +148,53 @@ public class DataProcessAndPublishingAgent implements Runnable {
             jsonObMap.put("ip", APIUtil.ipToLong(remoteIP));
         }
 
-        if(transportHeaderMap!=null && transportHeaderMap.size()>0) {
-            for (Map.Entry<String, String> entry : transportHeaderMap.entrySet()) {
-                jsonObMap.put(entry.getKey(), entry.getValue());
-            }
+        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableHeaderConditions()) {
+            jsonObMap.putAll(transportHeaderMap);
         }
-
         //Setting query parameters
-        String queryString = (String) axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
-        if(!StringUtils.isEmpty(queryString)) {
-            if (queryString.indexOf("?") > -1) {
-                queryString = queryString.substring(queryString.indexOf("?") + 1);
-            }
-            String[] queryParams = queryString.split("&");
-            Map<String, String> queryParamsMap = new HashMap<String, String>();
-            String[] queryParamArr;
-            String queryParamName, queryParamValue = "";
-            for(String queryParam : queryParams) {
-                queryParamArr = queryParam.split("=");
-                if(queryParamArr.length == 2) {
-                    queryParamName = queryParamArr[0];
-                    queryParamValue = queryParamArr[1];
-                } else {
-                    queryParamName = queryParamArr[0];
+        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableQueryParamConditions()) {
+
+            String queryString = (String) axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
+            if (!StringUtils.isEmpty(queryString)) {
+                if (queryString.indexOf("?") > -1) {
+                    queryString = queryString.substring(queryString.indexOf("?") + 1);
                 }
-                queryParamsMap.put(queryParamName, queryParamValue);
-                jsonObMap.put(queryParamName, queryParamValue);
+                String[] queryParams = queryString.split("&");
+                Map<String, String> queryParamsMap = new HashMap<String, String>();
+                String[] queryParamArr;
+                String queryParamName, queryParamValue = "";
+                for (String queryParam : queryParams) {
+                    queryParamArr = queryParam.split("=");
+                    if (queryParamArr.length == 2) {
+                        queryParamName = queryParamArr[0];
+                        queryParamValue = queryParamArr[1];
+                    } else {
+                        queryParamName = queryParamArr[0];
+                    }
+                    queryParamsMap.put(queryParamName, queryParamValue);
+                    jsonObMap.put(queryParamName, queryParamValue);
+                }
             }
         }
 
         //Publish jwt claims
-        if(authenticationContext.getCallerToken() != null) {
-            //take first part
-            String[] jwtTokenArray = authenticationContext.getCallerToken().split(Pattern.quote("."));
-            // decode  JWT part
-            try {
-                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
-                String jwtHeader = new String(jwtByteArray, "UTF-8");
-                JSONParser parser = new JSONParser();
-                JSONObject jwtHeaderOb = (JSONObject) parser.parse(jwtHeader);
-                String claimName;
-                for(Iterator iterator = jwtHeaderOb.keySet().iterator(); iterator.hasNext();) {
-                    claimName = (String) iterator.next();
-                    jsonObMap.put(claimName, jwtHeaderOb.get(claimName));
+        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableJwtConditions()) {
+
+            if (authenticationContext.getCallerToken() != null) {
+                //take first part
+                String[] jwtTokenArray = authenticationContext.getCallerToken().split(Pattern.quote("."));
+                // decode  JWT part
+                try {
+                    byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
+                    String jwtHeader = new String(jwtByteArray, "UTF-8");
+                    JSONParser parser = new JSONParser();
+                    JSONObject jwtHeaderOb = (JSONObject) parser.parse(jwtHeader);
+                    jsonObMap.putAll(jwtHeaderOb);
+                } catch (UnsupportedEncodingException e) {
+                    log.info("Error while decoding jwt header", e);
+                } catch (ParseException e) {
+                    log.info("Error while parsing jwt header", e);
                 }
-            } catch (UnsupportedEncodingException e) {
-                log.info("Error while decoding jwt header", e);
-            } catch (ParseException e) {
-                e.printStackTrace();
             }
         }
 
