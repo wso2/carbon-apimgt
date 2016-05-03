@@ -192,6 +192,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setConsumerKey(info.getConsumerKey());
             authContext.setApiTier(info.getApiTier());
             authContext.setThrottlingDataList(info.getThrottlingDataList());
+            authContext.setIsContentAware(info.isContentAware());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
 
             /* Synapse properties required for BAM Mediator*/
