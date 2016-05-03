@@ -115,17 +115,30 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <% for (var i=0;i<lcData.nextStates.length;i++) {
            var next = lcData.nextStates[i].toLowerCase();
       
-            if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
-	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
-	                <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
-	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
-	                <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
-	           <%} else {%>
-	                <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
-	           <%}
-	        } else {%>
-	             <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
-	      	<%}      
+            if(lcStatus=="CREATED"){
+               if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
+               <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
+               <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%} else {%>
+               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%}
+            } else if(lcStatus=="PROTOTYPED") {%>
+               <% if (lcData.nextStates[i].toLowerCase().indexOf("prototype") == -1) {%>
+               <%if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
+               <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
+               <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%} else {%>
+               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%}}
+            } else if(lcStatus=="PUBLISHED") {%>
+               <% if (lcData.nextStates[i].toLowerCase().indexOf("publish") == -1) {%>
+               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <%}%>
+            <%} else {%>
+               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+            <%}
 
         }%>
                 
