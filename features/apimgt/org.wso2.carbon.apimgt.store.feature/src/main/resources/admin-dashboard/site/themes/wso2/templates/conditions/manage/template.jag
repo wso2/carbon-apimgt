@@ -2,15 +2,14 @@
     <div id="listing">
     	<div class="page-header">
                 <div class="page-title">
-                    <h1><%=i18n.localize("blockedEntities")%></h1>
-                    <div class="form-actions">
-        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("blockNew")%>">
-    </div>
+                    <h1><%=i18n.localize("blockedEntities")%></h1>                    
                  </div>
          </div>
 
     <div class="content-section shadow-up">
     <div class="content-data">
+    
+   
     <%
           var conditionslist =  outputs.conditions;
             var conditonsArray = conditionslist.toArray();
@@ -37,7 +36,7 @@
                     <td><%=condition.getConditionId()%></td>
                     <td><%=condition.getConditionType()%></td>
                     <td><%=condition.getConditionValue()%></td>
-                    <td>
+                    <td class="text-right">
                     <div class="form-group">
                         <div class="col-sm-12 form-inline">
                             <label class="switch">
@@ -51,7 +50,7 @@
                             </label>
                             <a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view" onclick="deleteCondition(<%=condition.getConditionId()%>)">
                                 <span class="fw-stack">
-                                    <i class="fw fw-ring fw-stack-2x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     <i class="fw fw-delete fw-stack-1x"></i>
                                 </span></a>
                         </div>
@@ -62,7 +61,15 @@
             }
             %>  
     </table>
-        <%}%>
+        <%} else {%>
+        		<div class="message message-info">
+					<h4><i class="icon fw fw-info"></i><%=i18n.localize("noBlockedEntities")%></h4>
+					<p><%=i18n.localize("noBlockedEntitiesDescription")%></p>
+				</div>
+        <%} %>
+         <div class="form-actions">
+	        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("blockNew")%>">
+	    </div>
     </div>
 
     </div>
