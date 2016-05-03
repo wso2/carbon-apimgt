@@ -197,10 +197,15 @@
                 
 
                  <div class="form-group">
-                        <label class="control-label col-sm-3" for="subPolicysubPolicy"><%=i18n.localize("subPolicy")%>:<span class="requiredAstrix">*</span>
-                            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
-                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                        </label>
+                    <label class="control-label col-sm-3" for="subPolicysubPolicy"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
+		                <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
+                		    <span class="icon fw-stack fw-lg" style="font-size:6px">
+							    <i class="fw fw-circle fw-stack-2x"></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+						    </span>
+                	    </a>
+                	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                   </label>
 
                     <div class="controls col-sm-8 tierSelect">
                         <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
@@ -220,7 +225,7 @@
 
                  <% } else {%>
                      <div class="form-group">
-                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span>
+                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
                         	<a class="help_popup" help_data="tier_help" title="tier_help" data-trigger="hover" data-placement="bottom">
                         		<span class="icon fw-stack fw-lg" style="font-size:6px">
 									<i class="fw fw-circle fw-stack-2x"></i>
