@@ -52,12 +52,15 @@ var getApplicationTiers = function () {
                 tierArray[i] = tier;                
             }
             if(isUnlimitedTierEnabled){
-            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
-            var tempTier = {};
-            tempTier.tierName = APIConstants.UNLIMITED_TIER;
-            tempTier.tierDisplayName = APIConstants.UNLIMITED_TIER;
-            tempTier.tierDescription = APIConstants.UNLIMITED_TIER_DESC;
-             tierArray[tierList.length] = tempTier;    
+                        var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+                if(APIConstants.UNLIMITED_TIER != tierArray[tierList.length-1].tierDisplayName){
+            			var logc = new Log();
+                        var tempTier = {};
+                        tempTier.tierName = APIConstants.UNLIMITED_TIER;
+                        tempTier.tierDisplayName = APIConstants.UNLIMITED_TIER;
+                        tempTier.tierDescription = APIConstants.UNLIMITED_TIER_DESC;
+                        tierArray[tierList.length] = tempTier;
+            	}
             }
             if (log.isDebugEnabled()) {
                 log.debug("getTiers : " + stringify(tierArray));
