@@ -503,6 +503,9 @@
         </JMSConnectionDetails>
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
         <EnableSubscriptionSpikeArrest>false</EnableSubscriptionSpikeArrest>
+        <EnableHeaderConditions>false</EnableHeaderConditions>
+        <EnableJWTClaimConditions>false</EnableJWTClaimConditions>
+        <EnableQueryParamConditions>false</EnableQueryParamConditions>
     </ThrottlingConfigurations>
 
     <SwaggerCodegen>
