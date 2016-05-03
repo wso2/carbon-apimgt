@@ -113,6 +113,7 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
         apiKeyValidationInfoDTO.setApiTier(thriftDTO.getApiTier());
         apiKeyValidationInfoDTO.setThrottlingDataList(thriftDTO.getThrottlingDataList());
+        apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
         return apiKeyValidationInfoDTO;
     }
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion

@@ -836,10 +836,12 @@ public class ApiMgtDAO {
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
                     String tier = rs.getString("API_TIER");
+                    String subscriberUserId = rs.getString("USER_ID");
+                    String subsciberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
                     //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                     //TODO isContentAware
                     boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
-                    infoDTO.setContentAware(isContentAware);
+                    infoDTO.setContentAware(false);
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
@@ -857,6 +859,7 @@ public class ApiMgtDAO {
                     list.add(spikeArrest);
                     list.add(spikeArrestUnit);
                     list.add(stopOnQuotaReach);
+                    list.add(subsciberTenant);
                     if (tier != null && tier.trim().length() > 0) {
                         infoDTO.setApiTier(tier);
                     }
