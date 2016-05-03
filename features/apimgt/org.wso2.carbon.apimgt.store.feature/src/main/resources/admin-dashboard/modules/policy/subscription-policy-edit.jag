@@ -47,6 +47,10 @@ var constructPolicyObject = function (userName, policyName, description, default
     var tenantId = APIUtil.getTenantId(userName);
     subscriptionPolicy.setTenantId(tenantId);
 
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+    subscriptionPolicy.setTenantDomain(tenantDomain);
+
     if(stopOnQuotaReach == "true"){
         subscriptionPolicy.setStopOnQuotaReach(true);
     }else{

@@ -5,7 +5,7 @@
         "subscription": "Subscription Successful" ,
         "subscriptionRejectTitle": "Subscription Rejected" ,
         "subscriptionPendingTitle": "Subscription Awaiting Approval",
-        "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.",
+        "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API.",
         "subscriptionPending": "Congratulations! Your subscription request has been submitted and is now awaiting approval.",
         "subscriptionRejected": "Your subscription is rejected, since it does not matched with authetication requirments. Please contact the api publisher for more information",
         "applicationSuccess": "Congratulations! You have successfully added the API.",

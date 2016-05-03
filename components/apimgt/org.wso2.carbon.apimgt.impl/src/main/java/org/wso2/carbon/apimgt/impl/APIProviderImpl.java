@@ -3650,7 +3650,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
-        List<String> executionFlows = new ArrayList<String>();
+        Map<String, String> executionFlows = new HashMap<String, String>();
         String policyLevel = null;
 
         try {
@@ -3659,18 +3659,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
-                executionFlows.add(defaultPolicy);
+                String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName();
+                String defaultPolicyName = policyFile + "_default";
+                executionFlows.put(defaultPolicyName, defaultPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
-                executionFlows.add(policyString);
+                String policyFile = appPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP + "_" + appPolicy.getPolicyName();
+                executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addApplicationPolicy(appPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
-                executionFlows.add(policyString);
+                String policyFile = subPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP + "_" + subPolicy.getPolicyName();
+                executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addSubscriptionPolicy(subPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
@@ -3686,7 +3690,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
                     throw new APIManagementException("Key Template Already Exist");
                 }
-                executionFlows.add(policyString);
+
+                String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + globalPolicy.getPolicyName();
+                executionFlows.put(policyFile, policyString);
+
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
             } else {
@@ -3700,8 +3707,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // deploy in global cep and gateway manager
         try {
-            for (String flowString : executionFlows) {
-                manager.deployPolicyToGlobalCEP(policy.getPolicyName(), flowString);
+            Iterator iterator = executionFlows.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next();
+                String policyName  = entry.getKey();
+                String flowString  = entry.getValue();
+                manager.deployPolicyToGlobalCEP(policyName, flowString);
             }
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
         } catch (APIManagementException e) {
@@ -3716,7 +3727,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
-        List<String> executionFlows = new ArrayList<String>();
+        Map<String, String> executionFlows = new HashMap<String, String>();
         String policyLevel = null;
         String policyName = policy.getPolicyName();
         List<String> policiesToUndeploy = new ArrayList<String>();
@@ -3728,12 +3739,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
-                executionFlows.add(defaultPolicy);
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 //TODO rename level to  resource or appropriate name
-                String policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
+                String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
+                String defaultPolicyName = policyFile + "_default";
+                executionFlows.put(defaultPolicyName, defaultPolicy);
                 //add default policy file name
-                policiesToUndeploy.add(policyFile + "_default");
+                policiesToUndeploy.add(defaultPolicyName);
                 for (int i = 0; i < existingPolicy.getPipelines().size(); i++) {
                     policiesToUndeploy.add(policyFile + "_condition_" +  existingPolicy.getPipelines().get(i).getId());
                 }
@@ -3741,18 +3753,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
-                executionFlows.add(policyString);
                 apiMgtDAO.updateApplicationPolicy(appPolicy);
-                String policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+                String policyFile = appPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+                executionFlows.put(policyFile, policyString);
                 policiesToUndeploy.add(policyFile);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
-                executionFlows.add(policyString);
                 apiMgtDAO.updateSubscriptionPolicy(subPolicy);
-                String policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
+                String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
                 policiesToUndeploy.add(policyFile);
+                executionFlows.put(policyFile, policyString);
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -3766,9 +3778,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
                     throw new APIManagementException("Key Template Already Exist");
                 }
-                executionFlows.add(policyString);
                 apiMgtDAO.updateGlobalPolicy(globalPolicy);
                 String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
+                executionFlows.put(policyFile, policyString);
                 policiesToUndeploy.add(policyFile);
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
             } else {
@@ -3790,8 +3802,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            for (String flowString : executionFlows) {
-                    deploymentManager.deployPolicyToGlobalCEP(policyLevel + "_"+policy.getPolicyName(), flowString);
+            Iterator iterator = executionFlows.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> pair = (Map.Entry<String, String>) iterator.next();
+                String policyPlanName  = pair.getKey();
+                String flowString  = pair.getValue();
+                deploymentManager.deployPolicyToGlobalCEP(policyPlanName, flowString);
             }
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);

@@ -39,8 +39,10 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ThrottlePolicyTemplateBuilder {
@@ -74,12 +76,12 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public List<String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
+    public Map<String, String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
             log.debug("Generating policy for apiLevel :" + policy.toString());
         }
-        List<String> policyArray = new ArrayList<String>();
+        Map<String, String> policyArray = new HashMap<String, String>();
         Set<String> conditionsSet = new HashSet<String>();
         
         if(!(policy instanceof APIPolicy)){
@@ -118,7 +120,10 @@ public class ThrottlePolicyTemplateBuilder {
                     if (log.isDebugEnabled()) {
                         log.debug("Policy : " + writer.toString());
                     }
-                    policyArray.add(writer.toString());
+
+                    String policyName = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" +
+                                        policy.getPolicyName() + "_condition_" + pipeline.getId();
+                    policyArray.put(policyName, writer.toString());
                 }
             }
         } catch (Exception e) {
@@ -288,7 +293,6 @@ public class ThrottlePolicyTemplateBuilder {
             throw new APITemplateException("Velocity Error", e);
         }
         String str = writer.toString();
-        log.info(str);
         return writer.toString();
     }
 

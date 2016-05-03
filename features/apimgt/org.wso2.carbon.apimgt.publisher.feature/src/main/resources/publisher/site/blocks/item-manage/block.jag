@@ -18,6 +18,12 @@ jagg.block("item-manage", {
     result = mod.getAPI({name:name, version:version, provider:provider});
     api = result.api;
 
+    var apiData = {};
+    apiData.provider = provider;
+    apiData.name = name;
+    apiData.version = version;
+    var lcStatus = mod.getAPILCStatus(apiData);
+
     result = mod.isSynapseGateway();
     isSynapseGateway = result.isSynapseGateway;
     
@@ -31,7 +37,8 @@ jagg.block("item-manage", {
             "isCreatePermitted":isCreatePermitted,
             "tenant":tenant,
             "isSynapseGateway":isSynapseGateway,
-            "isDataPublishingEnabled":isDataPublishingEnabled            
+            "isDataPublishingEnabled":isDataPublishingEnabled,
+            "lcStatus":lcStatus
         }
     }
 

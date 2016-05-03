@@ -29,6 +29,7 @@ public class Policy implements Serializable {
     private String description;
     private QuotaPolicy defaultQuotaPolicy;
     private int tenantId;
+    private String tenantDomain;
     private boolean isDeployed;
 
     public Policy(String name){
@@ -103,5 +104,13 @@ public class Policy implements Serializable {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 }
