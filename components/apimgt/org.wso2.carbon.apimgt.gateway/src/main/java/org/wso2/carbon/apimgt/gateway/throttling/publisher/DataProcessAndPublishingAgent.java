@@ -93,7 +93,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
                                  String apiTenant, String appId, MessageContext messageContext,
                                  AuthenticationContext authenticationContext){
-        if(resourceLevelTier==null && apiLevelTier!=null){
+        if (StringUtils.isEmpty(resourceLevelTier) && apiLevelTier != null) {
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
         }
