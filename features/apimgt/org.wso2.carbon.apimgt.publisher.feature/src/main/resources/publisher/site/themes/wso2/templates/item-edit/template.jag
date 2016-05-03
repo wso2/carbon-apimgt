@@ -108,7 +108,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </div>
 
             <div class="control-group">
-                    <label class="control-label" for="editTier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="editTier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <select id="editTier" class="selected" name="editTier"  multiple="multiple">
                        </select>
