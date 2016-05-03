@@ -386,21 +386,8 @@ public abstract class APIUsageStatisticsClient {
             while (rs.next()) {
                 String consumerKey = rs.getString("CONSUMER_KEY");
                 String appName = rs.getString("NAME");
-                APIManagerConfiguration config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
-                String tokenEncryptionConfig = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENCRYPT_TOKENS);
-
-                boolean isTokenEncryptionEnabled = Boolean.parseBoolean(tokenEncryptionConfig);
-
-                //check encription enable
-                if (isTokenEncryptionEnabled) {
-                    String decryptedConsumerKey = new String(
-                            CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(consumerKey));
-                    consumerKeys.add(decryptedConsumerKey);
-                    subscriberAppsMap.put(decryptedConsumerKey, appName);
-                } else {
-                    consumerKeys.add(consumerKey);
-                    subscriberAppsMap.put(consumerKey, appName);
-                }
+                consumerKeys.add(consumerKey);
+                subscriberAppsMap.put(consumerKey, appName);
             }
             return consumerKeys;
 
