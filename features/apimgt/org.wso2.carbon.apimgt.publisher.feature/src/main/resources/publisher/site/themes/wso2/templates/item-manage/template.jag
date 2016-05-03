@@ -137,7 +137,7 @@
 	                        </a>
 	                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
 	                         </label>
-	                     	<div class="col-sm-8">
+	                     	<div class="controls col-sm-8">
 	                     	  <label class="checkbox">
 	                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
 	                            <span class="helper"></span>
@@ -165,31 +165,36 @@
 	                        </a>
 	                        <p id="api_policy_help" class="hide"><%=i18n.localize("enableApiLevelPolicyHelpMsg")%></p>
                         </label>
-                        <label class="checkbox">
-	                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
-	                            <span class="helper"></span>
-	                    </label>
+                        <div class="controls col-sm-8">
+	                        <label class="checkbox">
+		                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
+		                            <span class="helper"></span>
+		                    </label>
+		                    </div>
+		                    </div>
 	                    <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
-	                   <div class="controls col-sm-8" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
-                            <select id="apiTier" name="apiTier"  class="form-control selected required">
-                            <%
-
-                            for (var i = 0; i < resourceTiers.length; i++) {
-                                var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
-                                var isSelected = false;
-                                
-                                if(resourceTiers[i].tierName == api.apiLevelPolicy){
-                                    isSelected = true;
-                                }
-                               
-                                %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option>%%><%
-                            }
-                            %>
-                            </select>
-                            <a class=" help_popup" help_data="tier_help"></a>
-                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                        </div>
-</div>
+	                  	<div class="form-group">
+	                  		<div class="control-label col-sm-3"></div>
+		                  	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
+	                            <select id="apiTier" name="apiTier"  class="form-control selected required">
+	                            <%
+	
+	                            for (var i = 0; i < resourceTiers.length; i++) {
+	                                var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
+	                                var isSelected = false;
+	                                
+	                                if(resourceTiers[i].tierName == api.apiLevelPolicy){
+	                                    isSelected = true;
+	                                }
+	                               
+	                                %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option>%%><%
+	                            }
+	                            %>
+	                            </select>
+	                            <a class=" help_popup" help_data="tier_help"></a>
+	                            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+	                        </div>
+						</div>
 <%  }%>
 
 
@@ -197,7 +202,7 @@
                 
 
                  <div class="form-group">
-                    <label class="control-label col-sm-3" for="subPolicysubPolicy"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
+				 <label class="control-label col-sm-3" for="subPolicysubPolicy"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
 		                <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
                 		    <span class="icon fw-stack fw-lg" style="font-size:6px">
 							    <i class="fw fw-circle fw-stack-2x"></i>
@@ -209,20 +214,20 @@
 
                     <div class="controls col-sm-8 tierSelect">
                         <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-                        <%
-                        for (var i = 0; i < tiers.length; i++) {
-                        var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
-                        }
-                        %>
-        </select>
+	                        <%
+	                        for (var i = 0; i < tiers.length; i++) {
+	                        	var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+	                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+	                        }
+	                        %>
+        				</select>
         <script type="text/javascript">
 
         </script>
         <a class=" help_popup" help_data="tier_help"></a>
         <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
-
+					</div>
                  <% } else {%>
                      <div class="form-group">
                         <label class="control-label col-sm-3" for="tier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
