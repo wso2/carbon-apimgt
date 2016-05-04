@@ -198,7 +198,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         //this parameter will be used to capture message size and pass it to calculation logic
-        int messageSizeInBytes = 0;
+        long messageSizeInBytes = 0;
         if (authenticationContext.isContentAwareTierPresent()) {
             //this request can match with with bandwidth policy. So we need to get message size.
             Object obj = transportHeaderMap.get("Content-Length");

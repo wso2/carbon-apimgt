@@ -5466,7 +5466,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAppLevel(applicationPolicy);
                     String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
                             applicationPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5515,7 +5517,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
                     String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
                                                                                 "_" + subscriptionPolicy.getPolicyName();
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
                                                                                           subscriptionPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5562,7 +5566,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
                             apiPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {

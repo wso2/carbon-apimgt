@@ -826,26 +826,29 @@ public class ApiMgtDAO {
                     return false;
                 }
 
-                infoDTO.setTier(rs.getString("TIER_ID"));
+                String apiProvider = rs.getString("API_PROVIDER");
+                String subTier = rs.getString("TIER_ID");
+                String appTier = rs.getString("APPLICATION_TIER");
+                infoDTO.setTier(subTier);
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
                 infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
                 infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setApiPublisher(rs.getString("API_PROVIDER"));
+                infoDTO.setApiPublisher(apiProvider);
                 infoDTO.setApplicationName(rs.getString("NAME"));
-                infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
+                infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
 
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
-                    String tier = rs.getString("API_TIER");
+                    String apiTier = rs.getString("API_TIER");
                     String subscriberUserId = rs.getString("USER_ID");
-                    String subsciberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                    //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                    String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
+                    int apiId = rs.getInt("API_ID");
+                    int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
+                    int apiTenantId = APIUtil.getTenantId(apiProvider);
                     //TODO isContentAware
-                    int subscriptionTenantId = -1;
-                    int appTenantId = -1;
-                    boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
-                    infoDTO.setContentAware(false);
+                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, appTier, subTier, subscriberTenantId, apiTenantId, apiId);
+                    infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
@@ -863,9 +866,9 @@ public class ApiMgtDAO {
                     list.add(spikeArrest);
                     list.add(spikeArrestUnit);
                     list.add(stopOnQuotaReach);
-                    list.add(subsciberTenant);
-                    if (tier != null && tier.trim().length() > 0) {
-                        infoDTO.setApiTier(tier);
+                    list.add(subscriberTenant);
+                    if (apiTier != null && apiTier.trim().length() > 0) {
+                        infoDTO.setApiTier(apiTier);
                     }
                     //We also need to set throttling data list associated with given API. This need to have policy id and
                     // condition id list for all throttling tiers associated with this API.
@@ -892,16 +895,8 @@ public class ApiMgtDAO {
 			String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
 		boolean isAnyContentAware = false;
 		// only check if using CEP based throttling.
-
 		ResultSet resultSet = null;
 		PreparedStatement ps = null;
-		
-		/*if (apiPolicy == null) {
-			sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
-
-		} else {
-			sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
-		}*/
 		String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
 
 		try {
@@ -912,8 +907,6 @@ public class ApiMgtDAO {
 			}
 			
 			ps = conn.prepareStatement(sqlQuery);
-
-			
 			ps.setString(1, apiPolicy);
 			ps.setInt(2, subscriptionTenantId);
 			ps.setString(3, apiPolicy);
@@ -926,30 +919,23 @@ public class ApiMgtDAO {
 			ps.setInt(10, subscriptionTenantId);
 			ps.setString(11, appPolicy);
 			ps.setInt(12, appTenantId);
-
 			resultSet = ps.executeQuery();
 			// We only expect one result if all are not content aware.
 			if (resultSet == null) {
 				throw new APIManagementException(" Result set Null");
 			}
-			
 			int count = 0;
-
 			if (resultSet.next()) {
 				count = resultSet.getInt(1);
 				if(count > 0){
 					isAnyContentAware = true;
 				}
 			}
-
-			
-
 		} catch (SQLException e) {
 			handleException("Failed to get content awareness of the policies ", e);
 		} finally {
 			APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
 		}
-
 		return isAnyContentAware;
 	}
 

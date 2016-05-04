@@ -24,6 +24,9 @@
     for(j = 0; j < apiPolicyArray.length; j++) {
         var apiPolicy = apiPolicyArray[j];
         var policyName = apiPolicy.getPolicyName();
+        if(policyName == "Unlimited") {
+            continue;
+        }
         var defaultQuotaPolicy = apiPolicy.getDefaultQuotaPolicy().getType();
         if (defaultQuotaPolicy == "requestCount"){
             var quota = apiPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();
