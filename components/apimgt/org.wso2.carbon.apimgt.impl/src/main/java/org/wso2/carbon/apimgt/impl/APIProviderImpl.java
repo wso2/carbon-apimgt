@@ -74,7 +74,10 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManag
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -3891,23 +3894,70 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
-        return apiMgtDAO.updateBlockConditionState(conditionId,state);
+
+        boolean updateState = apiMgtDAO.updateBlockConditionState(conditionId,state);
+
+        if(updateState){
+            BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
+
+            if(blockCondition != null) {
+                publishBlockingEvent(blockCondition.getConditionType(), blockCondition.getConditionValue(),
+                                     Boolean.toString(blockCondition.isEnabled()));
+            }
+        }
+
+        return updateState;
     }
 
     @Override
     public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
-        return apiMgtDAO.addBlockConditions(conditionType,conditionValue,tenantDomain);
+
+        boolean state = apiMgtDAO.addBlockConditions(conditionType,conditionValue,tenantDomain);
+
+        if(state) {
+            publishBlockingEvent(conditionType,conditionValue,"true");
+        }
+
+        return state;
     }
 
     @Override
     public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
-        return apiMgtDAO.deleteBlockCondition(conditionId);
+
+        BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
+        boolean deleteState = apiMgtDAO.deleteBlockCondition(conditionId);
+        if(deleteState && blockCondition != null){
+            publishBlockingEvent(blockCondition.getConditionType(),blockCondition.getConditionValue(),"delete");
+        }
+        return deleteState;
     }
 
 
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
         APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
         return policy;
+    }
+
+    /**
+     * Publishes the changes on blocking conditions.
+     * @param conditionType -
+     * @param conditionValue
+     */
+    private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
+        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
+
+        HashMap<String, String> blockingMessage = new HashMap<String, String>();
+        blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
+        blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
+        blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
+        blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
+        //PrivilegedCarbonContext.endTenantFlow();
+
+        //PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(CarbonConstants.SUPER_TENANT_ID);
+        eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
+                , blockingMessage);
+//        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,true);
+//        PrivilegedCarbonContext.startTenantFlow();
     }
 
 }

@@ -102,9 +102,9 @@ public class NotificationExecutor{
         } catch (ClassNotFoundException e) {
             throw new NotificationException("Error while Initializing the notifier class",e);
         } catch (RegistryException e) {
-            throw new NotificationException("Error while Reading Notification Configuration",e);
+            throw new NotificationException("Error while Reading notification Configuration",e);
         } catch (ParseException e) {
-            throw new NotificationException("Error while passing Notification Configuration",e);
+            throw new NotificationException("Error while passing notification Configuration",e);
         }
     }
 }

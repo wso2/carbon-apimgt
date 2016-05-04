@@ -21,6 +21,10 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class GatewayUtils {
     public static boolean isClusteringEnabled() {
         ClusteringAgent agent = ServiceReferenceHolder.getInstance().getServerConfigurationContext().
@@ -29,5 +33,13 @@ public class GatewayUtils {
             return true;
         }
         return false;
+    }
+
+    public static <T> Map<String, T> generateMap(Collection<T> list) {
+        Map<String, T> map = new HashMap<String, T>();
+        for (T el : list) {
+            map.put(el.toString(), el);
+        }
+        return map;
     }
 }

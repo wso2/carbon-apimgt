@@ -2457,6 +2457,8 @@ public class SQLConstants {
                 "INSERT INTO `AM_BLOCK_CONDITIONS` (`TYPE`,`VALUE`,`ENABLED`,`DOMAIN`) VALUES (?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+        public static final String GET_BLOCK_CONDITION_SQL =
+                "SELECT TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID =?";
         public static final String UPDATE_BLOCK_CONDITION_STATE_SQL =
                 "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
         public static final String DELETE_BLOCK_CONDITION_SQL =
