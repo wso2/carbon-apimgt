@@ -307,7 +307,8 @@ public class SQLConstants {
                     "   API.API_PROVIDER," +
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH" +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   API.API_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -338,7 +339,8 @@ public class SQLConstants {
                     "   API.API_PROVIDER," +
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH" +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   API.API_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
