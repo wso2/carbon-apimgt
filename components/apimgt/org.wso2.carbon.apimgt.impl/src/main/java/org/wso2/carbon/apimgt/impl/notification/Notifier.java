@@ -44,7 +44,7 @@ public abstract class Notifier implements Runnable {
             sendNotifications(notificationDTO);
         }
         catch (Exception e) {
-            log.error("Exception Occured during Notification Sending ", e);
+            log.error("Exception Occured during notification Sending ", e);
         }
     }
 

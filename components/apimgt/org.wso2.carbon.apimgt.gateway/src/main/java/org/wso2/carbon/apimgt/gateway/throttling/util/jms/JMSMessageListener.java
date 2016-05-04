@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 
 import javax.jms.JMSException;
@@ -55,15 +56,12 @@ public class JMSMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
 
-                    String throttleKey = map.get("throttleKey").toString();
-                    String throttleState = map.get("isThrottled").toString();
-                    if (throttleState.equals("true")) {
-                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                getThrottleDataMap().put(throttleKey, throttleState);
-                    } else {
-                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                getThrottleDataMap().remove(throttleKey);
+                    if(map.get(APIConstants.THROTTLE_KEY) != null){
+                        handleThrottleUpdateMessage(map);
+                    } else if(map.get(APIConstants.BLOCKING_CONDITION_KEY) != null){
+                        handleBlockingMessage(map);
                     }
+
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
@@ -72,6 +70,62 @@ public class JMSMessageListener implements MessageListener {
             }
         } catch (JMSException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        }
+    }
+
+    private void handleThrottleUpdateMessage(Map<String, Object> map) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Key -  throttleKey : " + map.get("throttleKey").toString() + " , " +
+                      "isThrottled :" + map.get("isThrottled").toString());
+        }
+
+        String throttleKey = map.get("throttleKey").toString();
+        String throttleState = map.get("isThrottled").toString();
+        if (throttleState.equals("true")) {
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataMap().put(throttleKey, throttleState);
+        } else {
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataMap().remove(throttleKey);
+        }
+    }
+
+    private void handleBlockingMessage(Map<String, Object> map) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString() + " , " +
+                      "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
+                      "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
+        }
+
+        String condition = map.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
+        String conditionValue = map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString();
+        String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
+        String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
+
+        if(APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)){
+            if("true".equals(conditionState)){
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().put
+                        (conditionValue,conditionValue);
+            }else {
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
+                        .remove(conditionValue);
+            }
+        } else if(APIConstants.BLOCKING_CONDITIONS_API.equals(condition)){
+            if("true".equals(conditionState)){
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().put
+                        (conditionValue,conditionValue);
+            }else {
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap()
+                        .remove(conditionValue);
+            }
+        }else if(APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)){
+            if("true".equals(conditionState)){
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().put
+                        (conditionValue,conditionValue);
+            }else {
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap()
+                        .remove(conditionValue);
+            }
         }
     }
 }

@@ -9840,14 +9840,14 @@ public class ApiMgtDAO {
     }
 
     public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
-            APIManagementException {
+                                                                                                        APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
-            if ("API".equals(conditionType)) {
+            if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
                 String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
                 if (extractedTenantDomain == null) {
                     extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -9856,9 +9856,9 @@ public class ApiMgtDAO {
                     valid = true;
                 } else {
                     throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                            conditionValue);
+                                                     conditionValue);
                 }
-            } else if ("APPLICATION".equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
                 if (appArray.length > 1) {
                     String appOwner = appArray[0];
@@ -9866,18 +9866,18 @@ public class ApiMgtDAO {
 
                     if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
                             (appOwner,
-                            appName)) {
+                             appName)) {
                         valid = true;
-                    }else{
+                    } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                "name " + appName + "from Application " +
-                                "Owner " + appOwner);
+                                                         "name " + appName + "from Application " +
+                                                         "Owner " + appOwner);
                     }
                 }
-            } else if ("USER".equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
                 if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
-                }else{
+                } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
             } else {
@@ -9907,6 +9907,43 @@ public class ApiMgtDAO {
         }
         return status;
     }
+
+    /*
+     * Gets details about a blocking condition.
+     */
+    public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        BlockConditionsDTO blockCondition = null;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITION_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setInt(1, conditionId);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                blockCondition = new BlockConditionsDTO();
+                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockCondition.setConditionType(resultSet.getString("TYPE"));
+                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionId(conditionId);
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to get Block condition", e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockCondition;
+    }
+
 
     public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
         Connection connection = null;
