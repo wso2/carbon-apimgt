@@ -122,7 +122,7 @@ $(document).ready(function () {
 
     $("#goBackBtn").click(function () {
     	var loginUrl = siteContext;        
-        if ($('#tenant').val()) {
+        if ($('#tenant').val() != null && $('#tenant').val() != "null") {
         	loginUrl = siteContext + '?tenant='+$('#tenant').val();
         }
     	window.location.href = loginUrl;
