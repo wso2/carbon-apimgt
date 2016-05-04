@@ -97,8 +97,8 @@ for(var i=0;i < outputs.tiers.length; i++){
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
     $(document).ready(function() {
-      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION"});
-      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX"}); 
+      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %> });
+      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX", provide_keys: <%= site.mapExistingAuthApps %>}); 
 
       //activate a tab based on hash
       if(location.hash != undefined || location.hash !=""){
