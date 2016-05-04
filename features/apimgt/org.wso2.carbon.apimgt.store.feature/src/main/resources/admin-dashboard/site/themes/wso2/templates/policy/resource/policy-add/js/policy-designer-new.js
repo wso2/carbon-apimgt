@@ -326,6 +326,8 @@ var addPolicyToBackend = function () {
                     if (ipInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -351,6 +353,8 @@ var addPolicyToBackend = function () {
                     if (headerInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -376,6 +380,8 @@ var addPolicyToBackend = function () {
                     if (queryParamInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -401,6 +407,8 @@ var addPolicyToBackend = function () {
                     if (jwtClaimInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
         }
