@@ -8,7 +8,8 @@
      tenantDomain = MultitenantUtils.getTenantDomain(api.provider);
  }
  var urlPrefix = jagg.getTenantURLPrefix();%>
-<div id="overview">
+<div class="row">
+		  <div class="col-md-12 col-lg-6">
 	<%if (!api.isAdvertiseOnly) {%>
 
 	    <% 
@@ -54,7 +55,7 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
-	    	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
+	    	            <div  class="endpoint-copybtn well well-small api_urls"><a data-clipboard-text="<%=environmenturls[urltype]%><%=api.context%>" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=api.context%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
@@ -135,6 +136,7 @@
     <% if(user) jagg.includeBlock("comment/comment-add", null); %>
     <% jagg.includeBlock("comment/comment-list", {api:api}); %>
 </div>
+</div>
 <script language="javascript">
     $(document).ready(function(){
         var link = window.location+'';
@@ -158,6 +160,7 @@
         $("#digg").attr("href","http://www.digg.com/submit?url="+api_url);
 
     });
+    
 </script>
 
 <% }); %>

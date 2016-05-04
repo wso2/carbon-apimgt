@@ -48,6 +48,7 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "jquery-dataTable","libs/data-tables_1.10.7/media/js/jquery.dataTables.min.js");
         jagg.addFooterJS("page/base", "responsive-datatables-js", "libs/data-tables_1.10.7/extensions/Bootstrap/js/dataTables.bootstrap.js");
         jagg.addFooterJS("page/base", "datatables-js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
+        jagg.addFooterJS("page/base", "zeroClipboard", "js/lib/ZeroClipboard.min.js");
     }
 });
 %>
