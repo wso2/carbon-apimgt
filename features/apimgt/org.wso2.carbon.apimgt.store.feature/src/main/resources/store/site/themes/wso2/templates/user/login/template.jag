@@ -39,8 +39,8 @@
                                 <input type="hidden" id="tenant" name="tenant" value="<%=request_tenant%>">
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                        <button type="button" id="loginBtn" onclick="login()" class="btn btn-default btn-primary add-margin-right-2x">Sign In</button>
-                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary hidden-xs hidden-sm">Go Back</button>
+                                        <button type="button" id="loginBtn" onclick="login()" class="btn btn-default btn-primary add-margin-right-2x"><%=i18n.localize("login")%></button>
+                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary hidden-xs hidden-sm"><%=i18n.localize("goBack")%></button>
                                     </div>
                                 </div>
                             </form>
