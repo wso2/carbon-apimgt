@@ -113,11 +113,10 @@
       <button type="button" class="btn btn-default share_links" ref="embed"><%=i18n.localize("embed")%></button>
       <a title="<%=i18n.localize("email")%>" href="" id="api_mailto" class="btn btn-default"><i class="fa fa-envelope-o"></i> <%=i18n.localize("email")%></a>
     </div>
-    <div class="row">    
-    <div id="share_div_embed" class="share_dives col-sm-6" style="display:none">
-        <textarea id="embed_iframe" class="form-control "></textarea>
-    </div>
-    </div>
+    <div id="share_div_embed" class="share_dives highlight" style="display:none">
+		<pre><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></pre>
+	</div>
+
     <div id="share_div_social" class="share_dives">
         <!-- Facebook -->
         <a class="social_links" id="facebook" href="#" target="_blank"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/facebook.png"))%>" alt="Facebook" /></a>
@@ -142,7 +141,8 @@
         var link = window.location+'';
         $('#api_mailto').attr('href',"mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location));
         $('#embed_iframe').text('<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
-
+        $('#embed-copy').attr('data-clipboard-text', '<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
+        
         $('.share_links').click(function(){
             $('.share_links').removeClass('disabled');
             $(this).addClass('disabled');
