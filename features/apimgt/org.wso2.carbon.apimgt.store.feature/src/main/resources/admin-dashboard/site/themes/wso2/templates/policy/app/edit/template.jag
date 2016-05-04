@@ -47,7 +47,7 @@
     <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data" action="/admin-dashboard/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
         <div class="page-header">
             <h2><br></h2>
-            <p class="lead">General Details</p>
+            <p class="lead"><%=i18n.localize("generalDetails")%></p>
         </div>
         <div class="form-group">
             <label class="control-label col-sm-3"><%="Name"%></label>
@@ -63,7 +63,7 @@
         </div>
         <div class="page-header">
             <h2><br></h2>
-            <p class="lead">Quota</p>
+            <p class="lead"><%=i18n.localize("quotalimits")%></p>
         </div>
         <div id="quotaTypeRadioDev">
             <div class="form-group">

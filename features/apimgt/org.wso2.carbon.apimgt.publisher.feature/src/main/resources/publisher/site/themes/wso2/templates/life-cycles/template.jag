@@ -44,17 +44,53 @@ var apiName=$("#name").val();
 var version=$("#apiVersion").val();
 var provider=$("#provider").val();
 
+if(status=='Deprecate'){
+jagg.message({
+        content:"Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API - " + apiName + " - " + version+"?",
+        type:"confirm",
+        title:"Change Lifecycle status",
+        anotherDialog:true,
+        okCallback:function(){
+                       $('#messageModal').modal({backdrop: 'static', keyboard: false });
+                                  $(".modal-header .close").hide();
+                                  $(".modal-footer").html("");
+                                  $(".modal-title").html("Please wait");
+                                  $(".modal-body").addClass("loadingButton");
+                                  $(".modal-body").css({"margin-left":25});
+                                  $(".modal-body").html("Changing the API lifecycle status : "+ apiName + " - " + version );
+                      jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
+                          function (result) {
+                              if (!result.error) {
+                                 $('#statusUpdateMsg').show();
+                                 setTimeout(function(){
+                						location = ''
+              					 },1000)
+                              } else {
+                                jagg.message({content:result.message,type:"error"});
+                              }
+                          }, "json");
+
+    },
+    cancelCallback:function(){
+    $('#messageModal').modal('hide');
+    }
+    });
+}else{
  jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
-              function (result) {
-                  if (!result.error) {
-                     $('#statusUpdateMsg').show();
-                     setTimeout(function(){
-    						location = ''
-  					 },1000)
-                  } else {
-                    jagg.message({content:result.message,type:"error"});
-                  }
-              }, "json");
+                           function (result) {
+                               if (!result.error) {
+                                  $('#statusUpdateMsg').show();
+                                  setTimeout(function(){
+                 						location = ''
+               					 },1000)
+                               } else {
+                                 jagg.message({content:result.message,type:"error"});
+                               }
+                           }, "json");
+
+}
+
+
 
 };
 
@@ -81,11 +117,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 		<div class="form-group form-inline">
 		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
 		        <div class="controls col-sm-8">
-				<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>		            
+					<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>		            
 		         </div> 
 		</div>
 		<br/>
-                 <div class="controls publishCheckBoxes">
+                 
                  <%for (var j=0;j<lcData.items.length;j++){
                  var item=lcData.items[j];
                  var itemName=item.name;
@@ -95,17 +131,25 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  var state=item.lifeCycleStatus;
                  %>
                  <% if(isVisible=="true"){%> 
-                     <%if((state!="Created")||(state=="Created" && oldExist)){%>                
-                     <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
-                        <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
-                     </label>
+                     <%if((state!="Created")||(state=="Created" && oldExist)){%> 
+                      <div class="form-group">      
+                      	 <label class="control-label col-sm-3"></label>         
+	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+	                        	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+	                        		<span class="helper"><%=itemName%></span>
+	                     </label>
+                     </div>
                     <%}else{%>   
                         <%if((itemName == i18n.localize("requireReSubscription"))||(itemName  == i18n.localize("deprecateOldVersions"))){
                                 continue;
                         }else{%> 
-                                 <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
-                                <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
-                            </label>
+                        		<div class="form-group">   
+                        			 <label class="control-label col-sm-3"></label>     
+	                                 <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+	                                	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+	                                	<span class="helper"><%=itemName%></span>
+	                            	</label>
+                            	</div>
                         <%} 
                  <%}}}%>
                  </div>

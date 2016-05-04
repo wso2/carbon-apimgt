@@ -9,7 +9,7 @@
 		define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
 		FROM RequestStream
-		SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and subscriptionTier == '$policy.getPolicyName()') AS isEligible, subscriptionKey AS throttleKey
+		SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and subscriptionTier == '$policy.getPolicyName()') AS isEligible, subscriptionKey AS throttleKey, propertiesMap
 		INSERT INTO EligibilityStream;
 
 		#if($quotaPolicy != "")

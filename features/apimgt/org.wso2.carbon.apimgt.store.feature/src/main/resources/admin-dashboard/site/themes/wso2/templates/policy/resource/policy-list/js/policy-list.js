@@ -19,3 +19,26 @@ var deleteAPIPolicy = function (policyObject) {
         }
     });
 };
+
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#api-policy').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#api-policy_length option:selected" ).val()
+	     || $("#api-policy_length option:selected" ).val()==-1)
+	       $('#api-policy_paginate').hide();
+	       else $('#api-policy_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
+});
