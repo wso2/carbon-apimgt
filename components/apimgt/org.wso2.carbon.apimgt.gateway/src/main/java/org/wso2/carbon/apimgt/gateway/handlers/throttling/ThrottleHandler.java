@@ -165,7 +165,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
             //TODO This is wrong you have to get the tenant domain from remote as gatway we don't share the configs
-            subscriberTenantDomain = MultitenantUtils.getTenantDomain(authContext.getUsername());
+            subscriberTenantDomain = authContext.getThrottlingDataList().get(4);
             applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.

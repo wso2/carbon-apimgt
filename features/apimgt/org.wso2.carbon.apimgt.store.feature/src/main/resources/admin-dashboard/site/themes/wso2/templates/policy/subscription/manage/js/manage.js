@@ -19,3 +19,28 @@ var deleteSubscriptionPolicy = function (policyObject) {
         }
     });
 };
+
+$(function(){
+
+    /***********************************************************
+     *  data-tables config
+     ***********************************************************/
+	$('#subscription-policy').datatables_extended({
+	     "fnDrawCallback": function(){
+	       if(this.fnSettings().fnRecordsDisplay()<=$("#subscription-policy_length option:selected" ).val()
+	     || $("#subscription-policy_length option:selected" ).val()==-1)
+	       $('#subscription-policy_paginate').hide();
+	       else $('#subscription-policy_paginate').show();
+	     } ,
+         "aoColumns": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         { "bSortable": false },
+         { "bSortable": false }
+         ]
+	});
+
+});

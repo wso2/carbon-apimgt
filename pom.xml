@@ -141,7 +141,7 @@
         <repository>
             <id>wso2-staging</id>
             <name>WSO2 staging Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/orgwso2carbonmediation-401/</url>
+            <url>https://maven.wso2.org/nexus/content/repositories/orgjaggeryjs-1002/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
@@ -388,10 +388,16 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-	    <dependency>
+	        <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
                 <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
@@ -543,7 +549,7 @@
                 <version>${carbon.governance.version}</version>
             </dependency>
 
-	    <dependency>
+	        <dependency>
                 <groupId>org.wso2.carbon.governance</groupId>
                 <artifactId>org.wso2.carbon.governance.lcm</artifactId>
                 <version>${carbon.governance.version}</version>
@@ -901,7 +907,7 @@
                 <version>${wso2-uri-templates.version}</version>
             </dependency>
 
-	    <dependency>
+	        <dependency>
                 <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>
                 <version>${orbit.version.pdfbox}</version>
@@ -1038,7 +1044,7 @@
 
         <carbon.analytics.common.version>5.0.12-alpha</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.5</carbon.kernel.version>
+        <carbon.kernel.version>4.4.6-SNAPSHOT</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.5.2</carbon.commons.version>
@@ -1046,7 +1052,7 @@
         <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
         <carbon.identity.version>5.0.9-SNAPSHOT</carbon.identity.version>
         <carbon.governance.version>4.6.2</carbon.governance.version>
-        <carbon.deployment.version>4.6.1</carbon.deployment.version>
+        <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
         <carbon.multitenancy.version>4.5.1</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
@@ -1061,7 +1067,7 @@
         <carbon.commons.imp.pkg.version>[5.0.0, 5.2.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
-        <carbon.platform.package.import.version.range>[4.4.1, 4.5.0)</carbon.platform.package.import.version.range>
+        <carbon.platform.package.import.version.range>[4.4.1, 4.6.0)</carbon.platform.package.import.version.range>
 
         <!--lib thrift version range-->
         <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
@@ -1093,7 +1099,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.12.3</jaggery.version>
+        <jaggery.version>0.12.4</jaggery.version>
 
         <!-- Misc Versions -->
         <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>

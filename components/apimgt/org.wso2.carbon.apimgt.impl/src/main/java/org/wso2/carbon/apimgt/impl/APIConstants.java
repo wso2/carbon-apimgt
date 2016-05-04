@@ -1192,6 +1192,8 @@ public final class APIConstants {
         public static final String BLOCK_CONDITION_RETRIEVER_INIT_DELAY =  "InitDelay";
         public static final String BLOCK_CONDITION_RETRIEVER_PERIOD =  "Period";
         public static final String ENABLE_SUBSCRIPTION_SPIKE_ARREST = "EnableSubscriptionSpikeArrest";
-
+        public static final String ENABLE_HEADER_CONDITIONS = "EnableHeaderConditions";
+        public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
+        public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
     }
 }

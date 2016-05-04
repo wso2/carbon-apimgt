@@ -25,6 +25,38 @@ var apiPolicy =
     }
 };
 
+var changeStatusIcon = function(flowId, type, checkBoxOb) {
+    var spanId;
+    var iconId;
+    if(type == "IP") {
+       spanId = "ip-condition-configured-" + flowId;
+        iconId = "ip-condition-configured-icon-" + flowId;
+    } else if(type == "Header") {
+        spanId = "header-condition-configured-" + flowId;
+        iconId = "header-condition-configured-icon-" + flowId;
+    } else if(type == "QueryParam") {
+        spanId = "queryparam-condition-configured-" + flowId;
+        iconId = "queryparam-condition-configured-icon-" + flowId;
+    } else if(type == "JWTClaim") {
+        spanId = "ip-condition-configured-" + flowId;
+        iconId = "ip-condition-configured-icon-" + flowId;
+    } else {
+        return;
+    }
+
+    if($(checkBoxOb).is(":checked")) {
+        $('#'+spanId).removeClass('has-configured');
+        $('#'+iconId).removeClass('fw-circle-outline');
+        $('#'+spanId).addClass('has-success');
+        $('#'+iconId).addClass('fw-check');
+    } else {
+        $('#'+spanId).removeClass('has-success');
+        $('#'+iconId).removeClass('fw-check');
+        $('#'+spanId).addClass('has-configured');
+        $('#'+iconId).addClass('fw-circle-outline');
+    }
+};
+
 var addPolicy = function () {
 
     var executionFlow = {
@@ -270,7 +302,8 @@ var addPolicyToBackend = function () {
     var policyName = $('#policy-name').val();
     var policyDescription = $('#policy-description').val();
     var policyLevel = $("#policy-level option:selected").val();
-    var defaultPolicyType = $("#default-policy-level option:selected").val();
+    //var defaultPolicyType = $("#default-policy-level option:selected").val();
+    var defaultPolicyType = $('input[name=select-quota-type]:checked').val();
     var defaultPolicyLimit;
     var defaultPolicyUnit;
     var defaultPolicyUnitTime;
@@ -283,14 +316,14 @@ var addPolicyToBackend = function () {
     if (defaultPolicyType == 'requestCount') {
         defaultPolicyLimit = $('#request-count').val();
         defaultPolicyUnit = $("#request-count-unit option:selected").val();
-        defaultPolicyUnitTime = $("#request-unit-time-count").val();
+        defaultPolicyUnitTime = $("#unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
     } else {
         defaultPolicyLimit = $('#bandwidth').val();
         defaultPolicyUnit = $("#bandwidth-unit option:selected").val();
-        defaultPolicyUnitTime = $("#bandwidth-unit-time-count").val();
+        defaultPolicyUnitTime = $("#unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyUnit;
@@ -325,6 +358,8 @@ var addPolicyToBackend = function () {
                     if (ipInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -350,6 +385,8 @@ var addPolicyToBackend = function () {
                     if (headerInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -375,6 +412,8 @@ var addPolicyToBackend = function () {
                     if (queryParamInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -400,6 +439,8 @@ var addPolicyToBackend = function () {
                     if (jwtClaimInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
         }
@@ -432,7 +473,7 @@ var addPolicyToBackend = function () {
         if (!data.error) {
             location.href = 'site/pages/policy-list.jag';
         } else {
-            jagg.message({content:result.message,type:"error"});
+            jagg.message({content:data.error.message,type:"error"});
         }
     }, "json");
 };

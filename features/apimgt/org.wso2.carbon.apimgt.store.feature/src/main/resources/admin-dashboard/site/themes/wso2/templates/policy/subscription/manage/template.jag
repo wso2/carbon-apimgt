@@ -5,7 +5,7 @@
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
-    <table class="table table-bordered">
+    <table class="table table-responsive table-striped" id="subscription-policy">
         <thead>
             <tr>
                 <th class="userSpecialCell"><%="Name"%></th>
@@ -14,7 +14,7 @@
                 <th class="appSpecialCell"><%="Unit Time"%></th>
                 <th class="appSpecialCell"><%="Rate Limit"%></th>
                 <th class="appSpecialCell"><%="Time Unit"%></th>
-                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
+                <th class="userSpecialCell"></th>
             </tr>
         </thead>
 
@@ -45,17 +45,22 @@
                     <td><%=unitTime%></td>
                     <td><%=rateLimitCount%></td>
                     <td><%=rateLimitTimeUnit%></td>
-                    <td>
-                        <a id="editButton<%=count%>" onClick="editSubscriptionPolicy('<%=policyName%>')">
-                            <i class="icon-edit"></i>
-                                Edit
+                    <td class="text-right">
+                        <a id="editButton<%=count%>" onClick="editSubscriptionPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
+                            <span class="fw-stack">
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    <i class="fw fw-edit fw-stack-1x"></i>
+                                </span>
+                                <span class="hidden-xs">Edit</span>
                         </a>
-                        <a id="deleteButton<%=count%>" onclick="deleteSubscriptionPolicy('<%=policyName%>')">
-                            <i class="icon-trash"></i>
-                            Delete
+                        <a id="deleteButton<%=count%>" onclick="deleteSubscriptionPolicy('<%=policyName%>')" class="btn padding-reduce-on-grid-view">
+                             <span class="fw-stack">
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                </span>
+                                <span class="hidden-xs">Delete</span>
                         </a>
                     </td>
-
                 </tr>
             <%
         count++;

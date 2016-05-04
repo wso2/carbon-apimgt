@@ -25,10 +25,9 @@ public class IPCondition extends Condition {
     private String endingIP;
 
     public IPCondition(String conditionType) {
-       /* setType(PolicyConstants.IP_SPECIFIC_TYPE);*/
     	setType(conditionType);
-        this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.IP_QUERY + PolicyConstants.END_QUERY;
-        // "cast(map:get(properties,’"+value+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.IP_QUERY + PolicyConstants
+                .END_QUERY_LONG;
     }
 
     public String getSpecificIP() {
@@ -77,21 +76,21 @@ public class IPCondition extends Condition {
     	if(PolicyConstants.IP_SPECIFIC_TYPE.equalsIgnoreCase(getType())){
     		long ip = ipToLong(getSpecificIP());
             condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
-                    + PolicyConstants.QUOTE + ip + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
+                    +ip +PolicyConstants.END_LONG +PolicyConstants.CLOSE_BRACKET;
             if (isInvertCondition()) {
-                condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
+                condition = PolicyConstants.INVERT_CONDITION + condition;
             }
     	}
     	
     	if(PolicyConstants.IP_RANGE_TYPE.equalsIgnoreCase(getType())){
     		 long ipStart = ipToLong(getStartingIP());
     	        long ipEnd = ipToLong(getEndingIP());
-    	        condition = PolicyConstants.OPEN_BRACKET + PolicyConstants.QUOTE + ipStart + PolicyConstants.QUOTE
-    	                + PolicyConstants.LESS_THAN + getQueryAttributeName() + PolicyConstants.AND + PolicyConstants.QUOTE
-    	                + ipEnd + PolicyConstants.QUOTE + PolicyConstants.GREATER_THAN + getQueryAttributeName()
-    	                + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
+            condition = PolicyConstants.OPEN_BRACKET + ipStart + PolicyConstants.END_LONG + PolicyConstants.LESS_THAN
+                    + getQueryAttributeName() + PolicyConstants.AND  + ipEnd + PolicyConstants.END_LONG +
+                    PolicyConstants.GREATER_THAN + getQueryAttributeName()
+    	                + PolicyConstants.CLOSE_BRACKET;
     	        if (isInvertCondition()) {
-    	            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
+    	            condition = PolicyConstants.INVERT_CONDITION + condition;
     	        }
     	}
         

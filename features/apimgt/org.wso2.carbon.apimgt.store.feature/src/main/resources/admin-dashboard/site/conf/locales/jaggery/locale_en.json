@@ -166,5 +166,12 @@
     "InvalidKeyTemplateMessage": "Invalid Key Template",
     "keyTemplateAlreadyExist": "Key Template Already Exist. Add a new Key Template",
     "invalidExecutionPlan": "Siddhi Query deployment failed due to Siddhi syntax errors",
-    "globalPolicyErrorMessage": "Error occurred while saving policy (Cause:"
+    "globalPolicyErrorMessage": "Error occurred while saving policy (Cause:",
+    "quotalimits":"Quota Limits",
+    "generalDetails":"General Details",
+    "policyFlags":"Policy Flags",
+    "noCustomRulesDescription":"Custom Rules are not defined",
+    "noCustomRules":"No Custom Rules Found",
+    "noBlockedEntitiesDescription":"Blocked Entities are not defined",
+    "noBlockedEntities":"No Blocked Entities Found"
 }
