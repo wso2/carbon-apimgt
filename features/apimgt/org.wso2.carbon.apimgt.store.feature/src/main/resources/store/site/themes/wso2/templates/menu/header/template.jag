@@ -71,7 +71,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 					           <li><a href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><%=i18n.localize("privacy")%></a></li> 
 					           <% } %>           
 					           <li class="divider visible-xs"></li>
-					           <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; Log out</a></li>
+					           <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; <%=i18n.localize("logout")%></a></li>
 					         </ul>
 				      </li>
        </ul>

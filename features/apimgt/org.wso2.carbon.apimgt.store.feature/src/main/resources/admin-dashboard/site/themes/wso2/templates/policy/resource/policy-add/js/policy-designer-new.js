@@ -270,7 +270,8 @@ var addPolicyToBackend = function () {
     var policyName = $('#policy-name').val();
     var policyDescription = $('#policy-description').val();
     var policyLevel = $("#policy-level option:selected").val();
-    var defaultPolicyType = $("#default-policy-level option:selected").val();
+    //var defaultPolicyType = $("#default-policy-level option:selected").val();
+    var defaultPolicyType = $('input[name=select-quota-type]:checked').val();
     var defaultPolicyLimit;
     var defaultPolicyUnit;
     var defaultPolicyUnitTime;
@@ -283,14 +284,14 @@ var addPolicyToBackend = function () {
     if (defaultPolicyType == 'requestCount') {
         defaultPolicyLimit = $('#request-count').val();
         defaultPolicyUnit = $("#request-count-unit option:selected").val();
-        defaultPolicyUnitTime = $("#request-unit-time-count").val();
+        defaultPolicyUnitTime = $("#unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
     } else {
         defaultPolicyLimit = $('#bandwidth').val();
         defaultPolicyUnit = $("#bandwidth-unit option:selected").val();
-        defaultPolicyUnitTime = $("#bandwidth-unit-time-count").val();
+        defaultPolicyUnitTime = $("#unit-time-count").val();
         apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyUnit;
@@ -325,6 +326,8 @@ var addPolicyToBackend = function () {
                     if (ipInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -350,6 +353,8 @@ var addPolicyToBackend = function () {
                     if (headerInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -375,6 +380,8 @@ var addPolicyToBackend = function () {
                     if (queryParamInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
 
@@ -400,6 +407,8 @@ var addPolicyToBackend = function () {
                     if (jwtClaimInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
                     }
+                } else {
+                    apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
                 }
             }
         }
@@ -432,7 +441,7 @@ var addPolicyToBackend = function () {
         if (!data.error) {
             location.href = 'site/pages/policy-list.jag';
         } else {
-            jagg.message({content:result.message,type:"error"});
+            jagg.message({content:data.error.message,type:"error"});
         }
     }, "json");
 };

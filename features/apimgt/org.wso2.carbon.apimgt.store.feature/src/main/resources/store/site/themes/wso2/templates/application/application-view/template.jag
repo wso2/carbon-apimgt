@@ -37,7 +37,7 @@ for(var i=0;i < outputs.tiers.length; i++){
   <div class="form-group">
     <label class="col-sm-2 control-label">Throttling Tier</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;( <%= app_tier.tierDescription %> )</p>
+      <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;&nbsp;<%=app_tier.tierDescription %></p>
       <p>An application is available at different levels of service. The maximum number of requests you can make to an API is determined by this tier.</p>
     </div>
   </div>

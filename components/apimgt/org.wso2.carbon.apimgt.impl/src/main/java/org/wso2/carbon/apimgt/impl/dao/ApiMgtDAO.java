@@ -838,12 +838,14 @@ public class ApiMgtDAO {
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
                     String tier = rs.getString("API_TIER");
+                    String subscriberUserId = rs.getString("USER_ID");
+                    String subsciberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
                     //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                     //TODO isContentAware
                     int subscriptionTenantId = -1;
                     int appTenantId = -1;
                     boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
-                    infoDTO.setContentAware(isContentAware);
+                    infoDTO.setContentAware(false);
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
@@ -861,6 +863,7 @@ public class ApiMgtDAO {
                     list.add(spikeArrest);
                     list.add(spikeArrestUnit);
                     list.add(stopOnQuotaReach);
+                    list.add(subsciberTenant);
                     if (tier != null && tier.trim().length() > 0) {
                         infoDTO.setApiTier(tier);
                     }
@@ -5750,12 +5753,12 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId = policyName + ":" + conditionGroupId;
+				String policyConditionGroupId  ="condition" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
-						continue;
+                    if (StringUtils.isEmpty(conditionGroupId)) {
+                        continue;
 					}
 					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
 				} else {
@@ -5775,7 +5778,7 @@ public class ApiMgtDAO {
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+					if (StringUtils.isEmpty(conditionGroupId)) {
 						continue;
 					}
 					conditionGroupIdSet.add(policyConditionGroupId);

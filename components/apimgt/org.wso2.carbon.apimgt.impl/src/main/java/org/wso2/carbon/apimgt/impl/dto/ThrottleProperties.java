@@ -30,7 +30,9 @@ public class ThrottleProperties {
     private String throttleDataSourceName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
-
+    private boolean enableHeaderConditions;
+    private boolean enableJwtConditions;
+    private boolean enableQueryParamConditions;
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
         return enabledSubscriptionLevelSpikeArrest;
     }
@@ -117,6 +119,30 @@ public class ThrottleProperties {
 
     public void setJmsConnectionProperties(JMSConnectionProperties jmsConnectionProperties) {
         this.jmsConnectionProperties = jmsConnectionProperties;
+    }
+
+    public boolean isEnableHeaderConditions() {
+        return enableHeaderConditions;
+    }
+
+    public void setEnableHeaderConditions(boolean enableHeaderConditions) {
+        this.enableHeaderConditions = enableHeaderConditions;
+    }
+
+    public boolean isEnableJwtConditions() {
+        return enableJwtConditions;
+    }
+
+    public void setEnableJwtConditions(boolean enableJwtConditions) {
+        this.enableJwtConditions = enableJwtConditions;
+    }
+
+    public boolean isEnableQueryParamConditions() {
+        return enableQueryParamConditions;
+    }
+
+    public void setEnableQueryParamConditions(boolean enableQueryParamConditions) {
+        this.enableQueryParamConditions = enableQueryParamConditions;
     }
 
     public static class DataPublisher {

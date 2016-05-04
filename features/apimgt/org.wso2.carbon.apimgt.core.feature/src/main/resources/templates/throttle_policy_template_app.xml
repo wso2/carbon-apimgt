@@ -8,13 +8,18 @@
         define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
 
         FROM RequestStream
-        SELECT messageID, (appTenant == '$policy.getTenantDomain()' and appTier == '$policy.getPolicyName()') AS isEligible, appKey AS throttleKey
+        SELECT messageID, (appTenant == '$policy.getTenantDomain()' and appTier == '$policy.getPolicyName()') AS isEligible, appKey AS throttleKey, propertiesMap
         INSERT INTO EligibilityStream;
 
+        #if($quotaPolicy != "")
         FROM EligibilityStream[isEligible==true]#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit())
+        #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
         select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled
-        group by throttleKey
+        #else
+        select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getDataAmount()) as isThrottled
+        #end
         INSERT ALL EVENTS into ResultStream;
+        #end
 
         from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)
         select *

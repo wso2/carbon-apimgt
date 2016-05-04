@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class ThrottleDataDTO {
     String clientIP;
-    String messageSizeInBytes;
+    int messageSizeInBytes;
     Map<String, String> transportHeaders;
     Map<String, String> queryParameters;
 
@@ -39,12 +39,22 @@ public class ThrottleDataDTO {
         this.clientIP = clientIP;
     }
 
-    public String getMessageSizeInBytes() {
+    public int getMessageSizeInBytes() {
         return messageSizeInBytes;
     }
 
-    public void setMessageSizeInBytes(String messageSizeInBytes) {
+    public void setMessageSizeInBytes(int messageSizeInBytes) {
         this.messageSizeInBytes = messageSizeInBytes;
+    }
+
+    /**
+     * Cleaning DTO by setting null reference for all it instance variables.
+     */
+    public void cleanDTO(){
+        this.clientIP = null;
+        this.messageSizeInBytes = 0;
+        this.transportHeaders =null;
+        this.queryParameters =null;
     }
 
 }
