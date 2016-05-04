@@ -25,6 +25,38 @@ var apiPolicy =
     }
 };
 
+var changeStatusIcon = function(flowId, type, checkBoxOb) {
+    var spanId;
+    var iconId;
+    if(type == "IP") {
+       spanId = "ip-condition-configured-" + flowId;
+        iconId = "ip-condition-configured-icon-" + flowId;
+    } else if(type == "Header") {
+        spanId = "header-condition-configured-" + flowId;
+        iconId = "header-condition-configured-icon-" + flowId;
+    } else if(type == "QueryParam") {
+        spanId = "queryparam-condition-configured-" + flowId;
+        iconId = "queryparam-condition-configured-icon-" + flowId;
+    } else if(type == "JWTClaim") {
+        spanId = "ip-condition-configured-" + flowId;
+        iconId = "ip-condition-configured-icon-" + flowId;
+    } else {
+        return;
+    }
+
+    if($(checkBoxOb).is(":checked")) {
+        $('#'+spanId).removeClass('has-configured');
+        $('#'+iconId).removeClass('fw-circle-outline');
+        $('#'+spanId).addClass('has-success');
+        $('#'+iconId).addClass('fw-check');
+    } else {
+        $('#'+spanId).removeClass('has-success');
+        $('#'+iconId).removeClass('fw-check');
+        $('#'+spanId).addClass('has-configured');
+        $('#'+iconId).addClass('fw-circle-outline');
+    }
+};
+
 var addPolicy = function () {
 
     var executionFlow = {
