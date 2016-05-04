@@ -2439,10 +2439,26 @@ public class SQLConstants {
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
 				+ " WHERE APPPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
 
-		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "SELECT APIPOLICY.TENANT_ID, APIPOLICY.DEFAULT_QUOTA_TYPE "
-				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, " + "AM_POLICY_APPLICATION APPPOLICY, "
-				+ " AM_POLICY_SUBSCRIPTION SUBPOLICY " + "WHERE APIPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND "
-				+ " SUBPOLICY.NAME=? AND " + "APIPOLICY.NAME =?  ";
+		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "select ("
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS, AM_CONDITION_GROUP cg where"
+				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume' "
+				+ " ) "
+				+ " + "
+				+ "  (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS where "
+				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
+				+ " + "
+				+ " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.tenant_id = ? AND SUBPOLICY.quota_type = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.tenant_id = ? AND APPPOLICY.quota_type = 'bandwidthVolume')"
+				+ " ) ";
 
 		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, "
 				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID  "

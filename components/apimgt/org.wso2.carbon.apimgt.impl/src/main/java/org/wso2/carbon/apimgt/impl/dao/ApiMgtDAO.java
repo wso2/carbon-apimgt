@@ -59,6 +59,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -797,6 +798,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
@@ -838,6 +840,8 @@ public class ApiMgtDAO {
                     String tier = rs.getString("API_TIER");
                     //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
                     //TODO isContentAware
+                    int subscriptionTenantId = -1;
+                    int appTenantId = -1;
                     boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
                     infoDTO.setContentAware(isContentAware);
 
@@ -871,81 +875,80 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
         } finally {
+        	try {
+				conn.setAutoCommit(false);
+			} catch (SQLException e) {
+				
+			}
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return false;
     }
 
-    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
-            String subPolicy) throws APIManagementException {
-        boolean isAnyContentAware = false;
+	private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
+			String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+		boolean isAnyContentAware = false;
+		// only check if using CEP based throttling.
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
-        //only check if using CEP based throttling.
-        if(isGlobalThrottlingEnabled){
+		ResultSet resultSet = null;
+		PreparedStatement ps = null;
+		
+		/*if (apiPolicy == null) {
+			sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
 
-            ResultSet resultSet = null;
-            PreparedStatement ps = null;
-            String sqlQuery;
-            if(apiPolicy == null){
-            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
+		} else {
+			sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+		}*/
+		String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
 
-            } else {
-            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
-            }
+		try {
+			String dbType = conn.getMetaData().getDatabaseProductName();
+			if("oracle".equalsIgnoreCase(dbType)){
+				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
+				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
+			}
+			
+			ps = conn.prepareStatement(sqlQuery);
 
-            try {
+			
+			ps.setString(1, apiPolicy);
+			ps.setInt(2, subscriptionTenantId);
+			ps.setString(3, apiPolicy);
+			ps.setInt(4, subscriptionTenantId);
+			ps.setInt(5, apiId);
+			ps.setInt(6, subscriptionTenantId);
+			ps.setInt(7, apiId);
+			ps.setInt(8, subscriptionTenantId);
+			ps.setString(9, subPolicy);
+			ps.setInt(10, subscriptionTenantId);
+			ps.setString(11, appPolicy);
+			ps.setInt(12, appTenantId);
 
-                ps = conn.prepareStatement(sqlQuery);
+			resultSet = ps.executeQuery();
+			// We only expect one result if all are not content aware.
+			if (resultSet == null) {
+				throw new APIManagementException(" Result set Null");
+			}
+			
+			int count = 0;
 
-                ps.setInt(1, APIUtil.getTenantId(userName));
-                ps.setString(2, appPolicy);
-                ps.setString(3, subPolicy);
+			if (resultSet.next()) {
+				count = resultSet.getInt(1);
+				if(count > 0){
+					isAnyContentAware = true;
+				}
+			}
 
-                if(apiPolicy != null) {
-                    ps.setString(4, apiPolicy);
-                }
+			
 
-                resultSet = ps.executeQuery();
-                // We only expect one result if all are not content aware.
-                if(resultSet == null){
-                	throw new APIManagementException(" Result set Null");
-                }
+		} catch (SQLException e) {
+			handleException("Failed to get content awareness of the policies ", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+		}
 
-                String quotaType = null;
-
-                if (resultSet.next()) {
-                	if(apiPolicy == null){
-                		quotaType = resultSet.getString("QUOTA_TYPE");
-                	}else{
-                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");
-                	}
-                }
-
-                if(quotaType == null || StringUtils.isEmpty(quotaType)){
-                	return false;
-                }
-
-                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
-                	isAnyContentAware = true;
-                }
-
-                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_REQUESTCOUNT)){
-                	isAnyContentAware = false;
-                }
-
-            } catch (SQLException e) {
-                handleException("Failed to get content awareness of the policies ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-            }
-
-        }
-
-        return isAnyContentAware;
-    }
+		return isAnyContentAware;
+	}
 
 
 
@@ -8867,16 +8870,23 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+               /* Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if(blob != null){
                     byte[] customAttrib = blob.getBytes(1,(int)blob.length());
                     subPolicy.setCustomAttributes(customAttrib);
+                }*/
+                InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(binary != null){
+                	byte[] customAttrib = APIUtil.toByteArray(binary);
+                	subPolicy.setCustomAttributes(customAttrib);
                 }
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
-        } finally {
+        } catch (IOException e) {
+        	handleException("Error while executing SQL", e);
+		} finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
@@ -9514,7 +9524,8 @@ public class ApiMgtDAO {
             updateStatement.setString(11, policy.getBillingPlan());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	long lengthOfStream = policy.getCustomAttributes().length;
+            	updateStatement.setBinaryStream(12, new ByteArrayInputStream(policy.getCustomAttributes()),lengthOfStream);
             	updateStatement.setString(13, policy.getPolicyName());
                 updateStatement.setInt(14, policy.getTenantId());
             }else{

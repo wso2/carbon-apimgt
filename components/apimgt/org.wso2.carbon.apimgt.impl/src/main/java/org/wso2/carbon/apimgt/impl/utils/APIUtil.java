@@ -5653,4 +5653,8 @@ public final class APIUtil {
         }
         return availableTier;
     }
+    
+    public static byte[] toByteArray(InputStream is) throws IOException{
+    	return IOUtils.toByteArray(is);
+    }
 }
