@@ -252,36 +252,60 @@
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 IP Condition
-                                <span id="ip-condition-policy-configured" class="has-configured status-icon"><i class="fw fw-circle-outline"></i></span>
-                                <span id="ip-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="ip-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+                                {{#each executionFlow.conditions}}
+                                    {{#if_eq type "IP"}}
+                                        {{#if ../enabled}}
+                                            <span id="ip-condition-configured-{{../../../executionFlow.id}}" class="has-success status-icon"><i id="ip-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-check"></i></span>
+                                        {{else}}
+                                            <span id="ip-condition-configured-{{../../../executionFlow.id}}" class="has-configured status-icon"><i id="ip-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-circle-outline"></i></span>
+                                        {{/if}}
+                                    {{/if_eq}}
+                                {{/each}}
                             </a>
                             <a href="javascript:void(0)" onclick="showAdvanceOperation('header-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 Header Condition
-                                <span id="header-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="header-ok" class="has-success status-icon"><i class="fw fw-check"></i></span>
-                                <span id="header-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+                                {{#each executionFlow.conditions}}
+                                    {{#if_eq type "Header"}}
+                                        {{#if ../enabled}}
+                                            <span id="header-condition-configured-{{../../../executionFlow.id}}" class="has-success status-icon"><i id="header-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-check"></i></span>
+                                        {{else}}
+                                            <span id="header-condition-configured-{{../../../executionFlow.id}}" class="has-configured status-icon"><i id="header-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-circle-outline"></i></span>
+                                        {{/if}}
+                                    {{/if_eq}}
+                                {{/each}}
                             </a>
                             <a href="javascript:void(0)" onclick="showAdvanceOperation('query-param-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 Query Param Condition
-                                <span id="query-param-condition-policy-configured" class="has-configured status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="query-param-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="query-param-condition-policy-error" class="has-error status-icon"><i class="fw fw-cancel"></i></span>
+                                {{#each executionFlow.conditions}}
+                                    {{#if_eq type "QueryParam"}}
+                                        {{#if ../enabled}}
+                                            <span id="queryparam-condition-configured-{{../../../executionFlow.id}}" class="has-success status-icon"><i id="queryparam-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-check"></i></span>
+                                        {{else}}
+                                            <span id="queryparam-condition-configured-{{../../../executionFlow.id}}" class="has-configured status-icon"><i id="queryparam-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-circle-outline"></i></span>
+                                        {{/if}}
+                                    {{/if_eq}}
+                                {{/each}}
                             </a>
                             <a href="javascript:void(0)" onclick="showAdvanceOperation('jwt-claim-condition-{{executionFlow.id}}', this, '{{executionFlow.id}}')">
                                 <span class="wr-hidden-operations-icon fw-stack">
                                     <i class="fw fw-key fw-stack-2x"></i>
                                 </span>
                                 JWT Claim Condition
-                                <span id="jwt-claim-condition-policy-configured" class="has-configured status-icon"><i class="fw fw-circle-outline"></i></span>
-                                <span id="jwt-claim-condition-policy-ok" class="has-success status-icon hidden"><i class="fw fw-ok"></i></span>
-                                <span id="jwt-claim-condition-policy-error" class="has-error status-icon hidden"><i class="fw fw-error"></i></span>
+                                {{#each executionFlow.conditions}}
+                                    {{#if_eq type "JWTClaim"}}
+                                        {{#if ../enabled}}
+                                            <span id="claim-condition-configured-{{../../../executionFlow.id}}" class="has-success status-icon"><i id="claim-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-check"></i></span>
+                                        {{else}}
+                                            <span id="claim-condition-configured-{{../../../executionFlow.id}}" class="has-configured status-icon"><i id="claim-condition-configured-icon-{{../../../executionFlow.id}}" class="fw fw-circle-outline"></i></span>
+                                        {{/if}}
+                                    {{/if_eq}}
+                                {{/each}}
                             </a>
                         </div>
                         <div class="wr-hidden-operations-content col-lg-8">
@@ -294,7 +318,7 @@
                                         <h2 class="sub-title panel-title">
                                             IP Condition Policy
                                             <label id="ip-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#ip-condition-body-{{../../executionFlow.id}}">
-                                                <input id="ip-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
+                                                <input id="ip-condition-checkbox-{{../../executionFlow.id}}" onclick="changeStatusIcon({{../../executionFlow.id}}, 'IP', this)" {{#if ../enabled}}checked{{/if}} type="checkbox" />
                                                 <span class="helper"></span>
                                                 <span class="text"></span>
                                             </label>
@@ -390,7 +414,7 @@
                                         <h2 class="sub-title panel-title">
                                             Header Condition Policy
                                             <label id="header-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#header-condition-body-{{../../executionFlow.id}}">
-                                                <input id="header-condition-checkbox-{{../../executionFlow.id}}" {{#if ../enabled}}checked{{/if}} type="checkbox" />
+                                                <input id="header-condition-checkbox-{{../../executionFlow.id}}" onclick="changeStatusIcon({{../../executionFlow.id}}, 'Header', this)" {{#if ../enabled}}checked{{/if}} type="checkbox" />
                                                 <span class="helper"></span>
                                                 <span class="text"></span>
                                             </label>
@@ -478,7 +502,7 @@
                                         <h2 class="sub-title panel-title">
                                             Query Param Condition Policy
                                             <label id="query-param-condition-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#query-param-condition-body-{{../../executionFlow.id}}">
-                                                <input id="query-param-condition-checkbox-{{../../executionFlow.id}}" type="checkbox" {{#if ../enabled}}checked{{/if}} />
+                                                <input id="query-param-condition-checkbox-{{../../executionFlow.id}}" onclick="changeStatusIcon({{../../executionFlow.id}}, 'QueryParam', this)" type="checkbox" {{#if ../enabled}}checked{{/if}} />
                                                 <span class="helper"></span>
                                                 <span class="text"></span>
                                             </label>
@@ -564,7 +588,7 @@
                                         <h2 class="sub-title panel-title">
                                             Jwt Condition Policy
                                             <label id="jwt-claims-condition-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#jwt-claim-condition-body-{{../../executionFlow.id}}">
-                                                <input id="jwt-claim-condition-checkbox-{{../../executionFlow.id}}"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
+                                                <input id="jwt-claim-condition-checkbox-{{../../executionFlow.id}}" onclick="changeStatusIcon({{../../executionFlow.id}}, 'JWTClaim', this)"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
                                                 <span class="helper"></span>
                                                 <span class="text"></span>`
                                             </label>
