@@ -107,7 +107,6 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.applicationLevelThrottleKey = applicationLevelThrottleKey;
         this.applicationLevelTier = applicationLevelTier;
         this.apiLevelThrottleKey = apiLevelThrottleKey;
-        this.applicationLevelTier = apiLevelTier;
         this.subscriptionLevelThrottleKey = subscriptionLevelThrottleKey;
         this.subscriptionLevelTier = subscriptionLevelTier;
         this.resourceLevelThrottleKey = resourceLevelThrottleKey;

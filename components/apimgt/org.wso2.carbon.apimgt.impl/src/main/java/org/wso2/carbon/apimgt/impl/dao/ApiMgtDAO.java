@@ -5750,12 +5750,12 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId = policyName + ":" + conditionGroupId;
+				String policyConditionGroupId  ="condition" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
-						continue;
+                    if (StringUtils.isEmpty(conditionGroupId)) {
+                        continue;
 					}
 					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
 				} else {
@@ -5775,7 +5775,7 @@ public class ApiMgtDAO {
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+					if (StringUtils.isEmpty(conditionGroupId)) {
 						continue;
 					}
 					conditionGroupIdSet.add(policyConditionGroupId);
