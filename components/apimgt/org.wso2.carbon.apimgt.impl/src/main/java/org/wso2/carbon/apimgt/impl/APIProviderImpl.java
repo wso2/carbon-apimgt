@@ -3912,10 +3912,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
-        boolean state = apiMgtDAO.addBlockConditions(conditionType,conditionValue,tenantDomain);
+        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
+            conditionValue = tenantDomain + ":" + conditionValue.trim();
+        }
+        boolean state = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
-        if(state) {
-            publishBlockingEvent(conditionType,conditionValue,"true");
+        if (state) {
+            publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
         return state;
@@ -3951,13 +3954,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
-        //PrivilegedCarbonContext.endTenantFlow();
-
-        //PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(CarbonConstants.SUPER_TENANT_ID);
         eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
                 , blockingMessage);
-//        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,true);
-//        PrivilegedCarbonContext.startTenantFlow();
     }
 
 }

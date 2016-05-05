@@ -9880,7 +9880,7 @@ public class ApiMgtDAO {
                 } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
-            } else {
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
                 valid = true;
             }
             if (valid) {
@@ -9893,6 +9893,7 @@ public class ApiMgtDAO {
                 insertPreparedStatement.setString(3, "TRUE");
                 status = insertPreparedStatement.execute();
                 connection.commit();
+                status = true;
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -10017,6 +10018,7 @@ public class ApiMgtDAO {
             deleteBlockConditionPreparedStatement.setInt(1, conditionId);
             status = deleteBlockConditionPreparedStatement.execute();
             connection.commit();
+            status = true;
         } catch (SQLException e) {
             if (connection != null) {
                 try {
