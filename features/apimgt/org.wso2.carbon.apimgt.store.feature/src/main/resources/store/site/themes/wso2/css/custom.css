@@ -960,6 +960,94 @@ div.image-container {
     }
 }
 
+/* ========================================================================
+ * Media panels tablist
+ * ======================================================================== */
+
+#accordion1 h4 a,#accordion2 h4 a{
+    text-decoration:none;
+    font-weight:bold;
+}
+#accordion1 h4 p,#accordion2 h4 p{
+    padding:10px;
+    margin-bottom:0px;
+}
+#accordion1 .panel,#accordion2 .panel{
+    margin-bottom:10px;
+}
+#accordion1 .panel-heading,#accordion2 .panel-heading{
+    background:#e2e2e2;
+    margin-bottom:0px;
+    padding-bottom:0px;
+    border:none;
+    cursor:pointer;
+}
+#accordion1 .panel-heading:hover,#accordion2 .panel-heading:hover{
+    background:#efefef;
+}
+#accordion1 .panel-body,#accordion2 .panel-body{
+    padding:10px;
+    border:1px solid #e2e2e2;
+}
+#accordion1 h4 input[type=checkbox],#accordion1 h4 input[type=radio],
+#accordion2 h4 input[type=checkbox],#accordion2 h4 input[type=radio]{
+    margin-top:0px;
+    margin-right:4px;
+}
+#accordion1 .panel-heading .radio,#accordion2 .panel-heading .radio{
+    width:60px;
+    height:60px;
+    float:left;
+    margin-right:0px;
+    background:#ccc;
+}
+#accordion1 .panel-heading .radio .helper{
+    padding-top:0px;
+    top:20px;
+    left:20px;
+}
+#accordion1 .panel-heading .radio > i{
+    position:relative;
+    top:20px;
+    left:20px;
+}
+#accordion1 .panel-heading .radio > span{
+    position:relative;
+    top:10px;
+    left:10px;
+}
+#accordion1 .panel-heading div .status{
+    margin-top:-42px;
+}
+#accordion1 .panel-heading div .status i{
+    position:relative;
+    top:16px;
+    left:calc(100% - 100px);
+}
+#accordion1 .panel-heading p,#accordion2 .panel-heading p{
+    float:none;
+    width:auto;
+}
+#accordion1 .panel-heading div .heading{
+    font-weight:bold;
+    padding-top:10px;
+    padding-bottom:4px;
+    text-indent:10px;
+}
+#accordion1 .panel-heading div .description{
+    text-indent:10px;
+    margin-right:60px;
+}
+.truncate {
+  min-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#accordion1 h4 a i,#accordion2 h4 a i{
+    margin-top:-4px;
+}
 
 /* ========================================================================
  * Rating Component
