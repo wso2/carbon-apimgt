@@ -58,11 +58,55 @@
             //register actions
             this.element.on( "click", ".regenerate", $.proxy(this.regenerateToken, this));
             this.element.on( "click", ".generatekeys", $.proxy(this.generateKeys, this));
+            this.element.on( "click", ".provide_keys", $.proxy(this.provideKeys, this));
+            this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
+            this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
         },
 
         yourOtherFunction: function(el, options) {
             // some logic
         },
+
+        provideKeys: function(){
+            this.app.provide_keys_form = true;
+            this.render();
+            return false;
+        },
+
+        provideKeysCancel: function(){
+            this.app.provide_keys_form = false;
+            this.render();
+            return false;
+        },
+
+        provideKeysSave: function(){
+            var client_id = this.element.find("#ConsumerKey").val();
+            var client_secret = this.element.find("#ConsumerSecret").val();
+
+            var oJsonParams = {
+                "key_type" : this.type,
+                "client_secret":client_secret
+            };
+
+            jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+                action: "mapExistingOauthClient",
+                applicationName: this.app.name,
+                keytype: this.type,
+                callbackUrl: this.app.callbackUrl,
+                jsonParams: JSON.stringify(oJsonParams),
+                client_id : client_id,
+                validityTime: 3600 //set a default value.
+            }, $.proxy(function (result) {
+                if (!result.error) {
+                    this.app.ConsumerKey = client_id;
+                    this.app.ConsumerSecret = client_secret;
+                    this.render();
+                } else {
+                    jagg.message({content: result.message, type: "error"});
+                }
+            },this), "json");
+            return false;
+        },                
 
         generateKeys: function(){
             var validity_time = this.element.find(".validity_time").val();
@@ -121,6 +165,7 @@
             this.app.basickey = Base64.encode(this.app.ConsumerKey+":"+this.app.ConsumerSecret);
             this.app.username = this.options.username;
             this.app.password = this.options.password;
+            this.app.provide_keys = this.options.provide_keys;
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
             this.element.find(".selectpicker").selectpicker();
