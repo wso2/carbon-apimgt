@@ -120,22 +120,54 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                 <div class="white-wrapper">
                                     <div class="api-details-container">
                                         <div class="add-padding-4x">
-                                            <p class="no-margin"><strong>Version:</strong><%=api.version%></p>
-                                            <p class="no-margin"><strong>By:</strong><%=displayOwner %></p>
-                                            <p class="no-margin"><strong>Updated:</strong><%=api.updatedDate%></p>
-                                            <p class="text-info margin-top-10"><strong class="padding-right-10">Status:</strong><i class="fw fw-publish fw-2x"></i> <%=api.status%></p>
-                                            <% if(isRatingActivated && user){%>
-                                            <p class="no-margin"><strong>Your Rating:</strong>
-                                    			<input type="hidden" class="rating-tooltip-manual rate_save" value="<%= api.userRate %>"/> 
-                                    			<a class="remove_rating"><i class="fa fa-times-circle"></i></a>    
-                                    			</p>  
-                                            <%} %>
-                                            <% if(isRatingActivated){%>
-                                            	 <% if(api.rates!=0) {%>
-                                            	 	<div class="average-rating"><%=api.rates%></div>
-                                            	 <%} %>
-                                            <%} %>
-                                        </div>
+											<div class="form-horizontal">
+											  	<div class="form-group">
+													<label class="col-sm-2 control-label"><strong>Version:</strong></label>
+													<div class="col-sm-10">
+													  <p class="form-control-static"><%=api.version%></p>
+													</div>
+											  	</div>
+											<div class="form-group">
+												<label class="col-sm-2 control-label"><strong>By:</strong></label>
+												<div class="col-sm-10">
+													<p class="form-control-static"><%=displayOwner %></p>
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="col-sm-2 control-label"><strong>Updated:</strong></label>
+												<div class="col-sm-10">
+													<p class="form-control-static"><%=api.updatedDate%></p>
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="col-sm-2 control-label"><strong>Status:</strong></label>
+												<div class="col-sm-10">
+													<p class="form-control-static"><span class="text-info"><i class="fw fw-publish fw-2x"></i> <%=api.status%></span></p>
+												</div>
+											</div>
+											<div class="form-group">
+												<% if(isRatingActivated && user){%>
+													<label class="col-sm-2 control-label"><strong>Rating:</strong></label>
+													<div class="col-sm-10">
+														<p class="form-control-static">
+															<input type="hidden" class="rating-tooltip-manual rate_save" value="<%= api.userRate %>"/>
+															<a class="remove_rating"><i class="fa fa-times-circle"></i></a>
+														</p>
+													</div>
+												<%} %>
+												<% if(isRatingActivated){%>
+													<% if(api.rates!=0) {%>
+													<label class="col-sm-2 control-label">&nbsp;</label>
+													<div class="col-sm-10">
+														<div class="average-rating">
+															<%=api.rates%>
+														</div>
+													</div>
+													<%} %>
+												<%} %>
+										</div>
+									</div>
+								</div>
                                         <%if(subsPermitted && api.status =="PUBLISHED"){%>
 	                                        <form class="form-api-subscription form-inline add-padding-4x">
 		                                        <!-- Load Application -->
