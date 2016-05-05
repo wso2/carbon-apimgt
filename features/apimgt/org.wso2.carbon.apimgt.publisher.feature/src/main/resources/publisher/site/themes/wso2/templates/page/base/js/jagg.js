@@ -76,13 +76,6 @@ var jagg = jagg || {};
                 params.title = "API Publisher"
             }
             jagg.messageDisplay({content:params.content,title:params.title ,buttons:[
-                {name:"No",cssClass:"btn",cbk:function() {
-                    $('#messageModal').modal('hide');
-                    if (typeof params.cancelCallback == "function") {
-                        params.cancelCallback()
-                    }
-
-                }},
                 {name:"Yes",cssClass:"btn btn-primary",cbk:function() {
                     if(!params.anotherDialog){
                         console.info('hiding');
@@ -93,7 +86,15 @@ var jagg = jagg || {};
                     }
 
 
+                }},
+                {name:"No",cssClass:"btn",cbk:function() {
+                    $('#messageModal').modal('hide');
+                    if (typeof params.cancelCallback == "function") {
+                        params.cancelCallback()
+                    }
+
                 }}
+                
             ]
             });
             return;
