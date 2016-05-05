@@ -1,6 +1,4 @@
 instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/common_throttle_config.xml/,target:${installFolder}/../../conf/common_throttle_config.xml,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/global-CEP-config.xml/,target:${installFolder}/../../conf/global-CEP-config.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventreceivers/,target:${installFolder}/../../conf/eventreceivers,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventstreams/,target:${installFolder}/../../conf/eventstreams,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventpublishers/,target:${installFolder}/../../conf/eventpublishers,overwrite:true);\
