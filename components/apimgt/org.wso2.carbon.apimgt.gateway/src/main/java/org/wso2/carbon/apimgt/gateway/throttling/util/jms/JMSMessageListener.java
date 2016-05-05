@@ -102,30 +102,23 @@ public class JMSMessageListener implements MessageListener {
         String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
         String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
 
+        Map<String,String> blockingMap = null;
+
         if(APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)){
-            if("true".equals(conditionState)){
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap().put
-                        (conditionValue,conditionValue);
-            }else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
-                        .remove(conditionValue);
-            }
+            blockingMap =ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                    .getBlockedApplicationConditionsMap();
         } else if(APIConstants.BLOCKING_CONDITIONS_API.equals(condition)){
-            if("true".equals(conditionState)){
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().put
-                        (conditionValue,conditionValue);
-            }else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap()
-                        .remove(conditionValue);
-            }
+            blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap();
         }else if(APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)){
-            if("true".equals(conditionState)){
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().put
-                        (conditionValue,conditionValue);
-            }else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap()
-                        .remove(conditionValue);
-            }
+            blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap();
+        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)){
+            blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap();
+        }
+
+        if("true".equals(conditionState)){
+            blockingMap.put(conditionValue,conditionValue);
+        }else {
+            blockingMap.remove(conditionValue);
         }
     }
 }

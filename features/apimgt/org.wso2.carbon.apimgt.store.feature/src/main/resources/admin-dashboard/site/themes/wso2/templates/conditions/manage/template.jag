@@ -14,6 +14,18 @@
           var conditionslist =  outputs.conditions;
             var conditonsArray = conditionslist.toArray();
             var conditionsListSize  = conditionslist.size();
+
+            for (i = 0; i < conditionsListSize; i++) {
+                if ("IP".equals(conditonsArray[i].getConditionType())) {
+                    var value = conditonsArray[i].getConditionValue();
+                    var index = value.indexOf(":");
+                    if (index > -1) {
+                        // Removing Tenant Domain from IP
+                        value = value.substring(index + 1, value.length());
+                        conditonsArray[i].setConditionValue(value);
+                    }
+                }
+            }
     %>
     <%if(conditionsListSize > 0){%>
     <table class="table table-responsive table-striped" id="manage-tiers">

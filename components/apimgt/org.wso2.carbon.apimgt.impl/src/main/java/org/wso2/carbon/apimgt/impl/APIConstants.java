@@ -1156,6 +1156,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
+    public static final String BLOCKING_CONDITIONS_IP = "IP";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
