@@ -121,18 +121,6 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
                                     "title": i18n.localize("forum"),
                                     "body": [
                                         {
@@ -178,18 +166,6 @@ jagg.block("api/api-info", {
                                             "name": "api/documentation",
                                             "inputs": {
                                                 "api": api
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
@@ -257,18 +233,6 @@ jagg.block("api/api-info", {
                                             }
                                         }
                                     ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
                                 }
                             ]
                         }
@@ -304,18 +268,6 @@ jagg.block("api/api-info", {
                                             "name": "api/documentation",
                                             "inputs": {
                                                 "api": api
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
