@@ -1145,6 +1145,17 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
 
+    public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
+    public static final String BLOCKING_EVENT_TYPE = "jms";
+    public static final String BLOCKING_EVENT_FORMAT = "map";
+    public static final String THROTTLE_KEY = "throttleKey";
+    public static final String BLOCKING_CONDITION_STATE = "state";
+    public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+    public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+    public static final String BLOCKING_CONDITION_DOMAIN = "tenantDomain";
+    public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+    public static final String BLOCKING_CONDITIONS_API = "API";
+    public static final String BLOCKING_CONDITIONS_USER = "USER";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";

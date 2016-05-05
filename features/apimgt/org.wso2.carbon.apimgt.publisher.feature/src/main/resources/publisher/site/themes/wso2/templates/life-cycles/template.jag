@@ -105,7 +105,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 </div>
 <div class="row-fluid">
 
- <form form class="form-horizontal well">
+ <form class="form-horizontal well">
      <input type="hidden" name="action" id="action" value="updateStatus"/>
      <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
      <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
@@ -152,7 +152,6 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                             	</div>
                         <%} 
                  <%}}}%>
-                 </div>
 </div>
 
     <div class="form-actions"> 

@@ -59,6 +59,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -797,6 +798,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
@@ -824,24 +826,29 @@ public class ApiMgtDAO {
                     return false;
                 }
 
-                infoDTO.setTier(rs.getString("TIER_ID"));
+                String apiProvider = rs.getString("API_PROVIDER");
+                String subTier = rs.getString("TIER_ID");
+                String appTier = rs.getString("APPLICATION_TIER");
+                infoDTO.setTier(subTier);
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
                 infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
                 infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setApiPublisher(rs.getString("API_PROVIDER"));
+                infoDTO.setApiPublisher(apiProvider);
                 infoDTO.setApplicationName(rs.getString("NAME"));
-                infoDTO.setApplicationTier(rs.getString("APPLICATION_TIER"));
+                infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
 
                 //Advanced Level Throttling Related Properties
                 if(APIUtil.isAdvanceThrottlingEnabled()) {
-                    String tier = rs.getString("API_TIER");
+                    String apiTier = rs.getString("API_TIER");
                     String subscriberUserId = rs.getString("USER_ID");
-                    String subsciberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                    //check "API_POLICY" or "TIER_ID" or "APPLICATION_TIER" related policy is content aware
+                    String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
+                    int apiId = rs.getInt("API_ID");
+                    int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
+                    int apiTenantId = APIUtil.getTenantId(apiProvider);
                     //TODO isContentAware
-                    boolean isContentAware = false;  //isAnyPolicyContentAware(conn, rs.getString("API_PROVIDER"), null, rs.getString("APPLICATION_TIER"), rs.getString("TIER_ID"));
-                    infoDTO.setContentAware(false);
+                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, appTier, subTier, subscriberTenantId, apiTenantId, apiId);
+                    infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
                     String apiLevelThrottlingKey = "api_level_throttling_key";
@@ -859,9 +866,9 @@ public class ApiMgtDAO {
                     list.add(spikeArrest);
                     list.add(spikeArrestUnit);
                     list.add(stopOnQuotaReach);
-                    list.add(subsciberTenant);
-                    if (tier != null && tier.trim().length() > 0) {
-                        infoDTO.setApiTier(tier);
+                    list.add(subscriberTenant);
+                    if (apiTier != null && apiTier.trim().length() > 0) {
+                        infoDTO.setApiTier(apiTier);
                     }
                     //We also need to set throttling data list associated with given API. This need to have policy id and
                     // condition id list for all throttling tiers associated with this API.
@@ -874,81 +881,63 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
         } finally {
+        	try {
+				conn.setAutoCommit(false);
+			} catch (SQLException e) {
+				
+			}
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return false;
     }
 
-    private boolean isAnyPolicyContentAware(Connection conn, String userName, String apiPolicy, String appPolicy,
-            String subPolicy) throws APIManagementException {
-        boolean isAnyContentAware = false;
+	private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
+			String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+		boolean isAnyContentAware = false;
+		// only check if using CEP based throttling.
+		ResultSet resultSet = null;
+		PreparedStatement ps = null;
+		String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
-        //only check if using CEP based throttling.
-        if(isGlobalThrottlingEnabled){
-
-            ResultSet resultSet = null;
-            PreparedStatement ps = null;
-            String sqlQuery;
-            if(apiPolicy == null){
-            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_WITHOUT_API_POLICY_SQL;
-
-            } else {
-            	sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
-            }
-
-            try {
-
-                ps = conn.prepareStatement(sqlQuery);
-
-                ps.setInt(1, APIUtil.getTenantId(userName));
-                ps.setString(2, appPolicy);
-                ps.setString(3, subPolicy);
-
-                if(apiPolicy != null) {
-                    ps.setString(4, apiPolicy);
-                }
-
-                resultSet = ps.executeQuery();
-                // We only expect one result if all are not content aware.
-                if(resultSet == null){
-                	throw new APIManagementException(" Result set Null");
-                }
-
-                String quotaType = null;
-
-                if (resultSet.next()) {
-                	if(apiPolicy == null){
-                		quotaType = resultSet.getString("QUOTA_TYPE");
-                	}else{
-                		quotaType = resultSet.getString("DEFAULT_QUOTA_TYPE");
-                	}
-                }
-
-                if(quotaType == null || StringUtils.isEmpty(quotaType)){
-                	return false;
-                }
-
-                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_BANDWIDTH)){
-                	isAnyContentAware = true;
-                }
-
-                if(quotaType.equalsIgnoreCase(SQLConstants.ThrottleSQLConstants.QUOTA_TYPE_REQUESTCOUNT)){
-                	isAnyContentAware = false;
-                }
-
-            } catch (SQLException e) {
-                handleException("Failed to get content awareness of the policies ", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-            }
-
-        }
-
-        return isAnyContentAware;
-    }
+		try {
+			String dbType = conn.getMetaData().getDatabaseProductName();
+			if("oracle".equalsIgnoreCase(dbType)){
+				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
+				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
+			}
+			
+			ps = conn.prepareStatement(sqlQuery);
+			ps.setString(1, apiPolicy);
+			ps.setInt(2, subscriptionTenantId);
+			ps.setString(3, apiPolicy);
+			ps.setInt(4, subscriptionTenantId);
+			ps.setInt(5, apiId);
+			ps.setInt(6, subscriptionTenantId);
+			ps.setInt(7, apiId);
+			ps.setInt(8, subscriptionTenantId);
+			ps.setString(9, subPolicy);
+			ps.setInt(10, subscriptionTenantId);
+			ps.setString(11, appPolicy);
+			ps.setInt(12, appTenantId);
+			resultSet = ps.executeQuery();
+			// We only expect one result if all are not content aware.
+			if (resultSet == null) {
+				throw new APIManagementException(" Result set Null");
+			}
+			int count = 0;
+			if (resultSet.next()) {
+				count = resultSet.getInt(1);
+				if(count > 0){
+					isAnyContentAware = true;
+				}
+			}
+		} catch (SQLException e) {
+			handleException("Failed to get content awareness of the policies ", e);
+		} finally {
+			APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+		}
+		return isAnyContentAware;
+	}
 
 
 
@@ -5750,12 +5739,12 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId = policyName + ":" + conditionGroupId;
+				String policyConditionGroupId  ="condition" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
-						continue;
+                    if (StringUtils.isEmpty(conditionGroupId)) {
+                        continue;
 					}
 					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
 				} else {
@@ -5775,7 +5764,7 @@ public class ApiMgtDAO {
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
-					if (conditionGroupId == null || conditionGroupId.trim().length() == 0) {
+					if (StringUtils.isEmpty(conditionGroupId)) {
 						continue;
 					}
 					conditionGroupIdSet.add(policyConditionGroupId);
@@ -8870,16 +8859,23 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+               /* Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if(blob != null){
                     byte[] customAttrib = blob.getBytes(1,(int)blob.length());
                     subPolicy.setCustomAttributes(customAttrib);
+                }*/
+                InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(binary != null){
+                	byte[] customAttrib = APIUtil.toByteArray(binary);
+                	subPolicy.setCustomAttributes(customAttrib);
                 }
                 policies.add(subPolicy);
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
-        } finally {
+        } catch (IOException e) {
+        	handleException("Error while executing SQL", e);
+		} finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
@@ -9517,7 +9513,8 @@ public class ApiMgtDAO {
             updateStatement.setString(11, policy.getBillingPlan());
 
             if(hasCustomAttrib){
-            	updateStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	long lengthOfStream = policy.getCustomAttributes().length;
+            	updateStatement.setBinaryStream(12, new ByteArrayInputStream(policy.getCustomAttributes()),lengthOfStream);
             	updateStatement.setString(13, policy.getPolicyName());
                 updateStatement.setInt(14, policy.getTenantId());
             }else{
@@ -9829,14 +9826,14 @@ public class ApiMgtDAO {
     }
 
     public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
-            APIManagementException {
+                                                                                                        APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
-            if ("API".equals(conditionType)) {
+            if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
                 String extractedTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(conditionValue);
                 if (extractedTenantDomain == null) {
                     extractedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -9845,9 +9842,9 @@ public class ApiMgtDAO {
                     valid = true;
                 } else {
                     throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                            conditionValue);
+                                                     conditionValue);
                 }
-            } else if ("APPLICATION".equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
                 if (appArray.length > 1) {
                     String appOwner = appArray[0];
@@ -9855,18 +9852,18 @@ public class ApiMgtDAO {
 
                     if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
                             (appOwner,
-                            appName)) {
+                             appName)) {
                         valid = true;
-                    }else{
+                    } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                "name " + appName + "from Application " +
-                                "Owner " + appOwner);
+                                                         "name " + appName + "from Application " +
+                                                         "Owner " + appOwner);
                     }
                 }
-            } else if ("USER".equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
                 if (MultitenantUtils.getTenantDomain(conditionValue).equals(tenantDomain)) {
                     valid = true;
-                }else{
+                } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
             } else {
@@ -9896,6 +9893,43 @@ public class ApiMgtDAO {
         }
         return status;
     }
+
+    /*
+     * Gets details about a blocking condition.
+     */
+    public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        BlockConditionsDTO blockCondition = null;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITION_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setInt(1, conditionId);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                blockCondition = new BlockConditionsDTO();
+                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockCondition.setConditionType(resultSet.getString("TYPE"));
+                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionId(conditionId);
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to get Block condition", e);
+                }
+            }
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockCondition;
+    }
+
 
     public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
         Connection connection = null;

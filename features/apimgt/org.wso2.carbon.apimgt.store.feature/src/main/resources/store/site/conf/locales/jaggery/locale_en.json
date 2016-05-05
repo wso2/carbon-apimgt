@@ -45,6 +45,7 @@
 
     "overview.title" : "Overview",
     "documentation.title" : "Documentation",
+    "type" : "Type",
     "apiconsole.title" : "API Console",
     "browse.title" : "Browse APIs",
     "signupTitle" : "Sign - Up for a New Account",
@@ -96,8 +97,8 @@
     "submit":"Submit",
 	"save":"Save",
     "signup" : "Sign-up",
-    "login" : "Login",
-    "logout" : "Logout",
+    "login" : "Sign In",
+    "logout" : "Sign Out",
     "cancel" : "Cancel",
     "postComment" : "Posted By",
     "regenerate" : "Re-generate",

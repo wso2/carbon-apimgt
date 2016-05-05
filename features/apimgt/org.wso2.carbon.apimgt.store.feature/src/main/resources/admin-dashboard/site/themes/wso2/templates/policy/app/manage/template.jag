@@ -24,6 +24,9 @@
     for(j = 0; j < appPolicyArray.length; j++) {
         var appPolicy = appPolicyArray[j];
         var policyName = appPolicy.getPolicyName();
+        if(policyName == "Unlimited") {
+            continue;
+        }
         var defaultQuotaPolicy = appPolicy.getDefaultQuotaPolicy().getType();
         if (defaultQuotaPolicy == "requestCount"){
             var quota = appPolicy.getDefaultQuotaPolicy().getLimit().getRequestCount();

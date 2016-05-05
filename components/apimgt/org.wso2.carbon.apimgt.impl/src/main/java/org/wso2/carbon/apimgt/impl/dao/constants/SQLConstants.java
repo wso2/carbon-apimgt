@@ -307,7 +307,8 @@ public class SQLConstants {
                     "   API.API_PROVIDER," +
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH" +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   API.API_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -338,7 +339,8 @@ public class SQLConstants {
                     "   API.API_PROVIDER," +
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH" +
+                    "   APS.STOP_ON_QUOTA_REACH," +
+                    "   API.API_ID" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
@@ -2439,10 +2441,26 @@ public class SQLConstants {
 				+ " FROM AM_POLICY_APPLICATION APPPOLICY," + "AM_POLICY_SUBSCRIPTION SUBPOLICY "
 				+ " WHERE APPPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND " + "SUBPOLICY.NAME=? ";
 
-		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "SELECT APIPOLICY.TENANT_ID, APIPOLICY.DEFAULT_QUOTA_TYPE "
-				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, " + "AM_POLICY_APPLICATION APPPOLICY, "
-				+ " AM_POLICY_SUBSCRIPTION SUBPOLICY " + "WHERE APIPOLICY.TENANT_ID =? AND " + "APPPOLICY.NAME =? AND "
-				+ " SUBPOLICY.NAME=? AND " + "APIPOLICY.NAME =?  ";
+		public static final String IS_ANY_POLICY_CONTENT_AWARE_SQL = "select ("
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS, AM_CONDITION_GROUP cg where"
+				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume' "
+				+ " ) "
+				+ " + "
+				+ "  (SELECT count(*) as c"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS where "
+				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
+				+ " + "
+				+ " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.tenant_id = ? AND SUBPOLICY.quota_type = 'bandwidthVolume')"
+				+ " + "
+				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.tenant_id = ? AND APPPOLICY.quota_type = 'bandwidthVolume')"
+				+ " ) ";
 
 		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, "
 				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID  "
@@ -2457,6 +2475,8 @@ public class SQLConstants {
                 "INSERT INTO `AM_BLOCK_CONDITIONS` (`TYPE`,`VALUE`,`ENABLED`,`DOMAIN`) VALUES (?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
+        public static final String GET_BLOCK_CONDITION_SQL =
+                "SELECT TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID =?";
         public static final String UPDATE_BLOCK_CONDITION_STATE_SQL =
                 "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
         public static final String DELETE_BLOCK_CONDITION_SQL =

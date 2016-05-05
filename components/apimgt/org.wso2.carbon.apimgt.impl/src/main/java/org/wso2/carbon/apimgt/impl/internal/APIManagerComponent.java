@@ -46,7 +46,9 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
@@ -333,6 +335,24 @@ public class APIManagerComponent {
         }
     }
 
+    /*
+    Registers the JMS OutputEventAdapter
+     */
+    private void configureJMSPublisher(){
+        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
+        adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
+        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
+        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
+        adapterConfiguration.setStaticProperties(APIUtil.getEventPublisherProperties());
+
+        try {
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+        } catch (OutputEventAdapterException e) {
+            log.warn("Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly", e);
+        }
+
+    }
+
     private void setupImagePermissions() throws APIManagementException {
         try {
             AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
@@ -553,6 +573,7 @@ public class APIManagerComponent {
      */
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
+        configureJMSPublisher();
     }
 
     /**

@@ -1047,6 +1047,20 @@ public final class APIUtil {
 
     }
 
+    public static final Map<String,String> getEventPublisherProperties(){
+        HashMap<String,String> propertiesMap = new HashMap<String, String>();
+
+        propertiesMap.put("java.naming.factory.initial","org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
+        //propertiesMap.put("transport.jms.UserName",null);
+        propertiesMap.put("java.naming.provider.url","repository/conf/jndi.properties");
+        //propertiesMap.put("transport.jms.Password",null);
+        propertiesMap.put("transport.jms.DestinationType","topic");
+        propertiesMap.put("transport.jms.Destination","throttleData");
+        propertiesMap.put("transport.jms.ConcurrentPublishers","allow");
+        propertiesMap.put("transport.jms.ConnectionFactoryJNDIName","TopicConnectionFactory");
+        return propertiesMap;
+    }
+
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
      *
@@ -5452,7 +5466,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAppLevel(applicationPolicy);
                     String policyFile = applicationPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_APP +
                             "_" + applicationPolicy.getPolicyName();
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(!APIConstants.DEFAULT_APP_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(),
                             applicationPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5501,7 +5517,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subscriptionPolicy);
                     String policyFile = subscriptionPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_SUB +
                                                                                 "_" + subscriptionPolicy.getPolicyName();
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName(),
                                                                                           subscriptionPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5548,7 +5566,9 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
-                    deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    if(APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                        deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
+                    }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
                             apiPolicy.getTenantId(), true);
                 } catch (APITemplateException e) {
@@ -5652,6 +5672,10 @@ public final class APIUtil {
             }
         }
         return availableTier;
+    }
+    
+    public static byte[] toByteArray(InputStream is) throws IOException{
+    	return IOUtils.toByteArray(is);
     }
 
     public static long ipToLong(String ipAddress) {
