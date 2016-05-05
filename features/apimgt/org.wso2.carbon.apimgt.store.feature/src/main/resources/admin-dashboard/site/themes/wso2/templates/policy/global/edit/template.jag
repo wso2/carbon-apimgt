@@ -3,8 +3,7 @@
     var policyName = request.getParameter("policyName");
     var pageTitle = i18n.localize("addCustomRule");
     var nameFieldDisableStatus = "";
-    var streamParameters = "appKey,apiKey,subscriptionKey,resourceKey,userId,apiContext,apiVersion,appTenant,
-    apiTenant,appId";
+    var streamParameters = "appKey,apiKey,subscriptionKey,resourceKey,userId,apiContext,apiVersion,appTenant,apiTenant,appId";
 
     if(policyName != null) {
         pageTitle = "Edit Custom Policy";
@@ -111,12 +110,11 @@ var isNewPolicy = true;
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=policyName%>");
-          $('#description').val("<%=description%>");
-          $('#keyTemplate').val("<%=keyTemplate%>");
-          $('#siddhiQuery').val("<%=siddhiQuery%>");
+          $('#policyName').val("<%=encode.forHtml(String(policyName))%>");
+          $('#description').val("<%=encode.forHtml(String(description))%>");
+          $('#keyTemplate').val("<%=encode.forHtml(String(keyTemplate))%>");
+          $('#siddhiQuery').val("<%=encode.forHtml(String(siddhiQuery))%>");
         }
-
       
       var parameterArray = ("<%=streamParameters%>").split(',');
       jQuery('input#keyTemplate').bind('input propertychange', function() {
