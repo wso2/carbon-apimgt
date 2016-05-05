@@ -686,7 +686,12 @@
         <ul>
             {{#each api_doc.x-wso2-security.apim.x-wso2-scopes }}
             <li>
-                <h6><a data-index='{{ @index }}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>"><i class='icon-trash' title="<%=i18n.localize("deleteScope")%>"></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
+                <h6><a data-index='{{ @index }}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>">
+						<span class="fw-stack" style="font-size:10px">
+                                <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                		</span>
+					</a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
                 <strong>Roles</strong> : {{ roles }}    
                 <p>{{ description }}</p>
             </li>

@@ -350,7 +350,7 @@ APIDesigner.prototype.init_controllers = function(){
     $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
 
     this.container.delegate( ".delete_resource", "click", function( event ) { 
-    	$(".modal-footer").html("");
+    	$("#messageModal div.modal-footer").html("");
         var operations = API_DESIGNER.query($(this).attr('data-path'));
         var operations = operations[0]
         var i = $(this).attr('data-index');
@@ -429,6 +429,7 @@ APIDesigner.prototype.init_controllers = function(){
     });
 
     this.container.delegate(".delete_scope","click", function(){
+    	$("#messageModal div.modal-footer").html("");
         var i = $(this).attr("data-index");
         jagg.message({content: i18n.t('confirm.deleteScope'),
             type: 'confirm', title: "Delete Scope",
@@ -835,6 +836,7 @@ $(document).ready(function(){
         var designer = APIDesigner();
 
         if(designer.has_resources() == false){
+        	$("#messageModal div.modal-footer").html("");
             jagg.message({
                 content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)?" ,
                 type:"confirm",
