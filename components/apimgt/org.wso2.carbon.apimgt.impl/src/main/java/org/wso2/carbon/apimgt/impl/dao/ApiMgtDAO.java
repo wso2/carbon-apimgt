@@ -5739,7 +5739,7 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId  ="condition" + conditionGroupId;
+				String policyConditionGroupId  ="condition_" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -5777,12 +5777,13 @@ public class ApiMgtDAO {
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
 					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
 						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+                        uriTemplate.getThrottlingConditions().add("_default");
 					}
 
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add(uriTemplate.getThrottlingTier() + ":" + "default");
+					uriTemplate.getThrottlingConditions().add("");
 				}
 
 			}
