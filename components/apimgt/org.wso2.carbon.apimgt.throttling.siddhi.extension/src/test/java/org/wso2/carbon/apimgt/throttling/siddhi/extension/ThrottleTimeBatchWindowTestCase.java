@@ -52,7 +52,7 @@ public class ThrottleTimeBatchWindowTestCase {
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#throttler:timeBatch(5 sec) " +
-                "select symbol,sum(price) as sumPrice,volume, expireTimeStamp " +
+                "select symbol,sum(price) as sumPrice,volume, expiryTimeStamp " +
                 "insert all events into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
@@ -100,7 +100,7 @@ public class ThrottleTimeBatchWindowTestCase {
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#throttler:timeBatch(5 sec , 0) " +
-                "select symbol,sum(price) as sumPrice,volume, expireTimeStamp " +
+                "select symbol,sum(price) as sumPrice,volume, expiryTimeStamp " +
                 "insert all events into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
