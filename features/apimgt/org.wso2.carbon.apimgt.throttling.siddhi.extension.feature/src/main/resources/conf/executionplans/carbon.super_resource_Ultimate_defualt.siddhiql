@@ -10,14 +10,14 @@
 define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string, apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
 
 @Export('org.wso2.throttle.globalThrottle.stream:1.0.0')
-define stream GlobalThrottleStream (throttleKey string, isThrottled bool);
+define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
 
 FROM RequestStream
 SELECT messageID, ( apiTenant == 'carbon.super' and resourceTier == 'Ultimate') AS isEligible, resourceKey AS throttleKey
 INSERT INTO EligibilityStream;
 
-FROM EligibilityStream[isEligible==true]#window.time(1 min) 
-select throttleKey, (count(messageID) >= 20) as isThrottled 
+FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) 
+select throttleKey, (count(messageID) >= 20) as isThrottled, expiryTimeStamp
 group by throttleKey 
 INSERT ALL EVENTS into ResultStream;
 

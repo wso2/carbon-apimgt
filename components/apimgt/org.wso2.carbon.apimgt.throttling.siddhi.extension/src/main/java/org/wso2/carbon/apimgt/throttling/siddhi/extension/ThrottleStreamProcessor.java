@@ -108,7 +108,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
         lastSentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
-        attributeList.add(new Attribute("expireTimeStamp", Attribute.Type.LONG));
+        attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
         return attributeList;
     }
 
