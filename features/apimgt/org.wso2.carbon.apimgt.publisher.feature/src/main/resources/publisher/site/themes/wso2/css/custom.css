@@ -20,7 +20,11 @@ div.image-container {
 .app-data h4 {
 	margin-bottom: 0px;
 }
-
+.app-data h4 a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
 .launch-app-data h4 {
 	margin-top: 0px;
 }
