@@ -21,11 +21,12 @@
 		var defaults = {	
 			allowed: 140,		
 			warning: 25,
-			css: 'counter',
+			css: 'counter-container',
 			counterElement: 'span',
 			cssWarning: 'warning',
 			cssExceeded: 'exceeded',
-			counterText: ''
+			counterText: '',
+			placement:'after'
 		}; 
 			
 		var options = $.extend(defaults, options); 
@@ -34,28 +35,33 @@
 			var count = $(obj).val().length;
 			var available = options.allowed - count;
 
-            $(obj).prev().html(options.counterText + available);
+            $(obj).parent().find(options.counterElement).html(options.counterText + available);
 			if(available <= options.warning && available >= 0){
-				$(obj).prev().addClass(options.cssWarning);
+				$(obj).parent().find(options.counterElement).addClass(options.cssWarning);
 			} else {
-				$(obj).prev().removeClass(options.cssWarning);
+				$(obj).parent().find(options.counterElement).removeClass(options.cssWarning);
 			}
 			if(available < 0){
                 $(obj).val($(obj).val().substring(0, options.allowed));
-                $(obj).prev().html(options.counterText + 0);
+                $(obj).parent().find(options.counterElement).html(options.counterText + 0);
                 $(obj).scrollTop(
                         $(obj)[0].scrollHeight - $(obj).height()
                         );
-                $(obj).prev().addClass(options.cssExceeded);
+                $(obj).parent().find(options.counterElement).addClass(options.cssExceeded);
 
             } else {
-				$(obj).prev().removeClass(options.cssExceeded);
+				$(obj).parent().find(options.counterElement).removeClass(options.cssExceeded);
 			}
 
 		};
 				
-		this.each(function() {  			
-			$(this).before('<'+ options.counterElement +' class="' + options.css + '">'+ options.counterText +'</'+ options.counterElement +'>');
+		this.each(function() {
+			var counterStr = '<'+ options.counterElement +' class="' + options.css + '">'+ options.counterText +'</'+ options.counterElement +'>';
+			if(options.placement == "before"){
+				$(this).before(counterStr);
+			}else{
+				$(this).after(counterStr);
+			}
 			calculate(this);
 			$(this).keyup(function(){calculate(this)});
 			$(this).change(function(){calculate(this)});

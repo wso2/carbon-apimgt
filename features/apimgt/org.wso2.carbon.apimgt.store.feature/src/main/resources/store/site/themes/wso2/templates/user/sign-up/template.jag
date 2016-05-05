@@ -39,10 +39,16 @@
                                         <div class="input-group input-wrap">
                                             <input id="newUsername" name="newUsername" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
                                         </div>
-                                        <% if(request_tenant != null) { %>
-                     						<label class="lblTenantDomainName" class="control-label col-sm-2" for="newUsername"> @<%=request_tenant%></label>
-            							<% } %>           
+
             							<input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+                                        <label class="control-label">&nbsp;</label>
+                                        <% if(request_tenant != null) { %>
+                                        <div class="input-group input-wrap">
+                                            <p class="lblTenantDomainName form-control-static" for="newUsername"><strong>@<%=request_tenant%></strong></label>
+                                        </div>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <div class="form-group">
