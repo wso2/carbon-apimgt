@@ -104,7 +104,7 @@ public class ThrottleDataHolder {
      * false if key is not there in throttle map(that means its not throttled).
      */
     public boolean isThrottled(String key) {
-        return this.throttleDataMap.containsKey(key) || this.throttleDataMap.containsKey(key+"_default");
+        return this.throttleDataMap.containsKey(key);
     }
 
 

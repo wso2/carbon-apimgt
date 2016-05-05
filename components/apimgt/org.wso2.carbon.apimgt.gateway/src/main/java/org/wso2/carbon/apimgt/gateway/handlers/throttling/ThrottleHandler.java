@@ -220,12 +220,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
                             if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
                                 //Then we will apply resource level throttling
-                                resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                                 for (String conditionString : resourceLevelThrottleConditions) {
-                                    resourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
+                                    String tempResourceLevelThrottleKey = verbInfoDTO.getRequestKey() + conditionString;
                                     resourceLevelTier = verbInfoDTO.getThrottling();
                                     if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                            isThrottled(resourceLevelThrottleKey)) {
+                                            isThrottled(tempResourceLevelThrottleKey)) {
                                         isResourceLevelThrottled = isThrottled = true;
                                         break;
                                     }
