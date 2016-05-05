@@ -245,7 +245,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <%=i18n.localize("lifecycleSuccessMsg")%>
        </div>
        <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
-       <svg width=600 height=420 ><g/></svg>
+       <svg width=800 height=600 ><g/></svg>
        </div>
       </form>
 
