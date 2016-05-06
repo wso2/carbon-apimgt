@@ -902,7 +902,7 @@ public class ApiMgtDAO {
 
 		try {
 			String dbType = conn.getMetaData().getDatabaseProductName();
-			if("oracle".equalsIgnoreCase(dbType)){
+			if("oracle".equalsIgnoreCase(dbType) || conn.getMetaData().getDriverName().contains("Oracle")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 			}

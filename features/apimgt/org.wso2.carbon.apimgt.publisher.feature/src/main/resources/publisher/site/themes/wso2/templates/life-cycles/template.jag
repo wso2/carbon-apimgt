@@ -3,16 +3,78 @@ if(outputs.isPublishPermitted){
         var api = outputs.api;
         var oldExist = outputs.oldExist;
         var lcs = outputs.lcs;
-        var lcData = outputs.lcData; 
-        var publishedInExternalStores = outputs.publishedInExternalStores; 
-        var i,resCount,rowNums = [];  
-        var lcStatus = outputs.lcStatus   
+        var lcData = outputs.lcData;
+        var publishedInExternalStores = outputs.publishedInExternalStores;
+        var i,resCount,rowNums = [];
+        var lcStatus = outputs.lcStatus;
+        var apiLc=outputs.apiLc;
  %>
 
 <script type="text/javascript">
 $(document).ready(function() {
 // call when page load to display message if the API is published to external stores and status is not published
 checkExternalStores('<%=lcStatus%>');
+var lc='<%=apiLc%>';
+var lcJSON=JSON.parse(lc);
+var statesList=lcJSON.definition.configuration.lifecycle.scxml.state;
+var states=[];
+
+// Create a new directed graph
+var g = new dagreD3.graphlib.Graph().setGraph({});
+
+for (var key in statesList) {
+// States and transitions from RFC 793
+states.push(key.toUpperCase());
+}
+
+// Automatically label each of the nodes
+states.forEach(function(state) { g.setNode(state, { label: state }); });
+
+
+// Set up the edges
+g.setEdge("CREATED",     "PUBLISHED",     { label: "PUBLISH",labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });
+for (var key in statesList) {
+var transition=statesList[key].transition;
+if(transition!=null){
+    for(var i = 0; i < transition.length; i++) {
+    var obj = transition[i];
+    var event=obj.event;
+    var target=obj.target;
+    // Set up the edges
+
+g.setEdge(key.toUpperCase(),     target.toUpperCase(),     { label: event.toUpperCase(),labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });}
+}
+}
+g.nodes().forEach(function(v) {
+  var node = g.node(v);
+  node.rx = node.ry = 5;
+});
+var status='<%=lcStatus%>';
+// Add some custom colors based on state
+g.node(status).style = "fill: #5D76E4";
+
+
+var svg = d3.select("svg"),
+    inner = svg.select("g");
+
+// Set up zoom support
+var zoom = d3.behavior.zoom().on("zoom", function() {
+      inner.attr("transform", "translate(40,30) scale(1)");
+    });
+svg.call(zoom);
+
+// Create the renderer
+var render = new dagreD3.render();
+
+// Run the renderer. This is what draws the final graph.
+render(inner, g);
+// Center the graph
+var initialScale = 0.75;
+zoom
+  .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
+  .scale(initialScale)
+  .event(svg);
+svg.attr('height', g.graph().height * initialScale + 40);
 });
 
 function setChecklistItemVal(element,order) {
@@ -29,7 +91,7 @@ function setChecklistItemVal(element,order) {
     jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"setCheckListItemVal",provider:provider,name:apiName,version:version,order:order,value:value },
                function (result) {
                   if (!result.error) {
-                    
+
                      setTimeout(function(){
                             location = ''
                      },1000)
@@ -37,7 +99,7 @@ function setChecklistItemVal(element,order) {
                     jagg.message({content:result.message,type:"error"});
                   }
               },"json");
-    
+
 };
 function updateStatus(status){
 var apiName=$("#name").val();
@@ -117,11 +179,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 		<div class="form-group form-inline">
 		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
 		        <div class="controls col-sm-8">
-					<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>		            
-		         </div> 
+					<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>
+		         </div>
 		</div>
 		<br/>
-                 
+
                  <%for (var j=0;j<lcData.items.length;j++){
                  var item=lcData.items[j];
                  var itemName=item.name;
@@ -130,34 +192,34 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  var itemOrder=item.order;
                  var state=item.lifeCycleStatus;
                  %>
-                 <% if(isVisible=="true"){%> 
-                     <%if((state!="Created")||(state=="Created" && oldExist)){%> 
-                      <div class="form-group">      
-                      	 <label class="control-label col-sm-3"></label>         
+                 <% if(isVisible=="true"){%>
+                     <%if((state!="Created")||(state=="Created" && oldExist)){%>
+                      <div class="form-group">
+                      	 <label class="control-label col-sm-3"></label>
 	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
 	                        	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
 	                        		<span class="helper"><%=itemName%></span>
 	                     </label>
                      </div>
-                    <%}else{%>   
+                    <%}else{%>
                         <%if((itemName == i18n.localize("requireReSubscription"))||(itemName  == i18n.localize("deprecateOldVersions"))){
                                 continue;
-                        }else{%> 
-                        		<div class="form-group">   
-                        			 <label class="control-label col-sm-3"></label>     
+                        }else{%>
+                        		<div class="form-group">
+                        			 <label class="control-label col-sm-3"></label>
 	                                 <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
 	                                	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
 	                                	<span class="helper"><%=itemName%></span>
 	                            	</label>
                             	</div>
-                        <%} 
+                        <%}
                  <%}}}%>
 </div>
 
-    <div class="form-actions"> 
+    <div class="form-actions">
        <% for (var i=0;i<lcData.nextStates.length;i++) {
            var next = lcData.nextStates[i].toLowerCase();
-      
+
             if(lcStatus=="CREATED"){
                if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
                <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
@@ -184,12 +246,16 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
             <%}
 
         }%>
-                
-       </div>
+
+       </div><br/>&nbsp;
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
         <%=i18n.localize("lifecycleSuccessMsg")%>
       </div>
+
       </form>
+ <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
+       <svg width=900 height=600 ><g/></svg>
+       </div>
 
 <div class="page-header">
 		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>

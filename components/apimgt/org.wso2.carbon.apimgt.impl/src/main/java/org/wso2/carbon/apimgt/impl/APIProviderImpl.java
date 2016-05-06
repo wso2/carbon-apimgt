@@ -42,13 +42,7 @@ import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -58,6 +52,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
+import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -76,7 +73,6 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptio
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -3739,6 +3735,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
                 //TODO Need to fix appropriately
+                List<Pipeline> pipelineList = apiPolicy.getPipelines();
+                if (pipelineList != null && pipelineList.size() != 0) {
+                    Iterator<Pipeline> pipelineIterator = pipelineList.iterator();
+                    while (pipelineIterator.hasNext()) {
+                        Pipeline pipeline = pipelineIterator.next();
+                        if (!pipeline.isEnabled()) {
+                            pipelineIterator.remove();
+                        } else {
+                            if (pipeline.getConditions() != null && pipeline.getConditions().size() != 0) {
+                                Iterator<Condition> conditionIterator = pipeline.getConditions().iterator();
+                                while (conditionIterator.hasNext()) {
+                                    Condition condition = conditionIterator.next();
+                                    if (JavaUtils.isFalseExplicitly(condition.getConditionEnabled())) {
+                                        conditionIterator.remove();
+                                    }
+                                }
+                            } else {
+                                pipelineIterator.remove();
+                            }
+                        }
+                    }
+                }
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
@@ -3957,5 +3975,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
                 , blockingMessage);
     }
+
+    public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIUtil utils = new APIUtil();
+            return utils.getFullLifeCycleData(configRegistry);
+        } catch (XMLStreamException e) {
+            handleException("Parsing error while getting the lifecycle configuration content.", e);
+            return null;
+        } catch (RegistryException e) {
+            handleException("Registry error while getting the lifecycle configuration content.", e);
+            return null;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
 
 }

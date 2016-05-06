@@ -63,7 +63,7 @@ var reqUrl = request.getRequestURI();
              	if( tag.split(site.tagGroupKey).length == 2 ){
                  	tagDisplayName = tag.split(site.tagGroupKey)[0];
       %>
-             		<h2>APIs - <%= encode.forHtml(tagDisplayName)%></h2>
+             		<h1>APIs - <%= encode.forHtml(tagDisplayName)%></h1>
 		             <ul class="breadcrumb">
 		                 <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag")%><%=urlPrefix%>" title="<%=i18n.localize("listAPIs")%>">APIs groups</a> <span class="divider">/</span></li>
 		                 <li class="active"><%= encode.forHtml(tagDisplayName)%></li>
@@ -71,7 +71,7 @@ var reqUrl = request.getRequestURI();
        <%
             	}else{
 	               %>
-	               <h2>APIs - ( <%= encode.forHtml(tag) %> )</h2>
+	               <h1>APIs - ( <%= encode.forHtml(tag) %> )</h1>
 	               <%
             	}
              } else{
@@ -195,7 +195,7 @@ var reqUrl = request.getRequestURI();
 	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>"><%=api.name%></a></h4>
+                                    <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p><%=api.apiOwner%></p>
