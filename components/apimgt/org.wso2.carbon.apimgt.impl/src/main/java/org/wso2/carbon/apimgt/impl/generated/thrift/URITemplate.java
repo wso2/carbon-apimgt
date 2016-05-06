@@ -37,6 +37,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   private static final org.apache.thrift.protocol.TField AUTH_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("authType", org.apache.thrift.protocol.TType.STRING, (short)5);
   private static final org.apache.thrift.protocol.TField THROTTLING_TIER_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingTier", org.apache.thrift.protocol.TType.STRING, (short)6);
   private static final org.apache.thrift.protocol.TField THROTTLING_CONDITIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingConditions", org.apache.thrift.protocol.TType.LIST, (short)7);
+  private static final org.apache.thrift.protocol.TField APPLICABLE_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("applicableLevel", org.apache.thrift.protocol.TType.STRING, (short)8);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -51,6 +52,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   public String authType; // optional
   public String throttlingTier; // optional
   public List<String> throttlingConditions; // optional
+  public String applicableLevel; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -60,7 +62,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     HTTP_VERB((short)4, "httpVerb"),
     AUTH_TYPE((short)5, "authType"),
     THROTTLING_TIER((short)6, "throttlingTier"),
-    THROTTLING_CONDITIONS((short)7, "throttlingConditions");
+    THROTTLING_CONDITIONS((short)7, "throttlingConditions"),
+    APPLICABLE_LEVEL((short)8, "applicableLevel");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -89,6 +92,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           return THROTTLING_TIER;
         case 7: // THROTTLING_CONDITIONS
           return THROTTLING_CONDITIONS;
+        case 8: // APPLICABLE_LEVEL
+          return APPLICABLE_LEVEL;
         default:
           return null;
       }
@@ -129,7 +134,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   }
 
   // isset id assignments
-  private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE,_Fields.THROTTLING_TIER,_Fields.THROTTLING_CONDITIONS};
+  private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE,_Fields.THROTTLING_TIER,_Fields.THROTTLING_CONDITIONS,_Fields.APPLICABLE_LEVEL};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -148,6 +153,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     tmpMap.put(_Fields.THROTTLING_CONDITIONS, new org.apache.thrift.meta_data.FieldMetaData("throttlingConditions", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+    tmpMap.put(_Fields.APPLICABLE_LEVEL, new org.apache.thrift.meta_data.FieldMetaData("applicableLevel", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(URITemplate.class, metaDataMap);
   }
@@ -184,6 +191,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       this.throttlingConditions = __this__throttlingConditions;
     }
+    if (other.isSetApplicableLevel()) {
+      this.applicableLevel = other.applicableLevel;
+    }
   }
 
   public URITemplate deepCopy() {
@@ -199,6 +209,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     this.authType = null;
     this.throttlingTier = null;
     this.throttlingConditions = null;
+    this.applicableLevel = null;
   }
 
   public String getUriTemplate() {
@@ -384,6 +395,30 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     }
   }
 
+  public String getApplicableLevel() {
+    return this.applicableLevel;
+  }
+
+  public URITemplate setApplicableLevel(String applicableLevel) {
+    this.applicableLevel = applicableLevel;
+    return this;
+  }
+
+  public void unsetApplicableLevel() {
+    this.applicableLevel = null;
+  }
+
+  /** Returns true if field applicableLevel is set (has been assigned a value) and false otherwise */
+  public boolean isSetApplicableLevel() {
+    return this.applicableLevel != null;
+  }
+
+  public void setApplicableLevelIsSet(boolean value) {
+    if (!value) {
+      this.applicableLevel = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case URI_TEMPLATE:
@@ -442,6 +477,14 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       break;
 
+    case APPLICABLE_LEVEL:
+      if (value == null) {
+        unsetApplicableLevel();
+      } else {
+        setApplicableLevel((String)value);
+      }
+      break;
+
     }
   }
 
@@ -468,6 +511,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     case THROTTLING_CONDITIONS:
       return getThrottlingConditions();
 
+    case APPLICABLE_LEVEL:
+      return getApplicableLevel();
+
     }
     throw new IllegalStateException();
   }
@@ -493,6 +539,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       return isSetThrottlingTier();
     case THROTTLING_CONDITIONS:
       return isSetThrottlingConditions();
+    case APPLICABLE_LEVEL:
+      return isSetApplicableLevel();
     }
     throw new IllegalStateException();
   }
@@ -570,6 +618,15 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (!(this_present_throttlingConditions && that_present_throttlingConditions))
         return false;
       if (!this.throttlingConditions.equals(that.throttlingConditions))
+        return false;
+    }
+
+    boolean this_present_applicableLevel = true && this.isSetApplicableLevel();
+    boolean that_present_applicableLevel = true && that.isSetApplicableLevel();
+    if (this_present_applicableLevel || that_present_applicableLevel) {
+      if (!(this_present_applicableLevel && that_present_applicableLevel))
+        return false;
+      if (!this.applicableLevel.equals(that.applicableLevel))
         return false;
     }
 
@@ -655,6 +712,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     }
     if (isSetThrottlingConditions()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.throttlingConditions, typedOther.throttlingConditions);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetApplicableLevel()).compareTo(typedOther.isSetApplicableLevel());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetApplicableLevel()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.applicableLevel, typedOther.applicableLevel);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -745,6 +812,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         sb.append("null");
       } else {
         sb.append(this.throttlingConditions);
+      }
+      first = false;
+    }
+    if (isSetApplicableLevel()) {
+      if (!first) sb.append(", ");
+      sb.append("applicableLevel:");
+      if (this.applicableLevel == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.applicableLevel);
       }
       first = false;
     }
@@ -856,6 +933,14 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 8: // APPLICABLE_LEVEL
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.applicableLevel = iprot.readString();
+              struct.setApplicableLevelIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -927,6 +1012,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           oprot.writeFieldEnd();
         }
       }
+      if (struct.applicableLevel != null) {
+        if (struct.isSetApplicableLevel()) {
+          oprot.writeFieldBegin(APPLICABLE_LEVEL_FIELD_DESC);
+          oprot.writeString(struct.applicableLevel);
+          oprot.writeFieldEnd();
+        }
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -966,7 +1058,10 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (struct.isSetThrottlingConditions()) {
         optionals.set(6);
       }
-      oprot.writeBitSet(optionals, 7);
+      if (struct.isSetApplicableLevel()) {
+        optionals.set(7);
+      }
+      oprot.writeBitSet(optionals, 8);
       if (struct.isSetUriTemplate()) {
         oprot.writeString(struct.uriTemplate);
       }
@@ -994,12 +1089,15 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           }
         }
       }
+      if (struct.isSetApplicableLevel()) {
+        oprot.writeString(struct.applicableLevel);
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, URITemplate struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(7);
+      BitSet incoming = iprot.readBitSet(8);
       if (incoming.get(0)) {
         struct.uriTemplate = iprot.readString();
         struct.setUriTemplateIsSet(true);
@@ -1036,6 +1134,10 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           }
         }
         struct.setThrottlingConditionsIsSet(true);
+      }
+      if (incoming.get(7)) {
+        struct.applicableLevel = iprot.readString();
+        struct.setApplicableLevelIsSet(true);
       }
     }
   }

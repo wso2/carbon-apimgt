@@ -682,10 +682,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 resourceLevelSpikeArrestThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 info = roleBasedAccessController.canAccess(resourceLevelSpikeArrestThrottleContext, throttleKey,
                         throttleKey);
-//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getLocalCounter());
-//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getGlobalCounter());
-//                System.out.println(resourceLevelSpikeArrestThrottleContext.getCallerContext(throttleKey).getRoleId());
-//                System.out.println(info.isAccessAllowed() + "     " + info.getFaultReason());
                 if (log.isDebugEnabled()) {
                     log.debug("Throttle by hard limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));

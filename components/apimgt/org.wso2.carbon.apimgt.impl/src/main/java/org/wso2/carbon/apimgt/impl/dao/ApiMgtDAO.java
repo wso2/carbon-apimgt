@@ -5726,12 +5726,7 @@ public class ApiMgtDAO {
 			prepStmt.setString(2, version);
 
 			rs = prepStmt.executeQuery();
-
-			// THROTTLING_TIER == POLICY_NAME
-			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
-			// HashMap<String,URITemplate>();
 			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
-
 			while (rs != null && rs.next()) {
 
 				String httpVerb = rs.getString("HTTP_METHOD");
@@ -5739,6 +5734,7 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+				String applicableLevel = rs.getString("APPLICABLE_LEVEL");
 				String policyConditionGroupId  ="condition_" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
@@ -5754,13 +5750,13 @@ public class ApiMgtDAO {
 					uriTemplate.setAuthType(authType);
 					uriTemplate.setHTTPVerb(httpVerb);
 					uriTemplate.setUriTemplate(urlPattern);
-
+                    uriTemplate.setApplicableLevel(applicableLevel);
 					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
 					if (mediationScriptBlob != null) {
 						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
 					}
-					uriTemplate.setMediationScript(script);
 
+					uriTemplate.setMediationScript(script);
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);

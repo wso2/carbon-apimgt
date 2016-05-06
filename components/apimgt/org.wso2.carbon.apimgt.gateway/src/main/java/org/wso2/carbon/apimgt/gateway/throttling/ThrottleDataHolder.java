@@ -92,7 +92,9 @@ public class ThrottleDataHolder {
         this.keyTemplateMap = keyTemplateMap;
     }
 
-    Map<String, String> throttleDataMap = new ConcurrentHashMap();
+    private Map<String, String> throttleDataMap = new ConcurrentHashMap();
+
+    private Map<String, Long> throttleDataTimestampMap = new ConcurrentHashMap();
 
     /**
      * This method will check given key in throttle data Map. Throttle data map need to be update from topic
@@ -104,7 +106,20 @@ public class ThrottleDataHolder {
      * false if key is not there in throttle map(that means its not throttled).
      */
     public boolean isThrottled(String key) {
-        return this.throttleDataMap.containsKey(key);
+        boolean isThrottled = this.throttleDataMap.containsKey(key);
+        if(isThrottled) {
+            long currentTime = System.currentTimeMillis();
+            long timstamp = this.throttleDataTimestampMap.get(key);
+            if(timstamp >= currentTime) {
+                return isThrottled;
+            } else {
+                this.throttleDataMap.remove(key);
+                this.throttleDataTimestampMap.remove(key);
+                return false;
+            }
+        } else {
+            return isThrottled;
+        }
     }
 
 
@@ -125,7 +140,6 @@ public class ThrottleDataHolder {
         return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
                 blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
                 blockedUserConditionsMap.containsKey(userBlockingKey) ||
-                blockedCustomConditionsMap.containsKey("test") ||
                 blockedIpConditionsMap.containsKey(ipBlockingKey));
     }
 
@@ -135,5 +149,13 @@ public class ThrottleDataHolder {
 
     public void setBlockedIpConditionsMap(Map<String, String> blockedIpConditionsMap) {
         this.blockedIpConditionsMap = blockedIpConditionsMap;
+    }
+
+    public Map<String, Long> getThrottleDataTimestampMap() {
+        return throttleDataTimestampMap;
+    }
+
+    public void setThrottleDataTimestampMap(Map<String, Long> throttleDataTimestampMap) {
+        this.throttleDataTimestampMap = throttleDataTimestampMap;
     }
 }

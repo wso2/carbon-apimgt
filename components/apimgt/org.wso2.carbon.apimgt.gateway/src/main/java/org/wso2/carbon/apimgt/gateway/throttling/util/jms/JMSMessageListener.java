@@ -81,12 +81,17 @@ public class JMSMessageListener implements MessageListener {
 
         String throttleKey = map.get("throttleKey").toString();
         String throttleState = map.get("isThrottled").toString();
+        long timeStamp = Long.parseLong(map.get("expiryTimeStamp").toString());
         if (throttleState.equals("true")) {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     getThrottleDataMap().put(throttleKey, throttleState);
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataTimestampMap().put(throttleKey, timeStamp);
         } else {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     getThrottleDataMap().remove(throttleKey);
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataTimestampMap().remove(throttleKey);
         }
     }
 
