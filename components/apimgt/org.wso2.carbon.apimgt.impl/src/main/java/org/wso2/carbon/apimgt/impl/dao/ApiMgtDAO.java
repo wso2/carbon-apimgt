@@ -5735,7 +5735,7 @@ public class ApiMgtDAO {
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
 				String applicableLevel = rs.getString("APPLICABLE_LEVEL");
-				String policyConditionGroupId  ="condition_" + conditionGroupId;
+				String policyConditionGroupId  = "_condition_" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -5779,7 +5779,7 @@ public class ApiMgtDAO {
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("");
+					uriTemplate.getThrottlingConditions().add("_default");
 				}
 
 			}

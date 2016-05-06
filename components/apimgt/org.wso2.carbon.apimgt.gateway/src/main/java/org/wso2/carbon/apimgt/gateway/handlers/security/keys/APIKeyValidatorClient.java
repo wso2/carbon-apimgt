@@ -139,7 +139,6 @@ public class APIKeyValidatorClient {
         dto.setContentAware(generatedDto.getContentAware());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
-        dto.setApplicableLevel(generatedDto.getApplicableLevel());
         return dto;
     }
 
