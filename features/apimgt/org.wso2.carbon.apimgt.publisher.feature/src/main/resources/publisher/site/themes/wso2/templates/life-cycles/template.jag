@@ -6,38 +6,45 @@ if(outputs.isPublishPermitted){
         var lcData = outputs.lcData;
         var publishedInExternalStores = outputs.publishedInExternalStores;
         var i,resCount,rowNums = [];
-        var lcStatus = outputs.lcStatus
+        var lcStatus = outputs.lcStatus;
+        var apiLc=outputs.apiLc;
  %>
 
 <script type="text/javascript">
 $(document).ready(function() {
 // call when page load to display message if the API is published to external stores and status is not published
 checkExternalStores('<%=lcStatus%>');
+var lc='<%=apiLc%>';
+var lcJSON=JSON.parse(lc);
+var statesList=lcJSON.definition.configuration.lifecycle.scxml.state;
+var states=[];
+
 // Create a new directed graph
 var g = new dagreD3.graphlib.Graph().setGraph({});
 
+for (var key in statesList) {
 // States and transitions from RFC 793
-var states = [ "CREATED", "PROTOTYPED", "PUBLISHED", "BLOCKED", "DEPRECATED",
-               "RETIRED" ];
+states.push(key.toUpperCase());
+}
 
 // Automatically label each of the nodes
 states.forEach(function(state) { g.setNode(state, { label: state }); });
 
+
 // Set up the edges
 g.setEdge("CREATED",     "PUBLISHED",     { label: "PUBLISH",labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });
-g.setEdge("CREATED",     "PROTOTYPED",   { label: "DEPLOY AS PROTOTYPE",labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });
-g.setEdge("PROTOTYPED",     "PUBLISHED",   { label: "PUBLISH",labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });
-g.setEdge("PROTOTYPED",     "CREATED",     { label: "DEMOTE AS CREATED",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("PUBLISHED",     "CREATED",     { label: "DEMOTE AS CREATED",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("PUBLISHED",     "PROTOTYPED",     { label: "DEMOTE AS PROTOTYPE",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("PUBLISHED",     "BLOCKED",     { label: "BLOCK",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("PUBLISHED",     "DEPRECATED",     { label: "DEPRECATE",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("BLOCKED",     "PUBLISHED",     { label: "RE-PUBLISH",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("BLOCKED",     "DEPRECATED",     { label: "DEPRECATE",labelStyle: "fill: white",lineInterpolate: 'basis' });
-g.setEdge("DEPRECATED",     "RETIRED",     { label: "RETIRE",labelStyle: "fill: white",lineInterpolate: 'basis'});
+for (var key in statesList) {
+var transition=statesList[key].transition;
+if(transition!=null){
+    for(var i = 0; i < transition.length; i++) {
+    var obj = transition[i];
+    var event=obj.event;
+    var target=obj.target;
+    // Set up the edges
 
-
-// Set some general styles
+g.setEdge(key.toUpperCase(),     target.toUpperCase(),     { label: event.toUpperCase(),labelStyle: "fill: white",lineInterpolate: 'basis',arrowheadClass: 'arrowhead' });}
+}
+}
 g.nodes().forEach(function(v) {
   var node = g.node(v);
   node.rx = node.ry = 5;
@@ -242,11 +249,12 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 
        </div><br/>&nbsp;
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
-       <%=i18n.localize("lifecycleSuccessMsg")%>
-       </div>
+        <%=i18n.localize("lifecycleSuccessMsg")%>
+      </div>
        <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
-       <svg width=800 height=600 ><g/></svg>
+       <svg width=900 height=600 ><g/></svg>
        </div>
+
       </form>
 
 <div class="page-header">

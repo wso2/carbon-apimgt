@@ -622,4 +622,12 @@ public interface APIProvider extends APIManager {
      */
     boolean deleteBlockCondition(int conditionId) throws APIManagementException;
 
+    /**
+     *  Get the lifecycle configuration for a tenant
+     * @param tenantDomain
+     * @return lifecycle
+     * @throws APIManagementException
+     */
+    String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
+
 }
