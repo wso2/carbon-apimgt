@@ -735,8 +735,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
     private OMElement createHardThrottlingPolicy() {
 
-        if (productionMaxCount == null &&
-                sandboxMaxCount == null) {
+        if (StringUtils.isEmpty(productionMaxCount) &&
+                StringUtils.isEmpty(sandboxMaxCount)) {
             return null;
         }
 
