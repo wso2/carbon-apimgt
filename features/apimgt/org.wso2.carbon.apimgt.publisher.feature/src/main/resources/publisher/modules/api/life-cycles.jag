@@ -133,5 +133,28 @@ var getAPILCStatus = function(apiData) {
     }
 };
 
+var getAPILC=function(){
+    var tenantDomain = String(jagg.getTenantDomain());
+    var username = jagg.getUser().username;
+    var lifecycleModule = require('lifecycle');
+    var lcApi = lifecycleModule.api;
+    var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+    var result;
+try {
+    result= lcApi.getLifecycle(tenantDomain, apiProvider);
+
+    if (log.isDebugEnabled()) {
+        log.debug("getAPILifecycle for tenant : " + tenantDomain);
+    }
+    return result;
+
+    } catch (e) {
+
+        log.error(e.message);
+        return "ERROR";
+    }
+};
+
+
 
 %>
