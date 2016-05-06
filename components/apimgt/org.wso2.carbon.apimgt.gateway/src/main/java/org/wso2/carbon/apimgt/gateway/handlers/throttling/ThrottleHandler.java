@@ -33,7 +33,14 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.commons.throttle.core.*;
+import org.apache.synapse.commons.throttle.core.AccessInformation;
+import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
+import org.apache.synapse.commons.throttle.core.Throttle;
+import org.apache.synapse.commons.throttle.core.ThrottleConfiguration;
+import org.apache.synapse.commons.throttle.core.ThrottleConstants;
+import org.apache.synapse.commons.throttle.core.ThrottleContext;
+import org.apache.synapse.commons.throttle.core.ThrottleException;
+import org.apache.synapse.commons.throttle.core.ThrottleFactory;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -51,8 +58,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import javax.xml.stream.XMLStreamException;
 
+import javax.xml.stream.XMLStreamException;
 import java.util.List;
 import java.util.Map;
 
@@ -167,23 +174,23 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
             //TODO This is wrong you have to get the tenant domain from remote as gatway we don't share the configs
-            subscriberTenantDomain = authContext.getThrottlingDataList().get(4);
+            subscriberTenantDomain = authContext.getSubscriberTenantDomain();
             applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
             //Following throttle data list can be use to hold throttle data and api level throttle key
             //should be its first element.
             //if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
             apiLevelThrottleKey = apiContext + ":" + apiVersion; //authContext.getApiTier();
+
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
             //TODO handle blocked and throttled requests separately.
-
             ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
             appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
-            //}
             isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
                     apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
+
             if (isBlockedRequest) {
-                String msg = "Request blocked as it violates defined blocking conditions, for API:" + apiContext +
+                String msg = "Request blocked as it violates defined blocking conditions, for API: " + apiContext +
                         " ,application:" + appLevelBlockingKey + " ,user:" + authorizedUser;
                 if (log.isDebugEnabled()) {
                     log.debug(msg);
@@ -530,22 +537,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     }
 
 
-    private OMElement createSpikeArrestSubscriptionLevelPolicy(String policyName, String maxCount, String time) {
-        if (maxCount == null) {
-            return null;
-        }
+    private OMElement createSpikeArrestSubscriptionLevelPolicy(String policyName, int maxCount, int unitTime) {
 
         OMElement parsedPolicy = null;
-
         StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" " +
                 "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
                 "    <throttle:MediatorThrottleAssertion>\n");
 
-        if (maxCount != null && time != null) {
-            policy.append(createSpikeArrestPolicy(policyName, time, maxCount));
+        if (maxCount != 0 && unitTime != 0) {
+            policy.append(createSpikeArrestPolicy(policyName, unitTime, maxCount));
         }
 
-        policy.append("    </throttle:MediatorThrottleAssertion>\n" +
+        policy.append("</throttle:MediatorThrottleAssertion>\n" +
                 "</wsp:Policy>");
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
@@ -564,7 +567,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @param maxCount   maximum request count within given time window
      * @return policy string for created policy.
      */
-    private String createSpikeArrestPolicy(String policyName, String unitTime, String maxCount) {
+    private String createSpikeArrestPolicy(String policyName, int unitTime, int maxCount) {
         return "<wsp:Policy>\n" +
                 "     <throttle:ID throttle:type=\"ROLE\">" + policyName + "</throttle:ID>\n" +
                 "            <wsp:Policy>\n" +
@@ -593,51 +596,45 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
-        String unitTime = null;
-        String maxRequestCount = null;
-        List<String> throttlingDataList = authContext.getThrottlingDataList();
-        if (throttlingDataList != null && throttlingDataList.size() > 0) {
-            unitTime = throttlingDataList.get(2);
-            if (unitTime.equalsIgnoreCase("min")) {
-                unitTime = "60000";
+        int maxRequestCount = authContext.getSpikeArrestLimit();
+        if (maxRequestCount != 0) {
+            String unitTime = authContext.getSpikeArrestUnit();
+            int spikeArrestWindowUnitTime;
+            if ("min".equalsIgnoreCase(unitTime)) {
+                spikeArrestWindowUnitTime = 60000;
             } else {
-                unitTime = "1000";
+                spikeArrestWindowUnitTime = 1000;
             }
-            maxRequestCount = throttlingDataList.get(1);
-            if (unitTime != null && unitTime.length() > 0 && maxRequestCount != null && maxRequestCount.length() > 0) {
-                try {
-                    synchronized (this) {
-                        if (throttle == null) {
+            try {
+                synchronized (this) {
+                    if (throttle == null) {
+                        OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
+                                subscriptionLevelThrottleKey, maxRequestCount, spikeArrestWindowUnitTime);
+                        if (spikeArrestSubscriptionLevelPolicy != null) {
+                            throttle = ThrottleFactory.createMediatorThrottle(
+                                    PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
+                        }
+                    } else {
+                        if (throttle.getThrottleContext(subscriptionLevelThrottleKey) == null) {
                             OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
-                                    subscriptionLevelThrottleKey, maxRequestCount, unitTime);
+                                    subscriptionLevelThrottleKey, maxRequestCount, spikeArrestWindowUnitTime);
                             if (spikeArrestSubscriptionLevelPolicy != null) {
-                                throttle = ThrottleFactory.createMediatorThrottle(
+                                Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
                                         PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
-                            }
-                        } else {
-                            if (throttle.getThrottleContext(subscriptionLevelThrottleKey) == null) {
-                                OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
-                                        subscriptionLevelThrottleKey, maxRequestCount, unitTime);
-                                if (spikeArrestSubscriptionLevelPolicy != null) {
-                                    Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
-                                            PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
-                                    ThrottleConfiguration newThrottleConfig = tempThrottle.
-                                            getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
-                                    ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
-                                            createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
-                                    throttle.addThrottleContext(subscriptionLevelThrottleKey, subscriptionLevelSpikeThrottle);
-                                }
+                                ThrottleConfiguration newThrottleConfig = tempThrottle.
+                                        getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                                ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
+                                        createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
+                                throttle.addThrottleContext(subscriptionLevelThrottleKey, subscriptionLevelSpikeThrottle);
                             }
                         }
                     }
-                } catch (ThrottleException e) {
-                    log.error("Error while initializing throttling object for subscription level spike arrest policy" +
-                            e.getMessage());
                 }
+            } catch (ThrottleException e) {
+                log.error("Error while initializing throttling object for subscription level spike arrest policy" +
+                        e.getMessage());
             }
-
         }
-
     }
 
     /**

@@ -50,6 +50,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final org.apache.thrift.protocol.TField IS_CONTENT_AWARE_FIELD_DESC = new org.apache.thrift.protocol.TField("isContentAware", org.apache.thrift.protocol.TType.BOOL, (short)18);
   private static final org.apache.thrift.protocol.TField API_TIER_FIELD_DESC = new org.apache.thrift.protocol.TField("apiTier", org.apache.thrift.protocol.TType.STRING, (short)19);
   private static final org.apache.thrift.protocol.TField THROTTLING_DATA_LIST_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingDataList", org.apache.thrift.protocol.TType.LIST, (short)20);
+  private static final org.apache.thrift.protocol.TField SPIKE_ARREST_LIMIT_FIELD_DESC = new org.apache.thrift.protocol.TField("spikeArrestLimit", org.apache.thrift.protocol.TType.I32, (short)21);
+  private static final org.apache.thrift.protocol.TField SUBSCRIBER_TENANT_DOMAIN_FIELD_DESC = new org.apache.thrift.protocol.TField("subscriberTenantDomain", org.apache.thrift.protocol.TType.STRING, (short)22);
+  private static final org.apache.thrift.protocol.TField SPIKE_ARREST_UNIT_FIELD_DESC = new org.apache.thrift.protocol.TField("spikeArrestUnit", org.apache.thrift.protocol.TType.STRING, (short)23);
+  private static final org.apache.thrift.protocol.TField STOP_ON_QUOTA_REACH_FIELD_DESC = new org.apache.thrift.protocol.TField("stopOnQuotaReach", org.apache.thrift.protocol.TType.BOOL, (short)24);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -77,6 +81,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   public boolean isContentAware; // optional
   public String apiTier; // optional
   public List<String> throttlingDataList; // optional
+  public int spikeArrestLimit; // optional
+  public String subscriberTenantDomain; // optional
+  public String spikeArrestUnit; // optional
+  public boolean stopOnQuotaReach; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -99,7 +107,11 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     ISSUED_TIME((short)17, "issuedTime"),
     IS_CONTENT_AWARE((short)18, "isContentAware"),
     API_TIER((short)19, "apiTier"),
-    THROTTLING_DATA_LIST((short)20, "throttlingDataList");
+    THROTTLING_DATA_LIST((short)20, "throttlingDataList"),
+    SPIKE_ARREST_LIMIT((short)21, "spikeArrestLimit"),
+    SUBSCRIBER_TENANT_DOMAIN((short)22, "subscriberTenantDomain"),
+    SPIKE_ARREST_UNIT((short)23, "spikeArrestUnit"),
+    STOP_ON_QUOTA_REACH((short)24, "stopOnQuotaReach");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -154,6 +166,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           return API_TIER;
         case 20: // THROTTLING_DATA_LIST
           return THROTTLING_DATA_LIST;
+        case 21: // SPIKE_ARREST_LIMIT
+          return SPIKE_ARREST_LIMIT;
+        case 22: // SUBSCRIBER_TENANT_DOMAIN
+          return SUBSCRIBER_TENANT_DOMAIN;
+        case 23: // SPIKE_ARREST_UNIT
+          return SPIKE_ARREST_UNIT;
+        case 24: // STOP_ON_QUOTA_REACH
+          return STOP_ON_QUOTA_REACH;
         default:
           return null;
       }
@@ -199,8 +219,10 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
   private static final int __VALIDITYPERIOD_ISSET_ID = 2;
   private static final int __ISSUEDTIME_ISSET_ID = 3;
   private static final int __ISCONTENTAWARE_ISSET_ID = 4;
-  private BitSet __isset_bit_vector = new BitSet(5);
-  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME,_Fields.IS_CONTENT_AWARE,_Fields.API_TIER,_Fields.THROTTLING_DATA_LIST};
+  private static final int __SPIKEARRESTLIMIT_ISSET_ID = 5;
+  private static final int __STOPONQUOTAREACH_ISSET_ID = 6;
+  private BitSet __isset_bit_vector = new BitSet(7);
+  private _Fields optionals[] = {_Fields.AUTHORIZED,_Fields.SUBSCRIBER,_Fields.TIER,_Fields.TYPE,_Fields.END_USER_TOKEN,_Fields.END_USER_NAME,_Fields.APPLICATION_NAME,_Fields.VALIDATION_STATUS,_Fields.APPLICATION_ID,_Fields.APPLICATION_TIER,_Fields.API_NAME,_Fields.CONSUMER_KEY,_Fields.API_PUBLISHER,_Fields.AUTHORIZED_DOMAINS,_Fields.SCOPES,_Fields.VALIDITY_PERIOD,_Fields.ISSUED_TIME,_Fields.IS_CONTENT_AWARE,_Fields.API_TIER,_Fields.THROTTLING_DATA_LIST,_Fields.SPIKE_ARREST_LIMIT,_Fields.SUBSCRIBER_TENANT_DOMAIN,_Fields.SPIKE_ARREST_UNIT,_Fields.STOP_ON_QUOTA_REACH};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -247,6 +269,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     tmpMap.put(_Fields.THROTTLING_DATA_LIST, new org.apache.thrift.meta_data.FieldMetaData("throttlingDataList", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+    tmpMap.put(_Fields.SPIKE_ARREST_LIMIT, new org.apache.thrift.meta_data.FieldMetaData("spikeArrestLimit", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+    tmpMap.put(_Fields.SUBSCRIBER_TENANT_DOMAIN, new org.apache.thrift.meta_data.FieldMetaData("subscriberTenantDomain", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.SPIKE_ARREST_UNIT, new org.apache.thrift.meta_data.FieldMetaData("spikeArrestUnit", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.STOP_ON_QUOTA_REACH, new org.apache.thrift.meta_data.FieldMetaData("stopOnQuotaReach", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(APIKeyValidationInfoDTO.class, metaDataMap);
   }
@@ -322,6 +352,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       this.throttlingDataList = __this__throttlingDataList;
     }
+    this.spikeArrestLimit = other.spikeArrestLimit;
+    if (other.isSetSubscriberTenantDomain()) {
+      this.subscriberTenantDomain = other.subscriberTenantDomain;
+    }
+    if (other.isSetSpikeArrestUnit()) {
+      this.spikeArrestUnit = other.spikeArrestUnit;
+    }
+    this.stopOnQuotaReach = other.stopOnQuotaReach;
   }
 
   public APIKeyValidationInfoDTO deepCopy() {
@@ -355,6 +393,12 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     this.isContentAware = false;
     this.apiTier = null;
     this.throttlingDataList = null;
+    setSpikeArrestLimitIsSet(false);
+    this.spikeArrestLimit = 0;
+    this.subscriberTenantDomain = null;
+    this.spikeArrestUnit = null;
+    setStopOnQuotaReachIsSet(false);
+    this.stopOnQuotaReach = false;
   }
 
   public boolean isAuthorized() {
@@ -877,6 +921,100 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     }
   }
 
+  public int getSpikeArrestLimit() {
+    return this.spikeArrestLimit;
+  }
+
+  public APIKeyValidationInfoDTO setSpikeArrestLimit(int spikeArrestLimit) {
+    this.spikeArrestLimit = spikeArrestLimit;
+    setSpikeArrestLimitIsSet(true);
+    return this;
+  }
+
+  public void unsetSpikeArrestLimit() {
+    __isset_bit_vector.clear(__SPIKEARRESTLIMIT_ISSET_ID);
+  }
+
+  /** Returns true if field spikeArrestLimit is set (has been assigned a value) and false otherwise */
+  public boolean isSetSpikeArrestLimit() {
+    return __isset_bit_vector.get(__SPIKEARRESTLIMIT_ISSET_ID);
+  }
+
+  public void setSpikeArrestLimitIsSet(boolean value) {
+    __isset_bit_vector.set(__SPIKEARRESTLIMIT_ISSET_ID, value);
+  }
+
+  public String getSubscriberTenantDomain() {
+    return this.subscriberTenantDomain;
+  }
+
+  public APIKeyValidationInfoDTO setSubscriberTenantDomain(String subscriberTenantDomain) {
+    this.subscriberTenantDomain = subscriberTenantDomain;
+    return this;
+  }
+
+  public void unsetSubscriberTenantDomain() {
+    this.subscriberTenantDomain = null;
+  }
+
+  /** Returns true if field subscriberTenantDomain is set (has been assigned a value) and false otherwise */
+  public boolean isSetSubscriberTenantDomain() {
+    return this.subscriberTenantDomain != null;
+  }
+
+  public void setSubscriberTenantDomainIsSet(boolean value) {
+    if (!value) {
+      this.subscriberTenantDomain = null;
+    }
+  }
+
+  public String getSpikeArrestUnit() {
+    return this.spikeArrestUnit;
+  }
+
+  public APIKeyValidationInfoDTO setSpikeArrestUnit(String spikeArrestUnit) {
+    this.spikeArrestUnit = spikeArrestUnit;
+    return this;
+  }
+
+  public void unsetSpikeArrestUnit() {
+    this.spikeArrestUnit = null;
+  }
+
+  /** Returns true if field spikeArrestUnit is set (has been assigned a value) and false otherwise */
+  public boolean isSetSpikeArrestUnit() {
+    return this.spikeArrestUnit != null;
+  }
+
+  public void setSpikeArrestUnitIsSet(boolean value) {
+    if (!value) {
+      this.spikeArrestUnit = null;
+    }
+  }
+
+  public boolean isStopOnQuotaReach() {
+    return this.stopOnQuotaReach;
+  }
+
+  public APIKeyValidationInfoDTO setStopOnQuotaReach(boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
+    setStopOnQuotaReachIsSet(true);
+    return this;
+  }
+
+  public void unsetStopOnQuotaReach() {
+    __isset_bit_vector.clear(__STOPONQUOTAREACH_ISSET_ID);
+  }
+
+  /** Returns true if field stopOnQuotaReach is set (has been assigned a value) and false otherwise */
+  public boolean isSetStopOnQuotaReach() {
+    return __isset_bit_vector.get(__STOPONQUOTAREACH_ISSET_ID);
+  }
+
+  public void setStopOnQuotaReachIsSet(boolean value) {
+    __isset_bit_vector.set(__STOPONQUOTAREACH_ISSET_ID, value);
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case AUTHORIZED:
@@ -1039,6 +1177,38 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       }
       break;
 
+    case SPIKE_ARREST_LIMIT:
+      if (value == null) {
+        unsetSpikeArrestLimit();
+      } else {
+        setSpikeArrestLimit((Integer)value);
+      }
+      break;
+
+    case SUBSCRIBER_TENANT_DOMAIN:
+      if (value == null) {
+        unsetSubscriberTenantDomain();
+      } else {
+        setSubscriberTenantDomain((String)value);
+      }
+      break;
+
+    case SPIKE_ARREST_UNIT:
+      if (value == null) {
+        unsetSpikeArrestUnit();
+      } else {
+        setSpikeArrestUnit((String)value);
+      }
+      break;
+
+    case STOP_ON_QUOTA_REACH:
+      if (value == null) {
+        unsetStopOnQuotaReach();
+      } else {
+        setStopOnQuotaReach((Boolean)value);
+      }
+      break;
+
     }
   }
 
@@ -1104,6 +1274,18 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
     case THROTTLING_DATA_LIST:
       return getThrottlingDataList();
 
+    case SPIKE_ARREST_LIMIT:
+      return Integer.valueOf(getSpikeArrestLimit());
+
+    case SUBSCRIBER_TENANT_DOMAIN:
+      return getSubscriberTenantDomain();
+
+    case SPIKE_ARREST_UNIT:
+      return getSpikeArrestUnit();
+
+    case STOP_ON_QUOTA_REACH:
+      return Boolean.valueOf(isStopOnQuotaReach());
+
     }
     throw new IllegalStateException();
   }
@@ -1155,6 +1337,14 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       return isSetApiTier();
     case THROTTLING_DATA_LIST:
       return isSetThrottlingDataList();
+    case SPIKE_ARREST_LIMIT:
+      return isSetSpikeArrestLimit();
+    case SUBSCRIBER_TENANT_DOMAIN:
+      return isSetSubscriberTenantDomain();
+    case SPIKE_ARREST_UNIT:
+      return isSetSpikeArrestUnit();
+    case STOP_ON_QUOTA_REACH:
+      return isSetStopOnQuotaReach();
     }
     throw new IllegalStateException();
   }
@@ -1349,6 +1539,42 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (!(this_present_throttlingDataList && that_present_throttlingDataList))
         return false;
       if (!this.throttlingDataList.equals(that.throttlingDataList))
+        return false;
+    }
+
+    boolean this_present_spikeArrestLimit = true && this.isSetSpikeArrestLimit();
+    boolean that_present_spikeArrestLimit = true && that.isSetSpikeArrestLimit();
+    if (this_present_spikeArrestLimit || that_present_spikeArrestLimit) {
+      if (!(this_present_spikeArrestLimit && that_present_spikeArrestLimit))
+        return false;
+      if (this.spikeArrestLimit != that.spikeArrestLimit)
+        return false;
+    }
+
+    boolean this_present_subscriberTenantDomain = true && this.isSetSubscriberTenantDomain();
+    boolean that_present_subscriberTenantDomain = true && that.isSetSubscriberTenantDomain();
+    if (this_present_subscriberTenantDomain || that_present_subscriberTenantDomain) {
+      if (!(this_present_subscriberTenantDomain && that_present_subscriberTenantDomain))
+        return false;
+      if (!this.subscriberTenantDomain.equals(that.subscriberTenantDomain))
+        return false;
+    }
+
+    boolean this_present_spikeArrestUnit = true && this.isSetSpikeArrestUnit();
+    boolean that_present_spikeArrestUnit = true && that.isSetSpikeArrestUnit();
+    if (this_present_spikeArrestUnit || that_present_spikeArrestUnit) {
+      if (!(this_present_spikeArrestUnit && that_present_spikeArrestUnit))
+        return false;
+      if (!this.spikeArrestUnit.equals(that.spikeArrestUnit))
+        return false;
+    }
+
+    boolean this_present_stopOnQuotaReach = true && this.isSetStopOnQuotaReach();
+    boolean that_present_stopOnQuotaReach = true && that.isSetStopOnQuotaReach();
+    if (this_present_stopOnQuotaReach || that_present_stopOnQuotaReach) {
+      if (!(this_present_stopOnQuotaReach && that_present_stopOnQuotaReach))
+        return false;
+      if (this.stopOnQuotaReach != that.stopOnQuotaReach)
         return false;
     }
 
@@ -1568,6 +1794,46 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetSpikeArrestLimit()).compareTo(typedOther.isSetSpikeArrestLimit());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetSpikeArrestLimit()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.spikeArrestLimit, typedOther.spikeArrestLimit);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetSubscriberTenantDomain()).compareTo(typedOther.isSetSubscriberTenantDomain());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetSubscriberTenantDomain()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.subscriberTenantDomain, typedOther.subscriberTenantDomain);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetSpikeArrestUnit()).compareTo(typedOther.isSetSpikeArrestUnit());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetSpikeArrestUnit()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.spikeArrestUnit, typedOther.spikeArrestUnit);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetStopOnQuotaReach()).compareTo(typedOther.isSetStopOnQuotaReach());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetStopOnQuotaReach()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.stopOnQuotaReach, typedOther.stopOnQuotaReach);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1765,6 +2031,38 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       } else {
         sb.append(this.throttlingDataList);
       }
+      first = false;
+    }
+    if (isSetSpikeArrestLimit()) {
+      if (!first) sb.append(", ");
+      sb.append("spikeArrestLimit:");
+      sb.append(this.spikeArrestLimit);
+      first = false;
+    }
+    if (isSetSubscriberTenantDomain()) {
+      if (!first) sb.append(", ");
+      sb.append("subscriberTenantDomain:");
+      if (this.subscriberTenantDomain == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.subscriberTenantDomain);
+      }
+      first = false;
+    }
+    if (isSetSpikeArrestUnit()) {
+      if (!first) sb.append(", ");
+      sb.append("spikeArrestUnit:");
+      if (this.spikeArrestUnit == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.spikeArrestUnit);
+      }
+      first = false;
+    }
+    if (isSetStopOnQuotaReach()) {
+      if (!first) sb.append(", ");
+      sb.append("stopOnQuotaReach:");
+      sb.append(this.stopOnQuotaReach);
       first = false;
     }
     sb.append(")");
@@ -2001,6 +2299,38 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 21: // SPIKE_ARREST_LIMIT
+            if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+              struct.spikeArrestLimit = iprot.readI32();
+              struct.setSpikeArrestLimitIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 22: // SUBSCRIBER_TENANT_DOMAIN
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.subscriberTenantDomain = iprot.readString();
+              struct.setSubscriberTenantDomainIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 23: // SPIKE_ARREST_UNIT
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.spikeArrestUnit = iprot.readString();
+              struct.setSpikeArrestUnitIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 24: // STOP_ON_QUOTA_REACH
+            if (schemeField.type == org.apache.thrift.protocol.TType.BOOL) {
+              struct.stopOnQuotaReach = iprot.readBool();
+              struct.setStopOnQuotaReachIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -2167,6 +2497,30 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           oprot.writeFieldEnd();
         }
       }
+      if (struct.isSetSpikeArrestLimit()) {
+        oprot.writeFieldBegin(SPIKE_ARREST_LIMIT_FIELD_DESC);
+        oprot.writeI32(struct.spikeArrestLimit);
+        oprot.writeFieldEnd();
+      }
+      if (struct.subscriberTenantDomain != null) {
+        if (struct.isSetSubscriberTenantDomain()) {
+          oprot.writeFieldBegin(SUBSCRIBER_TENANT_DOMAIN_FIELD_DESC);
+          oprot.writeString(struct.subscriberTenantDomain);
+          oprot.writeFieldEnd();
+        }
+      }
+      if (struct.spikeArrestUnit != null) {
+        if (struct.isSetSpikeArrestUnit()) {
+          oprot.writeFieldBegin(SPIKE_ARREST_UNIT_FIELD_DESC);
+          oprot.writeString(struct.spikeArrestUnit);
+          oprot.writeFieldEnd();
+        }
+      }
+      if (struct.isSetStopOnQuotaReach()) {
+        oprot.writeFieldBegin(STOP_ON_QUOTA_REACH_FIELD_DESC);
+        oprot.writeBool(struct.stopOnQuotaReach);
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -2245,7 +2599,19 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
       if (struct.isSetThrottlingDataList()) {
         optionals.set(19);
       }
-      oprot.writeBitSet(optionals, 20);
+      if (struct.isSetSpikeArrestLimit()) {
+        optionals.set(20);
+      }
+      if (struct.isSetSubscriberTenantDomain()) {
+        optionals.set(21);
+      }
+      if (struct.isSetSpikeArrestUnit()) {
+        optionals.set(22);
+      }
+      if (struct.isSetStopOnQuotaReach()) {
+        optionals.set(23);
+      }
+      oprot.writeBitSet(optionals, 24);
       if (struct.isSetAuthorized()) {
         oprot.writeBool(struct.authorized);
       }
@@ -2324,12 +2690,24 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           }
         }
       }
+      if (struct.isSetSpikeArrestLimit()) {
+        oprot.writeI32(struct.spikeArrestLimit);
+      }
+      if (struct.isSetSubscriberTenantDomain()) {
+        oprot.writeString(struct.subscriberTenantDomain);
+      }
+      if (struct.isSetSpikeArrestUnit()) {
+        oprot.writeString(struct.spikeArrestUnit);
+      }
+      if (struct.isSetStopOnQuotaReach()) {
+        oprot.writeBool(struct.stopOnQuotaReach);
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, APIKeyValidationInfoDTO struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(20);
+      BitSet incoming = iprot.readBitSet(24);
       if (incoming.get(0)) {
         struct.authorized = iprot.readBool();
         struct.setAuthorizedIsSet(true);
@@ -2436,6 +2814,22 @@ public class APIKeyValidationInfoDTO implements org.apache.thrift.TBase<APIKeyVa
           }
         }
         struct.setThrottlingDataListIsSet(true);
+      }
+      if (incoming.get(20)) {
+        struct.spikeArrestLimit = iprot.readI32();
+        struct.setSpikeArrestLimitIsSet(true);
+      }
+      if (incoming.get(21)) {
+        struct.subscriberTenantDomain = iprot.readString();
+        struct.setSubscriberTenantDomainIsSet(true);
+      }
+      if (incoming.get(22)) {
+        struct.spikeArrestUnit = iprot.readString();
+        struct.setSpikeArrestUnitIsSet(true);
+      }
+      if (incoming.get(23)) {
+        struct.stopOnQuotaReach = iprot.readBool();
+        struct.setStopOnQuotaReachIsSet(true);
       }
     }
   }

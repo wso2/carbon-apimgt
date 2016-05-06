@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2125="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2127="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2123="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2125="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2127="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2129="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2123="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
    <wsdl:documentation>APIKeyValidationService</wsdl:documentation>
    <wsdl:types>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
@@ -18,8 +18,8 @@
                <xs:element minOccurs="0" name="resourceSandboxURIExist" type="xs:boolean"/>
                <xs:element minOccurs="0" name="resourceURI" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resourceURIExist" type="xs:boolean"/>
-               <xs:element minOccurs="0" name="scope" nillable="true" type="ax2129:Scope"/>
-               <xs:element minOccurs="0" name="scopes" nillable="true" type="ax2129:Scope"/>
+               <xs:element minOccurs="0" name="scope" nillable="true" type="ax2127:Scope"/>
+               <xs:element minOccurs="0" name="scopes" nillable="true" type="ax2127:Scope"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="throttlingConditions" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingConditionsAsString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingTier" nillable="true" type="xs:string"/>
@@ -38,11 +38,11 @@
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
-      <xs:schema xmlns:ax2124="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2126="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2130="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2128="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+      <xs:schema xmlns:ax2124="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2126="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2130="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax2128="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
          <xs:import namespace="http://keymgt.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
-         <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://model.api.apimgt.carbon.wso2.org/xsd"/>
+         <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
          <xs:element name="APIKeyValidationServiceAPIKeyMgtException">
             <xs:complexType>
                <xs:sequence>
@@ -54,6 +54,21 @@
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax2125:APIManagementException"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getAllURITemplates">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getAllURITemplatesResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2127:URITemplate"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -73,22 +88,7 @@
          <xs:element name="validateKeyResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2127:APIKeyValidationInfoDTO"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="getAllURITemplates">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
-                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="getAllURITemplatesResponse">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2129:URITemplate"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2129:APIKeyValidationInfoDTO"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -115,7 +115,11 @@
                <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="spikeArrestLimit" type="xs:int"/>
+               <xs:element minOccurs="0" name="spikeArrestUnit" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="stopOnQuotaReach" type="xs:boolean"/>
                <xs:element minOccurs="0" name="subscriber" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="subscriberTenantDomain" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="throttlingDataList" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="tier" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="type" nillable="true" type="xs:string"/>

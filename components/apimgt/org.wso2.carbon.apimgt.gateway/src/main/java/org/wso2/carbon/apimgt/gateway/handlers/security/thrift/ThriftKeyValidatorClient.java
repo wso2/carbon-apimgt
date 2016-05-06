@@ -113,6 +113,10 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setValidityPeriod(thriftDTO.getValidityPeriod());
         apiKeyValidationInfoDTO.setApiTier(thriftDTO.getApiTier());
         apiKeyValidationInfoDTO.setThrottlingDataList(thriftDTO.getThrottlingDataList());
+        apiKeyValidationInfoDTO.setSpikeArrestLimit(thriftDTO.getSpikeArrestLimit());
+        apiKeyValidationInfoDTO.setSpikeArrestUnit(thriftDTO.getSpikeArrestUnit());
+        apiKeyValidationInfoDTO.setSubscriberTenantDomain(thriftDTO.getSubscriberTenantDomain());
+        apiKeyValidationInfoDTO.setStopOnQuotaReach(thriftDTO.isStopOnQuotaReach());
         apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
         return apiKeyValidationInfoDTO;
     }
