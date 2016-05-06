@@ -350,8 +350,8 @@ var addPolicyToBackend = function () {
                         var endIp = $('#ip-range-end-address-input-' + executionFlowId).val();
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         apiPolicyNew.executionFlows[i].conditions[j].ipType = 'range';
-                        apiPolicyNew.executionFlows[i].conditions[j].endingIP = startIp;
-                        apiPolicyNew.executionFlows[i].conditions[j].enabled = endIp;
+                        apiPolicyNew.executionFlows[i].conditions[j].startingIP = startIp;
+                        apiPolicyNew.executionFlows[i].conditions[j].endingIP = endIp;
                     }
 
                     var ipInvertCondition = $('#ip-condition-invert-' + executionFlowId).attr('checked');
