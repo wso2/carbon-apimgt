@@ -251,11 +251,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
         <%=i18n.localize("lifecycleSuccessMsg")%>
       </div>
-       <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
-       <svg width=900 height=600 ><g/></svg>
-       </div>
 
       </form>
+ <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
+       <svg width=900 height=600 ><g/></svg>
+       </div>
 
 <div class="page-header">
 		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>
