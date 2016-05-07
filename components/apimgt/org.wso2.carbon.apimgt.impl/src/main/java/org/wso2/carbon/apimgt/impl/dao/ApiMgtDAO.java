@@ -9868,7 +9868,7 @@ public class ApiMgtDAO {
     }
 
     public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
-                                                                                                        APIManagementException {
+            APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
@@ -9884,7 +9884,7 @@ public class ApiMgtDAO {
                     valid = true;
                 } else {
                     throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                                                     conditionValue);
+                            conditionValue);
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -9894,12 +9894,12 @@ public class ApiMgtDAO {
 
                     if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
                             (appOwner,
-                             appName)) {
+                                    appName)) {
                         valid = true;
                     } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                                         "name " + appName + "from Application " +
-                                                         "Owner " + appOwner);
+                                "name " + appName + "from Application " +
+                                "Owner " + appOwner);
                     }
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
@@ -9914,14 +9914,18 @@ public class ApiMgtDAO {
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
-                insertPreparedStatement = connection.prepareStatement(query);
-                insertPreparedStatement.setString(1, conditionType);
-                insertPreparedStatement.setString(2, conditionValue);
-                insertPreparedStatement.setString(4, tenantDomain);
-                insertPreparedStatement.setString(3, "TRUE");
-                status = insertPreparedStatement.execute();
-                connection.commit();
-                status = true;
+                if(isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                    insertPreparedStatement = connection.prepareStatement(query);
+                    insertPreparedStatement.setString(1, conditionType);
+                    insertPreparedStatement.setString(2, conditionValue);
+                    insertPreparedStatement.setString(4, tenantDomain);
+                    insertPreparedStatement.setString(3, "TRUE");
+                    status = insertPreparedStatement.execute();
+                    connection.commit();
+                    status = true;
+                }else{
+                    throw new APIManagementException("Condition " + conditionValue + "Already exist");
+                }
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -10149,5 +10153,31 @@ public class ApiMgtDAO {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }
          return apiLevelTier;
+    }
+
+    private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
+            connection) throws APIManagementException {
+        PreparedStatement checkIsExistPreparedStatement = null;
+        ResultSet checkIsResultSet = null;
+        boolean status = false;
+        try {
+            String isExistQuery = SQLConstants.ThrottleSQLConstants.BLOCK_CONDITION_EXIST_SQL;
+            checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
+            checkIsExistPreparedStatement.setString(1, tenantDomain);
+            checkIsExistPreparedStatement.setString(2, conditionType);
+            checkIsExistPreparedStatement.setString(3, conditionValue);
+            checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
+            connection.commit();
+            if (checkIsResultSet.next()) {
+                status = true;
+            }
+        } catch (SQLException e) {
+            String msg = "Couldn't check the Block Condition Exist";
+            log.error(msg, e);
+            handleException(msg, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
+        }
+        return status;
     }
 }
