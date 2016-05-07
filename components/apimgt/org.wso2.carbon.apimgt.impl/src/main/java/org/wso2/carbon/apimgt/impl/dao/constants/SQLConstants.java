@@ -2481,5 +2481,8 @@ public class SQLConstants {
                 "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
         public static final String DELETE_BLOCK_CONDITION_SQL =
                 "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `CONDITION_ID`=?";
+        public static final String BLOCK_CONDITION_EXIST_SQL =
+                "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
+                        "AND VALUE =?";
     }
 }
