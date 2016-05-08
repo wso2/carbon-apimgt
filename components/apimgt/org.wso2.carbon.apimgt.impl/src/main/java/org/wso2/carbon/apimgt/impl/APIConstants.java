@@ -1127,11 +1127,13 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_SILVER = "Silver";
     public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
+    public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 20 request(s) per minute.";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 5 request(s) per minute.";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1 request(s) per minute.";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
+    public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 60 request(s) per minute.";
 
     public static final String DEFAULT_API_POLICY_ULTIMATE = "Ultimate";
     public static final String DEFAULT_API_POLICY_PLUS = "Plus";
