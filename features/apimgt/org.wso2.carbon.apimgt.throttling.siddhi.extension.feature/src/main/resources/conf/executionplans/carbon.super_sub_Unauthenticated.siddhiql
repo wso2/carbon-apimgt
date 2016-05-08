@@ -1,8 +1,8 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('carbon.super_sub_Gold')
+@Plan:name('carbon.super_sub_Unauthenticated')
 
 /* Enter a unique description for ExecutionPlan */
-@Plan:description('ExecutionPlan for sub_gold')
+@Plan:description('ExecutionPlan for sub_unauthenticated')
 
 /* define streams/tables and write queries here ... */
 
