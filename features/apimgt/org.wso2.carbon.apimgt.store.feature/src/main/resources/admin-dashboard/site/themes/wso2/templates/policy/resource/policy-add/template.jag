@@ -151,8 +151,8 @@
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
-                        <option value="KB" >KB</option>
-                        <option value="MB" selected="true" >MB</option>
+                        <option value="KB">KB</option>
+                        <option value="MB" selected="true">MB</option>
                         <option value="GB">GB</option>
                     </select>
                 </div>
@@ -186,14 +186,14 @@
 
     <div class="page-header">
         <h2><br/></h2>
-        <p class="lead"><%=i18n.localize("executionFlows")%></p>
+        <p class="lead"><%=i18n.localize("conditionalGroups")%></p>
     </div>
     <div id="throttle-policies-pipeline-content" class="form-group">
         <button class="btn btn-secondary" type="button" onclick="addPolicy()">
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-                </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
+                </span>&nbsp;<%=i18n.localize("addConditionalGroup")%>
         </button>
     </div>
     <div id="pipeline-content" class="form-group"></div>

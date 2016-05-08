@@ -322,11 +322,13 @@ var addPolicyToBackend = function () {
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
     } else {
         defaultPolicyLimit = $('#bandwidth').val();
-        defaultPolicyUnit = $("#bandwidth-unit option:selected").val();
+        defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
         defaultPolicyUnitTime = $("#unit-time-count").val();
+        defaultPolicyUnit = $("#request-count-unit option:selected").val();
         apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-        apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyUnit;
+        apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
+        apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
     }
 
     var executionFlow, executionFlowId, checked;
