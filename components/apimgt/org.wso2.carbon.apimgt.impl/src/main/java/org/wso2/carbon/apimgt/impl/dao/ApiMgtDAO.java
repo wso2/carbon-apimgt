@@ -851,22 +851,23 @@ public class ApiMgtDAO {
                     infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
+                    int spikeArrest = 0;
                     String apiLevelThrottlingKey = "api_level_throttling_key";
-                    String spikeArrest = "0";
                     if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-                        spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                        spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
                     }
-                    String spikeArrestUnit = "0";
+
+                    String spikeArrestUnit = null;
                     if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
                         spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
                     }
-                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
-                    list.add(spikeArrest);
-                    list.add(spikeArrestUnit);
-                    list.add(stopOnQuotaReach);
-                    list.add(subscriberTenant);
+                    infoDTO.setSpikeArrestLimit(spikeArrest);
+                    infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+                    infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+                    infoDTO.setSubscriberTenantDomain(subscriberTenant);
                     if (apiTier != null && apiTier.trim().length() > 0) {
                         infoDTO.setApiTier(apiTier);
                     }
@@ -5726,12 +5727,7 @@ public class ApiMgtDAO {
 			prepStmt.setString(2, version);
 
 			rs = prepStmt.executeQuery();
-
-			// THROTTLING_TIER == POLICY_NAME
-			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
-			// HashMap<String,URITemplate>();
 			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
-
 			while (rs != null && rs.next()) {
 
 				String httpVerb = rs.getString("HTTP_METHOD");
@@ -5739,7 +5735,8 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId  ="condition_" + conditionGroupId;
+				String applicableLevel = rs.getString("APPLICABLE_LEVEL");
+				String policyConditionGroupId  = "_condition_" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -5754,13 +5751,13 @@ public class ApiMgtDAO {
 					uriTemplate.setAuthType(authType);
 					uriTemplate.setHTTPVerb(httpVerb);
 					uriTemplate.setUriTemplate(urlPattern);
-
+                    uriTemplate.setApplicableLevel(applicableLevel);
 					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
 					if (mediationScriptBlob != null) {
 						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
 					}
-					uriTemplate.setMediationScript(script);
 
+					uriTemplate.setMediationScript(script);
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
@@ -5783,7 +5780,7 @@ public class ApiMgtDAO {
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("");
+					uriTemplate.getThrottlingConditions().add("_default");
 				}
 
 			}

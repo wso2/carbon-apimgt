@@ -55,7 +55,10 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //Following throttle data list can be use to hold throttle data and api level throttle key
     //should be its first element.
     private  List<String> throttlingDataList;
-
+    private int spikeArrestLimit;
+    private String subscriberTenantDomain;
+    private String spikeArrestUnit;
+    private boolean stopOnQuotaReach;
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
     }
@@ -250,6 +253,10 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , issuedTime:").append(issuedTime).
                 append(" , apiName:").append(apiName).
                 append(" , consumerKey:").append(consumerKey).
+                append(" , spikeArrestLimit:").append(spikeArrestLimit).
+                append(" , spikeArrestUnit:").append(spikeArrestUnit).
+                append(" , subscriberTenantDomain:").append(subscriberTenantDomain).
+                append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
                 append(" , apiPublisher:").append(apiPublisher);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
@@ -273,6 +280,38 @@ public class APIKeyValidationInfoDTO implements Serializable {
         }
 
         return builder.toString();
+    }
+
+    public int getSpikeArrestLimit() {
+        return spikeArrestLimit;
+    }
+
+    public void setSpikeArrestLimit(int spikeArrestLimit) {
+        this.spikeArrestLimit = spikeArrestLimit;
+    }
+
+    public String getSpikeArrestUnit() {
+        return spikeArrestUnit;
+    }
+
+    public void setSpikeArrestUnit(String spikeArrestUnit) {
+        this.spikeArrestUnit = spikeArrestUnit;
+    }
+
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    public String getSubscriberTenantDomain() {
+        return subscriberTenantDomain;
+    }
+
+    public void setSubscriberTenantDomain(String subscriberTenantDomain) {
+        this.subscriberTenantDomain = subscriberTenantDomain;
     }
 }
 

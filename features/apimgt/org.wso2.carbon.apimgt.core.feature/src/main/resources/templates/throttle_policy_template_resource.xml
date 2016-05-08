@@ -3,7 +3,7 @@
 ###generate key
 #macro( getKey )##
 #if($policy.getUserLevel() == $ACROSS_ALL)
-str:concat(resourceKey,'${pipeline}')##
+str:concat(resourceKey,'_${pipeline}')##
 #else
 str:concat(resourceKey, '_', userId , '_${pipeline}')##
 #end

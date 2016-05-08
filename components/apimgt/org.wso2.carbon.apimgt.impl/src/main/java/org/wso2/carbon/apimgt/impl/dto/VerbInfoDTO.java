@@ -14,6 +14,8 @@ public class VerbInfoDTO implements Serializable {
 
     private String throttling;
 
+    private String applicableLevel;
+
     private List<String> throttlingConditions = new ArrayList<String>();
 
     private String requestKey;
@@ -78,5 +80,13 @@ public class VerbInfoDTO implements Serializable {
 
     public void setThrottlingConditions(List<String> throttlingConditions) {
         this.throttlingConditions = throttlingConditions;
+    }
+
+    public String getApplicableLevel() {
+        return applicableLevel;
+    }
+
+    public void setApplicableLevel(String applicableLevel) {
+        this.applicableLevel = applicableLevel;
     }
 }

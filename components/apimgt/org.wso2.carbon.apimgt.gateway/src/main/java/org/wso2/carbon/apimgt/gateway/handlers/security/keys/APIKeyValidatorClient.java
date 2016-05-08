@@ -139,6 +139,10 @@ public class APIKeyValidatorClient {
         dto.setContentAware(generatedDto.getContentAware());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
         dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
+        dto.setSpikeArrestLimit(generatedDto.getSpikeArrestLimit());
+        dto.setSpikeArrestUnit(generatedDto.getSpikeArrestUnit());
+        dto.setSubscriberTenantDomain(generatedDto.getSubscriberTenantDomain());
+        dto.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
         return dto;
     }
 

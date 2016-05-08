@@ -111,7 +111,6 @@ public class OAuthAuthenticator implements Authenticator {
         //If the matching resource does not require authentication
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
-        VerbInfoDTO verbInfoDTO = (VerbInfoDTO)synCtx.getProperty(APIConstants.VERB_INFO_DTO);
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
 
             if(log.isDebugEnabled()){
@@ -192,6 +191,10 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setConsumerKey(info.getConsumerKey());
             authContext.setApiTier(info.getApiTier());
             authContext.setThrottlingDataList(info.getThrottlingDataList());
+            authContext.setSubscriberTenantDomain(info.getSubscriberTenantDomain());
+            authContext.setSpikeArrestLimit(info.getSpikeArrestLimit());
+            authContext.setSpikeArrestUnit(info.getSpikeArrestUnit());
+            authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
             authContext.setIsContentAware(info.isContentAware());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
 
