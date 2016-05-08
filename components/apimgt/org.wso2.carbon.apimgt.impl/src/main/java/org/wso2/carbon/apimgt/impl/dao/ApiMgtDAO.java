@@ -9914,7 +9914,7 @@ public class ApiMgtDAO {
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
-                if(isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                if(!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
                     insertPreparedStatement = connection.prepareStatement(query);
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
