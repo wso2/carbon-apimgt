@@ -1103,6 +1103,9 @@ public final class APIConstants {
     public static final String DECISION_QUERY_ELEM = "decisionQuery";
     public static final String XML_EXTENSION= ".xml";
 
+    public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
+    public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
+
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";

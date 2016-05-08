@@ -8925,6 +8925,50 @@ public class ApiMgtDAO {
         return policies.toArray(new GlobalPolicy[policies.size()]);
     }
 
+
+    /**
+     * Get a particular Global level policy.
+     *
+     * @param policyId
+     * @return
+     * @throws APIManagementException
+     */
+    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_GLOBAL_POLICY;
+
+        GlobalPolicy globalPolicy = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyName);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String siddhiQuery = null;
+                globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+
+                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicy.setSiddhiQuery(siddhiQuery);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return globalPolicy;
+    }
+
     /**
      * Retrieves {@link APIPolicy} with name <code>policyName</code> and tenant Id <code>tenantNId</code>
      * <p>This will retrieve complete details about the APIPolicy with all pipelins and conditions.</p>
