@@ -52,9 +52,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
-import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
-import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -71,7 +68,6 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManag
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -3681,12 +3677,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
 
                 // validating custom execution plan
-                if(!manager.validateExecutionPlan(policyString)){
+                if (!manager.validateExecutionPlan(policyString)) {
                     throw new APIManagementException("Invalid Execution Plan");
                 }
 
                 // checking if keytemplate already exist
-                if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
+                if (apiMgtDAO.isKeyTemplatesExist(globalPolicy)) {
                     throw new APIManagementException("Key Template Already Exist");
                 }
 
@@ -3694,6 +3690,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.put(policyFile, policyString);
 
                 apiMgtDAO.addGlobalPolicy(globalPolicy);
+
+                publishKeyTemplateEvent(globalPolicy.getKeyTemplate(),"add");
                 policyLevel = PolicyConstants.POLICY_LEVEL_GLOBAL;
             } else {
                 String msg = "Policy type " + policy.getClass().getName() + " is not supported";
@@ -3901,8 +3899,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
 
+        GlobalPolicy globalPolicy = null;
+        if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
+            globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
+        }
         //remove from database
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
+
+        if(globalPolicy != null){
+            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(),"remove");
+        }
+
     }
 
     @Override
@@ -3974,6 +3981,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
         eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
                 , blockingMessage);
+    }
+
+    private void publishKeyTemplateEvent(String templateValue, String state) {
+
+        //Publishing an event to notify that a policy has been added.
+        HashMap<String, String> keyTemplateMap = new HashMap<String, String>();
+        keyTemplateMap.put(APIConstants.POLICY_TEMPLATE_KEY, templateValue);
+        keyTemplateMap.put(APIConstants.TEMPLATE_KEY_STATE, state);
+
+        ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
+                                                                                    APIUtil.getEventPublisherProperties()
+                , keyTemplateMap);
     }
 
     public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {
