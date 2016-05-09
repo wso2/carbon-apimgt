@@ -110,10 +110,10 @@ var isNewPolicy = true;
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=encode.forHtml(String(policyName))%>");
-          $('#description').val("<%=encode.forHtml(String(description))%>");
-          $('#keyTemplate').val("<%=encode.forHtml(String(keyTemplate))%>");
-          $('#siddhiQuery').val("<%=encode.forHtml(String(siddhiQuery))%>");
+          $('#policyName').val("<%=encode.forJavaScript(String(policyName))%>");
+          $('#description').val("<%=encode.forJavaScript(String(description))%>");
+          $('#keyTemplate').val("<%=encode.forJavaScript(String(keyTemplate))%>");
+          $('#siddhiQuery').val("<%=encode.forJavaScript(String(siddhiQuery))%>");
         }
       
       var parameterArray = ("<%=streamParameters%>").split(',');

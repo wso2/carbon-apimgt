@@ -8319,7 +8319,7 @@ public class ApiMgtDAO {
             policyStatement.setBoolean(13, policy.isStopOnQuotaReach());
             policyStatement.setString(14, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBlob(15, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBytes(15, policy.getCustomAttributes());
             }
             policyStatement.executeUpdate();
 
@@ -8857,11 +8857,12 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-               /* Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+
                 if(blob != null){
                     byte[] customAttrib = blob.getBytes(1,(int)blob.length());
                     subPolicy.setCustomAttributes(customAttrib);
-                }*/
+                }
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if(binary != null){
                 	byte[] customAttrib = APIUtil.toByteArray(binary);
