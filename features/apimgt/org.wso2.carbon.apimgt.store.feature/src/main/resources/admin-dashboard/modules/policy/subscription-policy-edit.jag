@@ -57,9 +57,10 @@ var constructPolicyObject = function (userName, policyName, description, default
         subscriptionPolicy.setStopOnQuotaReach(false);
 
     }
-    var attr = new String(attributes[0]);
 
-    subscriptionPolicy.setCustomAttributes(attr.getBytes());
+    var JsonString= stringify(attributes) ;
+    subscriptionPolicy.setCustomAttributes(new String(JsonString).getBytes("UTF-8"));
+
     subscriptionPolicy.setBillingPlan(tierPlan);
     var default_quotaPolicy = new QuotaPolicy();
 

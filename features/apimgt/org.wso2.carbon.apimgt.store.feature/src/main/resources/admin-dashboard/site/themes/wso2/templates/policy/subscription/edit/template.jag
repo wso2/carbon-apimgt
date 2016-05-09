@@ -35,19 +35,18 @@
         var stopOnQuotaReach = subscriptionPolicy.isStopOnQuotaReach();
         var tierPlan = subscriptionPolicy.getBillingPlan();
         
-        var customAttributes = subscriptionPolicy.getCustomAttributes();
-        var customAttributeList = {};
         var isCustomAttributesExist = false;
+        var customAttributes = subscriptionPolicy.getCustomAttributes();
+   		var String = Packages.java.lang.String;
 
-        /* if(customAttributes && customAttributes != null){
-            isCustomAttributesExist = true;
-            var numberOfCustomAttributes = customAttributes.length();
-            for(i = 0; i < numberOfCustomAttributes; i++ ){
-                var attributeName = customAttributes.keySet().toArray()[i];
-                var attributeValue = customAttributes.get(attributeName);
-                customAttributeList[attributeName] = attributeValue;
-            }
-        } */
+   		if ( customAttributes != null){
+   			var str ="{" +'"customAttributes"' +":"+ new String(customAttributes) + "}";
+   			var customAttributeJSON = JSON.parse(str);
+
+	        if(customAttributeJSON.customAttributes.length > 0){
+				isCustomAttributesExist = true;
+	        }
+   		}
     }
     %>
 
@@ -271,8 +270,7 @@
             $('#stopOnQuotaReach').prop('checked',"true");
           }
           if('<%=isCustomAttributesExist%>' == 'true'){
-//            var customAttributeListOfCurrentTier = <%=customAttributeList%>;
-            populateCustomerAttributes(<%=customAttributeList%>);
+            populateCustomerAttributes(<%=customAttributeJSON%>);
         	}
           
           $('#tierPlan').val("<%=tierPlan%>");
