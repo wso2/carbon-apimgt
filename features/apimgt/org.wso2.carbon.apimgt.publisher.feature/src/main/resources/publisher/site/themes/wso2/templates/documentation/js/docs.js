@@ -96,7 +96,7 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
 };
 
 var updateDocumentation = function (rowId, docName, docType, summary, sourceType, docUrl, filePath, otherTypeName,visibility) {
-    $("#docTable").hide('fast');
+    //$("#docTable").hide('fast');
     $('#newDoc .btn-primary').text('Update');
     $('#newDoc .btn-primary').val('Update');
     $('#addDoc').hide('fast');
