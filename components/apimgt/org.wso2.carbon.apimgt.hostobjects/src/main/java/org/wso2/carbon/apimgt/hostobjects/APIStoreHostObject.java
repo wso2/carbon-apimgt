@@ -628,7 +628,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
-                handleException("Login failed.Please recheck the username and password and try again.");
+                handleException("Login failed. Please recheck the username and password and try again.");
             }
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -666,7 +666,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("error", row, false);
                 row.put("hasPublisherAccess", row, loginUserHasPublisherAccess);
             } else {
-                handleException("Login failed.Insufficient Privileges.");
+                handleException("Login failed. Insufficient Privileges.");
             }
         } catch (Exception e) {
             row.put("error", row, true);
