@@ -5599,6 +5599,10 @@ public final class APIUtil {
                 }
             }
         }
+
+        if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            tierMap.remove(APIConstants.UNAUTHENTICATED_TIER);
+        }
         return tierMap;
     }
 
