@@ -14,7 +14,7 @@
         </script>
 
 <div class="page-header" id="Message">
-    <h1><%=i18n.localize("My Account")%></h1>
+    <h1><%=i18n.localize("My Account","My Account")%></h1>
 </div>
 
 <h3><%=i18n.localize("changePassword")%></h3>
