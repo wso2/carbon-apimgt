@@ -83,7 +83,7 @@
     "conditionalGroups":"Conditional Groups",
     "tiers":"Tier",
     "blockedEntities":"Blocked Entities",
-    "blockNew":"Block Entity",
+    "blockNew":"Add Block Entity",
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
     "conditionValueHead":"Condition Value",

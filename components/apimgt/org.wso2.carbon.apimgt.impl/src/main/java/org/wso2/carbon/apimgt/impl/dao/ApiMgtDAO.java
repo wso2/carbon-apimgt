@@ -9892,9 +9892,8 @@ public class ApiMgtDAO {
                     String appOwner = appArray[0];
                     String appName = appArray[1];
 
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
-                            (appOwner,
-                                    appName)) {
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
+                                                                                isValidApplication(appOwner, appName)) {
                         valid = true;
                     } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
@@ -9923,8 +9922,8 @@ public class ApiMgtDAO {
                     status = insertPreparedStatement.execute();
                     connection.commit();
                     status = true;
-                }else{
-                    throw new APIManagementException("Condition " + conditionValue + "Already exist");
+                } else {
+                    throw new APIManagementException("Condition is already exist");
                 }
             }
         } catch (SQLException e) {
