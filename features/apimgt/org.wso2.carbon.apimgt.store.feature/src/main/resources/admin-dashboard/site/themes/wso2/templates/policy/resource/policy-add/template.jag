@@ -47,7 +47,13 @@
 	        </div>
 	        
 	        <input type="hidden" id="action" name="action" value="<%=action%>">
-       
+       <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+
        		<div class="form-group">
 	            <label class="control-label col-sm-3"><%=i18n.localize("tierName")%>: <span class="requiredAstrix">*</span>
 	            		<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" title="">
