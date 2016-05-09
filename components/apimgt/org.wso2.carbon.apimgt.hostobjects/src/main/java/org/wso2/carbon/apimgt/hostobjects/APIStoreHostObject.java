@@ -522,9 +522,10 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws ScriptException
      * @throws APIManagementException
      * @throws ParseException
+     * @return NativeObject of key details will return.
      */
-    public static void jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj,
-                                                      Object[] args, Function funObj)
+    public static NativeObject jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj)
             throws ScriptException, APIManagementException, ParseException {
         if (args != null && args.length != 0) {
 
@@ -541,8 +542,13 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                NativeObject row = new NativeObject();
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+                for (Map.Entry<String, Object> entry : entries) {
+                    row.put(entry.getKey(), row, entry.getValue());
+                }
+                return row;
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -552,6 +558,7 @@ public class APIStoreHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
         }
 
+        return null;
     }
 
 
@@ -628,7 +635,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
-                handleException("Login failed.Please recheck the username and password and try again.");
+                handleException("Login failed. Please recheck the username and password and try again.");
             }
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -666,7 +673,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("error", row, false);
                 row.put("hasPublisherAccess", row, loginUserHasPublisherAccess);
             } else {
-                handleException("Login failed.Insufficient Privileges.");
+                handleException("Login failed. Insufficient Privileges.");
             }
         } catch (Exception e) {
             row.put("error", row, true);

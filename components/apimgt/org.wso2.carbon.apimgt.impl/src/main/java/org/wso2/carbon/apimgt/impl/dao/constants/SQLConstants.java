@@ -2256,6 +2256,14 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =?";
 
+    public static final String GET_GLOBAL_POLICY =
+            " SELECT " +
+            "   * " +
+            "FROM " +
+            "   AM_POLICY_GLOBAL " +
+            " WHERE" +
+            "   NAME =?";
+
 
     public static final String GET_APPLICATION_POLICY_SQL =
             "SELECT "+
@@ -2462,7 +2470,7 @@ public class SQLConstants {
 				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.tenant_id = ? AND APPPOLICY.quota_type = 'bandwidthVolume')"
 				+ " ) ";
 
-		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, "
+		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
 				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID  "
 				+ " FROM AM_API_URL_MAPPING AUM"
 				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
@@ -2481,5 +2489,8 @@ public class SQLConstants {
                 "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE CONDITION_ID = ?";
         public static final String DELETE_BLOCK_CONDITION_SQL =
                 "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `CONDITION_ID`=?";
+        public static final String BLOCK_CONDITION_EXIST_SQL =
+                "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
+                        "AND VALUE =?";
     }
 }

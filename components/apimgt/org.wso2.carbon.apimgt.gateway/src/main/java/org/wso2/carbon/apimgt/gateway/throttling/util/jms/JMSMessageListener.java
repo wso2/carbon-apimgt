@@ -56,10 +56,12 @@ public class JMSMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
 
-                    if(map.get(APIConstants.THROTTLE_KEY) != null){
+                    if (map.get(APIConstants.THROTTLE_KEY) != null) {
                         handleThrottleUpdateMessage(map);
-                    } else if(map.get(APIConstants.BLOCKING_CONDITION_KEY) != null){
+                    } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
                         handleBlockingMessage(map);
+                    } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
+                        handleKeyTemplateMessage(map);
                     }
 
                 } else {
@@ -81,12 +83,17 @@ public class JMSMessageListener implements MessageListener {
 
         String throttleKey = map.get("throttleKey").toString();
         String throttleState = map.get("isThrottled").toString();
+        long timeStamp = Long.parseLong(map.get("expiryTimeStamp").toString());
         if (throttleState.equals("true")) {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     getThrottleDataMap().put(throttleKey, throttleState);
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataTimestampMap().put(throttleKey, timeStamp);
         } else {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     getThrottleDataMap().remove(throttleKey);
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                    getThrottleDataTimestampMap().remove(throttleKey);
         }
     }
 
@@ -102,23 +109,42 @@ public class JMSMessageListener implements MessageListener {
         String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
         String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
 
-        Map<String,String> blockingMap = null;
+        Map<String, String> blockingMap = null;
 
-        if(APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)){
-            blockingMap =ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+        if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
+            blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
                     .getBlockedApplicationConditionsMap();
-        } else if(APIConstants.BLOCKING_CONDITIONS_API.equals(condition)){
+        } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
             blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap();
-        }else if(APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)){
+        } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)) {
             blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap();
-        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)){
+        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)) {
             blockingMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap();
         }
 
-        if("true".equals(conditionState)){
-            blockingMap.put(conditionValue,conditionValue);
-        }else {
+        if ("true".equals(conditionState)) {
+            blockingMap.put(conditionValue, conditionValue);
+        } else {
             blockingMap.remove(conditionValue);
+        }
+    }
+
+    private void handleKeyTemplateMessage(Map<String, Object> map) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Key -  KeyTemplate : " + map.get(APIConstants.POLICY_TEMPLATE_KEY).toString());
+        }
+
+        String keyTemplateValue = map.get(APIConstants.POLICY_TEMPLATE_KEY).toString();
+        String keyTemplateState = map.get(APIConstants.TEMPLATE_KEY_STATE).toString();
+
+        Map<String, String> blockingMap = null;
+
+        if ("add".equals(keyTemplateState)) {
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                    .getKeyTemplateMap().put(keyTemplateValue, keyTemplateValue);
+        } else {
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                    .getKeyTemplateMap().remove(keyTemplateValue);
         }
     }
 }

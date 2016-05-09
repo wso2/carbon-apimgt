@@ -105,7 +105,7 @@ function updateStatus(status){
 var apiName=$("#name").val();
 var version=$("#apiVersion").val();
 var provider=$("#provider").val();
-
+$(".modal-footer").html("");
 if(status=='Deprecate'){
 jagg.message({
         content:"Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API - " + apiName + " - " + version+"?",
@@ -135,6 +135,7 @@ jagg.message({
     },
     cancelCallback:function(){
     $('#messageModal').modal('hide');
+         $(".modal-footer").html("");
     }
     });
 }else{
@@ -251,11 +252,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
         <%=i18n.localize("lifecycleSuccessMsg")%>
       </div>
-       <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
-       <svg width=900 height=600 ><g/></svg>
-       </div>
 
       </form>
+ <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
+       <svg width=900 height=600 ><g/></svg>
+       </div>
 
 <div class="page-header">
 		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>

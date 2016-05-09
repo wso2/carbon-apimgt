@@ -229,7 +229,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
-                handleException("Login failed.Please recheck the username and password and try again..");
+                handleException("Login failed. Please recheck the username and password and try again..");
             }
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -261,7 +261,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("error", row, false);
                 row.put("showStoreURL", row, displayStoreUrlFromPublisher);
             } else {
-                handleException("Login failed.Insufficient privileges.");
+                handleException("Login failed. Insufficient privileges.");
             }
         } catch (Exception e) {
             row.put("error", row, true);
@@ -2716,9 +2716,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         continue;
                     }
                     long count = apiProvider.getAPISubscriptionCountByAPI(api.getId());
-                    if (count == 0) {
-                        continue;
-                    }
+
                     subscriptions.put(api.getId().getVersion(), count);
                 }
 

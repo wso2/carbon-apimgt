@@ -38,10 +38,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class KeyTemplateRetriever implements Runnable {
+public class KeyTemplateRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(KeyTemplateRetriever.class);
 
     @Override
@@ -97,17 +98,9 @@ public class KeyTemplateRetriever implements Runnable {
     }
 
     public void startKeyTemplateDataRetriever() {
-
-        ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
-                .getInstance().getThrottleProperties().getBlockCondition();
-
-        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor
-                (blockConditionRetrieverConfiguration.getCorePoolSize());
-
-        scheduledExecutorService.scheduleAtFixedRate(new KeyTemplateRetriever(),
-                                                     blockConditionRetrieverConfiguration.getInitDelay(),
-                                                     blockConditionRetrieverConfiguration.getPeriod(),
-                                                     TimeUnit.MILLISECONDS);
+        
+        new Timer().schedule(this, ServiceReferenceHolder
+                .getInstance().getThrottleProperties().getBlockCondition().getInitDelay());
     }
 
 

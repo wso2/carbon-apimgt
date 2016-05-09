@@ -3,7 +3,7 @@
 ###generate key
 #macro( getKey )##
 #if($policy.getUserLevel() == $ACROSS_ALL)
-str:concat(resourceKey,'${pipeline}')##
+str:concat(resourceKey,'_${pipeline}')##
 #else
 str:concat(resourceKey, '_', userId , '_${pipeline}')##
 #end
@@ -31,7 +31,7 @@ FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLim
 #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
 select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp
 #else
-select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getDataAmount()) as isThrottled
+select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getDataAmount()) as isThrottled, expiryTimeStamp
 #end
 INSERT ALL EVENTS into ResultStream;
 #end

@@ -140,14 +140,15 @@ function removeCustomAttribute(count){
 }
 
 function populateCustomerAttributes(attributesList){
-    
-    var attributes = attributesList;    
+    var attributeArray = attributesList.customAttributes;    
     var tBody = $('#custom-attribute-tbody');
         
-    if(attributes != null){
-        $.each(attributes, function( index, value ) {
+    if(attributeArray != null){
+        $.each(attributeArray, function( index, value ) {
             ++ attributeCount;
-            addCustomAttributeInitially(tBody, attributeCount,index, value);
+            name = value.name;
+            value = value.value;
+            addCustomAttributeInitially(tBody, attributeCount,name, value);
         });
     }
 }

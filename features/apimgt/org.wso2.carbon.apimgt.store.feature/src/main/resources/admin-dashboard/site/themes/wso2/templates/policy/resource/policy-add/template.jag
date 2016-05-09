@@ -47,7 +47,13 @@
 	        </div>
 	        
 	        <input type="hidden" id="action" name="action" value="<%=action%>">
-       
+       <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("errorMsgRequired")%>'/>
+                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("errorMessageInvalid")%>'/>
+                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+
        		<div class="form-group">
 	            <label class="control-label col-sm-3"><%=i18n.localize("tierName")%>: <span class="requiredAstrix">*</span>
 	            		<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" title="">
@@ -106,13 +112,13 @@
                 <label class="control-label col-sm-3"></label>
                 <div class="radio">
                     <label class="checkbox-inline">
-                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" <%if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "requestCount"){%> checked <%}%> onchange="showHideDefaultQuotaPolicy()"/>
                         Request Count
                     </label>
                 </div>
                 <div class="radio">
                     <label class="checkbox-inline">
-                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
+                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" <%if(defaultQuotaPolicy == "bandwidthVolume"){%> checked <%}%> onchange="showHideDefaultQuotaPolicy()"/>
                         Request Bandwidth
                     </label>
                 </div>
@@ -151,8 +157,8 @@
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
-                        <option value="KB" >KB</option>
-                        <option value="MB" selected="true" >MB</option>
+                        <option value="KB">KB</option>
+                        <option value="MB" selected="true">MB</option>
                         <option value="GB">GB</option>
                     </select>
                 </div>
@@ -186,14 +192,14 @@
 
     <div class="page-header">
         <h2><br/></h2>
-        <p class="lead"><%=i18n.localize("executionFlows")%></p>
+        <p class="lead"><%=i18n.localize("conditionalGroups")%></p>
     </div>
     <div id="throttle-policies-pipeline-content" class="form-group">
         <button class="btn btn-secondary" type="button" onclick="addPolicy()">
             <span class="icon fw-stack">
                 <i class="fw fw-add fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-                </span>&nbsp;<%=i18n.localize("addExecutionFlow")%>
+                </span>&nbsp;<%=i18n.localize("addConditionalGroup")%>
         </button>
     </div>
     <div id="pipeline-content" class="form-group"></div>
@@ -795,6 +801,24 @@
         </tr>
 </script>
 
+<script type="text/javascript">
+    function showHideDefaultQuotaPolicy(){
+        var quotaPolicy = $('input[name=select-quota-type]:checked').val();
+        if (quotaPolicy == "requestCount"){
+            $('#defaultBandwidthBasedDiv').hide();
+        } else{
+            $('#defaultBandwidthBasedDiv').show();
+        }
+
+        if (quotaPolicy == "bandwidthVolume"){
+            $('#defaultRequestCountBasedDiv').hide();
+        } else{
+            $('#defaultRequestCountBasedDiv').show();
+        }
+    }
+    showHideDefaultQuotaPolicy();
+</script>
+
 <% if(policyName != null && policyName != "") {%>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -818,22 +842,6 @@
         }
         showHideDefaultQuotaPolicy();
     });
-    
-    function showHideDefaultQuotaPolicy(){
-        var quotaPolicy = $('input[name=select-quota-type]:checked').val();
-        if (quotaPolicy == "requestCount"){
-            $('#defaultBandwidthBasedDiv').hide();
-        } else{
-            $('#defaultBandwidthBasedDiv').show();
-        }
-
-        if (quotaPolicy == "bandwidthVolume"){
-            $('#defaultRequestCountBasedDiv').hide();
-        } else{
-            $('#defaultRequestCountBasedDiv').show();
-        }
-
-    }
 </script>
 <%}%>
 <%});%>

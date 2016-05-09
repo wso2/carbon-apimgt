@@ -12,9 +12,12 @@
         <script>
             var context= "<%=jagg.getSiteContext()%>";
         </script>
-<div class="title-section"><h2><%=i18n.localize("privacy")%></h2></div>
 
-<h1><%=i18n.localize("changePassword")%></h1>
+<div class="page-header" id="Message">
+    <h1><%=i18n.localize("My Account","My Account")%></h1>
+</div>
+
+<h3><%=i18n.localize("changePassword")%></h3>
 <form class="form-horizontal">
 
 		<div class="form-group">

@@ -32,6 +32,7 @@ public class URITemplate implements Serializable{
     private LinkedHashSet<String> httpVerbs = new LinkedHashSet<String>();
     private List<String> authTypes = new ArrayList<String>();
     private List<String> throttlingConditions = new ArrayList<String>();
+    private String applicableLevel;
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
     private Scope scope;
@@ -261,5 +262,13 @@ public class URITemplate implements Serializable{
         }
         //todo this is a hack to make key validation service stub from braking need to rewrite.
         return JSONValue.toJSONString(verbs);
+    }
+
+    public String getApplicableLevel() {
+        return applicableLevel;
+    }
+
+    public void setApplicableLevel(String applicableLevel) {
+        this.applicableLevel = applicableLevel;
     }
 }

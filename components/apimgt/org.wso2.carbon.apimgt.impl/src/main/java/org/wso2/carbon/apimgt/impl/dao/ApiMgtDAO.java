@@ -851,22 +851,23 @@ public class ApiMgtDAO {
                     infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.
+                    int spikeArrest = 0;
                     String apiLevelThrottlingKey = "api_level_throttling_key";
-                    String spikeArrest = "0";
                     if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-                        spikeArrest = Integer.toString(rs.getInt("RATE_LIMIT_COUNT"));
+                        spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
                     }
-                    String spikeArrestUnit = "0";
+
+                    String spikeArrestUnit = null;
                     if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
                         spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
                     }
-                    String stopOnQuotaReach = String.valueOf(rs.getBoolean("STOP_ON_QUOTA_REACH"));
+                    boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
-                    list.add(spikeArrest);
-                    list.add(spikeArrestUnit);
-                    list.add(stopOnQuotaReach);
-                    list.add(subscriberTenant);
+                    infoDTO.setSpikeArrestLimit(spikeArrest);
+                    infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+                    infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+                    infoDTO.setSubscriberTenantDomain(subscriberTenant);
                     if (apiTier != null && apiTier.trim().length() > 0) {
                         infoDTO.setApiTier(apiTier);
                     }
@@ -5726,12 +5727,7 @@ public class ApiMgtDAO {
 			prepStmt.setString(2, version);
 
 			rs = prepStmt.executeQuery();
-
-			// THROTTLING_TIER == POLICY_NAME
-			// Map<String,URITemplate> mapByHttpVerbURLPattern = new
-			// HashMap<String,URITemplate>();
 			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
-
 			while (rs != null && rs.next()) {
 
 				String httpVerb = rs.getString("HTTP_METHOD");
@@ -5739,7 +5735,8 @@ public class ApiMgtDAO {
 				String urlPattern = rs.getString("URL_PATTERN");
 				String policyName = rs.getString("THROTTLING_TIER");
 				String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-				String policyConditionGroupId  ="condition_" + conditionGroupId;
+				String applicableLevel = rs.getString("APPLICABLE_LEVEL");
+				String policyConditionGroupId  = "_condition_" + conditionGroupId;
 
 				String key = httpVerb + ":" + urlPattern;
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -5754,13 +5751,13 @@ public class ApiMgtDAO {
 					uriTemplate.setAuthType(authType);
 					uriTemplate.setHTTPVerb(httpVerb);
 					uriTemplate.setUriTemplate(urlPattern);
-
+                    uriTemplate.setApplicableLevel(applicableLevel);
 					InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
 					if (mediationScriptBlob != null) {
 						script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
 					}
-					uriTemplate.setMediationScript(script);
 
+					uriTemplate.setMediationScript(script);
 					Set<String> conditionGroupIdSet = new HashSet<String>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
@@ -5783,7 +5780,7 @@ public class ApiMgtDAO {
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("");
+					uriTemplate.getThrottlingConditions().add("_default");
 				}
 
 			}
@@ -8322,7 +8319,7 @@ public class ApiMgtDAO {
             policyStatement.setBoolean(13, policy.isStopOnQuotaReach());
             policyStatement.setString(14, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBlob(15, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBytes(15, policy.getCustomAttributes());
             }
             policyStatement.executeUpdate();
 
@@ -8860,11 +8857,12 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-               /* Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+
                 if(blob != null){
                     byte[] customAttrib = blob.getBytes(1,(int)blob.length());
                     subPolicy.setCustomAttributes(customAttrib);
-                }*/
+                }
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if(binary != null){
                 	byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -8926,6 +8924,50 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return policies.toArray(new GlobalPolicy[policies.size()]);
+    }
+
+
+    /**
+     * Get a particular Global level policy.
+     *
+     * @param policyId
+     * @return
+     * @throws APIManagementException
+     */
+    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_GLOBAL_POLICY;
+
+        GlobalPolicy globalPolicy = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyName);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String siddhiQuery = null;
+                globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
+                globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+
+                InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicy.setSiddhiQuery(siddhiQuery);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return globalPolicy;
     }
 
     /**
@@ -9827,7 +9869,7 @@ public class ApiMgtDAO {
     }
 
     public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
-                                                                                                        APIManagementException {
+            APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
@@ -9843,7 +9885,7 @@ public class ApiMgtDAO {
                     valid = true;
                 } else {
                     throw new APIManagementException("Couldn't Save Block Condition Due to Invalid API Context " +
-                                                     conditionValue);
+                            conditionValue);
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -9851,14 +9893,13 @@ public class ApiMgtDAO {
                     String appOwner = appArray[0];
                     String appName = appArray[1];
 
-                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) && isValidApplication
-                            (appOwner,
-                             appName)) {
+                    if ((MultitenantUtils.getTenantDomain(appOwner).equals(tenantDomain)) &&
+                                                                                isValidApplication(appOwner, appName)) {
                         valid = true;
                     } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                                         "name " + appName + "from Application " +
-                                                         "Owner " + appOwner);
+                                "name " + appName + "from Application " +
+                                "Owner " + appOwner);
                     }
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
@@ -9873,14 +9914,18 @@ public class ApiMgtDAO {
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
-                insertPreparedStatement = connection.prepareStatement(query);
-                insertPreparedStatement.setString(1, conditionType);
-                insertPreparedStatement.setString(2, conditionValue);
-                insertPreparedStatement.setString(4, tenantDomain);
-                insertPreparedStatement.setString(3, "TRUE");
-                status = insertPreparedStatement.execute();
-                connection.commit();
-                status = true;
+                if(!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                    insertPreparedStatement = connection.prepareStatement(query);
+                    insertPreparedStatement.setString(1, conditionType);
+                    insertPreparedStatement.setString(2, conditionValue);
+                    insertPreparedStatement.setString(4, tenantDomain);
+                    insertPreparedStatement.setString(3, "TRUE");
+                    status = insertPreparedStatement.execute();
+                    connection.commit();
+                    status = true;
+                } else {
+                    throw new APIManagementException("Condition is already exist");
+                }
             }
         } catch (SQLException e) {
             if (connection != null) {
@@ -10108,5 +10153,31 @@ public class ApiMgtDAO {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }
          return apiLevelTier;
+    }
+
+    private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
+            connection) throws APIManagementException {
+        PreparedStatement checkIsExistPreparedStatement = null;
+        ResultSet checkIsResultSet = null;
+        boolean status = false;
+        try {
+            String isExistQuery = SQLConstants.ThrottleSQLConstants.BLOCK_CONDITION_EXIST_SQL;
+            checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
+            checkIsExistPreparedStatement.setString(1, tenantDomain);
+            checkIsExistPreparedStatement.setString(2, conditionType);
+            checkIsExistPreparedStatement.setString(3, conditionValue);
+            checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
+            connection.commit();
+            if (checkIsResultSet.next()) {
+                status = true;
+            }
+        } catch (SQLException e) {
+            String msg = "Couldn't check the Block Condition Exist";
+            log.error(msg, e);
+            handleException(msg, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
+        }
+        return status;
     }
 }

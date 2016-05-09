@@ -101,7 +101,7 @@ function pushDataForTabs(clickedTab){
                                   $('#versionTable').hide();
                                   $('#versionChart').css("fontSize", 14);
                                   $('#apiUsageByVersionNoData').html('');
-                                  $('#apiUsageByVersionNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
+                                  $('#apiUsageByVersionNoData').append($('<div class="message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div>'));
                               }
                           } else {
                               if (json.message == "AuthenticateError") {
@@ -138,7 +138,7 @@ function pushDataForTabs(clickedTab){
                                   $('#versionUserTable').hide();
                                   $('#versionUserChart').css("fontSize", 14);
                                   $('#apiSubscriptionsByVersionsNoData').html('');
-                                  $('#apiSubscriptionsByVersionsNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
+                                  $('#apiSubscriptionsByVersionsNoData').append($('<div class="message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div>'));
 
                               }
 
@@ -184,7 +184,7 @@ function pushDataForTabs(clickedTab){
                                   $('#userChart').hide();
                                   $('#userChart').css("fontSize", 14);
                                   $('#usageByCurrentSubscribersAcrossAllNoData').html('');
-                                  $('#usageByCurrentSubscribersAcrossAllNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
+                                  $('#usageByCurrentSubscribersAcrossAllNoData').append($('<div class="message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div>'));
                               }
 
                           } else {
@@ -220,7 +220,7 @@ function pushDataForTabs(clickedTab){
                                   $('#userVersionTable').hide();
                                   $('#userVersionChart').css("fontSize", 14);
                                   $('#usageByCurrentSubscribersNoData').html('');
-                                  $('#usageByCurrentSubscribersNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
+                                  $('#usageByCurrentSubscribersNoData').append($('<div class="message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div>'));
                               }
 
                           } else {
