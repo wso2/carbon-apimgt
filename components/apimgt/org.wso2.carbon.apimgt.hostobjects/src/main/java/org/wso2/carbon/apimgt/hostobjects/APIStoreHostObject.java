@@ -522,9 +522,10 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws ScriptException
      * @throws APIManagementException
      * @throws ParseException
+     * @return NativeObject of key details will return.
      */
-    public static void jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj,
-                                                      Object[] args, Function funObj)
+    public static NativeObject jsFunction_mapExistingOauthClient(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj)
             throws ScriptException, APIManagementException, ParseException {
         if (args != null && args.length != 0) {
 
@@ -540,9 +541,14 @@ public class APIStoreHostObject extends ScriptableObject {
                 //APIM application name.
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
-                String keyType = (String) apiData.get("keytype", apiData);
-
-                getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                String keyType = (String) apiData.get("keytype", apiData);s
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
+                NativeObject row = new NativeObject();
+                Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
+                for (Map.Entry<String, Object> entry : entries) {
+                    row.put(entry.getKey(), row, entry.getValue());
+                }
+                return row;
 
             } catch (Exception e) {
                 handleException("Error while obtaining the application access token for the application" + e
@@ -552,6 +558,7 @@ public class APIStoreHostObject extends ScriptableObject {
             handleException("Invalid input parameters.");
         }
 
+        return null;
     }
 
 
