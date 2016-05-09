@@ -541,7 +541,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 //APIM application name.
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
-                String keyType = (String) apiData.get("keytype", apiData);s
+                String keyType = (String) apiData.get("keytype", apiData);
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName, keyType);
                 NativeObject row = new NativeObject();
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
