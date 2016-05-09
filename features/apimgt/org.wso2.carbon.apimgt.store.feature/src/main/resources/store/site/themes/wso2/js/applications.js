@@ -18,6 +18,48 @@
     };
 }( jQuery ));
 
+;(function ( $, window, document, undefined ) {
+
+    var pluginName = "codeHighlight";
+
+    // The actual plugin constructor
+    function Plugin( element, options ) {
+        this.element = $(element);
+        this._name = pluginName;
+        this.init();
+    }
+
+    Plugin.prototype = {
+
+        init: function() {
+            this.editor = CodeMirror.fromTextArea(this.element[0], {
+              mode:  "shell",
+              readOnly: true,
+              lineWrapping: true
+            });
+        },
+
+        refresh: function(){
+            console.log(this.editor);
+            this.editor.refresh();
+        }
+
+
+    };
+
+    // A really lightweight plugin wrapper around the constructor,
+    // preventing against multiple instantiations
+    $.fn[pluginName] = function ( options ) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                new Plugin( this, options ));
+            }
+        });
+    };
+
+})( jQuery, window, document );
+
 
 ;(function ( $, window, document, undefined ) {
 
@@ -60,7 +102,7 @@
             this.element.on( "click", ".generatekeys", $.proxy(this.generateKeys, this));
             this.element.on( "click", ".provide_keys", $.proxy(this.provideKeys, this));
             this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
-            this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
+            this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));            
         },
 
         yourOtherFunction: function(el, options) {
@@ -168,7 +210,8 @@
             this.app.provide_keys = this.options.provide_keys;
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
-            this.element.find(".selectpicker").selectpicker();
+            this.element.find(".selectpicker").selectpicker(); 
+            this.element.find(".curl_command").codeHighlight();           
         }
     };
 
@@ -189,7 +232,6 @@
 
 
 $(document).ready(function() {
-
 
 $("#subscription-actions").each(function(){
     var source   = $("#subscription-actions").html();
@@ -344,6 +386,10 @@ $("#application-actions").each(function(){
         
         
     });    
+});
+
+$(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+    $(".curl_command").each(function(){ $(this).data("plugin_codeHighlight").editor.refresh()});
 });
 
 });
