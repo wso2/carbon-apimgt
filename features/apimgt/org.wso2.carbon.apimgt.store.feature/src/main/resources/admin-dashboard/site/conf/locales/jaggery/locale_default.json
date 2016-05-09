@@ -86,6 +86,8 @@
     "blockNew":"Add Block Entity",
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
+    "conditionActions":"Actions",
+    "conditionStatus":"Condition Status",
     "conditionValueHead":"Condition Value",
     "conditionManagementTitle":"Blocking Entities",
     "save":"Save",
