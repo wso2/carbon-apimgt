@@ -142,6 +142,7 @@
                 if (!result.error) {
                     this.app.ConsumerKey = client_id;
                     this.app.ConsumerSecret = client_secret;
+                    this.app.Key = result.data.key.accessToken;
                     this.render();
                 } else {
                     jagg.message({content: result.message, type: "error"});
