@@ -23,7 +23,7 @@
                         <div class="brand-container add-margin-bottom-5x">
                             <div class="row">
                                 <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
-                                    <img class="img-responsive brand-spacer" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                    <img class="img-responsive brand-spacer" alt="store_logo" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
                                 </div>
                             </div>
                             <h2 class="text-center-sm text-center-xs text-center-md text-right">API Store</h2>
@@ -37,7 +37,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("username")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newUsername" name="newUsername" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
+                                            <input id="newUsername" name="newUsername" title="newUsername" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
                                         </div>
 
             							<input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
@@ -55,7 +55,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPassword" name="newPassword" type="password" class="form-control password validPassword" placeholder="Password">
+                                            <input id="newPassword" name="newPassword" title="newPassword" type="password" class="form-control password validPassword" placeholder="Password">
                                         </div>
                                         <div class="help-block" id="password-help" style="display:none">
 							              <%=i18n.localize("pwHelpMsgLine1")%>
@@ -72,7 +72,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("retypePassword")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPasswordConfirm" type="password" class="form-control matchPasswords" placeholder="Password">
+                                            <input id="newPasswordConfirm" title="newPasswordConfirmation" type="password" class="form-control matchPasswords" placeholder="Password">
                                         </div>
                                     </div>
                                 </div>
@@ -98,7 +98,7 @@
                                         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                             <label class="control-label"><%=i18n.localize(field.name, field.name)%> </label>
                                             <div class="input-group input-wrap">
-                                                <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control">
+                                                <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" title="<%=i%>cliamUri" class="<%=inputClass%> form-control">
                                             </div>
                                         </div>
                                     </div>
@@ -133,7 +133,7 @@
 		                                        <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
 		                                            <label class="control-label"><%=i18n.localize(field.name, field.name)%> </label>
 		                                            <div class="input-group input-wrap">
-		                                                <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control">
+		                                                <input type="text" id="<%=i%>cliamUri" title="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control">
 		                                            </div>
 		                                        </div>
 		                                    </div>

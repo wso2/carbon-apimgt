@@ -38,7 +38,7 @@ var reqUrl = request.getRequestURI();
 	     <%} %>
           <div class="form-group">
             <div class="input-group">
-              <input type="text" class="form-control clearable search-input" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">
+              <input type="text" class="form-control clearable search-input" title="<%=i18n.localize('forum.searchForum')%>" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">
               <span class="input-group-btn">
                 <button class="btn btn-default search-button" id="forum_topic_search" ><i class="fa fa-search"></i> Search</button>
               </span>
