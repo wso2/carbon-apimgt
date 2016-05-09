@@ -120,43 +120,67 @@ var reqUrl = request.getRequestURI();
                             }
                         %>
                <%if(query != null && (query.indexOf(encode.forUriComponent("Doc:")) == 0 || query.indexOf(encode.forUriComponent("doc:")) == 0)) {%>
-                <div id="doc-search" style="padding-top:30px">       
-	                <li style="height:150px">
-	                	
-	                	<div class="doc-search-result left-menu-back01">
-		                	<h5><%= encode.forHtml(api.docName)%></h5>
-		                                       
-		                    <% if(api.docSummary && api.docSummary != ""){ %>
-		                    	<h6><%=i18n.localize("docSum")%>:</h6><p><%=  encode.forHtml(api.docSummary)%></p>
-		                    <% } %>
-		                    <%if(api.docSourceURL&& api.docSourceURL!="") { %>
-		                    	<p><a href="<%=api.docSourceURL%>" target="_blank" class="doc-search-result-text" title="<%=i18n.localize("docInline")%>"><%=i18n.localize("viewDoc")%></a></p>
-		                    <%}else if(api.docFilePath && api.docFilePath!=""){%>
-		                    	<p><a href="<%=api.docFilePath%>" target="_blank" class="doc-search-result-text" title="<%=i18n.localize("docFile")%>"><%=i18n.localize("download")%></a></p>
-		                    <%} else{%>
-			                    <div>
-				                     <%if(reqUrl.indexOf(".jag")>=0){%>
-				                     	<a href="doc-viewer.jag?docName=<%= encode.forUriComponent(api.docName)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%>&<%=urlPrefix%>"  target="_blank" class="doc-search-result-text" title="<%=i18n.localize("docContent")%>"><%=i18n.localize("viewDoc")%></a>
-				                     <%}else{%>
-				                     	<a href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(api.docName) %>&name=<%= encode.forUriComponent(name)%>&version=<%= encode.forUriComponent(version) %>&provider=<%=encode.forUriComponent(provider)%>&<%=urlPrefix%>"  title="<%=i18n.localize("docContent")%>" target="_blank" class="doc-search-result-text"><%=i18n.localize("viewDoc")%></a>
-				                     <%}%>
-			                    </div>
-		                     <%}%>
-	                    </div>
-	                    <div class="doc-search-api-result">
-	                        <a href="<%=path%>">
-	                            <img src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>" width="100" height="100"/>
-	                        </a>
-	                        <div><a href="<%=path%>" class="link-to-api" title="<%=i18n.localize("apiName")%>"><%if(api.name.length>12){%><%=api.name.slice(0,10)%>..<%}else{%><%=api.name%><% } %> (<%=api.version%>)</a></div>
-	                        <%if(api.isAdvertiseOnly) {%>
-	                        	<div><a href="<%=path%>" class="link-to-provider" title="<%=i18n.localize("apiOwner")%>"><%=api.apiOwner%></a></div>
-	                        <%}else {%>
-	                        	<div><a href="<%=path%>" class="link-to-provider" title="<%=i18n.localize("apiProvider")%>"><%=api.provider%></a></div>
-	                        <%}%>
-	                    </div>
-	                    
-	                </li>
-                </div>
+               		<%var docViewMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag"); %>
+               		<div class="col-sm-12">
+               			<div class="col-sm-5">
+               				<div class="add-padding-2x app-data ">
+               					 <h4><%=encode.forHtml(api.docName)%></h4>
+                                    <% if(api.docSummary && api.docSummary != ""){ %>
+                                    	<h5><%=i18n.localize("docSum")%>: <%=  encode.forHtml(api.docSummary)%></h5>
+                                    <%} %>
+                                    <%if (api.docSourceURL&& api.docSourceURL!="") { %>
+                                    	<p><a href="<%=api.docSourceURL%>" title="i18n.localize("viewDoc")%>" target="_blank"><%=i18n.localize("viewDoc")%></a></p>
+                                    <%} else if(api.docFilePath && api.docFilePath!="") { %>
+                                    	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("download")%>"><%=i18n.localize("download")%></a></p>
+                                    <% } else { %>
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + "&provider=" + encode.forUriComponent(api.provider) + urlPrefix; %>
+                                    	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("viewDoc")%>"><%=i18n.localize("viewDoc")%></a></p>
+                                    <% } %>
+               					
+               				</div>
+               			</div>
+               			<div class="col-sm-4">
+               						<div class="col-sm-6">
+               							 <div class="white-wrapper add-margin-bottom-4x">
+               							 		 <div class="thumbnail icon">
+				                                	<% if(thumbURL == null) { %>
+				                                		<div class="square-element setbgcolor">
+															<div class="api-name-icon"></div>
+															<div style="display: none">
+																<a href="" class="api-name" title="<%=i18n.localize("apiName")%>"><%=api.name%></a>
+															</div>
+														</div> 
+				                                    <% } else { %>
+				                                    	<div class="square-element">
+				                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
+				                                    	</div>
+				                                    <% } %>
+				                                     <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
+					                                    <div class="after">                                       
+					                                    <span class="fw-stack fw-lg">
+					                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+					                                    <i class="fw fw-view fw-stack-1x"></i>
+					                                    </span>          
+					                                    </div>
+					                                   </a>
+				                                </div>
+				                                <div class="add-padding-2x app-data ">
+				                                    <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+				                                    <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
+				                                    <%if(api.isAdvertiseOnly) {%>
+				                                    	<p><%=api.apiOwner%></p>
+				                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
+				                                    	<p><%=api.apiBusinessOwner%></p>
+				                                    <%} else { %>
+				                                    	<p><%=api.provider%></p>
+				                                    <% } %>
+				                                    <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+				                                </div>
+               							 </div>
+               						</div>
+               					</div>
+               		</div>
+
                 <%} else {%>
                 
                 	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
