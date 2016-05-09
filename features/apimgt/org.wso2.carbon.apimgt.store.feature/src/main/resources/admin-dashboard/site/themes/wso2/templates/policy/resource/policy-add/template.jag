@@ -106,13 +106,13 @@
                 <label class="control-label col-sm-3"></label>
                 <div class="radio">
                     <label class="checkbox-inline">
-                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
+                        <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" <%if(defaultQuotaPolicy == "" || defaultQuotaPolicy == "requestCount"){%> checked <%}%> onchange="showHideDefaultQuotaPolicy()"/>
                         Request Count
                     </label>
                 </div>
                 <div class="radio">
                     <label class="checkbox-inline">
-                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
+                        <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" <%if(defaultQuotaPolicy == "bandwidthVolume"){%> checked <%}%> onchange="showHideDefaultQuotaPolicy()"/>
                         Request Bandwidth
                     </label>
                 </div>
@@ -795,6 +795,24 @@
         </tr>
 </script>
 
+<script type="text/javascript">
+    function showHideDefaultQuotaPolicy(){
+        var quotaPolicy = $('input[name=select-quota-type]:checked').val();
+        if (quotaPolicy == "requestCount"){
+            $('#defaultBandwidthBasedDiv').hide();
+        } else{
+            $('#defaultBandwidthBasedDiv').show();
+        }
+
+        if (quotaPolicy == "bandwidthVolume"){
+            $('#defaultRequestCountBasedDiv').hide();
+        } else{
+            $('#defaultRequestCountBasedDiv').show();
+        }
+    }
+    showHideDefaultQuotaPolicy();
+</script>
+
 <% if(policyName != null && policyName != "") {%>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -818,22 +836,6 @@
         }
         showHideDefaultQuotaPolicy();
     });
-    
-    function showHideDefaultQuotaPolicy(){
-        var quotaPolicy = $('input[name=select-quota-type]:checked').val();
-        if (quotaPolicy == "requestCount"){
-            $('#defaultBandwidthBasedDiv').hide();
-        } else{
-            $('#defaultBandwidthBasedDiv').show();
-        }
-
-        if (quotaPolicy == "bandwidthVolume"){
-            $('#defaultRequestCountBasedDiv').hide();
-        } else{
-            $('#defaultRequestCountBasedDiv').show();
-        }
-
-    }
 </script>
 <%}%>
 <%});%>
