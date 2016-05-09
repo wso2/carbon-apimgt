@@ -25,14 +25,14 @@
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <div class="input-group input-wrap">
-                                            <input type="text" id="username" name="name" class="form-control" placeholder="<%=i18n.localize("username")%>">
+                                            <input type="text" id="username" name="name" title="<%=i18n.localize("username")%>" class="form-control" placeholder="<%=i18n.localize("username")%>">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <div class="input-group input-wrap">
-                                            <input type="password" id="password" name="pass" class="form-control" placeholder="<%=i18n.localize("password")%>">
+                                            <input type="password" id="password" name="pass" title="<%=i18n.localize("password")%>" class="form-control" placeholder="<%=i18n.localize("password")%>">
                                         </div>
                                     </div>
                                 </div>
