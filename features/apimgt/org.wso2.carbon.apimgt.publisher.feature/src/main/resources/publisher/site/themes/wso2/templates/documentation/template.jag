@@ -165,7 +165,7 @@
 		    <div class="col-sm-12">
 		        <div class="form-group">
 		            <button type="button" class="btn btn-primary" id="saveDocBtn" onclick='saveDoc()'><%=i18n.localize("addDoc")%></button>
-		            <button type="button" class="btn btn-default" onclick='clearDocs()'><%=i18n.localize("cancel")%></button>
+		            <button type="button" class="btn btn-secondary" onclick='clearDocs()'><%=i18n.localize("cancel")%></button>
 		        </div>
 		    </div>
 
