@@ -105,7 +105,7 @@ function updateStatus(status){
 var apiName=$("#name").val();
 var version=$("#apiVersion").val();
 var provider=$("#provider").val();
-
+$(".modal-footer").html("");
 if(status=='Deprecate'){
 jagg.message({
         content:"Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API - " + apiName + " - " + version+"?",
@@ -135,6 +135,7 @@ jagg.message({
     },
     cancelCallback:function(){
     $('#messageModal').modal('hide');
+         $(".modal-footer").html("");
     }
     });
 }else{
