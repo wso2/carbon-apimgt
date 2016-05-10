@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class JWTGenerator extends AbstractJWTGenerator {
 
@@ -35,8 +36,8 @@ public class JWTGenerator extends AbstractJWTGenerator {
             throws APIManagementException {
 
         //generating expiring timestamp
-        long currentTime = Calendar.getInstance().getTimeInMillis();
-        long expireIn = currentTime + 1000 * 60 * getTTL();
+        long currentTime = Calendar.getInstance().getTimeInMillis() / 1000 ;
+        long expireIn = currentTime + 60 * getTTL();
 
         //String jwtBody = "";
         String dialect;
