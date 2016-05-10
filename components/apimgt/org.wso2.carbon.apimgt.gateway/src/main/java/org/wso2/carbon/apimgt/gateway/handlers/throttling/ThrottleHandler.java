@@ -206,7 +206,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 apiLevelTier = authContext.getApiTier();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply
                 // for it
-                if (apiLevelTier != null && apiLevelTier.length() > 0 && apiLevelThrottleKey.length() > 0) {
+                if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
                 }
@@ -217,7 +217,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     return false;
                 } else {
                     //If verbInfo is present then only we will do resource level throttling
-                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
+                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling()) && !apiLevelThrottledTriggered) {
                         //If unlimited tier throttling will not apply at resource level and pass it
                         if (log.isDebugEnabled()) {
                             log.debug("Resource level throttling set as unlimited and request will pass " +

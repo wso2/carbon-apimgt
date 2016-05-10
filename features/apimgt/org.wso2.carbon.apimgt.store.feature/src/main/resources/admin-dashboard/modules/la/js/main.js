@@ -15,43 +15,97 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var gatewayPort = location.port -9443 + 8243; //Calculate the port offset based gateway port.
-var serverUrl = "https://"+location.hostname +":"+ gatewayPort+"/LogAnalyzerRestApi/1.0";
+var serverUrl = "https://"+location.hostname +":"+ location.port +"/admin-dashboard/modules/la/log-analyzer-proxy.jag";
 var client = new AnalyticsClient().init(null, null, serverUrl);
-var dataM = [];
-var filterdMessage;
-var template1 = "<ul class='template3' style='list-style-type:none' >{{#arr}}<li class='class'>{{class}}</li>{{/arr}}</ul>";
+var logLineArray = [];
+var template = "<ul class='template3' style='list-style-type:none' >{{#arr}}<li class='log'>{{log}}</li>{{/arr}}</ul>";
+var initialRecordCount = -1;
+var currentRecordCount;
 
 $(document).ready(function () {
-    fetch();
-    var interval = setInterval(fetch, 5000);
+     if(analyticsEnabled){
+        fetchInitialRecordCount();
+     }
 });
 
-function fetch() {
-    dataM.length = 0;
+/**
+ * This method fetches the initial record count in the LOGANALYZER table and if it is successful,
+ * sets the data fetching operation
+ *
+ */
+function fetchInitialRecordCount(){
+        var countQueryInfo = {
+                tableName: "LOGANALYZER",
+                searchParams: {
+                    query: "logstream:\"" + tenantId + "\"",
+                }
+            };
+        client.searchCount(countQueryInfo, function(count) {
+              if (count["status"] === "success"){
+                initialRecordCount = count["message"];
+                if(initialRecordCount >= 0){
+                    setInterval(fetchCurrentRecordCount, 5000);
+                }
+              }
+              return initialRecordCount;
+        }, function(error) {
+              console.log("error occured: " + error);
+        });
+}
+
+/**
+ * This method fetches the current record count in the LOGANALYZER table and if there are any
+ * new records, fetches the excess data.
+ *
+ */
+function fetchCurrentRecordCount() {
+
+    var countQueryInfo = {
+            tableName: "LOGANALYZER",
+            searchParams: {
+                query: "logstream:\"" + tenantId + "\"",
+            }
+        };
+    client.searchCount(countQueryInfo, function(count) {
+          currentRecordCount = count["message"];
+          var logCountDifference = currentRecordCount - initialRecordCount;
+          if(logCountDifference > 0){
+            fetchRecords(logCountDifference);
+          }
+    }, function(error) {
+          console.log("error occured: " + error);
+    });
+}
+
+/**
+ * This method fetches the newly added data to the table
+ *
+ */
+function fetchRecords(logCountDifference){
+    initialRecordCount = currentRecordCount;
+    logLineArray.length = 0;
     var queryInfo;
     queryInfo = {
         tableName: "LOGANALYZER",
         searchParams: {
             query: "logstream:\"" + tenantId + "\"",
-            start: 0, //starting index of the matching record set
-            count: 100, //page size for pagination
+            start: 0,
+            count: logCountDifference,
             sortBy : [
                     {
                         field : "_timestamp",
-                        sortType : "DESC", // This can be ASC, DESC
-                        reversed : "true" //optional
+                        sortType : "DESC",
+                        reversed : "true"
                     }
                 ]
         }
     };
-    console.log(queryInfo);
-    client.search(queryInfo, function (d) {
-        var obj = JSON.parse(d["message"]);
-        if (d["status"] === "success") {
 
-            for (var i = 0; i < obj.length; i++) {
-           var tempDay = new Date(parseInt(obj[i].values._eventTimeStamp)).toUTCString();
+    client.search(queryInfo, function (data) {
+    var obj = JSON.parse(data["message"]);
+    if (data["status"] === "success") {
+        for (var i = 0; i < obj.length; i++) {
+            var tempDay = new Date(parseInt(obj[i].values._eventTimeStamp)).toUTCString();
             var logLine;
             if(obj[i].values._trace == null){
                 logLine = tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content;
@@ -59,22 +113,24 @@ function fetch() {
                 logLine = tempDay +  "  " + obj[i].values._class + "-" + obj[i].values._content + "-" + obj[i].values._trace;
             }
 
-            dataM.push([{
-                    class: logLine
-                }]);
+            logLineArray.push([{
+                log: logLine
+            }]);
             }
             writeToLogViewer();
             window.scrollTo(0,document.body.scrollHeight);
         }
     }, function (error) {
-        console.log("error occured: " + error);
+        console.log("error occurred: " + error);
     });
 }
 
+/**
+ * This method writes the data to the log viewer
+ *
+ */
 function writeToLogViewer() {
-    $("#logViewer").empty();
-    for (var i=0;i<dataM.length;i++)
-    {
-            $('#logViewer').append(Mustache.to_html(template1, {arr:dataM[i]}));
+    for (var i=0;i<logLineArray.length;i++){
+       $('#logViewer').append(Mustache.to_html(template, {arr:logLineArray[i]}));
     }
 }
