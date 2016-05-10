@@ -110,8 +110,8 @@
 								<importFeatureDef>org.wso2.carbon.um.ws.service.client:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.user.mgt:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.xfer:${carbon.kernel.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.oauth.common:${carbon.identity.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity-inbound-auth-oauth.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.oauth.common:${carbon.identity-inbound-auth-oauth.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.application.authentication.framework.server:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.provider.server:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.mediator.bam:${carbon.mediation.version}</importFeatureDef>
