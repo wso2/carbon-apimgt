@@ -9,6 +9,11 @@ var mod = jagg.module("manager");
 var isSelfSignupEnabled = mod.isSelfSignupEnabledForTenantUser(request_tenant);
 var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
 
+var currentURL = request.getRequestURI();
+if(request.getQueryString()){
+    currentURL += "?" + request.getQueryString();
+}
+
 var isSuperTenant, tenantDomain;
 var tenant = request_tenant;
 if (jagg.getUser() != null) {
@@ -58,6 +63,53 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 			                </a>
 			            </li>
 				<%}%>
+				
+				<%if (site.showThemesMenu) { %>
+						<!-- Themes Menu -->
+						<li class="visible-inline-block">       		
+					         <a href="#" class="dropdown" data-toggle="dropdown">
+					            <span class="icon fw-stack fw-lg">
+					               <i class="fw fw-circle-outline fw-stack-2x"></i>
+					               <i class="fw fw-pages fw-stack-1x"></i>
+					            </span>
+					            <span class="hidden-xs"> &nbsp; Themes<span class="caret"></span></span>
+					         </a>
+					         <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
+					           <li>
+					           <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
+                        <input type="hidden" id="themeToApply" name="themeToApply" />
+                        <input type="hidden" id="subthemeToApply" name="subthemeToApply" />
+                        <input type="hidden" id="pathToSend" name="pathToSend" value="<%= encode.forHtmlAttribute(currentURL)%>" />
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <div class="thumbnail <% if(jagg.getUserTheme().base == "wso2" && jagg.getUserTheme().subtheme == null) { %>currentTheme<% } %>">
+                                        <a data-theme="wso2" data-subtheme="" class="badge themeLabel" onclick="applyTheme(this)">
+                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-wso2.png"))%>" />
+                                            <br /><div class="themeName"><%=i18n.localize("wso2")%></div>
+                                        </a>
+                                    </div>
+
+                                </td>                                
+                              </tr>
+                              <tr>
+                                <td>
+                                    <div class="thumbnail <% if(jagg.getUserTheme().base == "dark" && jagg.getUserTheme().subtheme == null) { %>currentTheme<% } %>">
+                                        <a data-theme="wso2" data-subtheme="dark" class="badge themeLabel" onclick="applyTheme(this)">
+                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-dark.png"))%>" />
+                                            <br /><div class="themeName"><%=i18n.localize("dark")%></div>
+                                        </a>
+                                    </div>
+                                </td>                            
+                            </tr>
+                        </table>
+                    </form>
+					           
+					           </li>
+					         </ul>
+				      </li>
+						<!-- End Themes Menu -->
+						<%} %>
 				       <li class="visible-inline-block">       		
 					         <a href="#" class="dropdown" data-toggle="dropdown">
 					            <span class="icon fw-stack fw-lg">

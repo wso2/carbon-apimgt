@@ -901,11 +901,17 @@ public class ApiMgtDAO {
 		String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
 
 		try {
-			String dbType = conn.getMetaData().getDatabaseProductName();
-			if("oracle".equalsIgnoreCase(dbType) || conn.getMetaData().getDriverName().contains("Oracle")){
+			String dbProdName = conn.getMetaData().getDatabaseProductName();
+			if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-			}
+			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
+				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
+				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
+				sqlQuery = sqlQuery + " x";
+            }
+				
+			
 			
 			ps = conn.prepareStatement(sqlQuery);
 			ps.setString(1, apiPolicy);

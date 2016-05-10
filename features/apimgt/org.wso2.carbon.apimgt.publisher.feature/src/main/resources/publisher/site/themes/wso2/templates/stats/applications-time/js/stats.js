@@ -59,8 +59,13 @@ $(document).ready(function(){
     });
 
     $("#apiFilter").change(function (e) {
+    	$('#apiSelect').empty();
+    	$('#apiSelect').append('<option>'+ "All"+'</option>');
+    	$('#developerSelect').empty();
+    	$('#developerSelect').append('<option>'+ "All"+'</option>');
         apiFilter = this.value;
         apiFilterList();
+        developerFilter();
         $("body").trigger("update_chart");
     });
 
@@ -100,7 +105,10 @@ $(document).ready(function(){
     });
 
     function developerFilter(){
-        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag", { },
+        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag",
+            {
+                "apiFilter" : apiFilter
+            },
             function (json) {
             if (!json.error) {
             var developerName = '';
