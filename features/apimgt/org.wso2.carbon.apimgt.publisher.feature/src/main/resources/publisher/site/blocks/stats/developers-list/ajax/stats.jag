@@ -10,7 +10,7 @@ var log = new Log();
     var api = request.getParameter("api");
     var fromDate = request.getParameter("fromDate");
     var toDate = request.getParameter("toDate");
-
+    var apiFilter = request.getParameter("apiFilter");
 
     if (jagg.getUser() == null) {
         print({
@@ -21,7 +21,7 @@ var log = new Log();
     else{
         mod = jagg.module("statistics");
         var provider = jagg.getUser().username;
-        result = mod.getDeveloperList(provider, 50);
+        result = mod.getDeveloperList(provider, apiFilter, 50);
 
         if (result.error == "true") {
             obj = {
