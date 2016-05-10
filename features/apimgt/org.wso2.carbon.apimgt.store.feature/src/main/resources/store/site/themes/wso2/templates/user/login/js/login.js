@@ -146,6 +146,13 @@ $(document).ready(function () {
 
 });
 
+//Theme Selection Logic
+function applyTheme(elm){
+    $('#themeToApply').val($(elm).attr("data-theme"));
+    $('#subthemeToApply').val($(elm).attr("data-subtheme"));
+    $('#themeSelectForm').submit();
+}
+
 function getAPIPublisherURL(){
     jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"getAPIPublisherURL"},
         function (result) {

@@ -99,9 +99,16 @@ public class Utils {
                                                                        "application/json/badgerfish",
                                                                        "text/javascript"));
 
-        //If an Accept header has been provided and is supported by the Gateway
+        // If an Accept header has been provided and is supported by the Gateway
         if(!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)){
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
+        } else {
+            // If there isn't Accept Header in the request, will use error_message_type property
+            // from _auth_failure_handler_.xml file
+            if (messageContext.getProperty("error_message_type") != null) {
+                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                                    messageContext.getProperty("error_message_type"));
+            }
         }
     }
     

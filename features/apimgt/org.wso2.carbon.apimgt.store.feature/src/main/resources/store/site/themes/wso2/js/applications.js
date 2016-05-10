@@ -83,6 +83,7 @@
 
         this.app = options.app;
         this.type = options.type;
+        this.app.show_keys = ( $.cookie('OAuth_key_visibility') === 'true');
 
         this.options = $.extend( {}, defaults, options) ;
 
@@ -102,11 +103,15 @@
             this.element.on( "click", ".generatekeys", $.proxy(this.generateKeys, this));
             this.element.on( "click", ".provide_keys", $.proxy(this.provideKeys, this));
             this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
-            this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));            
+            this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
+            this.element.on( "click", ".show_keys", $.proxy(this.toggleKeyVisibility, this));
         },
 
-        yourOtherFunction: function(el, options) {
-            // some logic
+        toggleKeyVisibility: function(el, options) {
+            this.app.show_keys = !this.app.show_keys;
+            $.cookie('OAuth_key_visibility', this.app.show_keys );
+            this.render();
+            return false;            
         },
 
         provideKeys: function(){

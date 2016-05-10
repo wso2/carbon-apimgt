@@ -22,7 +22,7 @@ var getRedirectPathForNonAuthenticatedUser = function () {
     // if reverse proxy enabled from site json, below code block will remove URI context from the absolute
     if(reverseProxyEnable){
         var requestedPageAbsoluteUrl = jagg.getAbsoluteUrl(request.getRequestURI());
-        var requestedPage = requestedPageAbsoluteUrl.replace(siteContext,'');
+        var requestedPage = requestedPageAbsoluteUrl.replace(siteContext + "/",'/');
     }else {
         var requestedPage = request.getRequestURI();
     }
