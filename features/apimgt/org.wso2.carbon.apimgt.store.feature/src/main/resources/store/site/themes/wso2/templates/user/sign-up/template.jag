@@ -96,7 +96,7 @@
 								<%if (required == true) {%>
 									 <div class="form-group">
                                         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                            <label class="control-label"><%=i18n.localize(field.name, field.name)%> </label>
+                                            <label class="control-label"><%=i18n.localize(field.name, field.name)%> *</label>
                                             <div class="input-group input-wrap">
                                                 <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" title="<%=i%>cliamUri" class="<%=inputClass%> form-control">
                                             </div>
