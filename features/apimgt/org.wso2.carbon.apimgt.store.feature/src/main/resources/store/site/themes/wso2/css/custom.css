@@ -920,9 +920,7 @@ div.image-container {
     border-bottom:1px solid #ddd;
     background:#FBFBFB;
 }
-.form-api-subscription .form-group{
-    padding-right:20px;
-}
+
 
 .api-details-container p.no-margin{
     margin:0px;
@@ -1405,4 +1403,13 @@ a.remove_rating:hover{ color: #C00}
 }
 .api-details-container .form-horizontal .form-group{
     margin-bottom:0px;
+}
+
+.btn-mobile {
+    width:100%;
+}
+@media (min-width: 768px) {
+  .btn-mobile {
+    width: auto;
+  }
 }

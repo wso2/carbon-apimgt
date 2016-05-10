@@ -122,33 +122,33 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                         <div class="add-padding-4x">
 											<div class="form-horizontal">
 											  	<div class="form-group">
-													<label class="col-sm-2 control-label"><strong>Version:</strong></label>
-													<div class="col-sm-10">
+													<label class="col-xs-4 col-sm-2 control-label"><strong>Version:</strong></label>
+													<div class="col-xs-8 col-sm-10">
 													  <p class="form-control-static"><%=api.version%></p>
 													</div>
 											  	</div>
 											<div class="form-group">
-												<label class="col-sm-2 control-label"><strong>By:</strong></label>
-												<div class="col-sm-10">
+												<label class="col-xs-4 col-sm-2 control-label"><strong>By:</strong></label>
+												<div class="col-xs-8 col-sm-10">
 													<p class="form-control-static"><%=displayOwner %></p>
 												</div>
 											</div>
 											<div class="form-group">
-												<label class="col-sm-2 control-label"><strong>Updated:</strong></label>
-												<div class="col-sm-10">
+												<label class="col-xs-4 col-sm-2 control-label"><strong>Updated:</strong></label>
+												<div class="col-xs-8 col-sm-10">
 													<p class="form-control-static"><%=api.updatedDate%></p>
 												</div>
 											</div>
 											<div class="form-group">
-												<label class="col-sm-2 control-label"><strong>Status:</strong></label>
-												<div class="col-sm-10">
+												<label class="col-xs-4 col-sm-2 control-label"><strong>Status:</strong></label>
+												<div class="col-xs-8 col-sm-10">
 													<p class="form-control-static"><span class="text-info"><i class="fw fw-publish fw-2x"></i> <%=api.status%></span></p>
 												</div>
 											</div>
 											<div class="form-group">
 												<% if(isRatingActivated && user){%>
-													<label class="col-sm-2 control-label"><strong>Rating:</strong></label>
-													<div class="col-sm-10">
+													<label class="col-xs-4 col-sm-2 control-label"><strong>Rating:</strong></label>
+													<div class="col-xs-8 col-sm-10">
 														<p class="form-control-static">
 															<input type="hidden" class="rating-tooltip-manual rate_save" value="<%= api.userRate %>"/>
 															<a class="remove_rating"><i class="fa fa-times-circle"></i></a>
@@ -157,8 +157,8 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 												<%} %>
 												<% if(isRatingActivated){%>
 													<% if(api.rates!=0) {%>
-													<label class="col-sm-2 control-label">&nbsp;</label>
-													<div class="col-sm-10">
+													<label class="col-xs-4 col-sm-2 control-label">&nbsp;</label>
+													<div class="col-xs-8 col-sm-10">
 														<div class="average-rating">
 															<%=api.rates%>
 														</div>
@@ -173,7 +173,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                                        <!-- Load Application -->
 		                                        <% if(user && apps) {
 						                            var subscribedToDefault=false;
-						                            length = apps.length;					
+						                            length = apps.length;
 						                                for(i = 0; i < length; i++) {
 						                                   app = apps[i];
 						                                   if(app.name=="DefaultApplication"){
@@ -193,7 +193,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 							                                       for(i = 0; i < length; i++) {
 							                                       app = apps[i];
 							                                       if(app.status=="APPROVED"){
-							
+
 							                                       %>
 							                                       <%if (app.name=="DefaultApplication"){%>
 							                                       <option selected value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
@@ -208,13 +208,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                                          <!-- Load Tiers -->
 		                                          <%if(user && api) { %>
 		                                            <div class="form-group">
-		                                                <label for="tier-select1"><%=i18n.localize("tiers")%></label>
+		                                                <label for="tier-select1" class="hidden-xs"><%=i18n.localize("tiers")%></label>
 		                                                <select id="tiers-list" name="tiers-list" class="form-control">
 		                                                    <%
 		                                                    	var tiersList = api.tiers, denied = false, tiersAvailable = false;
                             									var existingFirstTierDesc = [];
 																var log = new Log();
-                            									for(var j=0;j<tiersList.length;j++){																	
+                            									for(var j=0;j<tiersList.length;j++){
                                 									for (var k=0;k<deniedTiers.length;k++) {
 																		log.info(deniedTiers[j].tierName);
 																		if (tiersList[j].tierName == deniedTiers[k].tierName) {
@@ -225,7 +225,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 									                                    var tier=tiersList[j].tierName;
 									                                    var tierDisplayName=tiersList[j].tierDisplayName;
 									                                    tiersAvailable = true;
-									
+
 									                                    //adding the description of existing tiers to the list
 									                                    existingFirstTierDesc.push(tiersList[j].tierDescription);
                             								%>
@@ -246,9 +246,9 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                                            </div>
 		                                           <%} %>
                                                     <div class="form-group">
-                                                        <label for="tier-select1">&nbsp;</label>                                           
+                                                        <label for="tier-select1" class="hidden-xs">&nbsp;</label>
 	                                            <button type="button" onclick="triggerSubscribe()" id="subscribe-button" <%if(!tiersAvailable){%>disabled="disabled"<%}%>
-                                							class="btn btn-primary<% if(!user) { %>need-login<% } %>">
+                                							class="btn btn-primary btn-mobile<% if(!user) { %>need-login<% } %>">
 			                                        <span class="icon fw-stack">
 				                                        <i class="fw fw-subscribe fw-stack-1x"></i>
 				                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -272,7 +272,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 												}
 						                    	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
 						                      %>
-						                      	<a id="store-redirect-link" class="btn btn-primary"  href="<%=path%>" target="_">
+						                      	<a id="store-redirect-link" class="btn btn-primary btn-mobile"  href="<%=path%>" target="_">
 			                                        <span class="icon fw-stack">
 				                                        <i class="fw fw-subscribe fw-stack-1x"></i>
 				                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
