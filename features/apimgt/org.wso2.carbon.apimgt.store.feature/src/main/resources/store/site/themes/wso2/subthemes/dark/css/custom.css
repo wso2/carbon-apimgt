@@ -18,7 +18,7 @@ ol.breadcrumb.navbar-brand {
 .media-left {
     padding-right:0px;
 }
-.media-body{ background-color: #EFEFEF;}
+.media-body{ background-color: #8E8C98;}
 
 
 .form-api-subscription .btn .icon{
@@ -1272,7 +1272,7 @@ a.remove_rating:hover{ color: #C00}
 }
 
 .ribbon-green {
-    font: bold 14px Sans-Serif;
+    font: bold 10px Sans-Serif;
     color: #333;
     text-align: center;
     text-shadow: rgba(255,255,255,0.5) 0px 1px 0px;
@@ -1315,7 +1315,7 @@ a.remove_rating:hover{ color: #C00}
 }
 
 .ribbon-blue {
-     font: bold 14px Sans-Serif;
+     font: bold 10px Sans-Serif;
      text-align: center;
      text-shadow: rgba(255,255,255,0.5) 0px 1px 0px;
      -webkit-transform: rotate(45deg);
@@ -1356,7 +1356,7 @@ a.remove_rating:hover{ color: #C00}
 }
 
 .ribbon-yellow {
-     font: bold 14px Sans-Serif;
+     font: bold 10px Sans-Serif;
      text-align: center;
      text-shadow: rgba(255,255,255,0.5) 0px 1px 0px;
      -webkit-transform: rotate(45deg);

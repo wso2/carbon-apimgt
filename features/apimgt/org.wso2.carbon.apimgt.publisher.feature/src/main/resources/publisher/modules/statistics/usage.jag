@@ -859,11 +859,11 @@ function getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDat
     }
 }
 
-function getDeveloperList(provider, limit) {
+function getDeveloperList(provider, apiFilter, limit) {
     var usage;
     try {
         var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
-        usage = usageClient.getDeveloperList(provider, limit);
+        usage = usageClient.getDeveloperList(provider, apiFilter, limit);
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByMediation for : " + tenantDomain);
         }

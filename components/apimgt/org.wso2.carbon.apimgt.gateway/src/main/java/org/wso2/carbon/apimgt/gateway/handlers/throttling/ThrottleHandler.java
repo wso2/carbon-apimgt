@@ -52,12 +52,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.List;
@@ -155,12 +155,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         boolean isApplicationLevelThrottled;
         boolean isSubscriptionLevelThrottled;
         boolean isApiLevelThrottled = false;
-        boolean isBlockedRequest;
+        boolean isBlockedRequest = false;
         boolean apiLevelThrottledTriggered = false;
         boolean policyLevelUserTriggered = false;
 
         String ipLevelBlockingKey;
-        String appLevelBlockingKey;
+        String appLevelBlockingKey = "";
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -168,26 +168,21 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         apiVersion = apiVersion != null ? apiVersion : "";
 
         String subscriberTenantDomain = "";
+        String apiTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         List<String> resourceLevelThrottleConditions;
         String applicationId = authContext.getApplicationId();
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
-            //TODO This is wrong you have to get the tenant domain from remote as gatway we don't share the configs
-            subscriberTenantDomain = authContext.getSubscriberTenantDomain();
-            applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
-            //Following throttle data list can be use to hold throttle data and api level throttle key
-            //should be its first element.
-            //if ((authContext.getThrottlingDataList() != null) && (authContext.getThrottlingDataList().get(0) != null)) {
-            apiLevelThrottleKey = apiContext + ":" + apiVersion; //authContext.getApiTier();
-
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
-            //TODO handle blocked and throttled requests separately.
-            ipLevelBlockingKey = MultitenantUtils.getTenantDomain(authorizedUser) + ":" + getClientIp(synCtx);
-            appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
-            isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
-                    apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
+            //Do blocking if there are blocking conditions present
+            if(ServiceReferenceHolder.getInstance().getThrottleDataHolder().isBlockingConditionsPresent()) {
+                ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(synCtx);
+                appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+                isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
+                        apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
+            }
 
             if (isBlockedRequest) {
                 String msg = "Request blocked as it violates defined blocking conditions, for API: " + apiContext +
@@ -198,6 +193,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 synCtx.setProperty(APIThrottleConstants.BLOCKED_REASON, msg);
                 isThrottled = true;
             } else {
+                subscriberTenantDomain = authContext.getSubscriberTenantDomain();
+                applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
+                apiLevelThrottleKey = apiContext + ":" + apiVersion;
                 //If request is not blocked then only we perform throttling.
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
                 applicationLevelTier = authContext.getApplicationTier();
@@ -206,7 +204,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 apiLevelTier = authContext.getApiTier();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply
                 // for it
-                if (apiLevelTier != null && apiLevelTier.length() > 0 && apiLevelThrottleKey.length() > 0) {
+                if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
                 }
@@ -217,7 +215,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     return false;
                 } else {
                     //If verbInfo is present then only we will do resource level throttling
-                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling())) {
+                    if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(verbInfoDTO.getThrottling()) && !apiLevelThrottledTriggered) {
                         //If unlimited tier throttling will not apply at resource level and pass it
                         if (log.isDebugEnabled()) {
                             log.debug("Resource level throttling set as unlimited and request will pass " +
@@ -261,7 +259,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     if (!isResourceLevelThrottled) {
                         //Subscription Level Throttling
                         subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
-                                + apiVersion;
+                                                       + apiVersion;
                         isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
                         if (subscriptionLevelSpikeArrestEnabled) {
@@ -276,12 +274,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
-                                if (!validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
-                                        resourceLevelThrottleKey, apiLevelThrottleKey)) {
+                                boolean keyTemplatesAvailable = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isKeyTemplatesPresent();
+                                if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
+                                        subscriptionLevelThrottleKey, apiLevelThrottleKey, subscriptionLevelThrottleKey, apiContext,
+                                        apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
+                                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap())) {
                                     //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
-                                    if (isHardLimitThrottled(synCtx)) {
+                                    if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
                                         isThrottled = true;
 
                                     } else {
@@ -291,8 +292,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                 resourceLevelThrottleKey, resourceLevelTier,
                                                 authorizedUser, apiContext, apiVersion, subscriberTenantDomain,
-                                                CarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
-                                                applicationId, synCtx, authContext);
+                                                apiTenantDomain, applicationId, synCtx, authContext);
                                     }
                                 } else {
                                     if (log.isDebugEnabled()) {
@@ -327,9 +327,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             log.debug("Request throttled at resource level for throttle key" +
                                     verbInfoDTO.getRequestKey());
                         }
+                        //is throttled and resource level throttling
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                 APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
-                        //is throttled and resource level throttling
                     }
                 } else {
                     if (log.isDebugEnabled()) {
@@ -717,20 +717,24 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * and should not enabled by default. If we enabled this policy then all APIs available in system
      * will have to go through this check.
      *
-     * @param messageContext
      * @return
      */
-    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey) {
-        Map<String, String> keyTemplateMap = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                getKeyTemplateMap();
+    public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey,
+                                        String $subscriptionKey, String apiContext, String apiVersion, String appTenant,
+                                        String apiTenant, String appId, Map<String, String> keyTemplateMap) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
                 key = key.replaceAll("\\$appKey", appKey);
                 key = key.replaceAll("\\$resourceKey", resourceKey);
                 key = key.replaceAll("\\$userId", userID);
                 key = key.replaceAll("\\$apiKey", apiKey);
-                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                        getThrottleDataMap().containsKey(key)) {
+                key = key.replaceAll("\\$subscriptionKey", apiKey);
+                key = key.replaceAll("\\$apiContext", apiKey);
+                key = key.replaceAll("\\$apiVersion", apiKey);
+                key = key.replaceAll("\\$appTenant", apiKey);
+                key = key.replaceAll("\\$apiTenant", apiKey);
+                key = key.replaceAll("\\$appId", apiKey);
+                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(key)) {
                     return true;
                 }
             }
@@ -746,7 +750,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         OMElement parsedPolicy = null;
-
         StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
                 ".org/ws/2004/09/policy\" " +
                 "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
@@ -786,20 +789,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 " </wsp:Policy>\n";
     }
 
-    private boolean isHardLimitThrottled(MessageContext synCtx) {
+    private boolean isHardLimitThrottled(MessageContext synCtx, AuthenticationContext authContext, String apiContext, String apiVersion) {
         boolean status = false;
         if (StringUtils.isNotEmpty(sandboxMaxCount) || StringUtils.isNotEmpty(productionMaxCount)) {
-            ThrottleContext hardThrottleContext = throttle.getThrottleContext(
-                    APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
+            ThrottleContext hardThrottleContext = throttle.getThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
             try {
-                String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-                String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
-                        getAxis2MessageContext();
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
                 ConfigurationContext cc = axis2MC.getConfigurationContext();
                 apiContext = apiContext != null ? apiContext : "";
                 apiVersion = apiVersion != null ? apiVersion : "";
-                AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
 
                 if (hardThrottleContext != null && authContext.getKeyType() != null) {
                     String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();

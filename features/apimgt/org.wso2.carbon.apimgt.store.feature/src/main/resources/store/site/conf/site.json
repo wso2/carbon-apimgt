@@ -4,6 +4,7 @@
     },
     "context" : "/store",
     "showPublicStoreURL":true,
+    "showThemesMenu":false,
     "tagWiseMode" :"false",
     "tagGroupKey" :"-group",
     "ssoConfiguration" : {

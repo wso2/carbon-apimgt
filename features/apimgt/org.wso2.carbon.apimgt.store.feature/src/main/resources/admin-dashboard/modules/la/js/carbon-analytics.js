@@ -973,7 +973,7 @@ function AnalyticsClient() {
 AnalyticsClient.prototype.init = function (username, password, svrUrl) {
 
     if (svrUrl == null) {
-        this.serverUrl = "https://localhost:8243/LogAnalyzerRestApi/1.0";
+        this.serverUrl = "https://localhost:9443/admin-dashboard/modules/la/log-analyzer-proxy.jag";
     } else {
         this.serverUrl = svrUrl;
     }

@@ -1,7 +1,6 @@
 var chart;
 var chartData;
 var apiFilter = "allAPIs";
-var subscribedApi = "All";
 
 function update_chart(data) {
     // Update the SVG with the new data and call chart
@@ -58,9 +57,10 @@ $(document).ready(function(){
     });
 
     $("#apiFilter").change(function (e) {
+        $('#apiSelect').empty();
+        $('#apiSelect').append('<option> All </option>');
         apiFilter = this.value;
         apiFilterList();
-        $("body").trigger("update_chart");
     });
 
     nv.addGraph(function () {
@@ -93,7 +93,6 @@ $(document).ready(function(){
         chartData.transition().duration(500).call(chart);
 
         nv.utils.windowResize(chart.update);
-        $("body").trigger("update_chart");
         return chart;
     });
 
@@ -111,9 +110,8 @@ $(document).ready(function(){
                     $('#apiSelect')
                        .append(apiName)
                        .selectpicker('refresh');
-
+                    $("body").trigger("update_chart");
                     $('#apiSelect').on('change', function() {
-                        subscribedApi = this.value;//selected value
                         $("body").trigger("update_chart");
                     });
                 }
@@ -134,7 +132,7 @@ $(document).ready(function(){
             { 
                 "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                 "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD'),
-                "subscribedApi": subscribedApi,
+                "subscribedApi": $('#apiSelect').val(),
                 "apiFilter": apiFilter
             },
             function (json) {

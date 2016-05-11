@@ -152,9 +152,9 @@
     "logged" : "Logged in as",
 
     "selectTheme" : "Select a theme",
-    "fancy" : "Fancy",
+    "wso2" : "wso2",
     "modern" : "Modern",
-    "dark":"Light",
+    "dark":"Dark",
 
     "pwHelpMsgLine1":"For a more secure password:",
     "pwHelpMsgLine2":"Use 6 to 30 characters",

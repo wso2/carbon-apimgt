@@ -38,8 +38,8 @@ var changeStatusIcon = function(flowId, type, checkBoxOb) {
         spanId = "queryparam-condition-configured-" + flowId;
         iconId = "queryparam-condition-configured-icon-" + flowId;
     } else if(type == "JWTClaim") {
-        spanId = "ip-condition-configured-" + flowId;
-        iconId = "ip-condition-configured-icon-" + flowId;
+        spanId = "claim-condition-configured-" + flowId;
+        iconId = "claim-condition-configured-icon-" + flowId;
     } else {
         return;
     }
@@ -307,8 +307,14 @@ var addPolicyToBackend = function () {
     var defaultPolicyLimit;
     var defaultPolicyUnit;
     var defaultPolicyUnitTime;
+    var requiredMsg = $('#errorMsgRequired').val();
 
     apiPolicyNew.policyName = policyName;
+
+    if(!validateInput(policyName, $('#policy-name'), requiredMsg)) {
+        return false;
+    }
+
     apiPolicyNew.policyDescription = policyDescription;
     apiPolicyNew.policyLevel = policyLevel;
     apiPolicyNew.defaultQuotaPolicy.type = defaultPolicyType;
@@ -320,6 +326,20 @@ var addPolicyToBackend = function () {
         apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+
+        if(!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
+            return false;
+        }
+
+        if(!validateInput(defaultPolicyUnitTime, $('#unit-time-count'), requiredMsg)) {
+            return false;
+        }
+
+        if(!validateInput(defaultPolicyUnit, $("#request-count-unit option:selected"), requiredMsg)) {
+            return false;
+        }
+
+
     } else {
         defaultPolicyLimit = $('#bandwidth').val();
         defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
@@ -329,6 +349,22 @@ var addPolicyToBackend = function () {
         apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
         apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
         apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+
+        if(!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
+            return false;
+        }
+
+        if(!validateInput(defaultPolicyDataUnit, $("#bandwidth-unit option:selected"), requiredMsg)) {
+            return false;
+        }
+
+        if(!validateInput(defaultPolicyUnitTime,  $("#unit-time-count"), requiredMsg)) {
+            return false;
+        }
+
+        if(!validateInput(defaultPolicyUnit,  $("#request-count-unit option:selected"), requiredMsg)) {
+            return false;
+        }
     }
 
     var executionFlow, executionFlowId, checked;
@@ -479,3 +515,18 @@ var addPolicyToBackend = function () {
         }
     }, "json");
 };
+
+function validateInput(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text == ""){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
