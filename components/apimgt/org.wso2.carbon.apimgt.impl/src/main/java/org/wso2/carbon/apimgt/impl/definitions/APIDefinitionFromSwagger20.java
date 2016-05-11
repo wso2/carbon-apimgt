@@ -219,14 +219,12 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
 
         JSONParser parser = new JSONParser();
-        JSONObject apiJSON;
-        String apiDefinition = null;
+        String apiDocContent = null;
         try {
             if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
                 Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
-                String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                apiJSON = (JSONObject) parser.parse(apiDocContent);
-                apiDefinition = apiJSON.toJSONString();
+                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                parser.parse(apiDocContent);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Resource " + SWAGGER_2_0_FILE_NAME + " not found at " + resourcePath);
@@ -239,7 +237,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + '-' +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
-        return apiDefinition;
+        return apiDocContent;
     }
 
     /**

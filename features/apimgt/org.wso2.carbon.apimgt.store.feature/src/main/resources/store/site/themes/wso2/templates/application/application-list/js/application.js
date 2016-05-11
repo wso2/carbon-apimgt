@@ -2,13 +2,13 @@ function changeAppNameMode(linkObj){
     jagg.sessionAwareJS({redirect:'site/pages/applications.jag'});
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
-    $('td:first',theTr).html('<div class="row-fluid"> <input class="wrap-text app_name_new form-control"  value="'
+    $('td:first',theTr).html('<div class="row-fluid"> <input title="app_name_new" class="wrap-text app_name_new form-control"  value="'
         +'" type="text" /> </div> ');
     $('td:first',theTr).find(".app_name_new").val(theTr.attr('data-value'));
-    $('td:eq(3)',theTr).html('<div class="row-fluid"> <input class="wrap-text callback_new validInput form-control"  value="'
+    $('td:eq(3)',theTr).html('<div class="row-fluid"> <input title="callback_new" class="wrap-text callback_new validInput form-control"  value="'
         +'" type="text" /> </div> ');
     $('td:eq(3)',theTr).find(".callback_new").val(theTr.attr('callback-value'));
-    $('td:eq(4)',theTr).html('<div class="row-fluid"><input class="description-new form-control"  value="'
+    $('td:eq(4)',theTr).html('<div class="row-fluid"><input title="description-new" class="description-new form-control"  value="'
         +'" type="text" /> </div> ');
     $('td:eq(4)',theTr).find(".description-new").val(theTr.attr('description-value'));
     //Hide the Edit link

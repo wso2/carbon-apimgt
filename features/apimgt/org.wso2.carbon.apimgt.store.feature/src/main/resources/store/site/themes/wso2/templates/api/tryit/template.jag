@@ -26,7 +26,7 @@
                                     </select>
                                 </div>
                                 <div class="span9">
-                                    <input id="req_url" data-value="" value="" placeholder="http://www.example.com" />
+                                    <input id="req_url" title="request_url" data-value="" value="" placeholder="http://www.example.com" />
                                     <input id="apiName" type="hidden" value="" />
                                     <div class="help-block">
 

@@ -69,7 +69,7 @@
             <div class="cDivTabInput input_fields_wrap_scope_sandbox">
 
                 <div class="cDivScopeElementSandBox cDivElementFirst">
-                    <input class="input-large iScopeSandBox" type="text" name="iProductionAppScopeSandBox[]">
+                    <input class="input-large iScopeSandBox" type="text" title="appScopeSandBox" name="iProductionAppScopeSandBox[]">
                 </div>
                 <div class="cDivPlusIconCommon cDivPlusIconScopeSandBox">
                     add
@@ -77,7 +77,7 @@
                 <% if(scope != null) %>
                     <%  for(var x in scope){ %>
                         <div class="cDivScopeElementSandBox">
-                            <input type="text" class="input-large iScopeSandBox" value="<%=scope[x] %>" name="iProductionAppScopeSandBox[]"/>
+                            <input type="text" class="input-large iScopeSandBox" title="appScopeSandBox" value="<%=scope[x] %>" name="iProductionAppScopeSandBox[]"/>
                                 <div class="cDivRemoveIcon remove_field_scope_sandbox">Remove</div>
                          </div>
                     <%  }  %>
@@ -90,19 +90,19 @@
             </div>
             <div class="grantGroupSandBox">
                 <div class="cDivGrantElementSandBox">
-                    <input class="input-xlarge iGrantsSandBox" type="checkbox" <%  print(authorization_code); %> name=iGrantsSandBox[]" value="authorization_code"> authorization code
+                    <input title="authorization_code" class="input-xlarge iGrantsSandBox" type="checkbox" <%  print(authorization_code); %> name=iGrantsSandBox[]" value="authorization_code"> authorization code
                 </div>
                 <div class="cDivGrantElementSandBox">
-                    <input class="input-xlarge iGrantsSandBox" type="checkbox" <% print(client_credentials); %> name=iGrantsSandBox[]" value="client_credentials"> client credentials
+                    <input title="client_credentials" class="input-xlarge iGrantsSandBox" type="checkbox" <% print(client_credentials); %> name=iGrantsSandBox[]" value="client_credentials"> client credentials
                 </div>
                 <div class="cDivGrantElementSandBox">
-                    <input class="input-xlarge iGrantsSandBox" type="checkbox" <% print(password);; %> name=iGrantsSandBox[]" value="password"> password
+                    <input title="password" class="input-xlarge iGrantsSandBox" type="checkbox" <% print(password);; %> name=iGrantsSandBox[]" value="password"> password
                 </div>
                 <div class="cDivGrantElementSandBox">
-                    <input class="input-xlarge iGrantsSandBox" type="checkbox" <% print(implicit); %> name=iGrantsSandBox[]" value="implicit"> implicit
+                    <input title="implicit" class="input-xlarge iGrantsSandBox" type="checkbox" <% print(implicit); %> name=iGrantsSandBox[]" value="implicit"> implicit
                 </div>
                 <div class="cDivGrantElementSandBox">
-                    <input class="input-xlarge iGrantsSandBox" type="checkbox" <% print(redelegate); %> name=iGrantsSandBox[]" value="redelegate"> redelegate
+                    <input title="redelegate" class="input-xlarge iGrantsSandBox" type="checkbox" <% print(redelegate); %> name=iGrantsSandBox[]" value="redelegate"> redelegate
                 </div>
             </div>
 
@@ -114,25 +114,25 @@
             </div>
             <div class="grantGroupSandBox">
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code"> code
+                    <input title="code" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code"> code
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="token"> token
+                    <input title="token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="token"> token
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="id_token "> id_token
+                    <input title="id_token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="id_token "> id_token
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="token id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="token id_token"> token id_token
+                    <input title="token_id_token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="token id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="token id_token"> token id_token
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code id_token"> code id_token
+                    <input title="code_id_token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code id_token"> code id_token
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code token"> code token
+                    <input title="code_token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code token"> code token
                 </div>
                 <div class="cDivResponseElementSandBox">
-                    <input class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code token id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code token id_token"> code token id_token
+                    <input title="code_token_id_token" class="input-xlarge iResponseTypeSandBox" type="checkbox" <% if(response_types=="code token id_token") print("Checked"); %>  name=iResponseTypeSandBox[]" value="code token id_token"> code token id_token
                 </div>
             </div>
         </div>
