@@ -65,6 +65,7 @@ for(var i=0;i < outputs.tiers.length; i++){
             ConsumerSecret: oauthapp.prodConsumerSecret,
             Key: oauthapp.prodKey,
             KeyScope: oauthapp.prodKeyScopeValue,
+            Scopes: outputs.scopes,
             ValidityTime: oauthapp.prodValidityTime
         }
       %>
@@ -78,6 +79,7 @@ for(var i=0;i < outputs.tiers.length; i++){
             ConsumerSecret: oauthapp.sandboxConsumerSecret,
             Key: oauthapp.sandboxKey,
             KeyScope: oauthapp.sandKeyScope,
+            Scopes: outputs.scopes,
             ValidityTime: oauthapp.sandValidityTime
         }
       %>      

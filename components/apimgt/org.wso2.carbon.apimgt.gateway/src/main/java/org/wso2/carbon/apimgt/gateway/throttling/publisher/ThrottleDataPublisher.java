@@ -112,7 +112,6 @@ public class ThrottleDataPublisher {
             String authorizedUser, String apiContext, String apiVersion, String appTenant, String apiTenant,
             String appId, MessageContext messageContext,
             AuthenticationContext authenticationContext) {
-        //log.info("##########################################Publishing event");
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
             agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
@@ -122,8 +121,6 @@ public class ThrottleDataPublisher {
                                    authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
                                    authenticationContext);
             executor.execute(agent);
-            //log.info("##########################################Time Taken:"+(System.currentTimeMillis() -start));
-
         } catch (Exception e) {
             throw new ThrottlingRunTimeException("Error while publishing throttling events to global policy server");
         }
