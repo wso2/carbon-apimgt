@@ -79,6 +79,7 @@
     "editThrottlePolicy":"Save Throttle Policy",
     "executionFlow":"Execution Flow",
     "addConditionalGroup":"Add Conditional Group",
+    "conditionGroup":"Condition Group",
     "editExecutionFlow":"Edit Execution Flow",
     "conditionalGroups":"Conditional Groups",
     "tiers":"Tier",

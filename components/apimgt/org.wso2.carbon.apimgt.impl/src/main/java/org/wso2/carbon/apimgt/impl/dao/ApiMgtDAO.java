@@ -8511,6 +8511,7 @@ public class ApiMgtDAO {
 
 			conditionStatement.setLong(5, pipeline.getQuotaPolicy().getLimit().getUnitTime());
 			conditionStatement.setString(6, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+			conditionStatement.setString(7, pipeline.getDescription());
 			conditionStatement.executeUpdate();
 			rs = conditionStatement.getGeneratedKeys();
 
@@ -9169,7 +9170,7 @@ public class ApiMgtDAO {
             int pipelineId = -1;
             String timeUnit = null;
             String quotaUnit = null;
-
+            String description;
             pipelinesStatement.setInt(1, policyId);
             resultSet = pipelinesStatement.executeQuery();
 
@@ -9183,7 +9184,7 @@ public class ApiMgtDAO {
                 unitTime = resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME);
                 quota = resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA);
                 pipelineId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
-
+                description = resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION);
                 if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
                     RequestCountLimit requestCountLimit = new RequestCountLimit();
                     requestCountLimit.setUnitTime(unitTime);
@@ -9203,6 +9204,7 @@ public class ApiMgtDAO {
                 pipeline.setConditions(conditions);
                 pipeline.setQuotaPolicy(quotaPolicy);
                 pipeline.setId(pipelineId);
+                pipeline.setDescription(description);
                 pipelines.add(pipeline);
             }
         } catch (SQLException e) {
