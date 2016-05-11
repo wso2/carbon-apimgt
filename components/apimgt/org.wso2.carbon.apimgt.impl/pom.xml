@@ -322,6 +322,8 @@
                             com.nimbusds.*,
                             com.ibm.wsdl.*,
                             net.sf.saxon.*,
+                            org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
+                            org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.statsupdate.stub.*;version="${carbon.apimgt.imp.pkg.version}",

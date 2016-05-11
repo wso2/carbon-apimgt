@@ -74,8 +74,8 @@
 								<importFeatureDef>org.wso2.carbon.event.server:${carbon.commons.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.governance.lifecycle.management:${carbon.governance.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.governance.metadata:${carbon.governance.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity-inbound-auth-saml.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.ui:${carbon.identity-inbound-auth-saml.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity-inbound-auth-saml2.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.ui:${carbon.identity-inbound-auth-saml2.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.core:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.oauth:${carbon.identity-inbound-auth-oauth.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.identity.version}</importFeatureDef>
@@ -97,8 +97,8 @@
 								<importFeatureDef>org.wso2.carbon.security.mgt:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.service.mgt.server:${carbon.deployment.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.task.server:${carbon.kernel.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.um.ws.service.client:${carbon.identity.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.um.ws.service.client:${carbon.identity-user-ws.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.user.mgt:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.webapp.mgt:${carbon.deployment.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.xfer:${carbon.kernel.version}</importFeatureDef>
@@ -112,8 +112,8 @@
 								<importFeatureDef>org.wso2.carbon.transport.mail:${carbon.kernel.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.transport.nhttp:${carbon.kernel.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.transport.jms:${carbon.kernel.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.basicauth.server:${carbon.identity.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.samlsso.server:${carbon.identity.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.basicauth.server:${carbon.identity-local-auth-basicauth.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.samlsso.server:${carbon.identity-outbound-auth-samlsso.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.claim.mgt:${carbon.identity.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>

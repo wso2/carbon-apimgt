@@ -141,7 +141,7 @@
         <repository>
             <id>wso2-staging</id>
             <name>WSO2 staging Repository</name>
-            <url>https://maven.wso2.org/nexus/content/repositories/orgjaggeryjs-1002/</url>
+            <url>https://maven.wso2.org/nexus/content/repositories/orgjaggeryjs-1004/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
@@ -1015,9 +1015,11 @@
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.1.0</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.0.8</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-user-ws.version>5.0.8</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml.version>5.0.8</carbon.identity-inbound-auth-saml.version>
+        <carbon.identity-inbound-auth-oauth.version>5.1.0</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-user-ws.version>5.1.0</carbon.identity-user-ws.version>
+        <carbon.identity-inbound-auth-saml2.version>5.1.0</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-openid.version>5.1.0</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-local-auth-basicauth.version>5.1.0</carbon.identity-local-auth-basicauth.version>
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
@@ -1031,8 +1033,8 @@
 
         <!-- Carbon Identity import version ranges -->
         <carbon.identity.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity.imp.pkg.version>
-        <carbon.identity-inbound-auth-oauth.imp.pkg.version>[5.0.8, 6.0.0)</carbon.identity-inbound-auth-oauth.imp.pkg.version>
-        <carbon.identity-user-ws.imp.pkg.version>[5.0.8, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
+        <carbon.identity-inbound-auth-oauth.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity-inbound-auth-oauth.imp.pkg.version>
+        <carbon.identity-user-ws.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
 
         <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.5.8, 4.6.0)</carbon.governance.imp.pkg.version>
@@ -1072,7 +1074,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.12.4</jaggery.version>
+        <jaggery.version>0.12.5</jaggery.version>
 
         <!-- Misc Versions -->
         <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
