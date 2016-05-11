@@ -8,6 +8,7 @@ jagg.block("application/application-view", {
         user = jagg.getUser();
         var application = null;
         var oauthapp = null;
+        var scopes = [];
         if (user) {
             username = user.username;
             var applicationName = request.getParameter("name");
@@ -23,6 +24,7 @@ jagg.block("application/application-view", {
             for(i=0;i < result2.applications.length;i++){
                 if(result2.applications[i].name == applicationName){
                     oauthapp = result2.applications[i];
+                    scopes = oauthapp.scopes;
                 }
             }
         }
@@ -34,10 +36,6 @@ jagg.block("application/application-view", {
         var store = jagg.module("manager").getAPIStoreObj();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
 
-        var scopes = [];
-        if(result2.applications && result2.applications[0]) {
-            scopes = result2.applications[0].scopes;
-        }
         return {
             "tiers":tiers,
             "gatewayurl":gatewayURL[0],
