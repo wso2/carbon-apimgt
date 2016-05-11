@@ -17,7 +17,7 @@ jagg.block("application/application-view", {
             result = mod.getApplicationByName(username,applicationName,groupId);
             application = result.application;
 
-            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 1, 10);
+            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 0, 10);
             //@todo handle error
             result2 = result2.result;
             for(i=0;i < result2.applications.length;i++){
@@ -34,10 +34,15 @@ jagg.block("application/application-view", {
         var store = jagg.module("manager").getAPIStoreObj();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
 
+        var scopes = [];
+        if(result2.applications && result2.applications[0]) {
+            scopes = result2.applications[0].scopes;
+        }
         return {
             "tiers":tiers,
             "gatewayurl":gatewayURL[0],
             "application" : application,
+            "scopes": scopes,
             "oauthapp": oauthapp
         };
     }
