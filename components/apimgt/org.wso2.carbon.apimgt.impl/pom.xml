@@ -26,18 +26,15 @@
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
-            <version>${carbon.analytics.common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.email</artifactId>
-            <version>${carbon.analytics.common.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.sms</artifactId>
-            <version>${carbon.analytics.common.version}</version>
         </dependency>
 
         <dependency>
