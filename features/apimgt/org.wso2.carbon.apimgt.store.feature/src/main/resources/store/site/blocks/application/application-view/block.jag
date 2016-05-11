@@ -8,6 +8,7 @@ jagg.block("application/application-view", {
         user = jagg.getUser();
         var application = null;
         var oauthapp = null;
+        var scopes = [];
         if (user) {
             username = user.username;
             var applicationName = request.getParameter("name");
@@ -17,12 +18,13 @@ jagg.block("application/application-view", {
             result = mod.getApplicationByName(username,applicationName,groupId);
             application = result.application;
 
-            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 1, 10);
+            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 0, 10);
             //@todo handle error
             result2 = result2.result;
             for(i=0;i < result2.applications.length;i++){
                 if(result2.applications[i].name == applicationName){
                     oauthapp = result2.applications[i];
+                    scopes = oauthapp.scopes;
                 }
             }
         }
@@ -38,6 +40,7 @@ jagg.block("application/application-view", {
             "tiers":tiers,
             "gatewayurl":gatewayURL[0],
             "application" : application,
+            "scopes": scopes,
             "oauthapp": oauthapp
         };
     }
