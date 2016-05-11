@@ -192,6 +192,16 @@ var addQueryParam = function (id) {
     var source = $("#designer-query-pram-table-content").html();
     var paramName = $('#query-param-name-' + id).val();
     var paramValue = $('#query-param-value-' + id).val();
+
+    if(!validateInput(paramName,  $('#query-param-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(paramValue,   $('#query-param-value-' + id), requiredMsg)) {
+        return false;
+    }
+    var requiredMsg = $('#errorMsgRequired').val();
+
     var tableRow = {
         "name": paramName,
         "value": paramValue,
@@ -223,6 +233,16 @@ var addHeader = function (id) {
     var source = $("#designer-header-value-table-content").html();
     var headerName = $('#header-name-' + id).val();
     var headerValue = $('#header-value-' + id).val();
+    var requiredMsg = $('#errorMsgRequired').val();
+
+    if(!validateInput(headerName,  $('#header-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(headerValue,   $('#header-value-' + id), requiredMsg)) {
+        return false;
+    }
+
     var tableRow = {
         "name": headerName,
         "value": headerValue,
@@ -259,6 +279,15 @@ var addJwtClaim = function (id) {
         "value": claimValue,
         "flowId": id
     };
+    var requiredMsg = $('#errorMsgRequired').val();
+
+    if(!validateInput(claimName,  $('#jwt-claim-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(claimValue,   $('#jwt-claim-value-' + id), requiredMsg)) {
+        return false;
+    }
 
     Handlebars.partials['designer-jwt-claim-value-table-content'] = Handlebars.compile(source);
     var context = {
@@ -385,12 +414,22 @@ var addPolicyToBackend = function () {
                     var ipConditionType = $("#ip-condition-type-" + executionFlowId + " option:selected").val();
                     if (ipConditionType == 'specificIp') {
                         var specificIp = $('#specific-ip-address-input-' + executionFlowId).val();
+                        if(!validateInput(specificIp, $('#specific-ip-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         apiPolicyNew.executionFlows[i].conditions[j].ipType = 'specific';
                         apiPolicyNew.executionFlows[i].conditions[j].specificIP = specificIp;
                     } else {
                         var startIp = $('#ip-range-start-address-input-' + executionFlowId).val();
                         var endIp = $('#ip-range-end-address-input-' + executionFlowId).val();
+
+                        if(!validateInput(startIp, $('#ip-range-start-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
+                        if(!validateInput(endIp, $('#ip-range-end-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         apiPolicyNew.executionFlows[i].conditions[j].ipType = 'range';
                         apiPolicyNew.executionFlows[i].conditions[j].startingIP = startIp;
