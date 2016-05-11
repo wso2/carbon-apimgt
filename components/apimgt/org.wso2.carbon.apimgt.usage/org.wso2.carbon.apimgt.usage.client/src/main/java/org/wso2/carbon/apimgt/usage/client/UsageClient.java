@@ -322,35 +322,38 @@ public class UsageClient {
             String groupAndOrder = " group by app.created_time order by app.created_time asc";
             String time = " and app.created_time between '" + fromDate + "' and '" + toDate + "' ";
 
-            if ("All".equals(apiName)) {
+            if ("All".equals(apiName) && "All".equals(developer)) {
                 from = "from AM_APPLICATION AS app,AM_SUBSCRIBER sub ";
-            } else {
+            }else{
                 from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
                 where += " and api.api_id=subc.api_id and app.application_id=subc.application_id";
-                where += " and api.api_name='" + apiName + "'";
-                /*if (!"allAPIs".equals(apiFilter)) {
-                    where += " and api.api_provider = '" + provider + "' ";
-                } else {
-                    APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
-                    List<API> apiList = apiProvider.getAllAPIs();
-                    StringBuilder apis = new StringBuilder(" and api.context in (");
-                    if (apiList.size() > 0) {
-                        apis.append("'").append(apiList.get(0).getContext()).append("'");
-                    }
-                    for (int i = 1; i < apiList.size(); i++) {
-                        apis.append(", '").append(apiList.get(i).getContext()).append("' ");
-                    }
-                    apis.append(") ");
-                    where += apis.toString();
-                }*/
-            }
 
-            if (!"All".equals(developer)) {
-                where += " and sub.user_id='" + developer + "'";
+                if ("allAPIs".equals(apiFilter)) {
+                    List<String> providerList = getApiProviders(provider);
+                    StringBuilder providers = new StringBuilder(" and api.api_provider in (");
+                    if (providerList.size() > 0) {
+                        providers.append("'").append(providerList.get(0)).append("'");
+                    }
+                    for (int i = 1; i < providerList.size(); i++) {
+                        providers.append(", '").append(providerList.get(i)).append("' ");
+                    }
+                    providers.append(") ");
+                    where += providers.toString();
+                }else{
+                    where += " and api.api_provider = '" + provider + "' ";
+                }
+
+                if (!"All".equals(apiName)) {
+                    where += " and api.api_name = '" + apiName + "' ";
+                }
+
+                if (!"All".equals(developer)) {
+                    where += " and sub.user_id = '" + developer + "' ";
+                }
+
             }
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
-
             //execute
             rs = statement.executeQuery();
 
@@ -382,7 +385,6 @@ public class UsageClient {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-
                 }
             }
         }
@@ -419,14 +421,13 @@ public class UsageClient {
             if (!"allAPIs".equals(apiFilter)) {
                 where += " and api.api_provider = '" + provider + "' ";
             } else {
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
-                Object[] providerList = apiProvider.getAllProviders().toArray();
+                List<String> providerList = getApiProviders(provider);
                 StringBuilder providers = new StringBuilder(" and api.api_provider in (");
-                if (providerList.length > 0) {
-                    providers.append("'").append(((Provider) providerList[0]).getName()).append("'");
+                if (providerList.size() > 0) {
+                    providers.append("'").append(providerList.get(0)).append("'");
                 }
-                for (int i = 1; i < providerList.length; i++) {
-                    providers.append(", '").append(((Provider) providerList[i]).getName()).append("' ");
+                for (int i = 1; i < providerList.size(); i++) {
+                    providers.append(", '").append(providerList.get(i)).append("' ");
                 }
                 providers.append(") ");
                 where += providers.toString();
@@ -569,12 +570,13 @@ public class UsageClient {
     /**
      * List set of subscribers in the current logged user tenant domain
      *
-     * @param provider logged user
-     * @param limit    result limit
+     * @param provider  logged user
+     * @param apiFilter Stat type
+     * @param limit     result limit
      * @return list of subscribers
      * @throws APIMgtUsageQueryServiceClientException throws if db exception occur
      */
-    public static List<DeveloperListDTO> getDeveloperList(String provider, int limit)
+    public static List<DeveloperListDTO> getDeveloperList(String provider, String apiFilter, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -584,8 +586,17 @@ public class UsageClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
             int tenantId = APIUtil.getTenantId(provider);
-            String query = "select subc.user_id as id, subc.email_address as email, subc.created_time as time from "
-                    + "AM_SUBSCRIBER subc where TENANT_ID=" + tenantId;
+            String query;
+            if ("allAPIs".equals(apiFilter)) {
+                query = "select subc.user_id as id, subc.email_address as email, subc.created_time as time from "
+                        + "AM_SUBSCRIBER subc where TENANT_ID=" + tenantId;
+            } else {
+                query = "select sub.user_id as id, sub.email_address as email, sub.created_time as time "
+                        + "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION subc "
+                        + "where api.api_id=subc.api_id and app.application_id=subc.application_id and "
+                        + "sub.subscriber_id=app.subscriber_id and api.api_provider='" + provider
+                        + "' and sub.TENANT_ID=" + tenantId;
+            }
             statement = connection.prepareStatement(query);
             //execute
             rs = statement.executeQuery();
@@ -658,6 +669,64 @@ public class UsageClient {
             return list;
         } catch (APIManagementException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        }
+    }
+
+    /**
+     * get list all providers of the current login user
+     *
+     * @param provider provider name of the current tenant
+     * @return list of api providers
+     * @throws SQLException                           throws if any db exceptions occurred
+     * @throws APIMgtUsageQueryServiceClientException throws if any other error occurred
+     */
+    private static List<String> getApiProviders(String provider)
+            throws SQLException, APIMgtUsageQueryServiceClientException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            //get the connection
+            connection = APIMgtDBUtil.getConnection();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            String query;
+
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%'";
+            } else {
+                query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER LIKE '%@" + tenantDomain + "'";
+            }
+            statement = connection.prepareStatement(query);
+            //execute
+            rs = statement.executeQuery();
+            List<String> list = new ArrayList<String>();
+            //iterate over the results
+            while (rs.next()) {
+                String providerName = rs.getString("API_PROVIDER");
+                list.add(providerName);
+            }
+            return list;
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 var chart;
 var chartData;
 var apiFilter = "allAPIs";
-var selectedDeveloper = "All";
+
 function update_chart(data) {
     // Update the SVG with the new data and call chart
     chartData.datum(data).transition().duration(500).call(chart);
@@ -57,8 +57,10 @@ $(document).ready(function(){
     });
 
     $("#apiFilter").change(function (e) {
+        $('#developerSelect').empty();
+        $('#developerSelect').append('<option> All </option>');
         apiFilter = this.value;
-        $("body").trigger("update_chart");
+        developerFilter();
     });
 
     nv.addGraph(function () {
@@ -91,12 +93,14 @@ $(document).ready(function(){
         chartData.transition().duration(500).call(chart);
 
         nv.utils.windowResize(chart.update);
-        $("body").trigger("update_chart");
         return chart;
     });
 
     function developerFilter(){
-        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag", { },
+        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag",
+            {
+                "apiFilter": apiFilter
+            },
             function (json) {
             if (!json.error) {
             var developerName = '';
@@ -106,6 +110,7 @@ $(document).ready(function(){
                 $('#developerSelect')
                    .append(developerName)
                    .selectpicker('refresh');
+                $("body").trigger("update_chart");
 
                 $('#developerSelect').on('change', function() {
                     selectedDeveloper = this.value;//selected value
@@ -130,7 +135,7 @@ $(document).ready(function(){
             {
                "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD'),
                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD'),
-               "developer": selectedDeveloper,
+               "developer": $('#developerSelect').val(),
                "apiFilter": apiFilter
             },
             function (json) {
