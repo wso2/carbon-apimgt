@@ -923,8 +923,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
 
-            PaginationContext.init(0, limit, "DESC", "timestamp", Integer.MAX_VALUE);
-        	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+            PaginationContext.init(0, limit, APIConstants.REGISTRY_ARTIFACT_SEARCH_DESC_ORDER,
+                    APIConstants.REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME, Integer.MAX_VALUE);
+            Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         	listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
         		add(APIConstants.PUBLISHED);
         	}});

@@ -1202,4 +1202,7 @@ public final class APIConstants {
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
     }
+
+    public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
+    public static final String REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME = "meta_created_date";
 }
