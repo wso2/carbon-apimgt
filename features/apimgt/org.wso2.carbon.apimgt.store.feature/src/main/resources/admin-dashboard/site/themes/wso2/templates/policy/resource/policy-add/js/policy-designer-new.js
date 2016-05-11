@@ -62,6 +62,7 @@ var addPolicy = function () {
     var executionFlow = {
         "id": 0,
         "enabled": false,
+        "description": "",
         "quotaPolicy": {
             "type": "",
             "limit": {
@@ -106,6 +107,7 @@ var addPolicy = function () {
 
     var source = $("#designer-policy-template").html();
     executionFlow.id = index;
+    executionFlow.description = "Sample description about condition group";
     Handlebars.partials['designer-policy-template'] = Handlebars.compile(source);
     var context = {
         "executionFlow": executionFlow
@@ -132,6 +134,8 @@ $(document).ready(function () {
             }
         });
     });
+    $('body').on('click', '.editable-click', function(e){e.stopPropagation();});
+    $('body').on('click', '.editable-submit', function(e){e.stopPropagation();});
 });
 
 var showAdvanceOperation = function (operation, button, id) {
@@ -371,7 +375,8 @@ var addPolicyToBackend = function () {
     for (var i = 0; i < apiPolicyNew.executionFlows.length; i++) {
         executionFlow = apiPolicyNew.executionFlows[i];
         executionFlowId = executionFlow.id;
-        executionFlow = apiPolicyNew.executionFlows[i].enabled = true;
+        apiPolicyNew.executionFlows[i].description = $("#executionFlow-desc-" + executionFlowId).text();
+        apiPolicyNew.executionFlows[i].enabled = true;
         for (var j = 0; j < apiPolicyNew.executionFlows[i].conditions.length; j++) {
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "IP") {
                 checked = $('#ip-condition-checkbox-' + executionFlowId).is(':checked')
