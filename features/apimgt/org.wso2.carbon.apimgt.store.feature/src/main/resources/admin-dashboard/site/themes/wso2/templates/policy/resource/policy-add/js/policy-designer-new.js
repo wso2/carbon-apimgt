@@ -192,6 +192,8 @@ var addQueryParam = function (id) {
     var source = $("#designer-query-pram-table-content").html();
     var paramName = $('#query-param-name-' + id).val();
     var paramValue = $('#query-param-value-' + id).val();
+    var isDuplicate = false;
+    var requiredMsg = $('#errorMsgRequired').val();
 
     if(!validateInput(paramName,  $('#query-param-name-' + id), requiredMsg)) {
         return false;
@@ -200,7 +202,21 @@ var addQueryParam = function (id) {
     if(!validateInput(paramValue,   $('#query-param-value-' + id), requiredMsg)) {
         return false;
     }
-    var requiredMsg = $('#errorMsgRequired').val();
+
+    var table = $("#query-param-value-table-content-" + executionFlowId + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        queryParamName = $tds.eq(0).text();
+        queryParamVal = $tds.eq(1).text();
+        if(queryParamName == paramName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Query Param");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
+    }
 
     var tableRow = {
         "name": paramName,
@@ -234,13 +250,28 @@ var addHeader = function (id) {
     var headerName = $('#header-name-' + id).val();
     var headerValue = $('#header-value-' + id).val();
     var requiredMsg = $('#errorMsgRequired').val();
-
+    var isDuplicate = false;
     if(!validateInput(headerName,  $('#header-name-' + id), requiredMsg)) {
         return false;
     }
 
     if(!validateInput(headerValue,   $('#header-value-' + id), requiredMsg)) {
         return false;
+    }
+
+    var table = $("#header-value-table-content-" + id + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        headerNameT = $tds.eq(0).text();
+        headerValT = $tds.eq(1).text();
+        if(headerNameT == headerName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Header");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
     }
 
     var tableRow = {
@@ -274,6 +305,7 @@ var addJwtClaim = function (id) {
     var source = $("#designer-jwt-claim-value-table-content").html();
     var claimName = $('#jwt-claim-name-' + id).val();
     var claimValue = $('#jwt-claim-value-' + id).val();
+    var isDuplicate = false;
     var tableRow = {
         "name": claimName,
         "value": claimValue,
@@ -287,6 +319,21 @@ var addJwtClaim = function (id) {
 
     if(!validateInput(claimValue,   $('#jwt-claim-value-' + id), requiredMsg)) {
         return false;
+    }
+
+    var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        jwtClaimName = $tds.eq(0).text();
+        jwtClaimValue = $tds.eq(1).text();
+        if(jwtClaimName == claimName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Claim");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
     }
 
     Handlebars.partials['designer-jwt-claim-value-table-content'] = Handlebars.compile(source);
@@ -569,6 +616,21 @@ function validateInput(text, element, errorMsg){
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
         return false;
     }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
+function addDuplicateError(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text == "duplicate"){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    } else{
         $('#label'+elementId).remove();
         element.css("border", "1px solid #cccccc");
         return true;
