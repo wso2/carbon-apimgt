@@ -282,7 +282,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
-                                    if (isHardLimitThrottled(synCtx)) {
+                                    if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
                                         isThrottled = true;
 
                                     } else {
@@ -750,7 +750,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         OMElement parsedPolicy = null;
-
         StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
                 ".org/ws/2004/09/policy\" " +
                 "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
@@ -790,20 +789,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 " </wsp:Policy>\n";
     }
 
-    private boolean isHardLimitThrottled(MessageContext synCtx) {
+    private boolean isHardLimitThrottled(MessageContext synCtx, AuthenticationContext authContext, String apiContext, String apiVersion) {
         boolean status = false;
         if (StringUtils.isNotEmpty(sandboxMaxCount) || StringUtils.isNotEmpty(productionMaxCount)) {
-            ThrottleContext hardThrottleContext = throttle.getThrottleContext(
-                    APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
+            ThrottleContext hardThrottleContext = throttle.getThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
             try {
-                String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-                String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
-                        getAxis2MessageContext();
+                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
                 ConfigurationContext cc = axis2MC.getConfigurationContext();
                 apiContext = apiContext != null ? apiContext : "";
                 apiVersion = apiVersion != null ? apiVersion : "";
-                AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
 
                 if (hardThrottleContext != null && authContext.getKeyType() != null) {
                     String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();
