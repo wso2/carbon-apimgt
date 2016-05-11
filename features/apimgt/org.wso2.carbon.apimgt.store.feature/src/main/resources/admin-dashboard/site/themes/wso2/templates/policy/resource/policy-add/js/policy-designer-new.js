@@ -38,8 +38,8 @@ var changeStatusIcon = function(flowId, type, checkBoxOb) {
         spanId = "queryparam-condition-configured-" + flowId;
         iconId = "queryparam-condition-configured-icon-" + flowId;
     } else if(type == "JWTClaim") {
-        spanId = "ip-condition-configured-" + flowId;
-        iconId = "ip-condition-configured-icon-" + flowId;
+        spanId = "claim-condition-configured-" + flowId;
+        iconId = "claim-condition-configured-icon-" + flowId;
     } else {
         return;
     }
