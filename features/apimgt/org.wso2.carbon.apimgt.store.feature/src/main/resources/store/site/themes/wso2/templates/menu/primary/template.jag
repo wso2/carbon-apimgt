@@ -9,7 +9,7 @@
 	                    <li class="purple active">
 	                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs <i class="fw fw-up fw-stack-1x toggle-icon-up remove-float"></i></span></a>
 	                        <ul class="sublevel-menu" style="display:block">
-	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-api icon"></i><span class="name">Prototyped APIs</span></a></li>
+	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-prototype icon"></i><span class="name">Prototyped APIs</span></a></li>
 	                        </ul>
 	                    </li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>                    
@@ -30,7 +30,7 @@
 	                  	<li class="purple">
 	                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
 	                        <ul class="sublevel-menu">
-	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-api icon"></i><span class="name">Prototyped APIs</span></a></li>
+	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-prototype icon"></i><span class="name">Prototyped APIs</span></a></li>
 	                        </ul>
 	                    </li>
 	                    <% if (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super") { %>	                    	
@@ -50,7 +50,7 @@
 	                  	<li class="purple">
 	                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
 	                        <ul class="sublevel-menu">
-	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-api icon"></i><span class="name">Prototyped APIs</span></a></li>
+	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-prototype icon"></i><span class="name">Prototyped APIs</span></a></li>
 	                        </ul>
 	                    </li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>
@@ -76,7 +76,7 @@
 	                   	<li class="purple">
 	                        <a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
 	                        <ul class="sublevel-menu">
-	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-api icon"></i><span class="name">Prototyped APIs</span></a></li>
+	                            <li><a href="<%= jagg.urlTenanted("/site/pages/list-prototyped-apis.jag") %>"><i class="fw fw-prototype icon"></i><span class="name">Prototyped APIs</span></a></li>
 	                        </ul>
 	                    </li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>
