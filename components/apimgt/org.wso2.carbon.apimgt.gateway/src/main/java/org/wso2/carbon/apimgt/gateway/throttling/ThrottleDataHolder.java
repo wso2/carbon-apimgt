@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ThrottleDataHolder {
 
     private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
-    private String streamID;
     private Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap<String, String>();
     private Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap<String, String>();
     private Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap<String, String>();
