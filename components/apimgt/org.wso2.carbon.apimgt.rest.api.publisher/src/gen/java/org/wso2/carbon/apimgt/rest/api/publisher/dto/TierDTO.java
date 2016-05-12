@@ -133,9 +133,9 @@ public class TierDTO  {
 
   
   /**
-   * By making this attribute to false, you are capabale of sending requests \neven if the request count exceeded within a unit time
+   * By making this attribute to false, you are capabale of sending requests\neven if the request count exceeded within a unit time
    **/
-  @ApiModelProperty(required = true, value = "By making this attribute to false, you are capabale of sending requests \neven if the request count exceeded within a unit time")
+  @ApiModelProperty(required = true, value = "By making this attribute to false, you are capabale of sending requests\neven if the request count exceeded within a unit time")
   @JsonProperty("stopOnQuotaReach")
   public Boolean getStopOnQuotaReach() {
     return stopOnQuotaReach;
