@@ -1025,7 +1025,7 @@
         <carbon.kernel.version>4.4.6-SNAPSHOT</carbon.kernel.version>
 	<carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.5.2</carbon.commons.version>
+        <carbon.commons.version>4.5.3</carbon.commons.version>
         <carbon.registry.version>4.5.4</carbon.registry.version>
         <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
 
@@ -1039,7 +1039,7 @@
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
-        <carbon.multitenancy.version>4.5.1</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.5.2</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.0.6-SNAPSHOT</siddhi.version>
@@ -1055,7 +1055,7 @@
         <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.5.8, 4.6.0)</carbon.governance.imp.pkg.version>
         <carbon.registry.package.import.version.range>[4.4.0, 4.6.0)</carbon.registry.package.import.version.range>
-        <carbon.commons.imp.pkg.version>[5.0.0, 5.2.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.imp.pkg.version>[4.5.3, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.import.version.range>[4.4.1, 4.6.0)</carbon.platform.package.import.version.range>

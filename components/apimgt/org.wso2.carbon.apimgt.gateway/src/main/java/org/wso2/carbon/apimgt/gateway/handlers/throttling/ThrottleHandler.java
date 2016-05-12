@@ -305,7 +305,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
                                 boolean keyTemplatesAvailable = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isKeyTemplatesPresent();
-                                if (keyTemplatesAvailable && !validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
+                                if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
                                         subscriptionLevelThrottleKey, apiLevelThrottleKey, subscriptionLevelThrottleKey, apiContext,
                                         apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
                                         ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap())) {
