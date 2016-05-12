@@ -58,6 +58,9 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.List;
@@ -78,6 +81,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private static volatile ThrottleDataPublisher throttleDataPublisher = null;
     private String policyKeyApplication = null;
     private boolean subscriptionLevelSpikeArrestEnabled;
+    private static final String THROTTLE_MAIN = "THROTTLE_MAIN";
+    private static final String INIT_SPIKE_ARREST = "INIT_SPIKE_ARREST";
+    private static final String CEP_THROTTLE = "CEP_THROTTLE";
+    private static final String HANDLE_THROTTLE_OUT = "HANDLE_THROTTLE_OUT";
+    private static final String RESOURCE_THROTTLE = "RESOURCE_THROTTLE";
+    private static final String BLOCKED_TEST = "BLOCKED_TEST";
+
     /**
      * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
      */
@@ -176,13 +186,19 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             authorizedUser = authContext.getUsername();
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
+
             //Do blocking if there are blocking conditions present
             if(ServiceReferenceHolder.getInstance().getThrottleDataHolder().isBlockingConditionsPresent()) {
                 ipLevelBlockingKey = apiTenantDomain + ":" + getClientIp(synCtx);
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+                Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                        APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), BLOCKED_TEST));
+                Timer.Context context = timer.start();
                 isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder().isRequestBlocked(
                         apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
+                context.stop();
             }
+
 
             if (isBlockedRequest) {
                 String msg = "Request blocked as it violates defined blocking conditions, for API: " + apiContext +
@@ -228,6 +244,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         }
                         //If tier is not unlimited only throttling will apply.
                         resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
+
+                        Timer timer1 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO,
+                                                          MetricManager.name(
+                                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), RESOURCE_THROTTLE));
+                        Timer.Context
+                                context1 = timer1.start();
+
                         if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
                             //Then we will apply resource level throttling
                             for (String conditionString : resourceLevelThrottleConditions) {
@@ -248,11 +271,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             log.warn("Unable to find throttling information for resource and http verb. Throttling "
                                     + "will not apply");
                         }
+
+                        context1.stop();
                     }
 
                 }
 
                 if (!isApiLevelThrottled) {
+
+                    Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                            APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), RESOURCE_THROTTLE));
+                    Timer.Context context2 = timer2.start();
+
                     //Here check resource level throttled. If throttled then call handler throttled and pass.
                     //Else go for subscription level and application level throttling
                     //if resource level not throttled then move to subscription level
@@ -331,6 +361,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                 APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                     }
+                    context2.stop();
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Request throttled at api level for throttle key" + apiLevelThrottleKey);
@@ -359,7 +390,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     public boolean handleRequest(MessageContext messageContext) {
 
-        return doThrottle(messageContext);
+        Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
+        Timer.Context context3 = timer3.start();
+        boolean state = doThrottle(messageContext);
+        context3.stop();
+        return state;
     }
 
     /**
@@ -390,7 +426,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 getAxis2MessageContext();
         ConfigurationContext cc = axis2MC.getConfigurationContext();
         if (subscriptionLevelSpikeArrestEnabled) {
+            Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), INIT_SPIKE_ARREST));
+            Timer.Context context = timer.start();
             initThrottleForSubscriptionLevelSpikeArrest(messageContext);
+            context.stop();
         }
         boolean isThrottled = false;
 
@@ -399,11 +439,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //      getAxis2MessageContext();
             //ConfigurationContext cc = axis2MC.getConfigurationContext();
             long start = System.nanoTime();
+            Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), CEP_THROTTLE));
+            Timer.Context context = timer.start();
             isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
+            context.stop();
         }
         if (isThrottled) {
-
+            Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), HANDLE_THROTTLE_OUT));
+            Timer.Context context = timer.start();
             handleThrottleOut(messageContext);
+            context.stop();
             return false;
         }
         long end = System.currentTimeMillis();
