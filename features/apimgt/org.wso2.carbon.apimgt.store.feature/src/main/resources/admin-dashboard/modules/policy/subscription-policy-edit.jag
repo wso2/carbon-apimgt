@@ -30,6 +30,29 @@ var saveSubscriptionPolicy = function (action, policyName, description, defaultQ
     }
 };
 
+var updateThrottleTierPermissions = function (tierPermission) {
+    var result,  length,log = new Log(),
+            list = [],
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.updateThrottleTierPermissions(tierPermission);
+        if (log.isDebugEnabled()) {
+            log.debug("updateSubscription : " + stringify(apis));
+        }
+
+        return {
+            error:false,
+            update:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
                                       stopOnQuotaReach, tierPlan, attributes) {

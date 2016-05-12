@@ -17,6 +17,14 @@ jagg.block("policy/subscription/manage", {
 
         // we put results to the session.
         session.put("subscriptionPolicies", subscriptionPolicies);
+
+        var tierPermissions = session.get("throttleTierPermissions");
+        if (!tierPermissions) {
+            var result = jagg.module("policy").getThrottleTierPermissions();
+            tierPermissions = result.tierPermissions;
+            session.put("throttleTierPermissions", tierPermissions);
+        }
+
         return {
             "subscriptionPolicies":subscriptionPolicies
         };

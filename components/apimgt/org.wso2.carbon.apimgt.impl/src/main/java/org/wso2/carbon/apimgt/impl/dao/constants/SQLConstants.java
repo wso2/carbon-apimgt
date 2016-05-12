@@ -864,29 +864,29 @@ public class SQLConstants {
     //--------------------New tier permission management
 
     public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
-            " SELECT TIER_PERMISSIONS_ID " +
-            " FROM AM_TIER_PERMISSIONS " +
+            " SELECT THROTTLE_TIER_PERMISSIONS_ID " +
+            " FROM AM_THROTTLE_TIER_PERMISSIONS " +
             " WHERE TIER = ? AND " + "TENANT_ID = ?";
 
     public static final String ADD_THROTTLE_TIER_PERMISSION_SQL =
             " INSERT INTO" +
-            "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+            "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
             " VALUES(?, ?, ?, ?)";
 
     public static final String UPDATE_THROTTLE_TIER_PERMISSION_SQL =
             " UPDATE" +
-            "   AM_TIER_PERMISSIONS " +
+            "   AM_THROTTLE_TIER_PERMISSIONS " +
             " SET " +
             "   TIER = ?, " +
             "   PERMISSIONS_TYPE = ?," +
             "   ROLES = ? " +
             " WHERE " +
-            "   TIER_PERMISSIONS_ID = ? " +
+            "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
             "   AND TENANT_ID = ?";
 
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
-            " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
-            " FROM AM_TIER_PERMISSIONS " +
+            " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
+            " FROM AM_THROTTLE_TIER_PERMISSIONS " +
             " WHERE TENANT_ID = ?";
 
   //--------------------
