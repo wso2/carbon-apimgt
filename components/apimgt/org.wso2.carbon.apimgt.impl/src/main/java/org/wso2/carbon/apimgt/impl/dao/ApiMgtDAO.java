@@ -2802,6 +2802,88 @@ public class ApiMgtDAO {
         return tierPermission;
     }
 
+    public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+            throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement insertOrUpdatePS = null;
+        ResultSet resultSet = null;
+        int tierPermissionId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL;
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
+            }
+
+            if (tierPermissionId == -1) {
+                String query = SQLConstants.ADD_THROTTLE_TIER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, tierName);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, roles);
+                insertOrUpdatePS.setInt(4, tenantId);
+                insertOrUpdatePS.execute();
+            } else {
+                String query = SQLConstants.UPDATE_THROTTLE_TIER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, tierName);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, roles);
+                insertOrUpdatePS.setInt(4, tierPermissionId);
+                insertOrUpdatePS.setInt(5, tenantId);
+                insertOrUpdatePS.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(insertOrUpdatePS, null, null);
+        }
+    }
+
+    public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        Set<TierPermissionDTO> tierPermissions = new HashSet<TierPermissionDTO>();
+
+        try {
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSIONS_SQL;
+
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setInt(1, tenantId);
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                TierPermissionDTO tierPermission = new TierPermissionDTO();
+                tierPermission.setTierName(resultSet.getString("TIER"));
+                tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                String roles = resultSet.getString("ROLES");
+                if (roles != null && !roles.isEmpty()) {
+                    String roleList[] = roles.split(",");
+                    tierPermission.setRoles(roleList);
+                }
+                tierPermissions.add(tierPermission);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermissions;
+    }
+
     private Set<String> getApplicationKeys(int applicationId, String getKeysSql) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
