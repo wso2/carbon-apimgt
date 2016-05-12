@@ -175,10 +175,11 @@ public final class ThrottlingDBUtil {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlQuery = "select THROTTLEKEY from ThrottleTable WHERE THROTTLEKEY = '"+query+"'";
+        String sqlQuery = "select THROTTLEKEY from ThrottleTable WHERE THROTTLEKEY = ? ";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, query);
             rs = ps.executeQuery();
             while (rs.next()) {
                 String throttleKey = rs.getString("THROTTLEKEY");
