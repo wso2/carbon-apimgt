@@ -83,14 +83,14 @@
 				<div class="panel-body">
 					<form class="form-horizontal" id="startFromExistingSOAPEndpoint-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
 						<div class="form-group">
-	                               <div class="col-sm-8">
+	                               <div class="col-sm-12">
 	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
 	                                   <label for="wsdl-url" class="error wsdlError" style="display:none">Please use a valid wsdl endpoint</label>
 	                               </div>
 	                        </div>
 	                        <input name="action" value="start" type="hidden"/>
 	                        <input name="type" value="soap" type="hidden"/>
-	                        <div class = "col-sm-12"></div>
+	                        <div class="col-sm-12"></div>
 	                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
 					</form>
 				</div>
