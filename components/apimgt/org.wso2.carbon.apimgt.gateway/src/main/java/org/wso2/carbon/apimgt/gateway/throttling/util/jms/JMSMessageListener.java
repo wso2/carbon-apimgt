@@ -30,6 +30,7 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,14 +78,16 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) {
-        if (log.isDebugEnabled()) {
-            log.debug("Received Key -  throttleKey : " + map.get("throttleKey").toString() + " , " +
-                      "isThrottled :" + map.get("isThrottled").toString());
-        }
 
         String throttleKey = map.get("throttleKey").toString();
         String throttleState = map.get("isThrottled").toString();
         long timeStamp = Long.parseLong(map.get("expiryTimeStamp").toString());
+
+        if (log.isDebugEnabled()) {
+            log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
+                      "isThrottled :" + throttleState + " , expiryTime : "+ new Date(timeStamp).toString());
+        }
+
         if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     addThrottleData(throttleKey, timeStamp);
