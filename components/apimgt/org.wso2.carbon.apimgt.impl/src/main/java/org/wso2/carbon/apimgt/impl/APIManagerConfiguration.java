@@ -620,6 +620,7 @@ public class APIManagerConfiguration {
                                 (globalEngineWSConnectionInitialDelayElement
                                         .getText()));
                     }
+                    globalEngineWSConnection.setEnabled(true);
                 }
                 throttleProperties.setGlobalEngineWSConnection(globalEngineWSConnection);
 
@@ -721,6 +722,7 @@ public class APIManagerConfiguration {
                                 (jmsConnectionInitialDelayElement
                                         .getText()));
                     }
+                    jmsConnectionProperties.setEnabled(true);
                     throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 }
                 //Configuring policy deployer
@@ -826,6 +828,7 @@ public class APIManagerConfiguration {
                     }
                     blockConditionRetrieverConfiguration.setPassword(APIUtil.replaceSystemProperty
                             (blockConditionRetrieverServicePassword));
+                    blockConditionRetrieverConfiguration.setEnabled(true);
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
             }
