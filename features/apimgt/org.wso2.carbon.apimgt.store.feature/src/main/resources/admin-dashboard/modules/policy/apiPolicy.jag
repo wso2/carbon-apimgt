@@ -155,6 +155,7 @@ var getExecutionFlowTemplate = function () {
     var executionFlow = {
         "id": 0,
         "enabled": false,
+        "description": "",
         "quotaPolicy": {
             "type": "",
             "limit": {
@@ -245,6 +246,7 @@ var jsonToObject = function (policy) {
             var id = pipeline[i].id;
             var conditionsList = new ArrayList();
             pipe.setEnabled(enabled);
+            pipe.setDescription(pipeline[i].description);
             quotaPolicy.setType(quotaPolicyType);
             if (quotaPolicyType == "requestCount") {
                 requestCountLimit = new RequestCountLimit();
@@ -441,6 +443,7 @@ var objectToJson = function (policy) {
             executionFlow = getExecutionFlowTemplate();
             pipe = pipes.get(i);
             executionFlow.id = pipe.getId();
+            executionFlow.description = pipe.getDescription();
             type = pipe.getQuotaPolicy().getType();
             if (type == "requestCount") {
                 executionFlow.quotaPolicy.type = type;

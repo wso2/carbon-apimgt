@@ -239,9 +239,9 @@
                     </span>
                 </label>
                 <div>
-                    <div class="heading"><%=i18n.localize("executionFlow")%></div>
+                    <div class="heading"><%=i18n.localize("conditionGroup")%></div>
                     <div class="description truncate title" title="">
-                        <a href="#" id="executionFlow-desc-{{executionFlow.id}}" data-type="text" data-pk="1" data-title="Enter Description">Description for flow {{executionFlow.id}}</a>
+                        <a href="#" id="executionFlow-desc-{{executionFlow.id}}" data-type="text" data-pk="1" data-title="Enter Description">{{executionFlow.description}}</a>
                     </div>
                 </div>
                 <div class="clearfix"></div>
