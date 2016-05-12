@@ -88,17 +88,11 @@ public class KeyTemplateRetriever extends TimerTask {
 
 
     public void loadKeyTemplatesFromWebService() {
-
         List keyListMap = Arrays.asList(retrieveKeyTemplateData());
-        ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().clear();
-        ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap().putAll(
-                GatewayUtils.generateMap(keyListMap));
-
-
+        ServiceReferenceHolder.getInstance().getThrottleDataHolder().addKeyTemplateFromMap(GatewayUtils.generateMap(keyListMap));
     }
 
     public void startKeyTemplateDataRetriever() {
-        
         new Timer().schedule(this, ServiceReferenceHolder
                 .getInstance().getThrottleProperties().getBlockCondition().getInitDelay());
     }

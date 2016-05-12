@@ -1329,7 +1329,7 @@ public final class APIUtil {
      * @return
      * @throws Exception
      */
-    private static boolean isWSDL2Document(String url) throws APIManagementException {
+    public static boolean isWSDL2Document(String url) throws APIManagementException {
         URL wsdl = null;
         boolean isWsdl2 = false;
         try {

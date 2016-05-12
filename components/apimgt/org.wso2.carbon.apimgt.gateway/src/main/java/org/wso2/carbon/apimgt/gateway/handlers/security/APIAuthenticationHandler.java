@@ -144,9 +144,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
                     APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-            if (log.isDebugEnabled()) {
-                log.debug("API authentication failed with error " + e.getErrorCode(), e);
-            }
+
+            log.error("API authentication failed with error " + e.getErrorCode(), e);
+
             handleAuthFailure(messageContext, e);
         } finally {
             publishExecutionTime(messageContext, executionStartTime,"Authentication");

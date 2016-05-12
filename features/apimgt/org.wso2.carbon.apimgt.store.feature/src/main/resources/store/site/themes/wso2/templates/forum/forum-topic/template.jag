@@ -27,7 +27,7 @@
   </h2>
   <br>
   <div>
-    <input id="forum_topic_subject_edit_input" type="text" class="form-control input-lg" style="display: none" value="{{ replies.topic.0.subject}}">
+    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control input-lg" style="display: none" value="{{ replies.topic.0.subject}}">
     </input>
   </div>
 

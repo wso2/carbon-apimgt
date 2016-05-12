@@ -43,7 +43,7 @@
             </div>
             <div class="cDivTabInput">
 
-                    <input type="text" class="input-large required validInput noSpace" id="iSandboxAuthAppName" name="iSandboxAuthAppName" autofocus="autofocus" value="<%= clientNameSandBox %>"/>
+                    <input title="clientNameSandBox" type="text" class="input-large required validInput noSpace" id="iSandboxAuthAppName" name="iSandboxAuthAppName" autofocus="autofocus" value="<%= clientNameSandBox %>"/>
             </div>
         </div>
 
@@ -54,7 +54,7 @@
             <div class="cDivTabInput input_fields_wrap_sandbox">
 
                 <div class="cDivCallBackUrlElementSandBox cDivElementFirst">
-                    <input class="input-large icallbackURLsSandBox" type="text" name=callbackURLsSandBox[]">
+                    <input title="callbackURLsSandBox" class="input-large icallbackURLsSandBox" type="text" name=callbackURLsSandBox[]">
                 </div>
                 <div class="cDivPlusIconSandBox">
                     add
@@ -63,7 +63,7 @@
                 <% if(callbackURLsSandBox != null) %>
                     <%  for(var x in callbackURLsSandBox){ %>
 
-                        <div class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" value="<%=callbackURLsSandBox[x] %>" name="callbackURLsSandBox[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox">Remove</div></div>
+                        <div title="callbackURLsSandBox" class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" value="<%=callbackURLsSandBox[x] %>" name="callbackURLsSandBox[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox">Remove</div></div>
 
                     <%  }  %>
                 %>
@@ -78,7 +78,7 @@
             <div class="cDivTabInput input_fields_wrap_sandbox_contacts">
 
                 <div class="cDivContactSandBoxElement cDivElementFirst">
-                    <input class="input-large iContactsSandBox" type="text" name=iSandboxAuthAppContact[]">
+                    <input class="input-large iContactsSandBox" title="sandboxAuthAppContact" type="text" name=iSandboxAuthAppContact[]">
                 </div>
                 <div class="cDivPlusIconSandBoxContact">
                     add
@@ -87,7 +87,7 @@
                 <% if(iSandboxAuthAppContact != null) %>
                     <%  for(var x in iSandboxAuthAppContact){ %>
 
-                        <div class="cDivContactSandBoxElement"><input type="text" class="input-large iContactsSandBox" value="<%=iSandboxAuthAppContact[x] %>" name="iSandboxAuthAppContact[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">Remove</div></div>
+                        <div class="cDivContactSandBoxElement"><input type="text" title="contactsSandBox" class="input-large iContactsSandBox" value="<%=iSandboxAuthAppContact[x] %>" name="iSandboxAuthAppContact[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">Remove</div></div>
 
                     <%  }  %>
                 %>

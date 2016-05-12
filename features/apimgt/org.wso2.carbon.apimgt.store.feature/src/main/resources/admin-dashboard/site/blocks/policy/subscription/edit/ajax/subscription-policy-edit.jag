@@ -33,11 +33,25 @@ include("/jagg/jagg.jag");
             mod = jagg.module("policy");
 
             result = mod.addSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
+           
+            //add permissions            
+            var tierPermission = {};
+            tierPermission.policyName = policyName;
+            tierPermission.permissiontype = request.getParameter("permissionType", "UTF-8");
+            tierPermission.roles = request.getParameter("roles", "UTF-8");            
+            permissionResult = mod.updateThrottleTierPermissions(tierPermission);             
+            session.remove("throttleTierPermissions");
+
             if (result.error) {
                 obj = {
                     error:true,
                     message:msg.error.backendError(action)
                 };
+            } else if (permissionResult.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                   };                
             } else {
                 obj = {
                     error:false,

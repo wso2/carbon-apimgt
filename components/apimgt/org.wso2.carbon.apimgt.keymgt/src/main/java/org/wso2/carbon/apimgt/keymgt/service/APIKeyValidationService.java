@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.*;
 
@@ -85,6 +87,10 @@ public class APIKeyValidationService extends AbstractAdmin {
                                                String requiredAuthenticationLevel, String clientDomain,
                                                String matchingResource, String httpVerb)
             throws APIKeyMgtException, APIManagementException {
+
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_MAIN"));
+        Timer.Context timerContext = timer.start();
 
         MessageContext axis2MessageContext = MessageContext.getCurrentMessageContext();
         Map headersMap = null;
@@ -143,24 +149,41 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
 
         log.debug("Before calling Validate Token method...");
+
+        Timer timer2 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_TOKEN"));
+        Timer.Context timerContext2 = timer2.start();
         boolean state = keyValidationHandler.validateToken(validationContext);
+        timerContext2.stop();
         log.debug("State after calling validateToken ... " + state);
 
         if (state) {
+            Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
+            Timer.Context timerContext3 = timer3.start();
             state = keyValidationHandler.validateSubscription(validationContext);
+            timerContext3.stop();
         }
 
         log.debug("State after calling validateSubscription... " + state);
 
         if (state) {
+            Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
+            Timer.Context timerContext4 = timer4.start();
             state = keyValidationHandler.validateScopes(validationContext);
+            timerContext4.stop();
         }
 
         log.debug("State after calling validateScopes... " + state);
 
         if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled() 
                 && validationContext.getValidationInfoDTO().getEndUserName() != null) {
+            Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
+            Timer.Context timerContext5 = timer5.start();
             keyValidationHandler.generateConsumerToken(validationContext);
+            timerContext5.stop();
         }
         log.debug("State after calling generateConsumerToken... " + state);
 
@@ -175,6 +198,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (log.isDebugEnabled()) {
             log.debug("APIKeyValidationInfoDTO before returning : " + validationContext.getValidationInfoDTO());
         }
+
+        timerContext.stop();
         return validationContext.getValidationInfoDTO();
     }
 
@@ -189,9 +214,12 @@ public class APIKeyValidationService extends AbstractAdmin {
      */
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)
             throws APIKeyMgtException, APIManagementException {
-
-        return ApiMgtDAO.getInstance().getAllURITemplates(context, version);
-
+        Timer timer6 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_URI_TEMPLATE"));
+        Timer.Context timerContext6 = timer6.start();
+        ArrayList<URITemplate> templates = ApiMgtDAO.getInstance().getAllURITemplates(context, version);
+        timerContext6.stop();
+        return templates;
     }
 
     private void logMessageDetails(MessageContext messageContext, APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {

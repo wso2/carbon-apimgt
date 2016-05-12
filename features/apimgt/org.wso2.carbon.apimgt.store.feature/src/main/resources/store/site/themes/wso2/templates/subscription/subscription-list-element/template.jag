@@ -156,7 +156,7 @@
 													<% if(lenS > 0){ %>
 												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" data-target="#scopePopupTarget" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
                                             						            <% } %>		
-													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
+													Validity Time: <input type="text" title="refreshProdValidityTime" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<a class="icon-question-sign help_popup_prod"></a>
@@ -211,7 +211,7 @@
                         			</label>
 									<div class="cDivInputMappingExternalAuthApp col-sm-8">
 										<input type="text" class="form-control token-validity-input"
-										id="inputConsumerKeyProduction" value=""  maxlength="200"
+										id="inputConsumerKeyProduction" title="inputConsumerKeyProduction" value=""  maxlength="200"
 										autofocus="autofocus"
 										 />
 									</div>
