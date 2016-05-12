@@ -90,11 +90,6 @@ $(document).ready(function(){
             return '<p><b>'+x+'</b> -' + key + ': ' + y + '</p>'
         });
 
-         chart.lines.dispatch.on('elementClick', function(e) {
-             //alert("You've clicked on " + e.series.key + " - " + e.point.x);
-             window.location = "/analytics/site/pages/all-statistics.jag?page=applications-list&stat=all-stat";
-         });
-
         // Assign the SVG selction
         chartData = d3.select('#chartContainer svg').datum([]);
         chartData.transition().duration(500).call(chart);
