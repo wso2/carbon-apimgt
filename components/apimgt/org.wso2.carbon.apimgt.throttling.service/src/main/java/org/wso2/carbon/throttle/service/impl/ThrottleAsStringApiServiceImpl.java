@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 public class ThrottleAsStringApiServiceImpl extends ThrottleAsStringApiService {
     @Override
     public Response throttleAsStringGet(String query){
-        // do some magic!
         return Response.ok().entity(ThrottlingDBUtil.getThrottledEventsAsString(query)).build();
     }
 }
