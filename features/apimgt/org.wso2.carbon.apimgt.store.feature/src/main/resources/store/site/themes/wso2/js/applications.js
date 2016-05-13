@@ -247,7 +247,7 @@ $("#subscription-actions").each(function(){
 
     var sub_list = $('#subscription-table').datatables_extended({
         "ajax": {
-            "url": "/store/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=getSubscriptionByApplication&app="+$("#subscription-table").attr('data-app'),
+            "url": jagg.getBaseUrl()+ "/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=getSubscriptionByApplication&app="+$("#subscription-table").attr('data-app'),
             "dataSrc": function ( json ) {
             	if(json.apis.length > 0){
             		$('#subscription-table-wrap').removeClass("hide");            		
@@ -309,10 +309,9 @@ $("#application-actions").each(function(){
     var source   = $("#application-actions").html();
     var application_actions = Handlebars.compile(source);
 
-
     var app_list = $('#application-table').datatables_extended({
         "ajax": {
-            "url": "/store/site/blocks/application/application-list/ajax/application-list.jag?action=getApplications",
+            "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplications",
             "dataSrc": function ( json ) {
                 if(json.applications.length > 0){
                     $('#application-table-wrap').removeClass("hide");                  
