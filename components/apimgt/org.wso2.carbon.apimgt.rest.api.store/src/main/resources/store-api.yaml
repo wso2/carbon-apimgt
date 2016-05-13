@@ -1973,7 +1973,6 @@ definitions:
           - SANDBOX
         example: PRODUCTION
       token:
-        description: Token details object
         $ref: '#/definitions/Token'
 
 #-----------------------------------------------------

@@ -65,7 +65,7 @@
                 <% if(callbackURLs != null) %>
                     <%  for(var x in callbackURLs){ %>
 
-                        <div class="cDivCallBackUrlElement"><input type="text" class="input-large iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
+                        <div class="cDivCallBackUrlElement"><input type="text" title="Remove CallbackURLs" class="input-large iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
 
                     <%  }  %>
                 %>

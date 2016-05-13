@@ -31,7 +31,7 @@ var reqUrl = request.getRequestURI();
         <div class="form-inline form-search col-lg-7 col-md-12 col-sm-12">
         <%if(reqUrl.indexOf("forum") <= 0) { %>
 	          <div class="form-group">
-	            <a href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> ">
+	            <a title="<%=i18n.localize( 'forum.createNewTopic')%>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> ">
 	                <%=i18n.localize( 'forum.createNewTopic')%>
 	            </a>&nbsp;
 	          </div>
@@ -78,7 +78,7 @@ var reqUrl = request.getRequestURI();
             {{#each topics}} 
             <tr>
                 <td>
-                    <a href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <strong> {{subject}} </strong></a >
+                    <a title="forum topic" href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <strong> {{subject}} </strong></a >
                     <%if (jagg.getUser()) { %>
                         {{#if_creator topicOwner user}}
                             <span class = "glyphicon glyphicon-trash pull-right forum_delete_topic_icon" data-id = "{{ topicId }}" data-subject = "{{ subject }}" ></span>

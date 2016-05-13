@@ -2493,7 +2493,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
                     "FROM ");
-            String tableName = "API_REQUEST_GEO_LOCATION_SUMMARY";
+            String tableName = APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY;
             query.append(tableName).append(" WHERE ");
             query.append("api='" + apiName).append("'");
             if (version != null && !"ALL".equals(version)) {

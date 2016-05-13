@@ -46,7 +46,7 @@
     <a href="<%= link %>" target="_blank" class="nostyle" title="<%=i18n.localize("apiThumb")%>">
     <img width="100" src="<%= thumbURL %>" style="float:left; margin-right:20px;" alt="<%=i18n.localize("apiThumb")%>">
     </a>
-    <a href="<%= link %>" target="_blank"  class="nostyle">
+    <a title="API" href="<%= link %>" target="_blank"  class="nostyle">
     <h2><%=api.name%> - <%=api.version%></h2>
     </a>
     <p id="provider">Provider : <%=api.provider%></p>
@@ -60,7 +60,7 @@
                 print(api.description.substring(1,100).replace(/\b[a-z]$/,''));
                 print(' ...');
                 %>
-                    <a href="<%= link %>" target="_blank">
+                    <a title="more" href="<%= link %>" target="_blank">
                     more.
                     </a>
                 <%

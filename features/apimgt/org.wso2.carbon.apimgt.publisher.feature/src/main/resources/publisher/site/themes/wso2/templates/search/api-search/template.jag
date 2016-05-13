@@ -2,48 +2,48 @@
 var query=request.getParameter("query");
 %>
 <div class="row">
-  <div class="col-md-4 api-search">
+    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-4 api-search">
         <form class="form-horizontal" action="<%=jagg.getMappedUrl("/site/pages/index.jag")%>">
-                <div class="form-group">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                        <div class="input-group input-wrap">
-                            <input type="text" name="query" title="search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
-    placeholder="<%=i18n.localize("filterAPIs")%>"<%}%> />
-			    <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
-    				<input type="hidden" class="span5" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
-    			   <%}%>
-                            <div class="input-group-btn">
-                                <button class="btn btn-default wrap-input-right" type="submit" value="api_search">
-                                 <i class="fw fw-search" title="search"></i>
-                                </button>
-                            </div>
+            <div class="form-group">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="input-group input-wrap has-form-control-btn">
+                        <input type="text" name="query" title="Search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
+                        placeholder="<%=i18n.localize("search")%>"<%}%> />
+                        <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
+                            <input type="hidden" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
+                        <%}%>
+                        <div class="input-group-btn">
+                            <button class="form-control-btn" type="submit" title="Search"><i class="fw fw-search" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="input-group-btn">
+                            <a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom">
+                                <span class="icon fw-stack fw-lg add-margin-left-1x" style="font-size:8px">
+                                    <i class="fw fw-circle fw-stack-2x"></i>
+                                    <i class="fw fw-question fw-stack-1x fw-inverse" title="Search options"></i>
+                                </span>
+                            </a>
                         </div>
                     </div>
                 </div>
-		<div id="searchAPIHelp" class="hide help-popover-content">
-		    <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
-		    <ol>
-			<li><%=i18n.localize("searchAPIHelpMsg2")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg3")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg4")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg5")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg6")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg7")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg8")%></li>
-			<li><%=i18n.localize("searchAPIHelpMsg9")%></li>
-		    </ol>
-	      </div>
-   </form>
-  </div>
-  <div class="col-md-4 api-search ">
-  	<a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="help popup">
-  		<span class="icon fw-stack fw-lg" style="font-size:6px">
-			<i class="fw fw-circle fw-stack-2x"></i>
-			<i class="fw fw-question fw-stack-1x fw-inverse" title="question" style="font-size:8px"></i>
-		</span> Search Options</a></div>
+            </div>
+            <div id="searchAPIHelp" class="hide help-popover-content">
+                <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
+                <ol>
+                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+                <li><%=i18n.localize("searchAPIHelpMsg9")%></li>
+                </ol>
+            </div>
+        </form>
+    </div>
 </div>
-<div class="alert alert-success" id="searchMessageContainer" style="display:none">
-        <a class="close" data-dismiss="alert" title="alert">x</a>
-         <div id="searchMessage"></div>
-      </div>
+<div class="alert alert-success" id="searchMessageContainer" style="display:none;">
+    <a class="close" data-dismiss="alert" title="alert">x</a>
+    <div id="searchMessage"></div>
+</div>
 <% }); %>

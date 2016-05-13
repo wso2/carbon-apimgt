@@ -20,7 +20,7 @@
 	                        <span class="icon-bar"></span>
 	                    </button>
 	                    <!-- div class="navbar-brand">
-	                        <a href="#">Components</a>
+	                        <a title="Components" href="#">Components</a>
 	                    </div -->
 	                </div>
 	                <div id="navbar" class="collapse navbar-collapse">

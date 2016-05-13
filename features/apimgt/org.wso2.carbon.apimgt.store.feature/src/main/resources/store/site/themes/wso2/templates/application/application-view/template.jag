@@ -16,11 +16,11 @@ for(var i=0;i < outputs.tiers.length; i++){
   <!-- Nav tabs -->
   <div class="white-wrapper">
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>    
-      <li role="presentation"><a href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
-      <li role="presentation"><a href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>      
-      <li role="presentation"><a href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
-      <li role="presentation"><a href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li>
+      <li role="presentation" class="active"><a title="Details" href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>
+      <li role="presentation"><a title="Production Keys" href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
+      <li role="presentation"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>
+      <li role="presentation"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
+      <li role="presentation"><a title="SDKs"  href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li>
     </ul>
 
     <!-- Tab panes -->
