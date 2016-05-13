@@ -47,32 +47,7 @@ public final class ThrottlingDBUtil {
     private static long timeBetweenUpdates = 10000;
 
     public static void initialize() throws Exception {
-        if (dataSource != null) {
-            return;
-        }
-        Properties properties  = new Properties();
-        properties.load(new ClassPathResource("../throttle.properties").getInputStream());
-        String dataSourceName = (String) properties.get("throttle.datasource.name");
-        synchronized (ThrottlingDBUtil.class) {
-            if (dataSource == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Initializing data source");
-                }
-                if (dataSourceName != null) {
-                    try {
-                        Context ctx = new InitialContext();
-                        dataSource = (DataSource) ctx.lookup(dataSourceName);
-                        //Start updator task
-                        ExecutorService executor = Executors.newFixedThreadPool(1);
-                            Runnable worker = new WorkerThread("");
-                            executor.execute(worker);
-                    } catch (NamingException e) {
-                        throw new Exception("Error while looking up the data " +
-                                "source: " + dataSourceName, e);
-                    }
-                }
-            }
-        }
+        //Stop the initialization as this service currently no longer used
     }
 
 
