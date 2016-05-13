@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class ThrottleProperties {
     private boolean enabledSubscriptionLevelSpikeArrest;
-    private boolean enabled;
+    private boolean enabled = false;
     private DataPublisher dataPublisher;
     private GlobalEngineWSConnection globalEngineWSConnection;
     private DataPublisherPool dataPublisherPool;

@@ -723,8 +723,8 @@ public class APIManagerConfiguration {
                                         .getText()));
                     }
                     jmsConnectionProperties.setEnabled(true);
-                    throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 }
+                throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 //Configuring policy deployer
                 OMElement policyDeployerConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.POLICY_DEPLOYER_CONFIGURATION));
@@ -832,8 +832,6 @@ public class APIManagerConfiguration {
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
             }
-        } else {
-            throttleProperties.setEnabled(false);
         }
     }
     private int getPortOffset() {
