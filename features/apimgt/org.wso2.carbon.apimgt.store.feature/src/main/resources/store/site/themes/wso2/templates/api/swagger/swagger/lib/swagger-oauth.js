@@ -47,7 +47,7 @@ function handleLogin() {
       '<div class="api-popup-title">Select OAuth2.0 Scopes</div>',
       '<div class="api-popup-content">',
         '<p>Scopes are used to grant an application different levels of access to data on behalf of the end user. Each API may declare one or more scopes.',
-          '<a href="#">Learn how to use</a>',
+          '<a title="Learn how to us" href="#">Learn how to use</a>',
         '</p>',
         '<p><strong>' + appName + '</strong> API requires the following scopes. Select which ones you want to grant to Swagger UI.</p>',
         '<ul class="api-popup-scopes">',
@@ -62,7 +62,7 @@ function handleLogin() {
   popup = popupDialog.find('ul.api-popup-scopes').empty();
   for (i = 0; i < scopes.length; i ++) {
     scope = scopes[i];
-    str = '<li><input type="checkbox" id="scope_' + i + '" scope="' + scope.scope + '"' +'" oauthtype="' + scope.OAuthSchemeKey +'"/>' + '<label for="scope_' + i + '">' + scope.scope ;
+    str = '<li><input type="checkbox" title="scope" id="scope_' + i + '" scope="' + scope.scope + '"' +'" oauthtype="' + scope.OAuthSchemeKey +'"/>' + '<label for="scope_' + i + '">' + scope.scope ;
     if (scope.description) {
       if ($.map(auths, function(n, i) { return i; }).length > 1) //if we have more than one scheme, display schemes
 	    str += '<br/><span class="api-scope-desc">' + scope.description + ' ('+ scope.OAuthSchemeKey+')' +'</span>';

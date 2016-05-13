@@ -91,7 +91,7 @@
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
-        <a href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>" class="btn btn-default">Cancel</a>
+        <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/applications.jag") %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
 </form>

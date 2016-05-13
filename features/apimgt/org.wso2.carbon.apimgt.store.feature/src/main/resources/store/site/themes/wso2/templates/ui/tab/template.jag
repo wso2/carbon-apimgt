@@ -19,7 +19,7 @@
     %>
     <%if(tab.title!=undefined ||tab.title!=null){%>
         <li class="<%=clazz%>">
-            <a data-toggle="tab" href="#tab<%=String(i)%>"><%=tab.title%></a>
+            <a data-toggle="tab" title="<%=tab.title%>" href="#tab<%=String(i)%>"><%=tab.title%></a>
         </li>
     <% }} %>
     </ul>
