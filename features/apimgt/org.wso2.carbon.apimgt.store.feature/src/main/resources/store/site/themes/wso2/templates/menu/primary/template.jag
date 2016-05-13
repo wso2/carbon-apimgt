@@ -5,7 +5,7 @@
 %>
             <nav class="navigation">
                 <ul>
-                	<%if(inputs.pagePath == "api/listing" || inputs.pagePath == "api/api-listing-prototyped" || inputs.pagePath == "api/api-info" || inputs.pagePath == "api/documentation/view") { %
+                	<%if(inputs.pagePath == "api/listing" || inputs.pagePath == "api/api-listing-prototyped" || inputs.pagePath == "api/api-info" || inputs.pagePath == "api/documentation/view") { %>
 	                    <li class="purple active"><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a></li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>                    
 	                    <% if (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super") { %>
