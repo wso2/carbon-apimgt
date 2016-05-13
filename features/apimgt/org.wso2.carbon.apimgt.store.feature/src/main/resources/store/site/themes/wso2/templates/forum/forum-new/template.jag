@@ -19,7 +19,7 @@ var urlSuffix = jagg.getTenantURLPrefix();
                 <table width="100%">
                     <tr>
                         <td width="100%">
-                            <input type="text" id="subject" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level form-control input-lg">
+                            <input type="text" id="subject" title="<%=i18n.localize('forum.topicCreation.subject')%>" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level form-control input-lg">
                         </td>
                     </tr>
                 </table>

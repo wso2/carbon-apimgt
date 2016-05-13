@@ -27,9 +27,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -37,11 +34,6 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -86,26 +78,15 @@ public class BlockingConditionRetriever extends TimerTask {
     }
 
     public void loadBlockingConditionsFromWebService() {
-
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
         if (blockConditionsDTO != null) {
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
-                    .clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap()
-                    .clear();
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedAPIConditionsMap().putAll(
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().addAPIBlockingConditionsFromMap(
                     GatewayUtils.generateMap(blockConditionsDTO.getApi()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedApplicationConditionsMap()
-                    .putAll(
-                            GatewayUtils.generateMap(blockConditionsDTO.getApplication()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedUserConditionsMap().putAll(
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().addApplicationBlockingConditionsFromMap(
+                    GatewayUtils.generateMap(blockConditionsDTO.getApplication()));
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().addUserBlockingConditionsFromMap(
                     GatewayUtils.generateMap(blockConditionsDTO.getUser()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedCustomConditionsMap().putAll(
-                    GatewayUtils.generateMap(blockConditionsDTO.getCustom()));
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().getBlockedIpConditionsMap().putAll(
+            ServiceReferenceHolder.getInstance().getThrottleDataHolder().addIplockingConditionsFromMap(
                     GatewayUtils.generateMap(blockConditionsDTO.getIp()));
         }
     }

@@ -2200,6 +2200,31 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
+    public static boolean jsFunction_updateThrottleTierPermissions(Context cx, Scriptable thisObj, Object[] args,
+                                                                   Function funObj)
+            throws APIManagementException {
+        if (args == null ||args.length == 0) {
+            handleException("Invalid input parameters.");
+        }
+
+        NativeObject tierData = (NativeObject) args[0];
+        boolean success = false;
+        String tierName = (String) tierData.get("policyName", tierData);
+        String permissionType = (String) tierData.get("permissiontype", tierData);
+        String roles = (String) tierData.get("roles", tierData);
+
+        try {
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            apiProvider.updateThrottleTierPermissions(tierName, permissionType, roles);
+            return true;
+
+        } catch (APIManagementException e) {
+            handleException("Error while updating subscription status", e);
+            return false;
+        }
+
+    }
+
     public static NativeArray jsFunction_getTierPermissions(Context cx, Scriptable thisObj,
             Object[] args,
             Function funObj) {
@@ -2254,6 +2279,63 @@ public class APIProviderHostObject extends ScriptableObject {
          }
          return myn;
     }
+
+
+    public static NativeArray jsFunction_getThrottleTierPermissions(Context cx, Scriptable thisObj,
+                                                            Object[] args,
+                                                            Function funObj) {
+        NativeArray myn = new NativeArray(0);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+         /* Create an array with everyone role */
+        String everyOneRoleName = ServiceReferenceHolder.getInstance().getRealmService().
+                getBootstrapRealmConfiguration().getEveryOneRoleName();
+        String defaultRoleArray[] = new String[1];
+        defaultRoleArray[0] = everyOneRoleName;
+        try {
+            Set<Tier> tiers = apiProvider.getTiers();
+            Set<TierPermissionDTO> tierPermissions = apiProvider.getThrottleTierPermissions();
+            int i = 0;
+            if (tiers != null) {
+
+                for (Tier tier: tiers) {
+                    NativeObject row = new NativeObject();
+                    boolean found = false;
+                    for (TierPermissionDTO permission : tierPermissions) {
+                        if (permission.getTierName().equals(tier.getName())) {
+                            row.put("policyName", row, permission.getTierName());
+                            row.put("tierDisplayName", row, tier.getDisplayName());
+                            row.put("permissionType", row,
+                                    permission.getPermissionType());
+                            String[] roles = permission.getRoles();
+                             /*If no roles defined return default role list*/
+                            if (roles == null ||  roles.length == 0) {
+                                row.put("roles", row, defaultRoleArray);
+                            } else {
+                                row.put("roles", row,
+                                        permission.getRoles());
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+            		 /* If no permissions has defined for this tier*/
+                    if (!found) {
+                        row.put("policyName", row, tier.getName());
+                        row.put("tierDisplayName", row, tier.getDisplayName());
+                        row.put("permissionType", row,
+                                APIConstants.TIER_PERMISSION_ALLOW);
+                        row.put("roles", row, defaultRoleArray);
+                    }
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while getting available tiers", e);
+        }
+        return myn;
+    }
+
 
     public static String jsFunction_getDefaultAPIVersion(Context cx,Scriptable thisObj, Object[] args,
                                                          Function funObj) throws APIManagementException {

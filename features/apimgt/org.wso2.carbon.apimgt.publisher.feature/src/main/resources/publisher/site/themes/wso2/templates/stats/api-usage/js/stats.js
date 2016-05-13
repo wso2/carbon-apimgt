@@ -477,3 +477,7 @@ function getDateTime(currentDay,fromDay){
     $('#date-range').data('daterangepicker').setEndDate(to);
     drawProviderAPIUsage(from,to,apiFilter);
 }
+
+function round(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}

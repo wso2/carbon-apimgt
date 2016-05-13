@@ -114,6 +114,11 @@ if(jagg.isCSRFTokenValid())
                 return;
             }
 
+            //try to read the wsdl content from the url
+            var wsdlUrl = request.getParameter("wsdl");
+            if (wsdlUrl != null) {
+                org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+            }
 
             //If API not exist create
             result = mod.checkIfResourceExists(apiData);

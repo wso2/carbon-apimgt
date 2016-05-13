@@ -32,5 +32,7 @@ public class ThrottleConstants {
     public static final String PASSWORD = "password";
     public static final String HTTPS_PORT = "HTTPSPort";
     public static final String HTTP_PORT = "HTTPPort";
+    public static final String TRUE = "true";
+    public static final String ADD = "add";
 
 }

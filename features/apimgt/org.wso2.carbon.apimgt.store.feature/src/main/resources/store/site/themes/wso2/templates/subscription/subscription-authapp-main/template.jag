@@ -33,7 +33,7 @@
             </div>
             <div class="cDivTabInput">
 
-                    <input type="text" class="input-xlarge required validInput noSpace" id="iProductionAuthAppName" name="iProductionAuthAppName" autofocus="autofocus" value="<%= clientName %>"/>
+                    <input type="text" title="productionAuthAppName" class="input-xlarge required validInput noSpace" id="iProductionAuthAppName" name="iProductionAuthAppName" autofocus="autofocus" value="<%= clientName %>"/>
             </div>
         </div>
 
@@ -44,7 +44,7 @@
             <div class="cDivTabInput input_fields_wrap">
 
                 <div class="cDivCallBackUrlElement cDivCallBackUrlElementFirst">
-                    <input class="input-xlarge iCallBackUrls" type="text" name=callbackURLs[]">
+                    <input title="callBackUrls" class="input-xlarge iCallBackUrls" type="text" name=callbackURLs[]">
                 </div>
                 <div class="cDivPlusIcon">
                     add
@@ -53,7 +53,7 @@
                 <% if(callbackURLs != null) %>
                     <%  for(var x in callbackURLs){ %>
 
-                        <div class="cDivCallBackUrlElement"><input type="text" class="input-xlarge iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
+                        <div class="cDivCallBackUrlElement"><input type="text" title="callBackUrls" class="input-xlarge iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
 
                     <%  }  %>
                 %>

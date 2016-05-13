@@ -42,4 +42,23 @@ var getAllSubscriptionPolicies = function () {
         };
     }
 };
+
+var getThrottleTierPermissions = function () {
+    var mod, result, obj,log = new Log(),
+    provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.getThrottleTierPermissions();
+        var arr =result.throttleTierPermissions;
+        return {
+            error:false,
+            tierPermissions:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            message:e.message.split(":")[1]
+        };
+    }
+};
 %>

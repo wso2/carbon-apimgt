@@ -34,68 +34,145 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ThrottleDataHolder {
 
     private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
-    private String streamID;
+    private Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap<String, String>();
+    private Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap<String, String>();
+    private Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap<String, String>();
+    private Map<String, String> blockedIpConditionsMap = new ConcurrentHashMap<String, String>();
+    private Map<String, String> keyTemplateMap = new ConcurrentHashMap<String, String>();
+    private boolean isBlockingConditionsPresent = false;
+    private boolean isKeyTemplatesPresent = false;
+    private Map<String, Long> throttleDataMap = new ConcurrentHashMap<String, Long>();
 
-    public Map<String, String> getThrottleDataMap() {
-        return throttleDataMap;
+    public void addThrottleData(String key, Long value) {
+        throttleDataMap.put(key, value);
     }
 
-    public void setThrottleDataMap(Map<String, String> throttleDataMap) {
-        this.throttleDataMap = throttleDataMap;
+    public void addThrottleDataFromMap(Map<String, Long> data) {
+        throttleDataMap.putAll(data);
+    }
+
+    public void removeThrottleData(String key) {
+        throttleDataMap.remove(key);
+    }
+
+    public void addAPIBlockingCondition(String name, String value) {
+        isBlockingConditionsPresent = true;
+        blockedAPIConditionsMap.put(name, value);
+    }
+
+    public void addApplicationBlockingCondition(String name, String value) {
+        isBlockingConditionsPresent = true;
+        blockedApplicationConditionsMap.put(name, value);
     }
 
 
-    public Map<String, String> getBlockedAPIConditionsMap() {
-        return blockedAPIConditionsMap;
+    public void addUserBlockingCondition(String name, String value) {
+        isBlockingConditionsPresent = true;
+        blockedUserConditionsMap.put(name, value);
     }
 
-    public void setBlockedAPIConditionsMap(Map<String, String> blockedAPIConditionsMap) {
-        this.blockedAPIConditionsMap = blockedAPIConditionsMap;
+    public void addIplockingCondition(String name, String value) {
+        isBlockingConditionsPresent = true;
+        blockedIpConditionsMap.put(name, value);
     }
 
-    public Map<String, String> getBlockedApplicationConditionsMap() {
-        return blockedApplicationConditionsMap;
+    public void addUserBlockingConditionsFromMap(Map<String, String> data) {
+        if(data.size() > 0) {
+            blockedUserConditionsMap.putAll(data);
+            isBlockingConditionsPresent = true;
+        }
     }
 
-    public void setBlockedApplicationConditionsMap(Map<String, String> blockedApplicationConditionsMap) {
-        this.blockedApplicationConditionsMap = blockedApplicationConditionsMap;
+    public void addIplockingConditionsFromMap(Map<String, String> data) {
+        if(data.size() > 0) {
+            blockedIpConditionsMap.putAll(data);
+            isBlockingConditionsPresent = true;
+        }
     }
 
-    public Map<String, String> getBlockedUserConditionsMap() {
-        return blockedUserConditionsMap;
+    public void addAPIBlockingConditionsFromMap(Map<String, String> data) {
+        if(data.size() > 0) {
+            blockedAPIConditionsMap.putAll(data);
+            isBlockingConditionsPresent = true;
+        }
     }
 
-    public void setBlockedUserConditionsMap(Map<String, String> blockedUserConditionsMap) {
-        this.blockedUserConditionsMap = blockedUserConditionsMap;
+    public void addApplicationBlockingConditionsFromMap(Map<String, String> data) {
+        if(data.size() > 0) {
+            blockedApplicationConditionsMap.putAll(data);
+            isBlockingConditionsPresent = true;
+        }
     }
 
-    public Map<String, String> getBlockedCustomConditionsMap() {
-        return blockedCustomConditionsMap;
+    public void removeAPIBlockingCondition(String name) {
+        blockedAPIConditionsMap.remove(name);
+        if(isAnyBlockedMapContainsData()) {
+            isBlockingConditionsPresent = true;
+        } else {
+            isBlockingConditionsPresent = false;
+        }
     }
 
-    public void setBlockedCustomConditionsMap(Map<String, String> blockedCustomConditionsMap) {
-        this.blockedCustomConditionsMap = blockedCustomConditionsMap;
+    public void removeApplicationBlockingCondition(String name) {
+        blockedApplicationConditionsMap.remove(name);
+        if(isAnyBlockedMapContainsData()) {
+            isBlockingConditionsPresent = true;
+        } else {
+            isBlockingConditionsPresent = false;
+        }
     }
 
-    Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap();
-    Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap();
-    Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap();
-    Map<String, String> blockedCustomConditionsMap = new ConcurrentHashMap();
-    Map<String, String> blockedIpConditionsMap = new ConcurrentHashMap();
-    Map<String, String> keyTemplateMap = new ConcurrentHashMap();
+
+    public void removeUserBlockingCondition(String name) {
+        blockedUserConditionsMap.remove(name);
+        if(isAnyBlockedMapContainsData()) {
+            isBlockingConditionsPresent = true;
+        } else {
+            isBlockingConditionsPresent = false;
+        }
+    }
+
+    public void removeIpBlockingCondition(String name) {
+        blockedIpConditionsMap.remove(name);
+        if(isAnyBlockedMapContainsData()) {
+            isBlockingConditionsPresent = true;
+        } else {
+            isBlockingConditionsPresent = false;
+        }
+    }
+
+    public void addKeyTemplate(String key, String value) {
+        keyTemplateMap.put(key, value);
+        isKeyTemplatesPresent = true;
+    }
+
+    public void addKeyTemplateFromMap(Map<String, String> data) {
+        if(data.size() > 0) {
+            keyTemplateMap.putAll(data);
+            isKeyTemplatesPresent = true;
+        }
+    }
+
+    public void removeKeyTemplate(String name) {
+        keyTemplateMap.remove(name);
+        if(keyTemplateMap.size() > 0) {
+            isKeyTemplatesPresent = true;
+        } else {
+            isKeyTemplatesPresent = false;
+        }
+    }
 
     public Map<String, String> getKeyTemplateMap() {
         return keyTemplateMap;
     }
 
-    public void setKeyTemplateMap(Map<String, String> keyTemplateMap) {
-        this.keyTemplateMap = keyTemplateMap;
+    public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
+                                    String ipBlockingKey) {
+        return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
+                blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
+                blockedUserConditionsMap.containsKey(userBlockingKey) ||
+                blockedIpConditionsMap.containsKey(ipBlockingKey));
     }
-
-    private Map<String, String> throttleDataMap = new ConcurrentHashMap();
-
-    private Map<String, Long> throttleDataTimestampMap = new ConcurrentHashMap();
-
     /**
      * This method will check given key in throttle data Map. Throttle data map need to be update from topic
      * subscriber with all latest updates from global policy engine. This method will perfoem only local map
@@ -109,12 +186,11 @@ public class ThrottleDataHolder {
         boolean isThrottled = this.throttleDataMap.containsKey(key);
         if(isThrottled) {
             long currentTime = System.currentTimeMillis();
-            long timstamp = this.throttleDataTimestampMap.get(key);
-            if(timstamp >= currentTime) {
+            long timestamp = this.throttleDataMap.get(key);
+            if(timestamp >= currentTime) {
                 return isThrottled;
             } else {
                 this.throttleDataMap.remove(key);
-                this.throttleDataTimestampMap.remove(key);
                 return false;
             }
         } else {
@@ -122,40 +198,27 @@ public class ThrottleDataHolder {
         }
     }
 
-
-    /**
-     * This method will used to push un-throttled data events to global policy engine.
-     *
-     * @param throttleRequest is objects map which contains certain information retrieved from incoming message
-     *                        need to add as much as data to this map and send events.
-     */
-    public void sendToGlobalThrottler(Object[] throttleRequest, DataPublisher dataPublisher) {
-        org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
-                System.currentTimeMillis(), null, null, throttleRequest);
-        dataPublisher.tryPublish(event);
+    public boolean isBlockingConditionsPresent() {
+        return isBlockingConditionsPresent;
     }
 
-    public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
-                                    String ipBlockingKey) {
-        return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
-                blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
-                blockedUserConditionsMap.containsKey(userBlockingKey) ||
-                blockedIpConditionsMap.containsKey(ipBlockingKey));
+    public void setBlockingConditionsPresent(boolean blockingConditionsPresent) {
+        isBlockingConditionsPresent = blockingConditionsPresent;
     }
 
-    public Map<String, String> getBlockedIpConditionsMap() {
-        return blockedIpConditionsMap;
+    private boolean isAnyBlockedMapContainsData() {
+        if (blockedAPIConditionsMap.size() > 0 || blockedIpConditionsMap.size() > 0
+                || blockedApplicationConditionsMap.size() > 0 || blockedUserConditionsMap.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
-    public void setBlockedIpConditionsMap(Map<String, String> blockedIpConditionsMap) {
-        this.blockedIpConditionsMap = blockedIpConditionsMap;
+    public boolean isKeyTemplatesPresent() {
+        return isKeyTemplatesPresent;
     }
 
-    public Map<String, Long> getThrottleDataTimestampMap() {
-        return throttleDataTimestampMap;
-    }
-
-    public void setThrottleDataTimestampMap(Map<String, Long> throttleDataTimestampMap) {
-        this.throttleDataTimestampMap = throttleDataTimestampMap;
+    public void setKeyTemplatesPresent(boolean keyTemplatesPresent) {
+        isKeyTemplatesPresent = keyTemplatesPresent;
     }
 }

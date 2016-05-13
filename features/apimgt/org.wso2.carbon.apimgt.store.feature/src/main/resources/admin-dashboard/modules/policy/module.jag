@@ -9,6 +9,14 @@ jagg.module("policy", {
         return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").saveSubscriptionPolicy.apply(this, arguments);
     },
 
+    updateThrottleTierPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").updateThrottleTierPermissions.apply(this, arguments);
+    },
+
+    getThrottleTierPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-manage.jag").getThrottleTierPermissions.apply(this, arguments);
+    },
+
     deleteAppPolicy:function () {
         return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").deleteAppPolicy.apply(this, arguments);
     },

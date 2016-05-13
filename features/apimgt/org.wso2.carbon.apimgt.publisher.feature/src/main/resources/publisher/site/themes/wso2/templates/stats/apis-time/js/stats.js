@@ -76,17 +76,12 @@ $(document).ready(function(){
         .tickFormat(function (d) {
              return d3.time.format('%m/%d %H:%M')(new Date(d)) });
 
-        chart.yAxis.axisLabel('Application Count')
+        chart.yAxis.axisLabel('Published API Count')
             .tickFormat(d3.format('d'));
 
         chart.tooltipContent(function(key, x, y, e, graph) {
             return '<p><b>'+x+'</b> -' + key + ': ' + y + '</p>'
         });
-
-         chart.lines.dispatch.on('elementClick', function(e) {
-             //alert("You've clicked on " + e.series.key + " - " + e.point.x);
-             window.location = "/analytics/site/pages/all-statistics.jag?page=apis-list&stat=all-stat";
-         });
 
         // Assign the SVG selction
         chartData = d3.select('#chartContainer svg').datum([]);
