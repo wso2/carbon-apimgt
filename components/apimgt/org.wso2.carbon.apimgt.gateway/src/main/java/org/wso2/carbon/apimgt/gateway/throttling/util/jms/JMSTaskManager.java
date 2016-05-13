@@ -1042,7 +1042,7 @@ public class JMSTaskManager {
                             break;
                         }
                         case JMSConstants.TOPIC: {
-                            destination = session.createTopic(getDestinationJNDIName());
+                            destination = session.createTopic("BURL:" + getDestinationJNDIName());
                             break;
                         }
                         default: {
