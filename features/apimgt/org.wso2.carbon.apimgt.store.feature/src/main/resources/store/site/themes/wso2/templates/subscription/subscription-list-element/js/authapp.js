@@ -29,14 +29,14 @@ $(document).ready(function () {
         addNewCallBackURLelementSandbox :function addNewCallBackURLelementSandbox(){
             $(".cDivPlusIconSandBox").click(function(e){ //on add input button click
 
-                $(".input_fields_wrap_sandbox").append('<div class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" name="callbackURLsSandBox[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox">Remove</div></div>');
+                $(".input_fields_wrap_sandbox").append('<div class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" name="callbackURLsSandBox[]" title="callbackURLsSandBox"/><div class="cDivRemoveIconSandBox remove_field_sandbox">Remove</div></div>');
 
             });
         },
         addNewContactElementSandbox :function addNewContactElementSandbox(){
             $(".cDivPlusIconSandBoxContact").click(function(e){ //on add input button click
                 e.preventDefault();
-                $(".input_fields_wrap_sandbox_contacts").append('<div class="cDivContactSandBoxElement"><input type="text" class="input-large iContactsSandBox" name="iSandboxAuthAppContact[]"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">Remove</div></div>');
+                $(".input_fields_wrap_sandbox_contacts").append('<div class="cDivContactSandBoxElement"><input type="text" class="input-large iContactsSandBox" name="iSandboxAuthAppContact[]" title="SandboxAuthAppContact"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">Remove</div></div>');
 
             });
         },
@@ -45,7 +45,7 @@ $(document).ready(function () {
 
                 //alert($(".input_fields_wrap_scope").html());
 
-                $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" name="iProductionAppScopeSandBox[]"/><div class="cDivRemoveIcon remove_field_scope_sandbox">Remove</div></div>');
+                $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" name="iProductionAppScopeSandBox[]" title="ProductionAppScopeSandBox"/><div class="cDivRemoveIcon remove_field_scope_sandbox">Remove</div></div>');
 
             });
         },

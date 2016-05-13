@@ -145,8 +145,8 @@
 														cURL <span class="caret"></span>
 													</button>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
-														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'prodCurl');">GrantType: Password</a></li>
-														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'prodCurl');">GrantType: Client Credentials</a></li>
+														<li role="gencurl"><a title="GrantType: Password" role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'prodCurl');">GrantType: Password</a></li>
+														<li role="gencurl"><a title="GrantType: Client Credentials" role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'prodCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
 											</div>
@@ -154,7 +154,7 @@
 												<div class="form-inline proRegenerateForm pull-right">
 
 													<% if(lenS > 0){ %>
-												        <a href="#scopePopup" role="button" class="btn" data-toggle="modal" data-target="#scopePopupTarget" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
+												        <a title="<%=i18n.localize("selectScopes")%>" href="#scopePopup" role="button" class="btn" data-toggle="modal" data-target="#scopePopupTarget" id="selectScopeText" ><%=i18n.localize("selectScopes")%></a>
                                             						            <% } %>		
 													Validity Time: <input type="text" title="refreshProdValidityTime" class="form-control input-sm token-validity-input" id="refreshProdValidityTime" value='<%=prodValidityTime %>' maxlength="70"  autofocus="autofocus" /> Seconds
 
@@ -201,7 +201,7 @@
                         <%=i18n.localize("prodKeyMsg")%>
                         <% if(lenS > 0){ %>
                             <br><br>
-                            <a href="#scopePopup" role="dialog" data-target="#scopePopupTarget" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                            <a title="<%=i18n.localize("selectScopes")%>" href="#scopePopup" role="dialog" data-target="#scopePopupTarget" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                         <% } %>
                         <div class="gen-btn-wrapper">
                         	<div class="cDivParentOfManualAuthAppCreateProduction form-horizontal margin-top">
@@ -221,7 +221,7 @@
 									Consumer secret :
 									</label>
 									<div class="cDivInputMappingExternalAuthApp col-sm-8">
-										<input type="text" class="form-control token-validity-input"
+										<input type="text" title="inputConsumerSecretProduction" class="form-control token-validity-input"
 										id="inputConsumerSecretProduction" value="" maxlength="200"
 										autofocus="autofocus"
 										/>
@@ -394,15 +394,15 @@
 															cURL <span class="caret"></span>
 			   										</button>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
-														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'sandboxCurl');">GrantType: Password</a></li>
-														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'sandboxCurl');">GrantType: Client Credentials</a></li>
+														<li role="gencurl"><a title="GrantType: Password" role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'sandboxCurl');">GrantType: Password</a></li>
+														<li role="gencurl"><a title="GrantType: Client Credentials" role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.sandboxConsumerKey%>:<%=app.sandboxConsumerSecret%>', '<%=gatewayurlendpoint%>', 'client_credentials', 'sandboxCurl');">GrantType: Client Credentials</a></li>
 													</ul>
 												</div>
 											</div>
 											<div class="col-sm-10">
 												<div class="form-inline proRegenerateForm pull-right">
 												    <% if(lenS > 0){ %>
-													    <a href="#scopePopup" type="button" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+													    <a href="#scopePopup" title="<%=i18n.localize("selectScopes")%>" type="button" class="btn btn-primary" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
 													<% } %>
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
@@ -446,7 +446,7 @@
                        <%=i18n.localize("sandboxKeyMsg")%>
                        <% if(lenS > 0){ %>
                            <br><br>
-                           <a href="#scopePopup" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
+                           <a href="#scopePopup" title="<%=i18n.localize("selectScopes")%>" role="button" class="btn" data-toggle="modal" ><%=i18n.localize("selectScopes")%></a>
                        <% } %>
                        <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                        		<div class="cDivParentOfManualAuthAppCreateSandBox form-horizontal margin-top">
@@ -584,7 +584,7 @@
 
             			<tr>
 						 <td>
-						 	<a href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="<%=i18n.localize("apiThumb")%>" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
+						 	<a title="<%=i18n.localize("apiThumb")%>" href="<%=path%>" class="thumbnailInsideLink pull-left"><img width="50" alt="<%=i18n.localize("apiThumb")%>" src="<%=thumbURL%>"  <%if(api.subStatus != "UNBLOCKED") {%>class="desaturate"  title="Subscription not active."<%}%>/></a>
 						 	<dl>
 							  <dt>&nbsp; <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a></dt>
 							  <dd>&nbsp; API Status : 
@@ -600,10 +600,10 @@
 						 </td>
 				         <td>
 				            <% if(api.businessOwner != null){%>
-				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
+				                <a title="Business Owner" href="<%=path%>" class="link-to-provider link-h2"><%=api.businessOwner%></a>
 				            <%}
 				            <% else {%>
-				                <a href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
+				                <a title="API Provider" href="<%=path%>" class="link-to-provider link-h2"><%=api.provider%></a>
 				            <%}%>
 				         </td>
 				         <td>							
@@ -652,7 +652,7 @@
             <div class="pagination">
                 <ul class="pagination">
                     <li <% if(page == 1) { %> class="disabled" <% } %> >
-                        <a
+                        <a  title="pagination"
 							<% if(page != 1) { %>
                                 	href="?page=<%=String((page-1))%>&<%=urlPrefix%>"
 							 <%}%> >&lt;&lt;
@@ -663,7 +663,7 @@
 		   var pConst = 7;
 		   if(numberOfPages <= (pConst+6)){
 			   for(var i=1;i<=numberOfPages;i++) { %>
-                    					<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    					<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     		  <%}
 		   }
 
@@ -671,59 +671,59 @@
 			   if (page <= (pConst+6)){
 				   if(page<pConst){
 					   for(var i=1;i<=((pConst+6) -4);i++) { %>
-                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     				 <% } %>
-                    					<li class="disabled"><a href="#">...</a></li>
-                    					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    					<li class="disabled"><a title="pagination" href="#">...</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					<li><a title="pagination" href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     			<% }
 				   else if((numberOfPages - page) < pConst){ %>
-                    					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                    					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                    					<li class="disabled"><a href="#">...</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    					<li class="disabled"><a title="pagination" href="#">...</a></li>
                                         <%
 					   for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                   							 <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                   							 <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     		         <% }
 
 				   }
 				   else { %>
-											<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                    						<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                    						<li class="disabled"><a href="#">...</a></li>
+											<li><a title="pagination" href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    						<li><a title="pagination" href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    						<li class="disabled"><a title="pagination" href="#">...</a></li>
 
                     			         <%for(var i=(page-3);i<= (page +3);i++) { %>
-                    							<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    							<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     					<% } %>
-                    					   <li class="disabled"><a href="#">...</a></li>
-                    					   <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    					   <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    					   <li class="disabled"><a title="pagination" href="#">...</a></li>
+                    					   <li><a title="pagination" href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					   <li><a title="pagination" href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     		   <% }
 			   }
 			   else{ //  cp 14, 15 ...
 				   if (numberOfPages - page < pConst){   %>
-                   					 <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                    				 <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                   				     <li class="disabled"><a href="#">...</a></li>
+                   					 <li><a title="pagination" href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    				 <li><a title="pagination" href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                   				     <li class="disabled"><a title="pagination" href="#">...</a></li>
                     		        <%for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                                     	<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                                     	<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                      			   <% }
 				   }else{  %>
-                    					<li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
-                    					<li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
-                    					<li class="disabled"><a href="#">...</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
+                    					<li class="disabled"><a title="pagination" href="#">...</a></li>
 
                    					 <%for(var i=(page-3);i<= (page +3);i++) { %>
-                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
+                    						<li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination" href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                                     <% } %>
-                    					<li class="disabled"><a href="#">...</a></li>
-                    					<li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                    					<li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                    					<li class="disabled"><a title="pagination" href="#">...</a></li>
+                    					<li><a title="pagination" href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                    					<li><a title="pagination" href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                              <% }
 			   }
 		   }%>
 
-                      <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%>&<%=urlPrefix%>"<% } %>>&gt;&gt;</a></li>
+                      <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a title="pagination" <% if(page != numberOfPages) { %>href="?page=<%=String((page+1))%>&<%=urlPrefix%>"<% } %>>&gt;&gt;</a></li>
                 </ul>
             </div>
  <% } %>

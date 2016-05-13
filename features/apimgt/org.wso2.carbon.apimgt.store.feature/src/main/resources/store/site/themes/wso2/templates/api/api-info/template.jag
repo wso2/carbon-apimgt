@@ -104,7 +104,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                         	<div class="square-element setbgcolor">
 								<div class="api-name-icon"></div>
 									<div style="display: none">
-										<a href="" class="api-name"><%=api.name%></a>
+										<a href="" title="api name" class="api-name"><%=api.name%></a>
 									</div>
 							</div> 
                          <% } else { %>
@@ -272,7 +272,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 												}
 						                    	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
 						                      %>
-						                      	<a id="store-redirect-link" class="btn btn-primary"  href="<%=path%>" target="_">
+						                      	<a id="store-redirect-link" class="btn btn-primary"  title="browse" href="<%=path%>" target="_">
 			                                        <span class="icon fw-stack">
 				                                        <i class="fw fw-subscribe fw-stack-1x"></i>
 				                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -303,7 +303,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 						}
                     	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
                     %>
-                    	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" href="<%=path%>" target="_"><%=i18n.localize("goToSubscribe")%></a></div>
+                    	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" title="<%=i18n.localize("goToSubscribe")%>" href="<%=path%>" target="_"><%=i18n.localize("goToSubscribe")%></a></div>
                     <%}%>
                 </div>
             </div>
