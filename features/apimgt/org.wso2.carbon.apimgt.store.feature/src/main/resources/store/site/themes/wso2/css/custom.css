@@ -916,13 +916,9 @@ div.image-container {
 }
 
 .form-api-subscription{
-    border-top:1px solid #ddd;
-    border-bottom:1px solid #ddd;
     background:#FBFBFB;
 }
-.form-api-subscription .form-group{
-    padding-right:20px;
-}
+
 
 .api-details-container p.no-margin{
     margin:0px;
@@ -1400,12 +1396,23 @@ a.remove_rating:hover{ color: #C00}
     font-style: italic;
     margin-top:4px;
 }
+.api-details-container{
+    min-height:226px;
+}
+}
 .api-details-container .form-horizontal{
     max-width:100%;
 }
 .api-details-container .form-horizontal .form-group{
     margin-bottom:0px;
 }
+.btn-mobile {
+    width:100%;
+}
+@media (min-width: 768px) {
+  .btn-mobile {
+    width: auto;
+  }
 .currentTheme{
     border:solid 2px #0099ff;
 }
