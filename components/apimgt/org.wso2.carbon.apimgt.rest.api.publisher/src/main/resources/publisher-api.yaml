@@ -1655,8 +1655,6 @@ paths:
           name: permissions
           schema:
             $ref: '#/definitions/TierPermission'
-      description: |
-        Update tier permission
       tags:
         - Tiers
       responses:
