@@ -83,19 +83,19 @@ public class APIHandlerServiceComponent {
                     //Following method will initialize JMS listnet and listen all updates and keep throttle data map
                     // up to date
                     //start web service throttle data retriever as separate thread and start it.
-                    BlockingConditionRetriever webServiceThrottleDataRetriever = new
-                            BlockingConditionRetriever();
-                    webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+                    if (configuration.getThrottleProperties().getBlockCondition().isEnabled()){
+                        BlockingConditionRetriever webServiceThrottleDataRetriever = new
+                                BlockingConditionRetriever();
+                        webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
+                        KeyTemplateRetriever webServiceBlockConditionsRetriever = new
+                                KeyTemplateRetriever();
+                        webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
+                    }
 
-                    //Get blocking details from web service call.
-                    KeyTemplateRetriever webServiceBlockConditionsRetriever = new
-                            KeyTemplateRetriever();
-                    webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
-
-                    //start JMS throttle data retriever as separate thread and start it.
-                    JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
-                    jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
-
+                   if (configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()){
+                       JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
+                       jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
+                   }
                 }
             }
 		} catch (APIManagementException e) {

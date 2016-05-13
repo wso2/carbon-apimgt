@@ -620,6 +620,7 @@ public class APIManagerConfiguration {
                                 (globalEngineWSConnectionInitialDelayElement
                                         .getText()));
                     }
+                    globalEngineWSConnection.setEnabled(true);
                 }
                 throttleProperties.setGlobalEngineWSConnection(globalEngineWSConnection);
 
@@ -721,8 +722,9 @@ public class APIManagerConfiguration {
                                 (jmsConnectionInitialDelayElement
                                         .getText()));
                     }
-                    throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
+                    jmsConnectionProperties.setEnabled(true);
                 }
+                throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 //Configuring policy deployer
                 OMElement policyDeployerConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.POLICY_DEPLOYER_CONFIGURATION));
@@ -826,11 +828,10 @@ public class APIManagerConfiguration {
                     }
                     blockConditionRetrieverConfiguration.setPassword(APIUtil.replaceSystemProperty
                             (blockConditionRetrieverServicePassword));
+                    blockConditionRetrieverConfiguration.setEnabled(true);
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
             }
-        } else {
-            throttleProperties.setEnabled(false);
         }
     }
     private int getPortOffset() {
