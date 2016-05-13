@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -136,6 +137,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -5645,5 +5647,26 @@ public final class APIUtil {
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
+    }
+    
+    /**
+     * Composes OR based search criteria from provided array of values
+     * @param values
+     * @return
+     */
+    public static String getORBasedSearchCriteria(String[] values) {
+        String criteria = "(";
+        if (values != null) {
+            for (int i =0; i < values.length; i++) {
+                criteria = criteria + values[i];
+                if (i != values.length -1) {
+                    criteria = criteria + " OR ";
+                } else {
+                    criteria = criteria + ")";
+                }
+            }
+            return criteria;
+        }
+        return null;
     }
 }
