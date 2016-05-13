@@ -18,6 +18,10 @@ var jagg = jagg || {};
         $.post.apply(this, args);
     };
 
+    jagg.getBaseUrl = function(){
+        return this.site.context;
+    }
+
     jagg.syncPost = function(url, data, callback, type) {
         url = this.site.context + url;
         return jQuery.ajax({
