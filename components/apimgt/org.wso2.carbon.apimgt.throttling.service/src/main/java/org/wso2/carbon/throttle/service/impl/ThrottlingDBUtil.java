@@ -224,41 +224,4 @@ public final class ThrottlingDBUtil {
         }
 
     }
-
-
-    /**
-     * TODO This is not final implementation. This need to be revised and fix issues
-     * related to memory leaks caused due to web app stopping.
-     */
-    private static class WorkerThread implements Runnable {
-        private String command;
-        public WorkerThread(String s){
-            this.command=s;
-        }
-        @Override
-        public void run() {
-            if(lastAccessed <1){
-                lastAccessed = System.currentTimeMillis();
-            }
-            while(true) {
-                if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
-                    lastAccessed = System.currentTimeMillis();
-                    processCommand();
-                    try {
-                        Thread.sleep(timeBetweenUpdates);
-                    } catch (InterruptedException e) {
-                        log.warn("Worker Thread got interrupted",e);
-                    }
-                }
-            }
-        }
-
-        private void processCommand() {
-                ThrottlingDBUtil.getThrottledEventsAsStringFromDB(null);
-        }
-        @Override
-        public String toString(){
-            return this.command;
-        }
-    }
 }
