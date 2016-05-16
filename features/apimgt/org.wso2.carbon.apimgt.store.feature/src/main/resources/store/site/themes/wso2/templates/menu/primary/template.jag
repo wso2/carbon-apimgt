@@ -8,7 +8,7 @@
                 	<%if(inputs.pagePath == "api/listing" || inputs.pagePath == "api/api-listing-prototyped" || inputs.pagePath == "api/api-info" || inputs.pagePath == "api/documentation/view") { %>
 	                    <li class="purple active"><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a></li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>                    
-	                    <% if (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super") { %>
+	                    <% if (outputs.isForumEnabled && (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super")) { %>
 	                    	<li class="orange"><a title="forum" href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item">Forum</span></a></li>
 	                    <%} %>
 	                    <li class="yellow"><a title="Statistics" href="<%= jagg.urlTenanted("/site/pages/statistics.jag?stat=perAppAPICount")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-statistics icon"></i><span class="left-menu-item">Statistics <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
@@ -23,7 +23,7 @@
 	                  <%} else if (inputs.pagePath == "application/application-list" || inputs.pagePath == "application/application-add" || inputs.pagePath == "application/application-view" || inputs.pagePath == "application/application-edit") { %> 
 	                  	<li class="green active"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li> 
 	                  	<li class="purple"><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a></li>
-	                    <% if (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super") { %>	                    	
+	                    <% if (outputs.isForumEnabled && (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super")) { %>
 	                    	<li class="orange"><a title="Forum" href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item">Forum</span></a></li>
 	                    <%} %>
 	                    <li class="yellow"><a title="Statistics" href="<%= jagg.urlTenanted("/site/pages/statistics.jag?stat=perAppAPICount")%>" class="<%if(!user){%>need-login<%}%>"><i class="fw fw-statistics icon"></i><span class="left-menu-item">Statistics <i class="fw fw-down fw-stack-1x toggle-icon-up remove-float"></i></span></a>
@@ -60,7 +60,7 @@
 	                    </li>
 	                   	<li class="purple"><a href="<%= jagg.urlTenanted("/")%>"><i class="fw fw-api icon"></i><span class="left-menu-item ">APIs</span></a></li>
 	                    <li class="green"><a href="<%= jagg.urlTenanted("/site/pages/applications.jag")%>" class="<%= "link-myapplications" + (user ? "" : " need-login") %>"><i class="fw fw-application icon"></i><span class="left-menu-item">Applications</span></a></li>
-	                    <% if (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super") { %>
+	                    <% if (outputs.isForumEnabled && (!outputs.tenantDomains || outputs.tenantDomains.indexOf(tenant) == -1 || tenant =="carbon.super")) { %>
 	                    	<li class="orange"><a title="Forum" href="<%= jagg.urlTenanted("/forum")%>"><i class="fw fw-forum icon"></i><span class="left-menu-item">Forum</span></a></li>
 	                    <%} %>
 	                   <%} %>             

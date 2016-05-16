@@ -22,6 +22,7 @@ jagg.block("menu/primary", {
 		var urlPrefix = jagg.getTenantURLPrefix("?");
         var mod = jagg.module("manager");
         var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
+        var isForumEnabled = mod.isForumEnabled();
 
         links.push({
             "title":i18n.localize("apis"),
@@ -60,18 +61,21 @@ jagg.block("menu/primary", {
         });
 */
 
-        links.push({
-            "title":i18n.localize("forum"),
-            "url":jagg.getAbsoluteUrl("/forum/"+urlPrefix),
-            "classes":"link-forum",
-            "classIcon":"fw fw-forum fw-2x",
-            "tooltip":i18n.localize("forum"),
-            "active":(path == "/site/pages/forum.jag")
-        });
+        if(isForumEnabled) {
+            links.push({
+                "title":i18n.localize("forum"),
+                "url":jagg.getAbsoluteUrl("/forum/"+urlPrefix),
+                "classes":"link-forum",
+                "classIcon":"fw fw-forum fw-2x",
+                "tooltip":i18n.localize("forum"),
+                "active":(path == "/site/pages/forum.jag")
+            });
+        }
 
         return {
             "links":links,
-            "tenantDomains":tenantDomains
+            "tenantDomains":tenantDomains,
+            "isForumEnabled":isForumEnabled
         };
     },
 
