@@ -26,6 +26,8 @@ public class Pipeline {
     private List<Condition> conditions;
     private boolean enabled;
     private int id;
+    private String description;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -61,5 +63,13 @@ public class Pipeline {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

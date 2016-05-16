@@ -27,7 +27,7 @@
 		  <div class="form-group">
 		    <label class="" for="ConsumerKey"><%=i18n.localize("consumerKey")%></label>
 		    <div class="input-group">
-		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" id="ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" value="{{ConsumerKey}}">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" id="ConsumerKey" title="<%=i18n.localize("consumerKey")%>" placeholder="<%=i18n.localize("consumerKey")%>" value="{{ConsumerKey}}">
 		      <div class="input-group-btn">
 		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerKey}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
@@ -38,7 +38,7 @@
 		  <div class="form-group">
 		    <label class="" for="ConsumerSecret"><%=i18n.localize("consumerSecret")%></label>
 		    <div class="input-group">
-		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="{{ConsumerSecret}}">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" title="<%=i18n.localize("consumerSecret")%>" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="{{ConsumerSecret}}">
 		      <div class="input-group-btn">
 		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
@@ -67,7 +67,7 @@
 		  <div class="form-group">
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("accessToken")%></label>
 		    <div class="input-group">
-		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("accessToken")%>" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
 		      <div class="input-group-btn">
 		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
@@ -93,7 +93,7 @@
 			{{/each}}
 			</select>	    
 		    <span>Validity period </span>
-		    <input type="text" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
+		    <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
 			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>		    
 		  </div> 		  
 		</form>		  	
@@ -111,7 +111,7 @@
   	  {{#unless provide_keys_form }}
 	  <div class="form-group">	    
 	    <span>Access token validity period </span>
-	    <input type="text" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.    
+	    <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
 	    <button  class="btn btn-primary generatekeys">Generate keys</button>    
 	  </div>
 	  {{/unless}}
@@ -123,11 +123,11 @@
 		  <fieldset>
 		  <div class="form-group">
 		    <label class="" for="ConsumerKey"><%=i18n.localize("consumerKey")%></label>
-    		<input type="text" class="form-control" id="ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" />
+    		<input type="text" class="form-control" title="ConsumerKey" id="ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" />
 		  </div>
 		  <div class="form-group">
 		    <label class="" for="ConsumerSecret"><%=i18n.localize("consumerSecret")%></label>
-		    <input type="text" class="form-control" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" />
+		    <input type="text" class="form-control" title="ConsumerSecret" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" />
 		  </div>
 		  <div class="form-group">
 		    <button  class="btn btn-primary provide_keys_save">Save</button>	        

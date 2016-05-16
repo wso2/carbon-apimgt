@@ -371,7 +371,29 @@ public interface APIProvider extends APIManager {
      * @return List of available sequences
      * @throws APIManagementException
      */
-    
+
+
+    /**
+     * Update Throttle Tier Permissions
+     *
+     * @param tierName Tier Name
+     * @param permissionType Permission Type
+     * @param roles Roles
+     * @throws APIManagementException
+     *          If failed to update subscription status
+     */
+    void updateThrottleTierPermissions(String tierName, String permissionType, String roles) throws
+            APIManagementException;
+
+    /**
+     * Get the list of Throttle Tier Permissions
+     *
+     * @return Tier Permission Set
+     * @throws APIManagementException
+     *          If failed to update subscription status
+     */
+    Set getThrottleTierPermissions() throws APIManagementException;
+
     List<String> getCustomInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
     
     
@@ -586,6 +608,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+    
+    boolean hasSubscription(String username, String policyName)throws APIManagementException;
 
     /**
      *

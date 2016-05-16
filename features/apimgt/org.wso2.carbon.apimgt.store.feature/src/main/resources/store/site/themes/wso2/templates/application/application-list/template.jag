@@ -30,7 +30,7 @@
   //@todo groupId inform if check 
 %>
 <script id="application-actions" type="text/x-handlebars-template">
-  <a href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a title="View" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-view fw-stack-1x"></i>
@@ -38,7 +38,7 @@
       <span class="hidden-xs">View</span>
   </a>
   {{#if isActive}}
-  <a href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a title="Edit" href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-edit fw-stack-1x"></i>
@@ -46,7 +46,7 @@
       <span class="hidden-xs">Edit</span>
   </a>
   {{/if}}
-  <a href="#" data-id="{{ name }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+  <a title="Delete" href="#" data-id="{{ name }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-delete fw-stack-1x"></i>

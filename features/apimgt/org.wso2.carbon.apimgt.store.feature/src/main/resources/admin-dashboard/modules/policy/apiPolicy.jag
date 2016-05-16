@@ -104,12 +104,22 @@ var deleteAPIPolicy = function (policyName, userName, policyLevel) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
+        var hasSubscription = apiProvider.hasSubscription(provider,policyName);
 
-        var apiPolicies = apiProvider.deletePolicy(provider, "api", policyName);
-        return {
-            error: false,
-            apiPolicies: apiPolicies
-        };
+        if(hasSubscription){
+            return {
+                error: true,
+                message: "Policy already has subscriptions "
+            };
+        }else{
+           var apiPolicies = apiProvider.deletePolicy(provider, "api", policyName);
+            return {
+                error: false,
+                apiPolicies: apiPolicies
+            };
+        }
+
+        
 
     } catch (ex) {
         var errorMessage = "Error occurred while deleting the policy (Cause:" + ex.message + ")";
@@ -155,6 +165,7 @@ var getExecutionFlowTemplate = function () {
     var executionFlow = {
         "id": 0,
         "enabled": false,
+        "description": "",
         "quotaPolicy": {
             "type": "",
             "limit": {
@@ -245,6 +256,7 @@ var jsonToObject = function (policy) {
             var id = pipeline[i].id;
             var conditionsList = new ArrayList();
             pipe.setEnabled(enabled);
+            pipe.setDescription(pipeline[i].description);
             quotaPolicy.setType(quotaPolicyType);
             if (quotaPolicyType == "requestCount") {
                 requestCountLimit = new RequestCountLimit();
@@ -441,6 +453,7 @@ var objectToJson = function (policy) {
             executionFlow = getExecutionFlowTemplate();
             pipe = pipes.get(i);
             executionFlow.id = pipe.getId();
+            executionFlow.description = pipe.getDescription();
             type = pipe.getQuotaPolicy().getType();
             if (type == "requestCount") {
                 executionFlow.quotaPolicy.type = type;

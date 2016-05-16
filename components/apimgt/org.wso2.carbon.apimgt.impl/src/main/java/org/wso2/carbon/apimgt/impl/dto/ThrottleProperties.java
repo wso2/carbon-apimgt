@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class ThrottleProperties {
     private boolean enabledSubscriptionLevelSpikeArrest;
-    private boolean enabled;
+    private boolean enabled = false;
     private DataPublisher dataPublisher;
     private GlobalEngineWSConnection globalEngineWSConnection;
     private DataPublisherPool dataPublisherPool;
@@ -272,6 +272,7 @@ public class ThrottleProperties {
     }
 
     public static class JMSConnectionProperties {
+        private boolean enabled = false;
         private String destination;
         private String serviceUrl;
         private String username;
@@ -279,6 +280,14 @@ public class ThrottleProperties {
         private long initialDelay = 60000;
         private Properties jmsConnectionProperties;
         private JMSTaskManagerProperties jmsTaskManagerProperties;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public long getInitialDelay() {
             return initialDelay;
@@ -374,9 +383,18 @@ public class ThrottleProperties {
     }
 
     public static class PolicyDeployer {
+        private boolean enabled = false;
         private String serviceUrl;
         private String username;
         private String password;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public String getServiceUrl() {
             return serviceUrl;
@@ -403,6 +421,7 @@ public class ThrottleProperties {
         }
     }
     public static class BlockCondition {
+        private boolean enabled;
         private String dataSource;
         private String serviceUrl;
         private String username;
@@ -412,6 +431,14 @@ public class ThrottleProperties {
         private long initDelay = 60000;
         // by default per 5 min
         private long period = 300000;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
         public long getPeriod() {
             return period;

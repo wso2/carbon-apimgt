@@ -38,8 +38,8 @@ var changeStatusIcon = function(flowId, type, checkBoxOb) {
         spanId = "queryparam-condition-configured-" + flowId;
         iconId = "queryparam-condition-configured-icon-" + flowId;
     } else if(type == "JWTClaim") {
-        spanId = "ip-condition-configured-" + flowId;
-        iconId = "ip-condition-configured-icon-" + flowId;
+        spanId = "claim-condition-configured-" + flowId;
+        iconId = "claim-condition-configured-icon-" + flowId;
     } else {
         return;
     }
@@ -62,6 +62,7 @@ var addPolicy = function () {
     var executionFlow = {
         "id": 0,
         "enabled": false,
+        "description": "",
         "quotaPolicy": {
             "type": "",
             "limit": {
@@ -106,6 +107,7 @@ var addPolicy = function () {
 
     var source = $("#designer-policy-template").html();
     executionFlow.id = index;
+    executionFlow.description = "Sample description about condition group";
     Handlebars.partials['designer-policy-template'] = Handlebars.compile(source);
     var context = {
         "executionFlow": executionFlow
@@ -132,6 +134,8 @@ $(document).ready(function () {
             }
         });
     });
+    $('body').on('click', '.editable-click', function(e){e.stopPropagation();});
+    $('body').on('click', '.editable-submit', function(e){e.stopPropagation();});
 });
 
 var showAdvanceOperation = function (operation, button, id) {
@@ -188,6 +192,32 @@ var addQueryParam = function (id) {
     var source = $("#designer-query-pram-table-content").html();
     var paramName = $('#query-param-name-' + id).val();
     var paramValue = $('#query-param-value-' + id).val();
+    var isDuplicate = false;
+    var requiredMsg = $('#errorMsgRequired').val();
+
+    if(!validateInput(paramName,  $('#query-param-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(paramValue,   $('#query-param-value-' + id), requiredMsg)) {
+        return false;
+    }
+
+    var table = $("#query-param-value-table-content-" + executionFlowId + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        queryParamName = $tds.eq(0).text();
+        queryParamVal = $tds.eq(1).text();
+        if(queryParamName == paramName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Query Param");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
+    }
+
     var tableRow = {
         "name": paramName,
         "value": paramValue,
@@ -219,6 +249,31 @@ var addHeader = function (id) {
     var source = $("#designer-header-value-table-content").html();
     var headerName = $('#header-name-' + id).val();
     var headerValue = $('#header-value-' + id).val();
+    var requiredMsg = $('#errorMsgRequired').val();
+    var isDuplicate = false;
+    if(!validateInput(headerName,  $('#header-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(headerValue,   $('#header-value-' + id), requiredMsg)) {
+        return false;
+    }
+
+    var table = $("#header-value-table-content-" + id + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        headerNameT = $tds.eq(0).text();
+        headerValT = $tds.eq(1).text();
+        if(headerNameT == headerName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Header");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
+    }
+
     var tableRow = {
         "name": headerName,
         "value": headerValue,
@@ -250,11 +305,36 @@ var addJwtClaim = function (id) {
     var source = $("#designer-jwt-claim-value-table-content").html();
     var claimName = $('#jwt-claim-name-' + id).val();
     var claimValue = $('#jwt-claim-value-' + id).val();
+    var isDuplicate = false;
     var tableRow = {
         "name": claimName,
         "value": claimValue,
         "flowId": id
     };
+    var requiredMsg = $('#errorMsgRequired').val();
+
+    if(!validateInput(claimName,  $('#jwt-claim-name-' + id), requiredMsg)) {
+        return false;
+    }
+
+    if(!validateInput(claimValue,   $('#jwt-claim-value-' + id), requiredMsg)) {
+        return false;
+    }
+
+    var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
+    table.find('tr').each(function (k, el) {
+        var $tds = $(this).find('td');
+        jwtClaimName = $tds.eq(0).text();
+        jwtClaimValue = $tds.eq(1).text();
+        if(jwtClaimName == claimName) {
+            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Claim");
+            isDuplicate = true;
+        }
+    });
+
+    if(isDuplicate) {
+        return;
+    }
 
     Handlebars.partials['designer-jwt-claim-value-table-content'] = Handlebars.compile(source);
     var context = {
@@ -371,7 +451,8 @@ var addPolicyToBackend = function () {
     for (var i = 0; i < apiPolicyNew.executionFlows.length; i++) {
         executionFlow = apiPolicyNew.executionFlows[i];
         executionFlowId = executionFlow.id;
-        executionFlow = apiPolicyNew.executionFlows[i].enabled = true;
+        apiPolicyNew.executionFlows[i].description = $("#executionFlow-desc-" + executionFlowId).text();
+        apiPolicyNew.executionFlows[i].enabled = true;
         for (var j = 0; j < apiPolicyNew.executionFlows[i].conditions.length; j++) {
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "IP") {
                 checked = $('#ip-condition-checkbox-' + executionFlowId).is(':checked')
@@ -380,12 +461,22 @@ var addPolicyToBackend = function () {
                     var ipConditionType = $("#ip-condition-type-" + executionFlowId + " option:selected").val();
                     if (ipConditionType == 'specificIp') {
                         var specificIp = $('#specific-ip-address-input-' + executionFlowId).val();
+                        if(!validateInput(specificIp, $('#specific-ip-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         apiPolicyNew.executionFlows[i].conditions[j].ipType = 'specific';
                         apiPolicyNew.executionFlows[i].conditions[j].specificIP = specificIp;
                     } else {
                         var startIp = $('#ip-range-start-address-input-' + executionFlowId).val();
                         var endIp = $('#ip-range-end-address-input-' + executionFlowId).val();
+
+                        if(!validateInput(startIp, $('#ip-range-start-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
+                        if(!validateInput(endIp, $('#ip-range-end-address-input-' + executionFlowId), requiredMsg)) {
+                            return false;
+                        }
                         apiPolicyNew.executionFlows[i].conditions[j].enabled = true;
                         apiPolicyNew.executionFlows[i].conditions[j].ipType = 'range';
                         apiPolicyNew.executionFlows[i].conditions[j].startingIP = startIp;
@@ -525,6 +616,21 @@ function validateInput(text, element, errorMsg){
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
         return false;
     }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
+function addDuplicateError(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text == "duplicate"){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    } else{
         $('#label'+elementId).remove();
         element.css("border", "1px solid #cccccc");
         return true;

@@ -85,7 +85,7 @@
             <!-- api-console element specifies whether the environment should be listed in API Console or not -->
             <Environment type="hybrid" api-console="true">
                 <Name>Production and Sandbox</Name>
-                <Description> Description of environment</Description>
+                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
 		        <!-- Admin username for the API gateway. -->
@@ -412,6 +412,14 @@
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
         <WhiteListedURIs>
             <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -479,12 +487,6 @@
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->
         </BlockCondition>
-        <GlobalPolicyEngineWSConnectionDetails>
-            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
-            <Username>${admin.username}</Username>
-            <Password>${admin.password}</Password>
-            <!--InitDelay>300000</InitDelay-->
-        </GlobalPolicyEngineWSConnectionDetails>
         <JMSConnectionDetails>
             <ServiceURL>tcp://127.0.0.1:52556</ServiceURL>
             <Username>admin</Username>

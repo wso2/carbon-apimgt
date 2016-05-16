@@ -2762,6 +2762,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		return apiMgtDAO.getTierPermissions(tenantId);
 	}
 
+
+    /**
+     * Update the Tier Permissions
+     *
+     * @param tierName Tier Name
+     * @param permissionType Permission Type
+     * @param roles Roles
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateThrottleTierPermissions(String tierName, String permissionType, String roles) throws
+            APIManagementException {
+        apiMgtDAO.updateThrottleTierPermissions(tierName, permissionType, roles, tenantId);
+    }
+
+    @Override
+    public Set<TierPermissionDTO> getThrottleTierPermissions() throws APIManagementException {
+        return apiMgtDAO.getThrottleTierPermissions(tenantId);
+    }
+
     /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores
      * @param api The API which need to published
@@ -3898,7 +3918,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg, e);
             throw new APIManagementException(msg);
         }
-
+        
         GlobalPolicy globalPolicy = null;
         if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
             globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -3910,6 +3930,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publishKeyTemplateEvent(globalPolicy.getKeyTemplate(),"remove");
         }
 
+    }
+    
+    public boolean hasSubscription(String username, String policyName)throws APIManagementException{
+    	int tenantID = APIUtil.getTenantId(username);
+    	String tenantDomain = MultitenantUtils.getTenantDomain(username);
+    	String tenantDomainWithAt = username;
+        if(APIUtil.getSuperTenantId() != tenantID){
+        	tenantDomainWithAt = "@"+tenantDomain;
+        }
+       
+        boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt);
+        return hasSubscription;
     }
 
     @Override

@@ -27,7 +27,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 <header class="header header-default">
     <div class="container-fluid">
        <div class="pull-left brand float-remove-xs text-center-xs">
-          <a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%>" alt="API Store" title="API Store">
+          <a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%>" title="API Store">
               <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>" class="logo" alt="<%=i18n.localize("apistoreHome")%>"/>
               <h1 class="display-block-xs">API Store</h1>
           </a>
@@ -35,7 +35,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
        <% if(user){ %>
        <ul class="nav navbar-right float-remove-xs text-center-xs">
        <li class="visible-inline-block">
-			<a id="register-link" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
+			<a id="register-link" title="APIStore" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
 			  <span class="icon fw-stack fw-lg">
 			  <i class="fw fw-circle-outline fw-stack-2x"></i>
 			  <i class="fw fw-notification fw-stack-1x"></i>
@@ -44,7 +44,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 		</li>
        		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
 						<li class="visible-inline-block">
-			                <a id="register-link" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
+			                <a id="register-link" title="APIStore" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
 			                  <span class="icon fw-stack fw-lg">
 			                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 			                  <i class="fw fw-store fw-stack-1x"></i>
@@ -54,7 +54,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 			            </li>
 				<%} else if ((tenant != null) && site.showPublicStoreURL && (tenantDomains != null && tenantDomains.length  > 0)){%>
 						<li class="visible-inline-block">
-			                <a id="register-link" href="<%=jagg.getAbsoluteUrl("/")%>">
+			                <a id="register-link" title="<%=i18n.localize("publicAPIStore")%>" href="<%=jagg.getAbsoluteUrl("/")%>">
 			                  <span class="icon fw-stack fw-lg">
 			                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 			                  <i class="fw fw-store fw-stack-1x"></i>
@@ -67,7 +67,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 				<%if (site.showThemesMenu) { %>
 						<!-- Themes Menu -->
 						<li class="visible-inline-block">       		
-					         <a href="#" class="dropdown" data-toggle="dropdown">
+					         <a title="theme" href="#" class="dropdown" data-toggle="dropdown">
 					            <span class="icon fw-stack fw-lg">
 					               <i class="fw fw-circle-outline fw-stack-2x"></i>
 					               <i class="fw fw-pages fw-stack-1x"></i>
@@ -111,7 +111,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 						<!-- End Themes Menu -->
 						<%} %>
 				       <li class="visible-inline-block">       		
-					         <a href="#" class="dropdown" data-toggle="dropdown">
+					         <a title="user account" href="#" class="dropdown" data-toggle="dropdown">
 					            <span class="icon fw-stack fw-lg">
 					               <i class="fw fw-circle-outline fw-stack-2x"></i>
 					               <i class="fw fw-user fw-stack-1x"></i>
@@ -121,10 +121,10 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 					         <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
 					           <li class="dropdown-header visible-xs">&nbsp; <%=user.username%> <span class="caret"></span></li>
 					           <% if(isSelfSignupEnabled) { %>
-					           <li><a href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><i class="fw fw-settings"></i> &nbsp; <%=i18n.localize("My Account","My Account")%></a></li> 
+					           <li><a title="<%=i18n.localize("My Account","My Account")%>" href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><i class="fw fw-settings"></i> &nbsp; <%=i18n.localize("My Account","My Account")%></a></li>
 					           <% } %>           
 					           <li class="divider visible-xs"></li>
-					           <li><a href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; <%=i18n.localize("logout")%></a></li>
+					           <li><a title="<%=i18n.localize("logout")%>" href="#" id="logout-link"><i class="fw fw-sign-out"></i> &nbsp; <%=i18n.localize("logout")%></a></li>
 					         </ul>
 				      </li>
        </ul>
@@ -132,7 +132,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 		<ul class="nav navbar-right float-remove-xs text-center-xs">
 				<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
 						<li class="visible-inline-block">
-			                <a id="register-link" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
+			                <a title="<%=i18n.localize("apistoreDesc")%>" id="register-link" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>">
 			                  <span class="icon fw-stack fw-lg">
 			                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 			                  <i class="fw fw-store fw-stack-1x"></i>
@@ -142,7 +142,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 			            </li>
 				<%} else if ((tenant != null) && site.showPublicStoreURL){%>
 						<li class="visible-inline-block">
-			                <a id="register-link" href="<%=jagg.getAbsoluteUrl("/")%>">
+			                <a title="Go to <%=i18n.localize("publicAPIStore")%>" id="register-link" href="<%=jagg.getAbsoluteUrl("/")%>">
 			                  <span class="icon fw-stack fw-lg">
 			                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 			                  <i class="fw fw-store fw-stack-1x"></i>
@@ -154,7 +154,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 				
 			<%if(isSelfSignupEnabled){%>
 	            <li class="visible-inline-block">
-	                <a id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
+	                <a title="<%=i18n.localize("signup")%>" id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
 	                  <span class="icon fw-stack fw-lg">
 	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                  <i class="fw fw-register fw-stack-1x"></i>
@@ -203,9 +203,9 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 <ul class="nav navbar-nav navbar-right">
 <%if ((jagg.getTenantDomain() != null)&& site.showPublicStoreURL){%>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-external-link"></i> Go to <span class="caret"></span></a>
+  <a title="<%=i18n.localize("publicAPIStore")%>" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-external-link"></i> Go to <span class="caret"></span></a>
   <ul class="dropdown-menu" role="menu">
-    <li><a href="<%=jagg.getAbsoluteUrl("/")%>"><i class="fa fa-globe"></i> <%=i18n.localize("publicAPIStore")%></a></li>
+    <li><a title="<%=i18n.localize("publicAPIStore")%>" href="<%=jagg.getAbsoluteUrl("/")%>"><i class="fa fa-globe"></i> <%=i18n.localize("publicAPIStore")%></a></li>
   </ul>
 </li>      
 <%}%>
@@ -223,7 +223,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 <%if(jagg.getUser()!=null){%>
 	<!--Links to Access Tenant Store and Public Store-->
 		<%if (jagg.getUser().hasPublisherAccess) {%>
-			Go to <a href="<%=publisherUrl%>" target="_blank" ><%=i18n.localize("apipublisher")%></a>
+			Go to <a title="<%=i18n.localize("apipublisher")%>" href="<%=publisherUrl%>" target="_blank" ><%=i18n.localize("apipublisher")%></a>
            <%if(site.showPublicStoreURL){%>
            |
 
@@ -231,9 +231,9 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 	<%}%>
 
 		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
-				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
+				Go to <a title="<%=i18n.localize("apistoreDesc")%>" href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
 		<%} else if ((tenant != null)&& site.showPublicStoreURL){%>
-			  Go to <a href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
+			  Go to <a title="<%=i18n.localize("publicAPIStore")%>" href="<%=jagg.getAbsoluteUrl("/")%>"><%=i18n.localize("publicAPIStore")%></a>
 		<%}%>
 
 

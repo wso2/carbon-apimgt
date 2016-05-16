@@ -46,7 +46,7 @@
   <div class="form-group">
     <label class="control-label col-lg-2 col-md-3" for="application-name"><%=i18n.localize("name")%><span class="requiredAstrix">*</span></label>    
     <div class="col-lg-4 col-md-6">
-      <input type="text" class="form-control required validateSpecialChars validName" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>      
+      <input type="text" class="form-control required validateSpecialChars validName" title="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
     </div>
   </div>
   <div class="form-group">
@@ -84,7 +84,7 @@
   <div class="form-group">
     <label class="col-lg-2 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
     <div class="col-lg-4 col-md-6">
-        <input type="text" class="validInput form-control" name="callback-url"  id="callback-url" value="<%= encode.forHtmlAttribute(callbackUrl)%>"/>
+        <input type="text" class="validInput form-control" title="callback-url" name="callback-url"  id="callback-url" value="<%= encode.forHtmlAttribute(callbackUrl)%>"/>
     </div>
     <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
     <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
@@ -98,7 +98,7 @@
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("save")%>"/>
-        <a href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
+        <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
   <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>      

@@ -571,58 +571,6 @@ public class APIManagerConfiguration {
                 }
                 throttleProperties.setDataPublisherThreadPool(dataPublisherThreadPool);
 
-
-                //GlobalPolicyEngineWSConnectionDetails
-                OMElement globalEngineWSConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
-                        QName
-                        (APIConstants.AdvancedThrottleConstants.GLOBAL_POLICY_ENGINE_WS_CONFIGURATION));
-
-                ThrottleProperties.GlobalEngineWSConnection globalEngineWSConnection = new
-                        ThrottleProperties
-                                .GlobalEngineWSConnection();
-                if (globalEngineWSConnectionElement != null) {
-                    OMElement globalEngineWSConnectionServiceUrlElement = globalEngineWSConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
-                    if (globalEngineWSConnectionServiceUrlElement != null) {
-                        globalEngineWSConnection.setServiceUrl(APIUtil.replaceSystemProperty
-                                (globalEngineWSConnectionServiceUrlElement.getText()));
-                    }
-                    OMElement globalEngineWSConnectionServiceUsernameElement = globalEngineWSConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.USERNAME));
-                    if (globalEngineWSConnectionServiceUsernameElement != null) {
-                        globalEngineWSConnection.setUsername(APIUtil.replaceSystemProperty
-                                (globalEngineWSConnectionServiceUsernameElement.getText()));
-                    }
-                    String globalEngineWSConnectionServicePassword;
-                    String globalEngineWSConnectionServicePasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .GLOBAL_POLICY_ENGINE_WS_CONFIGURATION + "." + APIConstants.AdvancedThrottleConstants
-                            .PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (globalEngineWSConnectionServicePasswordKey)) {
-                        globalEngineWSConnectionServicePassword = secretResolver.resolve
-                                (globalEngineWSConnectionServicePasswordKey);
-                    } else {
-                        globalEngineWSConnectionServicePassword = globalEngineWSConnectionElement
-                                .getFirstChildWithName(new QName(APIConstants
-                                        .AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
-                    globalEngineWSConnection.setPassword(APIUtil.replaceSystemProperty
-                            (globalEngineWSConnectionServicePassword));
-                    globalEngineWSConnection.setEnabled(true);
-                    OMElement globalEngineWSConnectionInitialDelayElement = globalEngineWSConnectionElement
-                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
-                                    .BLOCK_CONDITION_RETRIEVER_INIT_DELAY));
-                    if (globalEngineWSConnectionInitialDelayElement != null) {
-                        globalEngineWSConnection.setInitialDelay(Long.parseLong
-                                (globalEngineWSConnectionInitialDelayElement
-                                        .getText()));
-                    }
-                }
-                throttleProperties.setGlobalEngineWSConnection(globalEngineWSConnection);
-
                 // Configuring JMSConnectionDetails
                 ThrottleProperties.JMSConnectionProperties jmsConnectionProperties = new
                         ThrottleProperties
@@ -721,8 +669,9 @@ public class APIManagerConfiguration {
                                 (jmsConnectionInitialDelayElement
                                         .getText()));
                     }
-                    throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
+                    jmsConnectionProperties.setEnabled(true);
                 }
+                throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
                 //Configuring policy deployer
                 OMElement policyDeployerConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.POLICY_DEPLOYER_CONFIGURATION));
@@ -826,11 +775,10 @@ public class APIManagerConfiguration {
                     }
                     blockConditionRetrieverConfiguration.setPassword(APIUtil.replaceSystemProperty
                             (blockConditionRetrieverServicePassword));
+                    blockConditionRetrieverConfiguration.setEnabled(true);
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
             }
-        } else {
-            throttleProperties.setEnabled(false);
         }
     }
     private int getPortOffset() {

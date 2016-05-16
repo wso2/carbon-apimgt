@@ -187,8 +187,6 @@ public final class APIConstants {
     
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     
-    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
-
     public static final String DOCUMENTATION_RESOURCE_MAP_DATA = "Data";
     public static final String DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE = "contentType";
     public static final String DOCUMENTATION_RESOURCE_MAP_NAME = "name";
@@ -390,6 +388,7 @@ public final class APIConstants {
     }
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
+    public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
     public static final int TOP_TATE_MARGIN = 4;
     
     public static final class Permissions {
@@ -414,7 +413,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
-    public static final String CACHE_CONFIGS = "CacheConfigurations";
+    public static final String CACHE_CONFIGS = "CacheConfigurations.";
     public static final String GATEWAY_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayTokenCache";
     public static final String GATEWAY_RESOURCE_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayResourceCache";
     public static final String JWT_CLAIM_CACHE_EXPIRY = CACHE_CONFIGS + "JWTClaimCacheExpiry";
@@ -1163,6 +1162,11 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
+    
+    public static final String SEARCH_AND_TAG = "&";
+    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
+    public static final String NAME_TYPE_PREFIX = "name";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";

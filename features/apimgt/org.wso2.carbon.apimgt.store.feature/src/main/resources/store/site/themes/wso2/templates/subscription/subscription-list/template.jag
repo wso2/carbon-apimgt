@@ -50,7 +50,7 @@
         <%
             if(lenI != 0 ){
         %>
-            <label class="checkbox pull-right show-keys-box"><input type="checkbox" id="showHideKeys" /> Show Keys</label>
+            <label class="checkbox pull-right show-keys-box"><input type="checkbox" title="showHideKeys" id="showHideKeys" /> Show Keys</label>
             <br /><br />
             <% jagg.includeBlock("subscription/subscription-list-element", {app:selectedApp,i:900,
                            length:totalLength,page:outputs.page,itemsPerPage:outputs.itemsPerPage}); %>
@@ -61,7 +61,7 @@
           listAPIsURL+= "?" + request.getQueryString();
           } %>
             <div class="alert alert-info margin-top">
-             No subscriptions are created yet. To add a new subscription , select an API and subscribe to it from  <a href="<%=jagg.getAbsoluteUrl(listAPIsURL)%>" >API listing page</a>.
+             No subscriptions are created yet. To add a new subscription , select an API and subscribe to it from  <a title="API listing page" href="<%=jagg.getAbsoluteUrl(listAPIsURL)%>" >API listing page</a>.
             </div>
     <%}%>
 <% }); %>

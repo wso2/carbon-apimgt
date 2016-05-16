@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-import javax.naming.NamingException;
-
 public class ThrottlingRunTimeException extends RuntimeException {
     public ThrottlingRunTimeException(String s, Exception e) {
     }

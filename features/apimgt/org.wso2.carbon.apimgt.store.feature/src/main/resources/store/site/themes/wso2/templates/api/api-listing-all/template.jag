@@ -243,7 +243,7 @@ var reqUrl = request.getRequestURI();
                 <div class="col-sm-12">
                 <ul class="pagination " id="apiListingPagination">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
-                        <a
+                        <a title="pagination"
                                 <% if(page != 1) { %>
 
                                 <%if(query!=null ) { %>
@@ -262,7 +262,7 @@ var reqUrl = request.getRequestURI();
 
                            if(numberOfPages <= (pConst+6)){
                                    for(var i=1;i<=numberOfPages;i++) { %>
-                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a
+                    <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a title="pagination"
                     href="?<%=tagPrefix%>page=<%=String(i)%><%=urlPrefix%><% if(query!=null){ %>&query=<%= query%><%}%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
                            }

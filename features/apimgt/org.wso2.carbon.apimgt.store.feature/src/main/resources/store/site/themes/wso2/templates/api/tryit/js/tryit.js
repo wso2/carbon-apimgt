@@ -145,8 +145,8 @@ var removeRow = function(btn,where) {
 };
 var createRow = function(key, value,where) {
     return $('<div class="row-by-row-rows">' +
-             '<input type="text" onchange="updateHeadersBodies(\''+where+'\')" class="input-large key" value="' + key + '" placeholder="Name">' +
-             '<input type="text" onchange="updateHeadersBodies(\''+where+'\')" class="input-xxlarge value" value="' + value + '" placeholder="Value">' +
+             '<input type="text" title="name" onchange="updateHeadersBodies(\''+where+'\')" class="input-large key" value="' + key + '" placeholder="Name">'+
+             '<input type="text" title="value" onchange="updateHeadersBodies(\''+where+'\')" class="input-xxlarge value" value="' + value + '" placeholder="Value">'+
              '<input type="button" class="btn" value="x" onclick="removeRow(this,\''+where+'\')">' +
              '</div>');
 };

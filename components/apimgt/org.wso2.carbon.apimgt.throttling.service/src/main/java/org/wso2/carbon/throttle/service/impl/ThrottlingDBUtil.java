@@ -47,32 +47,7 @@ public final class ThrottlingDBUtil {
     private static long timeBetweenUpdates = 10000;
 
     public static void initialize() throws Exception {
-        if (dataSource != null) {
-            return;
-        }
-        Properties properties  = new Properties();
-        properties.load(new ClassPathResource("../throttle.properties").getInputStream());
-        String dataSourceName = (String) properties.get("throttle.datasource.name");
-        synchronized (ThrottlingDBUtil.class) {
-            if (dataSource == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Initializing data source");
-                }
-                if (dataSourceName != null) {
-                    try {
-                        Context ctx = new InitialContext();
-                        dataSource = (DataSource) ctx.lookup(dataSourceName);
-                        //Start updator task
-                        ExecutorService executor = Executors.newFixedThreadPool(1);
-                            Runnable worker = new WorkerThread("");
-                            executor.execute(worker);
-                    } catch (NamingException e) {
-                        throw new Exception("Error while looking up the data " +
-                                "source: " + dataSourceName, e);
-                    }
-                }
-            }
-        }
+        //Stop the initialization as this service currently no longer used
     }
 
 
@@ -175,10 +150,11 @@ public final class ThrottlingDBUtil {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlQuery = "select THROTTLEKEY from ThrottleTable WHERE THROTTLEKEY = '"+query+"'";
+        String sqlQuery = "select THROTTLEKEY from ThrottleTable WHERE THROTTLEKEY = ? ";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, query);
             rs = ps.executeQuery();
             while (rs.next()) {
                 String throttleKey = rs.getString("THROTTLEKEY");
@@ -247,42 +223,5 @@ public final class ThrottlingDBUtil {
             }
         }
 
-    }
-
-
-    /**
-     * TODO This is not final implementation. This need to be revised and fix issues
-     * related to memory leaks caused due to web app stopping.
-     */
-    private static class WorkerThread implements Runnable {
-        private String command;
-        public WorkerThread(String s){
-            this.command=s;
-        }
-        @Override
-        public void run() {
-            if(lastAccessed <1){
-                lastAccessed = System.currentTimeMillis();
-            }
-            while(true) {
-                if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
-                    lastAccessed = System.currentTimeMillis();
-                    processCommand();
-                    try {
-                        Thread.sleep(timeBetweenUpdates);
-                    } catch (InterruptedException e) {
-                        log.warn("Worker Thread got interrupted",e);
-                    }
-                }
-            }
-        }
-
-        private void processCommand() {
-                ThrottlingDBUtil.getThrottledEventsAsStringFromDB(null);
-        }
-        @Override
-        public String toString(){
-            return this.command;
-        }
     }
 }

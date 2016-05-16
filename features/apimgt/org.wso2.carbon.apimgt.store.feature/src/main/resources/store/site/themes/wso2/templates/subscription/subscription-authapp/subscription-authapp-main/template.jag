@@ -44,7 +44,7 @@
             </div>
             <div class="cDivTabInput">
 
-                    <input type="text" class="input-large required validInput noSpace" id="iProductionAuthAppName" name="iProductionAuthAppName" autofocus="autofocus" value="<%= clientName %>"/>
+                    <input type="text" title="productionAuthAppName" class="input-large required validInput noSpace" id="iProductionAuthAppName" name="iProductionAuthAppName" autofocus="autofocus" value="<%= clientName %>"/>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
             <div class="cDivTabInput input_fields_wrap">
 
                 <div class="cDivCallBackUrlElement cDivElementFirst">
-                    <input class="input-large iCallBackUrls" type="text" name=callbackURLs[]">
+                    <input title="callBackUrls" class="input-large iCallBackUrls" type="text" name=callbackURLs[]">
                     <div class="cDivPlusIcon">
                         add
                     </div>
@@ -65,7 +65,7 @@
                 <% if(callbackURLs != null) %>
                     <%  for(var x in callbackURLs){ %>
 
-                        <div class="cDivCallBackUrlElement"><input type="text" class="input-large iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
+                        <div class="cDivCallBackUrlElement"><input type="text" title="Remove CallbackURLs" class="input-large iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
 
                     <%  }  %>
                 %>
@@ -80,7 +80,7 @@
             <div class="cDivTabInput input_fields_wrap_contacts">
 
                 <div class="cDivContactElement cDivElementFirst">
-                    <input class="input-large iContacts" type="text" name=iProductionAuthAppContact[]">
+                    <input class="input-large iContacts" type="text" title="productionAuthAppContact" name=iProductionAuthAppContact[]">
                 </div>
                 <div class="cDivPlusIconContact">
                     add
@@ -89,7 +89,7 @@
                 <% if(iProductionAuthAppContact != null) %>
                     <%  for(var x in iProductionAuthAppContact){ %>
 
-                        <div class="cDivContactElement"><input type="text" class="input-large iContacts" value="<%=iProductionAuthAppContact[x] %>" name="iProductionAuthAppContact[]"/><div class="cDivRemoveIcon remove_field_contact">Remove</div></div>
+                        <div class="cDivContactElement"><input type="text" title="productionAuthAppContact" class="input-large iContacts" value="<%=iProductionAuthAppContact[x] %>" name="iProductionAuthAppContact[]"/><div class="cDivRemoveIcon remove_field_contact">Remove</div></div>
 
                     <%  }  %>
                 %>

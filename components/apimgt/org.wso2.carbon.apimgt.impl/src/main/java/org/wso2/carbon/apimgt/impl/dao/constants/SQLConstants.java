@@ -864,29 +864,29 @@ public class SQLConstants {
     //--------------------New tier permission management
 
     public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
-            " SELECT TIER_PERMISSIONS_ID " +
-            " FROM AM_TIER_PERMISSIONS " +
+            " SELECT THROTTLE_TIER_PERMISSIONS_ID " +
+            " FROM AM_THROTTLE_TIER_PERMISSIONS " +
             " WHERE TIER = ? AND " + "TENANT_ID = ?";
 
     public static final String ADD_THROTTLE_TIER_PERMISSION_SQL =
             " INSERT INTO" +
-            "   AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
+            "   AM_THROTTLE_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES, TENANT_ID)" +
             " VALUES(?, ?, ?, ?)";
 
     public static final String UPDATE_THROTTLE_TIER_PERMISSION_SQL =
             " UPDATE" +
-            "   AM_TIER_PERMISSIONS " +
+            "   AM_THROTTLE_TIER_PERMISSIONS " +
             " SET " +
             "   TIER = ?, " +
             "   PERMISSIONS_TYPE = ?," +
             "   ROLES = ? " +
             " WHERE " +
-            "   TIER_PERMISSIONS_ID = ? " +
+            "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
             "   AND TENANT_ID = ?";
 
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
-            " SELECT TIER , PERMISSIONS_TYPE , ROLES " +
-            " FROM AM_TIER_PERMISSIONS " +
+            " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
+            " FROM AM_THROTTLE_TIER_PERMISSIONS " +
             " WHERE TENANT_ID = ?";
 
   //--------------------
@@ -2414,11 +2414,11 @@ public class SQLConstants {
 
 
 
-		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT) \n"
-															+ " VALUES (?,?,?,?,?,?)";
+		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT,DESCRIPTION) \n"
+															+ " VALUES (?,?,?,?,?,?,?)";
 
 		public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
-				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
+				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT, "+ "DESCRIPTION " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
 
 		public static final String GET_IP_CONDITIONS_SQL = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP, "
 				+ " WITHIN_IP_RANGE " + "FROM " + "AM_IP_CONDITION " + "WHERE " + "CONDITION_GROUP_ID = ? ";
@@ -2492,5 +2492,8 @@ public class SQLConstants {
         public static final String BLOCK_CONDITION_EXIST_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
                         "AND VALUE =?";
+        public static final String TIER_HAS_PERMISSION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
+        		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
+
     }
 }

@@ -14,7 +14,8 @@
                 
                 api = outputs.api;
                 
-                var reqUrl = request.getRequestURI() + urlPrefix;
+                var reqUrl = jagg.getAbsoluteReqUrl(request.getRequestURI()) + urlPrefix;       
+                
                 
                 var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
                 var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;

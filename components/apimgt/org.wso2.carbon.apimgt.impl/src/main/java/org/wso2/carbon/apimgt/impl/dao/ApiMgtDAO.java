@@ -26,13 +26,49 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
@@ -2764,6 +2800,88 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return tierPermission;
+    }
+
+    public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
+            throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement insertOrUpdatePS = null;
+        ResultSet resultSet = null;
+        int tierPermissionId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL;
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
+            }
+
+            if (tierPermissionId == -1) {
+                String query = SQLConstants.ADD_THROTTLE_TIER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, tierName);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, roles);
+                insertOrUpdatePS.setInt(4, tenantId);
+                insertOrUpdatePS.execute();
+            } else {
+                String query = SQLConstants.UPDATE_THROTTLE_TIER_PERMISSION_SQL;
+                insertOrUpdatePS = conn.prepareStatement(query);
+                insertOrUpdatePS.setString(1, tierName);
+                insertOrUpdatePS.setString(2, permissionType);
+                insertOrUpdatePS.setString(3, roles);
+                insertOrUpdatePS.setInt(4, tierPermissionId);
+                insertOrUpdatePS.setInt(5, tenantId);
+                insertOrUpdatePS.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(insertOrUpdatePS, null, null);
+        }
+    }
+
+    public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        Set<TierPermissionDTO> tierPermissions = new HashSet<TierPermissionDTO>();
+
+        try {
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSIONS_SQL;
+
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setInt(1, tenantId);
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                TierPermissionDTO tierPermission = new TierPermissionDTO();
+                tierPermission.setTierName(resultSet.getString("TIER"));
+                tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                String roles = resultSet.getString("ROLES");
+                if (roles != null && !roles.isEmpty()) {
+                    String roleList[] = roles.split(",");
+                    tierPermission.setRoles(roleList);
+                }
+                tierPermissions.add(tierPermission);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermissions;
     }
 
     private Set<String> getApplicationKeys(int applicationId, String getKeysSql) throws APIManagementException {
@@ -6317,7 +6435,9 @@ public class ApiMgtDAO {
             String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
 
             /*Adding data to the AM_API_COMMENTS table*/
-            insertPrepStmt = connection.prepareStatement(addCommentQuery, new String[]{"comment_id"});
+            String dbProductName = connection.getMetaData().getDatabaseProductName();
+            insertPrepStmt = connection.prepareStatement(addCommentQuery,
+                new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "comment_id")});
 
             insertPrepStmt.setString(1, commentText);
             insertPrepStmt.setString(2, user);
@@ -6325,7 +6445,7 @@ public class ApiMgtDAO {
             insertPrepStmt.setInt(4, apiId);
 
             insertPrepStmt.executeUpdate();
-            insertSet = getPrepStmt.getGeneratedKeys();
+            insertSet = insertPrepStmt.getGeneratedKeys();
             while (insertSet.next()) {
                 commentId = Integer.parseInt(insertSet.getString(1));
             }
@@ -8475,6 +8595,7 @@ public class ApiMgtDAO {
 
 			conditionStatement.setLong(5, pipeline.getQuotaPolicy().getLimit().getUnitTime());
 			conditionStatement.setString(6, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+			conditionStatement.setString(7, pipeline.getDescription());
 			conditionStatement.executeUpdate();
 			rs = conditionStatement.getGeneratedKeys();
 
@@ -9133,7 +9254,7 @@ public class ApiMgtDAO {
             int pipelineId = -1;
             String timeUnit = null;
             String quotaUnit = null;
-
+            String description;
             pipelinesStatement.setInt(1, policyId);
             resultSet = pipelinesStatement.executeQuery();
 
@@ -9147,7 +9268,7 @@ public class ApiMgtDAO {
                 unitTime = resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME);
                 quota = resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA);
                 pipelineId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
-
+                description = resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION);
                 if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
                     RequestCountLimit requestCountLimit = new RequestCountLimit();
                     requestCountLimit.setUnitTime(unitTime);
@@ -9167,6 +9288,7 @@ public class ApiMgtDAO {
                 pipeline.setConditions(conditions);
                 pipeline.setQuotaPolicy(quotaPolicy);
                 pipeline.setId(pipelineId);
+                pipeline.setDescription(description);
                 pipelines.add(pipeline);
             }
         } catch (SQLException e) {
@@ -9192,11 +9314,6 @@ public class ApiMgtDAO {
         String startingIP = null;
         String endingIP = null;
         String specificIP = null;
-        boolean withinRange = true;
-        /*String httpVerb = null;
-        String startingDate = null;
-        String endingDate = null;
-        String specificDate = null;*/
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -9205,57 +9322,27 @@ public class ApiMgtDAO {
             resultSet = conditionsStatement.executeQuery();
 
             while (resultSet.next()) {
-                /*startingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_DATE);
-                endingDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_DATE);
-                specificDate = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_DATE);
-                httpVerb = resultSet.getString(ThrottlePolicyConstants.COLUMN_HTTP_VERB);
-                */
                 startingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_IP);
                 endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
                 specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
-                withinRange = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
-
-
                 if (specificIP != null && !"".equals(specificIP)) {
                     IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
                     ipCondition.setSpecificIP(specificIP);
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
-                        /* Assumes availability of starting ip means ip range is enforced.
+                     /* Assumes availability of starting ip means ip range is enforced.
                        Therefore availability of ending ip is not checked.
                     */
-                	IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+                    IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);
                     ipRangeCondition.setEndingIP(endingIP);
                     conditions.add(ipRangeCondition);
                 }
-
-                /*if (specificDate != null && !"".equals(specificDate)) {
-                    DateCondition dateCondition = new DateCondition();
-                    dateCondition.setSpecificDate(specificDate);
-                    conditions.add(dateCondition);
-                } else if (startingDate != null && !"".equals(specificDate)) {
-
-                     Assumes availability of starting date means date range is enforced.
-                       Therefore availability of ending date is not checked.
-
-                    DateRangeCondition dateRangeCondition = new DateRangeCondition();
-                    dateRangeCondition.setStartingDate(startingDate);
-                    dateRangeCondition.setEndingDate(endingDate);
-                    conditions.add(dateRangeCondition);
-                }*/
-
-               /* if (httpVerb != null && !"".equals(httpVerb)) {
-                    HTTPVerbCondition httpVerbCondition = new HTTPVerbCondition();
-                    httpVerbCondition.setHttpVerb(httpVerb);
-                    conditions.add(httpVerbCondition);
-                }*/
-
-                setHeaderConditions(pipelineId, conditions);
-                setQueryParameterConditions(pipelineId, conditions);
-                setJWTClaimConditions(pipelineId, conditions);
             }
+            setHeaderConditions(pipelineId, conditions);
+            setQueryParameterConditions(pipelineId, conditions);
+            setJWTClaimConditions(pipelineId, conditions);
         } catch (SQLException e) {
             handleException("Failed to get conditions for pipelineId: " + pipelineId, e);
         } finally {
@@ -10185,5 +10272,39 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
         }
         return status;
+    }
+    
+    public boolean hasSubscription(String tierId, String tenantDomainWithAt) throws APIManagementException{
+    	 PreparedStatement checkIsExistPreparedStatement = null;
+    	 Connection connection = null;
+         ResultSet checkIsResultSet = null;
+         boolean status = false;
+         try {
+        	 /*String apiProvider = tenantId;*/
+        	 connection = APIMgtDBUtil.getConnection();
+        	 connection.setAutoCommit(true);
+             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_PERMISSION;
+             checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
+             checkIsExistPreparedStatement.setString(1, tierId);
+             checkIsExistPreparedStatement.setString(2, "%"+tenantDomainWithAt);
+             checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
+             if (checkIsResultSet != null && checkIsResultSet.next()) {
+            	 int count = checkIsResultSet.getInt(1);
+            	 if(count > 0){
+            		 status = true;
+            	 }
+                 
+             }
+             
+             connection.setAutoCommit(true);
+         } catch (SQLException e) {
+             String msg = "Couldn't check Subscription Exist";
+             log.error(msg, e);
+             handleException(msg, e);
+         } finally {
+             APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
+         }
+         return status;
+    	
     }
 }

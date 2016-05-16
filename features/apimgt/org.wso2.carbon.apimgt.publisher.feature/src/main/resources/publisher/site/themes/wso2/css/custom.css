@@ -178,6 +178,9 @@ div.image-container {
     text-indent:10px;
     margin-right:60px;
 }
+.panel-body .form-horizontal{
+    max-width:100%;
+}
 .truncate {
   min-width: 250px;
   white-space: nowrap;

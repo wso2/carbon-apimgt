@@ -5,10 +5,14 @@
     var nameFieldDisableStatus = "";
     var policyAction = request.getParameter("action");
 
+    var denied = false;
+    var roleList = "";
+
     if(policyName != null){
         pageTitle = i18n.localize("editSubsTier");
         nameFieldDisableStatus = "readonly";
         var subscriptionPolicies = session.get("subscriptionPolicies");
+        var tierPermissions = session.get("throttleTierPermissions");
         var subscriptionPolicy;
         // subscriptionPolicies contains an array that was returned. Hence we need to get the correct policy and proceed
         for(j = 0; j < subscriptionPolicies.length; j++) {
@@ -17,6 +21,23 @@
                 break;
             }
         }
+
+        // getting roles
+        for (i = 0; i < tierPermissions.length; i++) {
+            if(policyName.equalsIgnoreCase(tierPermissions[i].policyName)) {
+                if (tierPermissions[i].permissionType == 'deny') {
+					denied = true;
+				}
+                var roleArray = tierPermissions[i].roles;
+				if (roleArray.length > 0) {
+					roleList = roleArray[0];
+				}
+				for (var a = 1; a < roleArray.length; a ++) {
+					roleList = roleList + "," + roleArray[a];
+				}
+            }
+        }
+
         var description = subscriptionPolicy.getDescription() == null ? "" : subscriptionPolicy.getDescription();
         var defaultQuotaPolicy = subscriptionPolicy.getDefaultQuotaPolicy().getType();
         if (defaultQuotaPolicy == "requestCount"){
@@ -48,6 +69,11 @@
 	        }
    		}
     }
+
+	if (roleList==null || roleList == "") {
+    	roleList = "Internal/everyone";
+	}
+
     %>
 
 
@@ -218,6 +244,39 @@
                             </table>
                         	</div>
                         </div>
+
+                        <legend>Permissions</legend>
+                        <div class="form-group">					            
+	                        <label class="col-sm-3 control-label">Roles<span class="requiredAstrix">*</span></label>
+	                        <div class="col-sm-3">
+	                        	<input class="form-control" type="text" id="roles" name="roles" value="<%=roleList%>"/>
+	                        	<p class="help-block"><%=i18n.localize("tierPermissionMessagePart1")%>
+	                        		
+	                        			<%if(denied) { %>
+	                        				<span class="label label-danger">
+	                        				<%=i18n.localize("denied")%>
+	                        			<%} else { %>
+	                        				<span class="label label-success">
+	                        				<%=i18n.localize("allowed")%>
+	                        		<%} %></span> 
+	                        		<%=i18n.localize("tierPermissionMessagePart2")%>
+	                        	</p>
+	                        </div>
+					    </div>
+
+					    <div class="form-group">
+					    	<div class="col-sm-3"></div>
+						    <div class="col-sm-3" id="permissionTypes">
+	                            <label class="radio">
+	                                <input type="radio" name="permissionAction" value="allow" <%if(!denied) { %>checked<%} %>> 
+	                                <span class="helper"><%=i18n.localize("allow")%></span>
+	                            </label>
+	                            <label class="radio">
+	                                <input type="radio" name="permissionAction" value="deny" <%if(denied) { %>checked<%} %>>
+	                                <span class="helper"><%=i18n.localize("deny")%></span>
+	                            </label>
+	                        </div>
+	                    </div>
                         
                         <div class="form-group">
 						        <button type="button" id="add-tier-btn" onclick="addSubscriptionPolicy()" name="save-tier-btn" class="btn btn-primary has-spinner">
