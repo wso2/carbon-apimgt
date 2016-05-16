@@ -4479,7 +4479,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     Object sandEPs = jsonObject.get("sandbox_endpoints");
 
                     if(prodEPs == null && sandEPs == null) {
-                        handleException("No Endpoint is defined");
+                        handleException("At least one endpoint from Production Endpoint or Sandbox Endpoint must be defined.");
                     }
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
