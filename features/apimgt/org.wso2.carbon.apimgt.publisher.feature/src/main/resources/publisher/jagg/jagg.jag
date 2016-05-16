@@ -361,6 +361,14 @@ var getThemeFile = function (path) {
         }
         return host + url(path);
     };
+    
+    var getAbsoluteReqUrl = function (path) {
+        var host = "";
+        if(isReverseProxyEnabled()){
+            host = "https://" + site.reverseProxy.host ;
+        }
+        return host + path;
+    };
 
     var getSiteDomainFromRequest = function(){
         var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
@@ -784,7 +792,8 @@ var getThemeFile = function (path) {
         getTenantDomain:getTenantDomain,
 		getSiteContext:getSiteContext,
         setCSRFToken:setCSRFToken,
-        isCSRFTokenValid:isCSRFTokenValid
+        isCSRFTokenValid:isCSRFTokenValid,
+        getAbsoluteReqUrl:getAbsoluteReqUrl
     };
 
 }());

@@ -62,7 +62,7 @@ jagg.block("api/api-listing-all", {
         } else {
             mod = jagg.module("api");
 	    var returnAPITags = "false";
-            response = mod.getAllPaginatedPublishedAPIs(tenantDomain, start, end, returnAPITags);
+            response = mod.getAllPaginatedAPIs(tenantDomain, start, end, returnAPITags);
             apis = response.result.apis;
         }
 

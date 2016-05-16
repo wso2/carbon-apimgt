@@ -439,6 +439,20 @@ public interface APIConsumer extends APIManager {
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
+    
+    
+    /**
+     * Returns API Search result based on the provided query
+     * @param searchQuery search query
+     * @param tenantDomain tenant domain 
+     * @param start starting number
+     * @param end ending number
+     * @param limitAttributes whether or not to limit attributes in the search result
+     * @return API result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
+                                           boolean limitAttributes) throws APIManagementException;
 
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
@@ -530,6 +544,20 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
                                                           boolean returnAPITags) throws APIManagementException;
+    
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @param Status One or more Statuses
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
+                                                   boolean returnAPITags) throws APIManagementException;
 
     /**
      * Revokes the oldAccessToken generating a new one.
