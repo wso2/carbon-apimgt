@@ -105,7 +105,6 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
         } else {
             throw new ExecutionPlanValidationException("Throttle batch window should only have one/two parameter (<int|long|time> windowTime (and <int|long> startTime), but found " + attributeExpressionExecutors.length + " input attributes");
         }
-        lastSentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
         attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
@@ -116,7 +115,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
         long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
         boolean sendEvents;
-        if (currentTime >= lastSentTime + timeInMilliSeconds) {
+        if (currentTime >= lastSentTime + timeInMilliSeconds && lastSentTime > 0) {
             lastSentTime += timeInMilliSeconds;
             if (expiredEventChunk.getFirst() != null) {
                 expireEventTime = lastSentTime + timeInMilliSeconds;
@@ -129,6 +128,9 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 if (startTime != 0) {
                     expireEventTime = addTimeShift(currentTime);
                 } else {
+                    if (lastSentTime == 0) {
+                        lastSentTime = executionPlanContext.getTimestampGenerator().currentTime();
+                    }
                     expireEventTime = lastSentTime + timeInMilliSeconds;
                 }
                 scheduler.notifyAt(expireEventTime);
