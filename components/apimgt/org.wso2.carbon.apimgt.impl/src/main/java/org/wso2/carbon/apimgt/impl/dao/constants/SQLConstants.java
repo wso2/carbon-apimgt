@@ -2492,5 +2492,8 @@ public class SQLConstants {
         public static final String BLOCK_CONDITION_EXIST_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
                         "AND VALUE =?";
+        public static final String TIER_HAS_PERMISSION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
+        		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
+
     }
 }

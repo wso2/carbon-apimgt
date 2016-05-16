@@ -3918,7 +3918,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg, e);
             throw new APIManagementException(msg);
         }
-
+        
         GlobalPolicy globalPolicy = null;
         if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
             globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -3930,6 +3930,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publishKeyTemplateEvent(globalPolicy.getKeyTemplate(),"remove");
         }
 
+    }
+    
+    public boolean hasSubscription(String username, String policyName)throws APIManagementException{
+    	int tenantID = APIUtil.getTenantId(username);
+    	String tenantDomainWithAt = username;
+        if(APIUtil.getSuperTenantId() != tenantID){
+        	tenantDomainWithAt = APIUtil.getUserNameWithTenantSuffix(username);
+        }
+       
+        boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt);
+        return hasSubscription;
     }
 
     @Override

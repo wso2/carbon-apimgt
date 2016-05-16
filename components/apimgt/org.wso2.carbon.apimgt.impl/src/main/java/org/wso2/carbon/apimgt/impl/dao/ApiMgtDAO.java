@@ -10271,4 +10271,38 @@ public class ApiMgtDAO {
         }
         return status;
     }
+    
+    public boolean hasSubscription(String tierId, String tenantDomainWithAt) throws APIManagementException{
+    	 PreparedStatement checkIsExistPreparedStatement = null;
+    	 Connection connection = null;
+         ResultSet checkIsResultSet = null;
+         boolean status = false;
+         try {
+        	 /*String apiProvider = tenantId;*/
+        	 connection = APIMgtDBUtil.getConnection();
+        	 connection.setAutoCommit(true);
+             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_PERMISSION;
+             checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
+             checkIsExistPreparedStatement.setString(1, tierId);
+             checkIsExistPreparedStatement.setString(2, "%"+tenantDomainWithAt);
+             checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
+             if (checkIsResultSet != null && checkIsResultSet.next()) {
+            	 int count = checkIsResultSet.getInt(1);
+            	 if(count > 0){
+            		 status = true;
+            	 }
+                 
+             }
+             
+             connection.setAutoCommit(true);
+         } catch (SQLException e) {
+             String msg = "Couldn't check Subscription Exist";
+             log.error(msg, e);
+             handleException(msg, e);
+         } finally {
+             APIMgtDBUtil.closeAllConnections(checkIsExistPreparedStatement, null, checkIsResultSet);
+         }
+         return status;
+    	
+    }
 }

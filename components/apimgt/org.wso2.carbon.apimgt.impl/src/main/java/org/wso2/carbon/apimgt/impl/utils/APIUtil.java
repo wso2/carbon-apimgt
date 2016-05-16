@@ -3548,6 +3548,10 @@ public final class APIUtil {
 
         return -1;
     }
+    
+    public static int getSuperTenantId(){
+    	return MultitenantConstants.SUPER_TENANT_ID;
+    }
 
     /**
      * Helper method to get username with tenant domain.

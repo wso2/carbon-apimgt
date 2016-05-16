@@ -608,6 +608,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
+    
+    boolean hasSubscription(String username, String policyName)throws APIManagementException;
 
     /**
      *
