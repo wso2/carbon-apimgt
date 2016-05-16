@@ -6,12 +6,22 @@ var deleteAppPolicy = function (policyName) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
+        var hasSubscription = apiProvider.hasSubscription(provider,policyName);
 
-        var appPolicies = apiProvider.deletePolicy(provider, "app", policyName);
-        return {
-            error: false,
-            appPolicies: appPolicies
-        };
+        if(hasSubscription){
+            return {
+                error: true,
+                message: "Policy already has subscriptions "
+            };
+        }else{
+           var appPolicies = apiProvider.deletePolicy(provider, "app", policyName);
+            return {
+                error: false,
+                appPolicies: appPolicies
+            };
+        }
+
+        
     } catch (ex) {
         var errorMessage = "Error occurred while deleting policy: " + policyName + " (Cause:" + ex.message + ")";
         log.error(errorMessage);
