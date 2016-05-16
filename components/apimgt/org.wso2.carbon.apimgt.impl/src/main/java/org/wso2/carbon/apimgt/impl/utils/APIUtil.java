@@ -5646,4 +5646,19 @@ public final class APIUtil {
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
     }
+
+    /**
+     * return whether store forum feature is enabled
+     *
+     * @return true or false indicating enable or not
+     */
+    public static boolean isStoreForumEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String forumEnabled = config.getFirstProperty(APIConstants.API_STORE_FORUM_ENABLED);
+        if (forumEnabled == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(forumEnabled);
+    }
 }

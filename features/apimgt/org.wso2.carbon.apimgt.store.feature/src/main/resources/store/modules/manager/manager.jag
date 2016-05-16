@@ -165,4 +165,8 @@ var getUsageClient = function() {
     return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user);
 }
 
+var isForumEnabled = function() {
+    return org.wso2.carbon.apimgt.impl.utils.APIUtil.isStoreForumEnabled();
+}
+
 %>

@@ -316,6 +316,9 @@
         <!-- This parameter specifies whether to display the ratings  or not.
              Default is "true". If user wants to disable, he must set this param as "false" -->
         <DisplayRatings>true</DisplayRatings>
+
+        <!--set isStoreForumEnabled to false for disable forum in store-->
+        <!--isStoreForumEnabled>false</isStoreForumEnabled-->
     </APIStore>
 
     <APIPublisher>
