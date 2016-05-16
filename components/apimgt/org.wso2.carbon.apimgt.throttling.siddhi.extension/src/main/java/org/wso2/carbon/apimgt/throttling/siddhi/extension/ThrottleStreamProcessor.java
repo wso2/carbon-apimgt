@@ -48,7 +48,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
 
     private long timeInMilliSeconds;
     private long lastSentTime;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>();
+    private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
     private long expireEventTime;
@@ -150,7 +150,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
         }
         if (sendEvents) {
             expiredEventChunk.reset();
-            ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>();
+            ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>(true);
 
             if (expiredEventChunk.getFirst() != null) {
                 newEventChunk.add(expiredEventChunk.getFirst());
