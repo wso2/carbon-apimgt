@@ -426,6 +426,7 @@
     "addParameter":"Add Parameter",
     "apiListing":"API List",
     "apiBrowse":"Browse API",
-    "manageAlertTypes": "Manage alert types"
+    "manageAlertTypes": "Manage alert types",
+    "Upload":"Upload"
 
 }

@@ -297,8 +297,8 @@
 														    <input type="text" id="inSeqFileValue" class="form-control" readonly>
 														    <input type="file" id="inSeqFile" name="inSeqFile" class="form-control">
 														    <div class="input-group-btn">
-															<button class="btn btn-secondary btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
-															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
+															<button class="btn btn-secondary" id="uploadInSeqFile" type="button" onClick="uploadSequence('in')" title="<%=i18n.localize("Upload")%>">
+															    <span class="hidden-xs"><%=i18n.localize("Upload")%></span>
 															</button>
 														    </div>
 													   </div>
@@ -316,8 +316,8 @@
 														    <input type="file" id="outSeqFile"  name="outSeqFile" class="form-control">
 														    <div class="input-group-btn"></div>
 														    <div class="input-group-btn">
-															<button class="btn btn-secondary btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
-															    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
+															<button class="btn btn-secondary" id="uploadOutSeqFile" onClick="uploadSequence('out')" type="button" title="<%=i18n.localize("Upload")%>">
+															    <span class="hidden-xs"><%=i18n.localize("Upload")%></span>
 															</button>
 														    </div>
 													   </div>
@@ -634,9 +634,9 @@
 								                <hr />
 								                <div class="form-actions" id="saveButtons">
 
-								                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
-								                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
-								                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+								                    <input type="hidden" name="name" id="name" value="<%= encode.forHtml(api.name) %>" />
+								                    <input type="hidden" name="version" id="version" value="<%= encode.forHtml(api.version) %>" />
+								                    <input type="hidden" name="provider" id="provider" value="<%= encode.forHtml(api.provider) %>" />
 								                    <input type="hidden" name="action" value="implement" />
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
