@@ -3412,6 +3412,37 @@ public final class APIUtil {
     }
 
     /**
+     * check whether given role is exist
+     *
+     * @param userName logged user
+     * @param roleName role name need to check
+     * @return true if exist and false if not
+     * @throws APIManagementException If an error occurs
+     */
+    public static boolean isRoleNameExist(String userName, String roleName) throws APIManagementException {
+        if (roleName == null || StringUtils.isEmpty(roleName.trim())) {
+            return true;
+        }
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager;
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(MultitenantUtils.getTenantDomain(userName));
+            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+
+            String[] roles = roleName.split(",");
+            for (String role : roles) {
+                if (!userStoreManager.isExistingRole(role)) {
+                    return false;
+                }
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            log.error("Error when getting the list of roles", e);
+        }
+        return true;
+    }
+
+    /**
      * Create API Definition in JSON
      *
      * @param api API

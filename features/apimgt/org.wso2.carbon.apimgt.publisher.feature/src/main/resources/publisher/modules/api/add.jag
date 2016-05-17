@@ -506,17 +506,19 @@ var isMultipleTenantsAvailable = function(){
     }
 };
 
-var isScopeExist = function (scope, username) {
+var isScopeExist = function (scope, username, roleName) {
     var result, log = new Log(),
            provider = jagg.module("manager").getAPIProviderObj();
     try {
         result = provider.isScopeExist(scope, username);
+        var isRoleExist = org.wso2.carbon.apimgt.impl.utils.APIUtil.isRoleNameExist(username, roleName);
         if (log.isDebugEnabled()) {
             log.debug("Invoke isScopeExist()" );
         }
         return {
             error:false,
-            isScopeExist:result
+            isScopeExist:result,
+            isRoleExist:isRoleExist
         };
     } catch (e) {
         log.error(e.message);
