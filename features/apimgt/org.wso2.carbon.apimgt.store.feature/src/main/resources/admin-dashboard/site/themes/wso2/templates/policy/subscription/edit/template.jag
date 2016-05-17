@@ -248,7 +248,7 @@
                         <legend>Permissions</legend>
                         <div class="form-group">					            
 	                        <label class="col-sm-3 control-label">Roles<span class="requiredAstrix">*</span></label>
-	                        <div class="col-sm-3">
+	                        <div class="col-sm-6">
 	                        	<input class="form-control" type="text" id="roles" name="roles" value="<%=roleList%>"/>
 	                        	<p class="help-block"><%=i18n.localize("tierPermissionMessagePart1")%>
 	                        		

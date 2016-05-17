@@ -1776,7 +1776,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int totalLength=0;
         boolean isMore = false;
         String [] allStatusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
-        String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED}; 
+        String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED}; 
         String lcCriteria = "lcState=";
 
         try {
