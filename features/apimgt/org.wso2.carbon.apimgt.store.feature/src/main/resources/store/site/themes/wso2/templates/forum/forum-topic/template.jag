@@ -81,7 +81,7 @@
         
   <div id="forum_replies_list" style="display: none;">
     <div class="pull-left replies-list-title" style="vertical-align:middle;"><label><h4><%=i18n.localize('forum.replies')%></h4></label></div>
-    <div id="forum_replies_paginator" class="col-sm-6 pull-right"></div>
+    <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
     <div class="clearfix">
     <table class="table table-striped table-bordered forum-replies">
       <tbody id="reply_list_tbody">

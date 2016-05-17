@@ -473,6 +473,7 @@ $(document).ready(function () {
                     type: "error"
                 });
             }
+        $(".note-editable").attr('contenteditable','true');
         }, "json");
 
 
