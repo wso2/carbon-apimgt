@@ -248,13 +248,14 @@ margin: 20px 0px 10px 10px;
 }
 
 #swaggerEditer{
+    overflow: hidden;
 }
 
 .swagger_editer_header{
     position: absolute;
     top:0;
     padding: 5px;
-    height: 30px;
+    height: 40px;
 }
 
 body.modal-open {

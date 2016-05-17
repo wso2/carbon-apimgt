@@ -702,7 +702,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
-    $(".content-data.row").hide();
+    $(".container").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
@@ -710,7 +710,7 @@ APIDesigner.prototype.edit_swagger = function(){
 
 APIDesigner.prototype.close_swagger_editor = function(){
     $("body").removeClass("modal-open");
-    $(".content-data.row").show();
+    $(".container").show();
     $("#se-iframe").remove();
     $("#swaggerEditer").fadeOut("fast");
 };
@@ -910,7 +910,7 @@ $(document).ready(function(){
             var tagName = $(this).val();
             $tag = $(this);
 
-            if(tagName.match(/[^a-zA-Z0-9_ -]/g)){
+            if(/([~!@#;%^*+=\|\\<>\"\',])/.test(tagName)){
                 $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
                 		$('.tags-error').show();
                 		$('.add-tags-error').hide();
@@ -921,12 +921,14 @@ $(document).ready(function(){
             }
 
             if(tagName.length > 30){
-                $tag.val(tagName.substring(0, 30));
+                $tag.val(tagName.substring(0, 30));               
                 $('.tags-error').html('The tag can have only 30 characters maximum.');
             }
 
         });
+
         $('.tags-error').html('');
+        
         $("#tags").on('itemAdded', function(event) {
         	 $('.tags-error').hide();
     		 $('.add-tags-error').hide();
