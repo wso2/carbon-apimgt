@@ -152,6 +152,53 @@
 	                     </div>
 	                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
 	            </div>
+	            <div class="form-group transport-styles">
+                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
+                	<a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
+                		<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x"></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+						</span>
+                	</a>	
+                	<p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                </label>
+                <div class="controls col-sm-8">
+                	<label class="checkbox">
+                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
+                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                    </label>
+                    <label class="checkbox">
+                            <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+                            <span class="helper"><%=i18n.localize("httpTransport")%></span>
+                    </label>                    
+                </div>
+             </div>
+             
+             <!--Response Caching -->
+                <div class="form-group">
+                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
+                    	<a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
+                    		<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x"></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+                    	</a>	
+                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
+                    </label>
+                      <div class="col-sm-4 responseCacheSelect">
+                       <select class="select required form-control" id="responseCache" name="responseCache">
+                            <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
+                            <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+                        </select>                        
+                     </div>
+                </div>
+                <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                    <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="col-sm-4">
+                        <input type="text" style="text-align:right;" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                    </div>
+                </div>
+            <!--Response Caching End -->
 
           <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
 
@@ -257,28 +304,7 @@
 </div>
 <% }%>
 
-
-                <div class="form-group transport-styles">
-                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
-                	<a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
-                		<span class="icon fw-stack fw-lg" style="font-size:6px">
-								<i class="fw fw-circle fw-stack-2x"></i>
-								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-						</span>
-                	</a>	
-                	<p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
-                </label>
-                <div class="controls col-sm-8">
-                	<label class="checkbox">
-                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
-                    </label>
-                    <label class="checkbox">
-                            <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpTransport")%></span>
-                    </label>                    
-                </div>
-             </div>
+                
 
             <% if (isSynapseGateway) { %>
 
@@ -325,32 +351,6 @@
 
             <%}%>
 
-
-            <!--Response Caching -->
-                <div class="form-group">
-                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
-                    	<a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
-                    		<span class="icon fw-stack fw-lg" style="font-size:6px">
-								<i class="fw fw-circle fw-stack-2x"></i>
-								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-							</span>
-                    	</a>	
-                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
-                    </label>
-                      <div class="col-sm-4 responseCacheSelect">
-                       <select class="select required form-control" id="responseCache" name="responseCache">
-                            <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
-                            <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>                        
-                     </div>
-                </div>
-                <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
-                    <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="col-sm-4">
-                        <input type="text" style="text-align:right;" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
-                    </div>
-                </div>
-            <!--Response Caching End -->
 
                 
                 <% mod = jagg.module("api");
@@ -657,7 +657,6 @@
     </table>
 </div>  
 </script>
-
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <br />

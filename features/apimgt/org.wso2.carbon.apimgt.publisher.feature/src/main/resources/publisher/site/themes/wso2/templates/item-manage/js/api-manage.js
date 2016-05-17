@@ -166,6 +166,7 @@ $('#api_level_policy').change(function(){
         validateAPITier();
         $('#enableApiLevelPolicy').val("true");
         $('#api-level-policy-section').show();
+        $('.throttling_select').hide();
     } else {
         validateAPITier();
         $('#enableApiLevelPolicy').val("false");
