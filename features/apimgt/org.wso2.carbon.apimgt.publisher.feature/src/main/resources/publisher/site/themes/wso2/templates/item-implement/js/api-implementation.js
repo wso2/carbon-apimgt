@@ -198,7 +198,8 @@ $(document).ready(function(){
             });
         $("#prototype_form").submit();
 	return false;                         
-    });
+    });    
+    
 
     if( $("#toggleCorsPrototyped").attr('checked') ) {
         $('#corsTablePrototyped').show();
@@ -263,6 +264,62 @@ $('#go_to_manage').click(function(e){
 $('#save_policies').click(function(e){
     thisID = $(this).attr('id');
 });
+
+function uploadSequence (type) {
+	var file = $('#inSeqFile').get(0).files[0];
+	if (type == "out") {
+		file = $('#outSeqFile').get(0).files[0];
+	}
+	var formData = new FormData();
+	formData.append('file', file);
+	formData.append('name', $('#name').val());
+	formData.append('version', $('#version').val());
+	formData.append('provider', $('#provider').val());
+	formData.append('seqType', type);
+	formData.append('action', "uploadSequence");
+	$.ajax({
+                type: "POST",
+                url: jagg.site.context + "/site/blocks/item-design/ajax/add.jag",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(responseText){
+                    if (!responseText.error) {
+                    	if (type == "in") {
+                    		if ($("#inSequence option[value='" + responseText.fileName + "']").length == 0) {
+                    			$('#inSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
+                    		}                    		
+                    		$("#inSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
+                    		$('#inSeqFileValue').val('');
+                    	} else if (type == "out") {
+                    		if ($("#outSequence option[value='" + responseText.fileName + "']").length == 0) {
+                    			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
+                    		}                    		
+                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected")
+                    		$('#outSeqFileValue').val('');
+                    	}
+                    }else{
+                         if (responseText.message == "timeout") {
+                             if (ssoEnabled) {
+                                 var currentLoc = window.location.pathname;
+                                 if (currentLoc.indexOf(".jag") >= 0) {
+                                     location.href = "index.jag";
+                                 } else {
+                                	 location.href = 'site/pages/index.jag';
+                                 }
+                             } else {
+                                 jagg.showLogin();
+                             }
+                         }else {
+                          var message=responseText.message;
+                          jagg.message({content: responseText.message, type: "error"});
+                     }
+                    }
+                },
+                dataType: "json"
+            });               
+return false;                         
+}
 
 function showGatewayFailure(message) {
     if (message.split("||")[1] == "warning") {

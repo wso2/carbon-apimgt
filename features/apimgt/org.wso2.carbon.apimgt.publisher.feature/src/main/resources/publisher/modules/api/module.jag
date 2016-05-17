@@ -144,6 +144,9 @@ jagg.module("api", {
     },
     isGlobalCEPThrottlingEnabled:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").isGlobalCEPThrottlingEnabled.apply(this, arguments);
+    },
+    uploadSequenceFile:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").uploadSequenceFile.apply(this, arguments);
     }
 });
 %>

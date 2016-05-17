@@ -675,37 +675,15 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("inSeqFile", apiData) != null)  {
             FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-            ResourceFile inSeq = new ResourceFile(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
-            String inSeqFileName;
-            try {
-                OMElement seqElment = APIUtil.buildOMElement(inSeqFile.getInputStream());
-                inSeqFileName = seqElment.getAttributeValue(new QName("name"));
-            } catch (Exception e) {
-                String errorMsg = "An Error has occurred while reading custom sequence file";
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e);
-            }
-            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
-                               + inSeqFileName;
-            String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
-            api.setInSequence(inSeqFileName);
+            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR;
+            String inSeqFileName = uploadSequenceFile(apiProvider, inSeqFile, inSeqPath);
+            api.setInSequence(inSeqFileName);            
         }
 
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
-            ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
-            String outSeqFileName;
-            try {
-                OMElement seqElment = APIUtil.buildOMElement(outSeqFile.getInputStream());
-                outSeqFileName = seqElment.getAttributeValue(new QName("name"));
-            } catch (Exception e) {
-                String errorMsg = "An Error has occurred while reading custom sequence file";
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e);
-            }
-            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
-                                + outSeqFileName;
-            String outSeqFullPath = apiProvider.addResourceFile(outSeqPath, outSeq);
+            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR;
+            String outSeqFileName = uploadSequenceFile(apiProvider, outSeqFile, outSeqPath);
             api.setOutSequence(outSeqFileName);
         }
 
@@ -715,6 +693,65 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return saveAPI(apiProvider, api, null, false);
 
+    }
+    
+    private static String uploadSequenceFile(APIProvider apiProvider, FileHostObject seqFile, String filePath) 
+                                                        throws APIManagementException, ScriptException {
+        ResourceFile inSeq = new ResourceFile(seqFile.getInputStream(), seqFile.getJavaScriptFile().getContentType());
+        String seqFileName;
+        try {
+            OMElement seqElment = APIUtil.buildOMElement(seqFile.getInputStream());
+            seqFileName = seqElment.getAttributeValue(new QName("name"));            
+        } catch (Exception e) {
+            String errorMsg = "An Error has occurred while reading custom sequence file";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
+        }
+        apiProvider.addResourceFile(filePath + seqFileName, inSeq);
+        return seqFileName;
+    }
+    
+    /**
+     * This method is to functionality of uploading sequence to the registry     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments
+     * @param funObj  Function object
+     * @return true if the sequence was uploaded successfully
+     * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static String jsFunction_uploadSequenceFile(Context cx, Scriptable thisObj,
+                                                     Object[] args, Function funObj)
+            throws APIManagementException, ScriptException {
+        
+        if (args==null || args.length == 0) {
+            handleException("Invalid number of input parameters.");
+        }
+        
+        String inSeqFileName = null;
+
+        NativeObject apiData = (NativeObject) args[0];
+        String provider = String.valueOf(apiData.get("provider", apiData));
+        String name = (String) apiData.get("apiName", apiData);
+        String version = (String) apiData.get("version", apiData);
+        String sequenceType = (String) apiData.get("seqType", apiData);
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        provider = (provider != null ? provider.trim() : null);
+        name = (name != null ? name.trim() : null);
+        version = (version != null ? version.trim() : null);
+
+        APIIdentifier apiId = new APIIdentifier(provider, name, version);
+        
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        if (apiData.get("seqFile", apiData) != null)  {
+            FileHostObject seqFile = (FileHostObject) apiData.get("seqFile", apiData);
+            String inSeqPath = APIUtil.getSequencePath(apiId, sequenceType) + RegistryConstants.PATH_SEPARATOR;
+            inSeqFileName = uploadSequenceFile(apiProvider, seqFile, inSeqPath);
+        }
+        return inSeqFileName;
+        
     }
 
     /**

@@ -586,4 +586,23 @@ var getGatewayURL = function (api) {
         };
     }
 };
+
+var uploadSequenceFile = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.uploadSequenceFile(api);
+        if (log.isDebugEnabled()) {
+            log.debug("uploadSequenceFile : " + api.name + "-" + api.version);
+        }
+        return success;
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 %>
