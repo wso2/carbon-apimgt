@@ -70,10 +70,12 @@ var render = new dagreD3.render();
 render(inner, g);
 // Center the graph
 var initialScale = 0.75;
-zoom
+
+//Commented out since it throws a JS error
+/* zoom
   .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
   .scale(initialScale)
-  .event(svg);
+  .event(svg); */
 svg.attr('height', g.graph().height * initialScale + 40);
 });
 
