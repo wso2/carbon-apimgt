@@ -151,6 +151,11 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                         thriftKeyValidationInfoDTO.setIsContentAware(keyValidationInfoDTO.isContentAware());
                         thriftKeyValidationInfoDTO.setApiTier(keyValidationInfoDTO.getApiTier());
                         thriftKeyValidationInfoDTO.setThrottlingDataList(keyValidationInfoDTO.getThrottlingDataList());
+                        thriftKeyValidationInfoDTO.setSubscriberTenantDomain(keyValidationInfoDTO.getSubscriberTenantDomain());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestUnit(keyValidationInfoDTO.getSpikeArrestUnit());
+                        thriftKeyValidationInfoDTO.setStopOnQuotaReach(keyValidationInfoDTO.isStopOnQuotaReach());
                     } finally {
                          PrivilegedCarbonContext.endTenantFlow();
                     }
