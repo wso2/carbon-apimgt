@@ -21,7 +21,6 @@ $('input').on('change', function() {
     }
 
     if (validate_AllowCredentialsManaged()) {
-        console.log("adding *");
         $(".credentialContainerManaged").hide();
         $("#allowCredentialsManaged").attr("checked",false);
     }else{
@@ -79,7 +78,6 @@ $('input').on('change', function() {
     }
 
     if (validate_AllowCredentialsPrototyped()) {
-        console.log("adding *");
         $(".credentialContainerPrototyped").hide();
         $("#allowCredentialsPrototyped").attr("checked",false);
     }else{
@@ -121,7 +119,6 @@ function validate_AllowCredentialsPrototyped(){
     var status;
     for (var origin in origins) {
         if (origins[origin] == "*") {
-            console.log("in validate *");
             return true;
             break;
         }
@@ -133,7 +130,6 @@ function validate_AllowCredentialsManaged(){
     var status;
     for (var origin in origins) {
         if (origins[origin] == "*") {
-            console.log("in validate *");
             return true;
             break;
         }
