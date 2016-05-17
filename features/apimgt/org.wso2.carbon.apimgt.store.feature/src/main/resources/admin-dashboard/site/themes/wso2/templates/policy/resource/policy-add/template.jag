@@ -96,7 +96,7 @@
                 <div class="col-sm-9">
                     <select class="form-control select required valid" id="policy-level" name="level">
                         <option value="apiLevel" <% if(policyLevel == "" || policyLevel == "apiLevel") {%>selected<%}%> >API</option>
-                        <option value="useLevel" <% if(policyLevel == "userLevel") {%>selected<%}%> >User</option>
+                        <option value="userLevel" <% if(policyLevel == "userLevel") {%>selected<%}%> >User</option>
                     </select>
                 </div>
             </div>

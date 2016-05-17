@@ -464,7 +464,12 @@ APIDesigner.prototype.init_controllers = function(){
 			roles : $("#scopeRoles").val()
 		};
 
-		jagg.post("/site/blocks/item-design/ajax/add.jag", { action:"validateScope", scope:$("#scopeKey").val()},
+		jagg.post("/site/blocks/item-design/ajax/add.jag",
+		    {
+		        action:"validateScope",
+		        scope:$("#scopeKey").val(),
+                roleName:$("#scopeRoles").val()
+            },
 			function (result) {
 			    if (!result.error) {
 
@@ -481,13 +486,20 @@ APIDesigner.prototype.init_controllers = function(){
 						return;
 					}
 				}
-		      		if (result.isScopeExist == "true") {
+                if (result.isScopeExist == "true") {
 					jagg.message({
 						content : "Scope " + $("#scopeKey").val() + " already assigned by an API.",
 						type : "error"
 					});
 					return;
-				} 
+				}
+                if (result.isRoleExist == false) {
+                    jagg.message({
+                        content : "Role '" + $("#scopeRoles").val() + "' Does not exist.",
+                        type : "error"
+                    });
+                    return;
+                }
 			
 				API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].push(scope);
 				$("#define_scope_modal").modal('hide');

@@ -3934,9 +3934,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
     public boolean hasSubscription(String username, String policyName)throws APIManagementException{
     	int tenantID = APIUtil.getTenantId(username);
+    	String tenantDomain = MultitenantUtils.getTenantDomain(username);
     	String tenantDomainWithAt = username;
         if(APIUtil.getSuperTenantId() != tenantID){
-        	tenantDomainWithAt = APIUtil.getUserNameWithTenantSuffix(username);
+        	tenantDomainWithAt = "@"+tenantDomain;
         }
        
         boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt);

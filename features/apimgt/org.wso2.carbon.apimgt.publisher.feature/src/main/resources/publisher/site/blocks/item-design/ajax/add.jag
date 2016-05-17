@@ -403,7 +403,8 @@ if(jagg.isCSRFTokenValid())
         } else if (action === "validateScope") {
             mod = jagg.module("api");
             var scope = request.getParameter("scope");
-            var data = mod.isScopeExist(scope, jagg.getUser().username);
+            var roleName = request.getParameter("roleName");
+            var data = mod.isScopeExist(scope, jagg.getUser().username, roleName);
             print(data);
         } else {
             print({

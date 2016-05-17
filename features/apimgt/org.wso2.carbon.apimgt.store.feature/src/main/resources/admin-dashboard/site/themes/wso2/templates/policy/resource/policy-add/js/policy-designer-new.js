@@ -203,7 +203,7 @@ var addQueryParam = function (id) {
         return false;
     }
 
-    var table = $("#query-param-value-table-content-" + executionFlowId + " > tbody");
+    var table = $("#query-param-value-table-content-" + id + " > tbody");
     table.find('tr').each(function (k, el) {
         var $tds = $(this).find('td');
         queryParamName = $tds.eq(0).text();
@@ -321,7 +321,7 @@ var addJwtClaim = function (id) {
         return false;
     }
 
-    var table = $("#jwt-claim-value-table-content-" + executionFlowId + " > tbody");
+    var table = $("#jwt-claim-value-table-content-" + id + " > tbody");
     table.find('tr').each(function (k, el) {
         var $tds = $(this).find('td');
         jwtClaimName = $tds.eq(0).text();
