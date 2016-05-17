@@ -238,7 +238,7 @@ var saveDoc=function(){
         return;
     } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
         return;
-    }else if(sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty)) {
+    }else if(sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty) && $('#saveDocBtn').val() != "Update") {
         return;
     }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'),'This field is required.', isOtherTypeNameEmpty) && docName!="Swagger API Definition"){
         return;
