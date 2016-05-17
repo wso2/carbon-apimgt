@@ -181,7 +181,7 @@ public class RegistryForumManager implements ForumManager {
             String resourcePath = TOPICS_ROOT +
                                   RegistryConstants.PATH_SEPARATOR + resourceIdentifier +
                                   RegistryConstants.PATH_SEPARATOR + topicId;
-
+            artifactManager.removeGenericArtifact(genericArtifact);
             registry.delete(resourcePath);
         } catch (GovernanceException e) {
             log.error("Error while removing Governance Artifact " + e.getMessage());
