@@ -675,14 +675,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("inSeqFile", apiData) != null)  {
             FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR;
+            String inSeqPath = APIUtil.getSequencePath(api.getId(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN) + RegistryConstants.PATH_SEPARATOR;
             String inSeqFileName = uploadSequenceFile(apiProvider, inSeqFile, inSeqPath);
             api.setInSequence(inSeqFileName);            
         }
 
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
-            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR;
+            String outSeqPath = APIUtil.getSequencePath(api.getId(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT) + RegistryConstants.PATH_SEPARATOR;
             String outSeqFileName = uploadSequenceFile(apiProvider, outSeqFile, outSeqPath);
             api.setOutSequence(outSeqFileName);
         }
