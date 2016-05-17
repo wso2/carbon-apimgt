@@ -349,8 +349,8 @@
 																<div class="col-sm-9">
 																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
 																		<tr>
-																			<td>
-																				<%=i18n.localize("accessControlOrigin")%>
+																			<td class="col-sm-4">
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
 																			</td>
 																			<td>
 																				<div id="allOriginContainerManaged">
@@ -389,7 +389,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlHeaders")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="headerContainer tagContainer">
@@ -399,7 +399,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlMethods")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="headerContainer tagContainer">
@@ -409,7 +409,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlCredentials")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="controls credentialContainerManaged">
@@ -551,8 +551,8 @@
 																<div class="col-sm-9">
 																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
 																		<tr>
-																			<td>
-																				<%=i18n.localize("accessControlOrigin")%>
+																			<td class="col-sm-4">
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
 																			</td>
 																			<td>
 																				<div id="allOriginContainerPrototyped">
@@ -591,7 +591,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlHeaders")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="headerContainer tagContainer">
@@ -601,7 +601,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlMethods")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="headerContainer tagContainer">
@@ -611,7 +611,7 @@
 																		</tr>
 																		<tr>
 																			<td>
-																				<%=i18n.localize("accessControlCredentials")%>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
 																			</td>
 																			<td>
 																				<div class="controls credentialContainerPrototyped">
