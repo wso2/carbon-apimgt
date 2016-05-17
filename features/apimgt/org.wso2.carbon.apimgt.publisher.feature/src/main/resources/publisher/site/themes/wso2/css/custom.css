@@ -567,3 +567,8 @@ div.image-container {
 body.login-bg {
 	background-color : #efefef
 }
+
+
+#description {
+    resize: vertical; 
+}
