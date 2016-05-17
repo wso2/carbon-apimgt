@@ -36,6 +36,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -128,15 +129,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return generateToken(keyValidationInfoDTO, apiContext, version,null);
     }
 
-    public String encode(String stringToBeEncoded) throws APIManagementException{
-        try {
-            return Base64Utils.encode(stringToBeEncoded.getBytes("UTF-8"));
-
-        } catch(UnsupportedEncodingException e){
-            String error = "Unsupported encoding : " + e;
-            //do not log
-            throw new APIManagementException(error);
-        }
+    public String encode(byte[] stringToBeEncoded) throws APIManagementException {
+        return Base64Utils.encode(stringToBeEncoded);
     }
 
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
@@ -151,13 +145,13 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
             String base64UrlEncodedHeader = "";
             if (jwtHeader != null) {
-                base64UrlEncodedHeader = encode(jwtHeader);
+                base64UrlEncodedHeader = encode(jwtHeader.getBytes(Charset.defaultCharset()));
             }
 
             String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version, accessToken);
             String base64UrlEncodedBody = "";
             if (jwtBody != null) {
-                base64UrlEncodedBody = encode(jwtBody);
+                base64UrlEncodedBody = encode(jwtBody.getBytes());
             }
 
             if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
@@ -169,7 +163,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 if (log.isDebugEnabled()) {
                     log.debug("signed assertion value : " + new String(signedAssertion, "UTF-8"));
                 }
-                String base64UrlEncodedAssertion = encode(new String(signedAssertion, "UTF-8"));
+                String base64UrlEncodedAssertion = encode(signedAssertion);
 
                 return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
             } else {
@@ -379,7 +373,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             byte[] digestInBytes = digestValue.digest();
 
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint);
+            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint.getBytes(Charset.defaultCharset()));
             //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
             //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
             //return headerWithCertThumb;
