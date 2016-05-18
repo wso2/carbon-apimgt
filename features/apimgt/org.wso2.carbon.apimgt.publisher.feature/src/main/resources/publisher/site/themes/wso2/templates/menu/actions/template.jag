@@ -162,7 +162,8 @@
 	                      <li>
 	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
 	                                </span>
 	                                <%=i18n.localize("goToOverView")%>
 	                            </a>

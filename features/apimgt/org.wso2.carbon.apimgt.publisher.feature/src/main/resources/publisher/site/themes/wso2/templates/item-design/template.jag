@@ -393,10 +393,14 @@
     <div class="modal-content clearfix">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
-        <h4 class="modal-title" id="swaggerUploadLabel">Import API Definition</h4>
+        <h3 class="modal-title" id="swaggerUploadLabel">Import API Definition</h3>
       </div>
-      <div class="">
+      <div class="">      
                             <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                            <div class="message message-warning">
+			                    <h4><i class="icon fw fw-warning"></i>Warning</h4>
+			                    <p>Existing API Definition will be overwritten by the imported definition.</p>
+			                </div>
                             	<div id="swagger_help" class="alert alert-danger hide" role="alert">
 					                 Enter a valid url
 					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
@@ -414,7 +418,7 @@
 	                                </label>
                                 </div>
 					            </div>				            
-                                
+                                <br />
                                 <div class="toggleContainers">
                                 	<div class="form-group">
 										<div class="controls col-sm-8">
