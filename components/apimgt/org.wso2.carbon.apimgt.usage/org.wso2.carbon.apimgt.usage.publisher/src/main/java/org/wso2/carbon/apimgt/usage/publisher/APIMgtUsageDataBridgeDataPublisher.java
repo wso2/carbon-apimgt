@@ -137,11 +137,12 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         DataPublisher dataPublisher = UsageComponent.getDataPublisher(tenantDomain);
 
         //If a DataPublisher had not been registered for the tenant.
-        if (dataPublisher == null &&
-            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups() != null) {
+        if (dataPublisher == null
+                && DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups() != null) {
 
             String serverUser = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverServerUser();
-            String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverServerPassword();
+            String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
+                    .getDasReceiverServerPassword();
             String serverURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups();
 
             try {
