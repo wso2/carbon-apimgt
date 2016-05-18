@@ -702,7 +702,7 @@ APIDesigner.prototype.add_resource = function(resource, path){
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
-    $(".container").hide();
+    $(".wizard").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
     $("#swaggerEditer").fadeIn("fast");
@@ -710,7 +710,7 @@ APIDesigner.prototype.edit_swagger = function(){
 
 APIDesigner.prototype.close_swagger_editor = function(){
     $("body").removeClass("modal-open");
-    $(".container").show();
+    $(".wizard").show();
     $("#se-iframe").remove();
     $("#swaggerEditer").fadeOut("fast");
 };

@@ -39,7 +39,7 @@
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 
-    var manage_wlabel = "";
+    /*var manage_wlabel = "";
 	if(mod.isGlobalCEPThrottlingEnabled()){
          if( api != null && api.availableSubscriptionPolicy !="" ){
             manage_wlabel = "completed";      
@@ -53,6 +53,13 @@
         } else {
             var manage_w_link = '#';        
         }
+    }*/
+
+    var manage_wlabel = "";
+    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+        manage_wlabel = "completed";      
+    }else{
+        var manage_w_link = '#';        
     } 
 %>
 <!-- <center>
@@ -96,7 +103,7 @@
             </div>
   <%  }%>
 
-	<div class="container">
+	<div class="">
                 <div class="row">
                     <div class="wizard">
                         <div class="wizard-inner">
@@ -144,8 +151,8 @@
 							                            </label>
 							                                <div class="col-sm-3">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
-							                                        <option value="http"  selected="selected">HTTP Endpoint</option>
-							                                        <option value="address">Address Endpoint</option>
+							                                        <option value="http"  selected="selected">REST Endpoint</option>
+							                                        <option value="address">SOAP Endpoint</option>
 							                                        <option value="failover">Failover Endpoint</option>
 							                                        <option value="load_balance">Load balanced Endpoint</option>
 							                                        <option value="default">Default Endpoint</option>
@@ -156,8 +163,8 @@
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 							
 							                        <div id="endpoint_help" class="hide">
-								                         <strong>HTTP Endpoint </strong><p>A REST service endpoint based on a URI template</p>
-								                         <strong>Address Endpoint</strong><p>The direct URL of the service</p>
+								                         <strong>REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
+								                         <strong>SOAP Endpoint</strong><p>The direct URL of the service</p>
 								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
 								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
 								                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
