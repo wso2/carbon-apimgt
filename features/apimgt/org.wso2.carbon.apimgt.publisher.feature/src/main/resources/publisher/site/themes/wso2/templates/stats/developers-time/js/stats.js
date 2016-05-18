@@ -3,6 +3,8 @@ var chartData;
 var apiFilter = "allAPIs";
 
 function update_chart(data) {
+    //clear previous data
+    d3.select("svg").selectAll("*").remove();
     // Update the SVG with the new data and call chart
     chartData.datum(data).transition().duration(500).call(chart);
     nv.utils.windowResize(chart.update);
