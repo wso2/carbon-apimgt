@@ -39,7 +39,7 @@
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
 
-    var manage_wlabel = "";
+    /*var manage_wlabel = "";
 	if(mod.isGlobalCEPThrottlingEnabled()){
          if( api != null && api.availableSubscriptionPolicy !="" ){
             manage_wlabel = "completed";      
@@ -53,6 +53,13 @@
         } else {
             var manage_w_link = '#';        
         }
+    }*/
+
+    var manage_wlabel = "";
+    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+        manage_wlabel = "completed";      
+    }else{
+        var manage_w_link = '#';        
     } 
 %>
 <!-- <center>

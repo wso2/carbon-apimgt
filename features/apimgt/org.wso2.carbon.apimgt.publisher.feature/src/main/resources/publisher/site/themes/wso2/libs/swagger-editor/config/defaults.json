@@ -8,8 +8,6 @@
     }
   },
   "disableCodeGen": true,
-  "disableExamples":true,
-  "disableImport":true,
   "examplesFolder": "spec-files/",
   "editorOptions": {
     "theme": "ace/theme/atom_dark"
@@ -23,10 +21,9 @@
   "backendEndpoint": "/editor/spec",
   "useYamlBackend": false,
   "disableFileMenu": false,
-  "headerBranding": true,
-  "disableNewUserIntro": false,
+  "headerBranding": false,
+  "disableNewUserIntro": true,
   "enableTryIt": false,
   "brandingCssClass": "wso2apim",
-  "importProxyUrl": "",
-  "disableNewUserIntro": true
+  "importProxyUrl": ""
 }
