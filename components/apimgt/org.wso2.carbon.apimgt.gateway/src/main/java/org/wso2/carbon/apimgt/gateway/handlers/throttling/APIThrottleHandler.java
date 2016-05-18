@@ -698,6 +698,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 //check whether a configuration has been defined for this role name or not
                 //loads the ThrottleContext
                 ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                String apiKey;
                 if (context == null) {
                     log.warn("Unable to load throttle context");
                     return true;
@@ -720,7 +721,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     //adding consumerKey and authz_user combination instead of access token to apiKey
                     //This avoids sending more than the permitted number of requests in a unit time by
                     // regenerating the access token
-                    String apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
+                    apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
                     //If the application has not been subscribed to the Unlimited Tier and
                     //if application level throttling has passed
                     if (!APIConstants.UNLIMITED_TIER.equals(roleID) && (info == null || info.isAccessAllowed())) {
@@ -759,6 +760,10 @@ public class APIThrottleHandler extends AbstractHandler {
                         // limit has reached.
                         if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
                             synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Request throttled at API level for throttle key" + apiKey
+                                     + ". But role "+ consumerRoleID + "allows to continue to serve requests");
                         }
                     } else {
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);

@@ -32,6 +32,9 @@ public class BandwidthLimit extends Limit {
     }
 
     public String getDataUnit() {
+        if("MB".equalsIgnoreCase(dataUnit)) {
+            return Long.toString(dataAmount * 1024);
+        }
         return dataUnit;
     }
 

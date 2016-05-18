@@ -158,7 +158,6 @@
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
                         <option value="KB">KB</option>
                         <option value="MB" selected="true">MB</option>
-                        <option value="GB">GB</option>
                     </select>
                 </div>
             </div>
@@ -179,10 +178,11 @@
             </div>
             <div class="col-sm-3">
                 <select class="form-control select required" id="request-count-unit" name="request-count-unit">
-                    <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "sec") {%>selected<%}%>>Second(s)</option>
-                    <option value="min" <% if(defaultTimeUnit == "min") {%>selected<%}%>>Minute(s)</option>
+                    <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "min") {%>selected<%}%>>Minutes(s)</option>
                     <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>Hour(s)</option>
                     <option value="days" <% if(defaultTimeUnit == "day") {%>selected<%}%>>Day(s)</option>
+                    <option value="days" <% if(defaultTimeUnit == "month") {%>selected<%}%>>Month(s)</option>
+                    <option value="days" <% if(defaultTimeUnit == "year") {%>selected<%}%>>Year(s)</option>
                 </select>
             </div>
         </div>
@@ -714,10 +714,11 @@
                                                         </div>
                                                         <div class="col-sm-3">
                                                             <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                                                <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                                                <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                                                <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                                                <option value="min"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>Minute(s)</option>
+                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>Hour(s)</option>
+                                                                <option value="week" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "week"}}selected{{/if_eq}}>Week(s)</option>
+                                                                <option value="month" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "month"}}selected{{/if_eq}}>Month(s)</option>
+                                                                <option value="year" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "year"}}selected{{/if_eq}}>Year(s)</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -734,8 +735,8 @@
                                                         </div>
                                                         <div class="col-sm-3">
                                                             <select class="form-control select required valid" id="execution-flow-bandwidth-unit-{{executionFlow.id}}" name="bandwidth-unit">
-                                                                <option value="kbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
-                                                                <option value="Mbps" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
+                                                                <option value="KB" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "kB"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.dataUnit ""}}selected{{/if_eq}}{{/if_eq}}>KB</option>
+                                                                <option value="MB" {{#if_eq executionFlow.quotaPolicy.limit.dataUnit "MB"}}selected{{/if_eq}}>MB</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -750,10 +751,12 @@
                                                         </div>
                                                         <div class="col-sm-3">
                                                             <select class="form-control select required valid" id="execution-flow-request-count-unit-{{executionFlow.id}}" name="execution-flow-request-count-unit-{{executionFlow.id}}">
-                                                                <option value="sec"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "sec"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>sec</option>
-                                                                <option value="min" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{/if_eq}}>min</option>
-                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>hour</option>
-                                                                <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>day</option>
+                                                                <option value="min"  {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "min"}}selected{{else}}{{#if_eq executionFlow.quotaPolicy.limit.timeUnit ""}}selected{{/if_eq}}{{/if_eq}}>Minute(s)</option>
+                                                                <option value="hour" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "hour"}}selected{{/if_eq}}>Hour(s)</option>
+                                                                <option value="day" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "day"}}selected{{/if_eq}}>Day(s)</option>
+                                                                <option value="week" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "week"}}selected{{/if_eq}}>Week(s)</option>
+                                                                <option value="month" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "month"}}selected{{/if_eq}}>Month(s)</option>
+                                                                <option value="year" {{#if_eq executionFlow.quotaPolicy.limit.timeUnit "year"}}selected{{/if_eq}}>Year(s)</option>
                                                             </select>
                                                         </div>
                                                     </div>
