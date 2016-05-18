@@ -829,6 +829,8 @@ public class RegistryForumManager implements ForumManager {
                                                                                                 throws ForumException {
 
         try {
+            QName qName = artifact.getQName();
+            artifact.setQName(new QName(qName.getNamespaceURI(), forumTopicDTO.getSubject(), qName.getPrefix()));
             artifact.setAttribute(ForumConstants.OVERVIEW_TOPIC_ID, artifact.getId());
             artifact.setAttribute(ForumConstants.OVERVIEW_SUBJECT, forumTopicDTO.getSubject());
             artifact.setAttribute(ForumConstants.OVERVIEW_TOPIC_OWNER_TENANT_DOMAIN,
