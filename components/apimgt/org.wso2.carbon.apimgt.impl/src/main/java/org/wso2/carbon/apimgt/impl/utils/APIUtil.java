@@ -5547,7 +5547,7 @@ public final class APIUtil {
                     policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
-                    if(APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
+                    if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
                         deploymentManager.deployPolicyToGlobalCEP(policyFile, policyString);
                     }
                     apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName(),
