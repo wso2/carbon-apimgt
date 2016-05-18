@@ -568,6 +568,10 @@ body.login-bg {
 	background-color : #efefef
 }
 
+input.ep-field{ min-width: 50%;}
+._jsonform-array-ul label{width:118px; margin-left: 0px; }
+._jsonform-array-ul label .help_popup{ display: none }
+
 
 #description {
     resize: vertical; 
