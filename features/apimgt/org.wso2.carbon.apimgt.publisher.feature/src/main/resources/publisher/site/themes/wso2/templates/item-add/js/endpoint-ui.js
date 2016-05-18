@@ -415,7 +415,7 @@ $(document).ready(function () {
             "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
         }, {
             key: 'sandbox_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
+            "fieldHtmlClass": "input-xlarge hide validateEndpoints validateDefaultEndpoint"
         }]
     };
 
