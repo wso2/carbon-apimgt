@@ -20,17 +20,12 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.util.Map;
 
 public class APIManagerAnalyticsConfiguration {
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
-    private String bamServerUrlGroups;
-    private String bamServerUser;
-    private String bamServerPassword;
+    private String dasReceiverUrlGroups;
+    private String dasReceiverServerUser;
+    private String dasReceiverServerPassword;
     private String dasServerUrl;
     private String dasServerUser;
     private String dasServerPassword;
@@ -103,9 +98,9 @@ public class APIManagerAnalyticsConfiguration {
                 log.error("Execution Time stream name or version is null. Check api-manager.xml");
             }
 
-            bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-            bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-            bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+            dasReceiverUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+            dasReceiverServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+            dasReceiverServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
 
             dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
             dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
@@ -115,16 +110,16 @@ public class APIManagerAnalyticsConfiguration {
         }
     }
 
-    public String getBamServerPassword() {
-        return bamServerPassword;
+    public String getDasReceiverServerPassword() {
+        return dasReceiverServerPassword;
     }
 
-    public String getBamServerUser() {
-        return bamServerUser;
+    public String getDasReceiverServerUser() {
+        return dasReceiverServerUser;
     }
 
-    public String getBamServerUrlGroups() {
-        return bamServerUrlGroups;
+    public String getDasReceiverUrlGroups() {
+        return dasReceiverUrlGroups;
     }
 
     public boolean isAnalyticsEnabled() {
@@ -179,16 +174,16 @@ public class APIManagerAnalyticsConfiguration {
         return throttleStreamVersion;
     }
 
-    public void setBamServerUrlGroups(String bamServerUrlGroups) {
-        this.bamServerUrlGroups = bamServerUrlGroups;
+    public void setDasReceiverUrlGroups(String dasReceiverUrlGroups) {
+        this.dasReceiverUrlGroups = dasReceiverUrlGroups;
     }
 
-    public void setBamServerUser(String bamServerUser) {
-        this.bamServerUser = bamServerUser;
+    public void setDasReceiverServerUser(String dasReceiverServerUser) {
+        this.dasReceiverServerUser = dasReceiverServerUser;
     }
 
-    public void setBamServerPassword(String bamServerPassword) {
-        this.bamServerPassword = bamServerPassword;
+    public void setDasReceiverServerPassword(String dasReceiverServerPassword) {
+        this.dasReceiverServerPassword = dasReceiverServerPassword;
     }
 
     public void setAnalyticsEnabled(boolean analyticsEnabled) {

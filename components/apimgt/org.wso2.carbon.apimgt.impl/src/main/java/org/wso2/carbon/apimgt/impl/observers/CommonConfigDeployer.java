@@ -120,10 +120,9 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
                     getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
             boolean enabled = APIUtil.isAnalyticsEnabled();
             if (enabled) {
-                String bamServerURL = configuration.getBamServerUrlGroups();
-                String bamServerUser = configuration.getBamServerUser();
-                String bamServerPassword = configuration.getBamServerPassword();
-                APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, tenantId);
+                APIUtil.addBamServerProfile(configuration.getDasReceiverUrlGroups(),
+                        configuration.getDasReceiverServerUser(), configuration.getDasReceiverServerPassword(),
+                        tenantId);
             }
         } catch (APIManagementException e) {
             log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry", e);

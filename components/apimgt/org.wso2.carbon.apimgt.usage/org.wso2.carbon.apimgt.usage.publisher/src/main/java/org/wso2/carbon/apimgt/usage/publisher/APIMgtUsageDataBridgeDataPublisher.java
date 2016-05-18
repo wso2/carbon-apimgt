@@ -138,11 +138,11 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         //If a DataPublisher had not been registered for the tenant.
         if (dataPublisher == null &&
-            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups() != null) {
+            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups() != null) {
 
-            String serverUser = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUser();
-            String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerPassword();
-            String serverURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBamServerUrlGroups();
+            String serverUser = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverServerUser();
+            String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverServerPassword();
+            String serverURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups();
 
             try {
                 //Create new DataPublisher for the tenant.

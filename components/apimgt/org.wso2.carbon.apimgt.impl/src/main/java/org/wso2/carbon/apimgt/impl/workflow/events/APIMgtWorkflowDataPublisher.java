@@ -34,7 +34,6 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationExcep
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
-import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -82,9 +81,9 @@ public class APIMgtWorkflowDataPublisher {
 
         //Get DataPublisher which has been registered for the tenant.
         DataPublisher dataPublisher = getDataPublisher(tenantDomain);
-        String bamServerURL = analyticsConfig.getBamServerUrlGroups();
-        String bamServerUser = analyticsConfig.getBamServerUser();
-        String bamServerPassword = analyticsConfig.getBamServerPassword();
+        String bamServerURL = analyticsConfig.getDasReceiverUrlGroups();
+        String bamServerUser = analyticsConfig.getDasReceiverServerUser();
+        String bamServerPassword = analyticsConfig.getDasReceiverServerPassword();
 
         //If a DataPublisher had not been registered for the tenant.
         if (dataPublisher == null) {

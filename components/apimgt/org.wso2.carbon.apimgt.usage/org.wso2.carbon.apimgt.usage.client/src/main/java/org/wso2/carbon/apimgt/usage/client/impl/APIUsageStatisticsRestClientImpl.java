@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
@@ -66,10 +65,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Collections.sort;
@@ -116,7 +113,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 element = buildOMElement(new FileInputStream(filePath));
                 paymentPlan = new PaymentPlan(element);
             }
-            String targetEndpoint = apiManagerAnalyticsConfiguration.getBamServerUrlGroups();
+            String targetEndpoint = apiManagerAnalyticsConfiguration.getDasReceiverUrlGroups();
             if (targetEndpoint == null || targetEndpoint.equals("")) {
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
             }
