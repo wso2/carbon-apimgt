@@ -171,7 +171,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         String ipLevelBlockingKey;
         String appLevelBlockingKey = "";
-
+        boolean stopOnQuotaReach = true;
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         apiContext = apiContext != null ? apiContext : "";
@@ -212,6 +212,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriberTenantDomain = authContext.getSubscriberTenantDomain();
                 applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
                 apiLevelThrottleKey = apiContext + ":" + apiVersion;
+                stopOnQuotaReach = authContext.isStopOnQuotaReach();
                 //If request is not blocked then only we perform throttling.
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
                 applicationLevelTier = authContext.getApplicationTier();
@@ -344,13 +345,27 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 isThrottled = isApplicationLevelThrottled = true;
                             }
                         } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Request throttled at subscription level for throttle key" +
-                                        subscriptionLevelThrottleKey);
+                            if(!stopOnQuotaReach){
+                                // This means that we are allowing the requests to continue even after the throttling
+                                // limit has reached.
+                                if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
+                                    synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
+                                }
+                                isThrottled = false;
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Request throttled at subscription level for throttle key" +
+                                            subscriptionLevelThrottleKey + ". But subscription policy "+ subscriptionLevelTier + " allows to continue to serve requests");
+                                }
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Request throttled at subscription level for throttle key" +
+                                            subscriptionLevelThrottleKey);
+                                }
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
+                                        APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
+                                isThrottled = isSubscriptionLevelThrottled = true;
                             }
-                            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                    APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
-                            isThrottled = isSubscriptionLevelThrottled = true;
                         }
                     } else {
                         if (log.isDebugEnabled()) {

@@ -102,7 +102,7 @@
     "block": "Block",
     "addSubsTier": "Add Subscription Tier",
     "editSubsTier": "Edit Subscription Tier",
-    "rateLimitHeader": "Rate Limiting (Spike Arrest Limit)",
+    "rateLimitHeader": "Burst Control (Rate Limiting)",
     "customRules": "Custom Rules",
     "addCustomRule": "Add Custom Rule",
     "applyRule": "Apply Rule",
