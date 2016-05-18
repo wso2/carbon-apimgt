@@ -98,7 +98,7 @@
 		  <%  }%>
 		  
 		  
-		  <div class="">
+		  <div class="container">
                 <div class="row">
                     <div class="wizard">
                         <div class="wizard-inner">

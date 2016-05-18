@@ -568,7 +568,15 @@ body.login-bg {
 	background-color : #efefef
 }
 
+input.ep-field{ min-width: 50%;}
+._jsonform-array-ul label{width:118px; margin-left: 0px; }
+._jsonform-array-ul label .help_popup{ display: none }
+
 
 #description {
     resize: vertical; 
 }
+
+.modal-content { background: #FFF; color:#000;}
+.modal-header h3{ padding: 0px; margin:0px 0px 20px 0px}
+.modal-header { background: #e5e5e5; margin-bottom: 20px;}
