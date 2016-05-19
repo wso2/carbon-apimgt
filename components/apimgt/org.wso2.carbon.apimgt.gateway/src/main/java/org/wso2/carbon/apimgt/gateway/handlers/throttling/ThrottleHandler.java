@@ -500,7 +500,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
         payload.addChild(errorDetail);
-        if(nextAccessTimeValue != null) {
+        if(!StringUtils.isEmpty(nextAccessTimeValue)) {
             OMElement nextAccessTime = fac.createOMElement("nextAccessTime", ns);
             nextAccessTime.setText(nextAccessTimeValue);
             payload.addChild(nextAccessTime);
@@ -572,7 +572,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription, nextAccessTimeString));
         } else {
-            if(StringUtils.isEmpty(nextAccessTimeString)) {
+            if(!StringUtils.isEmpty(nextAccessTimeString)) {
                 errorDescription += errorDescription + " .You can access API after " + nextAccessTimeString;
             }
             Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
