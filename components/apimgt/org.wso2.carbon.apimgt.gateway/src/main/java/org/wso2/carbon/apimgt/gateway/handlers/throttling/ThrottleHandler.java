@@ -502,8 +502,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         payload.addChild(errorDetail);
         if(nextAccessTimeValue != null) {
             OMElement nextAccessTime = fac.createOMElement("nextAccessTime", ns);
-            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-            nextAccessTime.setText(df.format(nextAccessTimeValue));
+            nextAccessTime.setText(nextAccessTimeValue);
             payload.addChild(nextAccessTime);
         }
         return payload;
@@ -530,7 +529,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             errorMessage = "Message blocked";
             // By default we send a 429 response back
             httpErrorCode = HttpStatus.SC_FORBIDDEN;
-            errorDescription = "You have blocked on accessing the resource";
+            errorDescription = "You have been blocked from accessing the resource";
         } else {
             errorCode = 503;
             errorMessage = "Message throttled out";
