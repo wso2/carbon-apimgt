@@ -82,7 +82,7 @@ jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/templates/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
                 }
 
                 else{

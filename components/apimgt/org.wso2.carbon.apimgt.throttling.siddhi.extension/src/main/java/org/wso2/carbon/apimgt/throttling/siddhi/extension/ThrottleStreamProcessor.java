@@ -47,12 +47,11 @@ import java.util.Map;
 public class ThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
-    private long lastSentTime;
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
-    private long expireEventTime;
-    private long startTime;
+    private long expireEventTime = -1;
+    private long startTime = -1;
 
     @Override
     public void setScheduler(Scheduler scheduler) {
@@ -115,28 +114,24 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
         synchronized (this) {
+            if (expireEventTime == -1) {
+                long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+                if (startTime != -1) {
+                    expireEventTime = addTimeShift(currentTime);
+                } else {
+                    expireEventTime = executionPlanContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
+                }
+                scheduler.notifyAt(expireEventTime);
+            }
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
             boolean sendEvents;
-            if (currentTime >= lastSentTime + timeInMilliSeconds && lastSentTime > 0) {
-                lastSentTime += timeInMilliSeconds;
+            if (currentTime >= expireEventTime) {
+                expireEventTime += timeInMilliSeconds;
                 if (expiredEventChunk.getFirst() != null) {
-                    expireEventTime = lastSentTime + timeInMilliSeconds;
                     scheduler.notifyAt(expireEventTime);
                 }
                 sendEvents = true;
             } else {
-
-                if (expiredEventChunk.getFirst() == null) {
-                    if (startTime != 0) {
-                        expireEventTime = addTimeShift(currentTime);
-                    } else {
-                        if (lastSentTime == 0) {
-                            lastSentTime = executionPlanContext.getTimestampGenerator().currentTime();
-                        }
-                        expireEventTime = lastSentTime + timeInMilliSeconds;
-                    }
-                    scheduler.notifyAt(expireEventTime);
-                }
                 sendEvents = false;
             }
 
@@ -154,20 +149,16 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
             }
             if (sendEvents) {
                 expiredEventChunk.reset();
-                ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>(true);
-
                 if (expiredEventChunk.getFirst() != null) {
-                    newEventChunk.add(expiredEventChunk.getFirst());
+                    streamEventChunk.add(expiredEventChunk.getFirst());
                 }
                 expiredEventChunk.clear();
-                if (newEventChunk.getFirst() != null) {
-                    streamEventChunk = newEventChunk;
-                }
             }
         }
-
-        if (streamEventChunk.getFirst() != null && streamEventChunk.getFirst().getType() != ComplexEvent.Type.TIMER) {
+        if (streamEventChunk.getFirst() != null) {
+            streamEventChunk.setBatch(true);
             nextProcessor.process(streamEventChunk);
+            streamEventChunk.setBatch(false);
         }
     }
 

@@ -117,7 +117,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 element = buildOMElement(new FileInputStream(filePath));
                 paymentPlan = new PaymentPlan(element);
             }
-            String targetEndpoint = apiManagerAnalyticsConfiguration.getBamServerUrlGroups();
+            String targetEndpoint = apiManagerAnalyticsConfiguration.getDasReceiverUrlGroups();
             if (targetEndpoint == null || targetEndpoint.equals("")) {
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
             }

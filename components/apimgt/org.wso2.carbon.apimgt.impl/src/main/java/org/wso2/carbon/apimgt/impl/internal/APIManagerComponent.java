@@ -209,10 +209,10 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            if (analyticsConfiguration.isAnalyticsEnabled()){
-                APIUtil.addBamServerProfile(analyticsConfiguration.getDasServerUrl(), analyticsConfiguration
-                        .getDasServerUser(), analyticsConfiguration.getDasServerPassword(), MultitenantConstants
-                        .SUPER_TENANT_ID);
+            if (analyticsConfiguration.isAnalyticsEnabled()) {
+                APIUtil.addBamServerProfile(analyticsConfiguration.getDasReceiverUrlGroups(),
+                        analyticsConfiguration.getDasReceiverServerUser(),
+                        analyticsConfiguration.getDasReceiverServerPassword(), MultitenantConstants.SUPER_TENANT_ID);
             }
             //Adding default throttle policies
             boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();

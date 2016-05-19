@@ -62,9 +62,9 @@ public class StatUpdateClusterMessage extends ClusteringMessage {
         if (receiverUrl != null && !receiverUrl.isEmpty() &&
             user != null && !user.isEmpty() &&
             password != null && !password.isEmpty()) {
-            instanceOfAPIAnalytics.setBamServerUrlGroups(receiverUrl);
-            instanceOfAPIAnalytics.setBamServerUser(user);
-            instanceOfAPIAnalytics.setBamServerPassword(password);
+            instanceOfAPIAnalytics.setDasReceiverUrlGroups(receiverUrl);
+            instanceOfAPIAnalytics.setDasReceiverServerUser(user);
+            instanceOfAPIAnalytics.setDasReceiverServerPassword(password);
         }
 
         if (log.isDebugEnabled()) {

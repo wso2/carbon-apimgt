@@ -259,7 +259,7 @@
 
     "nameHelpMsg" : "Display name to be shown in the API Store." ,
     "contextHelpMsg" : "URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context" ,
-    "tierHelpMsg" : "The tiers you select here are the ones available for subscriber to subscribe this API" ,
+    "tierHelpMsg" : "The tiers you select here are the ones available for subscriber to subscribe this API. Each tier indicates the number of requests, the subscriber is granted for within a unit time." ,
     "roleHelpMsg" : "<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong> Visible to my domain :</strong>  The API is visible to all users who are registered in the API's tenant domain.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify." ,
     "docRoleHelpMsg" : "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role." ,
     "tenantRoleHelpMsg" : "This option controls the API visibility based on the tenant. " ,
@@ -435,6 +435,10 @@
 
     "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied; Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)",
     
-    "Upload":"Upload"
+    "Upload":"Upload",
+    "Throttling Settings":"Throttling Settings",
+    "Refer ":"Refer ",
+    "documentation ":"documentation ",
+    "to find out details about each throttling setting.":"to find out details about each throttling setting."
 
 }
