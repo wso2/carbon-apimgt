@@ -173,6 +173,7 @@ public class ThrottleDataHolder {
                 blockedUserConditionsMap.containsKey(userBlockingKey) ||
                 blockedIpConditionsMap.containsKey(ipBlockingKey));
     }
+
     /**
      * This method will check given key in throttle data Map. Throttle data map need to be update from topic
      * subscriber with all latest updates from global policy engine. This method will perfoem only local map
@@ -196,6 +197,16 @@ public class ThrottleDataHolder {
         } else {
             return isThrottled;
         }
+    }
+
+    /**
+     * This method used to get the next access timestamp of a given key
+     *
+     * @param key String unique key of throttle event.
+     * @return throttle next access timestamp
+     */
+    public long getThrottleNextAccessTimestamp(String key) {
+        return this.throttleDataMap.get(key);
     }
 
     public boolean isBlockingConditionsPresent() {

@@ -63,6 +63,9 @@ import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -168,7 +171,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         boolean isBlockedRequest = false;
         boolean apiLevelThrottledTriggered = false;
         boolean policyLevelUserTriggered = false;
-
         String ipLevelBlockingKey;
         String appLevelBlockingKey = "";
         boolean stopOnQuotaReach = true;
@@ -207,6 +209,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     log.debug(msg);
                 }
                 synCtx.setProperty(APIThrottleConstants.BLOCKED_REASON, msg);
+                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.REQUEST_BLOCKED);
                 isThrottled = true;
             } else {
                 subscriberTenantDomain = authContext.getSubscriberTenantDomain();
@@ -309,7 +312,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
                                         subscriptionLevelThrottleKey, apiLevelThrottleKey, subscriptionLevelThrottleKey, apiContext,
                                         apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
-                                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap())) {
+                                        ServiceReferenceHolder.getInstance().getThrottleDataHolder().getKeyTemplateMap(), synCtx)) {
                                     //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
@@ -331,6 +334,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     }
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                             "Custom Policy Defined by admin");
+                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, );
                                     isThrottled = true;
 
                                 }
@@ -474,7 +478,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     }
 
 
-    private OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
+    private OMElement getFaultPayload(int throttleErrorCode, String message, String description, Date nextAccessTimeValue) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
                 APIThrottleConstants.API_THROTTLE_NS_PREFIX);
@@ -486,10 +490,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         errorMessage.setText(message);
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(description);
-
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
         payload.addChild(errorDetail);
+        if(nextAccessTimeValue != null) {
+            OMElement nextAccessTime = fac.createOMElement("nextAccessTime", ns);
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            nextAccessTime.setText(df.format(nextAccessTimeValue));
+            payload.addChild(nextAccessTime);
+        }
         return payload;
     }
 
@@ -507,6 +516,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             errorDescription = "API not accepting requests";
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } else if (APIThrottleConstants.REQUEST_BLOCKED.equals(
+                messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = 503;
+            errorMessage = "Message blocked";
+            // By default we send a 429 response back
+            httpErrorCode = HttpStatus.SC_FORBIDDEN;
+            errorDescription = "You have blocked on accessing the resource";
         } else {
             errorCode = 503;
             errorMessage = "Message throttled out";
@@ -783,7 +799,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey,
                                         String $subscriptionKey, String apiContext, String apiVersion, String appTenant,
-                                        String apiTenant, String appId, Map<String, String> keyTemplateMap) {
+                                        String apiTenant, String appId, Map<String, String> keyTemplateMap, MessageContext messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
                 key = key.replaceAll("\\$appKey", appKey);
@@ -797,6 +813,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$apiTenant", apiKey);
                 key = key.replaceAll("\\$appId", apiKey);
                 if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(key)) {
+                    long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getThrottleNextAccessTimestamp(key);
+                    messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                     return true;
                 }
             }

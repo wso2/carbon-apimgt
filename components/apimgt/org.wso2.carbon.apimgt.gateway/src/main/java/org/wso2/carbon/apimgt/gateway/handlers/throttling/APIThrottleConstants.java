@@ -44,7 +44,11 @@ public class APIThrottleConstants {
 
     public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;
 
+    public static final String THROTTLED_NEXT_ACCESS_TIMESTAMP = "NEXT_ACCESS_TIME";
+
     public static final String HARD_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED;
+
+    public static final String REQUEST_BLOCKED = "REQUEST_BLOCKED";
 
     public static final int SC_TOO_MANY_REQUESTS = 429;
 
