@@ -173,6 +173,20 @@ if(jagg.isCSRFTokenValid())
             };
             apiData.context = request.getParameter("context","UTF-8");
 
+            var endpointType = request.getParameter("endpoint_type");
+            
+            if(endpointType == "default") {
+                if(!(request.getParameter("inSequence")) || (request.getParameter("inSequence") == "none"))  {
+                    obj = {
+                           error:true,
+                           message:"You must upload or select a message mediation In Flow policy",
+                           data :apiId,
+                       };
+                   print(obj);
+                   return;
+                } 
+            }
+            
             apiData.implementation_type = request.getParameter("implementation_methods");
             apiData.wsdl = request.getParameter("wsdl");
             apiData.wadl = request.getParameter("wadl");
@@ -300,7 +314,7 @@ if(jagg.isCSRFTokenValid())
             apiData.seqFile = request.getFile("file");
             apiData.seqType= request.getParameter("seqType");
             result = mod.uploadSequenceFile(apiData);
-            log.info(result);
+
             if (result.error==true) {
                 obj = {
                     error:true,

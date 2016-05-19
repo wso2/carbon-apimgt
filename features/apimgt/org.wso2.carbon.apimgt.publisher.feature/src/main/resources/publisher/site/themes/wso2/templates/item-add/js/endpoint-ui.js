@@ -534,7 +534,8 @@ $(document).ready(function () {
             $('[name="production_endpoints"]').attr('readonly','readonly');
             $('[name="sandbox_endpoints"]').val("Default");
             $('[name="sandbox_endpoints"]').attr('readonly','readonly');
-            $("#help-block").text("Please upload the sequence file to Message Mediation Policies having TO header ");
+            $(".help-block").text("Please upload the sequence file to Message Mediation Policies having TO header ");
+            $(".help-block").show();
         }
     });
 
