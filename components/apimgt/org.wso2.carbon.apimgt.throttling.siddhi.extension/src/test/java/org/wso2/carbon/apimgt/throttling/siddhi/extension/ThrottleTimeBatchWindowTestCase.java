@@ -79,7 +79,6 @@ public class ThrottleTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         Thread.sleep(6000);
         inputHandler.send(new Object[]{"IBM", 700f, 0});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         Thread.sleep(6000);
         Assert.assertEquals(4, inEventCount);
