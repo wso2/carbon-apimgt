@@ -16,7 +16,7 @@ FROM RequestStream
 SELECT messageID, (appTenant == 'carbon.super' and appTier == 'Large') AS isEligible, appKey AS throttleKey
 INSERT INTO EligibilityStream;
 
-FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) 
+FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min, 0)
 select throttleKey, (count(messageID) >= 20) as isThrottled, expiryTimeStamp 
 group by throttleKey 
 INSERT ALL EVENTS into ResultStream;

@@ -53,4 +53,6 @@ public class APIThrottleConstants {
     public static final int SC_TOO_MANY_REQUESTS = 429;
 
     public static final String BLOCKED_REASON = APIConstants.BLOCKED_REASON_KEY;
+
+    public static final String UTC = "UTC";
 }

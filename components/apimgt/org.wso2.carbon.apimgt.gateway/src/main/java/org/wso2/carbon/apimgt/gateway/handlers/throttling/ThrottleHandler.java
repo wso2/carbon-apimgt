@@ -68,6 +68,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 
 /**
@@ -267,6 +268,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     } else {
                                         isApiLevelThrottled = isThrottled = true;
                                     }
+                                    long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                                            getThrottleNextAccessTimestamp(tempResourceLevelThrottleKey);
+                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                     break;
                                 }
                             }
@@ -334,7 +338,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     }
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                             "Custom Policy Defined by admin");
-                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, );
                                     isThrottled = true;
 
                                 }
@@ -346,6 +349,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 }
                                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                         APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
+                                long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getThrottleNextAccessTimestamp(applicationLevelThrottleKey);
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                 isThrottled = isApplicationLevelThrottled = true;
                             }
                         } else {
@@ -365,6 +370,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     log.debug("Request throttled at subscription level for throttle key" +
                                             subscriptionLevelThrottleKey);
                                 }
+                                long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getThrottleNextAccessTimestamp(subscriptionLevelThrottleKey);
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                                 synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                         APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
@@ -478,7 +485,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     }
 
 
-    private OMElement getFaultPayload(int throttleErrorCode, String message, String description, Date nextAccessTimeValue) {
+    private OMElement getFaultPayload(int throttleErrorCode, String message, String description, String nextAccessTimeValue) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
                 APIThrottleConstants.API_THROTTLE_NS_PREFIX);
@@ -508,7 +515,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String errorDescription = null;
         int errorCode = -1;
         int httpErrorCode = -1;
-
+        long timestamp = 0;
+        String nextAccessTimeString = "";
         if (APIThrottleConstants.HARD_LIMIT_EXCEEDED.equals(
                 messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
             errorCode = APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE;
@@ -529,6 +537,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
             errorDescription = "You have exceeded your quota";
+            Object timestampOb = messageContext.getProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP);
+            if(timestampOb != null) {
+                timestamp = (Long) timestampOb;
+                SimpleDateFormat formatUTC = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ssZ");
+                formatUTC.setTimeZone(TimeZone.getTimeZone(APIThrottleConstants.UTC));
+                Date date = new Date(timestamp);
+                nextAccessTimeString = formatUTC.format(date) + " " + APIThrottleConstants.UTC;
+            }
         }
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
@@ -555,8 +571,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
+            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription, nextAccessTimeString));
         } else {
+            if(StringUtils.isEmpty(nextAccessTimeString)) {
+                errorDescription += errorDescription + " .You can access API after " + nextAccessTimeString;
+            }
             Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
         }
 
