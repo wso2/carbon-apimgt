@@ -129,7 +129,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             responsePublisherDTO.setUsername((String) mc.getProperty(APIMgtGatewayConstants.USER_ID));
             responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
             responsePublisherDTO.setContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
-            responsePublisherDTO.setApiVersion((String) mc.getProperty(APIMgtGatewayConstants.API_VERSION));
+            responsePublisherDTO.setApiVersion((String) mc.getProperty(RESTConstants.SYNAPSE_REST_API));
             responsePublisherDTO.setApi((String) mc.getProperty(APIMgtGatewayConstants.API));
             responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtGatewayConstants.VERSION));
             responsePublisherDTO.setResourcePath((String) mc.getProperty(APIMgtGatewayConstants.RESOURCE));
