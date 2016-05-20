@@ -66,7 +66,7 @@
 	            
 	            </label>
 	            <div class="col-md-9">
-	                <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" type="text" id="policy-name" name="policy-nam" autofocus="autofocus" value="<%=policyName%>" <%=nameFieldDisableStatus%>/>
+	                <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" type="text" id="policy-name" name="policy-nam" autofocus="autofocus" value="<%=encode.forHtml(String(policyName))%>" <%=nameFieldDisableStatus%>/>
 	            </div>
         	</div>
             <div class="form-group">
@@ -80,7 +80,7 @@
                     <p id="desc_help" class="hide">Description of the throttle policy.</p>
                 </label>
                 <div class="col-sm-9">
-                	<textarea class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" cols="40" rows="2" name="policy-description"><%=policyDesc%></textarea>
+                	<textarea class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" cols="40" rows="2" name="policy-description"><%=encode.forHtml(String(policyDesc))%></textarea>
                 </div>
             </div>            
             <div class="form-group">
@@ -136,7 +136,7 @@
                     <p id="request_count_help" class="hide">Number of requests allowed.</p>
                  </label>
                 <div class="col-sm-9">
-                    <input class="form-control required validInput noSpace" type="text" id="request-count" name="request-count" autofocus="autofocus" value="<%=defaultRequestCount%>" />
+                    <input class="form-control required validInput noSpace" type="text" id="request-count" name="request-count" autofocus="autofocus" value="<%=encode.forHtml(String(defaultRequestCount))%>" />
                 </div>
             </div>
         </div>
@@ -152,7 +152,7 @@
                     <p id="bandwidth_help" class="hide">Bandwidth Allowed.</p>
                 </label>
                 <div class="col-sm-6">
-                   <input class="form-control required validInput noSpace" type="text" id="bandwidth" name="bandwidth" autofocus="autofocus" value="<%=defaultBandwidth%>" />
+                   <input class="form-control required validInput noSpace" type="text" id="bandwidth" name="bandwidth" autofocus="autofocus" value="<%=encode.forHtml(String(defaultBandwidth))%>" />
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
@@ -174,7 +174,7 @@
                     <p id="unit_time_help" class="hide">Time Configuration.</p>
             </label>
             <div class="col-sm-6">
-                <input class="form-control" type="text" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=defaultUnitTime%>" />
+                <input class="form-control" type="text" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="<%=encode.forHtml(String(defaultUnitTime))%>" />
             </div>
             <div class="col-sm-3">
                 <select class="form-control select required" id="request-count-unit" name="request-count-unit">
@@ -829,7 +829,7 @@ $(document).ready(function() {
 <% if(policyName != null && policyName != "") {%>
 <script type="text/javascript">
     $(document).ready(function() {
-       loadPolicy("<%=policyName%>");
+       loadPolicy("<%=encode.forJavaScript(String(policyName))%>");
        
        var isNewPolicy = true;
        if('<%=policyName%>' != 'null'){

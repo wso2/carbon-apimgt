@@ -39,7 +39,7 @@
         <p class="lead"></p>
     </div>
 
-    <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
+    <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtml(String(policyAction))%>" />
     <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
     <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("errorMessageInvalid")%>'/>
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
@@ -52,7 +52,7 @@
         <div class="form-group">
             <label class="control-label col-sm-3"><%="Name"%></label>
             <div class="col-md-9">
-                <input class="form-control" type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>/>
+                <input class="form-control" type="text" id="policyName" name="policyName" <%=encode.forHtml(String(nameFieldDisableStatus))%>/>
             </div>
         </div>
         <div class="form-group">
@@ -153,19 +153,19 @@
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=policyName%>");
-          $('#description').val("<%=description%>");
-          $('#defaultUnitTime').val("<%=defaultUnitTime%>");
-          $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
+          $('#policyName').val("<%=encode.forJavaScript(String(policyName))%>");
+          $('#description').val("<%=encode.forJavaScript(String(description))%>");
+          $('#defaultUnitTime').val("<%=encode.forJavaScript(String(defaultUnitTime))%>");
+          $('#defaultTimeUnit').val("<%=encode.forJavaScript(String(defaultTimeUnit))%>");
 
           if("<%=defaultQuotaPolicy%>" == ("requestCount")){
             $('#requestCountType').prop('checked',true);
-            $('#defaultRequestCount').val("<%=defaultRequestCount%>");
+            $('#defaultRequestCount').val("<%=encode.forJavaScript(String(defaultRequestCount))%>");
           }
           else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             $('#bandwidthType').prop('checked',true);
-            $('#defaultBandwidth').val("<%=defaultBandwidth%>");
-            $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
+            $('#defaultBandwidth').val("<%=encode.forJavaScript(String(defaultBandwidth))%>");
+            $('#defaultBandwidthUnit').val("<%=encode.forJavaScript(String(defaultBandwidthUnit))%>");
           }
         }
         showHideDefaultQuotaPolicy();
