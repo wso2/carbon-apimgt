@@ -46,9 +46,9 @@
                 var condition = conditonsArray[j];
         %>
                 <tr>
-                    <td><%=condition.getConditionId()%></td>
-                    <td><%=condition.getConditionType()%></td>
-                    <td><%=condition.getConditionValue()%></td>
+                    <td><%=encode.forHtml(String(condition.getConditionId()))%></td>
+                    <td><%=encode.forHtml(String(condition.getConditionType()))%></td>
+                    <td><%=encode.forHtml(String(condition.getConditionValue()))%></td>
                     <td class="text-left">
                     <div class="form-inline">
                             <label class="switch">

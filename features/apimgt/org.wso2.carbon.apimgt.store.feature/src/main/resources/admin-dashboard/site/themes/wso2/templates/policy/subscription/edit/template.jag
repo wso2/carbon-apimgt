@@ -100,7 +100,7 @@
 				        <div class="form-group">
 				            <label class="control-label col-sm-3"><%="Name"%></label>
 				            <div class="col-md-9">
-				                <input class="form-control" type="text" id="policyName" name="policyName" <%=nameFieldDisableStatus%>/>
+				                <input class="form-control" type="text" id="policyName" name="policyName" <%=encode.forHtml(nameFieldDisableStatus)%>/>
 				            </div>
 				        </div>
 				        <div class="form-group">
@@ -307,23 +307,23 @@
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=policyName%>");
-          $('#description').val("<%=description%>");
-          $('#defaultUnitTime').val("<%=defaultUnitTime%>");
-          $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
-          $('#rateLimitCount').val("<%=rateLimitCount%>");
+          $('#policyName').val("<%=encode.forJavaScript(policyName)%>");
+          $('#description').val("<%=encode.forJavaScript(description+"")%>");
+          $('#defaultUnitTime').val("<%=encode.forJavaScript(defaultUnitTime)%>");
+          $('#defaultTimeUnit').val("<%=encode.forJavaScript(defaultTimeUnit)%>");
+          $('#rateLimitCount').val("<%=encode.forJavaScript(rateLimitCount)%>");
           if ("<%=rateLimitTimeUnit%>") {
-        	  $('#rateLimitTimeUnit').val("<%=rateLimitTimeUnit%>");  
+        	  $('#rateLimitTimeUnit').val("<%=encode.forJavaScript(rateLimitTimeUnit)%>");  
           }
           
           if("<%=defaultQuotaPolicy%>" == ("requestCount")){
             $('#requestCountType').prop('checked',true);
-            $('#defaultRequestCount').val("<%=defaultRequestCount%>");
+            $('#defaultRequestCount').val("<%=encode.forJavaScript(defaultRequestCount)%>");
           }
           else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             $('#bandwidthType').prop('checked',true);
-            $('#defaultBandwidth').val("<%=defaultBandwidth%>");
-            $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
+            $('#defaultBandwidth').val("<%=encode.forJavaScript(defaultBandwidth)%>");
+            $('#defaultBandwidthUnit').val("<%=encode.forJavaScript(defaultBandwidthUnit)%>");
           }
           if("<%=stopOnQuotaReach%>" == "true"){
             $('#stopOnQuotaReach').attr('checked', true);
