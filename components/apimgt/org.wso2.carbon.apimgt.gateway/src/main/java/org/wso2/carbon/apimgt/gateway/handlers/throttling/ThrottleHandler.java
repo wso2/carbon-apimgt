@@ -334,7 +334,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         log.debug("Request throttled at custom throttling");
                                     }
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                            "Custom Policy Defined by admin");
+                                            APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                                     isThrottled = true;
 
                                 }
@@ -522,25 +522,50 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
         } else if (APIThrottleConstants.REQUEST_BLOCKED.equals(
                 messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = 503;
+            errorCode = APIThrottleConstants.BLOCKED_ERROR_CODE;
             errorMessage = "Message blocked";
             // By default we send a 429 response back
             httpErrorCode = HttpStatus.SC_FORBIDDEN;
             errorDescription = "You have been blocked from accessing the resource";
-        } else {
-            errorCode = 503;
+        } else if (APIThrottleConstants.API_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
             errorDescription = "You have exceeded your quota";
-            Object timestampOb = messageContext.getProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP);
-            if(timestampOb != null) {
-                timestamp = (Long) timestampOb;
-                SimpleDateFormat formatUTC = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ssZ");
-                formatUTC.setTimeZone(TimeZone.getTimeZone(APIThrottleConstants.UTC));
-                Date date = new Date(timestamp);
-                nextAccessTimeString = formatUTC.format(date) + " " + APIThrottleConstants.UTC;
-            }
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else if (APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else if (APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else {
+            errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
         }
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
@@ -968,6 +993,20 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
     public void init(SynapseEnvironment synapseEnvironment) {
         initThrottleForHardLimitThrottling();
+    }
+
+    private String getNextAccessTimeString(MessageContext messageContext) {
+        Object timestampOb = messageContext.getProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP);
+        if(timestampOb != null) {
+            long timestamp = (Long) timestampOb;
+            SimpleDateFormat formatUTC = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ssZ");
+            formatUTC.setTimeZone(TimeZone.getTimeZone(APIThrottleConstants.UTC));
+            Date date = new Date(timestamp);
+            String nextAccessTimeString = formatUTC.format(date) + " " + APIThrottleConstants.UTC;
+            messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIME , nextAccessTimeString);
+            return nextAccessTimeString;
+        }
+        return null;
     }
 
     public void destroy() {

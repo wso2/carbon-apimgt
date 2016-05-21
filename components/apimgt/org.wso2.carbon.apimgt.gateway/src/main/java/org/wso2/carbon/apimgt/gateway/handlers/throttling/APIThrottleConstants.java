@@ -21,15 +21,18 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 public class APIThrottleConstants {
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
+    public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
     public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
     public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
-
-    public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
+    public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
+    public static final int BLOCKED_ERROR_CODE = 900805;
+    public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
 
     public static final String API_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
     public static final String RESOURCE_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
     public static final String APPLICATION_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;
     public static final String SUBSCRIPTION_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED;
+    public static final String CUSTOM_POLICY_LIMIT_EXCEED = "CUSTOM_POLICY_LIMIT_EXCEED";
 
     public static final String API_THROTTLE_NS = "http://wso2.org/apimanager/throttling";
     public static final String API_THROTTLE_NS_PREFIX = "amt";
@@ -45,6 +48,8 @@ public class APIThrottleConstants {
     public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;
 
     public static final String THROTTLED_NEXT_ACCESS_TIMESTAMP = "NEXT_ACCESS_TIME";
+
+    public static final String THROTTLED_NEXT_ACCESS_TIME = "NEXT_ACCESS_UTC_TIME";
 
     public static final String HARD_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED;
 

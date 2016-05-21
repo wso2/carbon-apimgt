@@ -3975,6 +3975,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean state = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
         if (state) {
+            if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+                conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
+                conditionValue = conditionValue + "@" + tenantDomain;
+            }
             publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
@@ -3987,7 +3991,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
         boolean deleteState = apiMgtDAO.deleteBlockCondition(conditionId);
         if(deleteState && blockCondition != null){
-            publishBlockingEvent(blockCondition.getConditionType(),blockCondition.getConditionValue(),"delete");
+            String blockingConditionType = blockCondition.getConditionType();
+            String blockingConditionValue = blockCondition.getConditionValue();
+            if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+            }
+            publishBlockingEvent(blockingConditionType, blockingConditionValue ,"delete");
         }
         return deleteState;
     }
