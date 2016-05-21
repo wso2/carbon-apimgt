@@ -334,7 +334,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         log.debug("Request throttled at custom throttling");
                                     }
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                            "Custom Policy Defined by admin");
+                                            APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                                     isThrottled = true;
 
                                 }
@@ -522,7 +522,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
         } else if (APIThrottleConstants.REQUEST_BLOCKED.equals(
                 messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
-            errorCode = 503;
+            errorCode = APIThrottleConstants.BLOCKED_ERROR_CODE;
             errorMessage = "Message blocked";
             // By default we send a 429 response back
             httpErrorCode = HttpStatus.SC_FORBIDDEN;
@@ -538,6 +538,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
                 .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
             errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+            nextAccessTimeString = getNextAccessTimeString(messageContext);
+        } else if (APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
@@ -995,6 +1003,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             formatUTC.setTimeZone(TimeZone.getTimeZone(APIThrottleConstants.UTC));
             Date date = new Date(timestamp);
             String nextAccessTimeString = formatUTC.format(date) + " " + APIThrottleConstants.UTC;
+            messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIME , nextAccessTimeString);
             return nextAccessTimeString;
         }
         return null;
