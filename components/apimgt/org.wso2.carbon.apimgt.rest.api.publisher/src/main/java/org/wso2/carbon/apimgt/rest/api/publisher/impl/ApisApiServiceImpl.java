@@ -359,6 +359,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             apiProvider.updateAPI(apiToUpdate);
+			apiProvider.saveSwagger20Definition(apiToUpdate.getId(), body.getApiDefinition());
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
