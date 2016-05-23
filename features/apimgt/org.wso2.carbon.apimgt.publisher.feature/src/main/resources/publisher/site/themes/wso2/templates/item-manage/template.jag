@@ -97,6 +97,16 @@
             </div>
 		  <%  }%>
 		  
+		  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
+   		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!", "Success!")%></strong>
+                    <%=i18n.localize("You have successfully saved the API.", "You have successfully saved the API.")%>
+                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
+                        <span aria-hidden="true">
+                            <i class="fw fw-cancel"></i>
+                        </span>
+                    </button>
+   </div>
+		  
 		  
 		  <div class="">
                 <div class="row">
@@ -631,7 +641,7 @@
               <div class="modal-body">
                 <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
                 </br>
-                <label class="publish-label">What's Next</label>
+                <label class="publish-label">What&#39;s Next</label>
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
@@ -920,7 +930,9 @@
         });
 
         $('#save_api').click(function(e){
-            thisID=$(this).attr('id');
+          thisID=$(this).attr('id');
+          $('#apiSaved').show();
+          setTimeout("hideMsg()", 3000);
         });
 
         
@@ -935,6 +947,10 @@
         });
 
     });
+    
+    var hideMsg=function () {
+        $('#apiSaved').hide("slow");
+    }
 </script>
 
 
@@ -950,13 +966,13 @@
         <div class="control-group">
             <label class="control-label" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeKey" name="scopeKey" class="form-control required" placeholder="Eg: api_name_read">
+            <input type="text" id="scopeKey" name="scopeKey" class="form-control required characterValidation" placeholder="Eg: api_name_read">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
             <div class="controls">
-            <input type="text" id="scopeName" name="scopeName"  class="form-control required" placeholder="Eg: Read My Data">
+            <input type="text" id="scopeName" name="scopeName"  class="form-control required characterValidation" placeholder="Eg: Read My Data">
             </div>
         </div>
         <div class="control-group">
@@ -1003,18 +1019,24 @@
         <div class="modal-footer">
         <div id="res" class="hide" style="color:red;float:left"></div>
         <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
-                                   <script type="text/javascript">
-                            function doGatewayAction() {
-                            var type=$("#retryType").val();
-                            if(type=="manage"){
-                               $("#environmentsRetry-modal").modal('hide');
-                               $( "body" ).trigger( "api_saved" );
-                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
-                            }else{
-                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
-                            }
-                              }
-                                   </script>
+       <script type="text/javascript">
+        function doGatewayAction() {
+            var type=$("#retryType").val();
+            if(type=="manage"){
+               $("#environmentsRetry-modal").modal('hide');
+               $( "body" ).trigger( "api_saved" );
+               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+            }else{
+               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+            }
+        }
+
+        jQuery.validator.addMethod("characterValidation", function(value, element) {
+            // not allow any special charaters
+            return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
+        }, 'Field Contain special characters');
+
+       </script>
         </div>
         </div>
 <% }); %>

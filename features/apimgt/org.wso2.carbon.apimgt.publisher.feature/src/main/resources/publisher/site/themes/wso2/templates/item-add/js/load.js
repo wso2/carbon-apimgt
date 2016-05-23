@@ -31,6 +31,10 @@ function loadTiers(row) {
                           $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                       }
 
+                  }else {
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
+                      }
                   }
               }, "json");
 }
@@ -83,6 +87,10 @@ $(document).ready(function() {
                                       .attr('value', tierArr)
                                       .appendTo('#addAPIForm');
                           }
+                      }
+                  }else {
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
                       }
                   }
               }, "json");
@@ -307,7 +315,11 @@ function loadInSequences() {
 				}
 			}
 			inSequencesLoaded = true;
-		}
+		}else {
+            if (result.message == "timeout") {
+                jagg.showLogin();
+            }
+        }
 	}, "json");
 }
 
@@ -347,7 +359,11 @@ function loadOutSequences() {
 						}
 					}
 					outSequencesLoaded = true;
-				}
+				}else {
+                    if (result.message == "timeout") {
+                        jagg.showLogin();
+                    }
+                }
 			}, "json");
 }
 
@@ -387,7 +403,11 @@ function loadFaultSequences() {
 						}
 					}
 					faultSequencesLoaded = true;
-				}
+				}else {
+                    if (result.message == "timeout") {
+                        jagg.showLogin();
+                    }
+                }
 			}, "json");
 }
 

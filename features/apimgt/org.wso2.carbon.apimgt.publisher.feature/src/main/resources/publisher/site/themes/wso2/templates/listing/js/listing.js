@@ -43,10 +43,14 @@ var removeAPI = function(name, version, provider, buttonElement) {
                   else if (!result.error) {
                       window.location.reload();
                   }else{
-                       $("#messageModal").show();
-                       jagg.message({content:result.message,type:"error"});
-                       buttonElement.hidden = false;
-                       apiThumbnail.show();
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
+                      }else {
+                          $("#messageModal").show();
+                          jagg.message({content: result.message, type: "error"});
+                          buttonElement.hidden = false;
+                          apiThumbnail.show();
+                      }
                   }
             }, "json");
 

@@ -8034,7 +8034,7 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL;
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, keyType);
             resultSet = ps.executeQuery();
 

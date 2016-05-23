@@ -19,11 +19,10 @@
 package org.wso2.carbon.apimgt.impl.token;
 
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-//import org.codehaus.jettison.json.JSONException;
-//import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -35,7 +34,6 @@ import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -83,8 +81,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
         signatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_SIGNATURE_ALGORITHM);
-        if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm) || SHA256_WITH_RSA.equals
-                (signatureAlgorithm))) {
+        if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
+                                            || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
 
@@ -122,6 +120,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public abstract Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
             String version, String accessToken) throws APIManagementException;
+
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
             throws APIManagementException {
         //To have backward compatibility with implementations done based on TokenGenerator interface
@@ -355,31 +354,31 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             //generate the SHA-1 thumbprint of the certificate
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
             MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            byte[] der = publicCert.getEncoded();
-            digestValue.update(der);
-            byte[] digestInBytes = digestValue.digest();
+            if (publicCert != null) {
+                byte[] der = publicCert.getEncoded();
+                digestValue.update(der);
+                byte[] digestInBytes = digestValue.digest();
+                Base64  base64 = new Base64(true);
+                String base64UrlEncodedThumbPrint = base64.encodeToString(digestInBytes).trim();
+                StringBuilder jwtHeader = new StringBuilder();
+                //Sample header
+                //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
+                //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
+                jwtHeader.append("{\"typ\":\"JWT\",");
+                jwtHeader.append("\"alg\":\"");
+                jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
+                jwtHeader.append("\",");
 
-            String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint.getBytes(Charset.defaultCharset()));
-            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
-            //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
-            //return headerWithCertThumb;
+                jwtHeader.append("\"x5t\":\"");
+                jwtHeader.append(base64UrlEncodedThumbPrint);
+                jwtHeader.append('\"');
 
-            StringBuilder jwtHeader = new StringBuilder();
-            //Sample header
-            //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"NmJmOGUxMzZlYjM2ZDRhNTZlYTA1YzdhZTRiOWE0NWI2M2JmOTc1ZA=="}
-            //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append('\"');
-
-            jwtHeader.append('}');
-            return jwtHeader.toString();
+                jwtHeader.append('}');
+                return jwtHeader.toString();
+            } else {
+                String error = "Error in obtaining tenant's keystore";
+                throw new APIManagementException(error);
+            }
 
         } catch (KeyStoreException e) {
             String error = "Error in obtaining tenant's keystore";

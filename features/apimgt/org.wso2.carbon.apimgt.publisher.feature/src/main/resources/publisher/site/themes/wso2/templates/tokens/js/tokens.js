@@ -24,9 +24,13 @@ var revokeAccessToken = function(k) {
 
 
                  } else {
-                     jagg.message({content:result.message,type:"error"});
-                     $('#populatedDataDiv #search').attr("disabled", false);
-                     $("#catogName").val('');
+                     if (result.message == "timeout") {
+                         jagg.showLogin();
+                     }else {
+                         jagg.message({content: result.message, type: "error"});
+                         $('#populatedDataDiv #search').attr("disabled", false);
+                         $("#catogName").val('');
+                     }
 
                  }
              }, "json");

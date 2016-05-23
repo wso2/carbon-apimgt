@@ -63,7 +63,8 @@ $(document).ready(function(){
    validateAPITier();
 
     $("select[name='apiTier']").change(function(){
-       validateAPITier();
+    	       validateAPITier();
+    	       $('.throttling_select').hide();
         
     });
 

@@ -239,9 +239,7 @@ function  drawThrottledOutTime(from,to,api){
 	var tier1 = (res.tiers[0].tierDescription).split(" ")[1];
 	var tier2 = (res.tiers[1].tierDescription).split(" ")[1];
 	var tier3 = (res.tiers[2].tierDescription).split(" ")[1];
-	console.log(tier1)
-	console.log(tier2)
-	console.log(tier3)
+
 	
 	for(var i = 0 ; i < (res.tiers.length) ; i++){
 		nameDataTableJSONText = nameDataTableJSONText + "\""+res.tiers[i].tierName+"\",";

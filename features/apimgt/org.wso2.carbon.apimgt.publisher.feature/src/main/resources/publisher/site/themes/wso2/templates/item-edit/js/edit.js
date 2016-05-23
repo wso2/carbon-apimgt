@@ -165,6 +165,10 @@ function loadTiers() {
                 }
                 addSelectedTiers(target);
 
+            }else {
+                if (result.message == "timeout") {
+                    jagg.showLogin();
+                }
             }
             $('#saveMessage').hide(); $('#saveButtons').show();
 
@@ -510,7 +514,11 @@ function loadInSequences() {
 				}
 			}
 			inSequencesLoaded = true;
-		}
+		}else {
+            if (result.message == "timeout") {
+                jagg.showLogin();
+            }
+        }
 	}, "json");
 }
  
@@ -555,7 +563,11 @@ function loadOutSequences() {
 						}
 					}
 					outSequencesLoaded = true;
-				}
+				}else {
+                    if (result.message == "timeout") {
+                        jagg.showLogin();
+                    }
+                }
 			}, "json");
 }
 
@@ -600,7 +612,11 @@ function loadFaultSequences() {
 						}
 					}
 					faultSequencesLoaded = true;
-				}
+				}else {
+                    if (result.message == "timeout") {
+                        jagg.showLogin();
+                    }
+                }
 			}, "json");
 }
 

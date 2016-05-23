@@ -468,10 +468,10 @@ var addPolicyToBackend = function () {
                 apiPolicyNew.executionFlows[i].quotaPolicy.limit.dataUnit = $("#execution-flow-bandwidth-unit-" + executionFlowId + " option:selected").val();
             }
         }
-        console.log(JSON.stringify(apiPolicyNew));
+
         jagg.post("/site/blocks/policy-add/ajax/tiers.jag", {
             action: "addApiPolicy",
-            apiPolicy :JSON.stringify(apiPolicyNew),
+            apiPolicy :JSON.stringify(apiPolicyNew)
         }, function (result) {
             location.href = '../../site/pages/policy-list.jag';
         },"json");

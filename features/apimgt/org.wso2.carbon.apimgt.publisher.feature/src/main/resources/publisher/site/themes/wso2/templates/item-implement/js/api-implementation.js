@@ -82,7 +82,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "api_saved" );                             
+                $( "body" ).trigger( "api_saved" ); 
+                $('#apiSaved').show();
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -112,7 +114,7 @@ $(document).ready(function(){
              }
         },
     });
-
+    
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
@@ -131,7 +133,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "prototype_saved" );                             
+                $( "body" ).trigger( "prototype_saved" );
+                $('#apiSaved').removeClass('hide');
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -241,6 +245,32 @@ $(document).ready(function(){
     else {
         $('#toggleSequence').parent().next().hide();
     }
+    
+    $('#upload_sequence').attr('disabled','disabled');
+    $('.toggleRadios input[type=radio]').click(function(){
+        if (typeof jsonFile != 'undefined') {
+            $('#upload_sequence').removeAttr("disabled");
+        } else {
+            $('#upload_sequence').attr('disabled','disabled');
+        }
+    });
+
+    $('#sequence_file').change(function (event) {
+        var file = event.target.files[0];
+        var fileReader = new FileReader();
+        fileReader.addEventListener("load", function (event) {
+            jsonFile = event.target;
+        });
+        $('#upload_sequence').removeAttr("disabled");
+    });
+
+    $('#upload_sequence').click(function () {
+    	
+    	$('#upload_sequence').buttonLoader('start');
+        	var type = $('.toggleRadios input[type=radio]:checked').val();
+        	uploadSequence(type);
+            $('#upload_sequence').buttonLoader('stop');
+    });
 
 });
 
@@ -265,11 +295,9 @@ $('#save_policies').click(function(e){
     thisID = $(this).attr('id');
 });
 
+
 function uploadSequence (type) {
-	var file = $('#inSeqFile').get(0).files[0];
-	if (type == "out") {
-		file = $('#outSeqFile').get(0).files[0];
-	}
+	var file = $('#sequence_file').get(0).files[0];
 	var formData = new FormData();
 	formData.append('file', file);
 	formData.append('name', $('#name').val());
@@ -290,14 +318,15 @@ function uploadSequence (type) {
                     			$('#inSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#inSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
-                    		$('#inSeqFileValue').val('');
                     	} else if (type == "out") {
                     		if ($("#outSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
-                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected")
-                    		$('#outSeqFileValue').val('');
+                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
                     	}
+                    	$("#sequenceUpload").modal('hide');
+                    	$('#sequence_file_value').val('');
+                    	$('#sequence_file_help').addClass('hide');
                     }else{
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {
@@ -310,16 +339,22 @@ function uploadSequence (type) {
                              } else {
                                  jagg.showLogin();
                              }
-                         }else {
-                          var message=responseText.message;
-                          jagg.message({content: responseText.message, type: "error"});
+                         } else {
+                          var message = responseText.message;
+                          $('#sequence_file_help').text(responseText.message);
+                          $('#sequence_file_help').removeClass('hide');
                      }
                     }
                 },
                 dataType: "json"
             });               
-return false;                         
+return true;                         
 }
+
+var hideMsg = function () {
+    $('#apiSaved').hide("slow");
+}
+
 
 function showGatewayFailure(message) {
     if (message.split("||")[1] == "warning") {
@@ -397,6 +432,10 @@ function loadInSequences() {
                           }
                       }
                       inSequencesLoaded = true;
+                  }else {
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
+                      }
                   }
               }, "json");
 }
@@ -442,6 +481,10 @@ function loadOutSequences() {
                           }
                       }
                       outSequencesLoaded = true;
+                  }else {
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
+                      }
                   }
               }, "json");
 }
@@ -487,6 +530,10 @@ function loadFaultSequences() {
                           }
                       }
                       faultSequencesLoaded = true;
+                  }else {
+                      if (result.message == "timeout") {
+                          jagg.showLogin();
+                      }
                   }
               }, "json");
 }
@@ -496,11 +543,13 @@ function loadFaultSequences() {
 $("#toggleSequence").change(function(e){
     if($(this).is(":checked")){
         $('#seqTable').show();
+        $('#uploadSeqDiv').show();
         loadInSequences();
         loadOutSequences();
         loadFaultSequences();
     }else{
     	$('#seqTable').hide();
+    	$('#uploadSeqDiv').hide();
         $('#faultSequence').val('');
         $('#inSequence').val('') ;
         $('#outSequence').val('');

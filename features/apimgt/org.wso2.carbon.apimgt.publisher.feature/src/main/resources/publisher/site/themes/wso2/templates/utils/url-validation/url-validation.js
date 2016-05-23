@@ -71,7 +71,12 @@ $(document).ready(function(){
                           var foo = setTimeout(function() {
                                 $(toFade).hide();
                           }, 3000);
+                      }else {
+                          if (result.message == "timeout") {
+                              jagg.showLogin();
+                          }
                       }
+
                       $(btn).removeClass("loadingButton-small");
                       $(btn).val(i18n.t('validationMsgs.testUri'));
                   }, "json");
