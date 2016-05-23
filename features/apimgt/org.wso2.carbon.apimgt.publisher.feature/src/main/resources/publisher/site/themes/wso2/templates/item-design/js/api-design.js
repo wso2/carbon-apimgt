@@ -878,6 +878,8 @@ $(document).ready(function(){
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
                     $( "body" ).trigger( "api_saved" );
+                    $('#apiSaved').removeClass('hide');
+                    setTimeout("hideMsg()", 3000);
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
@@ -904,6 +906,7 @@ $(document).ready(function(){
         });
         }
     });
+    
 
     $("#design_form").keypress(function(e){
         $('.tagContainer .bootstrap-tagsinput input').keyup(function(e) {
@@ -1015,5 +1018,9 @@ function updateContextPattern(){
         context = context.replace("{version}",version);
         $('#resource_url_pattern_refix').text(context);
     }
+}
+
+var hideMsg = function () {
+    $('#apiSaved').hide("slow");
 }
 

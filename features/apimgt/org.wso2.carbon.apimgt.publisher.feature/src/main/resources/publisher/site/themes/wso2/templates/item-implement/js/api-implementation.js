@@ -82,7 +82,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "api_saved" );                             
+                $( "body" ).trigger( "api_saved" ); 
+                $('#apiSaved').removeClass('hide');
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -112,7 +114,7 @@ $(document).ready(function(){
              }
         },
     });
-
+    
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
@@ -131,7 +133,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "prototype_saved" );                             
+                $( "body" ).trigger( "prototype_saved" );
+                $('#apiSaved').removeClass('hide');
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -314,13 +318,11 @@ function uploadSequence (type) {
                     			$('#inSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#inSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
-                    		$('#inSeqFileValue').val('');
                     	} else if (type == "out") {
                     		if ($("#outSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
-                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected")
-                    		$('#outSeqFileValue').val('');
+                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
                     	}
                     	$("#sequenceUpload").modal('hide');
                     	$('#sequence_file_value').val('');
@@ -348,6 +350,11 @@ function uploadSequence (type) {
             });               
 return true;                         
 }
+
+var hideMsg = function () {
+    $('#apiSaved').hide("slow");
+}
+
 
 function showGatewayFailure(message) {
     if (message.split("||")[1] == "warning") {

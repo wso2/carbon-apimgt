@@ -97,6 +97,16 @@
             </div>
 		  <%  }%>
 		  
+		  <div id="apiSaved" class="alert alert-success hide" role="alert">
+   		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!", "Success!")%></strong>
+                    <%=i18n.localize("You have successfully saved the API.", "You have successfully saved the API.")%>
+                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
+                        <span aria-hidden="true">
+                            <i class="fw fw-cancel"></i>
+                        </span>
+                    </button>
+   </div>
+		  
 		  
 		  <div class="">
                 <div class="row">
@@ -920,7 +930,9 @@
         });
 
         $('#save_api').click(function(e){
-            thisID=$(this).attr('id');
+          thisID=$(this).attr('id');
+          $('#apiSaved').removeClass('hide');
+          setTimeout("hideMsg()", 3000);
         });
 
         
@@ -935,6 +947,10 @@
         });
 
     });
+    
+    var hideMsg=function () {
+        $('#apiSaved').hide("slow");
+    }
 </script>
 
 
