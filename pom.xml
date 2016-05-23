@@ -1042,6 +1042,7 @@
         <carbon.identity-inbound-auth-saml2.version>5.1.0</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.1.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>5.1.0</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.0</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
