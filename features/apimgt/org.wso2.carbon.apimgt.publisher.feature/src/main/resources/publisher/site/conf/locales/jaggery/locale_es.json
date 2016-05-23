@@ -197,7 +197,7 @@
     "lifecycleSuccessMsg":"El estado de la API se ha actualizado con exito.",
     "searchMsg":"No se puede encontrar ninguna APIs con los criterios especificados.",
     "noAPIsMsg":"No existen APIs creadas.",
-    "noAPIsMsg1":"No existen APIs creadas. Haga clic en el boton de abajo para empezar.",
+    "noAPIsMsg1":"Haga clic en el boton de abajo para empezar.",
     "versionHelpMsg": "Ex:v1.0.1",
     "noApisByProviderMsg": "No exiten APIs del proveedor especificado",
     "revokeHelpMsg": "Opciones de búsqueda - 1) Por Access Token [Default]  2) Por usuario autorizado ->usuario:xxxx  3) Por fecha de creación -> después:yyyy-mm-dd  o antes:yyyy-mm-dd",
