@@ -15,7 +15,11 @@ var updatePermissions = function (tierName, n, btn) {
             $('#statusUpdateMsg' + n).show();
             var t = setTimeout("hideMsg("+ n +")", 1000);
         } else {
-            jagg.message({content:result.message, type:"error"});
+            if (result.message == "timeout") {
+                jagg.showLogin();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
         }
 
 

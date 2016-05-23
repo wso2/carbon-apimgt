@@ -182,12 +182,17 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                             }, 'json');
                     }, 'json');
             } else {
-                $(".modal-body").removeClass("loadingButton");
-                jagg.message({
-                    content: "Error occurred while adding sample API",
-                    type: "error",
-                    title: "Error"
-                });
+
+                if (result.message == "timeout") {
+                    jagg.showLogin();
+                }else {
+                    $(".modal-body").removeClass("loadingButton");
+                    jagg.message({
+                        content: "Error occurred while adding sample API",
+                        type: "error",
+                        title: "Error"
+                    });
+                }
             }
         }, 'json');
 };
