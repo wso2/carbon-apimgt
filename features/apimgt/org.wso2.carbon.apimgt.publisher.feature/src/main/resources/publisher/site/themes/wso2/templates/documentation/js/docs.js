@@ -76,7 +76,7 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
                 if (!result.error) {
                     $('#messageModal').modal('hide');
                     $('#' + apiName + '-' + docName.replace(/ /g,'__')).remove();
-                    clearDocs();
+                    window.location.reload();
                     if ($('#docTable tr').length == 1) {
                         $('#docTable').append($('<tr><td colspan="6">'+i18n.t('resultMsgs.noDocs')+'</td></tr>'));
                     }
@@ -182,7 +182,7 @@ var editInlineContent = function (provider, apiName, version, docName, mode,tena
 };
 
 var clearDocs = function () {
-    window.location.reload();
+	$('#newDoc').hide();
 
 };
 
@@ -191,7 +191,7 @@ var submitDoc = function() {
         success:function (result) {
             if (!result.error) {
                 $.cookie("tab", "docsLink");
-                clearDocs();
+                window.location.reload();
             } else {
                 if (result.message == "AuthenticateError") {
                     jagg.showLogin();
