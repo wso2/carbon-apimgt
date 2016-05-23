@@ -241,6 +241,32 @@ $(document).ready(function(){
     else {
         $('#toggleSequence').parent().next().hide();
     }
+    
+    $('#upload_sequence').attr('disabled','disabled');
+    $('.toggleRadios input[type=radio]').click(function(){
+        if (typeof jsonFile != 'undefined') {
+            $('#upload_sequence').removeAttr("disabled");
+        } else {
+            $('#upload_sequence').attr('disabled','disabled');
+        }
+    });
+
+    $('#sequence_file').change(function (event) {
+        var file = event.target.files[0];
+        var fileReader = new FileReader();
+        fileReader.addEventListener("load", function (event) {
+            jsonFile = event.target;
+        });
+        $('#upload_sequence').removeAttr("disabled");
+    });
+
+    $('#upload_sequence').click(function () {
+    	
+    	$('#upload_sequence').buttonLoader('start');
+        	var type = $('.toggleRadios input[type=radio]:checked').val();
+        	uploadSequence(type);
+            $('#upload_sequence').buttonLoader('stop');
+    });
 
 });
 
@@ -265,11 +291,9 @@ $('#save_policies').click(function(e){
     thisID = $(this).attr('id');
 });
 
+
 function uploadSequence (type) {
-	var file = $('#inSeqFile').get(0).files[0];
-	if (type == "out") {
-		file = $('#outSeqFile').get(0).files[0];
-	}
+	var file = $('#sequence_file').get(0).files[0];
 	var formData = new FormData();
 	formData.append('file', file);
 	formData.append('name', $('#name').val());
@@ -298,6 +322,9 @@ function uploadSequence (type) {
                     		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected")
                     		$('#outSeqFileValue').val('');
                     	}
+                    	$("#sequenceUpload").modal('hide');
+                    	$('#sequence_file_value').val('');
+                    	$('#sequence_file_help').addClass('hide');
                     }else{
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {
@@ -310,15 +337,16 @@ function uploadSequence (type) {
                              } else {
                                  jagg.showLogin();
                              }
-                         }else {
-                          var message=responseText.message;
-                          jagg.message({content: responseText.message, type: "error"});
+                         } else {
+                          var message = responseText.message;
+                          $('#sequence_file_help').text(responseText.message);
+                          $('#sequence_file_help').removeClass('hide');
                      }
                     }
                 },
                 dataType: "json"
             });               
-return false;                         
+return true;                         
 }
 
 function showGatewayFailure(message) {
@@ -496,11 +524,13 @@ function loadFaultSequences() {
 $("#toggleSequence").change(function(e){
     if($(this).is(":checked")){
         $('#seqTable').show();
+        $('#uploadSeqDiv').show();
         loadInSequences();
         loadOutSequences();
         loadFaultSequences();
     }else{
     	$('#seqTable').hide();
+    	$('#uploadSeqDiv').hide();
         $('#faultSequence').val('');
         $('#inSequence').val('') ;
         $('#outSequence').val('');

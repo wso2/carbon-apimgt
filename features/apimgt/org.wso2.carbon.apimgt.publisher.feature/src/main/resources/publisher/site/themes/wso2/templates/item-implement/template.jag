@@ -292,47 +292,15 @@
 							                                                    </select>
 							                                                </td>
 							                                            </tr>
-							                                            <tr>
-							                                                <td>
-													   <div id="in" class="input-group input-wrap file-upload-control">
-														   <div class="input-group-btn">
-															<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">
-															    <i class="fw fw-file-browse" aria-hidden="true"></i>
-															    <span class="hidden-xs">Browse</span>
-															</button>
-														    </div>
-														    <input type="text" id="inSeqFileValue" class="form-control" readonly>
-														    <input type="file" id="inSeqFile" name="inSeqFile" class="form-control">
-														    <div class="input-group-btn">
-															<button class="btn btn-secondary" id="uploadInSeqFile" type="button" onClick="uploadSequence('in')" title="<%=i18n.localize("Upload")%>">
-															    <span class="hidden-xs"><%=i18n.localize("Upload")%></span>
-															</button>
-														    </div>
-													   </div>
-							                                                </td>
-							                                                <td>
-													    <div id="out" class="input-group input-wrap file-upload-control">
-														   <div class="input-group-btn">
-															<button id="outSeqBrowse" class="btn browse" type="button" title="Browse File">
-															    <i class="fw fw-file-browse" aria-hidden="true"></i>
-															    <span class="hidden-xs">Browse</span>
-															</button>
-							
-														    </div>
-														    <input type="text" id="outSeqFileValue" class="form-control" readonly>
-														    <input type="file" id="outSeqFile"  name="outSeqFile" class="form-control">
-														    <div class="input-group-btn"></div>
-														    <div class="input-group-btn">
-															<button class="btn btn-secondary" id="uploadOutSeqFile" onClick="uploadSequence('out')" type="button" title="<%=i18n.localize("Upload")%>">
-															    <span class="hidden-xs"><%=i18n.localize("Upload")%></span>
-															</button>
-														    </div>
-													   </div>
-							                                                </td>
-							                                            </tr>
-							                                    </table>
+							                                    </table>							                                    
 							                            	</div>
 							                            </div>
+							                            	<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+							                            		<div class="col-sm-3"></div>
+							                            		<div class="col-sm-3">
+							                            			 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
+							                            		</div>
+							                            	</div>
 
 														<% if(outputs.isCreatePermitted){
 														 %>
@@ -678,6 +646,7 @@
 							                </div>
 							                </div>
 							            </div>
+
 							            </div>
 							            </div>
 							            </div>
@@ -690,6 +659,63 @@
     </div>
     </div>
     </div>
+
+							            <!-- Import Modal -->
+<div class="modal fade" id="sequenceUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content clearfix">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy</h3>
+      </div>
+      <div class="">      
+                            <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                            	<div id="sequence_file_help" class="alert alert-danger hide" role="alert">
+					                 
+					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+					            </div>
+					            <div class="form-group toggleRadios">
+					            	<label class="col-sm-3 control-label">Mediation Policy Type</label>
+					            <div class="col-sm-7">
+	                                <label class="radio">
+	                                    <input type="radio" class="select-file" name="upload-sequence" id="" value="in" checked> 
+	                                    <span class="helper">In</span>
+	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
+	                                    <span class="helper">Out</span>
+	                                </label>
+                                </div>
+					            </div>	
+					            <br class="spacer"/>
+                                	<div class="form-group">
+                                		<label class="col-sm-3"></label>
+										<div class="controls col-sm-8">
+											<div class="input-group input-wrap file-upload-control">
+												<input type="text" id="sequence_file_value" class="form-control" readonly> 
+												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
+												<div class="input-group-btn">
+													<button class="btn browse" type="button" title="Browse File">
+														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
+															class="hidden-xs">Browse</span>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <div class="modal-footer">
+                                <button type="button" id="upload_sequence" class="btn btn-primary has-spinner"><%=i18n.localize("Upload")%></button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal"><%=i18n.localize("close")%></button>
+                            </div>
+                        </div>
+        
+
+    </div>
+  </div>
+</div>
 
 <div  id="advance_endpoint_config" class="modal fade">
     <div class="modal-dialog">
