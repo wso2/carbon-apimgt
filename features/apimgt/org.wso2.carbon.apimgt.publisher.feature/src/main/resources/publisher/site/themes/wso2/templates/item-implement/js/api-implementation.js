@@ -82,7 +82,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "api_saved" );                             
+                $( "body" ).trigger( "api_saved" ); 
+                $('#apiSaved').removeClass('hide');
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -112,7 +114,7 @@ $(document).ready(function(){
              }
         },
     });
-
+    
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
@@ -131,7 +133,9 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "prototype_saved" );                             
+                $( "body" ).trigger( "prototype_saved" );
+                $('#apiSaved').removeClass('hide');
+                setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {
                      if (ssoEnabled) {
@@ -346,6 +350,11 @@ function uploadSequence (type) {
             });               
 return true;                         
 }
+
+var hideMsg = function () {
+    $('#apiSaved').hide("slow");
+}
+
 
 function showGatewayFailure(message) {
     if (message.split("||")[1] == "warning") {
