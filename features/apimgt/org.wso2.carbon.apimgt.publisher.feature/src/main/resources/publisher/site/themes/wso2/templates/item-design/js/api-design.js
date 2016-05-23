@@ -755,6 +755,7 @@ $(document).ready(function(){
     });
 	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
+    $('#swagger_import_file').parent().parent().fadeIn()
     $('.toggleRadios input[type=radio]').click(function(){
         if (($(this).val() == 'swagger_import_file' &&
             typeof jsonFile != 'undefined') ||

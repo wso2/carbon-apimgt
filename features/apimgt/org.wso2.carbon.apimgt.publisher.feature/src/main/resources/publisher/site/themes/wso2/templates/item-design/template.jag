@@ -418,7 +418,7 @@
 					            	<label class="col-sm-3 control-label sub-select-label">Upload API definition as</label>
 					            <div class="col-sm-7">
 	                                <label class="radio">
-	                                    <input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file"> 
+	                                    <input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file" checked> 
 	                                    <span class="helper">Swagger File</span>
 	                                </label>
 	                                <label class="radio">
