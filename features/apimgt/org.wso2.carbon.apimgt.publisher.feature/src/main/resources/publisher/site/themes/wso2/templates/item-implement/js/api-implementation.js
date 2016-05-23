@@ -314,13 +314,11 @@ function uploadSequence (type) {
                     			$('#inSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#inSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
-                    		$('#inSeqFileValue').val('');
                     	} else if (type == "out") {
                     		if ($("#outSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
-                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected")
-                    		$('#outSeqFileValue').val('');
+                    		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
                     	}
                     	$("#sequenceUpload").modal('hide');
                     	$('#sequence_file_value').val('');
