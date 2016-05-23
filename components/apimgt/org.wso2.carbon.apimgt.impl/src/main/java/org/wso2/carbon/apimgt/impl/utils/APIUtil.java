@@ -5409,7 +5409,15 @@ public final class APIUtil {
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
         ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
-        long[] requestCount = new long[] {20, 5, 1, Integer.MAX_VALUE};
+        Map<String, Long> defualtLimits = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties().getDefaultThrottleTierLimits();
+        long smallTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_SMALL) ?
+                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_SMALL) : 1;
+        long mediumTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_MEDIUM) ?
+                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_MEDIUM) : 5;
+        long largeTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_LARGE) ?
+                                                            defualtLimits.get(APIConstants.DEFAULT_APP_POLICY_LARGE) : 20;
+        long[] requestCount = new long[] {largeTierLimit, mediumTierLimit, smallTierLimit, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE, APIConstants.DEFAULT_APP_POLICY_MEDIUM,
                 APIConstants.DEFAULT_APP_POLICY_SMALL, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
@@ -5462,8 +5470,16 @@ public final class APIUtil {
             }
         }
 
+        long bronzeTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_BRONZE) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_BRONZE) : 1;
+        long silverTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_SILVER) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_SILVER) : 5;
+        long goldTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_GOLD) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_GOLD) : 20;
+        long unauthenticatedTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_LARGE) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED) : 60;
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[] {20, 5, 1, 60, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[] {goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
@@ -5514,6 +5530,14 @@ public final class APIUtil {
             }
         }
 
+        long basicTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_BASIC) ?
+                defualtLimits.get(APIConstants.DEFAULT_API_POLICY_BASIC) : 1;
+        long plusTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_PLUS) ?
+                defualtLimits.get(APIConstants.DEFAULT_API_POLICY_PLUS) : 5;
+        long ultimateTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_ULTIMATE) ?
+                defualtLimits.get(APIConstants.DEFAULT_API_POLICY_ULTIMATE) : 20;
+        long[] requestCountAPIPolicies = new long[] {ultimateTierLimit, plusTierLimit, basicTierLimit, Integer.MAX_VALUE};
+
         //Adding Resource level policies
         String[] apiPolicies = new String[]{APIConstants.DEFAULT_API_POLICY_ULTIMATE, APIConstants.DEFAULT_API_POLICY_PLUS,
                 APIConstants.DEFAULT_API_POLICY_BASIC, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
@@ -5531,7 +5555,7 @@ public final class APIUtil {
             apiPolicy.setTenantDomain(tenantDomain);
             QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
             RequestCountLimit requestCountLimit = new RequestCountLimit();
-            requestCountLimit.setRequestCount(requestCount[i]);
+            requestCountLimit.setRequestCount(requestCountAPIPolicies[i]);
             requestCountLimit.setUnitTime(1);
             requestCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
             defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
