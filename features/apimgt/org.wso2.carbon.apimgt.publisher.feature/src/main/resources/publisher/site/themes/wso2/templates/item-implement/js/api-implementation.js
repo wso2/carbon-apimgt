@@ -83,7 +83,7 @@ $(document).ready(function(){
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
                 $( "body" ).trigger( "api_saved" ); 
-                $('#apiSaved').removeClass('hide');
+                $('#apiSaved').show();
                 setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {

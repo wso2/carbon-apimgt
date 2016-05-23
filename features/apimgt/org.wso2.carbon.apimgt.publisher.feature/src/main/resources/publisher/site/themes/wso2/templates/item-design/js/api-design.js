@@ -755,7 +755,7 @@ $(document).ready(function(){
     });
 	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
-    $('#swagger_import_file').parent().parent().fadeIn()
+    $('#swagger_import_file').parent().parent().fadeIn();
     $('.toggleRadios input[type=radio]').click(function(){
         if (($(this).val() == 'swagger_import_file' &&
             typeof jsonFile != 'undefined') ||
@@ -879,7 +879,7 @@ $(document).ready(function(){
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
                     $( "body" ).trigger( "api_saved" );
-                    $('#apiSaved').removeClass('hide');
+                    $('#apiSaved').show();
                     setTimeout("hideMsg()", 3000);
                 } else {
                     if (responseText.message == "timeout") {
