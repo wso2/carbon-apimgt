@@ -103,7 +103,7 @@
             </div>
   <%  }%>
   
-  			  <div id="apiSaved" class="alert alert-success hide" role="alert">
+  			  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
    		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!", "Success!")%></strong>
                     <%=i18n.localize("You have successfully saved the API.", "You have successfully saved the API.")%>
                     <button type="button" class="close" aria-label="close" data-dismiss="alert">
