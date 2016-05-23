@@ -506,7 +506,7 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
-        <DefaultLimits>
+        <!--DefaultLimits>
             <SubscriptionTierLimits>
                 <Gold>20</Gold>
                 <Silver>5</Silver>
@@ -523,7 +523,7 @@
                 <Plus>5</Plus>
                 <Basic>1</Basic>
             </ResourceLevelTierLimits>
-        </DefaultLimits>
+        </DefaultLimits-->
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
         <EnableSubscriptionSpikeArrest>false</EnableSubscriptionSpikeArrest>
         <EnableHeaderConditions>false</EnableHeaderConditions>
