@@ -377,7 +377,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 return jwtHeader.toString();
             } else {
                 String error = "Error in obtaining tenant's keystore";
-                throw new APIManagementException(error, e);
+                throw new APIManagementException(error);
             }
 
         } catch (KeyStoreException e) {
