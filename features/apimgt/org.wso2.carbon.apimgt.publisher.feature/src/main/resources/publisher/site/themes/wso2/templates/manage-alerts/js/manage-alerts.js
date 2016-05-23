@@ -14,8 +14,12 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
 
             jagg.message({content: i18n.t("info.successfullySaved"), type: "info"});
 
-        } else {
-            jagg.message({content: result.message, type: "error"});
+        }else {
+            if (result.message == "AuthenticateError") {
+                jagg.showLogin();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
         }
     }, "json");
 

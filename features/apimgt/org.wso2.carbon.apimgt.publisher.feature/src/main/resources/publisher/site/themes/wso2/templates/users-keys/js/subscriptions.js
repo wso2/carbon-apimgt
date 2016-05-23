@@ -32,7 +32,11 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
             }
 
         } else {
-            jagg.message({content:result.message, type:"error"});
+            if (result.message == "AuthenticateError") {
+                jagg.showLogin();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
         }
 
 
