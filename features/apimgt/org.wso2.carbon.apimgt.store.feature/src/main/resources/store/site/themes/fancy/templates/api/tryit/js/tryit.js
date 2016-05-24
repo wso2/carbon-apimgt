@@ -221,22 +221,8 @@ var updateHeadersBodies = function(where) {
     }
 };
 $(document).ready(function() {
-    var width = $(document).width();
-    var height = $(document).height();
-
-    $('#tryit-content').css('width', width + "px");
-    $('#tryit-content').css('height', height + "px").show();
     $('div.header-menu a.brand img').css('height','35px');
     $('.tryit-menu-item').addClass('active');
-    $(window).resize(function() {
-        var width = $(document).width();
-        var height = $(document).height();
-
-
-        $('#tryit-content').css('width', width + "px");
-        $('#tryit-content').css('height', height + "px").show();
-    });
-
     $('#sendBtn').removeAttr('disabled').val('Send');
     $('a[data-toggle="tab"]').on('shown', function (e) {
         var tabId = e.target.href.split('#')[1];
