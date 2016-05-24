@@ -5734,6 +5734,13 @@ public final class APIUtil {
         return null;
     }
     
+    /**
+     * Generates solr compatible search criteria synatax from user entered query criteria. 
+     * Ex: From version:1.0.0, this returns version=*1.0.0*
+     * @param criteria
+     * @return solar compatible criteria 
+     * @throws APIManagementException
+     */
     public static String getSingleSearchCriteria(String criteria) throws APIManagementException{
         criteria = criteria.trim();
         String searchValue = criteria;
