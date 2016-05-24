@@ -241,7 +241,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         }
                     } else {
                         if(APIConstants.API_POLICY_USER_LEVEL.equalsIgnoreCase(verbInfoDTO.getApplicableLevel())) {
-                            resourceLevelThrottleKey = resourceLevelTier + "_" + authorizedUser;
+                            resourceLevelThrottleKey = resourceLevelThrottleKey + "_" + authorizedUser;
                             policyLevelUserTriggered = true;
                         }
                         //If tier is not unlimited only throttling will apply.
@@ -637,6 +637,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
     private String getClientIp(MessageContext synCtx) {
         String clientIp;
+
         org.apache.axis2.context.MessageContext axis2MsgContext =
                 ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         Map headers =
@@ -838,7 +839,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @return
      */
     public boolean validateCustomPolicy(String userID, String appKey, String resourceKey, String apiKey,
-                                        String $subscriptionKey, String apiContext, String apiVersion, String appTenant,
+                                        String subscriptionKey, String apiContext, String apiVersion, String appTenant,
                                         String apiTenant, String appId, Map<String, String> keyTemplateMap, MessageContext messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
@@ -846,12 +847,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$resourceKey", resourceKey);
                 key = key.replaceAll("\\$userId", userID);
                 key = key.replaceAll("\\$apiKey", apiKey);
-                key = key.replaceAll("\\$subscriptionKey", apiKey);
-                key = key.replaceAll("\\$apiContext", apiKey);
-                key = key.replaceAll("\\$apiVersion", apiKey);
-                key = key.replaceAll("\\$appTenant", apiKey);
-                key = key.replaceAll("\\$apiTenant", apiKey);
-                key = key.replaceAll("\\$appId", apiKey);
+                key = key.replaceAll("\\$subscriptionKey", subscriptionKey);
+                key = key.replaceAll("\\$apiContext", apiContext);
+                key = key.replaceAll("\\$apiVersion", apiVersion);
+                key = key.replaceAll("\\$appTenant", appTenant);
+                key = key.replaceAll("\\$apiTenant", apiTenant);
+                key = key.replaceAll("\\$appId", appId);
                 if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(key)) {
                     long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().getThrottleNextAccessTimestamp(key);
                     messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);

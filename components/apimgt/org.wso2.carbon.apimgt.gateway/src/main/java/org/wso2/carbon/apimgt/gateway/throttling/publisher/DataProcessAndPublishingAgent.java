@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -97,7 +96,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
                                  String apiTenant, String appId, MessageContext messageContext,
-                                 AuthenticationContext authenticationContext){
+                                 AuthenticationContext authenticationContext) {
         if (!StringUtils.isEmpty(apiLevelTier)) {
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -130,8 +129,8 @@ public class DataProcessAndPublishingAgent implements Runnable {
         //Set transport headers of the message
         TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-        if(transportHeaderMap != null){
-             remoteIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+        if (transportHeaderMap != null) {
+            remoteIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         }
 
         //Setting IP of the client
@@ -143,7 +142,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
             remoteIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
-        if(remoteIP !=null && remoteIP.length()>0) {
+        if (remoteIP != null && remoteIP.length() > 0) {
             jsonObMap.put("ip", APIUtil.ipToLong(remoteIP));
         }
 
@@ -185,10 +184,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 // decode  JWT part
                 try {
                     byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
-                    String jwtHeader = new String(jwtByteArray, "UTF-8");
+                    String jwtAssertion = new String(jwtByteArray, "UTF-8");
                     JSONParser parser = new JSONParser();
-                    JSONObject jwtHeaderOb = (JSONObject) parser.parse(jwtHeader);
-                    jsonObMap.putAll(jwtHeaderOb);
+                    JSONObject jwtAssertionOb = (JSONObject) parser.parse(jwtAssertion);
+                    jsonObMap.putAll(jwtAssertionOb);
                 } catch (UnsupportedEncodingException e) {
                     log.info("Error while decoding jwt header", e);
                 } catch (ParseException e) {
@@ -229,14 +228,14 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),
-                                        this.applicationLevelThrottleKey, this.applicationLevelTier,
-                                        this.apiLevelThrottleKey, this.apiLevelTier,
-                                        this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
-                                        this.resourceLevelThrottleKey, this.resourceLevelTier,
-                                        this.authorizedUser, this.apiContext, this.apiVersion,
-                                        this.appTenant, this.apiTenant, this.appId, this.apiName , jsonObMap.toString()};
+                this.applicationLevelThrottleKey, this.applicationLevelTier,
+                this.apiLevelThrottleKey, this.apiLevelTier,
+                this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
+                this.resourceLevelThrottleKey, this.resourceLevelTier,
+                this.authorizedUser, this.apiContext, this.apiVersion,
+                this.appTenant, this.apiTenant, this.appId, this.apiName, jsonObMap.toString()};
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
-                                                                        System.currentTimeMillis(), null, null, objects);
+                System.currentTimeMillis(), null, null, objects);
         dataPublisher.tryPublish(event);
     }
 
