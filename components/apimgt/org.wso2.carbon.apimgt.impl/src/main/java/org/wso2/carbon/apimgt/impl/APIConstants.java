@@ -1188,6 +1188,10 @@ public final class APIConstants {
         public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String DEFAULT_THROTTLE_LIMITS = "DefaultLimits";
+        public static final String SUBSCRIPTION_THROTTLE_LIMITS = "SubscriptionTierLimits";
+        public static final String APPLICATION_THROTTLE_LIMITS = "ApplicationTierLimits";
+        public static final String RESOURCE_THROTTLE_LIMITS = "ResourceLevelTierLimits";
         public static final String JMS_TASK_MANAGER = "JMSTaskManager";
         public static final String MIN_THREAD_POOL_SIZE = "MinThreadPoolSize";
         public static final String MAX_THREAD_POOL_SIZE = "MaxThreadPoolSize";
