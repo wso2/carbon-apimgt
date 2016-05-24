@@ -1100,7 +1100,7 @@
         <jaggery.version>0.12.5</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
+        <synapse.version>2.1.7-wso2v3-BETA</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
