@@ -1652,8 +1652,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If an error occurs while trying to create
      *          the new version of the API
      */
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
-                                                                       APIManagementException {
+    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
         String apiSourcePath = APIUtil.getAPIPath(api.getId());
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1798,8 +1797,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.applyTag(targetPath, tag.getTagName());
                 }
             }
-            
-            
+
+
             // Retain the docs
             List<Documentation> docs = getAllDocumentation(api.getId());
             APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
@@ -1927,6 +1926,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error(e.getMessage(), e);
             }
 
+        } catch (DuplicateAPIException e)   {
+            throw e;
         } catch (ParseException e) {
             String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
                                  api.getId().getApiName();

@@ -3386,8 +3386,7 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.createNewAPIVersion(api, newVersion);
             success = true;
         } catch (DuplicateAPIException e) {
-            handleException("Error occurred while creating a new API version. A duplicate API " +
-                            "already exists by the same name.", e);
+            handleException("Error occurred while creating a new API version. " + e.getMessage());
             return false;
         } catch (Exception e) {
             handleException("Error occurred while creating a new API version- " + newVersion, e);
