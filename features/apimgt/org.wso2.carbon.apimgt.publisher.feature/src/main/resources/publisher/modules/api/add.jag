@@ -422,11 +422,11 @@ var getCustomOutSequences = function (apiName, apiVersion, apiProvider) {
     }
 };
 
-var getCustomFaultSequences = function () {
+var getCustomFaultSequences = function (apiName, apiVersion, apiProvider) {
     var sequence,sequences,list=[],log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-    	sequences = provider.getCustomFaultSequences();
+    	sequences = provider.getCustomFaultSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
             log.debug("getCustomFaultSequences " +  " : " + stringify(sequences));
         }

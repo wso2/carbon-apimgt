@@ -102,6 +102,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -3135,7 +3136,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @throws APIManagementException
      */
-
+    @Deprecated
     public List<String> getCustomFaultSequences() throws APIManagementException {
 
         List<String> sequenceList = new ArrayList<String>();
@@ -3154,13 +3155,73 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                 }
-            }
+            }           
 
         } catch (Exception e) {
             handleException("Issue is in getting custom Fault Sequences from the Registry", e);
         }
         return sequenceList;
     }
+    
+    /**
+     * Get stored custom fault sequences from governanceSystem registry
+     *
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
+
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(
+                                                                       APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+
+                }
+            }
+            
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, 
+                                                                      APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT 
+                                                            + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
 
     /**
      * This method is used to initiate the web service calls and cluster messages related to stats publishing status

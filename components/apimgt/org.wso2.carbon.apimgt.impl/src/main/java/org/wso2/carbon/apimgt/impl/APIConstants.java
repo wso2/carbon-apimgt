@@ -929,6 +929,9 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
+    public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
+    public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";

@@ -3701,6 +3701,63 @@ public final class APIUtil {
         }
         return null;
     }
+    
+    /**
+     * Returns true if the sequence is a per API one
+     * @param sequenceName
+     * @param tenantId
+     * @param identifier API identifier
+     * @param sequenceType in/out/fault
+     * @return true/false
+     * @throws APIManagementException
+     */
+    public static boolean isPerAPISequence(String sequenceName, int tenantId, APIIdentifier identifier, 
+                                           String sequenceType) throws APIManagementException {
+        org.wso2.carbon.registry.api.Collection seqCollection = null;
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+
+            // If the sequence not found the default sequences, check in custom sequences
+
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                                                                                                   sequenceType));
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return true;
+                    }
+                }
+            }
+
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + sequenceType + " sequences of " + identifier 
+                                                                                                 + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return false;
+    }
+    
+
+    /**
+     * Returns true if sequence is set
+     * @param sequence
+     * @return
+     */
+    public static  boolean isSequenceDefined(String sequence){
+        return sequence != null && !"none".equals(sequence);
+    }
 
     /**
      * Return the sequence extension name.

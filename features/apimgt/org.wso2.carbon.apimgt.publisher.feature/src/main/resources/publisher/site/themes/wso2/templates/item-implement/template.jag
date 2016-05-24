@@ -695,6 +695,10 @@
 	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
 	                                    <span class="helper">Out</span>
 	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="upload-sequence" value="fault">
+	                                    <span class="helper">Fault</span>
+	                                </label>
                                 </div>
 					            </div>	
 					            <br class="spacer"/>
