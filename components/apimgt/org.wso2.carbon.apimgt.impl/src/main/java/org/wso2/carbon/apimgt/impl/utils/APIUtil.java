@@ -5733,6 +5733,41 @@ public final class APIUtil {
         }
         return null;
     }
+    
+    public static String getSingleSearchCriteria(String criteria) throws APIManagementException{
+        criteria = criteria.trim();
+        String searchValue = criteria;
+        String searchKey = APIConstants.NAME_TYPE_PREFIX;
+        
+        if (criteria.contains(":")) {
+            if (criteria.split(":").length > 1) {
+                searchKey = criteria.split(":")[0];
+                searchValue = criteria.split(":")[1];
+                if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                    if (!searchValue.endsWith("*")) {
+                        searchValue = searchValue + "*";
+                    }
+                    if (!searchValue.startsWith("*")) {
+                        searchValue = "*" + searchValue;
+                    }
+                }
+
+            } else {
+                throw new APIManagementException("Search term is missing. Try again with valid search query.");
+            }
+        } else {
+            if (!criteria.endsWith("*")) {
+                criteria = criteria + "*";
+            }
+            if (!criteria.startsWith("*")) {
+                criteria = "*" + criteria;
+            }                            
+        }
+        if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchKey)) {
+            searchValue = searchValue.replaceAll("@", "-AT-");
+        } 
+        return searchKey + "=" + searchValue;
+    }
 
     /**
      * return whether store forum feature is enabled
