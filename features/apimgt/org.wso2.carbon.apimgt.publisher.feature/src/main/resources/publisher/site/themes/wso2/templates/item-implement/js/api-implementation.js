@@ -323,6 +323,11 @@ function uploadSequence (type) {
                     			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
+                    	} else if (type == "fault") {
+                    		if ($("#faultSequence option[value='" + responseText.fileName + "']").length == 0) {
+                    			$('#faultSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
+                    		}                    		
+                    		$("#faultSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
                     	}
                     	$("#sequenceUpload").modal('hide');
                     	$('#sequence_file_value').val('');
@@ -496,7 +501,7 @@ function loadFaultSequences() {
     }
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomFaultSequences"
+                action : "getCustomFaultSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
             },
               function(result) {
                   if (!result.error) {
