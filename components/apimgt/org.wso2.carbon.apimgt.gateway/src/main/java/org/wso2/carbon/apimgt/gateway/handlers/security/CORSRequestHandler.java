@@ -127,9 +127,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
             if(selectedApi != null){
                 Resource[] selectedAPIResources = selectedApi.getResources();
-                if (selectedAPIResources.length > 0) {
+
+				Set<Resource> acceptableResources = new HashSet<Resource>();
+
+				for(Resource resource : selectedAPIResources){
+					//If the requesting method is OPTIONS or if the Resource contains the requesting method
+					if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+							(resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+						acceptableResources.add(resource);
+					}
+				}
+
+                if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                        Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
+                        Resource resource = dispatcher.findResource(messageContext, acceptableResources);
                         if (resource != null) {
                             selectedResource = resource;
                             if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {

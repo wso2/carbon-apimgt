@@ -3187,9 +3187,7 @@ public class APIProviderHostObject extends ScriptableObject {
         version = (String) args[2];
         docName = (String) args[3];
         docContent = (String) args[4];
-        if (docContent != null) {
-            docContent = docContent.replaceAll("\n", "");
-        }
+
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName,
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
