@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
+package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.base.BaseConstants;
@@ -63,7 +63,7 @@ public class JMSTaskManagerFactory {
         stm.setDestinationJNDIName(destName);
         stm.setDestinationType(getDestinationType(svc, cf));
         if (getOptionalBooleanProperty(JMSConstants.PARAM_SUB_DURABLE, svc, cf) != null &&
-                getOptionalBooleanProperty(JMSConstants.PARAM_SUB_DURABLE, svc, cf)) {
+            getOptionalBooleanProperty(JMSConstants.PARAM_SUB_DURABLE, svc, cf)) {
             stm.setDurableSubscriberClientId(getRqdStringProperty(
                     JMSConstants.PARAM_DURABLE_SUB_CLIENT_ID, svc, cf));
         }
@@ -289,7 +289,7 @@ public class JMSTaskManagerFactory {
             } else if (BaseConstants.STR_TRANSACTION_LOCAL.equalsIgnoreCase(val)) {
                 return BaseConstants.TRANSACTION_LOCAL;
             } else {
-                throw new ThrottlingRunTimeException("Invalid option : " + val + " for parameter : " +BaseConstants.STR_TRANSACTION_JTA);
+                throw new ThrottlingRunTimeException("Invalid option : " + val + " for parameter : " + BaseConstants.STR_TRANSACTION_JTA);
                 //TODO fix it
                 //return 0;
             }
