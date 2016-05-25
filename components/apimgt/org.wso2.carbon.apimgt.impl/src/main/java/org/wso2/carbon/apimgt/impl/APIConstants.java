@@ -1167,8 +1167,9 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_IP = "IP";
     
     public static final String SEARCH_AND_TAG = "&";
+    public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
-    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String NAME_TYPE_PREFIX = "name";
 
     public static class AdvancedThrottleConstants {
