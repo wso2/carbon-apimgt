@@ -2492,8 +2492,17 @@ public class SQLConstants {
         public static final String BLOCK_CONDITION_EXIST_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
                         "AND VALUE =?";
-        public static final String TIER_HAS_PERMISSION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
+        
+        public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
         		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
+        
+        public static final String TIER_ATTACHED_TO_RESOURCES_API = " select sum(c) as c from("
+        		+ " (select count(api.API_TIER) as c from  AM_API api where api.API_TIER = ? and api.API_PROVIDER like ? )"
+        		+ "		union "
+        		+ " (select count(map.THROTTLING_TIER) as c from AM_API_URL_MAPPING map, AM_API api"
+        		+ "  where map.THROTTLING_TIER = ? and api.API_PROVIDER like ?  and map.API_ID = api.API_ID)) x ";
+     
+        public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? and CREATED_BY like ? ";
 
     }
 }

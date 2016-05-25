@@ -609,7 +609,7 @@ public interface APIProvider extends APIManager {
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
     
-    boolean hasSubscription(String username, String policyName)throws APIManagementException;
+    boolean hasAttachments(String username, String policyName, String policyLevel)throws APIManagementException;
 
     /**
      *

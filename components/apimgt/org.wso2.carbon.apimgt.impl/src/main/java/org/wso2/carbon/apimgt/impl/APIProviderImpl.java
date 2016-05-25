@@ -3932,7 +3932,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
     
-    public boolean hasSubscription(String username, String policyName)throws APIManagementException{
+    public boolean hasAttachments(String username, String policyName, String policyType)throws APIManagementException{
     	int tenantID = APIUtil.getTenantId(username);
     	String tenantDomain = MultitenantUtils.getTenantDomain(username);
     	String tenantDomainWithAt = username;
@@ -3940,7 +3940,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         	tenantDomainWithAt = "@"+tenantDomain;
         }
        
-        boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt);
+        boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt, policyType);
         return hasSubscription;
     }
 
