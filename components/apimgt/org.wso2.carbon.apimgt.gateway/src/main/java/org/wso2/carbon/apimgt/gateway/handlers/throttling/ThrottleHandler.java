@@ -145,9 +145,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
 
         //Throttle Keys
+        //applicationLevelThrottleKey key is combination of {applicationId}:{authorizedUser}
         String applicationLevelThrottleKey;
+        //subscriptionLevelThrottleKey key is combination of {applicationId}:{apiContext}:{apiVersion}
         String subscriptionLevelThrottleKey;
+        // The key is combination of {apiContext}/ {apiVersion}{resourceUri}:{httpMethod} if policy is user level then authorized user will append at end
         String resourceLevelThrottleKey;
+        //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
         String apiLevelThrottleKey;
 
         //Throttle Tiers
@@ -220,8 +224,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriptionLevelTier = authContext.getTier();
                 resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                 apiLevelTier = authContext.getApiTier();
-                //If API level throttle policy is present then it will apply and no resource level policy will apply
-                // for it
+                //If API level throttle policy is present then it will apply and no resource level policy will apply for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
