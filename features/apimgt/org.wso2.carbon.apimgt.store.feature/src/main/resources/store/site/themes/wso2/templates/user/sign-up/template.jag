@@ -37,7 +37,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("username")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newUsername" name="newUsername" title="newUsername" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
+                                            <input id="newUsername" name="newUsername" title="<%=i18n.localize("characterLimit")%>" minlength="5" maxlength="30" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
                                         </div>
 
             							<input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
@@ -55,7 +55,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPassword" name="newPassword" title="newPassword" type="password" class="form-control password validPassword" placeholder="Password">
+                                            <input id="newPassword" name="newPassword" title="<%=i18n.localize("securePassword")%>" type="password" class="form-control password validPassword" placeholder="Password">
                                         </div>
                                         <div class="help-block" id="password-help" style="display:none">
 							              <%=i18n.localize("pwHelpMsgLine1")%>
@@ -72,7 +72,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("retypePassword")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPasswordConfirm" title="newPasswordConfirmation" type="password" class="form-control matchPasswords" placeholder="Password">
+                                            <input id="newPasswordConfirm" title="<%=i18n.localize("confirmPassword")%>" type="password" class="form-control matchPasswords" placeholder="Password">
                                         </div>
                                     </div>
                                 </div>
@@ -98,7 +98,11 @@
                                         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                             <label class="control-label"><%=i18n.localize(field.name, field.name)%> *</label>
                                             <div class="input-group input-wrap">
-                                                <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" title="<%=i%>cliamUri" class="<%=inputClass%> form-control">
+						                        <% if(field.name == "Email") {%>
+                                                    <input type="text" id="<%=i%>cliamUri" name="<%=i18n.localize("validEmail")%>" class="<%=inputClass%> form-control">
+                                                <%} else {%>
+                                                    <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control">
+                                                <%}%>
                                             </div>
                                         </div>
                                     </div>
