@@ -2501,7 +2501,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
         }
-
+        //check whether callback url is empty and set null
+        if (StringUtils.isBlank(application.getCallbackUrl())) {
+            application.setCallbackUrl(null);
+        }
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
@@ -2853,6 +2856,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
+            }
+
+            //check whether callback url is empty and set null
+            if (StringUtils.isBlank(callbackUrl)) {
+                callbackUrl = null;
             }
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
