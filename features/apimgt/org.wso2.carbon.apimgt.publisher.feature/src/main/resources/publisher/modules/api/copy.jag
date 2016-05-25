@@ -23,7 +23,7 @@ var copyAPI = function (api, newVersion) {
         log.error(e.message);
         return {
             error:true ,
-            message:e.message.split(":")[1]
+            message:e.message.substring(e.message.indexOf(":")+1, e.message.length)
         };
     }
 };

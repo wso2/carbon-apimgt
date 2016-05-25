@@ -178,11 +178,11 @@
             </div>
             <div class="col-sm-3">
                 <select class="form-control select required" id="request-count-unit" name="request-count-unit">
-                    <option value="sec" <% if(defaultTimeUnit == "" || defaultTimeUnit == "min") {%>selected<%}%>>Minutes(s)</option>
+                    <option value="min" <% if(defaultTimeUnit == "" || defaultTimeUnit == "min") {%>selected<%}%>>Minutes(s)</option>
                     <option value="hour" <% if(defaultTimeUnit == "hour") {%>selected<%}%>>Hour(s)</option>
                     <option value="days" <% if(defaultTimeUnit == "day") {%>selected<%}%>>Day(s)</option>
-                    <option value="days" <% if(defaultTimeUnit == "month") {%>selected<%}%>>Month(s)</option>
-                    <option value="days" <% if(defaultTimeUnit == "year") {%>selected<%}%>>Year(s)</option>
+                    <option value="month" <% if(defaultTimeUnit == "month") {%>selected<%}%>>Month(s)</option>
+                    <option value="year" <% if(defaultTimeUnit == "year") {%>selected<%}%>>Year(s)</option>
                 </select>
             </div>
         </div>

@@ -51,6 +51,11 @@
     "browse.title" : "Browse APIs",
     "signupTitle" : "Sign - Up for a New Account",
 
+    "characterLimit" : "Please enter at lease 5 characters",
+    "securePassword" : "Enter more secure password",
+    "confirmPassword" : "Confirm Password",
+    "validEmail" : "Please enter a valid email.",
+
     "listAPIs" : "List APIs",
     "listAPI" : "List APIs By",
     "listAPI.newest" : "Newest",

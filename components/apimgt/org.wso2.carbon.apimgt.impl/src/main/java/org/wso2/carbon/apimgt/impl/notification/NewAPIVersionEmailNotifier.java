@@ -98,10 +98,9 @@ public class NewAPIVersionEmailNotifier extends Notifier {
             } else {
                 log.info("Empty email list. Please set subscriber's email addresses");
             }
-        }
-        {
+        }else {
             if (log.isDebugEnabled()) {
-                log.debug("No exiting Subscribers for " + api.getApiName() + api.getVersion());
+                log.debug("No exiting Subscribers to send notifications for " + api.getApiName() + api.getVersion());
             }
         }
     }

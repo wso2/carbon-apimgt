@@ -44,6 +44,11 @@
     "browse.title" : "Examine APIs",
     "signupTitle" : "Registro de usuarios",
 
+    "characterLimit" : "introduzca en el arriendo 5 caracteres",
+    "securePassword" : "Introduzca la contraseña más segura",
+    "confirmPassword" : "Confirmar contraseña",
+    "validEmail" : "introducir un email válido",
+
     "listAPI" : "Listado de APIs por",
     "listAPI.newest" : "Novedad",
     "listAPI.catog" : "Por categor&iacute;a",

@@ -929,6 +929,9 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
+    public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
+    public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
+    public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
@@ -1164,8 +1167,9 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_IP = "IP";
     
     public static final String SEARCH_AND_TAG = "&";
+    public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
-    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String NAME_TYPE_PREFIX = "name";
 
     public static class AdvancedThrottleConstants {

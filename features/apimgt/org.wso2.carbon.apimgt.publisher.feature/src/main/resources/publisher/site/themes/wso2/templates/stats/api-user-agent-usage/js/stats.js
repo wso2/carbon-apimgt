@@ -119,6 +119,12 @@ var populateAPIList = function(){
                     .selectpicker('refresh')                    
                     .trigger('change');
                         }
+        else {
+            if (json.message == "AuthenticateError") {
+                jagg.showLogin();
+            }
+        }
+
         });
 };
 var populateVersionList = function(apiName,compare){
