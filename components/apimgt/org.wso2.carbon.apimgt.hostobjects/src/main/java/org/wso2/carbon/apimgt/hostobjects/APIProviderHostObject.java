@@ -95,6 +95,7 @@ import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -3502,6 +3503,145 @@ public class APIProviderHostObject extends ScriptableObject {
 
         }
         return apiStatus;
+    }
+    
+    public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj,
+                                                    Object[] args,
+                                                    Function funObj) throws APIManagementException {
+        if (args == null || args.length < 4) {
+            handleException("Invalid number of parameters.");
+        }
+        
+        NativeArray myn = new NativeArray(0);
+        NativeObject resultObj = new NativeObject();
+        Map<String, Object> result = new HashMap<String, Object>();
+        
+        String providerName = (String) args[0];
+        providerName = APIUtil.replaceEmailDomain(providerName);
+        String inputSearchQuery = (String) args[1];
+        int start = Integer.parseInt((String) args[2]);
+        int end = Integer.parseInt((String) args[3]);
+        boolean limitAttributes = false;
+        String newSearchQuery = "";
+        if (args.length == 5) {
+            limitAttributes = Boolean.parseBoolean((String) args[4]);
+        }
+        
+        /*String searchTerm;
+        String searchType;
+
+        if (searchValue.contains(":")) {
+            if (searchValue.split(":").length > 1) {
+                searchType = searchValue.split(":")[0];
+                searchTerm = searchValue.split(":")[1];
+            } else {
+                throw new APIManagementException("Search term is missing. Try again with valid search query.");
+            }
+
+        } else {
+            searchTerm = searchValue;
+            searchType = "default";
+        }*/
+        inputSearchQuery = inputSearchQuery.trim();
+        // sub context and doc content doesn't support AND search
+        if (inputSearchQuery != null && inputSearchQuery.contains(" ")) {
+            if (inputSearchQuery.split(" ").length > 1) {
+                String[] searchCriterias = inputSearchQuery.split(" ");
+                for (int i = 0; i < searchCriterias.length; i++) {
+                    if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
+                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0]) ||
+                            APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                            throw new APIManagementException(
+                                                             "Invalid query. AND based search is not supported for "
+                                                                     + "doc and subcontext prefixes");
+                        }
+                    }
+                    if (i == 0) {
+                        newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                    } else {
+                        newSearchQuery =
+                                         newSearchQuery + APIConstants.SEARCH_AND_TAG +
+                                                 APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                    }
+                }
+            }
+        } else {
+            newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
+        }
+        try {
+            /*if ("*".equals(searchTerm) || searchTerm.startsWith("*")) {
+                searchTerm = searchTerm.replaceFirst("\\*", ".*");
+            }*/
+            APIProvider apiProvider = getAPIProvider(thisObj);            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
+                                                                      ((APIProviderHostObject) thisObj).getUsername()));
+            result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
+            
+            if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(newSearchQuery)) {
+                Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
+                if (apiDocMap != null) {
+                    int i = 0;
+                    for (Map.Entry<Documentation, API> entry : apiDocMap.entrySet()) {
+                        Documentation doc = entry.getKey();
+                        API api = entry.getValue();
+                        APIIdentifier apiIdentifier = api.getId();
+
+                        NativeObject currentApi = new NativeObject();
+
+                        currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                        currentApi.put("provider", currentApi,
+                                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                        currentApi.put("version", currentApi,
+                                apiIdentifier.getVersion());
+                        currentApi.put("status", currentApi, checkValue(api.getStatus().toString()));
+                        currentApi.put("thumb", currentApi, getWebContextRoot(api.getThumbnailUrl()));
+                        currentApi.put("subs", currentApi, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                        if (providerName != null) {
+                            currentApi.put("lastUpdatedDate", currentApi, checkValue(api.getLastUpdated().toString()));
+                        }
+
+                        currentApi.put("docName", currentApi, doc.getName());
+                        currentApi.put("docSummary", currentApi, doc.getSummary());
+                        currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
+                        currentApi.put("docFilePath", currentApi, doc.getFilePath());
+
+                        myn.put(i, myn, currentApi);
+                        i++;
+                    }
+                    resultObj.put("apis", resultObj, myn);
+                    resultObj.put("totalLength", resultObj, result.get("length"));
+                }
+
+            } else {
+                Set<API> apiSet = (Set<API>) result.get("apis");
+                //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
+                Iterator it = apiSet.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object apiObject = it.next();
+                    API api = (API) apiObject;
+                    APIIdentifier apiIdentifier = api.getId();
+                    row.put("name", row, apiIdentifier.getApiName());
+                    row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    row.put("version", row, apiIdentifier.getVersion());
+                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                    row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                    if (providerName != null) {
+                        row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                    }
+                    myn.put(i, myn, row);
+                    i++;
+                }
+                resultObj.put("apis", resultObj, myn);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
+            }
+        } catch (Exception e) {
+            handleException("Error occurred while getting the searched API- " + inputSearchQuery, e);
+        }
+        return resultObj;
     }
 
     public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj,
