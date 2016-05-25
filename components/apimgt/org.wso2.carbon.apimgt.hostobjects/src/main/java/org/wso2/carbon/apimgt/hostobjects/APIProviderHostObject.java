@@ -3374,7 +3374,7 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Error occurred while creating a new API version. " + e.getMessage());
             return false;
         } catch (Exception e) {
-            handleException("Error occurred while creating a new API version- " + newVersion, e);
+            handleException("Error occurred while creating a new API version: " + newVersion, e);
             return false;
         } finally {
         	if (isTenantFlowStarted) {
