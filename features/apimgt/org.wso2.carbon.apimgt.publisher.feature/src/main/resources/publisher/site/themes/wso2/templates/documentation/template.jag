@@ -240,7 +240,7 @@
 				  </a>
 			<%}%>
 			
-						<a title="<%=i18n.localize("update")%>" onclick="updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+						<a title="<%=i18n.localize("update")%>" onclick="updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forJavaScriptAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=encode.forJavaScriptAttribute(doc.otherTypeName)%>','<%=doc.visibility%>')" target="_blank" title="<%=i18n.localize("editContent")%>" class="btn  btn-sm padding-reduce-on-grid-view">
 					      <span class="fw-stack">
 					          <i class="fw fw-circle-outline fw-stack-2x"></i>
 					          <i class="fw fw-edit fw-stack-1x"></i>

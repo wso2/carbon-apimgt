@@ -296,7 +296,7 @@
     "lifecycleSuccessMsg":"Successfully updated the API status.",
     "searchMsg":"No matching APIs found.",
     "noAPIsMsg":"No APIs created yet.",
-    "noAPIsMsg1":"No APIs created yet. Click one of the buttons below to get started.",
+    "noAPIsMsg1":"Click one of the buttons below to get started.",
     "versionHelpMsg": "E.g.,:v1.0.1",
     "noApisByProviderMsg": "No APIs provided by the user",
     "revokeHelpMsg": "Search Options - 1) By Access Token [Default]  2) By Authorized User ->user:xxxx  3) By Created Date -> after:yyyy-mm-dd  or before:yyyy-mm-dd",
@@ -436,6 +436,8 @@
     "Throttling Settings":"Throttling Settings",
     "Refer ":"Refer ",
     "documentation ":"documentation ",
-    "to find out details about each throttling setting.":"to find out details about each throttling setting."
+    "to find out details about each throttling setting.":"to find out details about each throttling setting.",
+    "Success!":"Success!",
+    "You have successfully saved the API.":"You have successfully saved the API."
 
 }

@@ -1016,6 +1016,12 @@
                 <artifactId>org.wso2.carbon.event.output.adapter.sms</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>xerces.wso2</groupId>
+                <artifactId>xercesImpl</artifactId>
+                <version>${xercesImpl.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1036,12 +1042,13 @@
         <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.1.0</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.1.0</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-user-ws.version>5.1.0</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.1.0</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.1.0</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>5.1.0</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity.version>5.1.1-SNAPSHOT</carbon.identity.version>
+        <carbon.identity-inbound-auth-oauth.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-user-ws.version>5.1.1-SNAPSHOT</carbon.identity-user-ws.version>
+        <carbon.identity-inbound-auth-saml2.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-openid.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-local-auth-basicauth.version>5.1.1-SNAPSHOT</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.1-SNAPSHOT</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
@@ -1099,7 +1106,7 @@
         <jaggery.version>0.12.5</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
+        <synapse.version>2.1.7-wso2v3-BETA</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1155,6 +1162,7 @@
         <swagger.models.version>1.5.8</swagger.models.version>
         <swagger.annotations.version>1.5.7</swagger.annotations.version>
         <google.guava.version>18.0</google.guava.version>
+        <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
     </properties>
 </project>
 

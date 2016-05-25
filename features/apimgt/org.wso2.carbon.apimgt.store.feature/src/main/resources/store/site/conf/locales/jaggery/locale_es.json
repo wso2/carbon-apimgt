@@ -28,6 +28,7 @@
     "addApp" : "A&ntilde;adir Nueva Aplicaci&oacute;n",
     "throttleByTier" : "Nivel de servicio",
     "callbackUrl" : "Callback URL",
+    "perUserQuota" : "User Quota",
     "none" : "Ninguno",
     "noThrottling" : "Servicio no aplicado",
     "throttlingTier" : "Nivel",
@@ -43,6 +44,11 @@
     "documentation.title" : "Documentaci&oacute;n",
     "browse.title" : "Examine APIs",
     "signupTitle" : "Registro de usuarios",
+
+    "characterLimit" : "introduzca en el arriendo 5 caracteres",
+    "securePassword" : "Introduzca la contraseña más segura",
+    "confirmPassword" : "Confirmar contraseña",
+    "validEmail" : "introducir un email válido",
 
     "listAPI" : "Listado de APIs por",
     "listAPI.newest" : "Novedad",

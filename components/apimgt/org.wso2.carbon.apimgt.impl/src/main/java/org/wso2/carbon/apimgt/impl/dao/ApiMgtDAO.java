@@ -938,17 +938,15 @@ public class ApiMgtDAO {
 
 		try {
 			String dbProdName = conn.getMetaData().getDatabaseProductName();
-			if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
+			/*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 				sqlQuery = sqlQuery + " x";
-            }
-				
-			
-			
+            }*/
+
 			ps = conn.prepareStatement(sqlQuery);
 			ps.setString(1, apiPolicy);
 			ps.setInt(2, subscriptionTenantId);
@@ -8034,7 +8032,7 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL;
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, applicationId);
+            ps.setInt(1, Integer.parseInt(applicationId));
             ps.setString(2, keyType);
             resultSet = ps.executeQuery();
 
@@ -10274,7 +10272,7 @@ public class ApiMgtDAO {
         return status;
     }
     
-    public boolean hasSubscription(String tierId, String tenantDomainWithAt) throws APIManagementException{
+    public boolean hasSubscription(String tierId, String tenantDomainWithAt, String policyLevel) throws APIManagementException{
     	 PreparedStatement checkIsExistPreparedStatement = null;
     	 Connection connection = null;
          ResultSet checkIsResultSet = null;
@@ -10283,10 +10281,22 @@ public class ApiMgtDAO {
         	 /*String apiProvider = tenantId;*/
         	 connection = APIMgtDBUtil.getConnection();
         	 connection.setAutoCommit(true);
-             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_PERMISSION;
+        	 String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
+        	 if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+        		 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_RESOURCES_API;
+             } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            	 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_APPLICATION;
+             } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            	 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
+             } 
+        	 
              checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
              checkIsExistPreparedStatement.setString(1, tierId);
              checkIsExistPreparedStatement.setString(2, "%"+tenantDomainWithAt);
+             if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            	 checkIsExistPreparedStatement.setString(3, tierId);
+                 checkIsExistPreparedStatement.setString(4, "%"+tenantDomainWithAt);
+             }
              checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
              if (checkIsResultSet != null && checkIsResultSet.next()) {
             	 int count = checkIsResultSet.getInt(1);

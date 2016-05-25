@@ -440,20 +440,6 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
     
-    
-    /**
-     * Returns API Search result based on the provided query
-     * @param searchQuery search query
-     * @param tenantDomain tenant domain 
-     * @param start starting number
-     * @param end ending number
-     * @param limitAttributes whether or not to limit attributes in the search result
-     * @return API result
-     * @throws APIManagementException if search is failed
-     */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
-                                           boolean limitAttributes) throws APIManagementException;
-
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     /**

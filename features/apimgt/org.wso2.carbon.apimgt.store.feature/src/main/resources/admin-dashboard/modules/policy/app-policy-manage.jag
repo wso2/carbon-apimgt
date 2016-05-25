@@ -6,12 +6,12 @@ var deleteAppPolicy = function (policyName) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        var hasSubscription = apiProvider.hasSubscription(provider,policyName);
+        var hasSubscription = apiProvider.hasAttachments(provider,policyName, "app");
 
         if(hasSubscription){
             return {
                 error: true,
-                message: "Policy already has subscriptions "
+                message: "Policy already attached to an application "
             };
         }else{
            var appPolicies = apiProvider.deletePolicy(provider, "app", policyName);

@@ -140,28 +140,7 @@ var jagg = jagg || {};
     };
 
     jagg.showLogin = function(params){
-        $('#messageModal').html($('#login-data').html());
-        if(!$('#messageModal').is(":visible")){
-            $('#messageModal').modal('show');
-        }
-         $('#mainLoginForm input').die();
-         $('#mainLoginForm input').keydown(function(event) {
-         if (event.which == 13) {
-                event.preventDefault();
-                jagg.login($("#username").val(), $("#password").val(),params);
-
-            }
-        });
-
-        $('#loginBtn').die();
-         $('#loginBtn').click(
-            function() {
-                jagg.login($("#username").val(), $("#password").val(),params);
-            }
-         );
-        $('#username').focus();
-        $('#loginErrorBox').show();
-        $('#loginErrorMsg').html('<strong>Session Timed Out </strong>- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ');
+        location.reload();
     };
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
