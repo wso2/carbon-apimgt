@@ -92,29 +92,33 @@ $(document).ready(function(){
     }     
     $("#access_token").trigger("change");
   };
+
 var show_environments = function(){
     var type = $(".keytype").val();
-    $(".env_name").children('option').hide();
-    $(".env_name").children("option[class='" + type + "']").show();
-	$(".env_name").children("option[class='hybrid']").show();
-    var options = $(".env_name").children("option[class='"+ type + "']");
-      if (options.length <= 1) {
-    	  console.log("ssssss");
+    $("#environment_name").children('option').hide();
+    $("#environment_name").children("option[class='" + type + "']").show();
+    $("#environment_name").children("option[class='hybrid']").show();
+    var options = $("#environment_name").children("option[class='hybrid'], option[class='" + type + "']");
+      if (options.length < 2) {
         $(".env_name").hide();
-         $("#OnEnvironment").hide();
+        $(".OnEnvironment").hide();
       }
     if(options.length > 1){
-     $("#OnEnvironment").show(); 
-     $(".env_name").show();
-    	options[0].selected=true;
-    } else if ($(".env_name").children("option[class='hybrid']").length > 0) {
-	    $(".env_name").children("option[class='hybrid']")[0].selected = true; 
+     options[0].selected = true;
+     $(".OnEnvironment").show();
+     $(".btn-group.env_name").show();
+    } else if ($("#environment_name").children("option[class='hybrid']").length > 0) {
+        $("#environment_name").children("option[class='hybrid']")[0].selected = true;
+    } else if($("#environment_name").children("option[class='" + type + "']").length > 0) {
+      $("#environment_name").children("option[class='" + type + "']")[0].selected = true;
     }else{
       $(".env_name").hide();
-      $("#OnEnvironment").hide();
+      $(".OnEnvironment").hide();
     }
+    $(".env_name").selectpicker("refresh");
     select_environment();
-          };
+  };
+
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name =selectedEnvironment.val();
@@ -128,7 +132,8 @@ var select_environment = function(){
     window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
     }
     change_token();
-          };
+  };
+
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
@@ -179,22 +184,20 @@ function checkOnKeyPress(e) {
 				         <div class="input-group-btn">	
 				         	 <label class="control-label OnEnvironment">On Environment</label>
 				         </div>
-				         <div class="input-group-btn">	
-				         	 <select id="environment_name" class="env_name">
-						          <%
-						          var envir = JSON.parse(api.serverURL);
-						          for(var types in envir){
-						            var endpointType=envir[types];
-						            for(var endpoint in endpointType){
-						                if(endpointType[endpoint]["showInConsole"]){
-						                %>
-						                   <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
-						                <% }
-						            }
-						          }
-						          %>
-				            </select>
-				         </div>
+                         <select id="environment_name" class="env_name">
+                              <%
+                              var envir = JSON.parse(api.serverURL);
+                              for(var types in envir){
+                                var endpointType=envir[types];
+                                for(var endpoint in endpointType){
+                                    if(endpointType[endpoint]["showInConsole"]){
+                                    %>
+                                       <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+                                    <% }
+                                }
+                              }
+                              %>
+                        </select>
 		        </div>
 
         </div>

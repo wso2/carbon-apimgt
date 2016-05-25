@@ -673,19 +673,6 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setFaultSequence(faultSequence);
         }
 
-        if (apiData.get("inSeqFile", apiData) != null)  {
-            FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-            String inSeqPath = APIUtil.getSequencePath(api.getId(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN) + RegistryConstants.PATH_SEPARATOR;
-            String inSeqFileName = uploadSequenceFile(apiProvider, inSeqFile, inSeqPath);
-            api.setInSequence(inSeqFileName);            
-        }
-
-        if (apiData.get("outSeqFile", apiData) != null) {
-            FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
-            String outSeqPath = APIUtil.getSequencePath(api.getId(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT) + RegistryConstants.PATH_SEPARATOR;
-            String outSeqFileName = uploadSequenceFile(apiProvider, outSeqFile, outSeqPath);
-            api.setOutSequence(outSeqFileName);
-        }
 
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
@@ -1401,7 +1388,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setOutSequence(outSequence);
         }
 
-        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        List<String> sequenceList = apiProvider.getCustomFaultSequences(apiId);
         if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
@@ -1948,7 +1935,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setOutSequence(outSequence);
         }
 
-        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        List<String> sequenceList = apiProvider.getCustomFaultSequences(apiId);
         if(!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
             api.setFaultSequence(faultSequence);
         }
@@ -3200,9 +3187,7 @@ public class APIProviderHostObject extends ScriptableObject {
         version = (String) args[2];
         docName = (String) args[3];
         docContent = (String) args[4];
-        if (docContent != null) {
-            docContent = docContent.replaceAll("\n", "");
-        }
+
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName,
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
@@ -3386,11 +3371,10 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.createNewAPIVersion(api, newVersion);
             success = true;
         } catch (DuplicateAPIException e) {
-            handleException("Error occurred while creating a new API version. A duplicate API " +
-                            "already exists by the same name.", e);
+            handleException("Error occurred while creating a new API version. " + e.getMessage());
             return false;
         } catch (Exception e) {
-            handleException("Error occurred while creating a new API version- " + newVersion, e);
+            handleException("Error occurred while creating a new API version: " + newVersion, e);
             return false;
         } finally {
         	if (isTenantFlowStarted) {
@@ -4360,8 +4344,25 @@ public class APIProviderHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getCustomFaultSequences(Context cx, Scriptable thisObj,
                                                               Object[] args, Function funObj)
             throws APIManagementException {
+        List<String> sequenceList = null;
+        
         APIProvider apiProvider = getAPIProvider(thisObj);
-        List<String> sequenceList = apiProvider.getCustomFaultSequences();
+        
+        if (args == null ||  args.length >= 3) {
+            String apiName = (String) args[0];
+            String apiVersion = (String) args[1];
+            String provider = (String) args[2];
+
+            if (provider != null) {
+                provider = APIUtil.replaceEmailDomain(provider);
+            }
+            APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+            
+            sequenceList = apiProvider.getCustomFaultSequences(apiIdentifier);
+        } else {
+            sequenceList = apiProvider.getCustomFaultSequences();
+        }
+                
 
         NativeArray myn = new NativeArray(0);
         if (sequenceList == null) {

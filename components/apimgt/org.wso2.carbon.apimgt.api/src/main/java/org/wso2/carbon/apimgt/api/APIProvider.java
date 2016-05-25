@@ -412,6 +412,14 @@ public interface APIProvider extends APIManager {
      */
 
     List<String> getCustomFaultSequences()  throws APIManagementException;
+    
+    /**
+     * Get the list of Custom Fault Sequences including per API sequences.
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
 
     /**

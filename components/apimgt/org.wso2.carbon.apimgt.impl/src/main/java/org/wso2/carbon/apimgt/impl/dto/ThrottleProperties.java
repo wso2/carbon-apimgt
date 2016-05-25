@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class ThrottleProperties {
@@ -33,6 +35,8 @@ public class ThrottleProperties {
     private boolean enableHeaderConditions;
     private boolean enableJwtConditions;
     private boolean enableQueryParamConditions;
+    private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
+
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
         return enabledSubscriptionLevelSpikeArrest;
     }
@@ -143,6 +147,14 @@ public class ThrottleProperties {
 
     public void setEnableQueryParamConditions(boolean enableQueryParamConditions) {
         this.enableQueryParamConditions = enableQueryParamConditions;
+    }
+
+    public Map<String, Long> getDefaultThrottleTierLimits() {
+        return defaultThrottleTierLimits;
+    }
+
+    public void setDefaultThrottleTierLimits(Map<String, Long> defaultThrottleTierLimits) {
+        this.defaultThrottleTierLimits = defaultThrottleTierLimits;
     }
 
     public static class DataPublisher {

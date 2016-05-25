@@ -1042,6 +1042,7 @@
         <carbon.identity-inbound-auth-saml2.version>5.1.0</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.1.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>5.1.0</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.0</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
@@ -1099,7 +1100,7 @@
         <jaggery.version>0.12.5</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
+        <synapse.version>2.1.7-wso2v3-BETA</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
