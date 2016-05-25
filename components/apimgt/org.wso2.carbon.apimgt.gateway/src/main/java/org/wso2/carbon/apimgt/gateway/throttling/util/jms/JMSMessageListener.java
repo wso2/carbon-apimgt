@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
@@ -59,10 +60,27 @@ public class JMSMessageListener implements MessageListener {
                     }
 
                     if (map.get(APIConstants.THROTTLE_KEY) != null) {
+                        /**
+                         * This message contains throttle data in map which contains Keys
+                         * throttleKey - Key of particular throttling level
+                         * isThrottled - Whether message has throttled or not
+                         * expiryTimeStamp - When the throttling time window will expires
+                         */
                         handleThrottleUpdateMessage(map);
                     } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
+                        /**
+                         * This message contains blocking condition data
+                         * blockingCondition - Blocking condition type
+                         * conditionValue - blocking condition value
+                         * state - State whether blocking condition is enabled or not
+                         */
                         handleBlockingMessage(map);
                     } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
+                        /**
+                         * This message contains key template data
+                         * keyTemplateValue - Value of key template
+                         * keyTemplateState - whether key template active or not
+                         */
                         handleKeyTemplateMessage(map);
                     }
 
@@ -79,9 +97,9 @@ public class JMSMessageListener implements MessageListener {
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) {
 
-        String throttleKey = map.get("throttleKey").toString();
-        String throttleState = map.get("isThrottled").toString();
-        long timeStamp = Long.parseLong(map.get("expiryTimeStamp").toString());
+        String throttleKey = map.get(APIThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = map.get(APIThrottleConstants.IS_THROTTLED).toString();
+        long timeStamp = Long.parseLong(map.get(APIThrottleConstants.EXPIRY_TIMESTAMP).toString());
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +

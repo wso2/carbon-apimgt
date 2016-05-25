@@ -30,6 +30,7 @@
     "newApp" : "New Application...",
     "addApp" : "Add New Application",
     "throttleByTier" : "Throttling Tier",
+    "perUserQuota" : "User Quota",
     "callbackUrl" : "Callback URL",
     "none" : "None",
     "noThrottling" : "Throttling not applied",
