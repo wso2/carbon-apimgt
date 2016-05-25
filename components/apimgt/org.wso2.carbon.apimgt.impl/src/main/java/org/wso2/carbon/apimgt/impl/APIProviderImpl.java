@@ -1665,7 +1665,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean transactionCommitted = false;
         try {
             if (registry.resourceExists(targetPath)) {
-                throw new DuplicateAPIException("API version already exist with version :" + newVersion);
+                throw new DuplicateAPIException("API already exists with version: " + newVersion);
             }
             registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
