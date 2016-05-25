@@ -28,6 +28,7 @@ public class APIUsageByResourcePath {
     private String context;
     private long requestCount;
     private String time;
+    private String resourcePath;
 
     public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context, long requestCount,
             String time) {
@@ -91,4 +92,11 @@ public class APIUsageByResourcePath {
         this.time = time;
     }
 
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
 }
