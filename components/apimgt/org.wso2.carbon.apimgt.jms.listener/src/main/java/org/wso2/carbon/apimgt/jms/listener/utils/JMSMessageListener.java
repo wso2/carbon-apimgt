@@ -16,12 +16,12 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
+package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -103,7 +103,7 @@ public class JMSMessageListener implements MessageListener {
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
-                      "isThrottled :" + throttleState + " , expiryTime : "+ new Date(timeStamp).toString());
+                      "isThrottled :" + throttleState + " , expiryTime : " + new Date(timeStamp).toString());
         }
 
         if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {

@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
+package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,17 +31,17 @@ import java.util.Hashtable;
 /**
  * The revamped JMS Transport listener implementation. Creates {@link JMSTaskManager} instances
  * for each service requesting exposure over JMS, and stops these if they are undeployed / stopped.
- *
+ * <p/>
  * A service indicates a JMS Connection factory definition by name, which would be defined in the
  * JMSListner on the axis2.xml, and this provides a way to reuse common configuration between
  * services, as well as to optimize resources utilized
- *
+ * <p/>
  * If the connection factory name was not specified, it will default to the one named "default"
- *
+ * <p/>
  * If a destination JNDI name is not specified, a service will expect to use a Queue with the same
  * JNDI name as of the service. Additional Parameters allows one to bind to a Topic or specify
  * many more detailed control options. See package documentation for more details
- *
+ * <p/>
  * All Destinations / JMS Administered objects used MUST be pre-created or already available
  */
 public class JMSListener implements Runnable {
@@ -84,7 +84,7 @@ public class JMSListener implements Runnable {
             boolean jmsProviderStarted = checkJMSConnection(stm);
             if (jmsProviderStarted) {
                 log.info("Connection attempt: " + r + " for JMS Provider for listener: " + listenerName
-                        + " was successful!");
+                         + " was successful!");
                 connected = true;
                 stm.start();
 
@@ -95,8 +95,8 @@ public class JMSListener implements Runnable {
                     // except for automated tests.
                     if (stm.getConsumerCount() > 0) {
                         log.info("Started to listen on destination : " + stm.getDestinationJNDIName() +
-                                " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
-                                " for listener " + listenerName);
+                                 " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
+                                 " for listener " + listenerName);
                         return;
                     }
                     try {
@@ -106,14 +106,14 @@ public class JMSListener implements Runnable {
                 }
 
                 log.warn("Polling tasks on destination : " + stm.getDestinationJNDIName() +
-                        " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
-                        " for listener " + listenerName + " have not yet started after 3 seconds ..");
+                         " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
+                         " for listener " + listenerName + " have not yet started after 3 seconds ..");
             } else {
                 log.error("Unable to continue server startup as it seems the JMS Provider " +
-                        "is not yet started. Please start the JMS provider now.");
+                          "is not yet started. Please start the JMS provider now.");
                 retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
                 log.error("Connection attempt : " + (r++) + " for JMS Provider failed. Next retry in "
-                        + (retryDuration / 1000) + " seconds");
+                          + (retryDuration / 1000) + " seconds");
                 if (retryDuration > maxReconnectDuration) {
                     retryDuration = maxReconnectDuration;
                 }
@@ -137,7 +137,7 @@ public class JMSListener implements Runnable {
                         stm.getConnFactoryJNDIName());
             } catch (NamingException e) {
                 log.error("Error looking up connection factory : " + stm.getConnFactoryJNDIName() +
-                        "using JNDI properties : " + jmsProperties, e);
+                          "using JNDI properties : " + jmsProperties, e);
             }
             connection = JMSUtils.createConnection(
                     jmsConFactory,
@@ -157,7 +157,7 @@ public class JMSListener implements Runnable {
         JMSTaskManager stm = jmsTaskManager;
         if (log.isDebugEnabled()) {
             log.debug("Stopping listening on destination : " + stm.getDestinationJNDIName() +
-                    " for listener : " + listenerName);
+                      " for listener : " + listenerName);
         }
 
         stm.stop();
