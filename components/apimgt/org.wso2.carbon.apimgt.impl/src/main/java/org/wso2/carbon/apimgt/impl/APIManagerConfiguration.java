@@ -723,23 +723,23 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.APPLICATION_THROTTLE_LIMITS));
                     if(subscriptionPolicyLimits != null) {
                         OMElement largeTierElement = applicationPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_APP_POLICY_LARGE));
+                                QName(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN));
                         if(largeTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_LARGE,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN,
                                     Long.parseLong(largeTierElement.getText()));
                         }
 
                         OMElement mediumTierElement = applicationPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_APP_POLICY_MEDIUM));
+                                QName(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN));
                         if(mediumTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_MEDIUM,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
                                     Long.parseLong(mediumTierElement.getText()));
                         }
 
                         OMElement smallTierElement = applicationPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_APP_POLICY_SMALL));
+                                QName(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN));
                         if(smallTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_SMALL,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN,
                                     Long.parseLong(smallTierElement.getText()));
                         }
                     }
@@ -748,23 +748,23 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.RESOURCE_THROTTLE_LIMITS));
                     if(resourceLevelPolicyLimits != null) {
                         OMElement ultimateTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_API_POLICY_ULTIMATE));
+                                QName(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN));
                         if(ultimateTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_ULTIMATE,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN,
                                     Long.parseLong(ultimateTierElement.getText()));
                         }
 
                         OMElement plusTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_API_POLICY_PLUS));
+                                QName(APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN));
                         if(plusTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_PLUS,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
                                     Long.parseLong(plusTierElement.getText()));
                         }
 
                         OMElement basicTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
-                                QName(APIConstants.DEFAULT_API_POLICY_BASIC));
+                                QName(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN));
                         if(basicTierElement != null) {
-                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_BASIC,
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN,
                                     Long.parseLong(basicTierElement.getText()));
                         }
                     }

@@ -28,6 +28,7 @@
     "addApp" : "A&ntilde;adir Nueva Aplicaci&oacute;n",
     "throttleByTier" : "Nivel de servicio",
     "callbackUrl" : "Callback URL",
+    "perUserQuota" : "User Quota",
     "none" : "Ninguno",
     "noThrottling" : "Servicio no aplicado",
     "throttlingTier" : "Nivel",

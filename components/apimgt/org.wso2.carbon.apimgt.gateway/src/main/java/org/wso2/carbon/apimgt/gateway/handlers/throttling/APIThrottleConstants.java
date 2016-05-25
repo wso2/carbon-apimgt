@@ -36,28 +36,22 @@ public class APIThrottleConstants {
 
     public static final String API_THROTTLE_NS = "http://wso2.org/apimanager/throttling";
     public static final String API_THROTTLE_NS_PREFIX = "amt";
-    
     public static final String API_THROTTLE_OUT_HANDLER = "_throttle_out_handler_";
-
     public static final String HARD_THROTTLING_CONFIGURATION = "hard_throttling_limits";
-
     public static final String PRODUCTION_HARD_LIMIT = "PRODUCTION_HARD_LIMIT";
-
     public static final String SANDBOX_HARD_LIMIT = "SANDBOX_HARD_LIMIT";
-
     public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;
-
     public static final String THROTTLED_NEXT_ACCESS_TIMESTAMP = "NEXT_ACCESS_TIME";
-
     public static final String THROTTLED_NEXT_ACCESS_TIME = "NEXT_ACCESS_UTC_TIME";
-
     public static final String HARD_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED;
-
     public static final String REQUEST_BLOCKED = "REQUEST_BLOCKED";
-
     public static final int SC_TOO_MANY_REQUESTS = 429;
-
     public static final String BLOCKED_REASON = APIConstants.BLOCKED_REASON_KEY;
-
     public static final String UTC = "UTC";
+    public static final String IS_THROTTLED = "isThrottled";
+    public static final String THROTTLE_KEY = "throttleKey";
+    public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+    public static final String IP = "ip";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String MESSAGE_SIZE = "messageSize";
 }

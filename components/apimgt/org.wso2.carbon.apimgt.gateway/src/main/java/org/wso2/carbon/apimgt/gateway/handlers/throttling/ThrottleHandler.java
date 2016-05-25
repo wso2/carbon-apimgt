@@ -145,9 +145,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
 
         //Throttle Keys
+        //applicationLevelThrottleKey key is combination of {applicationId}:{authorizedUser}
         String applicationLevelThrottleKey;
+        //subscriptionLevelThrottleKey key is combination of {applicationId}:{apiContext}:{apiVersion}
         String subscriptionLevelThrottleKey;
+        // The key is combination of {apiContext}/ {apiVersion}{resourceUri}:{httpMethod} if policy is user level then authorized user will append at end
         String resourceLevelThrottleKey;
+        //apiLevelThrottleKey key is combination of {apiContext}:{apiVersion}
         String apiLevelThrottleKey;
 
         //Throttle Tiers
@@ -220,8 +224,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriptionLevelTier = authContext.getTier();
                 resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                 apiLevelTier = authContext.getApiTier();
-                //If API level throttle policy is present then it will apply and no resource level policy will apply
-                // for it
+                //If API level throttle policy is present then it will apply and no resource level policy will apply for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
@@ -255,18 +258,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
                         if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
                             //Then we will apply resource level throttling
-                            for (String conditionString : resourceLevelThrottleConditions) {
-                                String tempResourceLevelThrottleKey = resourceLevelThrottleKey + conditionString;
+                            for (String conditionId : resourceLevelThrottleConditions) {
+                                String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionId;
                                 resourceLevelTier = verbInfoDTO.getThrottling();
                                 if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                        isThrottled(tempResourceLevelThrottleKey)) {
+                                        isThrottled(combinedResourceLevelThrottleKey)) {
                                     if(!apiLevelThrottledTriggered) {
                                         isResourceLevelThrottled = isThrottled = true;
                                     } else {
                                         isApiLevelThrottled = isThrottled = true;
                                     }
                                     long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                                            getThrottleNextAccessTimestamp(tempResourceLevelThrottleKey);
+                                                            getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                     break;
                                 }
@@ -843,11 +846,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         String apiTenant, String appId, Map<String, String> keyTemplateMap, MessageContext messageContext) {
         if (keyTemplateMap != null && keyTemplateMap.size() > 0) {
             for (String key : keyTemplateMap.keySet()) {
-                key = key.replaceAll("\\$appKey", appKey);
                 key = key.replaceAll("\\$resourceKey", resourceKey);
                 key = key.replaceAll("\\$userId", userID);
-                key = key.replaceAll("\\$apiKey", apiKey);
-                key = key.replaceAll("\\$subscriptionKey", subscriptionKey);
                 key = key.replaceAll("\\$apiContext", apiContext);
                 key = key.replaceAll("\\$apiVersion", apiVersion);
                 key = key.replaceAll("\\$appTenant", appTenant);

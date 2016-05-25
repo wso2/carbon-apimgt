@@ -1115,15 +1115,15 @@ public final class APIConstants {
     public static final String TIME_UNIT_HOUR = "hour";
     public static final String TIME_UNIT_DAY = "day";
 
-    public static final String DEFAULT_APP_POLICY_LARGE = "Large";
-    public static final String DEFAULT_APP_POLICY_MEDIUM = "Medium";
-    public static final String DEFAULT_APP_POLICY_SMALL = "Small";
+    public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
+    public static final String DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN = "20PerMin";
+    public static final String DEFAULT_APP_POLICY_TEN_REQ_PER_MIN = "10PerMin";
     public static final String DEFAULT_APP_POLICY_UNLIMITED = "Unlimited";
 
 
-    public static final String DEFAULT_APP_POLICY_LARGE_DESC = "Large tier";
-    public static final String DEFAULT_APP_POLICY_MEDIUM_DESC = "Medium tier";
-    public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Small tier";
+    public static final String DEFAULT_APP_POLICY_LARGE_DESC = "Allows 50 request per minute";
+    public static final String DEFAULT_APP_POLICY_MEDIUM_DESC = "Allows 20 request per minute";
+    public static final String DEFAULT_APP_POLICY_SMALL_DESC = "Allows 10 request per minute";
     public static final String DEFAULT_APP_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
 
     public static final String DEFAULT_SUB_POLICY_GOLD = "Gold";
@@ -1132,20 +1132,20 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
-    public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 20 request(s) per minute.";
-    public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 5 request(s) per minute.";
-    public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1 request(s) per minute.";
+    public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
-    public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 60 request(s) per minute.";
+    public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
 
-    public static final String DEFAULT_API_POLICY_ULTIMATE = "Ultimate";
-    public static final String DEFAULT_API_POLICY_PLUS = "Plus";
-    public static final String DEFAULT_API_POLICY_BASIC = "Basic";
+    public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
+    public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
+    public static final String DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN = "10KPerMin";
     public static final String DEFAULT_API_POLICY_UNLIMITED = "Unlimited";
 
-    public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Ultimate tier";
-    public static final String DEFAULT_API_POLICY_PLUS_DESC = "Plus tier";
-    public static final String DEFAULT_API_POLICY_BASIC_DESC = "Basic tier";
+    public static final String DEFAULT_API_POLICY_ULTIMATE_DESC = "Allows 50000 requests per minute";
+    public static final String DEFAULT_API_POLICY_PLUS_DESC = "Allows 20000 requests per minute";
+    public static final String DEFAULT_API_POLICY_BASIC_DESC = "Allows 10000 requests per minute";
     public static final String DEFAULT_API_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
 
     public static final String API_POLICY_USER_LEVEL = "userLevel";
