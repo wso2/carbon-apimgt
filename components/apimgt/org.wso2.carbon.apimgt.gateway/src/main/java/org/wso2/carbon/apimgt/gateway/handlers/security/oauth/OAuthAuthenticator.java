@@ -150,6 +150,7 @@ public class OAuthAuthenticator implements Authenticator {
             AuthenticationContext authContext = new AuthenticationContext();
             authContext.setAuthenticated(true);
             authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+            authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
             //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
             //we will use the client's IP address for throttling.
             authContext.setApiKey(clientIP);
