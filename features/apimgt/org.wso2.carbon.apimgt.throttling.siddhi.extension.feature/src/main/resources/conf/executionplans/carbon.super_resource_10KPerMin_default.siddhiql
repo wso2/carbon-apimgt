@@ -13,11 +13,11 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
 
 FROM RequestStream
-SELECT messageID, ( apiTenant == 'carbon.super' and resourceTier == 'Basic') AS isEligible, str:concat(resourceKey,'_default') AS throttleKey
+SELECT messageID, ( apiTenant == 'carbon.super' and resourceTier == '10KPerMin') AS isEligible, str:concat(resourceKey,'_default') AS throttleKey
 INSERT INTO EligibilityStream;
 
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min, 0)
-select throttleKey, (count(messageID) >= 20) as isThrottled, expiryTimeStamp
+select throttleKey, (count(messageID) >= 10000) as isThrottled, expiryTimeStamp
 group by throttleKey 
 INSERT ALL EVENTS into ResultStream;
 
