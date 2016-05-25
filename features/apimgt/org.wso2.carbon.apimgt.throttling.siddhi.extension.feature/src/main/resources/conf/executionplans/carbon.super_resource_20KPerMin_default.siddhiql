@@ -1,8 +1,8 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('carbon.super_app_Large')
+@Plan:name('carbon.super_resource_20KPerMin_default')
 
 /* Enter a unique description for ExecutionPlan */
-@Plan:description('ExecutionPlan for app_large')
+@Plan:description('Allows 20000 request per minute')
 
 /* define streams/tables and write queries here ... */
 
@@ -13,7 +13,7 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
 
 FROM RequestStream
-SELECT messageID, (appTenant == 'carbon.super' and appTier == 'Large') AS isEligible, appKey AS throttleKey
+SELECT messageID, ( apiTenant == 'carbon.super' and resourceTier == 'Plus') AS isEligible, str:concat(resourceKey,'_default') AS throttleKey
 INSERT INTO EligibilityStream;
 
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min, 0)

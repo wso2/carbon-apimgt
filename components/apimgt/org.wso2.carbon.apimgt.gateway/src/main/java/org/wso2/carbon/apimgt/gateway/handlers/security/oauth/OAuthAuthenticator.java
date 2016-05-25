@@ -37,6 +37,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -123,9 +124,25 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
             }
+
             //using existing constant in Message context removing the additinal constant in API Constants
-            String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext()
-                    .getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            String clientIP = null;
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+                                                         axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+            if (transportHeaderMap != null) {
+                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            }
+
+            //Setting IP of the client
+            if (clientIP != null && !clientIP.isEmpty()) {
+                if (clientIP.indexOf(",") > 0) {
+                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
+                }
+            } else {
+                clientIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            }
 
             //Create a dummy AuthenticationContext object with hard coded values for
             // Tier and KeyType. This is because we cannot determine the Tier nor Key
@@ -141,6 +158,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
+            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return true;
