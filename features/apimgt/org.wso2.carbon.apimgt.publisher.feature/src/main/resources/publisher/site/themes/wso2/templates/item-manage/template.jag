@@ -110,7 +110,7 @@
 		  
 		  <div class="">
                 <div class="row">
-                    <div class="wizard">
+                    <div class="wizard col-xs-12">
                         <div class="wizard-inner">
                         	<%if(createPermitted){%>
 	                            <ol class="wiz-nav-inner no-controls" >
