@@ -938,17 +938,15 @@ public class ApiMgtDAO {
 
 		try {
 			String dbProdName = conn.getMetaData().getDatabaseProductName();
-			if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
+			/*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 				sqlQuery = sqlQuery + " x";
-            }
-				
-			
-			
+            }*/
+
 			ps = conn.prepareStatement(sqlQuery);
 			ps.setString(1, apiPolicy);
 			ps.setInt(2, subscriptionTenantId);
