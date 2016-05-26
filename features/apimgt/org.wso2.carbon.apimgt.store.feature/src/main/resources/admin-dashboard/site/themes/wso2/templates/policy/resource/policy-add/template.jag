@@ -156,8 +156,8 @@
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
-                        <option value="KB">KB</option>
-                        <option value="MB" selected="true">MB</option>
+                        <option value="KB"  selected="true">KB</option>
+                        <option value="MB">MB</option>
                     </select>
                 </div>
             </div>

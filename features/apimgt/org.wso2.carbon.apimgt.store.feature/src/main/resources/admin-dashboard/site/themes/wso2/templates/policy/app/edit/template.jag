@@ -96,9 +96,8 @@
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit">
-                        <option value="KB" >KB</option>
-                        <option value="MB" selected="true" >MB</option>
-                        <option value="GB">GB</option>
+                        <option value="KB" selected="true" >KB</option>
+				        <option value="MB">MB</option>
                     </select>
                 </div>
             </div>
@@ -153,19 +152,19 @@
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=encode.forJavaScript(String(policyName))%>");
-          $('#description').val("<%=encode.forJavaScript(String(description))%>");
-          $('#defaultUnitTime').val("<%=encode.forJavaScript(String(defaultUnitTime))%>");
-          $('#defaultTimeUnit').val("<%=encode.forJavaScript(String(defaultTimeUnit))%>");
+          $('#policyName').val("<%=policyName%>");
+          $('#description').val("<%=description%>");
+          $('#defaultUnitTime').val("<%=defaultUnitTime%>");
+          $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
 
-          if("<%=defaultQuotaPolicy%>" == ("requestCount")){
+          if("<%=defaultQuotaPolicy%>" == "requestCount"){
             $('#requestCountType').prop('checked',true);
-            $('#defaultRequestCount').val("<%=encode.forJavaScript(String(defaultRequestCount))%>");
+            $('#defaultRequestCount').val("<%=defaultRequestCount%>");
           }
-          else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
+          else if("<%=defaultQuotaPolicy%>" == "bandwidthVolume"){
             $('#bandwidthType').prop('checked',true);
-            $('#defaultBandwidth').val("<%=encode.forJavaScript(String(defaultBandwidth))%>");
-            $('#defaultBandwidthUnit').val("<%=encode.forJavaScript(String(defaultBandwidthUnit))%>");
+            $('#defaultBandwidth').val("<%=defaultBandwidth%>");
+            $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
           }
         }
         showHideDefaultQuotaPolicy();
