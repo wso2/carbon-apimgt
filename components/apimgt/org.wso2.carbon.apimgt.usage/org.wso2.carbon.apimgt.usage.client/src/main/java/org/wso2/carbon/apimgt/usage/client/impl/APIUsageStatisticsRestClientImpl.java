@@ -1087,7 +1087,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             usage.setMethod(v.getColumnNames().get(3));
 
             if(((ArrayList) v.getColumnNames()).size() == 5){
-                usage.setResourcePath(v.getColumnNames().get(5));
+                usage.setResourcePath(v.getColumnNames().get(4));
             }
             usageByResourcePath.add(usage);
         }
