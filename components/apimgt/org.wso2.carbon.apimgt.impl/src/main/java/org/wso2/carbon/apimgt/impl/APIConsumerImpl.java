@@ -2941,8 +2941,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             deniedTiers.add(tierPermission.getTierName());
                         }
                     }
-
-
                 }
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
