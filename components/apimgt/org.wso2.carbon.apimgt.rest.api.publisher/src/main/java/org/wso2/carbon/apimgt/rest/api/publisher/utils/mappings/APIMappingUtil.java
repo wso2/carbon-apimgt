@@ -358,10 +358,6 @@ public class APIMappingUtil {
             //this means the provided gatewayEnvironments is "" (empty)
             model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
         }
-
-        if(dto.getThumbnailUrl() != null) {
-            model.setThumbnailUrl(dto.getThumbnailUrl());
-        }
         return model;
     }
 
