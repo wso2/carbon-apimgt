@@ -32,9 +32,6 @@ public class BandwidthLimit extends Limit {
     }
 
     public String getDataUnit() {
-        if("MB".equalsIgnoreCase(dataUnit)) {
-            return Long.toString(dataAmount * 1024);
-        }
         return dataUnit;
     }
 
@@ -47,6 +44,13 @@ public class BandwidthLimit extends Limit {
         return "BandwidthLimit [dataAmount=" + dataAmount + ", dataUnit=" + dataUnit + ", toString()="
                 + super.toString() + "]";
     }
-    
-    
+
+    public long getStandardDataAmount() {
+        if(PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
+            return dataAmount * 1024 * 1024;
+        } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
+            return dataAmount * 1024;
+        }
+        return dataAmount;
+    }
 }

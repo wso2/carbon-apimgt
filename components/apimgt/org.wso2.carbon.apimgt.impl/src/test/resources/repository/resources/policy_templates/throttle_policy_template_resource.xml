@@ -31,7 +31,7 @@ FROM EligibilityStream[isEligible==true]#window.time($quotaPolicy.getLimit().get
 #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
 select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled
 #else
-select throttleKey, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
+select throttleKey, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getStandardDataAmount()}
 #end
 INSERT ALL EVENTS into ResultStream;
 #end
