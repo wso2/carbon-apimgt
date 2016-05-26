@@ -2800,6 +2800,40 @@ public class ApiMgtDAO {
         return tierPermission;
     }
 
+    public TierPermissionDTO getThrottleTierPermission(String tierName, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        TierPermissionDTO tierPermission = null;
+        try {
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSION_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTierPermissionQuery);
+
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                tierPermission = new TierPermissionDTO();
+                tierPermission.setTierName(tierName);
+                tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                String roles = resultSet.getString("ROLES");
+                if (roles != null) {
+                    String roleList[] = roles.split(",");
+                    tierPermission.setRoles(roleList);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information for Tier " + tierName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermission;
+    }
+
+
     public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
             throws APIManagementException {
         Connection conn = null;
