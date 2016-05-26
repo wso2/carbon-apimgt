@@ -20,7 +20,7 @@ sub_${policy.getPolicyName()}##
 #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
 		select throttle_key, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
 #else
-		select throttle_key, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
+		select throttle_key, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getStandardDataAmount()}
 #end
 		group by throttle_key 
 		INSERT ALL EVENTS into ResultStream;

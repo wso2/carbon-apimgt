@@ -96,7 +96,8 @@ public class PolicyConstants {
 
     public static final String POLICY_IS_DEPLOYED = "IS_DEPLOYED";
 
-    
-    
-    
+    public static final String MB = "MB";
+
+    public static final String KB = "KB";
+
 }
