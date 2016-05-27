@@ -445,7 +445,7 @@ public class UsageClient {
             int subscription_count = 0;
             //iterate over the results
             while (rs.next()) {
-                subscription_count += rs.getInt("subscription_count");
+                subscription_count = rs.getInt("subscription_count");
                 long created_time = rs.getTimestamp("created_time").getTime();
                 String api_name = rs.getString("api_name");
                 String api_version = rs.getString("api_version");
