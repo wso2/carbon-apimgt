@@ -51,8 +51,8 @@
         var defaultUnitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
         var defaultTimeUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
 
-        var rateLimitCount = subscriptionPolicy.getRateLimitCount() < 0 ? "" : subscriptionPolicy.getRateLimitCount();
-        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
+        var rateLimitCount = subscriptionPolicy.getRateLimitCount() <= 0 ? "" : subscriptionPolicy.getRateLimitCount();
+        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit() == null ? "sec" : subscriptionPolicy.getRateLimitTimeUnit();
         var stopOnQuotaReach = subscriptionPolicy.isStopOnQuotaReach();
         var tierPlan = subscriptionPolicy.getBillingPlan();
         
@@ -189,7 +189,7 @@
 				        	</div>
 				        	<div class="col-sm-3">
 				        		<select class="form-control select required" id="rateLimitTimeUnit" name="rateLimitTimeUnit">
-                                    <option value="sec" selected="true">Request/s</option>
+                                        <option value="sec" selected="true">Request/s</option>
                                     <option value="min">Request/min</option>
                                  </select>
 				        	</div>
