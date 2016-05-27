@@ -22,6 +22,35 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
 }
 
 
+var unSubscribeAlerts = function() {
+
+    jagg.post("/site/blocks/manage-alerts/ajax/manage-alerts.jag", {
+        action: "unSubscribe"
+    }, function (result) {
+
+        //console.log(result);
+        if (!result.error) {
+
+            jagg.message({content: i18n.t("info.successfullySaved"), type: "info"});
+
+
+            $(":checkbox").each(function () {
+                $(this).removeAttr('checked');
+            });
+            
+            $("#tokenfield").tagsinput('removeAll');
+
+        }else {
+            if (result.message == "AuthenticateError") {
+                jagg.showLogin();
+            } else {
+                jagg.message({content:result.message,type:"error"});
+            }
+        }
+    }, "json");
+
+}
+
 $(document).ready(function () {
 
     $('#tokenfield').on('beforeItemAdd', function (event) {
@@ -44,6 +73,11 @@ $(document).ready(function () {
 
     });
 
+    $("#unsubscribeBtn").click(function () {
+
+        unSubscribeAlerts();
+
+    });
     $("#saveBtn").click(function () {
 
         if ($(".token").hasClass("invalid")) {

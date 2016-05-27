@@ -45,7 +45,34 @@ if (jagg.isCSRFTokenValid())
                     }
                 }
                 print(obj);
-            } else {
+            }else if(action === "unSubscribe"){
+
+                var userName = jagg.getUser().username;
+
+                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+                if ("carbon.super" == tenantDomain) {
+                    userName = userName + "@carbon.super";
+                }
+
+                mod = jagg.module("manage-alerts");
+
+                var results = mod.unSubscribe(userName);
+
+                if (results.error) {
+                    obj = {
+                        error: results.error,
+                        message: results.message
+                    };
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+                print(obj);
+
+            }else {
                 print({
                     error: true,
                     message: msg.error.invalidAction(action)
