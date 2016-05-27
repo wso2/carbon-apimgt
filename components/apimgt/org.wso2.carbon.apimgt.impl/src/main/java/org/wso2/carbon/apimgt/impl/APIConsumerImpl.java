@@ -2979,7 +2979,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     currentRolesList.retainAll(roles);
                     if (APIConstants.TIER_PERMISSION_ALLOW.equals(tierPermission.getPermissionType())) {
                         if (currentRolesList.isEmpty()) {
-                      //      return true;
+                            return true;
                         }
                     } else {
                         if (currentRolesList.size() > 0) {
