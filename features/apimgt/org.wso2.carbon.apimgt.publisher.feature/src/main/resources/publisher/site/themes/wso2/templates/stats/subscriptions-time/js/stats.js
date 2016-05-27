@@ -15,29 +15,29 @@ $(document).ready(function(){
 
         //day picker
         $('#today-btn').on('click',function(){
-            fromDate = convertTimeString(currentDay);
-            toDate = convertTimeString(currentDay-86400000);
+            toDate = convertTimeString(currentDay);
+            fromDate = convertTimeString(currentDay-86400000);
             drawSubscriptionTime();
         });
 
         //hour picker
         $('#hour-btn').on('click',function(){
-            fromDate = convertTimeString(currentDay);
-            toDate = convertTimeString(currentDay-3600000);
+            toDate = convertTimeString(currentDay);
+            fromDate = convertTimeString(currentDay-3600000);
             drawSubscriptionTime();
         })
 
         //week picker
         $('#week-btn').on('click',function(){
-            fromDate = convertTimeString(currentDay);
-            toDate = convertTimeString(currentDay-604800000);
+            toDate = convertTimeString(currentDay);
+            fromDate = convertTimeString(currentDay-604800000);
             drawSubscriptionTime();
         })
 
         //month picker
         $('#month-btn').on('click',function(){
-            fromDate = convertTimeString(currentDay);
-            toDate = convertTimeString(currentDay-(604800000*4));
+            toDate = convertTimeString(currentDay);
+            fromDate = convertTimeString(currentDay-(604800000*4));
             drawSubscriptionTime();
         });
 
@@ -49,14 +49,14 @@ $(document).ready(function(){
         $('#date-range').daterangepicker({
               timePicker: true,
               timePickerIncrement: 30,
-              format: 'YYYY-MM-DD h:mm',
+              format: 'YYYY-MM-DD HH:mm:ss',
               startDate: moment().subtract(1, 'month'),
-              endDate: moment().add(1, 'day').format('YYYY-MM-DD  h:mm'),
+              endDate: moment().add(1, 'day').format('YYYY-MM-DD  HH:mm:ss'),
               opens: 'left',
         });
 
-        fromDate = $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD');
-        toDate = $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+        fromDate = $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm:ss');
+        toDate = $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm:ss');
 
         $('#date-range').on('apply.daterangepicker', function(ev, picker) {
            btnActiveToggle(this);
@@ -66,6 +66,8 @@ $(document).ready(function(){
            var toStr = to.split(" ");
            var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
            $("#date-range span").html(dateStr);
+           fromDate = $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm:ss');
+           toDate = $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm:ss');
            drawSubscriptionTime();
         });
 
@@ -114,7 +116,8 @@ var drawSubscriptionTime = function () {
 
                         for(var i=0; i<origin_json.length; i++){
                         var d = new Date(origin_json[i].created_time);
-                        var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate());
+                        var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate())
+                                            + " " + formatTimeChunk(d.getHours())+ ":" + formatTimeChunk(d.getMinutes()) + ":" + formatTimeChunk(d.getMinutes());
                         	graph_data.push(
                         		{
                                 "api_name": origin_json[i].api_name,
@@ -122,7 +125,7 @@ var drawSubscriptionTime = function () {
                                         {	"version": origin_json[i].api_version ,
                                             "time": [
                                                     {	"subscription_count": origin_json[i].subscription_count,
-                                                        "created_time": formattedDate
+                                                        "created_time": d.toUTCString()
                                                     }
                                                 ]
                                         }],
@@ -245,7 +248,7 @@ var drawSubscriptionTime = function () {
 
                             chart.xAxis.axisLabel('Time')
                             .tickFormat(function (d) {
-                                 return d3.time.format('%d/%m %H:%M')(new Date(d)) });
+                                 return d3.time.format('%d/%m %H:%M:%S')(new Date(d)) });
 
                             chart.yAxis.axisLabel('Subscriber Count')
                                 .tickFormat(d3.format('d'));
@@ -282,7 +285,8 @@ var drawSubscriptionTime = function () {
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "
+                            + formatTimeChunk(d.getHours()) + ":" + formatTimeChunk(d.getMinutes()) + ":" + formatTimeChunk(d.getSeconds());
     return formattedDate;
 };
 
