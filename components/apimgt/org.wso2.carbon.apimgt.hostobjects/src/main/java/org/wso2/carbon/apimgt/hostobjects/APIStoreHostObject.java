@@ -1889,7 +1889,8 @@ public class APIStoreHostObject extends ScriptableObject {
                                 }
                             }
                         } else {
-                            Set<Tier> policySet = api.getAvailableTiers();
+                            List<Tier> policySet = APIUtil.sortTiers(api.getAvailableTiers());
+
                             if (policySet != null) {
                                 Iterator it = policySet.iterator();
                                 int j = 0;
