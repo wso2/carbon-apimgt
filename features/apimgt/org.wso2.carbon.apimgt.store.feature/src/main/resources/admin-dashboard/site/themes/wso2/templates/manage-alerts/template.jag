@@ -57,7 +57,7 @@
                             <div class="" id="saveButtons">
                                 <button type="submit" class="btn btn-primary " id="saveBtn" >Save</button>
                                 <button type="submit" class="btn btn-primary " id="cancelBtn" >Cancel</button>
-                                <button type="submit" class="btn btn-primary " id="unsubscribeBtn" >Unsubscribe </button>
+                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" >Unsubscribe </button>
                             </div>
                     <%
                 }else{

@@ -13,6 +13,7 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
         if (!result.error) {
 
             jagg.message({content: i18n.t("info.successfullySaved"), type: "info"});
+            $("#unsubscribeBtn").show();
 
         } else {
             jagg.message({content: result.message, type: "error"});
@@ -39,6 +40,7 @@ var unSubscribeAlerts = function() {
             });
             
             $("#tokenfield").tagsinput('removeAll');
+            $("#unsubscribeBtn").hide();
 
         }else {
             if (result.message == "AuthenticateError") {
@@ -52,6 +54,22 @@ var unSubscribeAlerts = function() {
 }
 
 $(document).ready(function () {
+
+    var notChecked = [], checked = [], checkedValues = [];
+    $(":checkbox").each(function () {
+        id = this.value;
+        values = this.id;
+        this.checked ? checked.push(id) : notChecked.push(id);
+        if (this.checked) {
+            checkedValues.push(values);
+        }
+
+    });
+
+    if (checkedValues.length > 0) {
+
+        $("#unsubscribeBtn").show();
+    }
 
     $('#tokenfield').on('beforeItemAdd', function (event) {
         /* Validate url */
