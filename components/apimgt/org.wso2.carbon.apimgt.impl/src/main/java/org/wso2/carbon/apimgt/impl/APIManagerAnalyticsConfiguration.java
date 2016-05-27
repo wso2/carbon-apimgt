@@ -54,7 +54,7 @@ public class APIManagerAnalyticsConfiguration {
 
         private APIManagerAnalyticsConfigurationHolder(){}
     }
-    public static synchronized APIManagerAnalyticsConfiguration getInstance() {
+    public static APIManagerAnalyticsConfiguration getInstance() {
         return APIManagerAnalyticsConfigurationHolder.INSTANCE;
     }
 
