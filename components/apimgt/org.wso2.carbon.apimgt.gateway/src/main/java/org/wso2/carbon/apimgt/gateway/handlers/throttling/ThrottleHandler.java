@@ -81,7 +81,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private volatile Throttle throttle;
     private static volatile ThrottleDataPublisher throttleDataPublisher = null;
     private String policyKeyApplication = null;
-    private boolean subscriptionLevelSpikeArrestEnabled;
     private static final String THROTTLE_MAIN = "THROTTLE_MAIN";
     private static final String INIT_SPIKE_ARREST = "INIT_SPIKE_ARREST";
     private static final String CEP_THROTTLE = "CEP_THROTTLE";
@@ -115,8 +114,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private RoleBasedAccessRateController roleBasedAccessController;
 
     public ThrottleHandler() {
-        subscriptionLevelSpikeArrestEnabled = ServiceReferenceHolder.getInstance().getThrottleProperties()
-                .isEnabledSubscriptionLevelSpikeArrest();
         if (log.isDebugEnabled()) {
             log.debug("Throttle Handler initialized");
         }
@@ -142,7 +139,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @param cc     Configuration context which holds current configuration context.
      * @return
      */
-    private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc) {
+    private boolean doRoleBasedAccessThrottlingWithCEP(MessageContext synCtx, ConfigurationContext cc, AuthenticationContext authenticationContext) {
 
         //Throttle Keys
         //applicationLevelThrottleKey key is combination of {applicationId}:{authorizedUser}
@@ -161,7 +158,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiLevelTier;
 
         //Other Relevant parameters
-        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+        AuthenticationContext authContext = authenticationContext;
         String authorizedUser;
 
         //Throttled decisions
@@ -300,7 +297,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                        + apiVersion;
                         isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
-                        if (subscriptionLevelSpikeArrestEnabled) {
+                        if (authContext.getSpikeArrestLimit() > 0) {
                             isSubscriptionLevelThrottled = isSubscriptionLevelSpike(synCtx, subscriptionLevelThrottleKey);
                         }
                         //if subscription level not throttled then move to application level
@@ -446,12 +443,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * handler in chain. Else return false to notify throttled message.
      */
     private boolean doThrottle(MessageContext messageContext) {
-        //long start = System.currentTimeMillis();
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         ConfigurationContext cc = axis2MC.getConfigurationContext();
-        if (subscriptionLevelSpikeArrestEnabled) {
+        AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
+
+        if (authenticationContext != null && authenticationContext.getSpikeArrestLimit() > 0) {
             Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), INIT_SPIKE_ARREST));
             Timer.Context context = timer.start();
@@ -464,11 +462,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             //org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
             //      getAxis2MessageContext();
             //ConfigurationContext cc = axis2MC.getConfigurationContext();
-            long start = System.nanoTime();
             Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), CEP_THROTTLE));
             Timer.Context context = timer.start();
-            isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
+            isThrottled = doRoleBasedAccessThrottlingWithCEP(messageContext, cc, authenticationContext);
             context.stop();
         }
         if (isThrottled) {
@@ -479,8 +476,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             context.stop();
             return false;
         }
-        long end = System.currentTimeMillis();
-        //log.info("Total-Time:" + (end - start));
         return true;
     }
 
@@ -814,13 +809,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 info = roleBasedAccessController.canAccess(resourceLevelSpikeArrestThrottleContext, throttleKey,
                         throttleKey);
                 if (log.isDebugEnabled()) {
-                    log.debug("Throttle by hard limit " + throttleKey);
+                    log.debug("Throttle by subscription level burst limit " + throttleKey);
                     log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
                 }
 
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
-                    log.info("Hard Throttling limit exceeded.");
+                    log.info("Subscription level burst control limit exceeded.");
                     return true;
                 }
             }
