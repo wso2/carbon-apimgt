@@ -164,9 +164,16 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-            setCORSHeaders(messageContext, selectedResource);
 
+			//If this is an OPTIONS request
 			if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
+				//If the OPTIONS method is explicity specified in the resource
+				if (Arrays.asList(selectedResource.getMethods()).contains(
+						APIConstants.SupportedHTTPVerbs.OPTIONS.name())) {
+					//We will not handle the CORS headers, let the back-end do it.
+					return true;
+				}
+				setCORSHeaders(messageContext, selectedResource);
 				Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
 				if (corsSequence != null) {
 					corsSequence.mediate(messageContext);
@@ -175,8 +182,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				return false;
 			}
 			else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
+				setCORSHeaders(messageContext, selectedResource);
 				messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
 			}
+			setCORSHeaders(messageContext, selectedResource);
 			return true;
 		} finally {
             context.stop();
