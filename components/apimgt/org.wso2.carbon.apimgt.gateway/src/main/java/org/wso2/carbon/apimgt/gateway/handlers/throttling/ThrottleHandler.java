@@ -828,7 +828,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED);
-                    log.debug("Subscription level burst control limit exceeded.");
+                    log.debug("Subscription level burst control limit exceeded for key " + throttleKey);
                     return true;
                 }
             }
