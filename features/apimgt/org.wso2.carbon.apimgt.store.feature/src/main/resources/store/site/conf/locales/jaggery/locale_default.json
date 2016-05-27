@@ -169,6 +169,8 @@
     "pwHelpMsgLine5":"Mix capital and lowercase letters",
     "retypePassword":"Re-type Password",
 
+    "passwordNotMatch" : "Password did not match",
+
     "apisTooltip":"Browse the latest versions of published APIs, make subscriptions and generate API keys.",
     "prototypedApisTooltip":"Browse the Prototyped APIs available",
     "myAppsTooltip":"Browse and create applications. Applications are required to make API subscriptions and consume them.",
