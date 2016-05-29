@@ -45,21 +45,28 @@ include("/jagg/jagg.jag");
 
             var tableName = "ORG_WSO2_ANALYTICS_APIM_APIAVAILABILITY";
 
-            var sortOrderBool = false;;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+
+            var sortOrderBool = false;
             if(sortOrder == "asc") {
                 sortOrderBool = false;
             } else if (sortOrder == "desc"){
                 sortOrderBool = true;
             }
 
+            //composing the search query
+            var fullSearchQuery = 'tenantDomain:' + tenantDomain;
+
             if (searchEntry != "") {
                 var lucenePrefix = "api_version:";
-                searchEntry = lucenePrefix+ '"'  + searchEntry +'"';
+                searchEntry = lucenePrefix + '"'  + searchEntry +'"';
+                fullSearchQuery += ' AND ' + searchEntry;
             }
 
 
-            dataResult = mod.getDataFromTable(tableName, searchEntry, startindex, count, "api_version", sortOrderBool);
-            countResult = result = mod.getCountFromTable(tableName, searchEntry);
+            dataResult = mod.getDataFromTable(tableName, fullSearchQuery, startindex, count, "api_version", sortOrderBool);
+            countResult = result = mod.getCountFromTable(tableName, fullSearchQuery);
 
             parsedDataResult = JSON.parse(dataResult);
 
@@ -88,7 +95,7 @@ include("/jagg/jagg.jag");
                     "recordsFiltered": countResult,
                     "data" :
                     arr
-            }
+                }
                 print(obj);
             }
 
@@ -101,4 +108,3 @@ include("/jagg/jagg.jag");
         }
     }
 }());
-%>
