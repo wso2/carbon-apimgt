@@ -19,14 +19,16 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
+import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
-import org.wso2.carbon.apimgt.gateway.throttling.util.jms.JMSThrottleDataRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -52,6 +54,7 @@ public class APIHandlerServiceComponent {
     private APIKeyValidatorClientPool clientPool;
     private ThriftKeyValidatorClientPool thriftClientPool;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    private ServiceRegistration registration;
 
     protected void activate(ComponentContext context) {
     	BundleContext bundleContext = context.getBundleContext();
@@ -75,9 +78,21 @@ public class APIHandlerServiceComponent {
 
                 if (configuration.getThrottleProperties().isEnabled()) {
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+                    APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
+                    throttleDataServiceImpl.setThrottleDataHolder(throttleDataHolder);
+
+
+                    // Register APIThrottleDataService so that ThrottleData maps are available to other components.
+                    registration = context.getBundleContext().registerService(
+                            APIThrottleDataService.class.getName(),
+                            throttleDataServiceImpl, null);
                     ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
+
+                    log.debug("APIThrottleDataService Registered...");
                     ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
                             .getThrottleProperties());
+
+
                     //First do web service call and update map.
                     //Then init JMS listener to listen que and update it.
                     //Following method will initialize JMS listnet and listen all updates and keep throttle data map
@@ -91,11 +106,6 @@ public class APIHandlerServiceComponent {
                                 KeyTemplateRetriever();
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
                     }
-
-                   if (configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()){
-                       JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
-                       jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
-                   }
                 }
             }
 		} catch (APIManagementException e) {
@@ -109,6 +119,10 @@ public class APIHandlerServiceComponent {
         }
         clientPool.cleanup();
         thriftClientPool.cleanup();
+        if(registration != null){
+            log.debug("Unregistering ThrottleDataService...");
+            registration.unregister();
+        }
     }
 
     protected void setConfigurationContextService(ConfigurationContextService cfgCtxService) {

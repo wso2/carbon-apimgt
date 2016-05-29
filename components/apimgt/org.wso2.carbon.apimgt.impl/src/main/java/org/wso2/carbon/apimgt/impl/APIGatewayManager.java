@@ -333,7 +333,7 @@ public class APIGatewayManager {
     private void deployCustomSequences(API api, String tenantDomain, Environment environment)
             throws APIManagementException, AxisFault {
 
-        if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 if(tenantDomain != null && !"".equals(tenantDomain)){
@@ -344,11 +344,11 @@ public class APIGatewayManager {
                 }
                 int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-                if (isSequenceDefined(api.getInSequence())) {
+                if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     deployInSequence(api, tenantId, tenantDomain, environment);
                 }
 
-                if (isSequenceDefined(api.getOutSequence())) {
+                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
                 	deployOutSequence(api, tenantId, tenantDomain, environment);
                 }
 
@@ -371,7 +371,7 @@ public class APIGatewayManager {
         OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in", api.getId());
 
         if (inSequence != null) {
-            String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
+            String inSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
             if (inSequence.getAttribute(new QName("name")) != null) {
                 inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
             }
@@ -387,7 +387,7 @@ public class APIGatewayManager {
         OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out", api.getId());
 
         if (outSequence != null) {
-            String outSeqExt  = APIUtil.getSequenceExtensionName(api) + "--Out";
+            String outSeqExt  = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
             if (outSequence.getAttribute(new QName("name")) != null)    {
                 outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
             }
@@ -406,7 +406,7 @@ public class APIGatewayManager {
 	 */
     private void undeployCustomSequences(API api, String tenantDomain, Environment environment) {
 
-        if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 if(tenantDomain != null && !"".equals(tenantDomain)){
@@ -418,13 +418,19 @@ public class APIGatewayManager {
                 }
                 APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
-                if (isSequenceDefined(api.getInSequence())) {
-                    String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
+                if (APIUtil.isSequenceDefined(api.getInSequence())) {
+                    String inSequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     client.deleteSequence(inSequence, tenantDomain);
                 }
-                if (isSequenceDefined(api.getOutSequence())) {
-                    String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
+                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
+                    String outSequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     client.deleteSequence(outSequence, tenantDomain);
+                }
+                if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    String faultSequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                    if(client.isExistingSequence(faultSequence, tenantDomain)) {
+                        client.deleteSequence(faultSequence, tenantDomain);
+                    }                    
                 }
             } catch (Exception e) {
                 String msg = "Error in deleting the sequence from gateway";
@@ -446,8 +452,8 @@ public class APIGatewayManager {
 	                                                                                         throws APIManagementException {
 
         //If sequences have been added, updated or removed.
-        if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence()) ||
-                isSequenceDefined(api.getOldInSequence()) || isSequenceDefined(api.getOldOutSequence())) {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence()) ||
+                APIUtil.isSequenceDefined(api.getOldInSequence()) || APIUtil.isSequenceDefined(api.getOldOutSequence())) {
 
             try {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -463,23 +469,23 @@ public class APIGatewayManager {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
                 //If an inSequence has been added, updated or removed.
-                if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOldInSequence())) {
-                    String inSequenceKey = APIUtil.getSequenceExtensionName(api) + "--In";
+                if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOldInSequence())) {
+                    String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     //If sequence already exists
                     if (client.isExistingSequence(inSequenceKey, tenantDomain)) {
                         //Delete existing sequence
                         client.deleteSequence(inSequenceKey, tenantDomain);
                     }
                     //If an inSequence has been added or updated.
-                    if(isSequenceDefined(api.getInSequence())){
+                    if(APIUtil.isSequenceDefined(api.getInSequence())){
                         //Deploy the inSequence
                         deployInSequence(api, tenantId, tenantDomain, environment);
                     }
                 }
 
                 //If an outSequence has been added, updated or removed.
-                if (isSequenceDefined(api.getOutSequence()) || isSequenceDefined(api.getOldOutSequence())) {
-                    String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
+                if (APIUtil.isSequenceDefined(api.getOutSequence()) || APIUtil.isSequenceDefined(api.getOldOutSequence())) {
+                    String outSequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     //If the outSequence exists.
                     if (client.isExistingSequence(outSequence, tenantDomain)) {
                         //Delete existing outSequence
@@ -487,7 +493,7 @@ public class APIGatewayManager {
                     }
 
                     //If an outSequence has been added or updated.
-                    if (isSequenceDefined(api.getOutSequence())){
+                    if (APIUtil.isSequenceDefined(api.getOutSequence())){
                         //Deploy outSequence
                         deployOutSequence(api, tenantId, tenantDomain, environment);
                     }
@@ -508,9 +514,10 @@ public class APIGatewayManager {
             throws APIManagementException {
 
         String faultSequenceName = api.getFaultSequence();
+        String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
 
         //If a fault sequence has be defined.
-        if (isSequenceDefined(faultSequenceName)) {
+        if (APIUtil.isSequenceDefined(faultSequenceName)) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 if (tenantDomain != null && !"".equals(tenantDomain)) {
@@ -529,9 +536,22 @@ public class APIGatewayManager {
                     client.deleteSequence(faultSequenceName, tenantDomain);
                 }
                 //Get the fault sequence xml
-                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault", api.getId());
+                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, 
+                                                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT, api.getId());
 
                 if (faultSequence != null) {
+                    if (APIUtil.isPerAPISequence(faultSequenceName, tenantId, api.getId(), 
+                                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
+                        if (faultSequence.getAttribute(new QName("name")) != null)    {
+                            faultSequence.getAttribute(new QName("name")).setAttributeValue(faultSeqExt);
+                        }
+                    } else {
+                        //If the previous sequence was a per API fault sequence delete it
+                        if (client.isExistingSequence(faultSeqExt, tenantDomain)) {
+                            client.deleteSequence(faultSeqExt, tenantDomain);
+                        }
+                    }
+
                     //Deploy the fault sequence
                     client.addSequence(faultSequence, tenantDomain);
                 }
@@ -545,9 +565,6 @@ public class APIGatewayManager {
         }
     }
 
-    private boolean isSequenceDefined(String sequence){
-        return sequence != null && !"none".equals(sequence);
-    }
        
     /**
      * Store the secured endpoint username password to registry

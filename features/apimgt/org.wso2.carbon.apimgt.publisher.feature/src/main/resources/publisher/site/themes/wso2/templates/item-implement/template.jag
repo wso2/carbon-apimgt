@@ -115,7 +115,7 @@
 
 	<div class="">
                 <div class="row">
-                    <div class="wizard">
+                    <div class="wizard col-xs-12">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
                                 <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
@@ -694,6 +694,10 @@
 	                                <label class="radio">
 	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
 	                                    <span class="helper">Out</span>
+	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="upload-sequence" value="fault">
+	                                    <span class="helper">Fault</span>
 	                                </label>
                                 </div>
 					            </div>	

@@ -49,8 +49,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
-            APIManagementException {
+    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
         checkCreatePermission();
         super.createNewAPIVersion(api, newVersion);
     }

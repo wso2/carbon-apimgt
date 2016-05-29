@@ -938,17 +938,15 @@ public class ApiMgtDAO {
 
 		try {
 			String dbProdName = conn.getMetaData().getDatabaseProductName();
-			if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
+			/*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
 				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
 				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
 				sqlQuery = sqlQuery + " x";
-            }
-				
-			
-			
+            }*/
+
 			ps = conn.prepareStatement(sqlQuery);
 			ps.setString(1, apiPolicy);
 			ps.setInt(2, subscriptionTenantId);
@@ -2801,6 +2799,40 @@ public class ApiMgtDAO {
         }
         return tierPermission;
     }
+
+    public TierPermissionDTO getThrottleTierPermission(String tierName, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        TierPermissionDTO tierPermission = null;
+        try {
+            String getTierPermissionQuery = SQLConstants.GET_THROTTLE_TIER_PERMISSION_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTierPermissionQuery);
+
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                tierPermission = new TierPermissionDTO();
+                tierPermission.setTierName(tierName);
+                tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                String roles = resultSet.getString("ROLES");
+                if (roles != null) {
+                    String roleList[] = roles.split(",");
+                    tierPermission.setRoles(roleList);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information for Tier " + tierName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermission;
+    }
+
 
     public void updateThrottleTierPermissions(String tierName, String permissionType, String roles, int tenantId)
             throws APIManagementException {
@@ -8261,6 +8293,59 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method will delete all email alert subscriptions details from tables
+     * @param userName
+     * @param agent whether its publisher or store or admin dash board.
+     */
+    public void unSubscribeAlerts(String userName, String agent) throws APIManagementException, SQLException {
+
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+
+        try {
+            connection.setAutoCommit(false);
+            String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
+
+            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER;
+
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndStakeHolderQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
+
+            String getEmailListIdByUserNameAndStakeHolderQuery = SQLConstants.GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER;
+            ps = connection.prepareStatement(getEmailListIdByUserNameAndStakeHolderQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            rs = ps.executeQuery();
+            int emailListId = 0;
+            while (rs.next()) {
+                emailListId = rs.getInt(1);
+            }
+            if(emailListId != 0) {
+                String deleteEmailListDetailsByEmailListId = SQLConstants.DELETE_EMAILLIST_BY_EMAIL_LIST_ID;
+                ps = connection.prepareStatement(deleteEmailListDetailsByEmailListId);
+                ps.setInt(1, emailListId);
+                ps.executeUpdate();
+
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Failed to delete alert email data.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+
+        }
+
+
+    }
+
+    /**
      *
      * @param userName User name.
      * @param emailList Comma separated email list.
@@ -10274,7 +10359,7 @@ public class ApiMgtDAO {
         return status;
     }
     
-    public boolean hasSubscription(String tierId, String tenantDomainWithAt) throws APIManagementException{
+    public boolean hasSubscription(String tierId, String tenantDomainWithAt, String policyLevel) throws APIManagementException{
     	 PreparedStatement checkIsExistPreparedStatement = null;
     	 Connection connection = null;
          ResultSet checkIsResultSet = null;
@@ -10283,10 +10368,22 @@ public class ApiMgtDAO {
         	 /*String apiProvider = tenantId;*/
         	 connection = APIMgtDBUtil.getConnection();
         	 connection.setAutoCommit(true);
-             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_PERMISSION;
+        	 String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
+        	 if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+        		 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_RESOURCES_API;
+             } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+            	 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_ATTACHED_TO_APPLICATION;
+             } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
+            	 isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
+             } 
+        	 
              checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
              checkIsExistPreparedStatement.setString(1, tierId);
              checkIsExistPreparedStatement.setString(2, "%"+tenantDomainWithAt);
+             if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+            	 checkIsExistPreparedStatement.setString(3, tierId);
+                 checkIsExistPreparedStatement.setString(4, "%"+tenantDomainWithAt);
+             }
              checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
              if (checkIsResultSet != null && checkIsResultSet.next()) {
             	 int count = checkIsResultSet.getInt(1);

@@ -17,6 +17,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
@@ -26,7 +27,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -97,7 +97,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                  String resourceLevelThrottleKey, String resourceLevelTier,
                                  String authorizedUser, String apiContext, String apiVersion, String appTenant,
                                  String apiTenant, String appId, MessageContext messageContext,
-                                 AuthenticationContext authenticationContext){
+                                 AuthenticationContext authenticationContext) {
         if (!StringUtils.isEmpty(apiLevelTier)) {
             resourceLevelTier = apiLevelTier;
             resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -123,18 +123,20 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
     public void run() {
 
-        String remoteIP = null;
         JSONObject jsonObMap = new JSONObject();
 
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                                                                                              .getAxis2MessageContext();
         //Set transport headers of the message
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-        if(transportHeaderMap != null){
-             remoteIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
+                                                     .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String remoteIP = null;
+        //Check whether headers map is null and x forwarded for header is present
+        if (transportHeaderMap != null) {
+            remoteIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         }
 
-        //Setting IP of the client
+        //Setting IP of the client by looking at x forded for header and  if it's empty get remote address
         if (remoteIP != null && !remoteIP.isEmpty()) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
@@ -143,16 +145,17 @@ public class DataProcessAndPublishingAgent implements Runnable {
             remoteIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
-        if(remoteIP !=null && remoteIP.length()>0) {
-            jsonObMap.put("ip", APIUtil.ipToLong(remoteIP));
+        if (remoteIP != null && remoteIP.length() > 0) {
+            jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
         }
 
+        //If header condition publishing enable then put headers in to json  object map
         if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableHeaderConditions()) {
             jsonObMap.putAll(transportHeaderMap);
         }
+
         //Setting query parameters
         if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableQueryParamConditions()) {
-
             String queryString = (String) axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
             if (!StringUtils.isEmpty(queryString)) {
                 if (queryString.indexOf("?") > -1) {
@@ -160,15 +163,15 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 }
                 String[] queryParams = queryString.split("&");
                 Map<String, String> queryParamsMap = new HashMap<String, String>();
-                String[] queryParamArr;
+                String[] queryParamArray;
                 String queryParamName, queryParamValue = "";
                 for (String queryParam : queryParams) {
-                    queryParamArr = queryParam.split("=");
-                    if (queryParamArr.length == 2) {
-                        queryParamName = queryParamArr[0];
-                        queryParamValue = queryParamArr[1];
+                    queryParamArray = queryParam.split("=");
+                    if (queryParamArray.length == 2) {
+                        queryParamName = queryParamArray[0];
+                        queryParamValue = queryParamArray[1];
                     } else {
-                        queryParamName = queryParamArr[0];
+                        queryParamName = queryParamArray[0];
                     }
                     queryParamsMap.put(queryParamName, queryParamValue);
                     jsonObMap.put(queryParamName, queryParamValue);
@@ -178,21 +181,20 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
         //Publish jwt claims
         if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableJwtConditions()) {
-
             if (authenticationContext.getCallerToken() != null) {
-                //take first part
+                //Split sections of jwt token
                 String[] jwtTokenArray = authenticationContext.getCallerToken().split(Pattern.quote("."));
-                // decode  JWT part
+                // decoding JWT
                 try {
                     byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
-                    String jwtHeader = new String(jwtByteArray, "UTF-8");
+                    String jwtAssertion = new String(jwtByteArray, "UTF-8");
                     JSONParser parser = new JSONParser();
-                    JSONObject jwtHeaderOb = (JSONObject) parser.parse(jwtHeader);
-                    jsonObMap.putAll(jwtHeaderOb);
+                    JSONObject jwtAssertionOb = (JSONObject) parser.parse(jwtAssertion);
+                    jsonObMap.putAll(jwtAssertionOb);
                 } catch (UnsupportedEncodingException e) {
-                    log.info("Error while decoding jwt header", e);
+                    log.error("Error while decoding jwt header", e);
                 } catch (ParseException e) {
-                    log.info("Error while parsing jwt header", e);
+                    log.error("Error while parsing jwt header", e);
                 }
             }
         }
@@ -201,9 +203,13 @@ public class DataProcessAndPublishingAgent implements Runnable {
         long messageSizeInBytes = 0;
         if (authenticationContext.isContentAwareTierPresent()) {
             //this request can match with with bandwidth policy. So we need to get message size.
-            Object obj = transportHeaderMap.get("Content-Length");
-            if (obj != null) {
-                messageSizeInBytes = Integer.parseInt(obj.toString());
+            Object contentLength = null;
+            if(transportHeaderMap != null) {
+                contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            }
+
+            if (contentLength != null) {
+                messageSizeInBytes = Integer.parseInt(contentLength.toString());
             } else {
                 try {
                     RelayUtils.buildMessage(axis2MessageContext);
@@ -225,7 +231,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                     }
                 }
             }
-            jsonObMap.put("messageSize", messageSizeInBytes);
+            jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),
@@ -234,9 +240,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
                                         this.subscriptionLevelThrottleKey, this.subscriptionLevelTier,
                                         this.resourceLevelThrottleKey, this.resourceLevelTier,
                                         this.authorizedUser, this.apiContext, this.apiVersion,
-                                        this.appTenant, this.apiTenant, this.appId, this.apiName , jsonObMap.toString()};
+                                        this.appTenant, this.apiTenant, this.appId, this.apiName, jsonObMap.toString()};
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
-                                                                        System.currentTimeMillis(), null, null, objects);
+                System.currentTimeMillis(), null, null, objects);
         dataPublisher.tryPublish(event);
     }
 

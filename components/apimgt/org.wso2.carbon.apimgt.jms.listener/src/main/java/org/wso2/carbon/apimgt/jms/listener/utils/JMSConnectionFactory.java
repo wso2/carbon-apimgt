@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
+package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +78,7 @@ public class JMSConnectionFactory {
      * Digest a JMS CF definition from an axis2.xml 'Parameter' and construct
      *
      * @param parameters the axis2.xml 'Parameter' that defined the JMS CF
-     * @param name JMS Connection name
+     * @param name       JMS Connection name
      */
     public JMSConnectionFactory(Hashtable<String, String> parameters, String name) {
         this.parameters = parameters;
@@ -88,15 +88,15 @@ public class JMSConnectionFactory {
         try {
             context = new InitialContext(parameters);
             conFactory = JMSUtils.lookup(context, ConnectionFactory.class,
-                    parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME));
+                                         parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME));
             log.info("JMS ConnectionFactory : " + name + " initialized");
 
         } catch (NamingException e) {
             throw new ThrottlingRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
-                    + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
-                    + " or default destination : "
-                    + parameters.get(JMSConstants.PARAM_DESTINATION) +
-                    " for JMS CF : " + name + " using : " + parameters, e);
+                                                 + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
+                                                 + " or default destination : "
+                                                 + parameters.get(JMSConstants.PARAM_DESTINATION) +
+                                                 " for JMS CF : " + name + " using : " + parameters, e);
         }
     }
 
@@ -198,7 +198,7 @@ public class JMSConnectionFactory {
             return JMSUtils.lookupDestination(context, destinationName, parameters.get(JMSConstants.PARAM_DEST_TYPE));
         } catch (NamingException e) {
             handleException("Error looking up the JMS destination with name " + destinationName
-                    + " of type " + parameters.get(JMSConstants.PARAM_DEST_TYPE), e);
+                            + " of type " + parameters.get(JMSConstants.PARAM_DEST_TYPE), e);
         }
 
         // never executes but keeps the compiler happy
@@ -221,8 +221,8 @@ public class JMSConnectionFactory {
      */
     public String getReplyDestinationType() {
         return parameters.get(JMSConstants.PARAM_REPLY_DEST_TYPE) != null ?
-                parameters.get(JMSConstants.PARAM_REPLY_DEST_TYPE) :
-                JMSConstants.DESTINATION_TYPE_GENERIC;
+               parameters.get(JMSConstants.PARAM_REPLY_DEST_TYPE) :
+               JMSConstants.DESTINATION_TYPE_GENERIC;
     }
 
     private void handleException(String msg, Exception e) {
@@ -237,7 +237,7 @@ public class JMSConnectionFactory {
      */
     public boolean isJmsSpec11() {
         return parameters.get(JMSConstants.PARAM_JMS_SPEC_VER) == null ||
-                "1.1".equals(parameters.get(JMSConstants.PARAM_JMS_SPEC_VER));
+               "1.1".equals(parameters.get(JMSConstants.PARAM_JMS_SPEC_VER));
     }
 
     /**
@@ -247,7 +247,7 @@ public class JMSConnectionFactory {
      */
     public Boolean isQueue() {
         if (parameters.get(JMSConstants.PARAM_CONFAC_TYPE) == null &&
-                parameters.get(JMSConstants.PARAM_DEST_TYPE) == null) {
+            parameters.get(JMSConstants.PARAM_DEST_TYPE) == null) {
             return null;
         }
 
@@ -257,9 +257,9 @@ public class JMSConnectionFactory {
             } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_CONFAC_TYPE))) {
                 return false;
             } else {
-               throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
-                        parameters.get(JMSConstants.PARAM_CONFAC_TYPE)
-                        + " for JMS CF : " + name);
+                throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
+                                                     parameters.get(JMSConstants.PARAM_CONFAC_TYPE)
+                                                     + " for JMS CF : " + name);
             }
         } else {
             if ("queue".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
@@ -268,8 +268,8 @@ public class JMSConnectionFactory {
                 return false;
             } else {
                 throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
-                        parameters.get(JMSConstants.PARAM_DEST_TYPE)
-                        + " for JMS CF : " + name);
+                                                     parameters.get(JMSConstants.PARAM_DEST_TYPE)
+                                                     + " for JMS CF : " + name);
             }
         }
         //TODO fix this
@@ -283,7 +283,7 @@ public class JMSConnectionFactory {
      */
     private boolean isSessionTransacted() {
         return parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED) != null &&
-                Boolean.valueOf(parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED));
+               Boolean.valueOf(parameters.get(JMSConstants.PARAM_SESSION_TRANSACTED));
     }
 
     private boolean isDurable() {
@@ -318,7 +318,7 @@ public class JMSConnectionFactory {
 
         } catch (JMSException e) {
             handleException("Error acquiring a Connection from the JMS CF : " + name +
-                    " using properties : " + parameters, e);
+                            " using properties : " + parameters, e);
         }
         return connection;
     }

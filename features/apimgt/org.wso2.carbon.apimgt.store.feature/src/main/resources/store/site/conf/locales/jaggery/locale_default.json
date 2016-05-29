@@ -30,6 +30,7 @@
     "newApp" : "New Application...",
     "addApp" : "Add New Application",
     "throttleByTier" : "Throttling Tier",
+    "perUserQuota" : "User Quota",
     "callbackUrl" : "Callback URL",
     "none" : "None",
     "noThrottling" : "Throttling not applied",
@@ -50,6 +51,11 @@
     "apiconsole.title" : "API Console",
     "browse.title" : "Browse APIs",
     "signupTitle" : "Sign - Up for a New Account",
+
+    "characterLimit" : "Please enter at lease 5 characters",
+    "securePassword" : "Enter more secure password",
+    "confirmPassword" : "Confirm Password",
+    "validEmail" : "Please enter a valid email.",
 
     "listAPIs" : "List APIs",
     "listAPI" : "List APIs By",
@@ -162,6 +168,8 @@
     "pwHelpMsgLine4":"Add special characters (such as @, ?, %)",
     "pwHelpMsgLine5":"Mix capital and lowercase letters",
     "retypePassword":"Re-type Password",
+
+    "passwordNotMatch" : "Password did not match",
 
     "apisTooltip":"Browse the latest versions of published APIs, make subscriptions and generate API keys.",
     "prototypedApisTooltip":"Browse the Prototyped APIs available",

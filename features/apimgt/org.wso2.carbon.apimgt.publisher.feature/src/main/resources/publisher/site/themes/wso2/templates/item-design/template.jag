@@ -86,7 +86,7 @@
    </div>
 <div class="">
                 <div class="row">
-                    <div class="wizard">
+                    <div class="wizard col-sm-12">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
                                 <li class="wiz-step current"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>

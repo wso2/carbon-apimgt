@@ -33,8 +33,8 @@
 </script>
 
 <script id="subscription-api-name" type="text/x-handlebars-template">
-  <div class="thumbnail icon pull-left" style="width:80px; margin-right:10px">
-		<a title="API browse" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
+    <a title="API browse" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
+        <div class="thumbnail icon pull-left" style="width:80px; margin-right:10px">
 			{{#if thumburl}}
 				<div class="square-element">
 					<img class="" src="{{ thumburl }}" alt="<%=i18n.localize("apiThumb")%>">
@@ -46,11 +46,11 @@
 						<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ apiName }}</a>
 					</div>
 				</div> 
-			{{/if}}        
-		</a>      
-  </div>
-  <h4>{{apiName}} - {{apiVersion}}</h4>
-  <i class="fw fw-publish fw-1x"></i> {{status}}
+			{{/if}}
+	    </div>
+        <h4>{{apiName}} - {{apiVersion}}</h4>
+        <i class="fw fw-publish fw-1x"></i> {{status}}
+  	</a>
 </script>
 
 <% }); %>

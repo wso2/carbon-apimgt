@@ -28,6 +28,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.*;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,10 +36,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
@@ -97,7 +95,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
 
-        boolean status;
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();
@@ -108,7 +105,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
 			API selectedApi = messageContext.getConfiguration().getAPI(apiName);
-			Resource selectedResourceWithVerb = null;
             Resource selectedResource = null;
 			String subPath = null;
             String path = RESTUtils.getFullRequestPath(messageContext);
@@ -126,65 +122,74 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
             if(selectedApi != null){
-                Resource[] selectedAPIResources = selectedApi.getResources();
-                if (selectedAPIResources.length > 0) {
+                Resource[] allAPIResources = selectedApi.getResources();
+
+				Set<Resource> acceptableResources = new HashSet<Resource>();
+
+				for(Resource resource : allAPIResources){
+					//If the requesting method is OPTIONS or if the Resource contains the requesting method
+					if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+							(resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+						acceptableResources.add(resource);
+					}
+				}
+
+                if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                        Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
+                        Resource resource = dispatcher.findResource(messageContext, acceptableResources);
                         if (resource != null) {
                             selectedResource = resource;
-                            if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                                selectedResourceWithVerb = resource;
-                                break;
-                            }
+                            break;
                         }
                     }
                 }
+				//If no acceptable resources are found
+				else{
+					//We're going to send a 405 or a 404. Run the following logic to determine which.
+					handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
+					return false;
+				}
+
+				//No matching resource found
+				if(selectedResource == null){
+					//Respond with a 404
+					onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
+							APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
+					return false;
+				}
             }
 
-            String resourceString =
-                    selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
+            String resourceString = selectedResource.getDispatcherHelper().getString();
             String resourceCacheKey = APIUtil
                     .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-            setCORSHeaders(messageContext, selectedResourceWithVerb);
-            if (selectedResource != null && selectedResourceWithVerb != null) {
-                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
-                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-                }
-                status = true;
-            } else if (selectedResource != null) {
-                if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-	                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
-	                if (corsSequence != null) {
-		                corsSequence.mediate(messageContext);
-	                }
-	                Utils.send(messageContext, HttpStatus.SC_OK);
-                    status = false;
-                } else {
-					messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
-					messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
-					messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "Method not allowed for given API resource");
-					Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
-					if (resourceMisMatchedSequence != null) {
-						resourceMisMatchedSequence.mediate(messageContext);
-					}
-					status = false;
+
+			//If this is an OPTIONS request
+			if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
+				//If the OPTIONS method is explicity specified in the resource
+				if (Arrays.asList(selectedResource.getMethods()).contains(
+						APIConstants.SupportedHTTPVerbs.OPTIONS.name())) {
+					//We will not handle the CORS headers, let the back-end do it.
+					return true;
 				}
-			} else {
-                messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
-                messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_NOT_FOUND);
-                messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "No matching resource found for given API Request");
-                Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
-                if (resourceMisMatchedSequence != null) {
-					resourceMisMatchedSequence.mediate(messageContext);
+				setCORSHeaders(messageContext, selectedResource);
+				Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+				if (corsSequence != null) {
+					corsSequence.mediate(messageContext);
 				}
-				status = false;
+				Utils.send(messageContext, HttpStatus.SC_OK);
+				return false;
 			}
+			else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
+				setCORSHeaders(messageContext, selectedResource);
+				messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+			}
+			setCORSHeaders(messageContext, selectedResource);
+			return true;
 		} finally {
             context.stop();
         }
-        return status;
     }
 
 	public boolean handleResponse(MessageContext messageContext) {
@@ -193,6 +198,39 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			corsSequence.mediate(messageContext);
 		}
 		return true;
+	}
+
+	private void handleResourceNotFound(MessageContext messageContext, List<Resource> allAPIResources) {
+
+		Resource uriMatchingResource = null;
+
+		for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+			uriMatchingResource = dispatcher.findResource(messageContext, allAPIResources);
+			//If a resource with a matching URI was found.
+			if (uriMatchingResource != null) {
+				onResourceNotFoundError(messageContext, HttpStatus.SC_METHOD_NOT_ALLOWED,
+						APIMgtGatewayConstants.METHOD_NOT_FOUND_ERROR_MSG);
+				return;
+			}
+		}
+
+		//If a resource with a matching URI was not found.
+		if(uriMatchingResource == null){
+			//Respond with a 404.
+			onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
+					APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
+			return;
+		}
+	}
+
+	private void onResourceNotFoundError(MessageContext messageContext, int statusCode, String errorMessage){
+		messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, statusCode);
+		messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, statusCode);
+		messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, errorMessage);
+		Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+		if (resourceMisMatchedSequence != null) {
+			resourceMisMatchedSequence.mediate(messageContext);
+		}
 	}
 
 	/**

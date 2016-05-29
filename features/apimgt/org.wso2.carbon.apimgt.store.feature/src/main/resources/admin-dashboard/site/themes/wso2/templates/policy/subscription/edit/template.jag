@@ -51,8 +51,8 @@
         var defaultUnitTime = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime();
         var defaultTimeUnit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit();
 
-        var rateLimitCount = subscriptionPolicy.getRateLimitCount() < 0 ? "" : subscriptionPolicy.getRateLimitCount();
-        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit();
+        var rateLimitCount = subscriptionPolicy.getRateLimitCount() <= 0 ? "" : subscriptionPolicy.getRateLimitCount();
+        var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit() == null ? "sec" : subscriptionPolicy.getRateLimitTimeUnit();
         var stopOnQuotaReach = subscriptionPolicy.isStopOnQuotaReach();
         var tierPlan = subscriptionPolicy.getBillingPlan();
         
@@ -152,8 +152,8 @@
 				                </div>
 				                <div class="col-sm-3">
 				                    <select class="form-control select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit">
-				                        <option value="KB" >KB</option>
-				                        <option value="MB" selected="true" >MB</option>
+				                        <option value="KB" selected="true" >KB</option>
+				                        <option value="MB" >MB</option>
 				                    </select>
 				                </div>
 				            </div>
@@ -189,7 +189,7 @@
 				        	</div>
 				        	<div class="col-sm-3">
 				        		<select class="form-control select required" id="rateLimitTimeUnit" name="rateLimitTimeUnit">
-                                    <option value="sec" selected="true">Request/s</option>
+                                        <option value="sec" selected="true">Request/s</option>
                                     <option value="min">Request/min</option>
                                  </select>
 				        	</div>
@@ -307,23 +307,22 @@
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=encode.forJavaScript(policyName)%>");
-          $('#description').val("<%=encode.forJavaScript(description+"")%>");
-          $('#defaultUnitTime').val("<%=encode.forJavaScript(defaultUnitTime)%>");
-          $('#defaultTimeUnit').val("<%=encode.forJavaScript(defaultTimeUnit)%>");
-          $('#rateLimitCount').val("<%=encode.forJavaScript(rateLimitCount)%>");
+          $('#policyName').val("<%=policyName%>");
+          $('#description').val("<%=description%>");
+          $('#defaultUnitTime').val("<%=defaultUnitTime%>");
+          $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
+          $('#rateLimitCount').val("<%=rateLimitCount%>");
           if ("<%=rateLimitTimeUnit%>") {
-        	  $('#rateLimitTimeUnit').val("<%=encode.forJavaScript(rateLimitTimeUnit)%>");  
+        	  $('#rateLimitTimeUnit').val("<%=rateLimitTimeUnit%>");
           }
           
-          if("<%=defaultQuotaPolicy%>" == ("requestCount")){
+          if("<%=defaultQuotaPolicy%>" == "requestCount"){
             $('#requestCountType').prop('checked',true);
-            $('#defaultRequestCount').val("<%=encode.forJavaScript(defaultRequestCount)%>");
-          }
-          else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
+            $('#defaultRequestCount').val("<%=defaultRequestCount%>");
+          } else if("<%=defaultQuotaPolicy%>" == "bandwidthVolume"){
             $('#bandwidthType').prop('checked',true);
-            $('#defaultBandwidth').val("<%=encode.forJavaScript(defaultBandwidth)%>");
-            $('#defaultBandwidthUnit').val("<%=encode.forJavaScript(defaultBandwidthUnit)%>");
+            $('#defaultBandwidth').val("<%=defaultBandwidth%>");
+            $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
           }
           if("<%=stopOnQuotaReach%>" == "true"){
             $('#stopOnQuotaReach').attr('checked', true);
@@ -333,7 +332,6 @@
           if('<%=isCustomAttributesExist%>' == 'true'){
             populateCustomerAttributes(<%=customAttributeJSON%>);
         	}
-          
           $('#tierPlan').val("<%=tierPlan%>");
         } else {
              $('#stopOnQuotaReach').attr('checked', true);

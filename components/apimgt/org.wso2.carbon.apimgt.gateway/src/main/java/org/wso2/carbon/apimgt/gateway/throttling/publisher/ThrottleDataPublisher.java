@@ -122,7 +122,7 @@ public class ThrottleDataPublisher {
                                    authenticationContext);
             executor.execute(agent);
         } catch (Exception e) {
-            throw new ThrottlingRunTimeException("Error while publishing throttling events to global policy server");
+            log.error("Error while publishing throttling events to global policy server", e);
         }
     }
 

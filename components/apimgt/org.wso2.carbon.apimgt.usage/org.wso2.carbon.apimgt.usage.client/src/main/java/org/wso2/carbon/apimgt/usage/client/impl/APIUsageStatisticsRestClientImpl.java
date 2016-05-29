@@ -1003,6 +1003,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     usageDTO.setMethod(usage.getMethod());
                     usageDTO.setContext(usage.getContext());
                     usageDTO.setCount(usage.getRequestCount());
+                    usageDTO.setResourcePath(usage.getResourcePath());
                     usageDTO.setTime(usage.getTime());
                     usageByResourcePath.add(usageDTO);
                 }
@@ -1043,7 +1044,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 4,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_METHOD_FACET,
                 APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -1084,6 +1085,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(2));
             usage.setMethod(v.getColumnNames().get(3));
+
+            if(((ArrayList) v.getColumnNames()).size() == 5){
+                usage.setResourcePath(v.getColumnNames().get(4));
+            }
             usageByResourcePath.add(usage);
         }
         return usageByResourcePath;

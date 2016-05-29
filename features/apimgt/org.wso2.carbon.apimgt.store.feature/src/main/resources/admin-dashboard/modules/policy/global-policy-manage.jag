@@ -6,15 +6,7 @@ var deleteGlobalPolicy = function (policyName) {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        var hasSubscription = apiProvider.hasSubscription(provider,policyName);
-
-        if(hasSubscription){
-            return {
-                error: true,
-                message: "Policy already has subscriptions "
-            };
-        }else{
-           var globalPolicies = apiProvider.deletePolicy(provider, "global", policyName);
+        var globalPolicies = apiProvider.deletePolicy(provider, "global", policyName);
             return {
                 error: false,
                 globalPolicies: globalPolicies

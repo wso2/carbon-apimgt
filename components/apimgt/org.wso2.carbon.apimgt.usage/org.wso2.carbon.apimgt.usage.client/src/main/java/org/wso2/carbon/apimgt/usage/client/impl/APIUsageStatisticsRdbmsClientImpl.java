@@ -898,6 +898,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     usageDTO.setContext(usage.getContext());
                     usageDTO.setCount(usage.getRequestCount());
                     usageDTO.setTime(usage.getTime());
+                    usageDTO.setResourcePath(usage.getResourcePath());
                     usageByResourcePath.add(usageDTO);
                 }
             }
@@ -1491,7 +1492,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     "SELECT " + APIUsageStatisticsClientConstants.API + ',' + APIUsageStatisticsClientConstants.VERSION
                             + ',' + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
                             + APIUsageStatisticsClientConstants.CONTEXT + ',' + APIUsageStatisticsClientConstants.METHOD
-                            + ',' + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ','
+                            + ',' + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                            + ',' + APIUsageStatisticsClientConstants.RESOURCE + ','
                             + APIUsageStatisticsClientConstants.TIME + " FROM " + tableName + " WHERE "
                     + APIUsageStatisticsClientConstants.TIME + " BETWEEN ?  AND ?";
             statement = connection.prepareStatement(query);
@@ -1506,8 +1508,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
                 String method = rs.getString(APIUsageStatisticsClientConstants.METHOD);
                 long hits = rs.getLong(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
+                String resourcePaths = rs.getString(APIUsageStatisticsClientConstants.RESOURCE);
                 String time = rs.getString(APIUsageStatisticsClientConstants.TIME);
-                apiUsageByResourcePath = new APIUsageByResourcePath(apiName, version, method, context, hits, time);
+                apiUsageByResourcePath = new APIUsageByResourcePath(apiName, version, method, context, hits, time,resourcePaths);
                 usage.add(apiUsageByResourcePath);
             }
             return usage;

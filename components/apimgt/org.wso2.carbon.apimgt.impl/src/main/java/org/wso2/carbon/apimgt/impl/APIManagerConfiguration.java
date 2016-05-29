@@ -24,27 +24,32 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.auth.AUTH;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -426,7 +431,7 @@ public class APIManagerConfiguration {
         OMElement throttleConfigurationElement = element.getFirstChildWithName(new QName(APIConstants
                 .AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS));
         if (throttleConfigurationElement != null) {
-
+            // Check advance throttling enabled
             OMElement enableAdvanceThrottlingElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_ADVANCE_THROTTLING));
@@ -434,7 +439,7 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnabled(JavaUtils.isTrueExplicitly(enableAdvanceThrottlingElement
                         .getText()));
             }
-
+            // Check unlimited tier enabled
             OMElement enableUnlimitedTierElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_UNLIMITED_TIER));
@@ -442,6 +447,7 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableUnlimitedTier(JavaUtils.isTrueExplicitly(enableUnlimitedTierElement
                         .getText()));
             }
+            // Check header condition enable
             OMElement enableHeaderConditionsElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_HEADER_CONDITIONS));
@@ -449,6 +455,7 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableHeaderConditions(JavaUtils.isTrueExplicitly(enableHeaderConditionsElement
                         .getText()));
             }
+            // Check JWT condition enable
             OMElement enableJwtElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_JWT_CLAIM_CONDITIONS));
@@ -456,6 +463,7 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableJwtConditions(JavaUtils.isTrueExplicitly(enableJwtElement
                         .getText()));
             }
+            // Check query param condition enable
             OMElement enableQueryParamElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_QUERY_PARAM_CONDITIONS));
@@ -463,16 +471,19 @@ public class APIManagerConfiguration {
                 throttleProperties.setEnableQueryParamConditions(JavaUtils.isTrueExplicitly(enableQueryParamElement
                         .getText()));
             }
+            // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .ENABLE_SUBSCRIPTION_SPIKE_ARREST));
             if (enabledSubscriptionLevelSpikeArrestElement != null) {
                 throttleProperties.setEnabledSubscriptionLevelSpikeArrest(JavaUtils.isTrueExplicitly
                         (enabledSubscriptionLevelSpikeArrestElement
-                        .getText()));
+                                .getText()));
             }
+            // if advance Throttling enable
             if (throttleProperties.isEnabled()) {
 
+                // Configuring throttle data publisher
                 ThrottleProperties.DataPublisher dataPublisher = new ThrottleProperties.DataPublisher();
                 OMElement dataPublisherConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURATION));
@@ -518,8 +529,8 @@ public class APIManagerConfiguration {
 
                 OMElement dataPublisherPoolConfigurationElement = dataPublisherConfigurationElement
                         .getFirstChildWithName(new
-                        QName
-                        (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_POOL_CONFIGURATION));
+                                QName
+                                (APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_POOL_CONFIGURATION));
 
                 ThrottleProperties.DataPublisherPool dataPublisherPool = new ThrottleProperties
                         .DataPublisherPool();
@@ -545,10 +556,11 @@ public class APIManagerConfiguration {
                 ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPool = new ThrottleProperties
                         .DataPublisherThreadPool();
                 if (dataPublisherThreadPoolConfigurationElement != null) {
-                    OMElement corePoolSizeElement = dataPublisherPoolConfigurationElement.getFirstChildWithName(new
-                            QName
-                            (APIConstants.AdvancedThrottleConstants
-                                    .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE));
+                    OMElement corePoolSizeElement = dataPublisherThreadPoolConfigurationElement.getFirstChildWithName
+                            (new
+                                    QName
+                                    (APIConstants.AdvancedThrottleConstants
+                                            .DATA_PUBLISHER_THREAD_POOL_CONFIGURATION_CORE_POOL_SIZE));
                     if (corePoolSizeElement != null) {
                         dataPublisherThreadPool.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
                     }
@@ -587,6 +599,7 @@ public class APIManagerConfiguration {
                     if (jmsConnectionUrlElement != null) {
                         jmsConnectionProperties.setServiceUrl(APIUtil.replaceSystemProperty(jmsConnectionUrlElement
                                 .getText()));
+                        System.setProperty("jms.url", jmsConnectionProperties.getServiceUrl());
                     }
                     OMElement jmsConnectionUserElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName
@@ -594,6 +607,7 @@ public class APIManagerConfiguration {
                     if (jmsConnectionUserElement != null) {
                         jmsConnectionProperties.setUsername(APIUtil.replaceSystemProperty(jmsConnectionUserElement
                                 .getText()));
+                        System.setProperty("jms.username",jmsConnectionProperties.getUsername());
                     }
                     OMElement jmsConnectionDestinationElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName
@@ -613,6 +627,7 @@ public class APIManagerConfiguration {
                                 .AdvancedThrottleConstants.PASSWORD)).getText();
                     }
                     jmsConnectionProperties.setPassword(APIUtil.replaceSystemProperty(jmsConnectionPassword));
+                    System.setProperty("jms.password",jmsConnectionProperties.getPassword());
 
                     OMElement jmsConnectionParameterElement = jmsConnectionDetailElement.getFirstChildWithName(new
                             QName(APIConstants.AdvancedThrottleConstants.JMS_CONNECTION_PARAMETERS));
@@ -672,6 +687,104 @@ public class APIManagerConfiguration {
                     jmsConnectionProperties.setEnabled(true);
                 }
                 throttleProperties.setJmsConnectionProperties(jmsConnectionProperties);
+
+                //Configuring default tier limits
+                Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
+                OMElement defaultTierLimits = throttleConfigurationElement.getFirstChildWithName(new
+                        QName
+                        (APIConstants.AdvancedThrottleConstants.DEFAULT_THROTTLE_LIMITS));
+
+                if (defaultTierLimits != null) {
+                    OMElement subscriptionPolicyLimits = defaultTierLimits
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .SUBSCRIPTION_THROTTLE_LIMITS));
+
+                    if (subscriptionPolicyLimits != null) {
+                        OMElement goldTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_GOLD));
+                        if (goldTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_GOLD,
+                                    Long.parseLong(goldTierElement.getText()));
+                        }
+
+                        OMElement silverTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_SILVER));
+                        if (silverTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_SILVER,
+                                    Long.parseLong(silverTierElement.getText()));
+                        }
+
+                        OMElement bronzeTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_BRONZE));
+                        if (bronzeTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_BRONZE,
+                                    Long.parseLong(bronzeTierElement.getText()));
+                        }
+
+                        OMElement unauthenticatedTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED));
+                        if (unauthenticatedTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                                    Long.parseLong(unauthenticatedTierElement.getText()));
+                        }
+                    }
+
+                    OMElement applicationPolicyLimits = defaultTierLimits
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .APPLICATION_THROTTLE_LIMITS));
+                    if (subscriptionPolicyLimits != null) {
+                        OMElement largeTierElement = applicationPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN));
+                        if (largeTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN,
+                                    Long.parseLong(largeTierElement.getText()));
+                        }
+
+                        OMElement mediumTierElement = applicationPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN));
+                        if (mediumTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
+                                    Long.parseLong(mediumTierElement.getText()));
+                        }
+
+                        OMElement smallTierElement = applicationPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN));
+                        if (smallTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN,
+                                    Long.parseLong(smallTierElement.getText()));
+                        }
+                    }
+
+                    OMElement resourceLevelPolicyLimits = defaultTierLimits
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                                    .RESOURCE_THROTTLE_LIMITS));
+                    if (resourceLevelPolicyLimits != null) {
+                        OMElement ultimateTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN));
+                        if (ultimateTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN,
+                                    Long.parseLong(ultimateTierElement.getText()));
+                        }
+
+                        OMElement plusTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN));
+                        if (plusTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
+                                    Long.parseLong(plusTierElement.getText()));
+                        }
+
+                        OMElement basicTierElement = resourceLevelPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN));
+                        if (basicTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN,
+                                    Long.parseLong(basicTierElement.getText()));
+                        }
+                    }
+
+                }
+
+                throttleProperties.setDefaultThrottleTierLimits(defaultThrottleTierLimits);
+
                 //Configuring policy deployer
                 OMElement policyDeployerConnectionElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.POLICY_DEPLOYER_CONFIGURATION));
@@ -726,7 +839,7 @@ public class APIManagerConfiguration {
                     if (blockConditionRetrieverServiceUrlElement != null) {
                         blockConditionRetrieverConfiguration.setServiceUrl(APIUtil
                                 .replaceSystemProperty(blockConditionRetrieverServiceUrlElement
-                                .getText()));
+                                        .getText()));
                     }
                     OMElement blockConditionRetrieverServiceUsernameElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
@@ -749,7 +862,7 @@ public class APIManagerConfiguration {
                     if (blockConditionRetrieverInitIdleElement != null) {
                         blockConditionRetrieverConfiguration.setInitDelay(Long.parseLong
                                 (blockConditionRetrieverInitIdleElement
-                                .getText()));
+                                        .getText()));
                     }
                     OMElement blockConditionRetrieverTimeIntervalElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -757,7 +870,7 @@ public class APIManagerConfiguration {
                     if (blockConditionRetrieverTimeIntervalElement != null) {
                         blockConditionRetrieverConfiguration.setPeriod(Long.parseLong
                                 (blockConditionRetrieverTimeIntervalElement
-                                .getText()));
+                                        .getText()));
                     }
                     String blockConditionRetrieverServicePassword;
                     String blockConditionRetrieverServicePasswordKey = APIConstants.AdvancedThrottleConstants

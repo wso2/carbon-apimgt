@@ -294,6 +294,12 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
@@ -740,6 +746,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.jms.listener.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
                 <version>${orbit.version.axiom}</version>
@@ -932,7 +945,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
                 <artifactId>swagger-parser</artifactId>
-                <version>1.0.17.wso2v1</version>
+                <version>${swagger.parser.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
@@ -1036,12 +1049,13 @@
         <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.1.0</carbon.identity.version>
-        <carbon.identity-inbound-auth-oauth.version>5.1.0</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-user-ws.version>5.1.0</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.1.0</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.1.0</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>5.1.0</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity.version>5.1.1-SNAPSHOT</carbon.identity.version>
+        <carbon.identity-inbound-auth-oauth.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-user-ws.version>5.1.1-SNAPSHOT</carbon.identity-user-ws.version>
+        <carbon.identity-inbound-auth-saml2.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-openid.version>5.1.1-SNAPSHOT</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-local-auth-basicauth.version>5.1.1-SNAPSHOT</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.1.1-SNAPSHOT</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.6.2</carbon.governance.version>
         <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
@@ -1099,7 +1113,7 @@
         <jaggery.version>0.12.5</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v3-SNAPSHOT</synapse.version>
+        <synapse.version>2.1.7-wso2v3-BETA</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1129,7 +1143,8 @@
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <swagger.codegen.version>2.1.5</swagger.codegen.version>
+        <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
+        <swagger.parser.version>1.0.17.wso2v1</swagger.parser.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
@@ -1138,6 +1153,7 @@
         <imp.pkg.version.google.code.gson>[2.2.4, 2.3.0)</imp.pkg.version.google.code.gson>
         <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
+        <imp.pkg.version.io.swagger.parser>[2.1.6, 3.0.0)</imp.pkg.version.io.swagger.parser>
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 

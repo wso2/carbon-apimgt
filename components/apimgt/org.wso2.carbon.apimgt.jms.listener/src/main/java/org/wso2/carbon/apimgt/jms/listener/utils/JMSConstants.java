@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.gateway.throttling.util.jms;
+package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.axis2.client.Options;
 

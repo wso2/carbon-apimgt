@@ -15,40 +15,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-.template1{
-    background: #FCD7D6;
-    border-left-width:10px;
-    border-left-style:solid;
-    border-left-color:#e74c3c;
-}
 
-.template2{
-    background: #D6F7FC;
-    border-left-width:10px;
-    border-left-style:solid;
-    border-left-color:#3498db;
-}
-
-.template3{
-    background: Black;
-    border-left-width:5px;
-    border-left-style:solid;
-    border-left-color:#2ecc71;
-    font-size: 15px;
-    font-family: Ubuntu Mono;
+.logLine {
     color:#00FF00;
+    white-space:normal;
 }
 
-
-.template4{
-    background: #FCF9D6;
-    border-left-width:10px;
-    border-left-style:solid;
-    border-left-color:#f1c40f;
+.logLine div {
+    display:inline-block;
+    padding-left: 8px;
 }
 
-.trace{
-    list-style: none;
+.logTimeStamp {
+    color:#00CCFF;
+}
+
+.logClassName {
+    color: #dddd00;
+}
+
+.logTrace {
+    color: #d33333;
+}
+
+.livelog a {
+    color:#00FF00;
+    text-underline;
+}
+
+.livelog {
+    font-family: "Courier New", Courier, monospace;
+    font-size: small;
+    /* Hack to hide the real caret */
+    color: transparent; text-shadow: 0 0 0 #ddd;
+}
+.livelog .content { padding: 15px 15px 0 15px; }
+.livelog .prompt { padding: 0 15px 15px 15px; }
+.livelog .content ul { margin: 0; }
+.livelog .content ul li { list-style-type: none; }
+.livelog .loading span::after {
+    content: "⚙";
+    color: #ddd; font-size: 10em;
+    border-radius: 10em; opacity: 0.4;
 }
 
 

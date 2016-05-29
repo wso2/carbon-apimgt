@@ -33,6 +33,7 @@
     <modules>
         <module>org.wso2.carbon.apimgt.core.feature</module>
         <module>org.wso2.carbon.apimgt.gateway.feature</module>
+        <module>org.wso2.carbon.apimgt.jms.listener.feature</module>
         <module>org.wso2.carbon.apimgt.publisher.feature</module>
         <module>org.wso2.carbon.apimgt.store.feature</module>
         <module>org.wso2.carbon.apimgt.interceptor.feature</module>
@@ -42,7 +43,7 @@
 	    <module>org.wso2.carbon.apimgt.rest.api.publisher.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr.feature</module>
-	<module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>
+	    <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>
     </modules>
     <build>
         <plugins>

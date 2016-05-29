@@ -412,6 +412,14 @@ public interface APIProvider extends APIManager {
      */
 
     List<String> getCustomFaultSequences()  throws APIManagementException;
+    
+    /**
+     * Get the list of Custom Fault Sequences including per API sequences.
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
 
     /**
@@ -609,7 +617,7 @@ public interface APIProvider extends APIManager {
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
     
-    boolean hasSubscription(String username, String policyName)throws APIManagementException;
+    boolean hasAttachments(String username, String policyName, String policyLevel)throws APIManagementException;
 
     /**
      *

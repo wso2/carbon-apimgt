@@ -1,8 +1,8 @@
 /* Enter a unique ExecutionPlan */
-@Plan:name('carbon.super_app_Small')
+@Plan:name('carbon.super_app_50PerMin')
 
 /* Enter a unique description for ExecutionPlan */
-@Plan:description('ExecutionPlan for app_small')
+@Plan:description('Allows 50 request per minute')
 
 /* define streams/tables and write queries here ... */
 
@@ -13,11 +13,11 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
 
 FROM RequestStream
-SELECT messageID, ( appTenant == 'carbon.super' and appTier == 'Small') AS isEligible, appKey AS throttleKey
+SELECT messageID, (appTenant == 'carbon.super' and appTier == '50PerMin') AS isEligible, appKey AS throttleKey
 INSERT INTO EligibilityStream;
 
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min, 0)
-select throttleKey, (count(messageID) >= 1) as isThrottled, expiryTimeStamp
+select throttleKey, (count(messageID) >= 50) as isThrottled, expiryTimeStamp
 group by throttleKey 
 INSERT ALL EVENTS into ResultStream;
 
