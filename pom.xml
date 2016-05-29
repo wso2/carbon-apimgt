@@ -1029,6 +1029,12 @@
                 <artifactId>xercesImpl</artifactId>
                 <version>${xercesImpl.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>commons-scxml.wso2</groupId>
+                <artifactId>commons-scxml</artifactId>
+                <version>${commons.scxml.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1172,6 +1178,7 @@
         <swagger.annotations.version>1.5.7</swagger.annotations.version>
         <google.guava.version>18.0</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
+        <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
     </properties>
 </project>
 
