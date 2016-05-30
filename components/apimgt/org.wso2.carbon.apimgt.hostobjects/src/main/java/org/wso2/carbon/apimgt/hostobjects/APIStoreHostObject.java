@@ -62,6 +62,7 @@ import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
@@ -4517,5 +4518,30 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         envCount++;
         return envCount;
+    }
+    
+    /**
+     * This method returns all the supported grant types
+     * @param cx Rhino Context
+     * @param thisObj Scriptable object
+     * @param args Passing arguments
+     * @param funObj Function object
+     * @return array of grant types
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
+    public static NativeArray jsFunction_getAllowedGrantTypes(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+        OAuthAdminService oAuthAdminService = new OAuthAdminService();
+        String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+        
+        NativeArray myn = new NativeArray(0);
+        int i = 0;
+        for (String grantType : allowedGrantTypes) {
+            myn.put(i, myn, grantType);
+            i++;
+        }
+        return myn;
+        
     }
 }
