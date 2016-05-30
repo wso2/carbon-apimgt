@@ -3,7 +3,7 @@
     var mw = 7;
     var mww = 12;
     if(!outputs.left && !outputs.right) {
-        mw = 12;
+        mw = 10;
         mww = 7;
     } else if(!outputs.left || !outputs.right) {
         mw = 9;

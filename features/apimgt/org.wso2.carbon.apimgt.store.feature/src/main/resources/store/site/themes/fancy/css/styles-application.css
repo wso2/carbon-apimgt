@@ -515,12 +515,7 @@ ul.more-from-provider li.list-header{
     color:#fff;
 }
 .tryit-content{
-    position:absolute;
-    background:#fff;
-    z-index:100;
-    top:0;
-    left:0;
-    margin-top:91px;
+    margin-top:40px;
 }
 div.tryit-header-section{
     background: #FAFAFA; /* Old browsers */
@@ -651,7 +646,6 @@ div.tryit-header-section{
 .tryit-content{
     font-size:11px;
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-    background:url("../images/back.jpg") repeat scroll 0 0 transparent;
 }
 .tryit-content .row-fluid [class*="span"] {
     min-height: 18px;
