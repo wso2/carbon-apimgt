@@ -889,6 +889,11 @@ public class SQLConstants {
             " FROM AM_THROTTLE_TIER_PERMISSIONS " +
             " WHERE TENANT_ID = ?";
 
+    public static final String GET_THROTTLE_TIER_PERMISSION_SQL =
+            " SELECT PERMISSIONS_TYPE, ROLES " +
+                    " FROM AM_THROTTLE_TIER_PERMISSIONS " +
+                    " WHERE TIER = ? AND TENANT_ID = ?";
+
   //--------------------
 
     public static final String GET_TIER_PERMISSION_ID_SQL =

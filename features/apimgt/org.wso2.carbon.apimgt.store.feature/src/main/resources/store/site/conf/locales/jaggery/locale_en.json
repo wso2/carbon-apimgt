@@ -56,6 +56,8 @@
     "confirmPassword" : "Confirm Password",
     "validEmail" : "Please enter a valid email.",
 
+    "passwordNotMatch" : "Password did not match",
+
     "listAPI" : "List APIs By",
     "listAPI.newest" : "Newest",
     "listAPI.catog" : "By Category",

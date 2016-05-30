@@ -33,7 +33,7 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("newPassword")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
-            <input type="password" title="newPassword" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
+            <input type="password" title="<%=i18n.localize("securePassword")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
 
             <div class="help-block" id="password-help" style="display:none">
               <%=i18n.localize("pwHelpMsgLine1")%>
@@ -58,7 +58,7 @@
 
     <div class="form-group">
             <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("retypePassword")%>:<span class="requiredAstrix">*</span></label>
-            <div class="col-sm-4"><input type="password" title="newPasswordConfirmation" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
+            <div class="col-sm-4"><input type="password" title="<%=i18n.localize("passwordNotMatch")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
     </div>
 	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/> 
     <div class="row">

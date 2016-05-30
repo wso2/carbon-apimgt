@@ -17,9 +17,9 @@ $(document).ready(function(){
     $('#date-range').daterangepicker({
         timePicker: true,
         timePickerIncrement: 30,
-        format: 'YYYY-MM-DD h:mm',
+        format: 'YYYY-MM-DD HH:mm:ss',
         startDate: moment().subtract(1, 'month'),
-        endDate: moment().add(1, 'day').format('YYYY-MM-DD  h:mm'),
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
         opens: 'left',
     });
 
@@ -33,28 +33,28 @@ $(document).ready(function(){
     //day picker
     $('#today-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('day'));
-        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD  h:mm'));        
+        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
         $("body").trigger("update_chart");
     });
 
     //hour picker
     $('#hour-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('hour'));
-        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD  h:mm'));         
+        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
         $("body").trigger("update_chart");
     })
 
     //week picker
     $('#week-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('week'));
-        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD  h:mm'));         
+        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
         $("body").trigger("update_chart");
     })
 
     //month picker
     $('#month-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('month'));
-        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD  h:mm'));   
+        $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
         $("body").trigger("update_chart");
     });
 
@@ -76,7 +76,7 @@ $(document).ready(function(){
 
         chart.xAxis.axisLabel('Time')
         .tickFormat(function (d) {
-             return d3.time.format('%m/%d %H:%M')(new Date(d)) });
+             return d3.time.format('%m/%d %H:%M:S')(new Date(d)) });
 
         chart.yAxis.axisLabel('Developer Signups')
             .tickFormat(d3.format('d'));
@@ -127,8 +127,8 @@ $(document).ready(function(){
     $("body").on("update_chart",function(){
         jagg.post("/site/blocks/stats/developers-time/ajax/stats.jag" + window.location.search, 
             { 
-                "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD'),
-                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD'),
+                "fromDate": $('#date-range').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm:ss'),
+                "toDate": $('#date-range').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm:ss'),
                 "subscribedApi": $('#apiSelect').val(),
                 "apiFilter": apiFilter
             },

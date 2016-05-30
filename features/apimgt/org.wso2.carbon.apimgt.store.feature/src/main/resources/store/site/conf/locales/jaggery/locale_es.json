@@ -96,6 +96,7 @@
     "prev" : "Anterior",
     "next" : "Pr&oacute;ximo",
 
+    "passwordNotMatch" : "Contraseña No se han encontrado",
 
     "keys" : "Claves",
     "showKeys" : "Mostrar keys",

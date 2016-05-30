@@ -3808,6 +3808,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         Map<String, String> executionFlows = new HashMap<String, String>();
         String policyLevel = null;
+        String oldKeyTemplate = null;
+        String newKeyTemplate = null;
         String policyName = policy.getPolicyName();
         List<String> policiesToUndeploy = new ArrayList<String>();
         try {
@@ -3879,6 +3881,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if(apiMgtDAO.isKeyTemplatesExist(globalPolicy)){
                     throw new APIManagementException("Key Template Already Exist");
                 }
+
+                // getting key templates before updating database
+                GlobalPolicy oldGlobalPolicy = apiMgtDAO.getGlobalPolicy(policy.getPolicyName());
+                oldKeyTemplate = oldGlobalPolicy.getKeyTemplate();
+                newKeyTemplate = globalPolicy.getKeyTemplate();
+
                 apiMgtDAO.updateGlobalPolicy(globalPolicy);
                 String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
                 executionFlows.put(policyFile, policyString);
@@ -3909,6 +3917,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String policyPlanName  = pair.getKey();
                 String flowString  = pair.getValue();
                 deploymentManager.deployPolicyToGlobalCEP(policyPlanName, flowString);
+
+                //publishing keytemplate after update
+                if (oldKeyTemplate != null && newKeyTemplate != null) {
+                    publishKeyTemplateEvent(oldKeyTemplate, "remove");
+                    publishKeyTemplateEvent(newKeyTemplate, "add");
+                }
             }
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);

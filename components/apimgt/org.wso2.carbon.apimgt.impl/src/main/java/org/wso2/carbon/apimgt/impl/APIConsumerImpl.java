@@ -2912,9 +2912,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (tenantId != 0) {
                 /* Get the roles of the Current User */
                 currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
-                        getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry).getUserName());
+                        getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry)
+                        .getUserName());
 
-                Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getTierPermissions(tenantId);
+                Set<TierPermissionDTO> tierPermissions;
+
+                if(APIUtil.isAdvanceThrottlingEnabled()){
+                    tierPermissions = apiMgtDAO.getThrottleTierPermissions(tenantId);
+                }else{
+                    tierPermissions = apiMgtDAO.getTierPermissions(tenantId);
+                }
+
                 for (TierPermissionDTO tierPermission : tierPermissions) {
                     String type = tierPermission.getPermissionType();
 
@@ -2956,7 +2964,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 /* Get the roles of the Current User */
                 currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
                         getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry).getUserName());
-                TierPermissionDTO tierPermission = apiMgtDAO.getTierPermission(tierName, tenantId);
+                TierPermissionDTO tierPermission;
+
+                if(APIUtil.isAdvanceThrottlingEnabled()){
+                    tierPermission = apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
+                }else{
+                    tierPermission = apiMgtDAO.getTierPermission(tierName, tenantId);
+                }
                 if (tierPermission == null) {
                     return false;
                 } else {

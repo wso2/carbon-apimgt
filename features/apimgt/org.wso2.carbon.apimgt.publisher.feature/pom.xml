@@ -88,22 +88,18 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
-            <version>1.5.8</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
-            <artifactId>swagger-parser</artifactId>
-            <version>1.0.17</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
+            <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-parser</artifactId>
-            <version>1.0.17.wso2v1</version>
+            <artifactId>swagger-codegen</artifactId>
         </dependency>
     </dependencies>
 
@@ -132,11 +128,14 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
+                                <bundleDef>io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
+                                <bundleDef>commons-io.wso2:commons-io</bundleDef>
+                                <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-				                <bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
+                                <bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
@@ -154,7 +153,7 @@
                                 <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-parser:1.0.17.wso2v1</importBundleDef>
+                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>

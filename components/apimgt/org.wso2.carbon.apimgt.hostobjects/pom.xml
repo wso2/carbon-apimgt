@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-parser</artifactId>
+            <artifactId>swagger-codegen</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -127,6 +127,7 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
+                            io.swagger.parser;version="${imp.pkg.version.io.swagger.parser}",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
