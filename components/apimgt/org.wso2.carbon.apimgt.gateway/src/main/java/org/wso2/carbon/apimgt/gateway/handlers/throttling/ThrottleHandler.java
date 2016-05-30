@@ -668,45 +668,17 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private OMElement createSpikeArrestSubscriptionLevelPolicy(String policyName, int maxCount, int unitTime) {
 
         OMElement parsedPolicy = null;
-        StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" " +
-                "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
-                "    <throttle:MediatorThrottleAssertion>\n");
-
+        StringBuilder policy = new StringBuilder(APIThrottleConstants.WS_THROTTLE_POLICY_HEADER);
         if (maxCount != 0 && unitTime != 0) {
-            policy.append(createSpikeArrestPolicy(policyName, unitTime, maxCount));
+            policy.append(createPolicyForRole(policyName, Integer.toString(unitTime), Integer.toString(maxCount)));
         }
-
-        policy.append("</throttle:MediatorThrottleAssertion>\n" +
-                "</wsp:Policy>");
+        policy.append(APIThrottleConstants.WS_THROTTLE_POLICY_BOTTOM);
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
             log.error("Error occurred while creating policy file for Hard Throttling.", e);
         }
         return parsedPolicy;
-    }
-
-    /**
-     * This method will create policy string for given policy name, unit time and max count.
-     * This will simple return policy string according to WS policy specification.
-     *
-     * @param policyName policy name of given policy
-     * @param unitTime   unit time in milli seconds
-     * @param maxCount   maximum request count within given time window
-     * @return policy string for created policy.
-     */
-    private String createSpikeArrestPolicy(String policyName, int unitTime, int maxCount) {
-        return "<wsp:Policy>\n" +
-                "     <throttle:ID throttle:type=\"ROLE\">" + policyName + "</throttle:ID>\n" +
-                "            <wsp:Policy>\n" +
-                "                <throttle:Control>\n" +
-                "                    <wsp:Policy>\n" +
-                "                        <throttle:MaximumCount>" + maxCount + "</throttle:MaximumCount>\n" +
-                "                        <throttle:UnitTime>" + unitTime + "</throttle:UnitTime>\n" +
-                "                    </wsp:Policy>\n" +
-                "                </throttle:Control>\n" +
-                "            </wsp:Policy>\n" +
-                " </wsp:Policy>\n";
     }
 
     /**
@@ -876,10 +848,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         OMElement parsedPolicy = null;
-        StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
-                ".org/ws/2004/09/policy\" " +
-                "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
-                "    <throttle:MediatorThrottleAssertion>\n");
+        StringBuilder policy = new StringBuilder(APIThrottleConstants.WS_THROTTLE_POLICY_HEADER);
 
         if (productionMaxCount != null && productionUnitTime != null) {
             policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT, productionUnitTime,
@@ -891,8 +860,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     sandboxMaxCount));
         }
 
-        policy.append("    </throttle:MediatorThrottleAssertion>\n" +
-                "</wsp:Policy>");
+        policy.append(APIThrottleConstants.WS_THROTTLE_POLICY_BOTTOM);
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
