@@ -157,9 +157,7 @@ public class APIKeyValidator {
         APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
                                                               matchingResource, httpVerb);
         if (info != null) {
-            //save into cache only if, validation is correct and api is allowed for all domains
-            if (gatewayKeyCacheEnabled && clientDomain == null) {
-
+            if (gatewayKeyCacheEnabled) {
                 //Get the tenant domain of the API that is being invoked.
                 String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
