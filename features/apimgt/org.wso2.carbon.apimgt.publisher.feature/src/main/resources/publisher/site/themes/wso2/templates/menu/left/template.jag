@@ -45,13 +45,13 @@
 				<ul class="nav nav-pills  nav-stacked pages">
 					<li <%if(reqUrl.equals(jagg.url(""))||reqUrl.equals(jagg.url("/"))||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0){%>class="active"<% } %>><a
 						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>" title="<%=i18n.localize("apis")%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("apis")%>"></i> <%=i18n.localize("apis")%></a></li>
+						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("apis")%>" style="font-size:22px;"></i> <%=i18n.localize("apis")%></a></li>
 
 
                         
                         
 					<li><a href="#" id="left-bar-menu-toggle" data-toggle="collapse" data-target="#secondaryMenu" title="<%=i18n.localize("statistics")%>"
-                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("statistics")%>"></i> <%=i18n.localize("statistics")%>
+                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("statistics")%>" style="font-size:22px;"></i> <%=i18n.localize("statistics")%>
                                <i class="icon fw fw-down fw-1x secondary-nav-toggle" title="<%=i18n.localize("statistics")%>"></i>
                                </a>
 					<ul class="nav nav-pills secondary-nav collapse <%if(reqUrl.indexOf(allStatsUrl) >= 0 || reqUrl.indexOf(allStatsMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1"
@@ -174,7 +174,7 @@
 					<%if(isPermitted){%>
 					<li <%if(reqUrl.equals(subsMappedUrl) || reqUrl.equals(subsUrl)){ %>class="active"<%} %>><a class="js_toggler" title="<%=i18n.localize("manageSubscriptions")%>"
 						href="<%=subsMappedUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("manageSubscriptions")%>"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
+						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("manageSubscriptions")%>" style="font-size:22px;"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
 					
 					<%}%>
 					<%
@@ -185,7 +185,7 @@
 							<%if(isPermitted){%>
 								<li <%if(reqUrl.equals(manageAlertTypesMappedUrl) || reqUrl.equals(manageAlertTypesUrl)){ %>class="active"<%} %>><a class="js_toggler"
 									href="<%=manageAlertTypesMappedUrl%><%=urlPrefix%>"
-									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
+									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" style="font-size:22px;"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
 							<%}%>
                     	<%
 						}
