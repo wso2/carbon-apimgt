@@ -39,14 +39,11 @@ public class JWTGenerator extends AbstractJWTGenerator {
         long currentTime = Calendar.getInstance().getTimeInMillis() / 1000 ;
         long expireIn = currentTime + 60 * getTTL();
 
-        //String jwtBody = "";
         String dialect;
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            //jwtBody = JWT_INITIAL_BODY.replaceAll("\\[0\\]", claimsRetriever.getDialectURI(endUserName));
             dialect = claimsRetriever.getDialectURI(keyValidationInfoDTO.getEndUserName());
         } else {
-            //jwtBody = JWT_INITIAL_BODY.replaceAll("\\[0\\]", dialectURI);
             dialect = getDialectURI();
         }
 
