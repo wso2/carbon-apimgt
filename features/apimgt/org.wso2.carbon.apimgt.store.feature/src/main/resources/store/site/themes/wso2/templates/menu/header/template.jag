@@ -120,7 +120,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 					         </a>
 					         <ul class="dropdown-menu dropdown-menu-right float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown" role="menu">
 					           <li class="dropdown-header visible-xs">&nbsp; <%=user.username%> <span class="caret"></span></li>
-					           <% if(isSelfSignupEnabled) { %>
+					           <% if(isSelfSignupEnabled && isSuperTenant) { %>
 					           <li><a title="<%=i18n.localize("My Account","My Account")%>" href="<%= jagg.urlTenanted('/site/pages/user-info.jag')%>"><i class="fw fw-settings"></i> &nbsp; <%=i18n.localize("My Account","My Account")%></a></li>
 					           <% } %>           
 					           <li class="divider visible-xs"></li>
