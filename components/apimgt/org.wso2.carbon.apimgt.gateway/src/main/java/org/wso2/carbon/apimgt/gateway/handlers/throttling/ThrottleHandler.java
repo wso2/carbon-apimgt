@@ -299,13 +299,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
                         if (authContext.getSpikeArrestLimit() > 0) {
-                            isSubscriptionLevelThrottled = isSubscriptionLevelSpike(synCtx, subscriptionLevelThrottleKey);
-                            isSubscriptionLevelSpikeThrottled = isSubscriptionLevelThrottled;
-
+                            isSubscriptionLevelSpikeThrottled = isSubscriptionLevelSpike(synCtx, subscriptionLevelThrottleKey);
                         }
                         //if subscription level not throttled then move to application level
                         //Stop on quata reach
-                        if (!isSubscriptionLevelThrottled) {
+                        if (!isSubscriptionLevelThrottled && !isSubscriptionLevelSpikeThrottled) {
                             //Application Level Throttling
                             isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                     isThrottled(applicationLevelThrottleKey);
@@ -376,7 +374,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                             APIThrottleConstants.SUBSCRIPTION_LIMIT_EXCEEDED);
-                                    isSubscriptionLevelThrottled = true;
                                 }
                                 isThrottled = true;
                             }
