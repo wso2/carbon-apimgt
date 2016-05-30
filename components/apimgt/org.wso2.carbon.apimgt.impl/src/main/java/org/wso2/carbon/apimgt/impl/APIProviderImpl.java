@@ -4033,14 +4033,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(updateState){
             BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
 
-            String blockingConditionType = blockCondition.getConditionType();
-            String blockingConditionValue = blockCondition.getConditionValue();
-            if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
-                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
-            }
-
             if(blockCondition != null) {
+
+                String blockingConditionType = blockCondition.getConditionType();
+                String blockingConditionValue = blockCondition.getConditionValue();
+                if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+                    blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+                    blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+                }
+
                 publishBlockingEvent(blockingConditionType, blockingConditionValue,  Boolean.toString(blockCondition
                         .isEnabled()));
             }
