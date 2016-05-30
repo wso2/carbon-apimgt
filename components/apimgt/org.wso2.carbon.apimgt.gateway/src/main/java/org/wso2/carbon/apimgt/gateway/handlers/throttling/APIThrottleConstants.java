@@ -58,4 +58,21 @@ public class APIThrottleConstants {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String MIN = "min";
+    public static String SUBSCRIPTION_BURST_CONTROL_TEMPLATE =
+            "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" " +
+                    "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
+                    "    <throttle:MediatorThrottleAssertion>\n" +
+                            "<wsp:Policy>\n" +
+                            "     <throttle:ID throttle:type=\"ROLE\">$1</throttle:ID>\n" +
+                            "            <wsp:Policy>\n" +
+                            "                <throttle:Control>\n" +
+                            "                    <wsp:Policy>\n" +
+                            "                        <throttle:MaximumCount>$2</throttle:MaximumCount>\n" +
+                            "                        <throttle:UnitTime>$3</throttle:UnitTime>\n" +
+                            "                    </wsp:Policy>\n" +
+                            "                </throttle:Control>\n" +
+                            "            </wsp:Policy>\n" +
+                            " </wsp:Policy>\n" +
+                    "   </throttle:MediatorThrottleAssertion>\n" +
+            "</wsp:Policy>";
 }
