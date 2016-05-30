@@ -64,7 +64,9 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     }
 
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
+    protected List<Attribute> init(AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors,
+                                   ExecutionPlanContext executionPlanContext, boolean outputExpectsExpiredEvents) {
         this.executionPlanContext = executionPlanContext;
 
         if (attributeExpressionExecutors.length == 1) {
@@ -75,10 +77,14 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                     timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
                 } else {
-                    throw new ExecutionPlanValidationException("Throttle batch window's 1st parameter attribute should be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
+                    throw new ExecutionPlanValidationException("Throttle batch window's 1st parameter attribute should be " +
+                                                               "either int or long, but found "
+                                                               + attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant parameter attribute but found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
+                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant " +
+                                                           "parameter attribute but found a dynamic attribute "
+                                                           + attributeExpressionExecutors[0].getClass().getCanonicalName());
             }
         } else if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -88,21 +94,30 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                     timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
                 } else {
-                    throw new ExecutionPlanValidationException("Throttle batch window's 1st parameter attribute should be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
+                    throw new ExecutionPlanValidationException("Throttle batch window's 1st parameter attribute should be " +
+                                                               "either int or long, but found "
+                                                               + attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant attribute but found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
+                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant " +
+                                                           "attribute but found a dynamic attribute "
+                                                           + attributeExpressionExecutors[0].getClass().getCanonicalName());
             }
 
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
-                startTime = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
+                startTime = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
+                                                                     attributeExpressionExecutors[1]).getValue()));
             } else if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
-                startTime = Long.parseLong(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
+                startTime = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
+                                                                   attributeExpressionExecutors[1]).getValue()));
             } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 2nd parameter needs to be a Long or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
+                throw new ExecutionPlanValidationException("Throttle batch window 2nd parameter needs to be a Long " +
+                                                           "or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
             }
         } else {
-            throw new ExecutionPlanValidationException("Throttle batch window should only have one/two parameter (<int|long|time> windowTime (and <int|long> startTime), but found " + attributeExpressionExecutors.length + " input attributes");
+            throw new ExecutionPlanValidationException("Throttle batch window should only have one/two parameter " +
+                                                       "(<int|long|time> windowTime (and <int|long> startTime), but found "
+                                                       + attributeExpressionExecutors.length + " input attributes");
         }
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
@@ -111,7 +126,8 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
         synchronized (this) {
             if (expireEventTime == -1) {
@@ -189,8 +205,13 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     }
 
     @Override
-    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return CollectionOperatorParser.parse(expression, matchingMetaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, inputDefinition, withinTime);
+    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent,
+                                  ExecutionPlanContext executionPlanContext,
+                                  List<VariableExpressionExecutor> variableExpressionExecutors,
+                                  Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
+        return CollectionOperatorParser.parse(expression, matchingMetaComplexEvent, executionPlanContext,
+                                              variableExpressionExecutors, eventTableMap, matchingStreamIndex,
+                                              inputDefinition, withinTime);
     }
 
     private long addTimeShift(long currentTime) {
