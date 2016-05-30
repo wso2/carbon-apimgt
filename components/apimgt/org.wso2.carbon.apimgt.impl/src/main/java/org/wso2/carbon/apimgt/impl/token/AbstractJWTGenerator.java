@@ -221,7 +221,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                     String claimURI = it.next();
                     String claimVal = standardClaims.get(claimURI);
                     List<String> claimList = new ArrayList<String>();
-                    if (userAttributeSeparator != null && claimVal.contains(userAttributeSeparator)) {
+                    if (userAttributeSeparator != null && claimVal != null && claimVal.contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
                         while (st.hasMoreElements()) {
                             String attValue = st.nextElement().toString();
