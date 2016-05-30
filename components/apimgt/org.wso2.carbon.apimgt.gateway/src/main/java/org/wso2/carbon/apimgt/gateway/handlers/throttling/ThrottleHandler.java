@@ -298,7 +298,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                        + apiVersion;
                         isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
-                        if (authContext.getSpikeArrestLimit() > 0) {
+                        if (!isSubscriptionLevelThrottled && authContext.getSpikeArrestLimit() > 0) {
                             isSubscriptionLevelSpikeThrottled = isSubscriptionLevelSpike(synCtx, subscriptionLevelThrottleKey);
                         }
                         //if subscription level not throttled then move to application level
