@@ -741,49 +741,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return inSeqFileName;
         
     }
-    
-	public static boolean jsFunction_isAPIUpdateValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-			throws APIManagementException, ScriptException, FaultGatewaysException {
-
-		if (args == null || args.length == 0) {
-			handleException("Invalid number of input parameters.");
-		}
-
-		boolean success = false;
-
-		NativeObject apiData = (NativeObject) args[0];
-		String provider = String.valueOf(apiData.get("provider", apiData));
-		String name = (String) apiData.get("apiName", apiData);
-		String version = (String) apiData.get("version", apiData);
-		
-		if (provider != null) {
-            provider = APIUtil.replaceEmailDomain(provider);
-        }
-        provider = (provider != null ? provider.trim() : null);
-        name = (name != null ? name.trim() : null);
-        version = (version != null ? version.trim() : null);
-        APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        API api = null;
-        boolean isTenantFlowStarted = false;
-        String tenantDomain;
-        try {
-            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            	isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            api = apiProvider.getAPI(apiId);
-            success = apiProvider.isAPIUpdateValid(api);
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
-        }
-		
-		return success;
-	}
 
     /**
      * This method is to functionality of update design API in API-Provider     *
@@ -866,10 +823,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             api = apiProvider.getAPI(apiId);
-            boolean isValid = apiProvider.isAPIUpdateValid(api);
-            if(!isValid){
-        		throw new APIManagementException(" User doesn't have permission for update");
-        	}
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();

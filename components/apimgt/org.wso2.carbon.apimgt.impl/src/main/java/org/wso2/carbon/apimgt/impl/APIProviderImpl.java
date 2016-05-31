@@ -727,37 +727,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
-    
-    public boolean isAPIUpdateValid(API api) throws APIManagementException{
-    	String apiSourcePath = APIUtil.getAPIPath(api.getId());
-    	boolean isValid = false;
-    	
-    	try{
-    		Resource apiSourceArtifact = registry.get(apiSourcePath);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
-            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            
-            if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
-            	//api at least is in published status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
-            		//user has publish permission
-            		isValid = true;
-            	}
-            }else if(APIConstants.CREATED.equals(status) || APIConstants.PROTOTYPED.equals(status)){
-            	//api in create status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
-            		//user has creat or publish permission
-            		isValid = true;
-            	}
-            }
-            
-    	}catch(RegistryException ex){
-    		 handleException("Error while validate user for API publishing", ex);
-    	}    	
-    	return isValid;
-    	
-    }
 
 
     /**
@@ -770,12 +739,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-    	
-    	boolean isValid = isAPIUpdateValid(api);
-    	if(!isValid){
-    		throw new APIManagementException(" User doesn't have permission for update");
-    	}
-    	
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
