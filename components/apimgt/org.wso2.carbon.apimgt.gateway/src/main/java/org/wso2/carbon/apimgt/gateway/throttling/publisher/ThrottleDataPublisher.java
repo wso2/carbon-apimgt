@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * When we use this for high concurrency usecases proper tuning is mandatory.
  */
 public class ThrottleDataPublisher {
-    public static final ThrottleDataPublisherPool dataPublisherPool = ThrottleDataPublisherPool.getInstance();
+    public static ThrottleDataPublisherPool dataPublisherPool;
 
     public static final Log log = LogFactory.getLog(ThrottleDataPublisher.class);
 
@@ -53,8 +53,7 @@ public class ThrottleDataPublisher {
         return dataPublisher;
     }
 
-    static Executor pool = Executors.newFixedThreadPool(100);
-    static volatile DataPublisher dataPublisher = null;
+    private static volatile DataPublisher dataPublisher = null;
 
     Executor executor;
 
@@ -63,6 +62,7 @@ public class ThrottleDataPublisher {
      * publisher which we used to publish throttle data.
      */
     public ThrottleDataPublisher() {
+        dataPublisherPool = ThrottleDataPublisherPool.getInstance();
         ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
                 .getThrottleProperties().getDataPublisher();
         ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder

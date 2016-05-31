@@ -88,7 +88,6 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 //check in local cache
                 String key = endUserName + ':' + tenantId;
                 ClaimCacheKey cacheKey = new ClaimCacheKey(key);
-                //Object result = claimsLocalCache.getValueFromCache(cacheKey);
                 Object result = getClaimsLocalCache().get(cacheKey);
                 if (result != null) {
                     return ((UserClaims) result).getClaimValues();
@@ -101,8 +100,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                     UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
                             getTenantUserRealm(tenantId).getUserStoreManager();
 
-                    claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs,
-                                                                                  null));
+                    claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs,null));
                     UserClaims userClaims = new UserClaims(claimValues);
                     //add to cache
                     getClaimsLocalCache().put(cacheKey, userClaims);

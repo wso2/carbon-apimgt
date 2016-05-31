@@ -5600,6 +5600,17 @@ public class ApiMgtDAO {
                 prepStmt.addBatch();
                 if (uriTemplate.getScope() != null) {
                     scopePrepStmt.setString(1, APIUtil.getResourceKey(api, uriTemplate));
+
+                    if (uriTemplate.getScope().getId() == 0) {
+                        String scopeKey = uriTemplate.getScope().getKey();
+                        Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
+                        if (scopeByKey != null) {
+                            if (scopeByKey.getId() > 0) {
+                                uriTemplate.getScopes().setId(scopeByKey.getId());
+                            }
+                        }
+                    }
+
                     scopePrepStmt.setInt(2, uriTemplate.getScope().getId());
                     scopePrepStmt.addBatch();
                 }
@@ -8289,6 +8300,59 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return list;
+
+    }
+
+    /**
+     * This method will delete all email alert subscriptions details from tables
+     * @param userName
+     * @param agent whether its publisher or store or admin dash board.
+     */
+    public void unSubscribeAlerts(String userName, String agent) throws APIManagementException, SQLException {
+
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+
+        try {
+            connection.setAutoCommit(false);
+            String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
+
+            String deleteAlertTypesByUserNameAndStakeHolderQuery = SQLConstants.DELETE_ALERTTYPES_BY_USERNAME_AND_STAKE_HOLDER;
+
+            ps = connection.prepareStatement(deleteAlertTypesByUserNameAndStakeHolderQuery);
+            ps.setString(1, userName);
+            ps.setString(2, agent);
+            ps.executeUpdate();
+
+            String getEmailListIdByUserNameAndStakeHolderQuery = SQLConstants.GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER;
+            ps = connection.prepareStatement(getEmailListIdByUserNameAndStakeHolderQuery);
+            ps.setString(1, userName);
+            ps.setString(2,agent);
+            rs = ps.executeQuery();
+            int emailListId = 0;
+            while (rs.next()) {
+                emailListId = rs.getInt(1);
+            }
+            if(emailListId != 0) {
+                String deleteEmailListDetailsByEmailListId = SQLConstants.DELETE_EMAILLIST_BY_EMAIL_LIST_ID;
+                ps = connection.prepareStatement(deleteEmailListDetailsByEmailListId);
+                ps.setInt(1, emailListId);
+                ps.executeUpdate();
+
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleException("Failed to delete alert email data.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+
+        }
+
 
     }
 

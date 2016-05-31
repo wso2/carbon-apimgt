@@ -372,6 +372,11 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
+
+        if (dto.getThumbnailUrl() != null) {
+            model.setThumbnailUrl(dto.getThumbnailUrl());
+        }
+
         return model;
     }
 

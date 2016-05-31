@@ -945,7 +945,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
                 <artifactId>swagger-parser</artifactId>
-                <version>1.0.17.wso2v1</version>
+                <version>${swagger.parser.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
@@ -1028,6 +1028,12 @@
                 <groupId>xerces.wso2</groupId>
                 <artifactId>xercesImpl</artifactId>
                 <version>${xercesImpl.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-scxml.wso2</groupId>
+                <artifactId>commons-scxml</artifactId>
+                <version>${commons.scxml.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1143,7 +1149,8 @@
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <swagger.codegen.version>2.1.5</swagger.codegen.version>
+        <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
+        <swagger.parser.version>1.0.17.wso2v1</swagger.parser.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
@@ -1152,6 +1159,7 @@
         <imp.pkg.version.google.code.gson>[2.2.4, 2.3.0)</imp.pkg.version.google.code.gson>
         <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
+        <imp.pkg.version.io.swagger.parser>[2.1.6, 3.0.0)</imp.pkg.version.io.swagger.parser>
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
@@ -1170,6 +1178,7 @@
         <swagger.annotations.version>1.5.7</swagger.annotations.version>
         <google.guava.version>18.0</google.guava.version>
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
+        <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
     </properties>
 </project>
 

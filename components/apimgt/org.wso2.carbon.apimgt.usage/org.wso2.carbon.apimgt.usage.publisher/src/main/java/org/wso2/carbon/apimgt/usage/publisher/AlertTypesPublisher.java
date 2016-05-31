@@ -37,7 +37,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
      * @param checkedAlertList Comma separated checked list ids.
      * @param emailList Comma separated email list.
      * @param userName user name
-     * @param agent publisher "p" store "s" agent "a".
+     * @param agent publisher "publisher" store "store" admin dashboard "admin-dashboard".
      * @param checkedAlertListValues alert type name lists.
      * @throws APIManagementException
      */
@@ -61,6 +61,48 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
             alertTypeDTO.setAlertTypes(checkedAlertListValues);
             alertTypeDTO.setEmails(emailList);
+            alertTypeDTO.setUserName(userName);
+            if ("publisher".equals(agent)) {
+                alertTypeDTO.setPublisher(true);
+                alertTypeDTO.setSubscriber(false);
+            } else if ("subscriber".equals(agent)) {
+                alertTypeDTO.setSubscriber(true);
+                alertTypeDTO.setPublisher(false);
+            }else if("admin-dashboard".equals(agent)){
+                alertTypeDTO.setSubscriber(true);
+                alertTypeDTO.setPublisher(true);
+            }
+            publisher.publishEvent(alertTypeDTO);
+
+        } catch (SQLException e) {
+            handleException("Error while saving alert types", e);
+        }
+
+    }
+
+    /**
+     * This method will delete all the data relating to the alert subscription by given user Name.
+     * @param userName logged in users name.
+     */
+    public void unSubscribe(String userName,String agent) throws APIManagementException {
+
+        try {
+
+            if (!enabled || skipEventReceiverConnection) {
+                throw new APIManagementException("Data publisher is not enabled");
+            }
+
+            if (publisher == null) {
+                this.initializeDataPublisher();
+            }
+
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            //data persist in the database.
+            apiMgtDAO.unSubscribeAlerts(userName,agent);
+            //set DTO
+            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+            alertTypeDTO.setAlertTypes("");
+            alertTypeDTO.setEmails("");
             alertTypeDTO.setUserName(userName);
             if ("publisher".equals(agent)) {
                 alertTypeDTO.setPublisher(true);

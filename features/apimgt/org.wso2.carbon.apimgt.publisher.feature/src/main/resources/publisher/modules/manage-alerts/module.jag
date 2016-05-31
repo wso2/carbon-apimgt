@@ -12,6 +12,10 @@ jagg.module("manage-alerts", {
     retrieveSavedEmailList:function () {
 
         return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").retrieveSavedEmailList.apply(this, arguments);
+    },
+    unSubscribe:function () {
+
+        return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").unSubscribe.apply(this, arguments);
     }
 
 });

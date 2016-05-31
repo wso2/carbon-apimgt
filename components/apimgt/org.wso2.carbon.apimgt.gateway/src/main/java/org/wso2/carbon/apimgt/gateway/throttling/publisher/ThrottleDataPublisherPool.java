@@ -35,8 +35,6 @@ public class ThrottleDataPublisherPool {
 
     private static final Log log = LogFactory.getLog(ThrottleDataPublisherPool.class);
 
-    private static final ThrottleDataPublisherPool instance = new ThrottleDataPublisherPool();
-
     private final ObjectPool clientPool;
 
     private ThrottleDataPublisherPool() {
@@ -58,8 +56,14 @@ public class ThrottleDataPublisherPool {
         }, dataPublisherPoolConfiguration.getMaxIdle(), dataPublisherPoolConfiguration.getInitIdleCapacity());
     }
 
+    private static class ThrottleDataPublisherPoolHolder {
+        private static final ThrottleDataPublisherPool INSTANCE = new ThrottleDataPublisherPool();
+
+        private ThrottleDataPublisherPoolHolder(){}
+    }
+
     public static ThrottleDataPublisherPool getInstance() {
-        return instance;
+        return ThrottleDataPublisherPoolHolder.INSTANCE;
     }
 
     public DataProcessAndPublishingAgent get() throws Exception {

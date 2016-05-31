@@ -48,6 +48,9 @@
             %>
 	    <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
+				<li>
+					<a href="<%=listUrl%>" title="Home" onclick="jagg.sessionAwareJS({redirect:'<%=listUrl%>',e:event})"><i class="icon fw fw-home"></i> <span class="hidden-xs">Home</span></a>
+				</li>
                 <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
                     <li class="active">
                     	<a href="<%=listMappedUrl%>" title="<%=i18n.localize("apiListing")%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
