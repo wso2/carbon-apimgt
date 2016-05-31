@@ -160,7 +160,7 @@
     "endpointTiers": "Endpoint Tiers",
     "endpointTierList": "Endpoint Tier List",
     "addEndpointTier": "Add Endpoint Tier",
-    "keyTemplateToolTip": "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $api:$version:$provide <br> <b>Allowed keys</b><br>",
+    "keyTemplateToolTip": "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>",
     "sampleSiddhiQuery": "Following query will allow 5 request per minute for Admin user <br>Key Template : <b>$userId</b><br>Siddhi Query : <code><p>FROM RequestStream<br>SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey<br>  INSERT INTO EligibilityStream; <br><br>FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) <br> SELECT throttleKey, (count(userId) >= 5) as isThrottled, expiryTimeStamp  group by throttleKey <br> INSERT ALL EVENTS into ResultStream;</p></code>",
     "invalidSiddhiQueryMessage": "Siddhi Query Contains Invalid Characters",
     "InvalidKeyTemplateMessage": "Invalid Key Template",

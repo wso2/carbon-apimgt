@@ -1218,4 +1218,7 @@ public final class APIConstants {
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
     public static final String REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME = "meta_created_date";
+
+    public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
+    public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
 }

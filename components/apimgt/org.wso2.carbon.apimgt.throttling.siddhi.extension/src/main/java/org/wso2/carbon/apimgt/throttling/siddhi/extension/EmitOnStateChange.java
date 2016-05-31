@@ -41,35 +41,34 @@ import java.util.Map;
  * Upon arrival of a request, looking at the key in the request, this throttler first decides whether to throttle the request or not.
  * If that decision is different to what it was for the previous request (with the same key),
  * then this processor emits this request as an event; hence the name emitOnStateChange.
- *
+ * <p/>
  * If this request is the first request from a certain key, then that requested will be emitted out.
- *
+ * <p/>
  * This is useful when the throttler needs to alert only when the throttling decision is changed, in contrast to alerting about every decision taken.
- *
+ * <p/>
  * Usage:
  * throttler:emitOnStateChange(key, isThrottled)
- *
+ * <p/>
  * Parameters:
  * key: The key coming in the request, based on which throttling decision was made.
  * isThrottled: The throttling decision made.
- *
+ * <p/>
  * Example on usage:
  * from DecisionStream#throttler:emitOnStateChange(key, isThrottled)
  * select *
  * insert into AlertStream;
- *
  */
 public class EmitOnStateChange extends StreamProcessor {
     private VariableExpressionExecutor keyExpressionExecutor;
-    private VariableExpressionExecutor isThrotlledExpressionExecutor;
-    private Map<String,Boolean> throttleStateMap = new HashMap<String, Boolean>();
+    private VariableExpressionExecutor isThrottledExpressionExecutor;
+    private Map<String, Boolean> throttleStateMap = new HashMap<String, Boolean>();
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
         while (streamEventChunk.hasNext()) {
             StreamEvent event = streamEventChunk.next();
-            Boolean currentThrottleState = (Boolean) isThrotlledExpressionExecutor.execute(event);
+            Boolean currentThrottleState = (Boolean) isThrottledExpressionExecutor.execute(event);
             String key = (String) keyExpressionExecutor.execute(event);
             Boolean lastThrottleState = throttleStateMap.get(key);
             if (lastThrottleState == currentThrottleState && !currentThrottleState) {
@@ -84,21 +83,26 @@ public class EmitOnStateChange extends StreamProcessor {
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
-                                   ExecutionPlanContext executionPlanContext) {
+                                   ExecutionPlanContext executionPlanContext, boolean outputExpectsExpiredEvents) {
         if (attributeExpressionExecutors.length != 2) {
-            throw new ExecutionPlanValidationException("Invalid no of arguments passed to throttler:emitOnStateChange(key,isThrottled), " +
-                    "required 2, but found " + attributeExpressionExecutors.length);
+            throw new ExecutionPlanValidationException("Invalid no of arguments passed to throttler:emitOnStateChange" +
+                                                       "(key,isThrottled), required 2, but found "
+                                                       + attributeExpressionExecutors.length);
         }
         if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.STRING) {
-            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of throttler:emitOnStateChange(key,isThrottled), " +
-                    "required " + Attribute.Type.STRING + ", but found " + attributeExpressionExecutors[0].getReturnType());
+            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of " +
+                                                       "throttler:emitOnStateChange(key,isThrottled), " +
+                                                       "required " + Attribute.Type.STRING + ", " +
+                                                       "but found " + attributeExpressionExecutors[0].getReturnType());
         }
         if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.BOOL) {
-            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of throttler:emitOnStateChange(key,isThrottled), " +
-                    "required " + Attribute.Type.BOOL + ", but found " + attributeExpressionExecutors[1].getReturnType());
+            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of " +
+                                                       "throttler:emitOnStateChange(key,isThrottled), " +
+                                                       "required " + Attribute.Type.BOOL + ", but found " +
+                                                       attributeExpressionExecutors[1].getReturnType());
         }
         keyExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[0];
-        isThrotlledExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[1];
+        isThrottledExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[1];
         return new ArrayList<Attribute>();    //this does not introduce any additional output attributes, hence returning an empty list.
     }
 
