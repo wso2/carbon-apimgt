@@ -240,6 +240,20 @@ div.image-container {
     -moz-box-shadow: none;
     box-shadow: none;
 }
+.default-popover{
+    max-width:300px;
+}
+.default-popover .popover-content ol{
+    margin:0px;
+    padding:0px;
+    padding-top:5px;
+    padding-left:20px;
+}
+.default-popover .popover-content li{
+    font-size:12px;
+    padding-top:2px;
+}
+
 
 
 /* ========================================================================
@@ -604,4 +618,12 @@ input.ep-field{ min-width: 50%;}
 }
 .navbar-menu-toggle[aria-expanded=true]{
     background:#242932;
+}
+.form-group label>.requiredAstrix {
+    color: #E74C3C;
+    font-weight: 400;
+    margin-left:2px;
+}
+.api-search .input-group-btn button{
+    line-height:31px;
 }
