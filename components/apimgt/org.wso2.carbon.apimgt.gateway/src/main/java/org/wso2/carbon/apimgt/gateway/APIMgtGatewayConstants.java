@@ -47,5 +47,8 @@ public class APIMgtGatewayConstants {
     public static final String SCOPES = "Scopes";
 
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
+
+    public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
+    public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
 }
 
