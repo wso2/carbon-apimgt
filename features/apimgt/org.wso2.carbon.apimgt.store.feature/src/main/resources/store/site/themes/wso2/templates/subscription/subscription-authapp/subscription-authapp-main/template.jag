@@ -1,0 +1,118 @@
+<% jagg.template("subscription/subscription-authapp/subscription-authapp-main", function (inputs, outputs, jagg) { %>
+    <%
+    var log = new Log();
+    var application = inputs.application;
+    var prodJsonString = inputs.app.prodJsonString;
+
+    if(typeof(prodJsonString) != "undefined" && prodJsonString != null){
+
+        var jsonParameters = parse(prodJsonString);
+        var clientName = jsonParameters.client_name;
+
+        if(typeof(jsonParameters.contacts) !="undefined"  && jsonParameters.contacts){
+            var iProductionAuthAppContact = jsonParameters.contacts;
+        }else{
+            var iProductionAuthAppContact=null;
+        }
+
+        if(typeof(jsonParameters.redirect_uris) !="undefined"  && jsonParameters.redirect_uris){
+            var callbackURLs = jsonParameters.redirect_uris;
+        }else{
+            var callbackURLs=null;
+        }
+
+        //iProductionAuthAppContact
+        var requestMode = "updateClientApplication";
+        var cancelBtnClass = "iBtnCancelCreateApp"
+
+    }else{
+        var clientName = application;
+        var callbackURLs=null;
+        var iProductionAuthAppContact = null;
+        var requestMode = "generateApplicationKey";
+        var cancelBtnClass = "btnCancleCreateProduction"
+    }
+
+
+    %>
+    <input type="hidden" id="iHiddenApplicationName" value="<%=encode.forHtmlAttribute(application) %>" />
+    <input type="hidden" id="iHiddenRequestMode" value="<%=encode.forHtmlAttribute(requestMode) %>" />
+    <fieldset>
+        <div class="tabElementset">
+            <div class="cDivTabLabel">
+                <label class="control-label" for="name">Client Name:<span class="requiredAstrix">*</span></label>
+            </div>
+            <div class="cDivTabInput">
+
+                    <input type="text" title="productionAuthAppName" class="input-large required validInput noSpace" id="iProductionAuthAppName" name="iProductionAuthAppName" autofocus="autofocus" value="<%= clientName %>"/>
+            </div>
+        </div>
+
+        <div class="tabElementset">
+            <div class="cDivTabLabel">
+                <label class="control-label" for="context">Callback Urls:<span class="requiredAstrix">*</span></label>
+            </div>
+            <div class="cDivTabInput input_fields_wrap">
+
+                <div class="cDivCallBackUrlElement cDivElementFirst">
+                    <input title="callBackUrls" class="input-large iCallBackUrls" type="text" name=callbackURLs[]">
+                    <div class="cDivPlusIcon">
+                        add
+                    </div>
+                </div>
+
+
+                <% if(callbackURLs != null) %>
+                    <%  for(var x in callbackURLs){ %>
+
+                        <div class="cDivCallBackUrlElement"><input type="text" title="Remove CallbackURLs" class="input-large iCallBackUrls" value="<%=callbackURLs[x] %>" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>
+
+                    <%  }  %>
+                %>
+            </div>
+        </div>
+
+
+        <div class="tabElementset">
+            <div class="cDivTabLabel">
+                <label class="control-label" for="name">Contact:<span class="requiredAstrix"></span></label>
+            </div>
+            <div class="cDivTabInput input_fields_wrap_contacts">
+
+                <div class="cDivContactElement cDivElementFirst">
+                    <input class="input-large iContacts" type="text" title="productionAuthAppContact" name=iProductionAuthAppContact[]">
+                </div>
+                <div class="cDivPlusIconContact">
+                    add
+                </div>
+
+                <% if(iProductionAuthAppContact != null) %>
+                    <%  for(var x in iProductionAuthAppContact){ %>
+
+                        <div class="cDivContactElement"><input type="text" title="productionAuthAppContact" class="input-large iContacts" value="<%=iProductionAuthAppContact[x] %>" name="iProductionAuthAppContact[]"/><div class="cDivRemoveIcon remove_field_contact">Remove</div></div>
+
+                    <%  }  %>
+                %>
+            </div>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <button  class="btnRegisterClientProduction btn btn-primary">
+                Save
+            </button>
+            <%
+
+            %>
+            <button  class="<%= cancelBtnClass %> btn btn-primary">
+                Cancel
+            </button>
+
+        </div>
+    </fieldset>
+
+
+<%
+}); %>

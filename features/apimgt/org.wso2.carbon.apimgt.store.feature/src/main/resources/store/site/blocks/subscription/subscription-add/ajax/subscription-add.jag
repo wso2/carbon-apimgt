@@ -367,14 +367,12 @@ include("/jagg/jagg.jag");
         keyType = request.getParameter("keytype");
         username = user.username;
         oldAccessToken = request.getParameter("oldAccessToken");
-        accessAllowDomains = request.getParameter("authorizedDomains");
-        accessAllowDomainsArr = accessAllowDomains.split(",");
         clientId = request.getParameter("clientId");
         clientSecret = request.getParameter("clientSecret");
         validityTime = request.getParameter("validityTime");
         tokenScope = request.getParameter("tokenScope");
         mod = jagg.module("subscription");
-        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret,validityTime,tokenScope);
+        result = mod.refreshToken(username,application,keyType,oldAccessToken,clientId, clientSecret,validityTime,tokenScope);
 
         if (result.error) {
             obj = {

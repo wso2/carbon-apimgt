@@ -1,0 +1,65 @@
+/*
+ * Copyright (c)  2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+.logLine {
+    color:#00FF00;
+    white-space:normal;
+}
+
+.logLine div {
+    display:inline-block;
+    padding-left: 8px;
+}
+
+.logTimeStamp {
+    color:#00CCFF;
+}
+
+.logClassName {
+    color: #dddd00;
+}
+
+.logTrace {
+    color: #d33333;
+}
+
+.livelog a {
+    color:#00FF00;
+    text-underline;
+}
+
+.livelog {
+    font-family: "Courier New", Courier, monospace;
+    font-size: small;
+    /* Hack to hide the real caret */
+    color: transparent; text-shadow: 0 0 0 #ddd;
+}
+.livelog .content { padding: 15px 15px 0 15px; }
+.livelog .prompt { padding: 0 15px 15px 15px; }
+.livelog .content ul { margin: 0; }
+.livelog .content ul li { list-style-type: none; }
+.livelog .loading span::after {
+    content: "⚙";
+    color: #ddd; font-size: 10em;
+    border-radius: 10em; opacity: 0.4;
+}
+
+
+
+
+

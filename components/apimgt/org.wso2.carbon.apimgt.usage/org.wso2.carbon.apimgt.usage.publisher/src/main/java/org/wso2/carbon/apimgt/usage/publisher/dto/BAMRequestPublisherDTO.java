@@ -26,7 +26,7 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
     public BAMRequestPublisherDTO (RequestPublisherDTO requestPublisherDTO){
         setConsumerKey(requestPublisherDTO.getConsumerKey());
         setContext(requestPublisherDTO.getContext());
-        setApi_version(requestPublisherDTO.getApi_version());
+        setApiVersion(requestPublisherDTO.getApiVersion());
         setApi(requestPublisherDTO.getApi());
         setResourcePath(requestPublisherDTO.getResourcePath());
         setMethod(requestPublisherDTO.getMethod());
@@ -43,7 +43,7 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
         Map<String, ByteBuffer> eventMap = new HashMap<String, ByteBuffer>();
         eventMap.put("consumerKey", ByteBuffer.wrap(getConsumerKey().getBytes()));
         eventMap.put("context", ByteBuffer.wrap(getContext().getBytes()));
-        eventMap.put("api_version", ByteBuffer.wrap(getApi_version().getBytes()));
+        eventMap.put("api_version", ByteBuffer.wrap(getApiVersion().getBytes()));
         eventMap.put("api", ByteBuffer.wrap(getApi().getBytes()));
         eventMap.put("resourcePath", ByteBuffer.wrap(getResourcePath().getBytes()));
         eventMap.put("method", ByteBuffer.wrap(getMethod().getBytes()));

@@ -9,6 +9,9 @@ jagg.module("tiers", {
     },
     getDeniedTiers:function () {
         return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").getDeniedTiers.apply(this, arguments);
+    },
+    isGlobalCEPThrottlingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").isGlobalCEPThrottlingEnabled.apply(this, arguments);
     }
 });
 %>

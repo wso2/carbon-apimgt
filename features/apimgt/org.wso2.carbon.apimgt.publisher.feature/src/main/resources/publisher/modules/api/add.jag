@@ -275,6 +275,50 @@ var getTiers = function () {
     }
 };
 
+var getAPILevelPolicies = function () {
+    var log = new Log();
+
+    var username = user.username;
+
+    try {
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var policies = apiProvider.getPolicies(username, org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.POLICY_LEVEL_API);
+      if(isUnlimitedTierEnabled){
+        log.info("unlimited api level tier");
+            var APIConstants = org.wso2.carbon.apimgt.impl.APIConstants;
+            var policy = new org.wso2.carbon.apimgt.api.model.policy.APIPolicy(APIConstants.UNLIMITED_TIER);
+            policy.setPolicyName(APIConstants.UNLIMITED_TIER);
+            policy.setDescription(APIConstants.UNLIMITED_TIER_DESC);
+            var length = policies.length;
+             policies[length-1] = policy;    
+            }
+        if (log.isDebugEnabled()) {
+            log.debug("getAPILevelPolicies " +  " : " + stringify(policies));
+        }
+
+        return {
+            error:false,
+            policies:policies
+        };
+    } catch (e) {
+        log.error("getAPILevelPolicies" + e.message);
+        return {
+            error:e,
+            policies:null
+        };
+    }
+};
+
+var isGlobalCEPThrottlingEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isAdvanceThrottlingEnabled();
+};
+
+var isUnlimitedTierEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isEnabledUnlimitedTier();
+};
+
 var getResourceTiers = function () {
     var tier,tiers,list=[],log = new Log();
     var tier;
@@ -378,11 +422,11 @@ var getCustomOutSequences = function (apiName, apiVersion, apiProvider) {
     }
 };
 
-var getCustomFaultSequences = function () {
+var getCustomFaultSequences = function (apiName, apiVersion, apiProvider) {
     var sequence,sequences,list=[],log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-    	sequences = provider.getCustomFaultSequences();
+    	sequences = provider.getCustomFaultSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
             log.debug("getCustomFaultSequences " +  " : " + stringify(sequences));
         }
@@ -462,17 +506,19 @@ var isMultipleTenantsAvailable = function(){
     }
 };
 
-var isScopeExist = function (scope, username) {
+var isScopeExist = function (scope, username, roleName) {
     var result, log = new Log(),
            provider = jagg.module("manager").getAPIProviderObj();
     try {
         result = provider.isScopeExist(scope, username);
+        var isRoleExist = org.wso2.carbon.apimgt.impl.utils.APIUtil.isRoleNameExist(username, roleName);
         if (log.isDebugEnabled()) {
             log.debug("Invoke isScopeExist()" );
         }
         return {
             error:false,
-            isScopeExist:result
+            isScopeExist:result,
+            isRoleExist:isRoleExist
         };
     } catch (e) {
         log.error(e.message);
@@ -542,4 +588,23 @@ var getGatewayURL = function (api) {
         };
     }
 };
+
+var uploadSequenceFile = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.uploadSequenceFile(api);
+        if (log.isDebugEnabled()) {
+            log.debug("uploadSequenceFile : " + api.name + "-" + api.version);
+        }
+        return success;
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 %>

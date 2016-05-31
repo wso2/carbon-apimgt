@@ -181,7 +181,7 @@ public class RegistryForumManager implements ForumManager {
             String resourcePath = TOPICS_ROOT +
                                   RegistryConstants.PATH_SEPARATOR + resourceIdentifier +
                                   RegistryConstants.PATH_SEPARATOR + topicId;
-
+            artifactManager.removeGenericArtifact(genericArtifact);
             registry.delete(resourcePath);
         } catch (GovernanceException e) {
             log.error("Error while removing Governance Artifact " + e.getMessage());
@@ -651,7 +651,7 @@ public class RegistryForumManager implements ForumManager {
         });
         listMap.put(ForumConstants.OVERVIEW_RESOURCE_IDENTIFIER, new ArrayList<String>() {
             {
-                add(resourceIdentifier.replace("@", "-AT-"));
+                add(resourceIdentifier.replace("@", "-AT-").replace(":","\\:"));
             }
         });
 
@@ -704,7 +704,7 @@ public class RegistryForumManager implements ForumManager {
 
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         listMap.put(ForumConstants.OVERVIEW_RESOURCE_IDENTIFIER, new ArrayList<String>() {{
-            add(resourceIdentifier.replace("@", "-AT-").replace(":","%3A"));
+            add(resourceIdentifier.replace("@", "-AT-").replace(":","\\:"));
         }});
 
         Registry registry = getRegistry(user, tenantDomain);
@@ -829,6 +829,8 @@ public class RegistryForumManager implements ForumManager {
                                                                                                 throws ForumException {
 
         try {
+            QName qName = artifact.getQName();
+            artifact.setQName(new QName(qName.getNamespaceURI(), forumTopicDTO.getSubject(), qName.getPrefix()));
             artifact.setAttribute(ForumConstants.OVERVIEW_TOPIC_ID, artifact.getId());
             artifact.setAttribute(ForumConstants.OVERVIEW_SUBJECT, forumTopicDTO.getSubject());
             artifact.setAttribute(ForumConstants.OVERVIEW_TOPIC_OWNER_TENANT_DOMAIN,

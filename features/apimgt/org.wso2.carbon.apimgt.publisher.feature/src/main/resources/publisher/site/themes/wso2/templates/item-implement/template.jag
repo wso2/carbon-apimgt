@@ -1,0 +1,883 @@
+<% jagg.template("item-implement", function(inputs, outputs, jagg) { %>
+<% 
+    var api = outputs.api;
+    var permitted=outputs.isPermitted;
+    var isCreatePermitted=outputs.isCreatePermitted;
+    var mod = jagg.module("api");
+    var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
+    var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
+    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
+    var storeUrl = jagg.module("manager").getAPIStoreURL().url;
+    var apiStatus = api.status;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+
+	var corsJson = JSON.parse(api.corsConfiguration);
+%>
+<script language="javascript">
+    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
+    var AUTH_TYPES = [
+      { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
+      { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
+      { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
+      { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
+    ];
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
+    var apiProvider = "<%=api.provider%>"
+    var apiVersion = "<%=api.version%>"
+    var apiName = "<%=api.name%>"
+</script>   
+<div id="item-add">
+<%
+    var design_w_link = jagg.url('/design?'+apiUrlId);
+    var implement_w_link = jagg.url('/implement?'+apiUrlId);
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
+
+    /*var manage_wlabel = "";
+	if(mod.isGlobalCEPThrottlingEnabled()){
+         if( api != null && api.availableSubscriptionPolicy !="" ){
+            manage_wlabel = "completed";      
+        } else {
+            var manage_w_link = '#';        
+        }
+    } else {
+        
+        if( api.availableTiers !="" ){
+            manage_wlabel = "completed";      
+        } else {
+            var manage_w_link = '#';        
+        }
+    }*/
+
+    var manage_wlabel = "";
+    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+        manage_wlabel = "completed";      
+    }else{
+        var manage_w_link = '#';        
+    } 
+%>
+<!-- <center>
+<ul class="new-sub-menu-wizard" style="margin:0 auto">
+    <li>
+        <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("design")%>">
+            <div class="wizard-number">1</div>
+            <span>"<%=i18n.localize("design")%></span>
+        </a>
+    </li>
+    <li>
+        <a href="<%= implement_w_link %>" class="wizard-active" title="<%=i18n.localize("implement")%>">
+            <div class="wizard-number">2</div>
+            <span>"<%=i18n.localize("implement")%></span>
+        </a>
+    </li>
+    <li>
+        <a href="<%= manage_w_link %>" class="<%= manage_wlabel%>" title="<%=i18n.localize("manage")%>">
+            <div class="wizard-number" >3</div>
+            <span>"<%=i18n.localize("manage")%></span>
+        </a>
+    </li>
+</ul>
+</center>-->
+
+	<div class="page-header">
+		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
+		</h2>
+	</div>
+    <div class="content-section shadow-up">
+    <div class="content-data">   
+    <div class="alert alert-block alert-danger" id="addAPIError" style="display:none">
+        <span id="addErrorSpan"></span>
+    </div>
+<%
+    if(api != null && api.subs > 0){%>
+   			<div class="message message-warning">
+                <h4><i class="icon fw fw-warning"></i>Warning!</h4>
+                <p>You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+	        active subscriptions.</p>
+            </div>
+  <%  }%>
+  
+  			  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
+   		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!", "Success!")%></strong>
+                    <%=i18n.localize("You have successfully saved the API.", "You have successfully saved the API.")%>
+                    <button type="button" class="close" aria-label="close" data-dismiss="alert">
+                        <span aria-hidden="true">
+                            <i class="fw fw-cancel"></i>
+                        </span>
+                    </button>
+   </div>
+
+	<div class="">
+                <div class="row">
+                    <div class="wizard col-xs-12">
+                        <div class="wizard-inner">
+                            <ol class="wiz-nav-inner no-controls" >
+                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
+                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span>2</span><span class="hidden-xs"><%=i18n.localize("implement")%></span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span>3</span><span class="hidden-xs"><%=i18n.localize("manage")%></span></a></li>
+                            </ol>
+                        </div>
+                        <div class="wiz-content">
+							    <div class="row">
+							        <div class="col-sm-12">
+									<div id="accordion1" class="panel-group" role="tablist">
+									<div class="panel panel-default">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+										<h4 class="panel-title">
+											<label class="radio">
+						                            <span class="fw-stack fw-lg">
+					                                    <i class="fw fw-settings fw-stack-2x"></i>
+					                                </span>
+						                    </label>
+						                    <div>
+				                                <div class="heading">Managed API</div>
+				                                <div class="description truncate">Provide the production and sandbox endpoints of the API to be managed.</div>
+				                                <div class="status">
+				                                    <i class="fw fw-down"></i>
+				                                </div>
+				                            </div>
+				                            <div class="clearfix"></div>
+										</h4>
+									</div>
+							        <div id="accordion1-collapse1" class="panel-collapse collapse <% if( apiStatus=="PUBLISHED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingOne">
+							            <div class="panel-body">
+							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
+							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
+							
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                            	</a>
+							                            </label>
+							                                <div class="col-sm-3">
+							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
+							                                        <option value="http"  selected="selected">REST Endpoint</option>
+							                                        <option value="address">SOAP Endpoint</option>
+							                                        <option value="failover">Failover Endpoint</option>
+							                                        <option value="load_balance">Load balanced Endpoint</option>
+							                                        <option value="default">Default Endpoint</option>
+							                                    </select>
+							                                </div>							
+							                        </div>
+							
+							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
+							
+							                        <div id="endpoint_help" class="hide">
+								                         <strong>REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
+								                         <strong>SOAP Endpoint</strong><p>The direct URL of the service</p>
+								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+								                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
+							                        </div>
+							
+							                        <div id="endpoint_form" class="endpoint_dives" >
+							                        </div>
+							
+							                         <div class="form-group">
+							                            <div class="controls">
+							                                <a href="#" class="more-options col-sm-3 col-sm-offset-3 but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
+							                             </div>
+							                         </div>
+							                        <div id="more-options-endpoints"  style="display:none">
+							
+							
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span>
+							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom" title="endpointSec_help">
+							                      				<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>							                      				
+							                      			</a>
+							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
+							                            <select class="select required form-control" id="endpointType" name="endpointType" >
+							                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
+							                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
+							                            </select>
+							                            </div>
+							                        </div>
+							
+							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("endpointAuthType")%>" data-placement="bottom">
+							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                            	</a>
+							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            </label>
+							                            <div class="col-sm-4">
+							                            <select class="select required form-control" id="endpointAuthType" name="endpointAuthType" >
+							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
+							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
+							                            </select>							                            
+							                            </div>
+							                        </div>
+							
+							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
+							                            <div class="col-sm-6 form-inline">
+							                                <input type="text" class="col-sm-2 form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
+							                                <input type="password" class="col-sm-4 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
+							                            </div>
+							                        </div>
+							
+							                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
+							                        <!--Southboud statistics -->
+							                        <div class="form-group">
+							                            <label class="control-label col-sm-3" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+							                              <div class="col-sm-4">
+							                               <select class="select required form-control" id="destinationStats" name="destinationStats">
+							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
+							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
+							                                </select>
+							                                <a class="help_popup" help_data="stats_help" data-trigger="hover" title="stats_help">
+							                                	<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							                                </a>
+							                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+							                             </div>
+							                        </div>
+							                        <!--Southboud statistics End -->
+							                        <% }%>
+							
+							                        </div><!-- more option endpoint -->
+							
+							                    <fieldset>
+							                        <% if (isSynapseGateway) { %>
+							                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
+							                            <div class="form-group">
+							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
+							                                <div class="controls col-sm-8">
+  
+							                                    <label class="checkbox">
+							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
+							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
+							                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>>
+							                                            <span class="helper"><%=i18n.localize("sequenceMsg")%></span>
+							                                    </label>							                                    
+							                                </div>
+							                            </div>
+							                            <div class="form-group form-inline">
+							                            	<div class="col-sm-3"></div>
+							                            	<div class="col-sm-9">
+							                            		<table class="table table-bordered table-striped" id="seqTable"
+							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+							                                            <thead>
+							                                                <tr>
+							                                                    <th><%=i18n.localize("inFlow")%></th>
+							                                                    <th><%=i18n.localize("outFlow")%></th>
+							                                                    <th><%=i18n.localize("faultFlow")%></th>
+							                                                </tr>
+							                                            </thead>
+							                                            <tr>
+							                                                <td>
+							                                                    <select class="form-control" id="inSequence"  name="inSequence" >
+							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+							                                                    </select>
+							                                                </td>
+							                                                <td>
+							                                                    <select class="form-control" id="outSequence"  name="outSequence">
+							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+							                                                    </select>
+							                                                </td>
+							                                                <td>
+							                                                    <select class="form-control" id="faultSequence"  name="faultSequence">
+							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+							                                                    </select>
+							                                                </td>
+							                                            </tr>
+							                                    </table>							                                    
+							                            	</div>
+							                            </div>
+							                            	<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+							                            		<div class="col-sm-3"></div>
+							                            		<div class="col-sm-3">
+							                            			 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
+							                            		</div>
+							                            	</div>
+
+														<% if(outputs.isCreatePermitted){
+														 %>
+
+														<div id="corsConfigsManaged">
+														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsManaged" name="cors_check"
+																			<%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															   <div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td class="col-sm-4">
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerManaged">
+																				<label class="checkbox">
+																					<input type="checkbox" id="toggleallOriginManaged" name="toggleallOriginManaged"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																				</label>
+																				</div>
+																						<%
+																				var accessOriginManaged ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginManaged += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginManaged != ""){
+																					accessOriginManaged=accessOriginManaged.substr(0,(accessOriginManaged.length-1));
+																				}
+																				var accessHeadersManaged ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersManaged += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersManaged != ""){
+																					accessHeadersManaged=accessHeadersManaged.substr(0,(accessHeadersManaged.length-1));
+																				}
+																				var accessMethodsManaged="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsManaged += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsManaged != ""){
+																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
+																				}
+																				%>
+																				<div class="originContainerManaged tagContainer">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="headerContainer tagContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="headerContainer tagContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerManaged">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsManaged" name="allowCredentialsManaged" placeholder="Access Control Allow Credentials"
+																						<% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																						<span class="helper">Check to send True</span>
+																					</label>
+																				</div>
+																			</td>
+																		</tr>
+																</table>
+															</div>
+														</div>
+
+													</div>
+												<% }; %>
+							                        <%}%>
+							                    </fieldset>
+												<hr />
+							                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+							                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+							                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+							                    <input type="hidden" name="action" value="implement" />
+							                    <input type="hidden" name="wsdl" value="<%= encode.forHtml(api.wsdl) %>" />                                        
+							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
+							                    <input type="hidden" value="endpoint" name="implementation_methods" >
+							                    <div class="form-actions" id="saveButtons">
+							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" >Save</button>
+							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
+							                    </div>
+							                    </form>
+							                </div>
+							            </div>
+							            </div>							
+							            <div class="panel panel-default">
+							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+												<h4 class="panel-title">
+													<label class="radio">
+								                            <span class="fw-stack fw-lg">
+							                                    <i class="fw fw-settings fw-stack-2x"></i>
+							                                </span>
+								                    </label>
+								                    <div>
+						                                <div class="heading">Prototyped API</div>
+						                                <div class="description truncate" title="Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs">Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</div>
+						                                <div class="status">
+						                                    <i class="fw fw-down"></i>
+						                                </div>
+						                            </div>
+						                            <div class="clearfix"></div>
+												</h4>
+											</div>							
+							            <div id="accordion1-collapse2" class="panel-collapse collapse <% if( apiStatus=="PROTOTYPED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingTwo">
+								            <div class="panel-body">								
+								            <div class="">
+								            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
+								                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
+								                <fieldset>
+								                <div class="form-group">
+								                    <label class="control-label col-sm-3" for="context">Implementation Method</label>
+								                    <div class="col-sm-8">
+								                        <%if(api.implementation && api.implementation == "INLINE"){
+								                                var inline_impl = "checked='checked'";
+								                                var hide_endpoint="hide";
+								                            }else{
+								                                var endpoint_impl = "checked='checked'";
+								                                var hide_impl="hide";
+								                            } %>
+								
+								                            <label class="radio-inline">
+								                            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
+								                            </label>
+								
+								                            <label class="radio-inline">
+								                            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
+								                            </label>
+								
+								                    </div>
+								                </div>
+								                </fieldset>
+								
+								                <div id="api_designer">
+								                    <div id ="apidoc_details"></div>
+								                    <div id ="resource_details"></div>
+								                </div>
+								
+								                <div class="clear"></div>
+								
+								
+								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
+								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
+								                    <div class="form-group form-inline">
+								                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
+								                        <div class="col-sm-8">
+								                            <div class="input-group">
+								                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
+								                                <span class="input-group-btn">
+								                                    <button type="button" id="prototype_test" class="btn btn-secondary check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
+								                                        <span>Test</span>
+								                                    </button>
+								                                </span>
+								                            </div>
+								                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
+								                            	<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													            </span>
+								                            </a>
+								                            <div id="endpoint_test_help" class="hide">
+								                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+								                            </div>
+								                        </div>
+								                        <span style="display:none;" class="help-block jsonform-errortext"></span>
+								                    </div>
+								                    </fieldset>
+								                    <fieldset>
+
+												<% if(outputs.isCreatePermitted){
+														%>
+
+														<div id="corsConfigsPrototyped">
+															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+
+															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
+															<div class="form-group">
+																<label class="control-label col-sm-3" for="corsConfigurationPrototyped"><%=i18n.localize("corsConfiguration")%></label>
+																<div class="controls col-sm-8">
+																	<label class="checkbox">
+																		<input type="checkbox" id="toggleCorsPrototyped" name="cors_check"
+																						 <%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
+																			<span class="helper"><%=i18n.localize("corsMsg")%></span>
+																	</label>
+																</div>
+															</div>
+															<div class="form-group form-inline">
+																<div class="col-sm-3"></div>
+																<div class="col-sm-9">
+																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
+																		<tr>
+																			<td class="col-sm-4">
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
+																			</td>
+																			<td>
+																				<div id="allOriginContainerPrototyped">
+																					<label class="checkbox">
+																						<input type="checkbox" id="toggleallOriginPrototyped" name="toggleallOriginPrototyped"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
+																						<span class="helper"><%=i18n.localize("allOrigins")%></span>
+																					</label>
+																				</div>
+																						<%
+																				var accessOriginPrototyped ="";
+																				for (var origin in corsJson.accessControlAllowOrigins){
+																					accessOriginPrototyped += corsJson.accessControlAllowOrigins[origin]+",";
+																				}
+																				if(accessOriginPrototyped != ""){
+																					accessOriginPrototyped=accessOriginPrototyped.substr(0,(accessOriginPrototyped.length-1));
+																				}
+																				var accessHeadersPrototyped ="";
+																				for (var headers in corsJson.accessControlAllowHeaders){
+																					accessHeadersPrototyped += corsJson.accessControlAllowHeaders[headers]+",";
+																				}
+																				if(accessHeadersPrototyped != ""){
+																					accessHeadersPrototyped=accessHeadersPrototyped.substr(0,(accessHeadersPrototyped.length-1));
+																				}
+																				var accessMethodsPrototyped="";
+																				for (var methods in corsJson.accessControlAllowMethods){
+																					accessMethodsPrototyped += corsJson.accessControlAllowMethods[methods]+",";
+																				}
+																				if(accessMethodsPrototyped != ""){
+																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
+																				}
+																				%>
+																				<div class="originContainerPrototyped tagContainer">
+																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
+																									</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="headerContainer tagContainer">
+																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="headerContainer tagContainer">
+																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
+																				</div>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>
+																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
+																			</td>
+																			<td>
+																				<div class="controls credentialContainerPrototyped">
+
+																					<label class="checkbox">
+																						<input type="checkbox" id="allowCredentialsPrototyped" name="allowCredentialsPrototyped" placeholder="Access Control Allow Credentials"
+																							 <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
+																								<span class="helper">Check to send True</span>
+																							</label>
+																				</div>
+																			</td>
+																		</tr>
+																	</table>
+																</div>
+															</div>
+
+														</div>
+												<% }; %>
+								                </fieldset>
+								                <hr />
+								                <div class="form-actions" id="saveButtons">
+
+								                    <input type="hidden" name="name" id="name" value="<%= encode.forHtml(api.name) %>" />
+								                    <input type="hidden" name="version" id="version" value="<%= encode.forHtml(api.version) %>" />
+								                    <input type="hidden" name="provider" id="provider" value="<%= encode.forHtml(api.provider) %>" />
+								                    <input type="hidden" name="action" value="implement" />
+								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
+								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                </div>
+								                            </form>
+								                </div>
+								            </div>
+							
+							            </div>
+							
+							            <div id="prototype-success" class="modal fade">
+							            <div class="modal-dialog">
+							                <div class="modal-content">
+							                <div class="modal-header">
+							                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							                <h3>API Publisher - Notification</h3>
+							                </div>
+							                <div class="modal-body">
+							                <table>
+							                    <tbody>
+							                        <tr>
+							                            <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/info.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("infoMsgThumb")%>"></td>
+							                            <td><span class="messageText">API deployed as a Prototype.</span></td>
+							                    </tbody>
+							                </table>
+							                </div>
+							                <div class="modal-footer">
+							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true " title="<%=i18n.localize("keepEditingAPI")%>"><%=i18n.localize("keepEditingAPI")%></button>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("goToStore")%>" ><%=i18n.localize("goToStore")%></a>
+							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary" title="<%=i18n.localize("goToOverview")%>" ><%=i18n.localize("goToOverview")%></a>
+							                </div>
+							                </div>
+							            </div>
+
+							            </div>
+							            </div>
+							            </div>
+							            </div>
+        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>	
+    </div>
+    </div>
+    </div>
+
+							            <!-- Import Modal -->
+<div class="modal fade" id="sequenceUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content clearfix">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy</h3>
+      </div>
+      <div class="">      
+                            <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                            	<div id="sequence_file_help" class="alert alert-danger hide" role="alert">
+					                 
+					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
+					            </div>
+					            <div class="form-group toggleRadios">
+					            	<label class="col-sm-3 control-label">Mediation Policy Type</label>
+					            <div class="col-sm-7">
+	                                <label class="radio">
+	                                    <input type="radio" class="select-file" name="upload-sequence" id="" value="in" checked> 
+	                                    <span class="helper">In</span>
+	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
+	                                    <span class="helper">Out</span>
+	                                </label>
+	                                <label class="radio">
+	                                    <input type="radio" class="select-url" name="upload-sequence" value="fault">
+	                                    <span class="helper">Fault</span>
+	                                </label>
+                                </div>
+					            </div>	
+					            <br class="spacer"/>
+                                	<div class="form-group">
+                                		<label class="col-sm-3"></label>
+										<div class="controls col-sm-8">
+											<div class="input-group input-wrap file-upload-control">
+												<input type="text" id="sequence_file_value" class="form-control" readonly> 
+												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
+												<div class="input-group-btn">
+													<button class="btn browse" type="button" title="Browse File">
+														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
+															class="hidden-xs">Browse</span>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <div class="modal-footer">
+                                <button type="button" id="upload_sequence" class="btn btn-primary has-spinner"><%=i18n.localize("Upload")%></button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal"><%=i18n.localize("close")%></button>
+                            </div>
+                        </div>
+        
+
+    </div>
+  </div>
+</div>
+
+<div  id="advance_endpoint_config" class="modal fade">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Advanced Endpoint Configuration</h3>
+        </div>
+        <div class="modal-body">
+        <form id="advance_form"></form>
+        </div>
+        <div class="modal-footer">
+        <div id="res" style="color:red;float:left"></div>
+        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
+        </div>
+    </div>
+    </div>
+</div>
+
+<script id="designer-apidoc-template" type="text/x-handlebars-template">
+</script>
+
+<script id="designer-resource-template" type="text/x-handlebars-template">
+<div class="resource_body_padding">
+    <h5>Description :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
+    <br />
+    <br />        
+    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
+    <br />
+    <h5>Parameters :</h5>
+    {{#if parameters}}
+    <table class="table table-condensed table-hover table-bordered">
+        <tr>
+        <th width="200px">Parameter Name</th>
+        <th>Description</th>
+        <th width="100px">Parameter Type</th>
+        <th width="100px">Data Type</th>
+        <th width="100px">Required</th>            
+        </tr>    
+    {{#each parameters}}
+        <tr>
+        <td>{{ name }}</td>
+        <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
+        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+        <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+        <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+        </tr> 
+    {{/each}}
+    {{/if}}
+    </table>   
+    <h5>Script :</h5>
+    <textarea class="editor col-sm-12" width="100%" style="height:150px;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+    {{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+{{/each}}
+mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+/*Uncomment the above comment block to send a sample response.*/{{/if}}
+</textarea>
+</div>  
+</script>
+<div  id="environmentsRetry-modal" class="modal hide fade">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Gateway Failures</h3>
+        </div>
+        <div class="modal-body">
+        <div id="modal-published-header">
+        Failed to Publish Environments
+        </div>
+        <div id="modal-published-content">
+        </div>
+        <div id="modal-unpublished-header">
+                Failed to UnPublish Environments
+                </div>
+                <div id="modal-unpublished-content">
+                </div>
+                <input type="hidden" id="retryType"/>
+        </div>
+        <div class="modal-footer">
+        <div id="res" class="hide" style="color:red;float:left"></div>
+        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="do gateway action">OK</a>
+                                   <script type="text/javascript">
+                            function doGatewayAction() {
+                               $("#environmentsRetry-modal").modal('hide');
+                              }
+                                   </script>
+        </div>
+</div>
+<script id="designer-resources-template" type="text/x-handlebars-template">
+<fieldset class="<%= hide_impl %> implementation_method_inline implementation_method">
+<legend>Resources</legend>
+<table style="width:100%">                       
+{{#each doc.paths}}
+    {{# each this}}
+        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+            </td>
+            <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+        </tr>
+        <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+    {{/each}}
+{{/each}}
+</table>
+</fieldset>                       
+</script>
+
+<script>
+    $(document).ready(function(){
+
+        var status = "<%=apiStatus%>";
+        if(status == "PUBLISHED"){
+            $('#managed-api').slideDown()
+        }else if(status == "PROTOTYPED"){
+            $('#prototype').slideDown();
+        }
+
+        $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>?name=<%= encode.forHtml(api.name) %>&version=<%= encode.forHtml(api.version) %>&provider=<%= encode.forHtml(api.provider) %>&action=swagger" , function( data ) {
+            var data = jQuery.parseJSON(data);
+            var designer = APIDesigner();
+            designer.load_api_document(data);
+            $("#swaggerUpload").modal('hide');
+        });
+
+        $('#go_to_manage').click(function(e){            
+            $("body").on("api_saved", function(e){
+                location.href = "<%= jagg.url("/manage?"+apiUrlId)%>";
+            });
+            $("#implement_form").submit();
+        });
+
+        $('#goToStore-btn').click(function(){
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+            location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
+        });
+
+        try{
+            var endpoint_config = jQuery.parseJSON($(".prototype_config").val());
+            if(endpoint_config.production_endpoints){
+                $("#prototype_endpoint").val(endpoint_config.production_endpoints.url);
+            }
+        }catch(e){
+            console.log("Invalid endpoint config");
+        }
+    })
+</script>
+
+
+<% }); %>

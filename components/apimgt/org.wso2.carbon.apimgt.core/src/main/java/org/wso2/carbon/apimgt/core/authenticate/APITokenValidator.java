@@ -17,38 +17,16 @@
 */
 package org.wso2.carbon.apimgt.core.authenticate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 
 public class APITokenValidator {
 
-    private static final Log log = LogFactory.getLog(APITokenValidator.class);
-
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String requiredAuthenticationLevel,
-                                               String clientDomain) throws APIManagementException {
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
+                                               String requiredAuthenticationLevel) throws APIManagementException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        // first check whether client domain is authorized
-        if (accessToken != null && apiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
-            apiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {
-            String authorizedDomains = apiMgtDAO.getAuthorizedDomains(accessToken);
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
         return apiMgtDAO.validateKey(context, version, accessToken, requiredAuthenticationLevel);
-    }
-
-    public static String getAPIManagerClientDomainHeader() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        return config.getFirstProperty(APIConstants.API_GATEWAY_CLIENT_DOMAIN_HEADER);
     }
 }

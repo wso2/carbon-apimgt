@@ -31,8 +31,8 @@ jagg.block("api/api-listing-all", {
         if(page==null){
         page=1;
         }
-        var start = (page - 1)*10;
-        var end = 10;
+        var start = (page - 1)*12;
+        var end = 12;
 
         if (tag) {
             mod = jagg.module("api");
@@ -62,7 +62,7 @@ jagg.block("api/api-listing-all", {
         } else {
             mod = jagg.module("api");
 	    var returnAPITags = "false";
-            response = mod.getAllPaginatedPublishedAPIs(tenantDomain, start, end, returnAPITags);
+            response = mod.getAllPaginatedAPIs(tenantDomain, start, end, returnAPITags);
             apis = response.result.apis;
         }
 

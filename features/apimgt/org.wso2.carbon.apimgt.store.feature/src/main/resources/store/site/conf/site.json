@@ -1,9 +1,10 @@
 {
     "theme" : {
-        "base" : "fancy"
+        "base" : "wso2"
     },
     "context" : "/store",
     "showPublicStoreURL":true,
+    "showThemesMenu":false,
     "tagWiseMode" :"false",
     "tagGroupKey" :"-group",
     "ssoConfiguration" : {

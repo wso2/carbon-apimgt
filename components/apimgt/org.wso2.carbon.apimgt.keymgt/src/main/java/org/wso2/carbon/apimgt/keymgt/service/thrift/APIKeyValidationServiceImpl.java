@@ -148,6 +148,14 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                         thriftKeyValidationInfoDTO.setIssuedTime(keyValidationInfoDTO.getIssuedTime());
                         thriftKeyValidationInfoDTO.setValidityPeriod(keyValidationInfoDTO.getValidityPeriod());
                         thriftKeyValidationInfoDTO.setAuthorizedDomains(keyValidationInfoDTO.getAuthorizedDomains());
+                        thriftKeyValidationInfoDTO.setIsContentAware(keyValidationInfoDTO.isContentAware());
+                        thriftKeyValidationInfoDTO.setApiTier(keyValidationInfoDTO.getApiTier());
+                        thriftKeyValidationInfoDTO.setThrottlingDataList(keyValidationInfoDTO.getThrottlingDataList());
+                        thriftKeyValidationInfoDTO.setSubscriberTenantDomain(keyValidationInfoDTO.getSubscriberTenantDomain());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestLimit(keyValidationInfoDTO.getSpikeArrestLimit());
+                        thriftKeyValidationInfoDTO.setSpikeArrestUnit(keyValidationInfoDTO.getSpikeArrestUnit());
+                        thriftKeyValidationInfoDTO.setStopOnQuotaReach(keyValidationInfoDTO.isStopOnQuotaReach());
                     } finally {
                          PrivilegedCarbonContext.endTenantFlow();
                     }
@@ -243,6 +251,8 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions(dto.getThrottlingConditions());
+        template.setApplicableLevel(dto.getApplicableLevel());
         return template;
     }
 

@@ -61,8 +61,11 @@ var getAPI = function (api) {
             productionTps:result[46],
             sandboxTps:result[47],
             endpointAuthTypeDigest:result[48],
+            corsConfiguration:result[49],
             hasDefaultVersion:hasDefaultVersion,
-            currentDefaultVersion:defaultVersion
+            currentDefaultVersion:defaultVersion,
+            availableSubscriptionPolicy:result[50],
+            apiLevelPolicy:result[51]
         };
         return {
             error:false,

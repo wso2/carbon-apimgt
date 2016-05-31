@@ -1,0 +1,43 @@
+<%
+include("/jagg/jagg.jag");
+response.contentType = "application/json; charset=UTF-8";
+var site = require("/site/conf/site.json");
+var msg = require("/site/conf/ui-messages.jag");
+var log = new Log();
+
+(function () {
+    /* Filters */
+    var provider = jagg.getUser().username;
+    var fromDate = request.getParameter("fromDate");
+    var toDate = request.getParameter("toDate");
+    var developer = request.getParameter("developer");
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    }
+    else{
+		mod = jagg.module("statistics");
+		var currentLocation = request.getParameter("currentLocation");
+		var apiFilter = request.getParameter("apiFilter");
+		var limit = 50;
+		result = mod.getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit);
+
+		if (result.error == "true") {
+			obj = {
+				error: result.error,
+				message: msg.error.backendError(action)
+			};
+		} else {
+			obj = {
+				error: false,
+				data: [{ "key": "APIs", "values": result.usage }]
+			}
+		}
+        print(obj);
+    }
+
+}());
+%>

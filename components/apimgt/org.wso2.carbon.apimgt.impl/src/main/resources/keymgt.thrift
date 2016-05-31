@@ -26,6 +26,13 @@ struct APIKeyValidationInfoDTO {
     15: optional set<string> scopes;
     16: optional i64 validityPeriod;
     17: optional i64 issuedTime;
+    18: optional bool isContentAware;
+    19: optional string apiTier;
+    20: optional list<string> throttlingDataList;
+    21: optional i32 spikeArrestLimit;
+    22: optional string subscriberTenantDomain;
+    23: optional string spikeArrestUnit;
+    24: optional bool stopOnQuotaReach;
 }
 
 struct URITemplate {
@@ -35,6 +42,8 @@ struct URITemplate {
     4: optional string httpVerb;
     5: optional string authType;
     6: optional string throttlingTier;
+    7: optional list<string>  throttlingConditions;
+    8: optional string applicableLevel;
 }
 
 

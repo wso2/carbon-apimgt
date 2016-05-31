@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
@@ -32,6 +33,7 @@ public class ServiceReferenceHolder {
     private RealmService realmService;
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
+    private OutputEventAdapterService outputEventAdapterService;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -43,7 +45,6 @@ public class ServiceReferenceHolder {
 
     private static ConfigurationContextService contextService;
     private ServiceReferenceHolder() {
-
     }
 
     public static ServiceReferenceHolder getInstance() {
@@ -87,5 +88,13 @@ public class ServiceReferenceHolder {
 
     public TenantIndexingLoader getIndexLoaderService(){
         return indexLoader;
+    }
+
+    public OutputEventAdapterService getOutputEventAdapterService() {
+        return outputEventAdapterService;
+    }
+
+    public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        this.outputEventAdapterService = outputEventAdapterService;
     }
 }

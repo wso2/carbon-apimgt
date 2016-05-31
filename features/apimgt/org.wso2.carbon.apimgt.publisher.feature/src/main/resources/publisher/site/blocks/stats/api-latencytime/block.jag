@@ -1,0 +1,6 @@
+<%
+jagg.block("stats/api-latencytime", {
+    initializer:function (data) {
+    }
+});
+%>

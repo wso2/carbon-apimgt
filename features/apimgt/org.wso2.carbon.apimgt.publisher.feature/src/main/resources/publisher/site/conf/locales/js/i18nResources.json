@@ -27,9 +27,12 @@
             "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
             "duplicateUrlPattern":"has duplicated entries. ",
             "noData":"No Data Found ... ",
-            "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM1100/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
+            "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM200/Publishing+API+Runtime+Statistics' target='_blank' title='WSO2 wiki documentation on APIM statistics' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
             "unavailableData":"Data unavailable",
-            "login":"Unable to log you in!"
+            "login":"Unable to log you in!",
+            "invalidEmailEntered": "Could not save. You have entered an invalid email address.",
+            "atleastOneEmailNeeded" : "Please enter at least one email address",
+            "atLeastOneAlertTypeNeeded" : "Please select at least one alert type"
         },
         "validationMsgs":{
             "context": "Duplicate context value.",
@@ -105,6 +108,9 @@
             "Never timeout":"Never timeout",
             "Discard message":"Discard message",
             "Execute fault sequence": "Execute fault sequence"
+        },
+        "info" : {
+            "successfullySaved": "Successfully saved"
         }
 
 }

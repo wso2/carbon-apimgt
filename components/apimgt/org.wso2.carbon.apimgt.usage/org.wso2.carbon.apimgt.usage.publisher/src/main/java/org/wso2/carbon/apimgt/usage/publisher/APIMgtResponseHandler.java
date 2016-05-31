@@ -24,82 +24,38 @@ import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 /*
 * This mediator is to publish events upon success API invocations
 */
 
-public class APIMgtResponseHandler extends AbstractMediator {
-
-    private boolean skipEventReceiverConnection;
-
-    private volatile APIMgtUsageDataPublisher publisher;
+public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
     public APIMgtResponseHandler() {
-        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            this.initializeDataPublisher();
-        }
-    }
-
-    private void initializeDataPublisher() {
-
-        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
-        if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled() ||
-            skipEventReceiverConnection) {
-            return;
-        }
-        if (publisher == null) {
-            synchronized (this) {
-                if (publisher == null) {
-                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                            getPublisherClass();
-                    try {
-                        log.debug("Instantiating Data Publisher");
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                        publisher.init();
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass, e);
-                    } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass, e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass, e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
-                }
-            }
-        }
+        super();
     }
 
     public boolean mediate(MessageContext mc) {
-
+        super.mediate(mc);
         if (publisher == null) {
             this.initializeDataPublisher();
         }
 
         try {
-            if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled()
-                || skipEventReceiverConnection) {
+            if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
             long responseSize = 0;
@@ -119,9 +75,9 @@ public class APIMgtResponseHandler extends AbstractMediator {
             //to get the response message size
             boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()
                     .isBuildMsg();
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).
+                    getAxis2MessageContext();
             if (isBuildMsg) {
-                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).
-                        getAxis2MessageContext();
                 Map headers = (Map) axis2MC.getProperty(
                         org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                 String contentLength = (String) headers.get(HttpHeaders.CONTENT_LENGTH);
@@ -143,7 +99,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
                     if (env != null) {
                         SOAPBody soapbody = env.getBody();
                         if (soapbody != null) {
-                            byte[] size = soapbody.toString().getBytes();
+                            byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
                             responseSize = size.length;
                         }
                     }
@@ -169,40 +125,31 @@ public class APIMgtResponseHandler extends AbstractMediator {
             }
 
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
-            responsePublisherDTO.setConsumerKey((String) mc.getProperty(
-                    APIMgtGatewayConstants.CONSUMER_KEY));
-            responsePublisherDTO.setUsername((String) mc.getProperty(
-                    APIMgtGatewayConstants.USER_ID));
-            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
-                    responsePublisherDTO.getUsername()));
-            responsePublisherDTO.setContext((String) mc.getProperty(
-                    APIMgtGatewayConstants.CONTEXT));
-            responsePublisherDTO.setApi_version((String) mc.getProperty(
-                    APIMgtGatewayConstants.API_VERSION));
-            responsePublisherDTO.setApi((String) mc.getProperty(
-                    APIMgtGatewayConstants.API));
-            responsePublisherDTO.setVersion((String) mc.getProperty(
-                    APIMgtGatewayConstants.VERSION));
-            responsePublisherDTO.setResourcePath((String) mc.getProperty(
-                    APIMgtGatewayConstants.RESOURCE));
-            responsePublisherDTO.setMethod((String) mc.getProperty(
-                    APIMgtGatewayConstants.HTTP_METHOD));
+            responsePublisherDTO.setConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
+            responsePublisherDTO.setUsername((String) mc.getProperty(APIMgtGatewayConstants.USER_ID));
+            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
+            responsePublisherDTO.setContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
+            responsePublisherDTO.setApiVersion((String) mc.getProperty(RESTConstants.SYNAPSE_REST_API));
+            responsePublisherDTO.setApi((String) mc.getProperty(APIMgtGatewayConstants.API));
+            responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtGatewayConstants.VERSION));
+            responsePublisherDTO.setResourcePath((String) mc.getProperty(APIMgtGatewayConstants.RESOURCE));
+            responsePublisherDTO.setResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
+            responsePublisherDTO.setMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
             responsePublisherDTO.setResponseTime(responseTime);
             responsePublisherDTO.setServiceTime(serviceTime);
             responsePublisherDTO.setBackendTime(backendTime);
-            responsePublisherDTO.setHostName((String) mc.getProperty(
-                    APIMgtGatewayConstants.HOST_NAME));
-            responsePublisherDTO.setApiPublisher((String) mc.getProperty(
-                    APIMgtGatewayConstants.API_PUBLISHER));
-            responsePublisherDTO.setApplicationName((String) mc.getProperty
-                    (APIMgtGatewayConstants.APPLICATION_NAME));
-            responsePublisherDTO.setApplicationId((String) mc.getProperty(
-                    APIMgtGatewayConstants.APPLICATION_ID));
+            responsePublisherDTO.setHostName((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
+            responsePublisherDTO.setApiPublisher((String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER));
+            responsePublisherDTO.setApplicationName((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_NAME));
+            responsePublisherDTO.setApplicationId((String) mc.getProperty(APIMgtGatewayConstants.APPLICATION_ID));
             responsePublisherDTO.setCacheHit(cacheHit);
             responsePublisherDTO.setResponseSize(responseSize);
             responsePublisherDTO.setEventTime(endTime);//This is the timestamp response event published
-            String url = (String) mc.getProperty(
-                    RESTConstants.REST_URL_PREFIX);
+
+            responsePublisherDTO.setResponseCode((Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC));
+
+            String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
+
             URL apiurl = new URL(url);
             int port = apiurl.getPort();
             String protocol = mc.getProperty(

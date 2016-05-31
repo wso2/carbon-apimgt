@@ -5,12 +5,13 @@
         "subscription": "Subscription Successful" ,
         "subscriptionRejectTitle": "Subscription Rejected" ,
         "subscriptionPendingTitle": "Subscription Awaiting Approval",
-        "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API. Please go to 'My Subscriptions' page to review your subscription and generate keys.",
+        "subscriptionSuccess": "Congratulations! You have successfully subscribed to the API.",
         "subscriptionPending": "Congratulations! Your subscription request has been submitted and is now awaiting approval.",
         "subscriptionRejected": "Your subscription is rejected, since it does not matched with authetication requirments. Please contact the api publisher for more information",
         "applicationSuccess": "Congratulations! You have successfully added the API.",
         "applicationPending": "Congratulations! Your application  request has been submitted and is now awaiting approval.",
         "gotoSubsPage": "Go to My Subscriptions",
+        "viewSubsPage": "View Subscriptions",
         "stayPage": "Stay on this page",
         "returntoAPIPage": "Return back to API detail page?",
         "yes": "Yes",
@@ -22,7 +23,9 @@
         "tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
-        "cancelSubs":"Cancel Subscription"
+        "cancelSubs":"Cancel Subscription",
+        "clieGenHelpMsg":"This will generate the client side SDK for the selected application. Select the language you prefer.",
+        "successfullySaved": "Successfully saved"
 
     },
     "confirm": {
@@ -70,7 +73,7 @@
         "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
         "duplicateUrlPattern":"has duplicated entries. ",
         "noData":"No Data Found ... ",
-        "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM1100/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
+        "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM200/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
         "unavailableData":"Data unavailable",
         "login":"Unable to log you in!",
         "cannotDeleteForumTopic" : "Cannot delete the topic. ",
@@ -79,7 +82,10 @@
         "cannotEditForumReply" : "Cannot edit the reply. ",
         "topicSubjectCannotBeEmpty" : "Topic subject cannot be empty.",
         "topicDescriptionCannotBeEmpty" : "Topic description cannot be empty.",
-        "replyCannotBeEmpty" : "Reply cannot be empty."
+        "replyCannotBeEmpty" : "Reply cannot be empty.",
+        "invalidEmailEntered": "Could not save. You have entered an invalid email address.",
+        "atleastOneEmailNeeded" : "Please enter at least one email address",
+        "atLeastOneAlertTypeNeeded" : "Please select at least one alert type"
     }
 
 }

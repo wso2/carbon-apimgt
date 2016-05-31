@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.util.List;
 import java.util.Map;
@@ -419,4 +421,35 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
+    
+
+    /**
+     * Get policy object for given level and user name
+     * @param username
+     * @param level
+     * @return
+     * @throws APIManagementException
+     */
+    Policy[] getPolicies(String username, String level) throws APIManagementException;
+
+    /**
+     * Get api throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException;
+    
+    /**
+     * Returns API Search result based on the provided query
+     * @param searchQuery search query
+     * @param tenantDomain tenant domain 
+     * @param start starting number
+     * @param end ending number
+     * @param limitAttributes whether or not to limit attributes in the search result
+     * @return API result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
+                                           boolean limitAttributes) throws APIManagementException;
 }

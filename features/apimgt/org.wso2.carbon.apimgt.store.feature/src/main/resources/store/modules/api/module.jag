@@ -49,6 +49,9 @@ jagg.module("api", {
     },
     getAPIEndpointURLs:function () {
      return jagg.require(jagg.getModulesDir() + "api/api.jag").getAPIEndpointURLs.apply(this, arguments);
+    },
+    getAllPaginatedAPIs:function () {
+        return jagg.require(jagg.getModulesDir() + "api/api.jag").getAllPaginatedAPIs.apply(this, arguments);
     }
 });
 %>

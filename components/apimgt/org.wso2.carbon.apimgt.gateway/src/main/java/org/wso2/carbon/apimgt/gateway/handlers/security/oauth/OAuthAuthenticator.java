@@ -24,18 +24,20 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -110,16 +112,37 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
         //If the matching resource does not require authentication
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
+        Timer.Context context = timer.start();
+
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
+        context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
 
             if(log.isDebugEnabled()){
                 log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
             }
+
             //using existing constant in Message context removing the additinal constant in API Constants
-            String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext()
-                    .getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            String clientIP = null;
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+                                                         axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+            if (transportHeaderMap != null) {
+                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            }
+
+            //Setting IP of the client
+            if (clientIP != null && !clientIP.isEmpty()) {
+                if (clientIP.indexOf(",") > 0) {
+                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
+                }
+            } else {
+                clientIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            }
 
             //Create a dummy AuthenticationContext object with hard coded values for
             // Tier and KeyType. This is because we cannot determine the Tier nor Key
@@ -127,6 +150,7 @@ public class OAuthAuthenticator implements Authenticator {
             AuthenticationContext authContext = new AuthenticationContext();
             authContext.setAuthenticated(true);
             authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+            authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
             //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
             //we will use the client's IP address for throttling.
             authContext.setApiKey(clientIP);
@@ -135,6 +159,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
+            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return true;
@@ -164,8 +189,13 @@ public class OAuthAuthenticator implements Authenticator {
             org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
+            timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                    APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
+            context = timer.start();
+
             info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
+            context.stop();
 
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
@@ -190,18 +220,20 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
             authContext.setConsumerKey(info.getConsumerKey());
+            authContext.setApiTier(info.getApiTier());
+            authContext.setThrottlingDataList(info.getThrottlingDataList());
+            authContext.setSubscriberTenantDomain(info.getSubscriberTenantDomain());
+            authContext.setSpikeArrestLimit(info.getSpikeArrestLimit());
+            authContext.setSpikeArrestUnit(info.getSpikeArrestUnit());
+            authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
+            authContext.setIsContentAware(info.isContentAware());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
-            
+
             /* Synapse properties required for BAM Mediator*/
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
 
-            try {
-                APIUtil.checkClientDomainAuthorized(info, clientDomain);
-            } catch (APIManagementException e) {
-               throw new APISecurityException(info.getValidationStatus(), e.getMessage(), e);
-            }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");
             }
@@ -271,45 +303,13 @@ public class OAuthAuthenticator implements Authenticator {
 
     protected void initOAuthParams() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_OAUTH_HEADER);
-        if (value != null) {
-            securityHeader = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONSUMER_KEY_HEADER_SEGMENT);
-        if (value != null) {
-            consumerKeyHeaderSegment = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_OAUTH_HEADER_SPLITTER);
-        if (value != null) {
-            oauthHeaderSplitter = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONSUMER_KEY_SEGMENT_DELIMITER);
-        if (value != null) {
-            consumerKeySegmentDelimiter = value;
-        }
-
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_CONTEXT_HEADER);
-        if (value != null) {
-            securityContextHeader = value;
-        }
-        value = config.getFirstProperty(
-                APISecurityConstants.API_SECURITY_REMOVE_OAUTH_HEADERS_FROM_OUT_MESSAGE);
+        String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
         if (value != null) {
             removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
         }
-
-        value = config.getFirstProperty
-                (APIConstants.API_GATEWAY_CLIENT_DOMAIN_HEADER);
+        value = config.getFirstProperty(APIConstants.JWT_HEADER);
         if (value != null) {
-            clientDomainHeader = value;
+            setSecurityContextHeader(value);
         }
     }
 

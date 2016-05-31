@@ -1,0 +1,121 @@
+<%
+var log = new Log();
+
+var saveSubscriptionPolicy = function (action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
+                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var policy = constructPolicyObject(provider, policyName, description, defaultQuotaPolicy, defaultRequestCount,
+                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
+
+        if (action == "add") {
+            apiProvider.addPolicy(policy);
+        } else if (action == "update") {
+            apiProvider.updatePolicy(policy);
+        }
+        log.info(policy.toString());
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var updateThrottleTierPermissions = function (tierPermission) {
+    var result,  length,log = new Log(),
+            list = [],
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.updateThrottleTierPermissions(tierPermission);
+        if (log.isDebugEnabled()) {
+            log.debug("updateSubscription : " + stringify(apis));
+        }
+
+        return {
+            error:false,
+            update:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
+                                      defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
+                                      stopOnQuotaReach, tierPlan, attributes) {
+    var SubscriptionPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+    var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+    var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+    var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+    var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var String = Packages.java.lang.String;
+    var subscriptionPolicy = new SubscriptionPolicy(policyName);
+
+    subscriptionPolicy.setPolicyName(policyName);
+    subscriptionPolicy.setDescription(description);
+
+    var tenantId = APIUtil.getTenantId(userName);
+    subscriptionPolicy.setTenantId(tenantId);
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+    subscriptionPolicy.setTenantDomain(tenantDomain);
+
+    if(stopOnQuotaReach == "true"){
+        subscriptionPolicy.setStopOnQuotaReach(true);
+    }else{
+        subscriptionPolicy.setStopOnQuotaReach(false);
+
+    }
+
+    var JsonString= stringify(attributes) ;
+    subscriptionPolicy.setCustomAttributes(new String(JsonString).getBytes("UTF-8"));
+
+    subscriptionPolicy.setBillingPlan(tierPlan);
+    var default_quotaPolicy = new QuotaPolicy();
+
+    if (defaultQuotaPolicy == "requestCount") {
+        var requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(defaultRequestCount);
+        requestCountLimit.setUnitTime(defaultUnitTime);
+        requestCountLimit.setTimeUnit(defaultTimeUnit);
+        default_quotaPolicy.setType(defaultQuotaPolicy);
+        default_quotaPolicy.setLimit(requestCountLimit);
+    }
+    else if (defaultQuotaPolicy == "bandwidthVolume") {
+        var bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(defaultBandwidth);
+        bandwidthLimit.setDataUnit(defaultBandwidthUnit);
+        bandwidthLimit.setUnitTime(defaultUnitTime);
+        bandwidthLimit.setTimeUnit(defaultTimeUnit);
+        default_quotaPolicy.setType(defaultQuotaPolicy);
+        default_quotaPolicy.setLimit(bandwidthLimit);
+    }
+
+    subscriptionPolicy.setDefaultQuotaPolicy(default_quotaPolicy);
+
+    if (rateLimitCount != "") {
+        subscriptionPolicy.setRateLimitCount(rateLimitCount);
+        subscriptionPolicy.setRateLimitTimeUnit(rateLimitTimeUnit);
+    }
+    else {
+        subscriptionPolicy.setRateLimitCount(-1);
+        subscriptionPolicy.setRateLimitTimeUnit("NA");
+    }
+
+    return subscriptionPolicy;
+}
+%>

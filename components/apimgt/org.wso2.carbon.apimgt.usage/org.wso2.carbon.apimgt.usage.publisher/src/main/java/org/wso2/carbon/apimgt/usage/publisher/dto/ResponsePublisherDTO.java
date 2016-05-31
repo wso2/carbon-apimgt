@@ -27,6 +27,7 @@ public class ResponsePublisherDTO extends PublisherDTO {
     private long backendTime;
     private long eventTime;
     private long responseSize;
+    private int responseCode;
 
     public int getResponse(){
         return response;
@@ -79,4 +80,11 @@ public class ResponsePublisherDTO extends PublisherDTO {
         return cacheHit;
     }
 
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
+    }
 }

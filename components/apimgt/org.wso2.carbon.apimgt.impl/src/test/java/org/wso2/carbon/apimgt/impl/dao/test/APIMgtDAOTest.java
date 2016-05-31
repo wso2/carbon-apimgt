@@ -18,9 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl.dao.test;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.io.FileUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -32,18 +39,29 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 public class APIMgtDAOTest extends TestCase {
 
-    ApiMgtDAO apiMgtDAO;
+    public static ApiMgtDAO apiMgtDAO;
 
     @Override
     protected void setUp() throws Exception {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
+        initializeDatabase  (dbConfigPath);
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(config));
         APIMgtDBUtil.initialize();
@@ -53,8 +71,64 @@ public class APIMgtDAOTest extends TestCase {
         IdentityConfigParser.getInstance(identityConfigPath);
     }
 
+    private void initializeDatabase(String configFilePath) {
+
+        InputStream in = null;
+        try {
+            in = FileUtils.openInputStream(new File(configFilePath));
+            StAXOMBuilder builder = new StAXOMBuilder(in);
+            String dataSource = builder.getDocumentElement().getFirstChildWithName(new QName("DataSourceName")).
+                    getText();
+            OMElement databaseElement = builder.getDocumentElement().getFirstChildWithName(new QName("Database"));
+            String databaseURL = databaseElement.getFirstChildWithName(new QName("URL")).getText();
+            String databaseUser = databaseElement.getFirstChildWithName(new QName("Username")).getText();
+            String databasePass = databaseElement.getFirstChildWithName(new QName("Password")).getText();
+            String databaseDriver = databaseElement.getFirstChildWithName(new QName("Driver")).getText();
+
+            BasicDataSource basicDataSource = new BasicDataSource();
+            basicDataSource.setDriverClassName(databaseDriver);
+            basicDataSource.setUrl(databaseURL);
+            basicDataSource.setUsername(databaseUser);
+            basicDataSource.setPassword(databasePass);
+
+            // Create initial context
+            System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+                        "org.apache.naming.java.javaURLContextFactory");
+            System.setProperty(Context.URL_PKG_PREFIXES,
+                    "org.apache.naming");
+            try {
+                InitialContext.doLookup("java:/comp/env/jdbc/WSO2AM_DB");
+            } catch (NamingException e) {
+                InitialContext ic = new InitialContext();
+                ic.createSubcontext("java:");
+                ic.createSubcontext("java:/comp");
+                ic.createSubcontext("java:/comp/env");
+                ic.createSubcontext("java:/comp/env/jdbc");
+
+                ic.bind("java:/comp/env/jdbc/WSO2AM_DB", basicDataSource);
+            }
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
+
+   /* public void testDataSource(){
+        Context ctx = null;
+        try {
+            ctx = new InitialContext();
+            DataSource dataSource = (DataSource) ctx.lookup("java:/comp/env/jdbc/WSO2AM_DB");
+            Assert.assertNotNull(dataSource);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }*/
+
     public void testGetSubscribersOfProvider() throws Exception {
-        Set<Subscriber> subscribers = apiMgtDAO.getSubscribersOfProvider("SUMEDHA");
+        Set<Subscriber> subscribers = apiMgtDAO.getInstance().getSubscribersOfProvider("SUMEDHA");
         assertNotNull(subscribers);
         assertTrue(subscribers.size() > 0);
     }
@@ -106,7 +180,7 @@ public class APIMgtDAOTest extends TestCase {
         apiInfoDTO.setApiName("API1");
         apiInfoDTO.setProviderId("SUMEDHA");
         apiInfoDTO.setVersion("V1.0.0");
-        APIKeyInfoDTO[] apiKeyInfoDTO = apiMgtDAO.getSubscribedUsersForAPI(apiInfoDTO);
+        APIKeyInfoDTO[] apiKeyInfoDTO = apiMgtDAO.getInstance().getSubscribedUsersForAPI(apiInfoDTO);
         assertNotNull(apiKeyInfoDTO);
         assertTrue(apiKeyInfoDTO.length > 1);
     }
@@ -139,7 +213,7 @@ public class APIMgtDAOTest extends TestCase {
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
         API api = new API(apiIdentifier);
-        apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED");
+        apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED", "admin");
     }
 
 	/*
@@ -354,5 +428,264 @@ public class APIMgtDAOTest extends TestCase {
             assertEquals("V1.0.0", apiId.getVersion());
         }
     }
+    public void testInsertApplicationPolicy() throws APIManagementException {
+        apiMgtDAO.addApplicationPolicy((ApplicationPolicy) getApplicationPolicy());
+    }
 
+    public void testInsertSubscriptionPolicy() throws APIManagementException {
+        apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) getSubscriptionPolicy());
+    }
+
+    public void testInsertAPIPolicy() throws APIManagementException {
+        apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser());
+    }
+
+    public void testUpdateApplicationPolicy() throws APIManagementException {
+        ApplicationPolicy policy = (ApplicationPolicy) getApplicationPolicy();
+        policy.setDescription("Updated application description");
+        apiMgtDAO.updateApplicationPolicy(policy);
+    }
+
+    public void testUpdateSubscriptionPolicy() throws APIManagementException {
+        SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy();
+        policy.setDescription("Updated subscription description");
+        apiMgtDAO.updateSubscriptionPolicy(policy);
+    }
+
+    public void testUpdateAPIPolicy() throws APIManagementException {
+        APIPolicy policy = (APIPolicy) getPolicyAPILevelPerUser();
+        policy.setDescription("New Description");
+
+        ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
+
+        Pipeline p = new Pipeline();
+
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("min");
+        requestCountLimit.setUnitTime(50);
+        requestCountLimit.setRequestCount(1000);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        ArrayList<Condition> conditions =  new ArrayList<Condition>();
+
+        DateCondition dateCondition = new DateCondition();
+        dateCondition.setSpecificDate("2016-03-03");
+        conditions.add(dateCondition);
+
+        HeaderCondition headerCondition1 = new HeaderCondition();
+        headerCondition1.setHeader("User-Agent");
+        headerCondition1.setValue("Chrome");
+        conditions.add(headerCondition1);
+
+        HeaderCondition headerCondition2 = new HeaderCondition();
+        headerCondition2.setHeader("Accept-Ranges");
+        headerCondition2.setValue("bytes");
+        conditions.add(headerCondition2);
+
+        QueryParameterCondition queryParameterCondition1 = new QueryParameterCondition();
+        queryParameterCondition1.setParameter("test1");
+        queryParameterCondition1.setValue("testValue1");
+        conditions.add(queryParameterCondition1);
+
+        QueryParameterCondition queryParameterCondition2 = new QueryParameterCondition();
+        queryParameterCondition2.setParameter("x");
+        queryParameterCondition2.setValue("abc");
+        conditions.add(queryParameterCondition2);
+
+        JWTClaimsCondition jwtClaimsCondition1= new JWTClaimsCondition();
+        jwtClaimsCondition1.setClaimUrl("test_url");
+        jwtClaimsCondition1.setAttribute("test_attribute");
+        conditions.add(jwtClaimsCondition1);
+
+        p.setQuotaPolicy(quotaPolicy);
+        p.setConditions(conditions);
+        pipelines.add(p);
+
+        policy.setPipelines(pipelines);
+        apiMgtDAO.updateAPIPolicy(policy);
+    }
+
+    public void testDeletePolicy() throws APIManagementException {
+        apiMgtDAO.removeThrottlePolicy("app", "Bronze", -1234);
+    }
+
+    public void testGetApplicationPolicies() throws APIManagementException {
+        apiMgtDAO.getApplicationPolicies(-1234);
+    }
+
+    public void testGetSubscriptionPolicies() throws APIManagementException {
+        apiMgtDAO.getSubscriptionPolicies(-1234);
+    }
+
+    public void testGetApiPolicies() throws APIManagementException {
+        apiMgtDAO.getAPIPolicies(-1234);
+    }
+
+    public void testGetApplicationPolicy() throws APIManagementException {
+        apiMgtDAO.getApplicationPolicy("Bronze", 4);
+    }
+
+    public void testGetSubscriptionPolicy() throws APIManagementException {
+        apiMgtDAO.getSubscriptionPolicy("Silver", 6);
+    }
+
+    public void testGetApiPolicy() throws APIManagementException {
+        apiMgtDAO.getAPIPolicy("Bronze", -1234);
+    }
+
+    private Policy getPolicyAPILevelPerUser(){
+        APIPolicy policy = new APIPolicy("Bronze");
+
+        policy.setUserLevel(PolicyConstants.PER_USER);
+        policy.setDescription("Description");
+        policy.setTenantId(-1234);
+
+        BandwidthLimit defaultLimit = new BandwidthLimit();
+        defaultLimit.setTimeUnit("min");
+        defaultLimit.setUnitTime(5);
+        defaultLimit.setDataAmount(400);
+        defaultLimit.setDataUnit("MB");
+
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setLimit(defaultLimit);
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+
+        policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+
+        List<Pipeline> pipelines;
+        Pipeline p;
+        QuotaPolicy quotaPolicy;
+        List<Condition> condition;
+        BandwidthLimit bandwidthLimit;
+        RequestCountLimit requestCountLimit;
+        pipelines = new ArrayList<Pipeline>();
+
+
+        ///////////pipeline item 1 start//////
+        p = new Pipeline();
+
+        quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+        bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setTimeUnit("min");
+        bandwidthLimit.setUnitTime(5);
+        bandwidthLimit.setDataAmount(100);
+        bandwidthLimit.setDataUnit("GB");
+        quotaPolicy.setLimit(bandwidthLimit);
+
+        condition =  new ArrayList<Condition>();
+        HTTPVerbCondition verbCond = new HTTPVerbCondition();
+        verbCond.setHttpVerb("POST");
+        condition.add(verbCond);
+
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+        condition.add(ipCondition);
+
+
+        DateRangeCondition dateRangeCondition = new DateRangeCondition();
+        dateRangeCondition.setStartingDate("2016-01-03");
+        dateRangeCondition.setEndingDate("2016-01-31");
+        condition.add(dateRangeCondition);
+
+        p.setQuotaPolicy(quotaPolicy);
+        p.setConditions(condition);
+        pipelines.add(p);
+        ///////////pipeline item 1 end//////
+
+        ///////////pipeline item 2 start//////
+        p = new Pipeline();
+
+        quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setTimeUnit("min");
+        requestCountLimit.setUnitTime(50);
+        requestCountLimit.setRequestCount(1000);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        condition =  new ArrayList<Condition>();
+
+        DateCondition dateCondition = new DateCondition();
+        dateCondition.setSpecificDate("2016-01-02");
+        condition.add(dateCondition);
+
+        HeaderCondition headerCondition1 = new HeaderCondition();
+        headerCondition1.setHeader("User-Agent");
+        headerCondition1.setValue("Firefox");
+        condition.add(headerCondition1);
+
+        HeaderCondition headerCondition2 = new HeaderCondition();
+        headerCondition2.setHeader("Accept-Ranges");
+        headerCondition2.setValue("bytes");
+        condition.add(headerCondition2);
+
+        QueryParameterCondition queryParameterCondition1 = new QueryParameterCondition();
+        queryParameterCondition1.setParameter("test1");
+        queryParameterCondition1.setValue("testValue1");
+        condition.add(queryParameterCondition1);
+
+        QueryParameterCondition queryParameterCondition2 = new QueryParameterCondition();
+        queryParameterCondition2.setParameter("test2");
+        queryParameterCondition2.setValue("testValue2");
+        condition.add(queryParameterCondition2);
+
+        JWTClaimsCondition jwtClaimsCondition1= new JWTClaimsCondition();
+        jwtClaimsCondition1.setClaimUrl("test_url");
+        jwtClaimsCondition1.setAttribute("test_attribute");
+        condition.add(jwtClaimsCondition1);
+
+        JWTClaimsCondition jwtClaimsCondition2= new JWTClaimsCondition();
+        jwtClaimsCondition2.setClaimUrl("test_url");
+        jwtClaimsCondition2.setAttribute("test_attribute");
+        condition.add(jwtClaimsCondition2);
+
+        p.setQuotaPolicy(quotaPolicy);
+        p.setConditions(condition);
+        pipelines.add(p);
+        ///////////pipeline item 2 end//////
+
+        policy.setPipelines(pipelines);
+        return policy;
+    }
+
+    private Policy getApplicationPolicy(){
+        ApplicationPolicy policy = new ApplicationPolicy("Bronze");
+        policy.setDescription("Bronze");
+        policy.setDescription("Application policy Description");
+        policy.setTenantId(4);
+
+        BandwidthLimit defaultLimit = new BandwidthLimit();
+        defaultLimit.setTimeUnit("min");
+        defaultLimit.setUnitTime(5);
+        defaultLimit.setDataAmount(600);
+        defaultLimit.setDataUnit("KB");
+
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setLimit(defaultLimit);
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+
+        policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return policy;
+    }
+
+    private Policy getSubscriptionPolicy(){
+        SubscriptionPolicy policy = new SubscriptionPolicy("Silver");
+        policy.setDisplayName("Silver");
+        policy.setDescription("Subscription policy Description");
+        policy.setTenantId(6);
+        policy.setBillingPlan("FREE");
+        RequestCountLimit defaultLimit = new RequestCountLimit();
+        defaultLimit.setTimeUnit("min");
+        defaultLimit.setUnitTime(50);
+        defaultLimit.setRequestCount(800);
+
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setLimit(defaultLimit);
+        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+
+        policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return policy;
+    }
 }

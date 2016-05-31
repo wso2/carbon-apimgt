@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 public final class APIUsageStatisticsClientConstants {
 
     public static final String API_LAST_ACCESS_TIME_SUMMARY = "API_LAST_ACCESS_TIME_SUMMARY";
@@ -105,16 +107,6 @@ public final class APIUsageStatisticsClientConstants {
     
     public static final String ALL_PROVIDERS = "__all_providers__";
 
-    public static final String API_USAGE_TRACKING = "APIUsageTracking.";
-
-    public static final String API_USAGE_JDBC_DRIVER =  API_USAGE_TRACKING + "JDBCDriver";
-
-    public static final String API_USAGE_JDBC_URL =  API_USAGE_TRACKING + "JDBCUrl";
-
-    public static final String API_USAGE_JDBC_UserName =  API_USAGE_TRACKING + "JDBCUserName";
-
-    public static final String API_USAGE_JDBC_Password =  API_USAGE_TRACKING + "JDBCPassword";
-    
     public static final String API_USAGEBY_DESTINATION_SUMMARY = "API_DESTINATION_SUMMARY";
 
     public static final String APPLICATION_NAME = "applicationName";
@@ -140,6 +132,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String HTTP_AUTH_HEADER_TYPE = "Basic";
 
     public static final String DAS_SEARCH_REST_API_URL = "/analytics/search";
+    public static final String DAS_SEARCH_COUNT_REST_API_URL = "/analytics/search_count";
     public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
     public static final String DAS_TABLE_EXIST_REST_API_URL = "/analytics/table_exists";
 
@@ -171,8 +164,21 @@ public final class APIUsageStatisticsClientConstants {
     public static final String ALIAS_THROTTLE_OUT_COUNT = "throttle_out_count";
 
     public static final String TENANT_DOMAIN = "tenantDomain";
+    public static final String API_EXECUTION_TME_DAY_SUMMARY = "API_EXE_TME_DAY_SUMMARY";
+    public static final String API_EXECUTION_TIME_HOUR_SUMMARY = "API_EXE_TIME_HOUR_SUMMARY";
+    public static final String API_EXECUTION_TIME_MINUTE_SUMMARY = "API_EXE_TIME_MIN_SUMMARY";
+    public static final String API_EXECUTION_TIME_SECONDS_SUMMARY = "API_EXE_TIME_SEC_SUMMARY";
 
     public static final String RDBMS_STATISTICS_CLIENT_TYPE = "RDBMS";
     public static final String REST_STATISTICS_CLIENT_TYPE = "REST";
 
+    public static final String HOUR = "hour";
+    public static final String MINUTES = "minutes";
+    public static final String SECONDS = "seconds";
+    public static final String MEDIATION = "mediationName";
+    public static final String EXECUTION_TIME = "executionTime";
+    public static final String COUNTRY_CITY_FACET = "key_country_city_facet";
+    public static final String API_REQUEST_GEO_LOCATION_SUMMARY = "API_REQ_GEO_LOC_SUMMARY";
+    public static final String API_REQUEST_USER_BROWSER_SUMMARY = "API_REQUEST_USER_BROWSER_SUMMARY";
+    public static String OS_BROWSER_FACET = "key_os_browser_facet";
 }
