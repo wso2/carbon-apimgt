@@ -66,7 +66,7 @@ include("/jagg/jagg.jag");
 
 
             dataResult = mod.getDataFromTable(tableName, fullSearchQuery, startindex, count, "api_version", sortOrderBool);
-            countResult = result = mod.getCountFromTable(tableName, fullSearchQuery);
+            countResult = mod.getCountFromTable(tableName, fullSearchQuery);
 
             parsedDataResult = JSON.parse(dataResult);
 
@@ -82,11 +82,15 @@ include("/jagg/jagg.jag");
                 var arr = new Array(parsedDataResult.length);
                 for (i=0; i<parsedDataResult.length ;i++) {
 
-                    arr[i] = new Array(3);
+                    arr[i] = new Array(2);
 
-                    arr[i][1] = parsedDataResult[i]["values"]["api_version"];
-                    arr[i][2] = parsedDataResult[i]["values"]["status"];
-
+                    arr[i][0] = parsedDataResult[i]["values"]["api_version"];
+                    var status = parsedDataResult[i]["values"]["status"];
+                    if (status != 'Available') {
+                        arr[i][1] = "Limited [" + status +"]";
+                    } else {
+                        arr[i][1] = status;
+                    }
                 }
 
                 obj = {
