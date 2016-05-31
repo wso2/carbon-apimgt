@@ -425,6 +425,7 @@
 							                    <input type="hidden" value="endpoint" name="implementation_methods" >
 							                    <div class="form-actions" id="saveButtons">
 							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" >Save</button>
+							                        <input type="hidden" id="hiddenGoToManage" value=""/>
 							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
 							                    </div>
 							                    </form>
@@ -856,7 +857,8 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
             $("#swaggerUpload").modal('hide');
         });
 
-        $('#go_to_manage').click(function(e){            
+        $('#go_to_manage').click(function(e){
+	    $("#hiddenGoToManage").val("gotonext");
             $("body").on("api_saved", function(e){
                 location.href = "<%= jagg.url("/manage?"+apiUrlId)%>";
             });
