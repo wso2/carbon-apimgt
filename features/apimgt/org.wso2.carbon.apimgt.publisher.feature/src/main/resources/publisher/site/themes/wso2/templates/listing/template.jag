@@ -252,15 +252,15 @@
                 </div>
     <%}else{%>
     	<%if(outputs.isCreatePermitted){ %>
-    	        <div class="message message-success">
-                    <h4><i class="icon fw fw-success"></i><%=i18n.localize("noAPIsMsg")%></h4>
+    	        <div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>
                     <p><%=i18n.localize("noAPIsMsg1")%></p>
                 </div>
                 <div style="display: inline"><a title="<%=i18n.localize("addAPI")%>" class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
         		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultTier%>', '<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
         <%}else{%>
-        		<div class="message message-success">
-                    <h4><i class="icon fw fw-success"></i><%=i18n.localize("noAPIsMsg")%></h4>
+        		<div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>
                     <p><%=i18n.localize("noAPIsMsg1")%></p>
                 </div>
         <%}%>
