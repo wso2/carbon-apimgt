@@ -44,10 +44,13 @@ var log = new Log();
         var currentLocation = request.getParameter("currentLocation");
         if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
             provider = allProviders;
+            if(org.wso2.carbon.utils.multitenancy.MultitenantUtils.isEmailUserName()){
+               provider = allProviders + "@" + tenantDomain;
+            }
         }
 
-        if (provider.indexOf("@") == -1) {
-            provider = provider + "@" + tenantDomain;
+        if(!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            provider = org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantAwareUsername(provider) + "@" + tenantDomain;
         }
 
         if (action === "getThrottleDataOfAPIAndApplication") {     

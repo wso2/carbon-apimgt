@@ -2122,7 +2122,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 preparedStatement.setString(index++, tenantDomain);
                 preparedStatement.setString(index++, apiName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     preparedStatement.setString(index++, provider);
                 }
                 if (!StringUtils.isEmpty(appName)) {
@@ -2213,7 +2212,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 preparedStatement.setString(index++, tenantDomain);
                 preparedStatement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     preparedStatement.setString(index++, provider);
                 }
                 preparedStatement.setString(index++, fromDate);

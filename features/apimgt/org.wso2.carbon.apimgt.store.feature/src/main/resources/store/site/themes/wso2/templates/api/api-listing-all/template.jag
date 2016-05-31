@@ -9,7 +9,7 @@ if (outputs.error) { %>
           </div>
 <% }else {
 
-          var i, api, path, thumbURL, apis = outputs.apis,totalLength=outputs.totalLength;
+          var i, api, path, thumbURL, apis = outputs.apis,totalLength=outputs.totalLength, isRatingActivated=outputs.isRatingActivated ;
                         if(apis!=null) {
 	                        length = totalLength;
 	
@@ -174,7 +174,9 @@ var reqUrl = request.getRequestURI();
 				                                    <%} else { %>
 				                                    	<p><%=api.provider%></p>
 				                                    <% } %>
-				                                    <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+				                                    <% if(isRatingActivated){ %>
+								                                  <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+				                                    <% } %>
 				                                </div>
                							 </div>
                						</div>
@@ -228,7 +230,9 @@ var reqUrl = request.getRequestURI();
                                     <%} else { %>
                                     	<p><%=api.provider%></p>
                                     <% } %>
-                                    <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+                                    <% if(isRatingActivated){ %>
+                                        <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
