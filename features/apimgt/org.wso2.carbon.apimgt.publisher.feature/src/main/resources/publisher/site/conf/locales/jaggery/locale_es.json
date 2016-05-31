@@ -246,9 +246,9 @@
     "re-publish" : "Volver a publicar",
     "retire" : "Retirarse",
 
-    "applicationsOverTime" : "Applications Time",
-    "userSubscriptionsOverTime" : "Subscriptions Time",
-    "developersOverTime" : "Developers Time"
+    "applicationsOverTime" : "Las aplicaciones creadas a través del tiempo",
+    "userSubscriptionsOverTime" : "Suscripciones creado a lo largo de tiempo",
+    "developersOverTime" : "Desarrollador Inscripciones a través del tiempo"
 
     
     
