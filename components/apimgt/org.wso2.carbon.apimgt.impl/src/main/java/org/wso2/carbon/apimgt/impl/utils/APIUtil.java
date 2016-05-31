@@ -2071,67 +2071,6 @@ public final class APIUtil {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
-    
-    
-    /**
-     * Checks whether the specified user has the specified permission.
-     *
-     * @param username   A username
-     * @param permission A valid Carbon permission
-     * @throws APIManagementException If the user does not have the specified permission or if an error occurs
-     */
-    public static boolean hasPermission(String username, String permission) throws APIManagementException {
-    	boolean authorized = false;
-        if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
-        }
-
-        if (isPermissionCheckDisabled()) {
-            log.debug("Permission verification is disabled by APIStore configuration");
-            authorized = true;
-            return authorized;
-        }
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                    getTenantId(tenantDomain);
-
-            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
-            } else {
-                // On the first login attempt to publisher (without browsing the
-                // store), the user realm will be null.
-                if (ServiceReferenceHolder.getUserRealm() == null) {
-                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
-                            .getRealmService()
-                            .getTenantUserRealm(tenantId));
-                }
-                authorized =
-                        AuthorizationManager.getInstance()
-                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
-                                        permission);
-            }
-            
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + username + " authorized or not", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-        
-        return authorized;
-    }
 
     /**
      * Checks whether the disablePermissionCheck parameter enabled
