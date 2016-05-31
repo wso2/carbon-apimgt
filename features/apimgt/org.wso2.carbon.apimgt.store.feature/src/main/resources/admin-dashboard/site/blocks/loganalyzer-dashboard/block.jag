@@ -1,0 +1,8 @@
+<%
+jagg.block("loganalyzer-dashboard", {
+    initializer:function (data) {
+    	
+    }
+
+});
+%>

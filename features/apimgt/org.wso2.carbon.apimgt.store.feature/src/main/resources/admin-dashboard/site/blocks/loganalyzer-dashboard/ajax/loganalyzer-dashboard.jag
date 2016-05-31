@@ -1,0 +1,13 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    }
+}());
+%>
