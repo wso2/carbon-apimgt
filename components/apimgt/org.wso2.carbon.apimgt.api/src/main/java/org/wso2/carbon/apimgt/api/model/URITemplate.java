@@ -31,6 +31,8 @@ public class URITemplate implements Serializable{
     private String authType;
     private LinkedHashSet<String> httpVerbs = new LinkedHashSet<String>();
     private List<String> authTypes = new ArrayList<String>();
+    private List<String> throttlingConditions = new ArrayList<String>();
+    private String applicableLevel;
     private String throttlingTier;
     private List<String> throttlingTiers = new ArrayList<String>();
     private Scope scope;
@@ -43,11 +45,18 @@ public class URITemplate implements Serializable{
     }
 
 
+    public List<String> getThrottlingConditions() {
+        return throttlingConditions;
+    }
+
+    public void setThrottlingConditions(List<String> throttlingConditions) {
+        this.throttlingConditions = throttlingConditions;
+    }
+
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
     }
-
-    /**
+	/**
      * Set mediation script for a given http method
      * @param method http method name
      * @param mediationScript mediation script content
@@ -196,6 +205,14 @@ public class URITemplate implements Serializable{
         return stringBuilder.toString().trim();
     }
 
+    public String getThrottlingConditionsAsString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String authType : throttlingConditions) {
+            stringBuilder.append(authType).append(" ");
+        }
+        return stringBuilder.toString().trim();
+    }
+
     public void setThrottlingTiers(String tier) {
         throttlingTiers.add(tier);
     }
@@ -230,6 +247,8 @@ public class URITemplate implements Serializable{
             Map verb = new LinkedHashMap();
             verb.put("auth_type",authTypes.get(i));
             verb.put("throttling_tier",throttlingTiers.get(i));
+            //Following parameter is not required as it not need to reflect UI level. If need please enable it.
+            // /verb.put("throttling_conditions", throttlingConditions.get(i));
             try{
                 Scope tmpScope = scopes.get(i);
                 if(tmpScope != null){
@@ -243,5 +262,13 @@ public class URITemplate implements Serializable{
         }
         //todo this is a hack to make key validation service stub from braking need to rewrite.
         return JSONValue.toJSONString(verbs);
+    }
+
+    public String getApplicableLevel() {
+        return applicableLevel;
+    }
+
+    public void setApplicableLevel(String applicableLevel) {
+        this.applicableLevel = applicableLevel;
     }
 }

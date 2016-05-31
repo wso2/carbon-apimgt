@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,6 +34,12 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriber;
     private String tier;
     private String type;
+    //isContentAware property is here to notify if there is at least one content based tier associated with request
+    //If this property is true then throttle handler should build message or get content length and pass it to
+    //throttle server.
+    private boolean contentAware;
+    //Form API Manager 2.0 onward API specific tiers can define and this property is here to pass it.
+    private String apiTier;
     //JWT or SAML token containing details of API invoker
     private String userType;
     private String endUserToken;
@@ -45,6 +52,36 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long validityPeriod;
     private long issuedTime;
     private List<String> authorizedDomains;
+    //Following throttle data list can be use to hold throttle data and api level throttle key
+    //should be its first element.
+    private  List<String> throttlingDataList;
+    private int spikeArrestLimit;
+    private String subscriberTenantDomain;
+    private String spikeArrestUnit;
+    private boolean stopOnQuotaReach;
+    public List<String> getThrottlingDataList() {
+        return throttlingDataList;
+    }
+
+    public void setThrottlingDataList(List<String> throttlingDataList) {
+        this.throttlingDataList = throttlingDataList;
+    }
+
+    public String getApiTier() {
+        return apiTier;
+    }
+
+    public void setApiTier(String apiTier) {
+        this.apiTier = apiTier;
+    }
+
+    public boolean isContentAware() {
+        return contentAware;
+    }
+
+    public void setContentAware(boolean contentAware) {
+        this.contentAware = contentAware;
+    }
 
     private Set<String> scopes;
 
@@ -149,16 +186,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setIssuedTime(long issuedTime) {
         this.issuedTime = issuedTime;
     }
-    
+
     public List<String> getAuthorizedDomains() {
-		return authorizedDomains;
-	}
+        return authorizedDomains;
+    }
 
-	public void setAuthorizedDomains(List<String> authorizedDomains) {
-		this.authorizedDomains = authorizedDomains;
-	}
+    public void setAuthorizedDomains(List<String> authorizedDomains) {
+        this.authorizedDomains = authorizedDomains;
+    }
 
-	public String getUserType() {
+    public String getUserType() {
         return userType;
     }
 
@@ -216,6 +253,10 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , issuedTime:").append(issuedTime).
                 append(" , apiName:").append(apiName).
                 append(" , consumerKey:").append(consumerKey).
+                append(" , spikeArrestLimit:").append(spikeArrestLimit).
+                append(" , spikeArrestUnit:").append(spikeArrestUnit).
+                append(" , subscriberTenantDomain:").append(subscriberTenantDomain).
+                append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
                 append(" , apiPublisher:").append(apiPublisher);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
@@ -239,6 +280,38 @@ public class APIKeyValidationInfoDTO implements Serializable {
         }
 
         return builder.toString();
+    }
+
+    public int getSpikeArrestLimit() {
+        return spikeArrestLimit;
+    }
+
+    public void setSpikeArrestLimit(int spikeArrestLimit) {
+        this.spikeArrestLimit = spikeArrestLimit;
+    }
+
+    public String getSpikeArrestUnit() {
+        return spikeArrestUnit;
+    }
+
+    public void setSpikeArrestUnit(String spikeArrestUnit) {
+        this.spikeArrestUnit = spikeArrestUnit;
+    }
+
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    public String getSubscriberTenantDomain() {
+        return subscriberTenantDomain;
+    }
+
+    public void setSubscriberTenantDomain(String subscriberTenantDomain) {
+        this.subscriberTenantDomain = subscriberTenantDomain;
     }
 }
 

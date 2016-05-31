@@ -1,0 +1,15 @@
+<%
+jagg.module("stats", {
+
+    isDataPublishingEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "stats/stats.jag").isDataPublishingEnabled.apply(this, arguments);
+    },
+    getDataFromTable:function () {
+        return jagg.require(jagg.getModulesDir() + "stats/stats.jag").getDataFromTable.apply(this, arguments);
+    },
+
+    getCountFromTable:function () {
+        return jagg.require(jagg.getModulesDir() + "stats/stats.jag").getCountFromTable.apply(this, arguments);
+    }
+});
+%>

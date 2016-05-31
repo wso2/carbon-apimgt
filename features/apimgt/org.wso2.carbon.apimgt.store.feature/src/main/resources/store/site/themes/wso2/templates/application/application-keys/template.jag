@@ -1,0 +1,149 @@
+<% jagg.template("application/application-keys", function(inputs, outputs, jagg) { 
+//@todo if prodkey and consumer is null 
+//@todo place holder when generating keys ie generating.....
+//@todo check production keys with workflows
+//@todo need to username and password to password grant curl
+//@todo check the ui with scope selection
+//@todo add help buttons
+	var type = outputs.type;
+    var app = outputs.app;
+
+    var gatewayurlendpoint = outputs.gatewayurl;
+    var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
+    if (customURL != null) {
+        gatewayurlendpoint = customURL;
+    }
+%>
+
+
+<script id="keys-template" type="text/x-handlebars-template">
+  {{#if ConsumerKey }}
+	<div class="row">	  
+	  <div class="col-md-12 col-lg-6">
+	  	<button type="button" class="btn btn-default show_keys">{{# if show_keys }}<i class="fw fw-view"></i> Hide Keys{{else}}<i class="fw fw-view"></i> Show Keys{{/if}}</button>
+	  	<br /><br />
+	  	<form>
+	  	  <fieldset>
+		  <div class="form-group">
+		    <label class="" for="ConsumerKey"><%=i18n.localize("consumerKey")%></label>
+		    <div class="input-group">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" id="ConsumerKey" title="<%=i18n.localize("consumerKey")%>" placeholder="<%=i18n.localize("consumerKey")%>" value="{{ConsumerKey}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerKey}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="" for="ConsumerSecret"><%=i18n.localize("consumerSecret")%></label>
+		    <div class="input-group">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" class="form-control" title="<%=i18n.localize("consumerSecret")%>" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" value="{{ConsumerSecret}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{ConsumerSecret}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		<div class="row">
+		  <div class="col-md-12">
+		  	<h4>Generating Access Tokens</h4>
+		  	<p>Following cURL command shows how to generate an access token using password grant type.</p>
+			<div class="highlight"><pre>
+		 <a data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
+	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
+	     <%= gatewayurlendpoint %>/token</textarea></pre>
+	        </div>
+	        <p>In a similar manner you can generate an access token using client credential grant type with the following cURL command.</p>	  	
+			<div class="highlight"><pre>
+			<a data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
+	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
+	     <%= gatewayurlendpoint %>/token</textarea></pre>
+	        </div>        
+		  </div>
+		</div>		  
+		<h4>Generate a Test Access Token</h4>
+		  <div class="form-group">
+		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("accessToken")%></label>
+		    <div class="input-group">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("accessToken")%>" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
+		      <div class="input-group-btn">
+		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
+                    <i class="fw fw-copy"></i>
+                </button>		      
+		      </div>
+		    </div>
+		  </div>
+		  <p>
+		  Above token has a validity period of <strong>{{ ValidityTime }}</strong> seconds.
+		  {{#if KeyScope}}
+			And the token has ( <strong>{{KeyScope}}</strong> ) scopes.		    		  			  
+		  {{/if}}
+		  </p>
+		  </fieldset>
+	  	</form>		  	
+	  	<form class="form-inline">
+		  <div class="form-group">		    
+		    <span>Scopes </span>
+		    <select class="selectpicker scope_select"  multiple title="Select..">
+			  <option title="sample" data-content="<strong>sample</strong><br /><span>sample scope.</span>">sample</option>
+			{{#each Scopes}}
+				<option title="{{scopeName}}" data-content="<strong>{{scopeName}}</strong><br /><span>{{scopeName}} scope.</span>">{{scopeKey}}</option>
+			{{/each}}
+			</select>	    
+		    <span>Validity period </span>
+		    <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
+			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>		    
+		  </div> 		  
+		</form>		  	
+	  </div>
+	</div>
+	<br />
+	
+
+  {{else}}
+    <div class="message message-info">
+    	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
+        <p><%=i18n.localize("sandboxKeyMsg")%></p>
+    </div>
+  	<form class="{{#unless provide_keys_form }}form-inline{{/unless}}">
+  	  {{#unless provide_keys_form }}
+	  <div class="form-group">	    
+	    <span>Access token validity period </span>
+	    <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
+	    <button  class="btn btn-primary generatekeys">Generate keys</button>    
+	  </div>
+	  {{/unless}}
+	  {{#if provide_keys }}
+	  	{{#if provide_keys_form }}
+	  	<h4>Provide Keys</h4>
+		<div class="row">
+		  <div class="col-md-12 col-lg-6">	  	
+		  <fieldset>
+		  <div class="form-group">
+		    <label class="" for="ConsumerKey"><%=i18n.localize("consumerKey")%></label>
+    		<input type="text" class="form-control" title="ConsumerKey" id="ConsumerKey" placeholder="<%=i18n.localize("consumerKey")%>" />
+		  </div>
+		  <div class="form-group">
+		    <label class="" for="ConsumerSecret"><%=i18n.localize("consumerSecret")%></label>
+		    <input type="text" class="form-control" title="ConsumerSecret" id="ConsumerSecret" placeholder="<%=i18n.localize("consumerSecret")%>" />
+		  </div>
+		  <div class="form-group">
+		    <button  class="btn btn-primary provide_keys_save">Save</button>	        
+		    <button  class="btn btn-secondory provide_keys_cancel">Cancel</button>
+		  </div>
+		  </fieldset>
+		  </div>
+		</div>
+	  	{{else}}
+		  <div class="form-group">	    
+		    <button  class="btn btn-secondory provide_keys">Provide Keys</button>	        
+		  </div>
+		{{/if}}
+	  {{/if}}
+	</form>			    
+  {{/if}}
+</script>
+
+<% }); %>

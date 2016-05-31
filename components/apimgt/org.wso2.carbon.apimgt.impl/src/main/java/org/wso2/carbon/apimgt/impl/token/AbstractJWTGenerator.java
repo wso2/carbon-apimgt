@@ -18,12 +18,13 @@
 
 package org.wso2.carbon.apimgt.impl.token;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-//import org.codehaus.jettison.json.JSONException;
-//import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -32,10 +33,14 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -69,31 +74,30 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private String signatureAlgorithm = SHA256_WITH_RSA;
 
-    private static final String SIGNATURE_ALGORITHM = "APIConsumerAuthentication.SignatureAlgorithm";
-
     private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<Integer, Key>();
     private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<Integer, Certificate>();
 
+    private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
     public AbstractJWTGenerator() {
 
 
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(ClaimsRetriever.CONSUMER_DIALECT_URI);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
         signatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(SIGNATURE_ALGORITHM);
-        if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm) || SHA256_WITH_RSA.equals
-                (signatureAlgorithm))) {
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_SIGNATURE_ALGORITHM);
+        if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
+                                            || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
 
 
         String claimsRetrieverImplClass =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(ClaimsRetriever.CLAIMS_RETRIEVER_IMPL_CLASS);
+                        getAPIManagerConfiguration().getFirstProperty(APIConstants.CLAIMS_RETRIEVER_CLASS);
 
         if (claimsRetrieverImplClass != null) {
             try {
@@ -124,6 +128,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public abstract Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
             String version, String accessToken) throws APIManagementException;
+
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
             throws APIManagementException {
         //To have backward compatibility with implementations done based on TokenGenerator interface
@@ -138,10 +143,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                                 String accessToken) throws APIManagementException {
 
         String jwtHeader = buildHeader(keyValidationInfoDTO);
-
-        /*//add cert thumbprint to header
-     String headerWithCertThumb = addCertToHeader(endUserName);*/
-
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
@@ -198,36 +199,52 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         Map<String, String> standardClaims = populateStandardClaims(keyValidationInfoDTO, apiContext, version);
         Map<String, String> customClaims = populateCustomClaims(keyValidationInfoDTO, apiContext, version, accessToken);
 
+        //get tenantId
+        int tenantId = APIUtil.getTenantId(keyValidationInfoDTO.getEndUserName());
+
+        String claimSeparator = getMultiAttributeSeparator(tenantId);
+        if (StringUtils.isNotBlank(claimSeparator)) {
+            userAttributeSeparator = claimSeparator;
+        }
+
         if (standardClaims != null) {
             if (customClaims != null) {
                 standardClaims.putAll(customClaims);
             }
 
-            StringBuilder body = new StringBuilder();
-            body.append('{');
+            Map<String, Object> claims = new HashMap<String, Object>();
+            JWTClaimsSet claimsSet = new JWTClaimsSet();
 
-            for (Map.Entry<String, String> entry : standardClaims.entrySet()) {
-                String key = entry.getKey();
-                if ("exp".equals(key) || "nbf".equals(key) || "iat".equals(key)) {
-                    //These values should be numbers.
-                    body.append('\"').append(key).append("\":").append(entry.getValue()).append(',');
-                } else {
-                    body.append('\"').append(key).append("\":\"").append(entry.getValue()).append("\",");
+            if(standardClaims != null) {
+                Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
+                while (it.hasNext()) {
+                    String claimURI = it.next();
+                    String claimVal = standardClaims.get(claimURI);
+                    List<String> claimList = new ArrayList<String>();
+                    if (userAttributeSeparator != null && claimVal != null && claimVal.contains(userAttributeSeparator)) {
+                        StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
+                        while (st.hasMoreElements()) {
+                            String attValue = st.nextElement().toString();
+                            if (StringUtils.isNotBlank(attValue)) {
+                                claimList.add(attValue);
+                            }
+                        }
+                        claims.put(claimURI, claimList.toArray(new String[claimList.size()]));
+                    } else if ("exp".equals(claimURI)) {
+                        claims.put("exp", new Date(Long.valueOf(standardClaims.get(claimURI))));
+                    } else {
+                        claims.put(claimURI, claimVal);
+                    }
                 }
             }
 
-            if (body.length() > 1) {
-                body.delete(body.length() - 1, body.length());
-            }
-
-            body.append('}');
-            return body.toString();
+            claimsSet.setAllClaims(claims);
+            return claimsSet.toJSONObject().toJSONString();
         }
         return null;
     }
 
-    private byte[] signJWT(String assertion, String endUserName)
-            throws APIManagementException {
+    private byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 
         String tenantDomain = null;
 
@@ -357,31 +374,31 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             //generate the SHA-1 thumbprint of the certificate
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
             MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            byte[] der = publicCert.getEncoded();
-            digestValue.update(der);
-            byte[] digestInBytes = digestValue.digest();
+            if (publicCert != null) {
+                byte[] der = publicCert.getEncoded();
+                digestValue.update(der);
+                byte[] digestInBytes = digestValue.digest();
+                Base64  base64 = new Base64(true);
+                String base64UrlEncodedThumbPrint = base64.encodeToString(digestInBytes).trim();
+                StringBuilder jwtHeader = new StringBuilder();
+                //Sample header
+                //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
+                //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
+                jwtHeader.append("{\"typ\":\"JWT\",");
+                jwtHeader.append("\"alg\":\"");
+                jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
+                jwtHeader.append("\",");
 
-            String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint.getBytes(Charset.defaultCharset()));
-            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
-            //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
-            //return headerWithCertThumb;
+                jwtHeader.append("\"x5t\":\"");
+                jwtHeader.append(base64UrlEncodedThumbPrint);
+                jwtHeader.append('\"');
 
-            StringBuilder jwtHeader = new StringBuilder();
-            //Sample header
-            //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"NmJmOGUxMzZlYjM2ZDRhNTZlYTA1YzdhZTRiOWE0NWI2M2JmOTc1ZA=="}
-            //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append('\"');
-
-            jwtHeader.append('}');
-            return jwtHeader.toString();
+                jwtHeader.append('}');
+                return jwtHeader.toString();
+            } else {
+                String error = "Error in obtaining tenant's keystore";
+                throw new APIManagementException(error);
+            }
 
         } catch (KeyStoreException e) {
             String error = "Error in obtaining tenant's keystore";
@@ -436,5 +453,30 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         else{
             return signatureAlgorithm;
         }
+    }
+
+    private String getMultiAttributeSeparator(int tenantId) {
+        try {
+            RealmConfiguration realmConfiguration = null;
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+            if (realmService != null && tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+                UserStoreManager userStoreManager = (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+
+
+                realmConfiguration = userStoreManager.getRealmConfiguration();
+            }
+
+            if (realmConfiguration != null) {
+                String claimSeparator = realmConfiguration.getUserStoreProperty(APIConstants.MULTI_ATTRIBUTE_SEPARATOR);
+                if (claimSeparator != null && !claimSeparator.trim().isEmpty()) {
+                    return claimSeparator;
+                }
+            }
+        } catch (UserStoreException e) {
+            log.error("Error occurred while getting the realm configuration, User store properties might not be " +
+                      "returned", e);
+        }
+        return null;
     }
 }

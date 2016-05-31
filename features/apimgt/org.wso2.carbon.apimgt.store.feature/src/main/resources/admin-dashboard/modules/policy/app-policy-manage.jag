@@ -1,0 +1,55 @@
+<%
+var log = new Log();
+
+var deleteAppPolicy = function (policyName) {
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+        var hasSubscription = apiProvider.hasAttachments(provider,policyName, "app");
+
+        if(hasSubscription){
+            return {
+                error: true,
+                message: "Policy already attached to an application "
+            };
+        }else{
+           var appPolicies = apiProvider.deletePolicy(provider, "app", policyName);
+            return {
+                error: false,
+                appPolicies: appPolicies
+            };
+        }
+
+        
+    } catch (ex) {
+        var errorMessage = "Error occurred while deleting policy: " + policyName + " (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var getAllAppPolicies = function () {
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var appPolicies = apiProvider.getPolicies(provider,"app");
+        return {
+            error: false,
+            appPolicies: appPolicies
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting all app policies (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+%>

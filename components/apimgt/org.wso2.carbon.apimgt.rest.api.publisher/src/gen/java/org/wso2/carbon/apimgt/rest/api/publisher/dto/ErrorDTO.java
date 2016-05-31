@@ -82,9 +82,9 @@ public class ErrorDTO  {
 
   
   /**
-   * If there are more than one error list them out. \nFor example, list out validation errors by each field.
+   * If there are more than one error list them out.\nFor example, list out validation errors by each field.
    **/
-  @ApiModelProperty(value = "If there are more than one error list them out. \nFor example, list out validation errors by each field.")
+  @ApiModelProperty(value = "If there are more than one error list them out.\nFor example, list out validation errors by each field.")
   @JsonProperty("error")
   public List<ErrorListItemDTO> getError() {
     return error;

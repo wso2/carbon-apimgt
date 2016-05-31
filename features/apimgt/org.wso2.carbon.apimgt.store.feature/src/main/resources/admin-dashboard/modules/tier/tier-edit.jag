@@ -48,4 +48,28 @@ var constructTierObject  = function(tierName, requestCount, unitTime, descriptio
 
     return tier;
 }
+
+var updateTierPermissions = function (tierPermission) {
+    var result,  length,log = new Log(),
+            list = [],
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.updateTierPermissions(tierPermission);
+        if (log.isDebugEnabled()) {
+            log.debug("updateSubscription : " + stringify(apis));
+        }
+
+        return {
+            error:false,
+            update:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 %>

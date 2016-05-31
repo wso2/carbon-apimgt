@@ -1,0 +1,18 @@
+<%
+jagg.initializer("stats/api-subscriptions", {
+
+    preInitialize:function () {
+        jagg.addFooterJS("stats", "d3" , "libs/nvd3/js/d3.v3.js");
+        jagg.addHeaderJS("stats", "common", "templates/stats/js/stats.js");
+        jagg.addFooterJS("stats","pagination","libs/pagination/jquery.simplePagination.js");
+        jagg.addFooterJS("stats", "jplot", "templates/stats/api-subscriptions/js/stats.js");
+    }
+});
+%>
+
+
+
+
+
+
+

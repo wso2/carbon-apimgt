@@ -32,6 +32,10 @@ jagg.block("api/api-info", {
                 user = jagg.getUser();
         var showConsole = true;
         var isAdvertiseOnly;
+        var isGlobalCEPEnabled;
+        var mod = jagg.module("manager");
+        var isForumEnabled = mod.isForumEnabled();
+
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
         }
@@ -68,18 +72,20 @@ jagg.block("api/api-info", {
                     }
             result = jagg.module("tiers").getDeniedTiers();
             deniedTiers = result.tiers;
+            isGlobalCEPEnabled = jagg.module("tiers").isGlobalCEPThrottlingEnabled();
 
         }
         if (!isAdvertiseOnly) {
             if (tenantDomain == "carbon.super" || tenantDomain == null) {
                 if (showConsole) {
-                    return {
+                    var result = {
                         "api": api,
                         "deniedTiers": deniedTiers,
                         "applications": list,
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -116,43 +122,38 @@ jagg.block("api/api-info", {
                                             }
                                         }
                                     ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("forum"),
-                                    "body": [
-                                        {
-                                            "name": "forum/forum-list",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
                                 }
                             ]
                         }
                     };
+
+                    if(isForumEnabled) {
+                        result.tabs.tabs.push(
+                            {
+                                "title": i18n.localize("forum"),
+                                "body": [
+                                    {
+                                        "name": "forum/forum-list",
+                                        "inputs": {
+                                            "api": api,
+                                            "uriTemplates": uriTemplates
+                                        }
+                                    }
+                                ]
+                            }
+                        );
+                    }
+                    return result;
                 }
                 else {
-                    return {
+                    var result = {
                         "api": api,
                         "deniedTiers": deniedTiers,
                         "applications": list,
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -177,34 +178,28 @@ jagg.block("api/api-info", {
                                             }
                                         }
                                     ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("forum"),
-                                    "body": [
-                                        {
-                                            "name": "forum/forum-list",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
                                 }
                             ]
                         }
                     };
+
+                    if(isForumEnabled) {
+                        result.tabs.tabs.push(
+                            {
+                                "title": i18n.localize("forum"),
+                                "body": [
+                                    {
+                                        "name": "forum/forum-list",
+                                        "inputs": {
+                                            "api": api,
+                                            "uriTemplates": uriTemplates
+                                        }
+                                    }
+                                ]
+                            }
+                        );
+                    }
+                    return result;
 
                 }
             } else {
@@ -216,6 +211,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -252,18 +248,6 @@ jagg.block("api/api-info", {
                                             }
                                         }
                                     ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
-                                            }
-                                        }
-                                    ]
                                 }
                             ]
                         }
@@ -277,6 +261,7 @@ jagg.block("api/api-info", {
                         "user": user,
                         "uriTemplates": uriTemplates,
                         "isRatingActivated": isRatingActivated,
+                        "isGlobalCEPEnabled": isGlobalCEPEnabled,
                         "tabs": {
                             "tabs": [
                                 {
@@ -298,18 +283,6 @@ jagg.block("api/api-info", {
                                             "name": "api/documentation",
                                             "inputs": {
                                                 "api": api
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
-                                    "title": i18n.localize("throttling.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/throttling",
-                                            "inputs": {
-                                                "api": api,
-                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
@@ -329,6 +302,7 @@ jagg.block("api/api-info", {
                 "user": user,
                 "uriTemplates": uriTemplates,
                 "isRatingActivated": isRatingActivated,
+                "isGlobalCEPEnabled": isGlobalCEPEnabled,
                 "tabs": {
                     "tabs": [
                         {

@@ -1,0 +1,32 @@
+<%
+jagg.block("application/application-edit", {
+    initializer:function (data) {
+
+    },
+
+    getOutputs:function (inputs) {
+
+        user = jagg.getUser();
+        var application = null;
+        var oauthapp = null;
+        if (user) {
+            username = user.username;
+            var applicationName = request.getParameter("name");
+            var groupId = session.get("groupId");
+
+            mod = jagg.module("application");
+            result = mod.getApplicationByName(username,applicationName,groupId);
+            application = result.application;
+        }
+
+        var tiers, result;
+        result = jagg.module("tiers").getApplicationTiers();
+        tiers = result.tiers;
+
+        return {
+            "tiers":tiers,
+            "application":application
+        };
+    }
+});
+%>

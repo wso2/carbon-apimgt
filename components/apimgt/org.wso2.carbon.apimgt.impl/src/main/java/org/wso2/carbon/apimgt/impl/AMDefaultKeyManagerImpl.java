@@ -281,7 +281,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Call the /revoke only if there's a token to be revoked.
         try {
-            if (tokenRequest.getTokenToRevoke() != null) {
+            if (tokenRequest.getTokenToRevoke() != null && tokenRequest.getTokenToRevoke() != "") {
                 URL revokeEndpointURL = new URL(revokeEndpoint);
                 String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
                 int revokeEndpointPort = revokeEndpointURL.getPort();
@@ -319,7 +319,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
             String applicationTokenScope = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                                             getAPIManagerConfiguration().getFirstProperty(APIConstants
-                                                                            .API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE);
+                                                                            .APPLICATION_TOKEN_SCOPE);
 
             // When validity time set to a negative value, a token is considered never to expire.
             if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
@@ -433,7 +433,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String[] scopes = responseDTO.getScope();
         String applicationTokenScope = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                                                 getAPIManagerConfiguration().getFirstProperty(APIConstants.
-                                                                            API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE);
+                APPLICATION_TOKEN_SCOPE);
 
         if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
             if (Arrays.asList(scopes).contains(applicationTokenScope)) {
@@ -533,8 +533,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
                 ;
                 this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
-                        .API_KEY_VALIDATOR_REVOKE_API_URL));
-                String revokeUrl = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_API_URL);
+                        .REVOKE_API_URL));
+                String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
 
                 // Read the revoke url and replace revoke part to get token url.
                 String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;

@@ -32,6 +32,8 @@ public class APIResourcePathUsageDTO {
 
     private String time;
 
+    private String resourcePath;
+
     public String getApiName() {
         return apiName;
     }
@@ -75,4 +77,12 @@ public class APIResourcePathUsageDTO {
     public String getTime() {return time;}
 
     public void setTime(String time) {this.time = time;}
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
 }

@@ -17,10 +17,9 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher;
 
-import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 
 public interface APIMgtUsageDataPublisher {
 
@@ -33,5 +32,9 @@ public interface APIMgtUsageDataPublisher {
     public void publishEvent(FaultPublisherDTO faultPublisherDTO);
 
     public void publishEvent(ThrottlePublisherDTO throttlePublisherDTO);
+
+    public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO);
+
+    public void publishEvent(AlertTypeDTO alertTypeDTO) throws APIManagementException;
 
 }

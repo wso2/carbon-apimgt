@@ -32,7 +32,6 @@ var getApplicationTiers = function () {
     var username = user.username;
 
     try {
-
         if (username != null) {
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer(username);
         } else {
@@ -90,5 +89,13 @@ var getDeniedTiers = function () {
     }
 };
 
+var isGlobalCEPThrottlingEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isAdvanceThrottlingEnabled();
+};
+var isUnlimitedTierEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isEnabledUnlimitedTier();
+};
 %>
 

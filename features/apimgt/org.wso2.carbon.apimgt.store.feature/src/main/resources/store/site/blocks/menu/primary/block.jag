@@ -22,67 +22,60 @@ jagg.block("menu/primary", {
 		var urlPrefix = jagg.getTenantURLPrefix("?");
         var mod = jagg.module("manager");
         var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
+        var isForumEnabled = mod.isForumEnabled();
 
         links.push({
             "title":i18n.localize("apis"),
             "url":jagg.getMappedUrl("/"+urlPrefix),
             "classes":"link-home",
-            "classIcon":"fa fa-cogs",
+            "classIcon":"fw fw-api fw-2x",
             "tooltip":i18n.localize("apisTooltip"),
             "active":(path == "/site/pages/list-apis.jag")
         });
         
-        links.push({
+        /*links.push({
             "title":i18n.localize("viewprototypedapis"),
             "url":jagg.getMappedUrl("/site/pages/list-prototyped-apis.jag"+urlPrefix),
             "classes":"link-ss",
             "classIcon":"fa fa-cog",
             "tooltip":i18n.localize("prototypedApisTooltip"),
             "active":(path == "/site/pages/list-prototyped-apis.jag")
-        });
+        });*/
 
         links.push({
             "title":i18n.localize("myApps"),
             "url":jagg.getMappedUrl("/site/pages/applications.jag"+urlPrefix),
             "classes":"link-myapplications" + (user ? "" : " need-login"),
-            "classIcon":"fa fa-suitcase",
+            "classIcon":"fw fw-application fw-2x",
             "tooltip":i18n.localize("myAppsTooltip"),
             "active":(path == "/site/pages/applications.jag")
         });
-
+        /*
         links.push({
             "title":i18n.localize("mySubs"),
             "url":jagg.getMappedUrl("/site/pages/subscriptions.jag"+urlPrefix),
             "classes":"link-mysubscriptions" + (user ? "" : " need-login"),
-            "classIcon":"fa fa-tags",
+            "classIcon":"fw fw-subscribe fw-2x",
             "tooltip":i18n.localize("mySubsTooltip"),
             "active":(path == "/site/pages/subscriptions.jag")
         });
+*/
 
-        var result = jagg.module("billing").isBillingEnabled();
-        if(result!=null && result.isBillingEnabled==true){
+        if(isForumEnabled) {
             links.push({
-                "title":i18n.localize("billing"),
-                "url":jagg.getMappedUrl("/site/pages/billing.jag"+urlPrefix),
-                "classes":"link-mysubscriptions" + (user ? "" : " need-login"),
-                "classIcon":"fa fa-usd",
-                "tooltip":i18n.localize("billingTooltip"),
-                "active":(path == "/site/pages/billing.jag")
+                "title":i18n.localize("forum"),
+                "url":jagg.getAbsoluteUrl("/forum/"+urlPrefix),
+                "classes":"link-forum",
+                "classIcon":"fw fw-forum fw-2x",
+                "tooltip":i18n.localize("forum"),
+                "active":(path == "/site/pages/forum.jag")
             });
         }
 
-        links.push({
-            "title":i18n.localize("forum"),
-            "url":jagg.getAbsoluteUrl("/forum/"+urlPrefix),
-            "classes":"link-forum",
-            "classIcon":"fa fa-comment-o",
-            "tooltip":i18n.localize("forum"),
-            "active":(path == "/site/pages/forum.jag")
-        });
-
         return {
             "links":links,
-            "tenantDomains":tenantDomains
+            "tenantDomains":tenantDomains,
+            "isForumEnabled":isForumEnabled
         };
     },
 

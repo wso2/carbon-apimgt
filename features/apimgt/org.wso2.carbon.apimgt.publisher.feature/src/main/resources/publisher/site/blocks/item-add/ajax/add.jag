@@ -70,6 +70,9 @@ if(jagg.isCSRFTokenValid())
             apiData.environments=request.getParameter("environments","UTF-8");
             apiData.productionTps = request.getParameter("productionTps","UTF-8");
             apiData.sandboxTps = request.getParameter("sandboxTps","UTF-8");
+            apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
+            apiData.apiPolicy = request.getParameter("apiTier");
+
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
             var provider = request.getParameter("provider","UTF-8");
@@ -297,8 +300,11 @@ if(jagg.isCSRFTokenValid())
             }
             print(obj);
         } else if (action === "getCustomFaultSequences") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
             mod = jagg.module("api");
-            result = mod.getCustomFaultSequences();
+            result = mod.getCustomFaultSequences(apiName, apiVersion, apiProvider);
             if (result.error) {
                 obj = {
                     error:true,

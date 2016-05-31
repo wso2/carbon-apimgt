@@ -48,7 +48,7 @@ public class APISecurityUtils {
         }
         synCtx.setProperty(API_AUTH_CONTEXT, authContext);
         synCtx.setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
-        if (contextHeader != null) {
+        if (contextHeader != null && authContext.getCallerToken() != null) {
             Map transportHeaders = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
                     .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             transportHeaders.put(contextHeader, authContext.getCallerToken());

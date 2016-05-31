@@ -13,6 +13,13 @@ var uri = request.getRequestURI();
 var callPath=uri.replace(site.context,"");
 
 var action = "list"; // default action list the topics
+
+var mod = jagg.module("manager");
+var result = mod.isForumEnabled();
+if(!result) {
+    response.sendError(404);
+}
+
 if(uri != null) {
     var uriMatcher = new URIMatcher(callPath);
     if (uriMatcher.match("/forum") || uriMatcher.match("/forum/")) {
@@ -50,11 +57,7 @@ include("header.jag");
                     "name":"layout/base",
                     "inputs":{
                         "title":"My Subscriptions",
-                        "top":[
-                            {
-                                "name":"banner/featured",
-                                "inputs":null
-                            },
+                        "top":[                            
                             {
                                 "name":"search/api-search",
                                 "inputs":null

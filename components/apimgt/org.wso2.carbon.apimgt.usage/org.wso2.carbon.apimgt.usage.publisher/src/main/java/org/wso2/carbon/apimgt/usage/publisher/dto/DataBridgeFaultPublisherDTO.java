@@ -25,7 +25,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     public DataBridgeFaultPublisherDTO(FaultPublisherDTO faultPublisherDTO){
         setConsumerKey(faultPublisherDTO.getConsumerKey());
         setContext(faultPublisherDTO.getContext());
-        setApi_version(faultPublisherDTO.getApi_version());
+        setApiVersion(faultPublisherDTO.getApiVersion());
         setApi(faultPublisherDTO.getApi());
         setResourcePath(faultPublisherDTO.getResourcePath());
         setMethod(faultPublisherDTO.getMethod());
@@ -79,8 +79,8 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
-                getVersion(),getErrorCode(),getErrorMessage(), getRequestTime(),getUsername(),
-                getTenantDomain(),getHostName(),getApiPublisher(), getApplicationName(), getApplicationId(),getProtocol()};
+        return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(), getResourcePath(), getMethod(),
+                            getVersion(), getErrorCode(), getErrorMessage(), getRequestTime(), getUsername(),
+                            getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(), getApplicationId(), getProtocol()};
     }
 }

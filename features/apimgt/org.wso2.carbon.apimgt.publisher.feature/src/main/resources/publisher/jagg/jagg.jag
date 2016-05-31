@@ -50,12 +50,10 @@ var jagg = jagg || (function () {
     var setUser = function (user) {
         //if jaggery allow session reset
         if (typeof request.getSession == "function") {
-            var groupId = session.get("groupId");
             if (session && !session.isNew()) {
                 session.invalidate();
             }
             session = request.getSession(true);
-            session.put("groupId", groupId);
         }
         session.put("logged.user", user);
     };
@@ -360,6 +358,14 @@ var getThemeFile = function (path) {
             host = "https://" + site.reverseProxy.host ;
         }
         return host + url(path);
+    };
+    
+    var getAbsoluteReqUrl = function (path) {
+        var host = "";
+        if(isReverseProxyEnabled()){
+            host = "https://" + site.reverseProxy.host ;
+        }
+        return host + path;
     };
 
     var getSiteDomainFromRequest = function(){
@@ -784,7 +790,8 @@ var getThemeFile = function (path) {
         getTenantDomain:getTenantDomain,
 		getSiteContext:getSiteContext,
         setCSRFToken:setCSRFToken,
-        isCSRFTokenValid:isCSRFTokenValid
+        isCSRFTokenValid:isCSRFTokenValid,
+        getAbsoluteReqUrl:getAbsoluteReqUrl
     };
 
 }());

@@ -35,6 +35,18 @@ var getAPIStoreObj = function() {
     }
 };
 
+var getAPIProviderObj = function() {
+    var user = jagg.getUser();
+    var store;
+    if (user == null) {
+        store = require('apipublisher');
+        return new store.APIProvider();
+    } else {
+        store = require('apipublisher');
+        return new store.APIProvider(user.username);
+    }
+};
+
 var loadTenantRegistry = function (tenantDomain) {
     try {
         if (tenantDomain != null && tenantDomain != "") {
@@ -53,5 +65,15 @@ var loadTenantRegistry = function (tenantDomain) {
     }    
 };
 
+var isGlobalCEPThrottlingEnabled = function() {
+     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        return APIUtil.isAdvanceThrottlingEnabled();
+};
+var getUsageClient = function() {
+    var user = jagg.getUser();
+    var client= org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl();
+    //client.initializeDataSource();
+    return client;
+}
 
 %>

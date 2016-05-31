@@ -136,10 +136,10 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     @Override
     public int compareTo(Tier tier) {
-        if(tier.getRequestsPerMin() == Long.MAX_VALUE){
+        if(tier.getRequestsPerMin() == Long.MAX_VALUE || tier.getRequestsPerMin() == Integer.MAX_VALUE){
             return 1;
         }
-        else if(this.getRequestsPerMin() == Long.MAX_VALUE){
+        else if(this.getRequestsPerMin() == Long.MAX_VALUE || this.getRequestsPerMin() == Integer.MAX_VALUE){
             return -1;
         }
         return new Long(tier.getRequestsPerMin() - this.getRequestsPerMin()).intValue();

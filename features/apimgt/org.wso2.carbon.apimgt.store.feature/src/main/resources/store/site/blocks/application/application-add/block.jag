@@ -7,6 +7,7 @@ jagg.block("application/application-add", {
     getOutputs:function (inputs) {
 
         var tiers, result;
+        var isGlobalCEPEnabled = jagg.module("tiers").isGlobalCEPThrottlingEnabled();
         result = jagg.module("tiers").getApplicationTiers();
         tiers = result.tiers;
 

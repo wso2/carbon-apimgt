@@ -1,0 +1,63 @@
+<%/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+%>
+
+<html>
+    <head>
+        <title>Live log viewer</title>
+        <link rel="stylesheet" href="modules/la/css/style.css" type="text/css"/>
+        <meta charset="utf-8">
+        <script src="modules/la/js/jquery-1.10.2.js"></script>
+        <script src="modules/la/js/topojson.js"></script>
+        <script src="modules/la/js/carbon-analytics.js"></script>
+        <script src="modules/la/js/ptty.jquery.min.js"></script>
+        <script src="modules/la/js/Mustache.js"></script>
+    </head>
+    <body bgcolor="#000000">
+        <div id="terminal"></div>
+        <%
+        include("/jagg/jagg.jag");
+        include("/site/pages/header.jag");
+        var isAnalyticsEnabled;
+        var tenantId;
+        var user = jagg.getUser();
+        (function () {
+            if (!user){
+                response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
+                return;
+            }
+            var log = new Log("log-viewer.jag");
+            var carbon = require('carbon');
+            var server = new carbon.server.Server();
+            tenantId = carbon.server.tenantId();
+            var analyticsConfig = Packages.org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+            var analyticsConfigInstance = analyticsConfig.getInstance();
+            isAnalyticsEnabled = analyticsConfigInstance.isAnalyticsEnabled();
+            if(!isAnalyticsEnabled){
+                log.error("Api Manager analytics has not been enabled in api-manager.xml");
+            }
+        }());
+        %>
+        <script>
+            var analyticsEnabled = <%=isAnalyticsEnabled%>;
+            var tenantId=  <%=tenantId%>;
+        </script>
+
+        <script src="modules/la/js/main.js"></script>
+    </body>
+</html>

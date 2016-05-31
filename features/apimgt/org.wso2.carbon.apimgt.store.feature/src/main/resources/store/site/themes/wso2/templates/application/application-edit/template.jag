@@ -1,0 +1,115 @@
+<% jagg.template("application/application-edit", function(inputs, outputs, jagg) {
+ var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+ var apiPath = "";
+ var goBack = "";
+ if(session.get('apiPath') != null){
+        apiPath = session.get('apiPath');
+ }
+ if(request.getParameter('goBack') != null){
+        goBack = request.getParameter('goBack');
+ }
+ var mod = jagg.module("manager");
+ var httpsUrl= mod.getHTTPsURL();
+ var i=0, tiers = outputs.tiers;
+ var app = outputs.application;
+
+ var description = "";
+ var callbackUrl = "";
+ if(app.description != null ){
+  description = app.description; 
+ }
+ if(app.callbackUrl != null ){
+  callbackUrl = app.callbackUrl; 
+ }
+ %>
+ <script>
+ var apiViewUrl = '<%= jagg.url('/apis/info') %>';
+ </script>
+
+<div class="page-header" id="Message">
+    <h1>Edit Application</h1>
+</div>
+<div class="content-section">
+<div class="content-data">
+        
+<div class="alert alert-success" id="appAddMessage" style="display:none">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>
+</div>
+<div class="alert alert-success" id="appAddPendingMessage" style="display:none">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong><%=i18n.localize("preAddPendingMsg")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("afterAddPendingMsg")%></strong>
+</div>        
+<br />
+<form class="form-horizontal" id="appAddForm">
+  <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
+  <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
+  <div class="form-group">
+    <label class="control-label col-lg-2 col-md-3" for="application-name"><%=i18n.localize("name")%><span class="requiredAstrix">*</span></label>    
+    <div class="col-lg-4 col-md-6">
+      <input type="text" class="form-control required validateSpecialChars validName" title="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
+    </div>
+  </div>
+  <div class="form-group">
+  <%
+    if(!APIUtil.isAdvanceThrottlingEnabled()){
+        %>
+    <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("throttleByTier")%></label>
+      <% } else { %>
+      <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("perUserQuota")%></label>
+      <% } %>
+    <div class="col-lg-10 col-md-6">
+        <select id="appTier" name="appTier" onChange="tierChanged(this)">
+          <%
+          var tierDescriptions = "";
+          var unlimitedTierDesc = "";
+          for(i=0; i<tiers.length; i++){
+            if(tierDescriptions == ""){
+                tierDescriptions = tierDescriptions + tiers[i].tierDescription;
+            }
+            else{
+                tierDescriptions = tierDescriptions + "," + tiers[i].tierDescription;
+            }
+
+            if(tiers[i].tierName == "Unlimited"){
+                unlimitedTierDesc = tiers[i].tierDescription;
+            }
+          %>
+          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>          
+            <%=tiers[i].tierDisplayName%>
+          </option>
+          <%}%>
+          </select>    
+          <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
+            <%=unlimitedTierDesc%>
+          </div>          
+          <div class="help-block"><%=i18n.localize("appHelpMsg")%>
+          </div>
+          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=tierDescriptions%>"/>  
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-lg-2 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
+    <div class="col-lg-4 col-md-6">
+        <input type="text" class="validInput form-control" title="callback-url" name="callback-url"  id="callback-url" value="<%= encode.forHtmlAttribute(callbackUrl)%>"/>
+    </div>
+    <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
+    <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
+  </div>
+  <div class="form-group">
+    <label for="description" class="col-lg-2 col-md-3 control-label">Description</label>    
+    <div class="col-lg-4 col-md-6">
+        <textarea id="description"  class="form-control" type="text" rows="3"><%= encode.forHtml(description)%></textarea>
+    </div>
+  </div>  
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("save")%>"/>
+        <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
+    </div>
+  </div>
+  <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>      
+</form>
+</div>
+</div>
+<% }); %>

@@ -1,4 +1,4 @@
-<%
+    <%
 include("/jagg/jagg.jag");
 
 (function () {
@@ -20,8 +20,9 @@ include("/jagg/jagg.jag");
             var currentLocation = request.getParameter("currentLocation");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
+            var apiFilter = request.getParameter("apiFilter");
 
-            if (currentLocation.indexOf("all-statistics") >= 0) {
+            if (currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
                 // Note the presence of the '@' character is being used to determine if this
                 // is a tenant user or not, if in future we allow user names containing '@',
                 // that are not tenants, this logic will need to be reconsidered
@@ -57,30 +58,13 @@ include("/jagg/jagg.jag");
             mod = jagg.module("statistics");
             var provider = jagg.getUser().username;
             var currentLocation = request.getParameter("currentLocation");
-            if (currentLocation.indexOf("all-statistics") >= 0) {
+            var apiFilter = request.getParameter("apiFilter");
+            
+            if (currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
                 result = mod.getFirstAccessTime(allProviders);
             } else {
                 result = mod.getFirstAccessTime(provider);
             }
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-
-         else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
             if (result.error == "true") {
                 obj = {
                     error: result.error,

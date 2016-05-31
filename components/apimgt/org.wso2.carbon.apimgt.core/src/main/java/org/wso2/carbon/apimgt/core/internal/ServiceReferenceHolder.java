@@ -46,7 +46,7 @@ public class ServiceReferenceHolder {
 
     public void  setAPIGatewayKeyCacheStatus(APIManagerConfiguration config) {
         try {
-                String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+                String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
                 isGatewayAPIKeyValidationEnabled = Boolean.parseBoolean(serviceURL);
             } catch (Exception e) {
                 isGatewayAPIKeyValidationEnabled = false;
