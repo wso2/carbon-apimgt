@@ -118,9 +118,9 @@
                     <div class="wizard col-xs-12">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
-                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
-                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span>2</span><span class="hidden-xs"><%=i18n.localize("implement")%></span></a></li>
-                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span>3</span><span class="hidden-xs"><%=i18n.localize("manage")%></span></a></li>
+                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span class="wiz-step-count">1</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("design")%></span></a></li>
+                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span class="wiz-step-count">2</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("implement")%></span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span class="wiz-step-count">3</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("manage")%></span></a></li>
                             </ol>
                         </div>
                         <div class="wiz-content">

@@ -278,7 +278,7 @@ div.image-container {
     border-bottom: 2px solid #3598db;
 }
 .wiz-nav-inner li span {
-    display: block;
+    display: inline-block;
 }
 .wiz-nav-inner .wiz-control {
     padding: 1.5% 0.5%;
@@ -335,6 +335,40 @@ div.image-container {
     border-width: 13px;
     margin-top: -13px;
     z-index: 1;
+}
+.wiz-step-count{
+    width: 32px;
+    height: 32px;
+    color:#fff;
+    background: #5477A1;
+    -moz-border-radius: 16px;
+    -webkit-border-radius: 16px;
+    border-radius: 16px;
+    padding-top:7px;
+}
+.wiz-step.current .wiz-step-count{
+    color:#5477A1;
+    background: #fff;
+}
+.wiz-step.completed .wiz-step-count{
+    color:#fff;
+    background: #7ea9ce;
+}
+.wiz-step-title{
+    font-size:16px;
+    margin-left:10px;
+}
+.wiz-step.current .wiz-step-title{
+    color:#fff;
+}
+.wiz-step.completed .wiz-step-title{
+    color:#7ea9ce;
+}
+.wiz-step .wiz-step-title{
+    color:#5477A1;
+}
+.wiz-step.current .wiz-step-title:hover{
+    color:#e2e2e2;
 }
 .with-controls li:nth-last-child(2):before, .with-controls li:nth-last-child(2):after{
     border: 0px;
