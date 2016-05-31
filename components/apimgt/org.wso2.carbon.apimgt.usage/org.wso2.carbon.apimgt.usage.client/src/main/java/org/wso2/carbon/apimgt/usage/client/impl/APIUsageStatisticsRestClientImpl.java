@@ -1512,7 +1512,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            provider = APIUtil.getUserNameWithTenantSuffix(provider);
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
                     .append("\"");
         }
@@ -1605,7 +1604,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            provider = APIUtil.getUserNameWithTenantSuffix(provider);
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
                     .append("\"");
         }
