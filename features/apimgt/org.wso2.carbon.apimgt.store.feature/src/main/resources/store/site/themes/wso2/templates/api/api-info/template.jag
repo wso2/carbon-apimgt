@@ -224,7 +224,6 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                             																var log = new Log();
                             																for(var j=0;j<tiersList.length;j++){
                             																	for (var k=0;k<deniedTiers.length;k++) {
-                            																		log.info(deniedTiers[j].tierName);
                             																		if (tiersList[j].tierName == deniedTiers[k].tierName) {
                             																			denied = true;
                             																		}
