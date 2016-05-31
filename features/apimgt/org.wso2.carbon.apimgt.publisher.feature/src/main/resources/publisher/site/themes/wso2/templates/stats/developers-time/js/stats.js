@@ -76,7 +76,7 @@ $(document).ready(function(){
 
         chart.xAxis.axisLabel('Time')
         .tickFormat(function (d) {
-             return d3.time.format('%m/%d %H:%M:S')(new Date(d)) });
+             return d3.time.format('%m/%d %H:%M:%S')(new Date(d)) });
 
         chart.yAxis.axisLabel('Developer Signups')
             .tickFormat(d3.format('d'));
