@@ -687,3 +687,7 @@ input.ep-field{ min-width: 50%;}
 .api-search .input-group-btn button{
     line-height:31px;
 }
+
+.editableform .control-group{
+    margin:0px;
+}
