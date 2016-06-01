@@ -182,9 +182,9 @@
     "apiResponseTimes" : "API Response Times",
     "apiLastAccessTimes" : "API Last Access Times",
 
-    "applicationsOverTime" : "Applications Time",
-    "userSubscriptionsOverTime" : "Subscriptions Time",
-    "developersOverTime" : "Developers Time",
+    "applicationsOverTime" : "Applications Created Over Time",
+    "userSubscriptionsOverTime" : "Subscriptions Created Over Time",
+    "developersOverTime" : "Developer Signups Over Time",
 
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "usageResourcePath" : "Usage by Resource Path",

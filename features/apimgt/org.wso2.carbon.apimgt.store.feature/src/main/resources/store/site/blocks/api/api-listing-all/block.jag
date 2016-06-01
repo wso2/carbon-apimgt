@@ -66,13 +66,17 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
         }
 
+        ratingResult = jagg.module("rating").isRatingActivated();
+        isRatingActivated = ratingResult.allow;
+
         return {
             "apis":apis,
             "totalLength":response.result.totalLength,
             "isMore":response.result.isMore,
             "isMonetizationEnabled":isMonetizationEnabled,
             "error":error,
-            "message":message
+            "message":message,
+            "isRatingActivated":isRatingActivated
         };
     }
 });

@@ -72,7 +72,6 @@ $(document).ready(function(){
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
         $('#'+thisID).buttonLoader('start');
-
         $(form).ajaxSubmit({
             success:function(responseText, statusText, xhr, $form) {
              if (!responseText.error) {
@@ -82,8 +81,10 @@ $(document).ready(function(){
                 designer.saved_api.version = responseText.data.version;
                 designer.saved_api.provider = responseText.data.provider;
                 $('#'+thisID).buttonLoader('stop');
-                $( "body" ).trigger( "api_saved" ); 
-                $('#apiSaved').show();
+                $( "body" ).trigger( "api_saved" );
+                if(!$("#hiddenGoToManage").val()){
+                    $('#apiSaved').show();
+                }
                 setTimeout("hideMsg()", 3000);
              } else {
                  if (responseText.message == "timeout") {

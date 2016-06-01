@@ -186,9 +186,9 @@
     "applicationThrottledRequests" : "App Throttled Requests",
 
 
-    "applicationsOverTime" : "Applications Time",
-    "userSubscriptionsOverTime" : "Subscriptions Time",
-    "developersOverTime" : "Developers Time",
+    "applicationsOverTime" : "Applications Created Over Time",
+    "userSubscriptionsOverTime" : "Subscriptions Created Over Time",
+    "developersOverTime" : "Developer Signups Over Time",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",

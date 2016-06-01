@@ -10294,7 +10294,7 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             validateContextPreparedStatement = connection.prepareStatement(query);
             validateContextPreparedStatement.setString(1,appName);
-            validateContextPreparedStatement.setString(2, MultitenantUtils.getTenantAwareUsername(appOwner));
+            validateContextPreparedStatement.setString(2, appOwner);
             resultSet = validateContextPreparedStatement.executeQuery();
             connection.commit();
             if (resultSet.next()){
