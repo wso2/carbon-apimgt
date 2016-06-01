@@ -323,11 +323,27 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             }
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String ttlValue = config.getFirstProperty(APIConstants.API_KEY_SECURITY_CONTEXT_TTL);
-            if (ttlValue != null) {
-                ttl = Long.parseLong(ttlValue);
-            } else {
-                ttl = 15L;
+
+            String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
+
+            String kmTokenCacheConfig = config.getFirstProperty(APIConstants.KEY_MANAGER_TOKEN_CACHE);
+            boolean isKMTokenCacheEnabled = Boolean.parseBoolean(kmTokenCacheConfig);
+
+            if (isGWTokenCacheEnabled || isKMTokenCacheEnabled) {
+                String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+
+                if (apimKeyCacheExpiry != null) {
+                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                }
+            }
+            else {
+                String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
+                if (ttlValue != null) {
+                    ttl = Long.parseLong(ttlValue);
+                } else {
+                    ttl = 15L;
+                }
             }
             return ttl;
         }
