@@ -274,7 +274,6 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_FIELD_TIER_ID = "TIER_ID";
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
-    public static final String SUBSCRIPTION_FIELD_LAST_ACCESS = "LAST_ACCESSED";
     public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
 
     public static final String SUBSCRIPTION_KEY_TYPE = "KEY_TYPE";
