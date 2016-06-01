@@ -1430,7 +1430,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
-                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setApplication(application);
             }
@@ -1474,7 +1473,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
-                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
                 subscribedAPI.setApplication(application);
             }
             return subscribedAPI;
