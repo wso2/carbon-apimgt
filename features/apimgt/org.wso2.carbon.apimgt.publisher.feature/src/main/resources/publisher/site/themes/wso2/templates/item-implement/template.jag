@@ -32,28 +32,12 @@
     var apiProvider = "<%=api.provider%>"
     var apiVersion = "<%=api.version%>"
     var apiName = "<%=api.name%>"
-</script>   
+</script>
 <div id="item-add">
 <%
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
-
-    /*var manage_wlabel = "";
-	if(mod.isGlobalCEPThrottlingEnabled()){
-         if( api != null && api.availableSubscriptionPolicy !="" ){
-            manage_wlabel = "completed";      
-        } else {
-            var manage_w_link = '#';        
-        }
-    } else {
-        
-        if( api.availableTiers !="" ){
-            manage_wlabel = "completed";      
-        } else {
-            var manage_w_link = '#';        
-        }
-    }*/
 
     var manage_wlabel = "";
     if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
@@ -62,28 +46,7 @@
         var manage_w_link = '#';        
     } 
 %>
-<!-- <center>
-<ul class="new-sub-menu-wizard" style="margin:0 auto">
-    <li>
-        <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("design")%>">
-            <div class="wizard-number">1</div>
-            <span>"<%=i18n.localize("design")%></span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= implement_w_link %>" class="wizard-active" title="<%=i18n.localize("implement")%>">
-            <div class="wizard-number">2</div>
-            <span>"<%=i18n.localize("implement")%></span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= manage_w_link %>" class="<%= manage_wlabel%>" title="<%=i18n.localize("manage")%>">
-            <div class="wizard-number" >3</div>
-            <span>"<%=i18n.localize("manage")%></span>
-        </a>
-    </li>
-</ul>
-</center>-->
+
 
 	<div class="page-header">
 		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
@@ -149,39 +112,234 @@
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-							
-							                        <div class="form-group">
-							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
-							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
-												                   <i class="fw fw-circle fw-stack-2x"></i>
-												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-												                </span>
-							                            	</a>
-							                            </label>
+
+													<div id="endpoint-ui">													
+
+													</div>
+
+													<script id="endpoint-ui-template" type="text/x-handlebars-template">
+														{{#*inline "add_remove_ep"}}
+								                            <div class="form-group">
+								                            	<label class="control-label col-sm-3"></label>
+								                            	<div class="col-md-3">
+								                            	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
+																	<span class="icon fw-stack fw-lg" style="font-size:8px">
+																	<i class="fw fw-circle-outline fw-stack-2x"></i>
+																	<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																	</span>
+								                            	</span>
+								                            	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
+								                            		<span class="icon fw-stack fw-lg" style="font-size:8px">
+																	<i class="fw fw-circle-outline fw-stack-2x"></i>
+																	<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																	</span>
+								                            	</span>
+								                            	</div>
+								                            </div>
+														{{/inline}}
+
+														{{#*inline "endpoint"}}
+								                        <div class="form-group">
+								                            <label class="control-label col-sm-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													                </span>
+								                            	</a>{{/if}}{{/if}}
+								                            </label>
+								                            <div class="col-md-7">
+																<div class="input-group col-sm-12">
+																  {{#if label }}
+																  <span class="input-group-addon">{{ label }}</span>
+																  {{/if}}
+																  <input type="text" class="form-control endpoint_input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">																  
+																  <span class="input-group-btn">
+																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title="Advanced Options"><i class="fw fw-settings"></i></button>
+																    <button class="btn btn-secondary check_url_valid" type="button" >Test</button>
+																  </span>
+																</div>
+																{{#if invalid }}
+																{{#if invalid.endpoint}}
+																<label class="error" for="name">Please specify either production or sandbox endpoint.</label>
+																{{/if}}
+																{{/if}}
+															</div>
+							                            </div>
+							                            {{/inline}}												
+
+								                        <div class="form-group">
+								                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
+								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													                </span>
+								                            	</a>
+								                            </label>
 							                                <div class="col-sm-3">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
-							                                        <option value="http"  selected="selected">REST Endpoint</option>
-							                                        <option value="address">SOAP Endpoint</option>
-							                                        <option value="failover">Failover Endpoint</option>
-							                                        <option value="load_balance">Load balanced Endpoint</option>
-							                                        <option value="default">Default Endpoint</option>
+							                                        <option value="http"  {{#if http }}selected="selected"{{/if}}>HTTP/REST Endpoint</option>
+							                                        <option value="address" {{#if address }}selected="selected"{{/if}}>HTTP/SOAP Endpoint</option>
+							                                        <option value="default" {{#if default }}selected="selected"{{/if}}>Dynamic Endpoint</option>
 							                                    </select>
-							                                </div>							
-							                        </div>
+							                                </div>
+							                            </div>
+							                            {{#if default }}
+							                            <div class="form-group">
+							                            	<div class="col-sm-3"></div>
+							                            	<div class="col-sm-8">
+															<div class="message message-info">
+											                    <h4><i class="icon fw fw-info"></i>Notice</h4>
+											                    <p>You have selected "Dynamic Endpoint" which will send the message to the address specified in the "To" header. Please upload a mediation sequence file to Message Mediation Policies which sets the "To" header.</p>
+															</div>
+															</div>
+														</div>
+							                            {{else}}
+							                            <div class="form-group">    
+								                            <label class="control-label col-sm-3">
+								                            </label>
+							                                <div class="col-sm-3">
+																<label class="checkbox">
+																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
+																  <span class="helper">Load Balanced</span>
+																</label>							                                							                                    
+							                                    <label class="checkbox">
+																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
+																  <span class="helper">Failover</span>
+																</label>																
+							                                </div>
+								                        </div>
+								                        <br />
+								                        {{#each production_endpoints}}
+								                        	{{#if ../load_balance}}
+								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label=(inc @index) invalid=../invalid}}
+								                        	{{else if ../failover}}
+								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label="Primary" invalid=../invalid}}
+								                        	{{else}}
+								                        		{{> endpoint this name="Production Endpoint" type="production_endpoints" invalid=../invalid}}
+								                        	{{/if}}
+							                            {{/each}}
+
+							                            {{#if load_balance }}
+							                            	{{> add_remove_ep ep_type="production_endpoints" }}
+							                            {{/if}}
+
+							                            {{#if failover }}
+								                            {{#each production_failovers}}
+									                        	{{> endpoint this name="" type="production_failovers" label=(concat "Failover " (inc @index))}}
+								                            {{/each}}
+							                            {{/if}}
+							                            {{#if failover }}
+							                            	{{> add_remove_ep ep_type="production_failovers" }}
+							                            {{/if}}		
+
+								                        {{#each sandbox_endpoints}}
+								                        	{{#if ../load_balance}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
+								                        	{{else if ../failover}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
+								                        	{{else}}
+								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
+								                        	{{/if}}								                        
+							                            {{/each}}
+
+							                       		{{#if load_balance }}
+							                            	{{> add_remove_ep ep_type="sandbox_endpoints" }}
+							                            {{/if}}
+
+							                         	{{#if failover }}
+								                            {{#each sandbox_failovers}}
+									                        	{{> endpoint this name="" type="sandbox_failovers" label=(concat "Failover " (inc @index))}}
+								                            {{/each}}
+							                            {{/if}}
+							                            {{#if failover }}
+							                            	{{> add_remove_ep ep_type="sandbox_failovers" }}
+							                            {{/if}}	
+							                            {{/if}}	
+
+							                            {{#if load_balance}}
+															<div class="form-group">
+															    <label class="col-sm-3 control-label" for="algoCombo">Algorithm
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
+															            <span class="icon fw-stack fw-lg" style="font-size:6px">
+															              <i class="fw fw-circle fw-stack-2x"></i>
+															              <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+															          	</span>
+															        </a>
+															    </label>
+															    <div class="col-sm-3">
+															        <select class="form-control valid load_balance_property" name="algoCombo" id="algoCombo" aria-invalid="false">
+															            <option {{#ifCond algoCombo "==" "org.apache.synapse.endpoints.algorithms.RoundRobin" }}selected="selected"{{/ifCond}} value="org.apache.synapse.endpoints.algorithms.RoundRobin">Round-robin</option>
+															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other">Other</option>
+															        </select>
+															    </div>
+															</div>
+															{{#ifCond algoCombo "==" "other"}}
+															<div class="form-group">
+															    <label class="col-sm-3 control-label" for="">Class Name for Algorithm
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-sm-5">
+															        <input type="text" class="required form-control load_balance_property" name="algoClassName" value="{{algoClassName}}" id="algoClassName">
+															    </div>
+															</div>
+															{{/ifCond}}
+															<div class="form-group">
+															    <label class="col-sm-3 control-label" for="sessionManagement">Session Management
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-sm-3">
+															        <select class="form-control load_balance_property" name="sessionManagement" id="sessionManagement">
+															            <option {{#ifCond sessionManagement "==" "http" }}selected="selected"{{/ifCond}} value="http">Transport</option>
+															            <option {{#ifCond sessionManagement "==" "soap" }}selected="selected"{{/ifCond}} value="soap">SOAP</option>
+															            <option {{#ifCond sessionManagement "==" "simpleClientSession" }}selected="selected"{{/ifCond}} value="simpleClientSession">Client ID</option>
+															            <option {{#ifCond sessionManagement "==" "none" }}selected="selected"{{/ifCond}} value="none">None</option>
+															        </select>
+															    </div>
+															</div>
+															<div class="form-group">
+															    <label class="col-sm-3 control-label" for="">Session Timeout (Mills)
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-sm-3">
+															        <input class="form-control load_balance_property" type="text" name="sessionTimeOut" value="{{sessionTimeOut}}" id="sessionTimeOut">
+															    </div>
+															</div>
+							                            {{/if}}	
+							                            <div  id="advance_endpoint_config" class="modal fade">
+														    <div class="modal-dialog">
+														    <div class="modal-content">
+														        <div class="modal-header">
+														        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+														        <h3>Advanced Endpoint Configuration</h3>
+														        </div>
+														        <div class="modal-body">
+														        <div id="advance_form">
+														        </div>
+														        </div>
+														        <div class="modal-footer">
+														        <div id="res" style="color:red;float:left"></div>
+														        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+														        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
+														        </div>
+														    </div>
+														    </div>
+														</div>				                            
+													</script>
 							
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 							
 							                        <div id="endpoint_help" class="hide">
-								                         <strong>REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
-								                         <strong>SOAP Endpoint</strong><p>The direct URL of the service</p>
+								                         <strong>HTTP/REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
+								                         <strong>HTTP/SOAP Endpoint</strong><p>The direct URL of the service</p>
 								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
 								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
-								                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
-							                        </div>
-							
-							                        <div id="endpoint_form" class="endpoint_dives" >
-							                        </div>
+								                         <Strong>Dynamic Endpoint</strong><p>The dynamic endpoint will send the message to the address specified in the 'To' header.</p>
+							                        </div>							
 							
 							                         <div class="form-group">
 							                            <div class="controls">
@@ -732,24 +890,7 @@
   </div>
 </div>
 
-<div  id="advance_endpoint_config" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Advanced Endpoint Configuration</h3>
-        </div>
-        <div class="modal-body">
-        <form id="advance_form"></form>
-        </div>
-        <div class="modal-footer">
-        <div id="res" style="color:red;float:left"></div>
-        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
-        </div>
-    </div>
-    </div>
-</div>
+
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
@@ -881,5 +1022,162 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
     })
 </script>
 
+
+
+<script id="advance-endpoint-ui-template" type="text/x-handlebars-template">
+		{{#if address }}
+        <fieldset>
+            <legend>Message Content</legend>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="format">Format</label>
+                <div class="col-sm-4">
+                    <select class="form-control selectpicker" id="format" name="format">
+                        <option value="soap11">SOAP 1.1</option>
+                        <option value="soap12">SOAP 1.2</option>
+                        <option value="POX">Plain Old XML (POX)</option>
+                        <option value="REST">REpresentational State Transer (REST)</option>
+                        <option value="GET">GET</option>
+                        <option selected value="leave-as-is">Leave As-Is</option>
+                    </select>
+                    <p class="help-block hide">Message format for the endpoint.</p>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="optimize">Optimize</label>
+                <div class="col-sm-4">
+                    <select class="form-control selectpicker" id="optimize" name="optimize">
+                        <option value="SWA">SWA</option>
+                        <option value="MTOM">MTOM</option>
+                        <option selected value="leave-as-is">Leave As-Is</option>
+                    </select>
+                    <p class="help-block hide">Method to optimize the attachments.</p>
+                </div>
+            </div>
+        </fieldset>
+        {{/if}}
+        <fieldset>
+            <legend>Endpoint Suspend State</legend>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="suspendErrorCode">Error Codes</label>
+                <div class="col-sm-4">
+                    <select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
+                        <option value="101000">101000 : Receiver IO error sending</option>
+                        <option value="101001">101001 : Receiver IO error receiving</option>
+                        <option value="101500">101500 : Sender IO error sending</option>
+                        <option value="101501">101501 : Sender IO error receiving</option>
+                        <option value="101503">101503 : Connection failed</option>
+                        <option value="101504">101504 : Connection timed out</option>
+                        <option value="101505">101505 : Connection closed</option>
+                        <option value="101506">101506 : HTTP protocol violation</option>
+                        <option value="101507">101507 : Connect cancel</option>
+                        <option value="101508">101508 : Connect timeout</option>
+                        <option value="101509">101509 : Send abort</option>
+                        <option value="101510">101510 : Response processing failure</option>
+                    </select>
+                    <p class="help-block">A list of error codes.If these
+                    error codes are received from the endpoint, the
+                    endpoint will be suspended.</p><span class=
+                    "help-block jsonform-errortext" style=
+                    "display:none;"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
+                    <p class="help-block hide">The duration that the endpoint is
+                    suspended for the first time after the receiving the
+                    suspend error codes.</p>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="suspendMaxDuration">Max Duration(ms)</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
+                    <p class="help-block hide">The maximum duration that the
+                    endpoint is suspended after the receiving the suspend
+                    error codes.</p>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="factor">Factor</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="factor" name="factor" type="text" value="">  
+                    <p class="help-block">The duration to suspend can vary
+                    from the first time suspension to the subsequent time.
+                    The factor value decides the suspense duration variance
+                    between subsequent suspensions.</p>                 
+                </div>
+                
+            </div>
+        </fieldset>
+        <fieldset class="control-group ">
+            <legend>Endpoint Timeout State</legend>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="">Error Codes</label>
+                <div class=" col-sm-4">
+                    <select class="form-control selectpicker" id="" multiple="multiple" name="retryErroCode">
+                        <option value="101000">101000 : Receiver IO error sending</option>
+                        <option value="101001">101001 : Receiver IO error receiving</option>
+                        <option value="101500">101500 : Sender IO error sending</option>
+                        <option value="101501">101501 : Sender IO error receiving</option>
+                        <option value="101503">101503 : Connection failed</option>
+                        <option value="101504">101504 : Connection timed out</option>
+                        <option value="101505">101505 : Connection closed</option>
+                        <option value="101506">101506 : HTTP protocol violation</option>
+                        <option value="101507">101507 : Connect cancel</option>
+                        <option value="101508">101508 : Connect timeout</option>
+                        <option value="101509">101509 : Send abort</option>
+                        <option value="101510">101510 : Response processing failure</option>
+                    </select>
+                    <p class="help-block">A list of error codes. If these
+                    error codes are received from the endpoint, the request
+                    will be subjected to a timeout.</p>
+                </div>
+                                   
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="retryTimeOut">Retries Before Suspension</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
+                    <p class="help-block">The number of re-tries in case of
+                    a timeout, caused by the above listed error
+                    codes.</p>                
+                </div>
+                
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="retryDelay">Retry Delay(ms)</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="retryDelay" name="retryDelay"
+                    type="text" value="">                                    
+                <p class="help-block">The delay between retries, in milliseconds.</p>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="control-group">
+            <legend>Connection Timeout</legend>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="actionSelect">Action</label>
+                <div class="col-sm-4">
+                    <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
+                        <option value="neverTimeout">Never timeout</option>
+                        <option value="discard">Discard message</option>
+                        <option selected value="fault">Execute fault sequence</option>
+                    </select>
+                    <p class="help-block">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
+					<span class="help-block jsonform-errortext" style="display:none;"></span>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="actionDuration">Duration (ms)</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
+                    <p class="help-block">The duration in milliseconds before considering a request as timeout.</p>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</script>
 
 <% }); %>
