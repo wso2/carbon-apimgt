@@ -233,7 +233,7 @@
                 
                 </label>
                 <div class="col-sm-8">
-                    <label class="radio"><% var l = new Log();l.info(api); %>
+                    <label class="radio">
                         <input type="radio" class="backend_tps" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
                         checked="checked"<%}%> value="unlimited">
                         <span class="helper">Unlimited</span>
