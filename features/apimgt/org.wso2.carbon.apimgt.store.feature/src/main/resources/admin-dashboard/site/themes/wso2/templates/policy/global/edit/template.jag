@@ -43,20 +43,20 @@
 
                     <fieldset>
                         <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%="Name"%></label>
+                            <label class="control-label cnl-label"><%="Name"%> <span class="requiredAstrix">*</span></label>
                             <div class="controls cnls">
                                 <input type="text" id="policyName" name="policyName" value="<%=nameFieldDisableStatus%>"/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
-                            <div class="controls cnls">
-                                <textarea id="description" class="text" cols="40" rows ="2" name="description">
+                            <div class="controls cnl">
+                                <textarea id="description" class="form-control" class="text" name="description">
                                 </textarea>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Key Template</label>
+                            <label class="control-label cnl-label">Key Template  <span class="requiredAstrix">*</span></label>
                             <div class="controls cnls">
                                 <input type="text" id="keyTemplate" name="keyTemplate" value=""/>
                                 <input type="hidden" id="formValidated" name="formValidated"
@@ -74,7 +74,7 @@
                             </div>
                         </div>
                         <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Siddhi Query</label>
+                            <label class="control-label cnl-label">Siddhi Query  <span class="requiredAstrix">*</span></label>
                     
                             <textarea id="siddhiQuery" class="text"  name="siddhiQuery" style="width:99%;height:200px" spellcheck='false'></textarea>
                             <span id="invalidSiddhiQuery" style="color:red;display:none"><%=i18n.localize("invalidSiddhiQueryMessage")%></span>
