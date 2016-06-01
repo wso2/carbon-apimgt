@@ -180,7 +180,7 @@
                     <label class="checkbox">
                             <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
                             <span class="helper"><%=i18n.localize("httpTransport")%></span>
-                    </label>                    
+                    </label>                      
                 </div>
              </div>
              
@@ -219,13 +219,52 @@
                     	<div class="clearfix"></div>										        
 					</h4>
 				</div>
-				
+            <% if (isSynapseGateway) { %>
+
+            <div class="form-group">
+                <label class="control-label col-sm-3" for="throttle">Maximum Backend Throughput
+                 <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
+                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                        <i class="fw fw-circle fw-stack-2x"></i>
+                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                    </span>
+                </a>
+                <p id="hard_throttle_help" class="hide">Limits the total number of calls the API Manager is allowed to make to the backend.</p>
+                
+                </label>
+                <div class="col-sm-8">
+                    <label class="radio">
+                        <input type="radio" name="backend_tps" <%if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+                        checked="checked"<%}%> >
+                        <span class="helper">Unlimited</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="backend_tps">
+                        <span class="helper">Specify</span>
+                    </label>                    
+                </div>
+            </div>
+            <div class="form-group sub-form-group">
+                <label class="control-label col-sm-3" for="throttle">Production TPS
+                </label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                </div>
+            </div>
+            <div class="form-group sub-form-group">
+                <label class="control-label col-sm-3" for="throttle">Sandbox TPS
+                </label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                </div>
+            </div>            
+            <%}%>				
 
              <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
                 
-
+                 <hr />
                  <div class="form-group">
-				 <label class="control-label col-sm-3" for="tiertier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
+				    <label class="control-label col-sm-3" for="tiertier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
 		                <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
                 		    <span class="icon fw-stack fw-lg" style="font-size:6px">
 							    <i class="fw fw-circle fw-stack-2x"></i>
@@ -233,25 +272,33 @@
 						    </span>
                 	    </a>
                 	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                   </label>
-
+                    </label>
                     <div class="controls col-sm-8 tierSelect">
-                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-	                        <%
+                        <!-- <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
+	                        <%                            
 	                        for (var i = 0; i < tiers.length; i++) {
 	                        	var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
 	                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
 	                        }
 	                        %>
-        				</select>
-        <script type="text/javascript">
-
-        </script>
-        <a class=" help_popup" help_data="tier_help"></a>
-        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+        				    </select> -->
+                        <%                         
+                            for (var i = 0; i < tiers.length; i++) {
+                                var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                            %>
+                            <label class="checkbox">
+                                    <input type="checkbox" id="" class="" name="" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
+                                    <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> <%= tiers[i].tierDescription %></span>
+                            </label><br />
+                            <%
+                            }
+                        %>
+                        <a class=" help_popup" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
 					</div>
                  <% } else {%>
+
                      <div class="form-group">
                         <label class="control-label col-sm-3" for="tier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
                         	<a class="help_popup" help_data="tier_help" title="tier_help" data-trigger="hover" data-placement="bottom">
@@ -272,15 +319,11 @@
         }
         %>
         </select>
-        <script type="text/javascript">
-
-        </script>
-
     </div>
 </div>
 <% }%>
           <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
-
+<hr />
                         <div class="form-group">
                         <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("enableApiLevelPolicy")%>:
                             <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
@@ -322,76 +365,18 @@
 	                        </div>
 						</div>
 <%  }%>
-                
-
-            <% if (isSynapseGateway) { %>
-
-            <div class="form-group">
-                            <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("throttle")%>:
-                             <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
-	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
-									<i class="fw fw-circle fw-stack-2x"></i>
-									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-								</span>
-	                        </a>
-	                        <p id="hard_throttle_help" class="hide">Limits the total number of calls the API Manager is allowed to make to the backend.</p>
-                            
-                            </label>
-                            <div class="col-sm-8">
-                            <label class="checkbox">
-	                            <input type="checkbox" name="throttle_check"   id="toggleThrottle"                         <%
-                            		if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
-                            		checked="checked"<%}%>>
-	                            <span class="helper"><%=i18n.localize("throttleMsg")%></span>
-                    		</label>                            
-                            </div>
-                        </div>
-              <div class="form-group">
-              	<div class="col-sm-3"></div>
-              	<div class="col-sm-8">
-              		<table class="table table-bordered table-striped" id="throttleTable" <%if((!api.productionTps || ("none".equals(api.productionTps))) && (!api.sandboxTps || ("none".equals(api.sandboxTps)))){ %>style="display:none"<%} %>>
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th><%=i18n.localize("maxCount")%></th>
-                                    </tr>
-                                </thead>
-                                    <tr>
-                                        <td>
-                                            <%=i18n.localize("prodLimit")%>
-                                        </td>
-                                        <td>
-                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <%=i18n.localize("sandLimit")%>
-                                        </td>
-                                        <td>
-                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
-                                        </td>
-                                    </tr>
-                                </table>
-                                              	
-              	</div>
-
-              </div>
               <div class="form-group">
                             <label class="control-label col-sm-3" for="throttle">                            
                             </label>
                             <div class="col-sm-8">
                                       <p class="help-block">
                                       <span class="icon fw-stack fw-lg" style="font-size:8px">
-									<i class="fw fw-circle fw-stack-2x"></i>
-									<i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
-								</span>
+                                    <i class="fw fw-circle fw-stack-2x"></i>
+                                    <i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
+                                </span>
                                       <%=i18n.localize("Refer ","Refer ")%><a style="color:#1a78d8" href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a><%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%></p>              
                             </div>
                         </div>
-
-            <%}%>
-
 
                 
                 <% mod = jagg.module("api");

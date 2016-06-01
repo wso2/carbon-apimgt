@@ -691,3 +691,5 @@ input.ep-field{ min-width: 50%;}
 .editableform .control-group{
     margin:0px;
 }
+
+.sub-form-group label { color: #777; }
