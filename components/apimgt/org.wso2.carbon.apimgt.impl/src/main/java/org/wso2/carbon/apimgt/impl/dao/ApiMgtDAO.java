@@ -5869,6 +5869,7 @@ public class ApiMgtDAO {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                 }
                 uriTemplate.setMediationScript(script);
+                uriTemplate.getThrottlingConditions().add("_default");
                 uriTemplates.add(uriTemplate);
             }
         } catch (SQLException e) {
