@@ -1617,7 +1617,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setUUID(result.getString("SUB_UUID"));
                 subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                 Application application = new Application(result.getString("APP_NAME"), subscriber);
                 application.setUUID(result.getString("APP_UUID"));
@@ -1748,7 +1747,6 @@ public class ApiMgtDAO {
                     subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                     subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                     subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                    subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                     Application application = new Application(result.getString("APP_NAME"), subscriber);
                     subscribedAPI.setApplication(application);
@@ -1833,9 +1831,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 String tierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
                 subscribedAPI.setTier(new Tier(tierName));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
                 subscribedAPI.setUUID(result.getString("SUB_UUID"));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
                 //setting NULL for subscriber. If needed, Subscriber object should be constructed &
                 // passed in
                 int applicationId = result.getInt("APP_ID");
@@ -5867,6 +5863,7 @@ public class ApiMgtDAO {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                 }
                 uriTemplate.setMediationScript(script);
+                uriTemplate.getThrottlingConditions().add("_default");
                 uriTemplates.add(uriTemplate);
             }
         } catch (SQLException e) {
