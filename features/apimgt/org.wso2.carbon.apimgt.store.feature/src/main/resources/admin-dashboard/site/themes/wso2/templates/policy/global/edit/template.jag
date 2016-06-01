@@ -51,8 +51,7 @@
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
                             <div class="controls cnl">
-                                <textarea id="description" class="form-control" class="text" name="description">
-                                </textarea>
+                                <textarea id="description" class="form-control" class="text" name="description"></textarea>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
