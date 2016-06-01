@@ -180,7 +180,7 @@
                     <label class="checkbox">
                             <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
                             <span class="helper"><%=i18n.localize("httpTransport")%></span>
-                    </label>                      
+                    </label>                    
                 </div>
              </div>
              
@@ -245,14 +245,14 @@
                     </label>                    
                 </div>
             </div>
-            <div class="form-group sub-form-group tps_boxes">
+            <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
                 <label class="control-label col-sm-3" for="throttle">Production TPS
                 </label>
                 <div class="col-sm-2">
                     <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
                 </div>
             </div>
-            <div class="form-group sub-form-group tps_boxes">
+            <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
                 <label class="control-label col-sm-3" for="throttle">Sandbox TPS
                 </label>
                 <div class="col-sm-2">
@@ -265,7 +265,7 @@
                 
                  <hr />
                  <div class="form-group">
-				    <label class="control-label col-sm-3" for="tiertier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
+				 <label class="control-label col-sm-3" for="tiertier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
 		                <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
                 		    <span class="icon fw-stack fw-lg" style="font-size:6px">
 							    <i class="fw fw-circle fw-stack-2x"></i>
@@ -273,33 +273,25 @@
 						    </span>
                 	    </a>
                 	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                    </label>
+                   </label>
+
                     <div class="controls col-sm-8 tierSelect">
-                        <!-- <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-	                        <%                            
+                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
+	                        <%
 	                        for (var i = 0; i < tiers.length; i++) {
 	                        	var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
 	                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
 	                        }
 	                        %>
-        				    </select> -->
-                        <%                         
-                            for (var i = 0; i < tiers.length; i++) {
-                                var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                            %>
-                            <label class="checkbox">
-                                    <input type="checkbox" id="" class="" name="" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
-                                    <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> <%= tiers[i].tierDescription %></span>
-                            </label><br />
-                            <%
-                            }
-                        %>
-                        <a class=" help_popup" help_data="tier_help"></a>
-                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+        				</select>
+        <script type="text/javascript">
+
+        </script>
+        <a class=" help_popup" help_data="tier_help"></a>
+        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
 					</div>
                  <% } else {%>
-
                      <div class="form-group">
                         <label class="control-label col-sm-3" for="tier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
                         	<a class="help_popup" help_data="tier_help" title="tier_help" data-trigger="hover" data-placement="bottom">
@@ -340,7 +332,7 @@
 		                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
 		                            <span class="helper"></span>
 		                    </label>
-		                </div>
+		                    </div>
 		                    </div>
 	                    <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
 	                  	<div class="form-group">
@@ -372,9 +364,9 @@
                             <div class="col-sm-8">
                                       <p class="help-block">
                                       <span class="icon fw-stack fw-lg" style="font-size:8px">
-                                    <i class="fw fw-circle fw-stack-2x"></i>
-                                    <i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
-                                </span>
+									<i class="fw fw-circle fw-stack-2x"></i>
+									<i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
+								</span>
                                       <%=i18n.localize("Refer ","Refer ")%><a style="color:#1a78d8" href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a><%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%></p>              
                             </div>
                         </div>

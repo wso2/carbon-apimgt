@@ -37,6 +37,7 @@ $(document).ready(function(){
             $(".tps_boxes").hide();
         }
         else{
+            $(".tps_boxes").removeClass("hide");
             $(".tps_boxes").show();
         }
     });
