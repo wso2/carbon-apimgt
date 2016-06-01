@@ -63,8 +63,6 @@
 								<importFeatureDef>org.wso2.carbon.application.mgt.synapse.server:${carbon.mediation.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.application.deployer.synapse:${carbon.mediation.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.datasource.server:${carbon.commons.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.event.common:${carbon.commons.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.event.server:${carbon.commons.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.governance.lifecycle.management:${carbon.governance.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.governance.metadata:${carbon.governance.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso:${carbon.identity-inbound-auth-saml2.version}</importFeatureDef>
@@ -101,6 +99,8 @@
 								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.basicauth.server:${carbon.identity-local-auth-basicauth.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.claim.mgt:${carbon.identity.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.forum.server:${carbon.apimgt.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.analytics.common.la.apim:${analytics.common.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.analytics.common.data.agents.log4j:${analytics.common.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>
