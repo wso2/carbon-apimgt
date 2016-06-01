@@ -44,19 +44,14 @@
     </div>
   </div>
   <div class="form-group">
-<<<<<<< HEAD
   <%
     if(!APIUtil.isAdvanceThrottlingEnabled()){
         %>
-        <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("throttleByTier")%></label>
+        <label class="col-lg-3 col-md-3 control-label" for="appTier"><%=i18n.localize("throttleByTier")%></label>
      <% } else { %>
-        <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("perUserQuota")%></label>
+        <label class="col-lg-3 col-md-3 control-label" for="appTier">Per Token Quota</label>
      <% } %>
-    <div class="col-lg-10 col-md-6">
-=======
-    <label class="col-lg-3 col-md-3 control-label" for="appTier">Per Instance Quota</label>    
     <div class="col-lg-9 col-md-9">
->>>>>>> throttling_ui
         <select id="appTier" name="appTier" onChange="tierChanged(this)">
           <%
           var tierDescriptions = "";
@@ -81,7 +76,7 @@
           <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
             <%=unlimitedTierDesc%>
           </div>          
-          <div class="help-block">This feature allows you to assign an API request quota per application token. If you are using user tokens this feature will apply the quota per user. Allocated quota will be shared among all the subscribed APIs of the application.</div>
+          <div class="help-block">This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application. </div>
           <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=tierDescriptions%>"/>  
     </div>
   </div>
