@@ -1045,6 +1045,7 @@
         <carbon.apimgt.version>6.0.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
+        <analytics.common.version>1.0.0-alpha1</analytics.common.version>
         <carbon.analytics.common.version>5.0.12-alpha</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.6-SNAPSHOT</carbon.kernel.version>
@@ -1071,6 +1072,7 @@
         <siddhi.version>3.0.6-SNAPSHOT</siddhi.version>
 
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
+        <carbon.commons.imp.pkg.version>[4.5.0, 4.6.0)</carbon.commons.imp.pkg.version>
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
 
         <!-- Carbon Identity import version ranges -->
@@ -1079,12 +1081,12 @@
         <carbon.identity-user-ws.imp.pkg.version>[5.1.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
 
         <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
-        <carbon.governance.imp.pkg.version>[4.5.8, 4.6.0)</carbon.governance.imp.pkg.version>
+        <carbon.governance.imp.pkg.version>[4.5.0, 4.6.0)</carbon.governance.imp.pkg.version>
         <carbon.registry.package.import.version.range>[4.4.0, 4.6.0)</carbon.registry.package.import.version.range>
-        <carbon.commons.imp.pkg.version>[4.5.3, 5.0.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.imp.pkg.version>[4.5.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
-        <carbon.platform.package.import.version.range>[4.4.1, 4.6.0)</carbon.platform.package.import.version.range>
+        <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
 
         <!--lib thrift version range-->
         <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
@@ -1154,7 +1156,7 @@
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
-        <imp.pkg.version.carbon.throttle>[4.2.1, 4.3.0)</imp.pkg.version.carbon.throttle>
+        <imp.pkg.version.carbon.throttle>[4.2.0, 4.3.0)</imp.pkg.version.carbon.throttle>
         <imp.pkg.version.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.carbon.base>
         <imp.pkg.version.google.code.gson>[2.2.4, 2.3.0)</imp.pkg.version.google.code.gson>
         <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
