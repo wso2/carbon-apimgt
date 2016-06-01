@@ -43,8 +43,11 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -63,6 +66,8 @@ public class APIKeyValidator {
     private boolean gatewayKeyCacheEnabled = true;
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
+
+    private  boolean isGatewayKeyCacheInitialized = false;
 
     protected Log log = LogFactory.getLog(getClass());
 
@@ -85,8 +90,20 @@ public class APIKeyValidator {
     }
 
     protected Cache getGatewayKeyCache() {
-        return Caching.getCacheManager(
-                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        String apimGWCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+                                            getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if(!isGatewayKeyCacheInitialized && apimGWCacheExpiry != null ) {
+            isGatewayKeyCacheInitialized = true;
+            return Caching.getCacheManager(
+                    APIConstants.API_MANAGER_CACHE_MANAGER).createCacheBuilder(APIConstants.GATEWAY_KEY_CACHE_NAME).
+                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                    Long.parseLong(apimGWCacheExpiry))).
+                    setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                            Long.parseLong(apimGWCacheExpiry))).setStoreByValue(false).build();
+        } else {
+            return Caching.getCacheManager(
+                    APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        }
     }
 
     protected Cache getGatewayTokenCache() {
