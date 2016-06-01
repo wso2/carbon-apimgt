@@ -233,25 +233,26 @@
                 
                 </label>
                 <div class="col-sm-8">
-                    <label class="radio">
-                        <input type="radio" name="backend_tps" <%if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
-                        checked="checked"<%}%> >
+                    <label class="radio"><% var l = new Log();l.info(api); %>
+                        <input type="radio" class="backend_tps" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
+                        checked="checked"<%}%> value="unlimited">
                         <span class="helper">Unlimited</span>
                     </label>
                     <label class="radio">
-                        <input type="radio" name="backend_tps">
+                        <input type="radio" class="backend_tps" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
+                        checked="checked"<%}%> value="specify">
                         <span class="helper">Specify</span>
                     </label>                    
                 </div>
             </div>
-            <div class="form-group sub-form-group">
+            <div class="form-group sub-form-group tps_boxes">
                 <label class="control-label col-sm-3" for="throttle">Production TPS
                 </label>
                 <div class="col-sm-2">
                     <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
                 </div>
             </div>
-            <div class="form-group sub-form-group">
+            <div class="form-group sub-form-group tps_boxes">
                 <label class="control-label col-sm-3" for="throttle">Sandbox TPS
                 </label>
                 <div class="col-sm-2">
@@ -325,7 +326,7 @@
           <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
 <hr />
                         <div class="form-group">
-                        <label class="control-label col-sm-3" for="apiPolicy"><%=i18n.localize("enableApiLevelPolicy")%>:
+                        <label class="control-label col-sm-3" for="apiPolicy">Advanced Throttling Policies:
                             <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
 	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
 									<i class="fw fw-circle fw-stack-2x"></i>
@@ -339,7 +340,7 @@
 		                            <input type="checkbox" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
 		                            <span class="helper"></span>
 		                    </label>
-		                    </div>
+		                </div>
 		                    </div>
 	                    <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
 	                  	<div class="form-group">
