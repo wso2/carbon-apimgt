@@ -61,6 +61,7 @@ function checkNested(obj) {
 
 //Create a designer class
 function APIDesigner(){
+
     //implement singleton pattern
     this.baseURLValue = "";
 
@@ -216,7 +217,8 @@ function APIDesigner(){
         $(".http_verb_select").attr("checked",false);
     });
 
- 
+    isAPIUpdateValid();
+    
 }
 
 APIDesigner.prototype.check_if_resource_exist = function(path, method){
@@ -1023,5 +1025,70 @@ function updateContextPattern(){
 
 var hideMsg = function () {
     $('#apiSaved').hide("slow");
+}
+
+var isAPIUpdateValid = function(){
+    var isValid = false;
+    var name = $("input[name=name]").val();
+    var version = $("input[name=version]").val();
+    var provider = $("input[name=provider]").val();
+    var context = $("input[name=context]").val();
+
+    if(!name || !provider){
+        return;
+    }
+
+    jagg.post("/site/blocks/item-design/ajax/add.jag",
+            {
+                action:"validateAPIUpdate",
+                name:name,
+                version:version,
+                provider:provider,
+                context:context
+            },
+            function (result) {
+                if (!result.error) {
+                    isValid = result.data;
+                    if(!isValid){
+                        disableForm();
+                    }
+                }else{
+                    jagg.message({
+                        content : "API Update validation error ",
+                        type : "error"
+                    });
+                    disableForm();
+                    
+                }
+                
+                 
+
+        }, "json");
+
+
+
+    return;
+}
+
+var disableForm = function(){
+    //var form = $('#design_form');
+    $("form").each(function(){
+     var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
+     var elements = $(this).find(':input');
+     for (var i = 0, len = elements.length; i < len; ++i) {
+        elements[i].disabled = true;
+     }
+    });
+
+    $("#api_designer").each(function(){
+      $(this).find('a').each(function() {
+       $(this).attr('disabled','true');
+  
+       });     
+    });
+
+    $('.btn-secondary').prop('disabled', true);
+    $('#swaggerEditor').unbind('click');
+
 }
 

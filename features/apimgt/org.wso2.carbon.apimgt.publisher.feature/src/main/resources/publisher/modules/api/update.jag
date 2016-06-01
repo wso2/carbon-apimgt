@@ -28,6 +28,28 @@ var updateAPI = function (api) {
     }
 };
 
+var isAPIUpdateValid = function (api) {
+    var log = new Log();
+    provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var success = provider.isAPIUpdateValid(api);
+        if (log.isDebugEnabled()) {
+            log.debug("isAPIUpdateValid : " + api.name + "-" + api.version);
+        }
+        return {
+            error:false,
+            isValid:success
+        };
+
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
 var updateExternalAPIStores = function (api) {
     var log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
