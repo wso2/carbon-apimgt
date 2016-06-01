@@ -32,6 +32,15 @@ function validateSubscription() {
 }
 
 $(document).ready(function(){
+    $(".backend_tps").click(function() {     
+        if($("input[name=backend_tps]:checked").val() == "unlimited"){
+            $(".tps_boxes").hide();
+        }
+        else{
+            $(".tps_boxes").removeClass("hide");
+            $(".tps_boxes").show();
+        }
+    });
 
     $('.multiselect').multiselect();
 

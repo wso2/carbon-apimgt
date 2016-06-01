@@ -141,7 +141,7 @@
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
 								                            <label class="control-label col-sm-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
-								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
 													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -161,7 +161,7 @@
 																</div>
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
-																<label class="error" for="name">Please specify either production or sandbox endpoint.</label>
+																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
 																{{/if}}
 																{{/if}}
 															</div>
@@ -336,8 +336,8 @@
 							                        <div id="endpoint_help" class="hide">
 								                         <strong>HTTP/REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
 								                         <strong>HTTP/SOAP Endpoint</strong><p>The direct URL of the service</p>
-								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
-								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+								                         <!-- strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p-->
 								                         <Strong>Dynamic Endpoint</strong><p>The dynamic endpoint will send the message to the address specified in the 'To' header.</p>
 							                        </div>							
 							
