@@ -16,10 +16,9 @@ var query=request.getParameter("query");
                             <button class="form-control-btn" type="submit" title="Search"><i class="fw fw-search" aria-hidden="true"></i></button>
                         </div>
                         <div class="input-group-btn">
-                            <a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom">
-                                <span class="icon fw-stack fw-lg add-margin-left-1x" style="font-size:8px">
-                                    <i class="fw fw-circle fw-stack-2x"></i>
-                                    <i class="fw fw-question fw-stack-1x fw-inverse" title="Search options"></i>
+                            <a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="Dismissible popover">
+                                <span class="icon fw-lg add-margin-left-1x" style="font-size:14px">
+                                    <i class="fw fw-info" title="Search options"></i>
                                 </span>
                             </a>
                         </div>
@@ -27,7 +26,7 @@ var query=request.getParameter("query");
                 </div>
             </div>
             <div id="searchAPIHelp" class="hide help-popover-content">
-                <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
+                <div><strong><%=i18n.localize("searchAPIHelpMsg1")%></strong></div>
                 <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
                 <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
