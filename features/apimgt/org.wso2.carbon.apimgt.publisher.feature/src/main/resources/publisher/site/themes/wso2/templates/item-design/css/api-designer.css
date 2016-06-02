@@ -167,6 +167,7 @@
 .resource_expand {
     cursor: pointer;
     word-wrap:none;
+    width:50%;
 }
 .resource_container .editable{ padding-top: 0px !important;}
 
@@ -179,8 +180,6 @@
 }
 .vtoptd{ vertical-align: top;}
 
-.resource_container input {  padding: 2px 24px 2px 4px !important; }
-.resource_container button { padding-top: 2px; padding-bottom: 2px;}
 .resource_container .editable-container{  }
 .resource_container .control-group{ margin-bottom: 0px !important;}
 
@@ -198,7 +197,9 @@
     vertical-align: middle;
     padding:0px 8px;
 }
-
+.table-fullwidth{
+    width:100%;
+}
 .resource_container{
     border-bottom: 2px solid #fff;
 }
@@ -239,7 +240,7 @@
     padding: 10px;
 }
 
-.resource_body div{
+.resource_body > div{
     background-color: #F5F5F5;
 }
 
@@ -250,7 +251,9 @@ margin: 20px 0px 10px 10px;
 .resource_summary{
     width: 400px;
 }
-
+.resource_summary{
+    height:30px;
+}
 #apiEditThumb{
     width: 100px;
     height:100px;

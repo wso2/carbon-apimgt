@@ -4683,7 +4683,7 @@ Editableform based on Twitter Bootstrap 3
       '</button>'+
       '<button type="button" class="btn btn-default btn-sm editable-cancel">'+
         '<i class="glyphicon glyphicon-remove"></i>'+
-      '</button>';         
+      '</button>';
     
     //error classes
     $.fn.editableform.errorGroupClass = 'has-error';
