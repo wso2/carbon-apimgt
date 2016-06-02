@@ -941,27 +941,27 @@
     </div>
     <div class="modal-body">
     <form id="scope_form" class="form-horizontal">
-        <div class="control-group">
-            <label class="control-label" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
-            <div class="controls">
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
+            <div class="col-sm-4">
             <input type="text" id="scopeKey" name="scopeKey" class="form-control required characterValidation" placeholder="Eg: api_name_read">
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
-            <div class="controls">
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
+            <div class="col-sm-4">
             <input type="text" id="scopeName" name="scopeName"  class="form-control required characterValidation" placeholder="Eg: Read My Data">
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="scopeRoles">Roles</label>
-            <div class="controls">
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="scopeRoles">Roles</label>
+            <div class="col-sm-4">
             <input type="text" id="scopeRoles" class="form-control" placeholder="E.g.: role1,role2,role3" data-role="tagsinput" />
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="inputEmail">Description</label>
-            <div class="controls">
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="inputEmail">Description</label>
+            <div class="col-sm-4">
             <textarea id="scopeDescription" class="form-control" placeholder="Eg: This scope will group all the administration APIs"></textarea>
             </div>
         </div>        
@@ -1013,6 +1013,14 @@
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
         }, 'Field Contain special characters');
+
+        //character validation excluding space
+        jQuery.validator.addMethod("characterValidationExceptSpace", function(value, element) {
+            // not allow any special charaters
+            return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\t\n]*$/.test( value );
+        }, 'Field Contain special characters');
+
+        
 
        </script>
         </div>
