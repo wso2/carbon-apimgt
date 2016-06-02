@@ -321,6 +321,12 @@ nav.navigation .second_level > .left-menu-item {
 
 }
 
+.tag-content a{
+    display: block;
+    float: left;
+    padding: 0px 5px;
+}
+
 .tag-content > label {
     padding: 3px 8px;
     line-height: 19px;
@@ -1035,7 +1041,7 @@ div.image-container {
     margin-right:60px;
 }
 .truncate {
-  min-width: 250px;
+  max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
