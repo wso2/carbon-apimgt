@@ -2316,7 +2316,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-         return addSubscriptionResponse;
+         return null;
     }
 
     public static SubscriptionResponse jsFunction_addAPISubscription(Context cx, Scriptable thisObj,
