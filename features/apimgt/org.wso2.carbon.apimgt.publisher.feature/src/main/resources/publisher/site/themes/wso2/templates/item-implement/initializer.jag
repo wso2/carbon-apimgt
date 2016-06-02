@@ -19,7 +19,7 @@ jagg.initializer("item-implement", {
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
         jagg.addFooterJS("endpint-ui-jq", "jagg", "templates/item-implement/js/apim-endpoint-ui.js");
         jagg.addFooterJS("implementation-api", "jagg", "templates/item-implement/js/api-implementation.js");
-        jagg.addFooterJS("cors-configuration", "jagg", "templates/item-implement/js/cors-configuration.js");
+        //jagg.addFooterJS("cors-configuration", "jagg", "templates/item-implement/js/cors-configuration.js");
         jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
         jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
 	jagg.addFooterJS("corsjs", "jagg", "templates/item-implement/js/jquery.corsUi.js");
