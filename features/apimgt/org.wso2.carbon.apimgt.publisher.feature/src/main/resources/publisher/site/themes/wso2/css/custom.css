@@ -701,3 +701,11 @@ input.ep-field{ min-width: 50%;}
     margin-left:2px;
 }
 .sub-form-group label { color: #777; }
+
+.tier_checkbox_label{ display: block; }
+
+.checkbox p {     
+    padding: 0 0 0 23px;
+    position: relative; 
+    margin: 0;
+}
