@@ -2309,6 +2309,7 @@ public class APIStoreHostObject extends ScriptableObject {
             } else {
                 handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage()
                         , e);
+                return null;
             }
         } finally {
             if (isTenantFlowStarted) {
