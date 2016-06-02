@@ -614,6 +614,10 @@ ul.product-tags {
     margin: auto;
     font-size: 26px;
 }
+.thumbnail.icon img {
+    width: 101%;
+}
+
 .search-wrap>.form-control, .search-wrap .btn.wrap-input-right  {
     background-color: #215080;
     border: 0px;
