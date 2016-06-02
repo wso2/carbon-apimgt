@@ -77,8 +77,6 @@
    </div>
 
 	<div class="">
-                <div class="row">
-                    <div class="wizard col-xs-12">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
                                 <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span class="wiz-step-count">1</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("design")%></span></a></li>
@@ -93,11 +91,6 @@
 									<div class="panel panel-default">
 							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
-											<label class="radio">
-						                            <span class="fw-stack fw-lg">
-					                                    <i class="fw fw-settings fw-stack-2x"></i>
-					                                </span>
-						                    </label>
 						                    <div>
 				                                <div class="heading">Managed API</div>
 				                                <div class="description truncate">Provide the production and sandbox endpoints of the API to be managed.</div>
@@ -120,27 +113,27 @@
 													<script id="endpoint-ui-template" type="text/x-handlebars-template">
 														{{#*inline "add_remove_ep"}}
 								                            <div class="form-group">
-								                            	<label class="control-label col-sm-3"></label>
-								                            	<div class="col-md-3">
-								                            	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
-																	<span class="icon fw-stack fw-lg" style="font-size:8px">
-																	<i class="fw fw-circle-outline fw-stack-2x"></i>
-																	<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
+								                            	<label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3"></label>
+								                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+																	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
+																		<span class="icon fw-stack fw-lg" style="font-size:8px">
+																		<i class="fw fw-circle-outline fw-stack-2x"></i>
+																		<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																		</span>
 																	</span>
-								                            	</span>
-								                            	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
-								                            		<span class="icon fw-stack fw-lg" style="font-size:8px">
-																	<i class="fw fw-circle-outline fw-stack-2x"></i>
-																	<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
+																		<span class="icon fw-stack fw-lg" style="font-size:8px">
+																		<i class="fw fw-circle-outline fw-stack-2x"></i>
+																		<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																		</span>
 																	</span>
-								                            	</span>
 								                            	</div>
 								                            </div>
 														{{/inline}}
 
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
-								                            <label class="control-label col-sm-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
@@ -148,8 +141,8 @@
 													                </span>
 								                            	</a>{{/if}}{{/if}}
 								                            </label>
-								                            <div class="col-md-7">
-																<div class="input-group col-sm-12">
+								                            <div class=" col-xs-12 col-sm-8 col-md-8 col-lg-8">
+																<div class="input-group">
 																  {{#if label }}
 																  <span class="input-group-addon">{{ label }}</span>
 																  {{/if}}
@@ -169,7 +162,7 @@
 							                            {{/inline}}												
 
 								                        <div class="form-group">
-								                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
@@ -177,7 +170,7 @@
 													                </span>
 								                            	</a>
 								                            </label>
-							                                <div class="col-sm-3">
+							                                <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
 							                                        <option value="http"  {{#if http }}selected="selected"{{/if}}>HTTP/REST Endpoint</option>
 							                                        <option value="address" {{#if address }}selected="selected"{{/if}}>HTTP/SOAP Endpoint</option>
@@ -187,9 +180,9 @@
 							                            </div>
 							                            {{#if default }}
 							                            <div class="form-group">
-							                            	<div class="col-sm-3"></div>
-							                            	<div class="col-sm-8">
-															<div class="message message-info">
+							                            	<div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"></div>
+							                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															<div class="message message-info remove-margin">
 											                    <h4><i class="icon fw fw-info"></i>Notice</h4>
 											                    <p>You have selected "Dynamic Endpoint" which will send the message to the address specified in the "To" header. Please upload a mediation sequence file to Message Mediation Policies which sets the "To" header.</p>
 															</div>
@@ -197,9 +190,9 @@
 														</div>
 							                            {{else}}
 							                            <div class="form-group">    
-								                            <label class="control-label col-sm-3">
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
 								                            </label>
-							                                <div class="col-sm-3">
+							                                <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 																<label class="checkbox">
 																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
 																  <span class="helper">Load Balanced</span>
@@ -260,7 +253,7 @@
 
 							                            {{#if load_balance}}
 															<div class="form-group">
-															    <label class="col-sm-3 control-label" for="algoCombo">Algorithm
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="algoCombo">Algorithm
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
 															            <span class="icon fw-stack fw-lg" style="font-size:6px">
 															              <i class="fw fw-circle fw-stack-2x"></i>
@@ -268,7 +261,7 @@
 															          	</span>
 															        </a>
 															    </label>
-															    <div class="col-sm-3">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															        <select class="form-control valid load_balance_property" name="algoCombo" id="algoCombo" aria-invalid="false">
 															            <option {{#ifCond algoCombo "==" "org.apache.synapse.endpoints.algorithms.RoundRobin" }}selected="selected"{{/ifCond}} value="org.apache.synapse.endpoints.algorithms.RoundRobin">Round-robin</option>
 															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other">Other</option>
@@ -277,21 +270,21 @@
 															</div>
 															{{#ifCond algoCombo "==" "other"}}
 															<div class="form-group">
-															    <label class="col-sm-3 control-label" for="">Class Name for Algorithm
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Class Name for Algorithm
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-sm-5">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															        <input type="text" class="required form-control load_balance_property" name="algoClassName" value="{{algoClassName}}" id="algoClassName">
 															    </div>
 															</div>
 															{{/ifCond}}
 															<div class="form-group">
-															    <label class="col-sm-3 control-label" for="sessionManagement">Session Management
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="sessionManagement">Session Management
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-sm-3">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															        <select class="form-control load_balance_property" name="sessionManagement" id="sessionManagement">
 															            <option {{#ifCond sessionManagement "==" "http" }}selected="selected"{{/ifCond}} value="http">Transport</option>
 															            <option {{#ifCond sessionManagement "==" "soap" }}selected="selected"{{/ifCond}} value="soap">SOAP</option>
@@ -301,11 +294,11 @@
 															    </div>
 															</div>
 															<div class="form-group">
-															    <label class="col-sm-3 control-label" for="">Session Timeout (Mills)
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Session Timeout (Mills)
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-sm-3">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															        <input class="form-control load_balance_property" type="text" name="sessionTimeOut" value="{{sessionTimeOut}}" id="sessionTimeOut">
 															    </div>
 															</div>
@@ -342,8 +335,8 @@
 							                        </div>							
 							
 							                         <div class="form-group">
-							                            <div class="controls">
-							                                <a href="#" class="more-options col-sm-3 col-sm-offset-3 but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
+							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
+							                                <a href="#" class="more-options but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
 							                             </div>
 							                         </div>
 							                        <div id="more-options-endpoints"  style="display:none">
@@ -593,11 +586,6 @@
 							            <div class="panel panel-default">
 							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
-													<label class="radio">
-								                            <span class="fw-stack fw-lg">
-							                                    <i class="fw fw-settings fw-stack-2x"></i>
-							                                </span>
-								                    </label>
 								                    <div>
 						                                <div class="heading">Prototyped API</div>
 						                                <div class="description truncate" title="Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs">Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</div>
@@ -820,8 +808,6 @@
 							            </div>
 							            </div>
 							            </div>
-        </div>
-                        </div>
                     </div>
                 </div>
             </div>	
