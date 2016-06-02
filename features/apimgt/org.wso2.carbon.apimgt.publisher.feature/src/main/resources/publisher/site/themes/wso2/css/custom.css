@@ -294,13 +294,14 @@ div.image-container {
     display: table-cell;
     border-right: 1px solid #E5E5E5;
     text-align: center;
-    padding: 1.5% 2%;
     border-bottom: 2px solid #3598db;
+    max-height:100px;
 }
 .wiz-nav-inner li span {
     display: inline-block;
 }
 .wiz-nav-inner li a{
+    padding: 15px;
     display: block;
 }
 .wiz-nav-inner .wiz-control {
@@ -688,8 +689,10 @@ input.ep-field{ min-width: 50%;}
     line-height:31px;
 }
 
-.editableform .control-group{
+#resource_details .editableform .control-group{
     margin:0px;
 }
-
+#resource_details .editable-buttons .editable-cancel{
+    margin-left:2px;
+}
 .sub-form-group label { color: #777; }

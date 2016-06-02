@@ -491,9 +491,9 @@
     <div class="add-margin-bottom-4x">
     	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="description">{{ description }}</a>
     </div>
-    <table class="add-margin-bottom-4x">
+    <table class="table-fullwidth add-margin-bottom-4x">
 		<tr>
-			<td width="20%"><strong>Produces : </strong><a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces" title="Produces">{{ produces }}</a></td>
+			<td width="40%"><strong>Produces : </strong><a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces" title="Produces">{{ produces }}</a></td>
 			<td><strong>Consumes : </strong><a href="#" data-path="{{resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes" title="Consumes">{{ consumes }}</a></td>
 		</tr>
     </table>
@@ -502,28 +502,30 @@
     		<strong>Parameters :</strong>
 		</div>
 		{{#if parameters}}
-		<table class="table table-condensed table-hover table-bordered">
+		<table class="table table-condensed table-bordered">
 			<tr>
-			<th width="200px">Parameter Name</th>
-			<th>Description</th>
-			<th width="100px">Parameter Type</th>
-			<th width="100px">Data Type</th>
-			<th width="100px">Required</th>
-			<th width="100px">Delete</th>
+				<th width="15%">Parameter Name</th>
+				<th width="35%">Description</th>
+				<th width="15%">Parameter Type</th>
+				<th width="15%">Data Type</th>
+				<th width="15%">Required</th>
+				<th width="5%">Delete</th>
 			</tr>
 		{{#each parameters}}
 			<tr id="{{name}}">
-			<td>{{ name }}</td>
-			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{ description }}</a></td>
-			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
-			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
-			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
-			<td align="center"><a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" style="margin-left: 40px" class="delete_parameter" title="index">
-			<span class="fw-stack" style="font-size:10px">
-									<i class="fw fw-delete fw-stack-1x"></i>
-									<i class="fw fw-circle-outline fw-stack-2x"></i>
-					</span>
-		</a></td>
+				<td>{{ name }}</td>
+				<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{ description }}</a></td>
+				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+				<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+				<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+				<td align="center">
+					<a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" class="delete_parameter" title="index">
+						<span class="fw-stack" style="font-size:10px">
+							<i class="fw fw-delete fw-stack-1x"></i>
+							<i class="fw fw-circle-outline fw-stack-2x"></i>
+						</span>
+					</a>
+				</td>
 			</tr>
 		{{/each}}
 		{{/if}}
