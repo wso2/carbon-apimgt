@@ -4,9 +4,29 @@ var lenI=0,apps = outputs.applications; if(apps!=null){lenI = apps.length;}
 
 <!--get loggedd in user -->
 <%  var username = jagg.getUser().username;
-var page = request.getParameter('page');
+var uriMatcher = new URIMatcher(request.getRequestURI())
+var page;
+//Provide a pattern to be matched against the URL
+if(uriMatcher.match('/{admindashboard}/{loganalyzer}/{pageNo}')) {
+//If pattern matches, elements can be accessed from their keys
+  page = uriMatcher.elements().pageNo;
+}
+
 if(page == null) {
-page = 'page1';
+    page = 'page6';
+}
+var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+var tenantDomain = MultitenantUtils.getTenantDomain(username);
+var carbon = require('carbon');
+var httpUriMatcher = new URIMatcher(carbon.server.address('http'));
+var httpsUriMatcher = new URIMatcher(carbon.server.address('https'));
+var httpPort;
+var httpsPort;
+if(httpUriMatcher.match('/{hostname}:{port}')) {
+    httpPort = httpUriMatcher.elements().port;
+}
+if(httpsUriMatcher.match('/{hostname}:{port}')) {
+    httpsPort = httpsUriMatcher.elements().port;
 }
 %>
 
@@ -154,12 +174,17 @@ page = 'page1';
             </div>
         </script>
 
-        <script src="/shindig/gadgets/js/container:open-views:opensearch:rpc:xmlutil:pubsub-2.js?c=1&amp;debug=1&amp;container=default"></script>
+    <script id="ues-menu-list-hbs" type="text/x-handlebars-template">
+        //{{#traverseMenu menu false isAnonView user isHiddenMenu}}{{/traverseMenu}}
+    </script>
+
+        <script src="/shindig/gadgets/js/container:open-views:opensearch:rpc:xmlutil:pubsub-2.js?c=1&debug=1&container=default"></script>
         <script src="/portal/js/ues.js"></script>
         <script src="/portal/js/ues-prefs.js"></script>
 
+
         <script>
-            ues.global.userDomain = "carbon.super";
+            ues.global.userDomain = "<%=tenantDomain%>";
             ues.global.urlDomain = null;
             ues.global.tenantPrefix = "/t";
             ues.global.type = 'default';
@@ -167,8 +192,8 @@ page = 'page1';
             ues.global.host = {"hostname": "localhost", "port": "", "protocol": ""};
             ues.global.context = "/portal";
             ues.global.server = {
-                httpPort: "9763",
-                httpsPort: "9443"
+                httpPort: "<%=httpPort%>",
+                httpsPort: "<%=httpsPort%>"
             };
         </script>
 
@@ -185,7 +210,7 @@ page = 'page1';
         <script src="/portal/extensions/components/gadget/index.js"></script>
         <script src="/portal/extensions/components/widget/index.js"></script>
         <script src="/portal/extensions/uris/local/index.js"></script>
-        <script src="/portal/extensions/uris/store/index.js"></script>
+        <script src="/portal/extensions/uris/fs/index.js"></script>
         <script src="/portal/js/gadget-properties.js"></script>
         <script src="/portal/js/ds-handlebar-helpers.js"></script>
         <script src="/portal/js/dashboard.js"></script>
@@ -238,7 +263,9 @@ page = 'page1';
                     $("#title-section").append('<h2>'+pages[i].title+'</h2>');
                 }
             }
-        </script>
+    //usage : in traverseMenu helper
+    var user = {}, isAnonView = null;
+    </script>
     </div>
 </div>
 <% }); %>
