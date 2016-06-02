@@ -18,7 +18,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/base",
                     "inputs":{
                         "title":"RESTClient",
-                        "middle":[
+                        "top":[
                             {
                                 "name":"tools/rest-client",
                                 "inputs":{
