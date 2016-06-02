@@ -475,97 +475,13 @@
 
 														<div id="corsConfigsManaged">
 														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+                                                            <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+															<div class="cors-ui-container"></div>
 
-															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
-															<div class="form-group">
-																<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
-																<div class="controls col-sm-8">
-																	<label class="checkbox">
-																		<input type="checkbox" id="toggleCorsManaged" name="cors_check"
-																			<%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
-																						<span class="helper"><%=i18n.localize("corsMsg")%></span>
-																	</label>
-																</div>
-															</div>
 															   <div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
-																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
-																		<tr>
-																			<td class="col-sm-4">
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
-																			</td>
-																			<td>
-																				<div id="allOriginContainerManaged">
-																				<label class="checkbox">
-																					<input type="checkbox" id="toggleallOriginManaged" name="toggleallOriginManaged"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
-																					<span class="helper"><%=i18n.localize("allOrigins")%></span>
-																				</label>
-																				</div>
-																						<%
-																				var accessOriginManaged ="";
-																				for (var origin in corsJson.accessControlAllowOrigins){
-																					accessOriginManaged += corsJson.accessControlAllowOrigins[origin]+",";
-																				}
-																				if(accessOriginManaged != ""){
-																					accessOriginManaged=accessOriginManaged.substr(0,(accessOriginManaged.length-1));
-																				}
-																				var accessHeadersManaged ="";
-																				for (var headers in corsJson.accessControlAllowHeaders){
-																					accessHeadersManaged += corsJson.accessControlAllowHeaders[headers]+",";
-																				}
-																				if(accessHeadersManaged != ""){
-																					accessHeadersManaged=accessHeadersManaged.substr(0,(accessHeadersManaged.length-1));
-																				}
-																				var accessMethodsManaged="";
-																				for (var methods in corsJson.accessControlAllowMethods){
-																					accessMethodsManaged += corsJson.accessControlAllowMethods[methods]+",";
-																				}
-																				if(accessMethodsManaged != ""){
-																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
-																				}
-																				%>
-																				<div class="originContainerManaged tagContainer">
-																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="controls credentialContainerManaged">
 
-																					<label class="checkbox">
-																						<input type="checkbox" id="allowCredentialsManaged" name="allowCredentialsManaged" placeholder="Access Control Allow Credentials"
-																						<% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
-																						<span class="helper">Check to send True</span>
-																					</label>
-																				</div>
-																			</td>
-																		</tr>
-																</table>
 															</div>
 														</div>
 
@@ -680,95 +596,13 @@
 															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
 
 															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
-															<div class="form-group">
-																<label class="control-label col-sm-3" for="corsConfigurationPrototyped"><%=i18n.localize("corsConfiguration")%></label>
-																<div class="controls col-sm-8">
-																	<label class="checkbox">
-																		<input type="checkbox" id="toggleCorsPrototyped" name="cors_check"
-																						 <%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
-																			<span class="helper"><%=i18n.localize("corsMsg")%></span>
-																	</label>
-																</div>
-															</div>
+
+															<div class="cors-ui-prototype-container"></div>
+
 															<div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
-																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
-																		<tr>
-																			<td class="col-sm-4">
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
-																			</td>
-																			<td>
-																				<div id="allOriginContainerPrototyped">
-																					<label class="checkbox">
-																						<input type="checkbox" id="toggleallOriginPrototyped" name="toggleallOriginPrototyped"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
-																						<span class="helper"><%=i18n.localize("allOrigins")%></span>
-																					</label>
-																				</div>
-																						<%
-																				var accessOriginPrototyped ="";
-																				for (var origin in corsJson.accessControlAllowOrigins){
-																					accessOriginPrototyped += corsJson.accessControlAllowOrigins[origin]+",";
-																				}
-																				if(accessOriginPrototyped != ""){
-																					accessOriginPrototyped=accessOriginPrototyped.substr(0,(accessOriginPrototyped.length-1));
-																				}
-																				var accessHeadersPrototyped ="";
-																				for (var headers in corsJson.accessControlAllowHeaders){
-																					accessHeadersPrototyped += corsJson.accessControlAllowHeaders[headers]+",";
-																				}
-																				if(accessHeadersPrototyped != ""){
-																					accessHeadersPrototyped=accessHeadersPrototyped.substr(0,(accessHeadersPrototyped.length-1));
-																				}
-																				var accessMethodsPrototyped="";
-																				for (var methods in corsJson.accessControlAllowMethods){
-																					accessMethodsPrototyped += corsJson.accessControlAllowMethods[methods]+",";
-																				}
-																				if(accessMethodsPrototyped != ""){
-																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
-																				}
-																				%>
-																				<div class="originContainerPrototyped tagContainer">
-																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
-																									</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="controls credentialContainerPrototyped">
-
-																					<label class="checkbox">
-																						<input type="checkbox" id="allowCredentialsPrototyped" name="allowCredentialsPrototyped" placeholder="Access Control Allow Credentials"
-																							 <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
-																								<span class="helper">Check to send True</span>
-																							</label>
-																				</div>
-																			</td>
-																		</tr>
-																	</table>
+																	
 																</div>
 															</div>
 
@@ -1178,6 +1012,67 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
             </div>
         </fieldset>
     </div>
+</script>
+
+<script id="cors-ui-template" type="text/x-handlebars-template">
+
+    <div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+			<div class="controls col-sm-8">
+			<label class="checkbox">
+                <input type="checkbox" class="toggleCorsManaged" name="cors_check" {{#if corsConfigurationEnabled }} checked="checked"  {{/if}} />
+				<span class="helper"><%=i18n.localize("corsMsg")%></span>
+			</label>
+	    </div>
+	</div>
+	{{#if corsConfigurationEnabled }}
+	<div id="corsFormElements">
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
+			<div class="headerContainer tagContainer col-sm-6">
+
+				{{#unless allowAll }}
+				<span id="accesseAllowOriginDiv">
+					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
+				</span>
+				{{/unless}}
+				<label class="checkbox">
+					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
+					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+				</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<input type="text" class="tagsinput form-control"  id="allowHeadersManaged" name="accessControlAllowHeaders" value="{{ accessControlAllowHeaders }}" data-role="tagsinput"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<input type="text"  class="tagsinput form-control"  id="allowMethodsManaged" name="accessControlAllowMethods" value="{{ accessControlAllowMethods }}" data-role="tagsinput"/>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<label class="checkbox">
+					<input type="checkbox" class="allowCredentialsManaged" name="accessControlAllowCredentials"
+					{{#if accessControlAllowCredentials }} checked="checked" {{/if}} />
+					<span class="helper"></span>
+				</label>
+			</div>
+		</div>
+	</div>
+	{{/if}}
 </script>
 
 <% }); %>
