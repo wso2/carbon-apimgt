@@ -50,9 +50,9 @@
         var payload = request.getContent();
 
         if(tenantId == "-1234" && isTenantAllowAllUsers){
-            payload.query = payload.query.replace(/#tenentID#/i, "\"*\"");
+            payload.query = payload.query.replace(/#tenantID#/i, "\"*\"");
         }else{
-            payload.query = payload.query.replace(/#tenentID#/i, "\"" + tenantId + "\"");
+            payload.query = payload.query.replace(/#tenantID#/i, "\"" + tenantId + "\"");
         }
 
         if(method == undefined){
