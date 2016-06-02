@@ -1,17 +1,17 @@
 var inSequencesLoaded = false;
 
 //hack to validate tiers
+var tier_error = $("#tier_error").text();
 function validate_tiers(){
-    var selectedValues = $('#tier').val();
-    var selectedValuesApiPolicy = $('#apiPolicy').val();
-    var selectedValuesSubPolicy = $('#subPolicy').val();
-    if((selectedValues && selectedValues.length > 0 )|| (selectedValuesSubPolicy && selectedValuesSubPolicy.length > 0 ) || (selectedValuesApiPolicy && selectedValuesApiPolicy.length > 0 )){
-        $("button.multiselect").removeClass('error-multiselect');
-        $("#tier_error").remove();
+    var selectedValues = [];
+    $("input[name='tier']:checked").each(function() {
+        selectedValues.push($(this).val());
+    });    
+    if(selectedValues && selectedValues.length > 0 ){
+        $("#tier_error").addClass("hide");
         return true;
     }
-    //set error
-    $("button.multiselect").addClass('error-multiselect').after('<label id="tier_error" class="error" for="tenants" generated="true" style="display: block;">This field is required.</label>').focus();
+    $("#tier_error").removeClass("hide").show().text(tier_error);
     return false;
 }
 
@@ -42,7 +42,7 @@ $(document).ready(function(){
         }
     });
 
-    $('.multiselect').multiselect();
+    //$('.multiselect').multiselect();
 
     $('#tier').change(validate_tiers);
     $('#transport_http').change(validate_Transports);
@@ -78,23 +78,25 @@ $(document).ready(function(){
     });
 
 
-    $("select[name='tier']").change(function() {
-            // multipleValues will be an array
-            var multipleValues = $(this).val() || [];
-            var countLength = $('#tiersCollection').length;
-            if (countLength == 0) {
-
-                $('<input>').attr('type', 'hidden')
-                        .attr('name', 'tiersCollection')
-                        .attr('id', 'tiersCollection')
-                        .attr('value', multipleValues)
-                        .appendTo('#manage_form');
-            } else {
-                $('#tiersCollection').attr('value', multipleValues);
-
-            }
-
+    $("input[name='tier']").click(function() {
+        // multipleValues will be an array
+        var multipleValues = [];
+        $("input[name='tier']:checked").each(function() {
+            multipleValues.push($(this).val());
         });
+        var countLength = $('#tiersCollection').length;
+        if (countLength == 0) {
+            $('<input>').attr('type', 'hidden')
+                    .attr('name', 'tiersCollection')
+                    .attr('id', 'tiersCollection')
+                    .attr('value', multipleValues)
+                    .appendTo('#manage_form');
+        } else {
+            $('#tiersCollection').attr('value', multipleValues);
+
+        }
+        validate_tiers();
+    });
 
     $("select[name='apiPolicy']").change(function() {
             // multipleValues will be an array

@@ -129,14 +129,14 @@
             this.render();
         },
 
-        _on_failover_checked:function(){
-            if(event.target.checked && this.config.endpoint_type != "load_balance"){
+        _on_failover_checked:function(e){
+            if(e.target.checked && this.config.endpoint_type != "load_balance"){
                 this.config.endpoint_type = "failover";
                 this.config.production_failovers = [ { url:"" }];
                 this.config.sandbox_failovers = [ { url:"" }];
-            }else if(event.target.checked && this.config.endpoint_type == "load_balance"){
+            }else if(e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="True";
-            }else if(!event.target.checked && this.config.endpoint_type == "load_balance"){
+            }else if(!e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="False";
             }else{
                 this.config.endpoint_type = this.element.find("#endpoint_type").val();
@@ -146,8 +146,8 @@
             this.render();
         },
 
-        _on_load_balance_checked: function(){
-            if(event.target.checked){
+        _on_load_balance_checked: function(e){
+            if(e.target.checked){
                 if(this.config.endpoint_type == "failover"){
                     this.config.failOver ="True";
                 }
@@ -191,7 +191,7 @@
 
         _load_balance_property_change:function(e){            
             var property = $(e.currentTarget).attr("name");
-            this.config[property] = $(event.target).val();
+            this.config[property] = $(e.target).val();
             if(property == "algoCombo" && this.config[property] =="other"){
                 this.config.algoClassName = "";
             }
@@ -203,7 +203,7 @@
             var ep_type = $(e.currentTarget).attr("data-type");
             if(this.config[ep_type] == undefined) this.config[ep_type] = [];
             if(this.config[ep_type][index] == undefined) this.config[index] = { url:"" };            
-            this.config[ep_type][index].url = $(event.target).val();
+            this.config[ep_type][index].url = $(e.target).val();
             console.log(this.config);
             this.validate();
         },     

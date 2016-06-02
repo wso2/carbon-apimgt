@@ -220,9 +220,8 @@
 					</h4>
 				</div>
             <% if (isSynapseGateway) { %>
-
             <div class="form-group">
-                <label class="control-label col-sm-3" for="throttle">Maximum Backend Throughput
+                <label class="control-label col-sm-3" for="throttle">Maximum Backend Throughput :
                  <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
                     <span class="icon fw-stack fw-lg" style="font-size:6px">
                         <i class="fw fw-circle fw-stack-2x"></i>
@@ -261,62 +260,40 @@
             </div>            
             <%}%>				
 
-             <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+
                 
-                 <hr />
-                 <div class="form-group">
-				 <label class="control-label col-sm-3" for="tiertier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
-		                <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
-                		    <span class="icon fw-stack fw-lg" style="font-size:6px">
-							    <i class="fw fw-circle fw-stack-2x"></i>
-								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-						    </span>
-                	    </a>
-                	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                   </label>
+    <hr />
+    <div class="form-group">
+	    <label class="control-label col-sm-3" for="tiertier">
+            <%=i18n.localize("subTier")%>:
+            <span class="requiredAstrix">*</span>
+            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
+    		    <span class="icon fw-stack fw-lg" style="font-size:6px">
+				    <i class="fw fw-circle fw-stack-2x"></i>
+					<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+			    </span>
+    	    </a>
+    	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+        </label>
+        <div class="controls col-sm-4 tierSelect">
+			<%                         
+                for (var i = 0; i < tiers.length; i++) {
+                    var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                %>
+                <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                        <input type="checkbox" class="tier_check" name="tier" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
+                        <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> : <%= tiers[i].tierDescription %></span>                                    
+                </label>
+                <%
+                }
+            %>
+           <label id="tier_error" class="error hide" style="display: block;">Please select at least one Subscription Tier.</label>
+        </div>
+	</div>
 
-                    <div class="controls col-sm-8 tierSelect">
-                        <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-	                        <%
-	                        for (var i = 0; i < tiers.length; i++) {
-	                        	var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-	                        %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
-	                        }
-	                        %>
-        				</select>
-        <script type="text/javascript">
 
-        </script>
-        <a class=" help_popup" help_data="tier_help"></a>
-        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                    </div>
-					</div>
-                 <% } else {%>
-                     <div class="form-group">
-                        <label class="control-label col-sm-3" for="tier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span>
-                        	<a class="help_popup" help_data="tier_help" title="tier_help" data-trigger="hover" data-placement="bottom">
-                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
-									<i class="fw fw-circle fw-stack-2x"></i>
-									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-								</span>
-                        	</a>
-                        	<p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-                        </label>
-
-                        <div class="controls col-sm-8 tierSelect">
-                            <select id="tier" name="tier"  class="form-control multiselect selected required" multiple="multiple">
-                            <%
-        for (var i = 0; i < tiers.length; i++) {
-            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-            %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
-        }
-        %>
-        </select>
-    </div>
-</div>
-<% }%>
           <%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
-<hr />
+                        <hr />
                         <div class="form-group">
                         <label class="control-label col-sm-3" for="apiPolicy">Advanced Throttling Policies:
                             <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
