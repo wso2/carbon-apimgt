@@ -2301,15 +2301,8 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
-
-            if (e.getMessage() != null && e.getMessage().contains("was blocked")) {
-                // throwing exception without logging stacktrace since its an expected behaviour
-                throw new APIManagementException("Error while adding subscription for user: " + userId + ". Reason: "
-                        + e.getMessage(), e);
-            } else {
-                handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage()
-                        , e);
-            }
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
+            return null;
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
