@@ -120,7 +120,7 @@
 							href="<%= jagg.url("/api-policy-list") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
-							<%= i18n.localize("apiTiers") %></a></li>
+							Advanced Throttling</a></li>
 
 					        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
 					        href="<%= jagg.url("/app-policy-manage") %>"
@@ -146,7 +146,7 @@
 						<li <%if (reqUrl.match("conditions-manage")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/site/pages/conditions-manage.jag") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i><%=i18n.localize("conditionManagementTitle") %></a></li>
+							<i class="fw fw-settings"></i>Black List</a></li>
 
 					     <%}%>
 					</ul>

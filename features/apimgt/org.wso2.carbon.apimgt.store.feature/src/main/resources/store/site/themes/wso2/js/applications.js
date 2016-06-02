@@ -40,7 +40,6 @@
         },
 
         refresh: function(){
-            console.log(this.editor);
             this.editor.refresh();
         }
 

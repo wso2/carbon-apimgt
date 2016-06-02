@@ -161,6 +161,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add API
      */
     void addAPI(API api) throws APIManagementException;
+    
+    public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations

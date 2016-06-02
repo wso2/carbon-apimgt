@@ -2,7 +2,7 @@
     <div id="listing">
     	<div class="page-header">
                 <div class="page-title">
-                    <h1><%=i18n.localize("blockedEntities")%></h1>                    
+                    <h1>Black Listed Entities</h1>                    
                  </div>
          </div>
 

@@ -45,7 +45,7 @@
   <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
   <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
   <div class="form-group">
-    <label class="control-label col-lg-2 col-md-3" for="application-name"><%=i18n.localize("name")%><span class="requiredAstrix">*</span></label>    
+    <label class="control-label col-lg-3 col-md-3" for="application-name"><%=i18n.localize("name")%><span class="requiredAstrix">*</span></label>    
     <div class="col-lg-4 col-md-6">
       <input type="text" class="form-control required validateSpecialChars validName" title="application-name" id="application-name" autofocus="autofocus" value="<%= encode.forHtmlAttribute(app.name)%>"/>
     </div>
@@ -54,11 +54,11 @@
   <%
     if(!APIUtil.isAdvanceThrottlingEnabled()){
         %>
-    <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("throttleByTier")%></label>
-      <% } else { %>
-      <label class="col-lg-2 col-md-3 control-label" for="appTier"><%=i18n.localize("perUserQuota")%></label>
-      <% } %>
-    <div class="col-lg-10 col-md-6">
+        <label class="col-lg-3 col-md-3 control-label" for="appTier"><%=i18n.localize("throttleByTier")%></label>
+     <% } else { %>
+        <label class="col-lg-3 col-md-3 control-label" for="appTier">Per Token Quota</label>
+     <% } %>
+    <div class="col-lg-9 col-md-9">
         <select id="appTier" name="appTier" onChange="tierChanged(this)">
           <%
           var tierDescriptions = "";
@@ -79,31 +79,30 @@
             <%=tiers[i].tierDisplayName%>
           </option>
           <%}%>
-          </select>    
+          </select>   
           <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
             <%=unlimitedTierDesc%>
           </div>          
-          <div class="help-block"><%=i18n.localize("appHelpMsg")%>
-          </div>
+          <div class="help-block">This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application. </div>
           <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=tierDescriptions%>"/>  
     </div>
-  </div>
+  </div>  
   <div class="form-group">
-    <label class="col-lg-2 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
-    <div class="col-lg-4 col-md-6">
+    <label class="col-lg-3 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%></label>    
+    <div class="col-lg-8 col-md-6">
         <input type="text" class="validInput form-control" title="callback-url" name="callback-url"  id="callback-url" value="<%= encode.forHtmlAttribute(callbackUrl)%>"/>
     </div>
     <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
     <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
   </div>
   <div class="form-group">
-    <label for="description" class="col-lg-2 col-md-3 control-label">Description</label>    
+    <label for="description" class="col-lg-3 col-md-3 control-label">Description</label>    
     <div class="col-lg-4 col-md-6">
         <textarea id="description"  class="form-control" type="text" rows="3"><%= encode.forHtml(description)%></textarea>
     </div>
   </div>  
   <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
+    <div class="col-sm-offset-3 col-sm-10">
         <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("save")%>"/>
         <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
     </div>

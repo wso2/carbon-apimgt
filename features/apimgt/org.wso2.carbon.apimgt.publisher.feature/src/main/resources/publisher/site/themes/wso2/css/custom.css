@@ -101,7 +101,7 @@ div.image-container {
 
 
 /* ========================================================================
- * Media panels tablist
+ * Accordion and Collapse Components
  * ======================================================================== */
 
 #accordion1 h4 a,#accordion2 h4 a{
@@ -114,6 +114,9 @@ div.image-container {
 }
 #accordion1 .panel,#accordion2 .panel{
     margin-bottom:10px;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 #accordion1 .panel-heading,#accordion2 .panel-heading{
     background:#e2e2e2;
@@ -141,45 +144,63 @@ div.image-container {
     margin-right:0px;
     background:#ccc;
 }
-#accordion1 .panel-heading .radio .helper{
+#accordion1 .panel-heading .panel-title,#accordion2 .panel-heading .panel-title{
+    height:60px;
+}
+#accordion1 .panel-heading .radio .helper,
+#accordion2 .panel-heading .radio .helper{
     padding-top:0px;
     top:20px;
     left:20px;
 }
-#accordion1 .panel-heading .radio > i{
+#accordion1 .panel-heading .radio > i,
+#accordion2 .panel-heading .radio > i{
     position:relative;
     top:20px;
     left:20px;
 }
-#accordion1 .panel-heading .radio > span{
+#accordion1 .panel-heading .radio > span,
+#accordion2 .panel-heading .radio > span{
     position:relative;
     top:10px;
     left:10px;
 }
-#accordion1 .panel-heading div .status{
+#accordion1 .panel-heading div .status,
+#accordion2 .panel-heading div .status{
     margin-top:-42px;
 }
-#accordion1 .panel-heading div .status i{
+#accordion1 .panel-heading div .status i,
+#accordion2 .panel-heading div .status i{
+    position:relative;
+    top:16px;
+    left:calc(100% - 40px);
+}
+#accordion1 .panel-heading .radio + div .status i,
+#accordion2 .panel-heading .radio + div .status i{
     position:relative;
     top:16px;
     left:calc(100% - 100px);
 }
-#accordion1 .panel-heading p,#accordion2 .panel-heading p{
+#accordion1 .panel-heading p,#accordion2 .panel-heading p,
+#accordion2 .panel-heading p,#accordion2 .panel-heading p{
     float:none;
     width:auto;
 }
-#accordion1 .panel-heading div .heading{
+#accordion1 .panel-heading div .heading,
+#accordion2 .panel-heading div .heading{
     font-weight:bold;
     padding-top:10px;
     padding-bottom:4px;
     text-indent:10px;
 }
-#accordion1 .panel-heading div .description{
+#accordion1 .panel-heading div .no-description,
+#accordion2 .panel-heading div .no-description{
+    padding-top:20px;
+}
+#accordion1 .panel-heading div .description,
+#accordion2 .panel-heading div .description{
     text-indent:10px;
     margin-right:60px;
-}
-.panel-body .form-horizontal{
-    max-width:100%;
 }
 .truncate {
   min-width: 250px;
@@ -191,7 +212,6 @@ div.image-container {
 #accordion1 h4 a i,#accordion2 h4 a i{
     margin-top:-4px;
 }
-
 
 /* ========================================
  * Form Styles 
@@ -240,6 +260,20 @@ div.image-container {
     -moz-box-shadow: none;
     box-shadow: none;
 }
+.default-popover{
+    max-width:300px;
+}
+.default-popover .popover-content ol{
+    margin:0px;
+    padding:0px;
+    padding-top:5px;
+    padding-left:20px;
+}
+.default-popover .popover-content li{
+    font-size:12px;
+    padding-top:2px;
+}
+
 
 
 /* ========================================================================
@@ -264,6 +298,9 @@ div.image-container {
     border-bottom: 2px solid #3598db;
 }
 .wiz-nav-inner li span {
+    display: inline-block;
+}
+.wiz-nav-inner li a{
     display: block;
 }
 .wiz-nav-inner .wiz-control {
@@ -322,6 +359,40 @@ div.image-container {
     margin-top: -13px;
     z-index: 1;
 }
+.wiz-step-count{
+    width: 32px;
+    height: 32px;
+    color:#fff;
+    background: #5477A1;
+    -moz-border-radius: 16px;
+    -webkit-border-radius: 16px;
+    border-radius: 16px;
+    padding-top:7px;
+}
+.wiz-step.current .wiz-step-count{
+    color:#5477A1;
+    background: #fff;
+}
+.wiz-step.completed .wiz-step-count{
+    color:#344860;
+    background: #7ea9ce;
+}
+.wiz-step-title{
+    font-size:16px;
+    margin-left:10px;
+}
+.wiz-step.current .wiz-step-title{
+    color:#fff;
+}
+.wiz-step.completed .wiz-step-title{
+    color:#7ea9ce;
+}
+.wiz-step .wiz-step-title{
+    color:#5477A1;
+}
+.wiz-step.current .wiz-step-title:hover{
+    color:#e2e2e2;
+}
 .with-controls li:nth-last-child(2):before, .with-controls li:nth-last-child(2):after{
     border: 0px;
 }
@@ -333,6 +404,9 @@ div.image-container {
     border-right: 1px solid #E5E5E5;
     border-bottom: 2px solid #3598db;
     margin-top: -1px;
+}
+.wiz-content .panel-body{
+    border:none!important;
 }
 
 .btn,a.btn{
@@ -605,3 +679,17 @@ input.ep-field{ min-width: 50%;}
 .navbar-menu-toggle[aria-expanded=true]{
     background:#242932;
 }
+.form-group label>.requiredAstrix {
+    color: #E74C3C;
+    font-weight: 400;
+    margin-left:2px;
+}
+.api-search .input-group-btn button{
+    line-height:31px;
+}
+
+.editableform .control-group{
+    margin:0px;
+}
+
+.sub-form-group label { color: #777; }
