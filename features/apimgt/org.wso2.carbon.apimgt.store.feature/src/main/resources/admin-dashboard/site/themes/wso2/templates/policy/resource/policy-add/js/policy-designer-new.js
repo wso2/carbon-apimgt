@@ -209,7 +209,7 @@ var addQueryParam = function (id) {
         queryParamName = $tds.eq(0).text();
         queryParamVal = $tds.eq(1).text();
         if(queryParamName == paramName) {
-            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Query Param");
+            addDuplicateError("duplicate", $('#query-param-name-' + id), "Duplicate Query Param");
             isDuplicate = true;
         }
     });
@@ -327,7 +327,7 @@ var addJwtClaim = function (id) {
         jwtClaimName = $tds.eq(0).text();
         jwtClaimValue = $tds.eq(1).text();
         if(jwtClaimName == claimName) {
-            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Claim");
+            addDuplicateError("duplicate", $('#jwt-claim-name-' + id), "Duplicate Claim");
             isDuplicate = true;
         }
     });
