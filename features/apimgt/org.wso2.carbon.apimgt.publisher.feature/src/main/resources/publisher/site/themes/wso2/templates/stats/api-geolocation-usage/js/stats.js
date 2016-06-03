@@ -142,9 +142,9 @@ var populateVersionList = function(apiName,compare){
         };
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
-   var to = convertTimeString(toDate);
+    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
-        getDateTime(to,from);
+    getDateTime(toDate,fromDate);
     var data = [];
            jagg.post("/site/blocks/stats/api-geolocation-usage/ajax/stats.jag", { action : "getGeolocationUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drilldown},
         function (json) {
