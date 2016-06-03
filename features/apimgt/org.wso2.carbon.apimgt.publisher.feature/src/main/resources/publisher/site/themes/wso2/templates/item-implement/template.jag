@@ -1007,7 +1007,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 			<div class="controls col-sm-8">
 			<label class="checkbox">
                 <input type="checkbox" class="toggleCorsManaged" name="cors_check" {{#if corsConfigurationEnabled }} checked="checked"  {{/if}} />
-				<span class="helper"><%=i18n.localize("corsMsg")%></span>
+				<span class="helper"></span>
 			</label>
 	    </div>
 	</div>
