@@ -2,11 +2,7 @@
 ##
 ###generate key
 #macro( getKey )##
-#if($policy.getUserLevel() == $ACROSS_ALL)
 str:concat(resourceKey,'_default')##
-#else
-str:concat(resourceKey, '_', userId , '_default')##
-#end
 #end
 ###generate rule
 #macro( getRule $policy)
