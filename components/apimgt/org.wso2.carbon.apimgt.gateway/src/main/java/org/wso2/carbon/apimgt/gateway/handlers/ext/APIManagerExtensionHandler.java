@@ -23,6 +23,7 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -70,9 +71,11 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
         Timer.Context context = timer.start();
+        long executionStartTime = System.currentTimeMillis();
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
+            Utils.publishExecutionTime(messageContext, executionStartTime, DIRECTION_IN + " Mediation");
             context.stop();
         }
     }
@@ -81,9 +84,11 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
         Timer.Context context = timer.start();
+        long executionStartTime = System.currentTimeMillis();
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
+            Utils.publishExecutionTime(messageContext, executionStartTime, DIRECTION_OUT + " Mediation");
             context.close();
         }
     }
