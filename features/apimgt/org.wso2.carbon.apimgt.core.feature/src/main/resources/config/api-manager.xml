@@ -508,20 +508,20 @@
         </JMSConnectionDetails>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
-                <Gold>20</Gold>
-                <Silver>5</Silver>
-                <Bronze>1</Bronze>
+                <Gold>5000</Gold>
+                <Silver>2000</Silver>
+                <Bronze>1000</Bronze>
                 <Unauthenticated>60</Unauthenticated>
             </SubscriptionTierLimits>
             <ApplicationTierLimits>
-                <Large>20</Large>
-                <Medium>5</Medium>
-                <Small>1</Small>
+                <50PerMin>50</50PerMin>
+                <20PerMin>20</20PerMin>
+                <10PerMin>10</10PerMin>
             </ApplicationTierLimits>
             <ResourceLevelTierLimits>
-                <Ultimate>20</Ultimate>
-                <Plus>5</Plus>
-                <Basic>1</Basic>
+                <50KPerMin>50000</50KPerMin>
+                <20KPerMin>20000</20KPerMin>
+                <10KPerMin>10000</10KPerMin>
             </ResourceLevelTierLimits>
         </DefaultLimits-->
         <EnableUnlimitedTier>true</EnableUnlimitedTier>
