@@ -42,9 +42,24 @@
     isManageTierPermitted = jagg.getManageTierPermitted().permitted;
     %>
 
-    <div class="page-header"> <h2><%=i18n.localize("statistics")%></h2> </div>
+
+
+<div class="page-header"> <h2><%=i18n.localize("statistics")%></h2> </div>
+    <%
+	var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+	var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+	if(!isAnalyticsEnabled) {
+		%>
+		<div class="message message-warning">
+		<h4><i class="icon fw fw-warning"></i><%=i18n.localize("notConfiguredDAS")%></h4>
+        <p><%=i18n.localize("checkBAMConnectivity")%></p>
+        </div>
+    <%
+	 }
+	%>
 
     <div class="row">
+
         <div class="col-xs-3">
             <h3>APIs</h3>
                 <ul class="nav nav-pills secondary-nav collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">

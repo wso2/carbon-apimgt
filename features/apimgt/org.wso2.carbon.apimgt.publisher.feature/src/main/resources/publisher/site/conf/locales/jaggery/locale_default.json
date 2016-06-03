@@ -200,7 +200,7 @@
     "applicationThrottledCounts" : "App Throttled Out Requests",
     "applicationThrottledRequests" : "App Throttled Requests",
 
-    "apiTime" : "PUBLISHED APIS OVER TIME",
+    "apiTime" : "Published APIs Over Time",
     "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
