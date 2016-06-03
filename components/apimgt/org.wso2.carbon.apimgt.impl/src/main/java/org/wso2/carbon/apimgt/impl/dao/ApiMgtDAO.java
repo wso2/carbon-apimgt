@@ -9405,7 +9405,7 @@ public class ApiMgtDAO {
         String startingIP = null;
         String endingIP = null;
         String specificIP = null;
-
+        boolean invert;
         try {
             connection = APIMgtDBUtil.getConnection();
             conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_IP_CONDITIONS_SQL);
@@ -9416,9 +9416,12 @@ public class ApiMgtDAO {
                 startingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_IP);
                 endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
                 specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
+                invert = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
+
                 if (specificIP != null && !"".equals(specificIP)) {
                     IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
                     ipCondition.setSpecificIP(specificIP);
+                    ipCondition.setInvertCondition(invert);
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
@@ -9428,6 +9431,7 @@ public class ApiMgtDAO {
                     IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);
                     ipRangeCondition.setEndingIP(endingIP);
+                    ipRangeCondition.setInvertCondition(invert);
                     conditions.add(ipRangeCondition);
                 }
             }
