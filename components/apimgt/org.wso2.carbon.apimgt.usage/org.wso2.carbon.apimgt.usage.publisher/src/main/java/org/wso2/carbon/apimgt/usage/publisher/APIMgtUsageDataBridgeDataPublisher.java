@@ -58,7 +58,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
                              +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
             //Publish Request Data
-            dataPublisher.publish( streamID ,
+            dataPublisher.tryPublish( streamID ,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeRequestPublisherDTO.createPayload());
         } catch(Exception e){
@@ -74,7 +74,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                               + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
             dataBridgeResponsePublisherDTO.createPayload();
             //Publish Response Data
-            dataPublisher.publish(streamID,
+            dataPublisher.tryPublish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeResponsePublisherDTO.createPayload());
 
@@ -90,7 +90,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
                               + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
             //Publish Fault Data
-            dataPublisher.publish(streamID,
+            dataPublisher.tryPublish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeFaultPublisherDTO.createPayload());
 
@@ -107,7 +107,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
                               DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
             //Publish Throttle data
-            dataPublisher.publish(streamID,
+            dataPublisher.tryPublish(streamID,
                                   System.currentTimeMillis(), new Object[]{"external"}, null,
                                   (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
 
@@ -123,7 +123,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + ":" +
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion();
 
-            dataPublisher.publish(streamID,System.currentTimeMillis(), new Object[]{"external"}, null,
+            dataPublisher.tryPublish(streamID,System.currentTimeMillis(), new Object[]{"external"}, null,
                     (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
         } catch (Exception e) {
             log.error("Error while publishing Execution time events", e);
@@ -185,7 +185,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamName() + ":" +
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamVersion();
 
-            dataPublisher.publish(streamID,System.currentTimeMillis(), null, null,
+            dataPublisher.tryPublish(streamID,System.currentTimeMillis(), null, null,
                     (Object[]) dataBridgeAlertTypesPublisherDTO.createPayload());
         } catch (Exception e) {
             log.error("Error while publishing alert types events.", e);
