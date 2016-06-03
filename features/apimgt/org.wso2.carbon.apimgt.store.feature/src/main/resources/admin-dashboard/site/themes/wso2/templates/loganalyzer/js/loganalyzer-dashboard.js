@@ -357,7 +357,7 @@ var loganalyzerDashboard = {
         },
         {
             "id": "page2",
-            "title": "Artifact Deployment Stats",
+            "title": "API Deployment Stats",
             "layout": {
                 "content": {
                     "loggedIn": {
@@ -465,7 +465,7 @@ var loganalyzerDashboard = {
                                         "required": true
                                     }
                                 },
-                                "locale_titles": {"en-US": "Deployed Artifacts"},
+                                "locale_titles": {"en-US": "Deployed APIs"},
                                 "settings": {}
                             }
                         }
@@ -506,7 +506,7 @@ var loganalyzerDashboard = {
                                         "required": true
                                     }
                                 },
-                                "locale_titles": {"en-US": "Deleted Artifacts"},
+                                "locale_titles": {"en-US": "Deleted APIs"},
                                 "settings": {}
                             }
                         }
