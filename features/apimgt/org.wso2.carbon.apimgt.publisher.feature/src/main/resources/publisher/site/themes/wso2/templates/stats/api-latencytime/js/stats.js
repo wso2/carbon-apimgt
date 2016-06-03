@@ -207,9 +207,9 @@ var populateMediations = function(data){
                     .selectpicker('refresh');
 };
 function renderGraph(fromDate,toDate,drillDown){
-   var to = convertTimeString(toDate);
+    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
-        getDateTime(to,from);
+    getDateTime(toDate,fromDate);
     if (statsEnabled) {
         jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
         function (json) {
