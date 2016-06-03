@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -47,6 +46,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * usageClient class it use to expose the Statistic class instance. it responsible to make instance of the class that is provided by the api-manager.xml
@@ -658,7 +659,8 @@ public class UsageClient {
                 apiList = apiProvider.getAPIsByProvider(provider);
             }
 
-            List<APIListDTO> list = new ArrayList<APIListDTO>();
+            //use set for skip similar apis with diffrent versions
+            Set<APIListDTO> list = new TreeSet<APIListDTO>();
             for (API apiInfo : apiList) {
                 int count = -1;
                 String apiName = apiInfo.getId().getApiName();
@@ -666,7 +668,7 @@ public class UsageClient {
                 String apiPublisher = apiInfo.getId().getProviderName();
                 list.add(new APIListDTO(count, apiName, version, apiPublisher));
             }
-            return list;
+            return new ArrayList<APIListDTO>(list);
         } catch (APIManagementException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         }
