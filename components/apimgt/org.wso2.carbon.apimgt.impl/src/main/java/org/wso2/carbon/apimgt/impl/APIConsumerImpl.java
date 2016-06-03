@@ -67,6 +67,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import org.wso2.carbon.registry.common.TermData;
+
 import javax.cache.Caching;
 
 import java.net.MalformedURLException;
@@ -74,6 +76,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -93,14 +97,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String EMPTY_STRING = "";
 
     /* Map to Store APIs against Tag */
-    private Map<String, Set<API>> taggedAPIs;
+    private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
     private boolean isTenantModeStoreView;
     private String requestedTenant;
     private boolean isTagCacheEnabled;
     private Set<Tag> tagSet;
     private long tagCacheValidityTime;
     private long lastUpdatedTime;
+    private long lastUpdatedTimeForTagApi;
     private Object tagCacheMutex = new Object();
+    private Object tagWithAPICacheMutex = new Object();
     private APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
@@ -142,21 +148,92 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map
      *
-     * @param tag The name of the tag
+     * @param tagName The name of the tag
      * @return Set of {@link API} with the given tag
      * @throws APIManagementException
      */
     @Override
-    public Set<API> getAPIsWithTag(String tag) throws APIManagementException {
-        if (taggedAPIs != null) {
-            return taggedAPIs.get(tag);
-        }
-        this.getAllTags(this.tenantDomain);
-        if (taggedAPIs != null) {
-            return taggedAPIs.get(tag);
-        }
-        return null;
-    }
+	public Set<API> getAPIsWithTag(String tagName) throws APIManagementException {
+    	
+    	 /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
+         */
+        long lastUpdatedTimeAtStart = lastUpdatedTimeForTagApi;
+        long currentTimeAtStart = System.currentTimeMillis();
+        if(isTagCacheEnabled && ( (currentTimeAtStart- lastUpdatedTimeAtStart) < tagCacheValidityTime)){
+        	if (taggedAPIs != null && taggedAPIs.containsKey(tagName)) {
+    			return taggedAPIs.get(tagName);
+    		}
+        }else{
+        	synchronized (tagWithAPICacheMutex) {
+        		lastUpdatedTimeForTagApi = System.currentTimeMillis();
+                taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
+            }
+        	
+        }    	
+        
+		/*
+		 * this.getAllTags(this.tenantDomain); if (taggedAPIs != null) { return
+		 * taggedAPIs.get(tag); }
+		 */
+
+		this.isTenantModeStoreView = (this.tenantDomain != null);
+
+		if (this.tenantDomain != null) {
+			this.requestedTenant = this.tenantDomain;
+		}
+
+		Registry userRegistry = null;
+		boolean isTenantFlowStarted = false;
+		String tagsQueryPath = null;
+		Set<API> apisWithTag = null;
+		try {
+			// as a tenant, I'm browsing my own Store or I'm browsing a Store of
+			// another tenant..
+			if ((this.isTenantModeStoreView && this.tenantDomain == null)
+					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(this.tenantDomain))) {
+				
+				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+						.getTenantId(this.requestedTenant);
+				userRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+						.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+			} else {
+				userRegistry = registry;
+			}
+
+			List<TermData> terms = null;
+			try {
+				if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+					isTenantFlowStarted = true;
+					PrivilegedCarbonContext.startTenantFlow();
+					PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+				}
+
+			} finally {
+				if (isTenantFlowStarted) {
+					PrivilegedCarbonContext.endTenantFlow();
+				}
+			}
+
+			apisWithTag = getAPIsWithTag(requestedTenant, userRegistry, tagName);
+			/* Add the APIs against the tag name */
+			if (!apisWithTag.isEmpty()) {
+				if (taggedAPIs.containsKey(tagName)) {
+					for (API api : apisWithTag) {
+						taggedAPIs.get(tagName).add(api);
+					}
+				} else {
+					taggedAPIs.putIfAbsent(tagName, apisWithTag);					
+				}
+			}
+
+		} catch (RegistryException e) {
+			handleException("Failed to get api by the tag", e);
+		} catch (UserStoreException e) {
+			handleException("Failed to get api by the tag", e);
+		}
+
+		return apisWithTag;
+	}
 
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map.
@@ -1190,7 +1267,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        Map<String, Set<API>> tempTaggedAPIs = new HashMap<String, Set<API>>();
         TreeSet<Tag> tempTagSet = new TreeSet<Tag>(new Comparator<Tag>() {
             @Override
             public int compare(Tag o1, Tag o2) {
@@ -1198,12 +1274,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         });
         Registry userRegistry = null;
-        String tagsQueryPath = null;
         boolean isTenantFlowStarted = false;
+        String tagsQueryPath = null;
         try {
-            tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
+        	tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
             Map<String, String> params = new HashMap<String, String>();
             params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
+            //as a tenant, I'm browsing my own Store or I'm browsing a Store of another tenant..
             if ((this.isTenantModeStoreView && this.tenantDomain==null) || (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant based store anonymous mode
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(this.requestedTenant);
@@ -1212,46 +1289,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 userRegistry = registry;
             }
-            Collection collection = null;
+
+            List<TermData> terms = null;
             try {
+            	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
                 }
-                collection = userRegistry.executeQuery(tagsQueryPath, params);
+                //rxt api media type
+                terms = GovernanceUtils.getTermDataList(Collections.EMPTY_MAP, APIConstants.API_OVERVIEW_TAG, APIConstants.API_RXT_MEDIA_TYPE, true);
             } finally {
                 if (isTenantFlowStarted) {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
 
-            if (collection != null) {
-                for (String fullTag : collection.getChildren()) {
-                    //remove hardcoded path value
-                    String tagName = fullTag.substring(fullTag.indexOf(';') + 1, fullTag.indexOf(COLON_CHAR));
-
-                    Set<API> apisWithTag = getAPIsWithTag(requestedTenant, userRegistry, tagName);
-                        /* Add the APIs against the tag name */
-                    if (!apisWithTag.isEmpty()) {
-                        if (tempTaggedAPIs.containsKey(tagName)) {
-                            for (API api : apisWithTag) {
-                                tempTaggedAPIs.get(tagName).add(api);
-                            }
-                        } else {
-                            tempTaggedAPIs.put(tagName, apisWithTag);
-                        }
-                    }
-                }
+            if(terms != null){
+            	for(TermData data : terms){
+            		tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
+            	}
             }
-
-            for (Map.Entry<String, Set<API>> entry : tempTaggedAPIs.entrySet()) {
-                tempTagSet.add(new Tag(entry.getKey(), entry.getValue().size()));
-
-            }
+   
             synchronized (tagCacheMutex) {
                 lastUpdatedTime = System.currentTimeMillis();
-                this.taggedAPIs = tempTaggedAPIs;
                 this.tagSet = tempTagSet;
             }
 
@@ -1263,7 +1325,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		// give a warn.
 				if (userRegistry != null && !userRegistry.resourceExists(tagsQueryPath)) {
 					log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
-					return new TreeSet<Tag>();
+					return tagSet == null ? Collections.EMPTY_SET : tagSet;
 				}
 			} catch (RegistryException e1) {
                 // Even if we should ignore this exception, we are logging this as a warn log.
@@ -1276,6 +1338,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
         }
+ 
         return tagSet;
     }
 
