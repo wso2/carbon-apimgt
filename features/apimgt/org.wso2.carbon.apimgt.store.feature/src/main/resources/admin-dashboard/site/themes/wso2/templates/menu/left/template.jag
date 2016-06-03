@@ -5,8 +5,13 @@
     var reqUrl = request.getRequestURI();
     var listUrl=jagg.url("/site/pages/index.jag");
     var listMappedUrl=jagg.url("/site/pages/index.jag");
-    var liveLogViewer=jagg.url("/log-viewer");
-    var loganalyzer =jagg.url("/log-analyzer");
+ 	var liveLogViewer=jagg.url("/loganalyzer/page6");
+    var loganalyzerOverview = jagg.url("/loganalyzer/page0");
+    var loganalyzerApplicationErrors = jagg.url("/loganalyzer/page1");
+    var loganalyzerApiDeploymentStats = jagg.url("/loganalyzer/page2");
+    var loganalyzerLoginStats = jagg.url("/loganalyzer/page3");
+    var loganalyzerNumberOfAPIFailures = jagg.url("/loganalyzer/page4");
+    var loganalyzerAccessTokenErrors = jagg.url("/loganalyzer/page5");
     var subsUrl=jagg.url("/site/pages/index.jag");
     var subsMappedUrl=jagg.url("/site/pages/index.jag");
     var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
@@ -153,16 +158,41 @@
 				</li>
 				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
                     <ul class="nav nav-pills secondary-nav collapse in">
-                         <li><a href="<%=loganalyzer%>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="fw fw-task"></i>
-                              Dashboard</a></li>
-                         </li>
-                         <li><a href="<%=liveLogViewer%>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="fw fw-task"></i>
-                              Live log viewer</a>
-                         </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page6")){%>class="active"<% } %>><a href="<%=liveLogViewer%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Live log viewer</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page0")){%>class="active"<% } %>><a href="<%=loganalyzerOverview%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerOverview%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Overview</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page1")){%>class="active"<% } %>><a href="<%=loganalyzerApplicationErrors%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApplicationErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Application Errors</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page2")){%>class="active"<% } %>><a href="<%=loganalyzerApiDeploymentStats%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApiDeploymentStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Api Deployment Stats</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page3")){%>class="active"<% } %>><a href="<%=loganalyzerLoginStats%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerLoginStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Login Stats</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page4")){%>class="active"<% } %>><a href="<%=loganalyzerNumberOfAPIFailures%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerNumberOfAPIFailures%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Number of API Failures</a>
+                        </li>
+                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page5")){%>class="active"<% } %>><a href="<%=loganalyzerAccessTokenErrors%>"
+                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerAccessTokenErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                            <i class="fw fw-task"></i>
+                            Access Token Errors</a>
+                        </li>
                     </ul>
                  </li>
                <li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Analytics</a>

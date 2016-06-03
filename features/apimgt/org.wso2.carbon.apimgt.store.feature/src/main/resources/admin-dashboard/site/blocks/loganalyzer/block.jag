@@ -1,0 +1,8 @@
+<%
+jagg.block("loganalyzer", {
+    initializer:function (data) {
+    	
+    }
+
+});
+%>

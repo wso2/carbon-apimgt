@@ -31,6 +31,12 @@
         var log = new Log("log-analyzer-proxy.jag");
         var serviceInvokers = session.get("serviceInvokers");
 
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(user.username);
+        var tenantManagerService = new Packages.org.wso2.carbon.um.ws.service.TenantManagerService();
+        var tenantId = tenantManagerService.getTenantId(tenantDomain);
+        var isTenantAllowAllUsers = true;
+
         if(serviceInvokers == null) {
             serviceInvokers = require("./js/backend-service-invoker.js").backendServiceInvoker;
             session.put("serviceInvokers", serviceInvokers);
@@ -42,6 +48,13 @@
         var method = request.getMethod();
         var targetURL = analyticsConfigInstance.getDasServerUrl() + "/portal/controllers/apis/analytics.jag";
         var payload = request.getContent();
+
+        if(tenantId == "-1234" && isTenantAllowAllUsers){
+            payload.query = payload.query.replace(/#tenantID#/i, "\"*\"");
+        }else{
+            payload.query = payload.query.replace(/#tenantID#/i, "\"" + tenantId + "\"");
+        }
+
         if(method == undefined){
             log.error("Method Undefined. Target URL: " + targetURL);
             return;
