@@ -1,5 +1,98 @@
 var inSequencesLoaded = false;
 
+;(function ( $, window, document, undefined ) {
+    Handlebars.logger.level = 0;
+    var source = $("#resource-policy-ui-template").html();    
+    var template;
+    if(source != undefined && source !="" ){
+        template = Handlebars.compile(source);
+    }  
+
+    Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+        switch (operator) {
+            case '==':
+                return (v1 == v2) ? options.fn(this) : options.inverse(this);
+            case '===':
+                return (v1 === v2) ? options.fn(this) : options.inverse(this);
+            case '<':
+                return (v1 < v2) ? options.fn(this) : options.inverse(this);
+            case '<=':
+                return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+            case '>':
+                return (v1 > v2) ? options.fn(this) : options.inverse(this);
+            case '>=':
+                return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+            case '&&':
+                return (v1 && v2) ? options.fn(this) : options.inverse(this);
+            case '||':
+                return (v1 || v2) ? options.fn(this) : options.inverse(this);
+            default:
+                return options.inverse(this);
+        }
+    });    
+
+    var pluginName = "resourceTierSelect";
+
+    var defaults = {
+         
+    };
+
+    // The actual plugin constructor
+    function Plugin( element, options ) {
+        this.element = $(element);
+        // do not extend the api config
+        this.config = options.config;
+        this.options = $.extend( {}, defaults, options) ;        
+        this._name = pluginName;
+        this.init();
+    }
+
+    Plugin.prototype = {
+
+        init: function() { 
+            this.render();
+            this.attach_events();
+        },
+
+        attach_events: function(){            
+            this.element
+            .on("change",".select_resource_policy", $.proxy(this.select_resource_policy, this))
+            .on("click",".select_adv_policy_for_resource", $.proxy(this.select_adv_policy_for_resource, this));
+        },
+
+        select_resource_policy:function(e){
+            var designer = APIDesigner();
+            var path = $(e.currentTarget).attr("data-path");
+            var method = $(e.currentTarget).attr("data-method");
+            designer.api_doc.paths[path][method]["x-throttling-tier"] = $(e.currentTarget).val();
+            $(".throttling_select[data-path='$.paths."+path+"."+method+"']").text($(e.currentTarget).val());
+        },
+
+        select_adv_policy_for_resource: function(e){
+            this.render();
+            this.element.find("#resource_policy_modal").modal('show');
+        },
+
+        render: function(){
+            var designer = new APIDesigner();
+            var context = { doc : designer.api_doc , tiers: this.options.tiers };
+            this.element.html(template(context));            
+        },
+
+    };
+    // A really lightweight plugin wrapper around the constructor,
+    // preventing against multiple instantiations
+    $.fn[pluginName] = function ( options ) {
+        return this.each(function () {
+            if (!$.data(this, "plugin_" + pluginName)) {
+                $.data(this, "plugin_" + pluginName,
+                new Plugin( this, options ));
+            }
+        });
+    };
+
+})( jQuery, window, document );
+
 //hack to validate tiers
 var tier_error = $("#tier_error").text();
 function validate_tiers(){
@@ -41,6 +134,14 @@ $(document).ready(function(){
             $(".tps_boxes").show();
         }
     });
+
+    $("#resource_adv_policy").click(function(){
+
+        return false;
+    });
+
+    
+    $("#resource-policy-select").resourceTierSelect({ tiers : TIERS });    
 
     //$('.multiselect').multiselect();
 
@@ -173,16 +274,18 @@ $("#toggleThrottle").change(function(e){
     }
 });
 
-$('#api_level_policy').change(function(){
-    if($(this).prop("checked")) {
-        validateAPITier();
-        $('#enableApiLevelPolicy').val("true");
+$(".api_level_policy").click(function() {     
+    if($("input[name=api_level_policy]:checked").val() == "api_level_policy"){
         $('#api-level-policy-section').show();
+        $("#resource-policy-select").addClass("hide");
+        $('#enableApiLevelPolicy').val("true");
         $('.throttling_select').hide();
-    } else {
-        validateAPITier();
-        $('#enableApiLevelPolicy').val("false");
+    }
+    else{
         $('#api-level-policy-section').hide();
+        $("#resource-policy-select").removeClass("hide");
+        $('#enableApiLevelPolicy').val("false");
+        $('.throttling_select').show();
     }
 });
 

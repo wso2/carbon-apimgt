@@ -709,3 +709,12 @@ input.ep-field{ min-width: 50%;}
     position: relative; 
     margin: 0;
 }
+
+#resource_policy_modal.modal .modal-body {
+    max-height: 600px !important;
+    overflow-y: auto !important;
+}
+
+#resource_policy_modal select{
+    margin: -6px;
+}

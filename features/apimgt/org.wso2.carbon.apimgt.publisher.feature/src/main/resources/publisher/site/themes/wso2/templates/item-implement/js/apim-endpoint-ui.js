@@ -97,14 +97,12 @@
             context[this.config.endpoint_type] = true;
             if(this.config.failOver == "False")
                 context.failOver = false;
-            console.log(context);
             this.element.html(template(context));
         },
 
         render_advance: function(){
             var context = jQuery.extend({}, this.config);
             context[this.config.endpoint_type] = true;
-            console.log(template2(context));
             var model = this.element.find("#advance_form").html(template2(context));
             this.element.find("#advance_endpoint_config").find('.selectpicker').selectpicker();
             this.element.find("#advance_endpoint_config").modal('show');
@@ -175,8 +173,7 @@
         _on_add_ep : function(e){
             var type = $(e.currentTarget).attr("data-type");
             if(this.config[type] == undefined)
-                this.config[type] = [];
-            console.log(this.config); 
+                this.config[type] = [];            
             this.config[type].push({ url :""});
             this.render();
         },
@@ -204,7 +201,6 @@
             if(this.config[ep_type] == undefined) this.config[ep_type] = [];
             if(this.config[ep_type][index] == undefined) this.config[index] = { url:"" };            
             this.config[ep_type][index].url = $(e.target).val();
-            console.log(this.config);
             this.validate();
         },     
 

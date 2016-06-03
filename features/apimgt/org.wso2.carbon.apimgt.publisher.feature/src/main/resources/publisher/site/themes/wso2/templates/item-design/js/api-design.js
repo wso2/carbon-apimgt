@@ -580,22 +580,22 @@ APIDesigner.prototype.render_resources = function(){
         success : this.update_elements
     });
 
-    if(typeof(TIERS) !== 'undefined'  && this.apiLevelPolicy.isAPILevel == true){
+    /*if(typeof(TIERS) !== 'undefined'  && this.apiLevelPolicy.isAPILevel == true){
         $('#resource_details').find('.throttling_select').editable({
             emptytext: '+ Throttling',        
             source: TIERS,
             success : this.update_elements,
             disabled : 'disabled'
         });
-    }   
+    }*/   
 
-     if(typeof(TIERS) !== 'undefined' && this.apiLevelPolicy.isAPILevel == false){
+    /*if(typeof(TIERS) !== 'undefined' && this.apiLevelPolicy.isAPILevel == false){
         $('#resource_details').find('.throttling_select').editable({
             emptytext: '+ Throttling',        
             source: TIERS,
             success : this.update_elements
         });
-    }   
+    }*/   
 
     if(typeof(AUTH_TYPES) !== 'undefined'){
         $('#resource_details').find('.auth_type_select').editable({
