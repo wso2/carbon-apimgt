@@ -45,9 +45,11 @@
     "analytics":"Configure Analytics",
     "themeUpload": "Upload Tenant Theme",
     "settings":"Settings",
-
+    "AnalyticsMenu": "Analytics",
     "tierManagement":"Throttling Tiers",
     "manageAlertTypes" : "Manage Alert Types",
+    "alertConfigurations" : "Alert Configurations",
+    "geoLocationConfigurations" : "GEO Location configurations",
     "tierName":"Name",
     "tierAddTitle":"Add Tier",
     "tierEditTitle":"Edit Tier",

@@ -99,6 +99,12 @@
 				</li>
 				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("settings")%></a>
 					<ul class="nav nav-pills secondary-nav collapse in">
+					    <li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+                              href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
+                              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                              <i class="fw fw-settings"></i>
+                              <%= i18n.localize("AnalyticsMenu") %></a>
+                        </li>
 						<li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
 							href="<%= jagg.url("/themeupload") %>"
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
@@ -201,11 +207,7 @@
                               onclick="jagg.sessionAwareJS({redirect:'<%=apiAvailability%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                               <i class="fw fw-task"></i>
                               API Availability</a></li>
-                             <li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
-              href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
-              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-              <i class="fw fw-settings"></i>
-              <%= i18n.localize("alerts") %></a></li>
+
 												<%
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
