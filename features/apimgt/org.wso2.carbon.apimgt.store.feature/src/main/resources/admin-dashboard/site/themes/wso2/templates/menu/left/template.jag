@@ -218,6 +218,9 @@
 							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 							<i class="fw fw-settings"></i>
 							<%= i18n.localize("manageAlertTypes") %></a></li>
+							<li> &nbsp; </li>
+							<li> &nbsp; </li>
+							<li> &nbsp; </li>
 							<%
     }
     %>
