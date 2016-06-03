@@ -1,0 +1,24 @@
+<%
+include("/jagg/jagg.jag");
+
+
+
+jagg.block("stats-list", {
+
+    initializer: function (data) {
+
+
+    },
+
+    getInputs: function () {
+        return {
+            "list": null
+        };
+    },
+    getOutputs: function () {
+
+    }
+
+
+});
+%>
