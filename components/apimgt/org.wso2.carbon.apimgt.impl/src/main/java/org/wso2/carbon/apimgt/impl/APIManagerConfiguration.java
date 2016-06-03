@@ -489,7 +489,7 @@ public class APIManagerConfiguration {
                         QName(APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURATION));
                 OMElement dataPublisherEnabledElement = dataPublisherConfigurationElement
                         .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
-                dataPublisher.setEnabled(JavaUtils.isTrueExplicitly(dataPublisherEnabledElement));
+                dataPublisher.setEnabled(JavaUtils.isTrueExplicitly(dataPublisherEnabledElement.getText()));
                 if (dataPublisher.isEnabled()) {
 
                     OMElement receiverUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new
@@ -606,9 +606,10 @@ public class APIManagerConfiguration {
                         (APIConstants.AdvancedThrottleConstants.JMS_CONNECTION_DETAILS));
 
                 if (jmsConnectionDetailElement != null) {
-                    OMElement blockingConditionEnabledElement = jmsConnectionDetailElement
+                    OMElement jmsConnectionEnabledElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
-                    jmsConnectionProperties.setEnabled(JavaUtils.isTrueExplicitly(blockingConditionEnabledElement));
+                    jmsConnectionProperties.setEnabled(JavaUtils.isTrueExplicitly(jmsConnectionEnabledElement
+                            .getText()));
                     OMElement jmsConnectionUrlElement = jmsConnectionDetailElement
                             .getFirstChildWithName(new QName
                                     (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
@@ -852,7 +853,7 @@ public class APIManagerConfiguration {
                     OMElement blockingConditionEnabledElement = blockConditionRetrieverElement
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     blockConditionRetrieverConfiguration.setEnabled(JavaUtils.isTrueExplicitly
-                            (blockingConditionEnabledElement));
+                            (blockingConditionEnabledElement.getText()));
                     String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" + System
                             .getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
                     blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);

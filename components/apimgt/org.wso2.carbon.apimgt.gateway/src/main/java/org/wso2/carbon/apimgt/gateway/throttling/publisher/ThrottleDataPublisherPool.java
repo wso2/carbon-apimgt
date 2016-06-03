@@ -35,7 +35,7 @@ public class ThrottleDataPublisherPool {
 
     private static final Log log = LogFactory.getLog(ThrottleDataPublisherPool.class);
 
-    private final ObjectPool clientPool;
+    private  ObjectPool clientPool;
 
     private ThrottleDataPublisherPool() {
         //Using stack object pool to handle high concurrency scenarios without droping any messages.
