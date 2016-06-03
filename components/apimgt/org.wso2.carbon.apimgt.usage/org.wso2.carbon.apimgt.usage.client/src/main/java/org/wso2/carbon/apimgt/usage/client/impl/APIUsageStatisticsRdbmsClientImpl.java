@@ -1065,8 +1065,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             statement = connection.prepareStatement(query);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[0];
-                String version = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[1];
+                String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split("--")[1];
+                String apiName = apiVersion.split(":v")[0];
+                String version = apiVersion.split(":v")[1];
                 String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
                 long responseCount = resultSet.getLong("totalTime");
                 double responseTime = resultSet.getDouble("totalWeightTime") / responseCount;
