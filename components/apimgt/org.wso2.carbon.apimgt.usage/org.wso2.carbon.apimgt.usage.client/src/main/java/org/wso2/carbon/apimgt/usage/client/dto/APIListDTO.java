@@ -18,7 +18,7 @@
 */
 package org.wso2.carbon.apimgt.usage.client.dto;
 
-public class APIListDTO {
+public class APIListDTO implements Comparable{
     private int SubscriptionCount;
     private String apiName;
     private String apiVersion;
@@ -61,5 +61,16 @@ public class APIListDTO {
 
     public void setApiProvider(String apiProvider) {
         this.apiProvider = apiProvider;
+    }
+
+    @Override
+    /**
+     *  use to compare object using api provider and name
+     */ public int compareTo(Object obj) {
+        APIListDTO o = (APIListDTO) obj;
+        if (this.apiName.equals(o.getApiName()) && this.apiProvider.equals(o.getApiProvider())) {
+            return 0;
+        }
+        return -1;
     }
 }
