@@ -1,6 +1,6 @@
 $(window).load(function() {
 
-    if($('.affix').length === 1){
+    if($('.affix').length > 0){
         $('.media').prepend('<div class="affix-spacer hidden-xs" style="width:' + $('.sidebar-wrapper').width() + 'px;float:left;height: 100vh"></div>')
     }
 
