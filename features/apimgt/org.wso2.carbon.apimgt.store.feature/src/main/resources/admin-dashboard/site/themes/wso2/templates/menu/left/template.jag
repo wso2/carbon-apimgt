@@ -187,7 +187,7 @@
                         <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page3")){%>class="active"<% } %>><a href="<%=loganalyzerLoginStats%>"
                                onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerLoginStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                             <i class="fw fw-task"></i>
-                            Login Stats</a>
+                            Login Errors</a>
                         </li>
                         <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page4")){%>class="active"<% } %>><a href="<%=loganalyzerNumberOfAPIFailures%>"
                                onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerNumberOfAPIFailures%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
