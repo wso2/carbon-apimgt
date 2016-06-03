@@ -10,10 +10,10 @@
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
     var resourceTiers = mod.getResourceTiers().tiers;
-    var default_tier = tiers[tiers.length -1].tierName;
-    for (var i = 0; i < tiers.length; i++){
-        if(tiers[i].defaultTier){
-            default_tier = tiers[i].tierName;
+    var default_tier = resourceTiers[resourceTiers.length -1].tierName;
+    for (var i = 0; i < resourceTiers.length; i++){
+        if(resourceTiers[i].defaultTier){
+            default_tier = resourceTiers[i].tierName;
             break;
         }
     }
