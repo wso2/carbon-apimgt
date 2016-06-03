@@ -1,7 +1,7 @@
 <% jagg.template("policy/resource/policy-list", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="title-section">
-        <h2><%=i18n.localize("apiResTierList")%></h2>
+        <h2>Advanced Throttling Policies</h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">

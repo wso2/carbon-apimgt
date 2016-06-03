@@ -18,16 +18,17 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import com.google.gson.JsonSyntaxException;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
-import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
-import org.wso2.carbon.apimgt.usage.client.bean.Result;
-import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.*;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceCompone
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.IOException;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -53,6 +55,8 @@ public abstract class APIUsageStatisticsClient {
 
     protected final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
     private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
+    private DASRestClient alertRestClient;
+
 
     /**
      * initialize datasource of implemented APIUsageStatisticsRestClient
@@ -766,4 +770,100 @@ public abstract class APIUsageStatisticsClient {
                                                                              String toDate, String drillDown)
             throws
             APIMgtUsageQueryServiceClientException;
+
+    /**
+     * Search a DAS indexed table and get the json response.
+     *
+     * @param tableName name of the table
+     * @param query     lucene query
+     * @param start     start index of the result list
+     * @param count     number of results required
+     * @param sortField from which field the sorting should happen, null if you don't want it sorted
+     * @param ascending sorting ascending or not
+     * @return json string of the response
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchTable(String tableName, String query, int start, int count, String sortField, boolean ascending)
+            throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        List<Map<String, String>> sortBy = new ArrayList();
+        if (sortField != null) {
+            Map<String, String> sortFieldMap = new HashedMap();
+            sortFieldMap.put("field", sortField);
+            String sortType = (ascending) ? "ASC" : "DESC";
+            sortFieldMap.put("sortType", sortType);
+            sortBy.add(sortFieldMap);
+        }
+        //create the bean
+        RequestSortBean request = new RequestSortBean(query, start, count, tableName, sortBy);
+        String result = null;
+        //do post and get the results
+        try {
+            if (alertRestClient == null) {
+                //get the config class
+                APIManagerAnalyticsConfiguration configs = APIManagerAnalyticsConfiguration.getInstance();
+                //check whether analytics enable
+                if (APIUtil.isAnalyticsEnabled()) {
+                    //get REST API config data
+                    String url = configs.getDasServerUrl();
+                    String user = configs.getDasServerUser();
+                    char[] pass = configs.getDasServerPassword().toCharArray();
+                    //crete new restClient instance
+                    alertRestClient = new DASRestClient(url, user, pass);
+                }
+            }
+            result = alertRestClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
+    /**
+     * Provides the count for the search result.
+     *
+     * @param tableName name of the table
+     * @param query     search query
+     * @return count of the search results
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public String searchCount(String tableName, String query) throws APIMgtUsageQueryServiceClientException {
+        if (query == null) {
+            query = "*:*";
+        }
+        //create the bean
+        RequestSearchCountBean request = new RequestSearchCountBean(tableName, query);
+        String result = null;
+        //do post and get the results
+        try {
+            if (alertRestClient == null) {
+                //get the config class
+                APIManagerAnalyticsConfiguration configs = APIManagerAnalyticsConfiguration.getInstance();
+                //check whether analytics enable
+                if (APIUtil.isAnalyticsEnabled()) {
+                    //get REST API config data
+                    String url = configs.getDasServerUrl();
+                    String user = configs.getDasServerUser();
+                    char[] pass = configs.getDasServerPassword().toCharArray();
+                    //crete new restClient instance
+                    alertRestClient = new DASRestClient(url, user, pass);
+                }
+            }
+            result = alertRestClient.doPost(request);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return result;
+    }
+
+
 }

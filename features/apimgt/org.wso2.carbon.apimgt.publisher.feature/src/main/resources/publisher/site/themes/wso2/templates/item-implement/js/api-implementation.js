@@ -1,4 +1,24 @@
 $(document).ready(function(){
+    var cors_config;
+    if($('#corsConfigurationManaged').val() != ""){
+        cors_config = jQuery.parseJSON($('#corsConfigurationManaged').val());
+    }
+
+ $(".cors-ui-container").corsUi({
+        config : cors_config
+    });
+
+    $(".cors-ui-prototype-container").corsUi({
+        config : cors_config
+    });
+
+    var endpoint_config;
+    if($('#endpoint_config').val() != ""){
+        endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    }
+    $("#endpoint-ui").apimEndpointUi({
+        config : endpoint_config
+    });
 
     $('a.help_popup').popover({
         html : true,
@@ -21,12 +41,12 @@ $(document).ready(function(){
     } else {
         $('#toggleThrottle').parent().next().hide();
     }
-   if( $("#toggleCorsManaged").attr('checked') ) {
-        $('#corsTableManaged').show();
-       } 
-      else {
-        $('#corsTableManaged').hide();
-      }
+   //if( $("#toggleCorsManaged").attr('checked') ) {
+   //     $('#corsTableManaged').show();
+   //    }
+   //   else {
+   //     $('#corsTableManaged').hide();
+   //   }
    if($('#toggleallOriginManaged').attr('checked')) {
        $('#allowCredentialsManaged').attr("checked",false);
        $('#allowCredentialsManaged').hide();
@@ -37,7 +57,8 @@ $(document).ready(function(){
         $('.originContainerManaged').show();
         } 
  
-     $('#endpointType').on('change',function() {
+    // @Todo: remove code
+    $('#endpointType').on('change',function() {
         var endpointType = $('#endpointType').find(":selected").val();
         if (endpointType == "secured") {
             var endpointAuthType = $('#endpointAuthType').find(":selected").val();
@@ -68,8 +89,14 @@ $(document).ready(function(){
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
-        APP.update_ep_config("managed");
+        if(!$("#endpoint-ui").data("plugin_apimEndpointUi").validate()){
+            return;
+        }
+        $('#endpoint_config').val(JSON.stringify($("#endpoint-ui").data("plugin_apimEndpointUi").get_endpoint_config()));
         $('.swagger').val(JSON.stringify(designer.api_doc));
+        $('#corsConfigurationManaged').val(JSON.stringify($(".cors-ui-container").data("plugin_corsUi").get_cors_config()));
+
+
 
         $('#'+thisID).buttonLoader('start');
         $(form).ajaxSubmit({
@@ -122,7 +149,7 @@ $(document).ready(function(){
         var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http","implementation_status":"prototyped"}
         $('.swagger').val(JSON.stringify(designer.api_doc));
         $('.prototype_config').val(JSON.stringify(endpoint_config));
-
+        $('#corsConfigurationPrototyped').val(JSON.stringify($(".cors-ui-prototype-container").data("plugin_corsUi").get_cors_config()));
         $('#'+thisID).buttonLoader('start');
 
         $(form).ajaxSubmit({

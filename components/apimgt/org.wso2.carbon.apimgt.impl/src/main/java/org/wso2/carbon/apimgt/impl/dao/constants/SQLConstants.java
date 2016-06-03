@@ -446,7 +446,6 @@ public class SQLConstants {
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUBS.UUID AS UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -465,7 +464,6 @@ public class SQLConstants {
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUBS.UUID AS UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -522,7 +520,6 @@ public class SQLConstants {
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +
@@ -571,7 +568,6 @@ public class SQLConstants {
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +
@@ -597,7 +593,6 @@ public class SQLConstants {
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +
@@ -1075,7 +1070,6 @@ public class SQLConstants {
             "   API.API_PROVIDER ," +
             "   API.API_NAME ," +
             "   API.API_VERSION ," +
-            "   SUBS.LAST_ACCESSED ," +
             "   SUBS.APPLICATION_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -1098,7 +1092,6 @@ public class SQLConstants {
             "   API.API_PROVIDER ," +
             "   API.API_NAME ," +
             "   API.API_VERSION ," +
-            "   SUBS.LAST_ACCESSED ," +
             "   SUBS.APPLICATION_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -1124,7 +1117,6 @@ public class SQLConstants {
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
-            "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
             "   SUB.USER_ID AS USER_ID, " +
             "   APP.NAME AS APPNAME, " +
             "   SUBS.UUID AS SUB_UUID, " +

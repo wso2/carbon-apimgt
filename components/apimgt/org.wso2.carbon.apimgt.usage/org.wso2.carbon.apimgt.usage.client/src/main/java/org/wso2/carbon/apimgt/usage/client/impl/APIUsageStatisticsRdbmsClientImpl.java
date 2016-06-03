@@ -1065,8 +1065,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             statement = connection.prepareStatement(query);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[0];
-                String version = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[1];
+                String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split("--")[1];
+                String apiName = apiVersion.split(":v")[0];
+                String version = apiVersion.split(":v")[1];
                 String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
                 long responseCount = resultSet.getLong("totalTime");
                 double responseTime = resultSet.getDouble("totalWeightTime") / responseCount;
@@ -2565,7 +2566,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
+            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,os,browser " +
                     "FROM ");
             String tableName = APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY;
             query.append(tableName).append(" WHERE ");

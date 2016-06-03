@@ -54,7 +54,7 @@ var addUrl="add";
 var editUrl="info";
 var user = jagg.getUser();
 %>
-<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
+<body class="sticky-footer" <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
 

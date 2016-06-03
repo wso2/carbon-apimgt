@@ -1,0 +1,16 @@
+<%
+jagg.initializer("loganalyzer", {
+    preInitialize:function () {
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-gridstack-css",'<link type="text/css" rel="stylesheet" href="/portal/libs/gridstack.js-0.2.5/gridstack.min.css"/>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-common-css",'<link type="text/css" rel="stylesheet" href="/portal/css/common.css"/>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-jquery-ui-js",'<script src="/portal/libs/jquery-ui-1.11.4/jquery-ui.min.js"></script>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-jquery-nanoscroller-min-js",'<script src="/portal/libs/nanoscroller_0.8.7/jquery.nanoscroller.min.js"></script>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-underscore-min-js",'<script src="/portal/libs/underscore-1.8.3/underscore-min.js"></script>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-gridstack.min-js",'<script src="/portal/libs/gridstack.js-0.2.5/gridstack.min.js"></script>');
+        jagg.addHeaderCode("loganalyzer", "loganalyzer-handlebars.min-js",'<script src="/portal/libs/handlebars-v4.0.2/handlebars.min.js"></script>');
+        jagg.addHeaderCSS("loganalyzer", "loganalyzer-custom-css","templates/loganalyzer/css/custom.css");
+        jagg.addHeaderJS("loganalyzer", "jagg", "templates/loganalyzer/js/loganalyzer-dashboard.js");
+    }
+});
+%>
+

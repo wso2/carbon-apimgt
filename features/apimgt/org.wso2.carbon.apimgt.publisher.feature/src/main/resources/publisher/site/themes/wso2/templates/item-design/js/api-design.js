@@ -611,7 +611,14 @@ APIDesigner.prototype.render_resources = function(){
         emptytext: '+ Summary',        
         success : this.update_elements,
         inputclass : 'resource_summary'
-    });  
+    });
+    $.fn.editableform.buttons =
+          '<button type="submit" class="btn btn-primary btn-sm editable-submit">'+
+            '<i class="fw fw-check"></i>'+
+          '</button>'+
+          '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
+            '<i class="fw fw-cancel"></i>'+
+          '</button>';
 };
 
 APIDesigner.prototype.render_resource = function(container){
@@ -639,7 +646,10 @@ APIDesigner.prototype.render_resource = function(container){
     container.find('.notes').editable({
         type: 'textarea',
         emptytext: '+ Add Implementation Notes',
-        success : this.update_elements
+        success : this.update_elements,
+        rows: 1,
+        tpl: '<textarea cols="50"></textarea>',
+        mode: 'popup'
     });
     container.find('.produces').editable({
         source: content_types,
@@ -651,25 +661,29 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.param_desc').editable({
         emptytext: '+ Empty',
-        success : this.update_elements
+        success : this.update_elements,
+        mode: 'popup'
     });
     if(isBodyRequired){
         container.find('.param_paramType').editable({
             emptytext: '+ Set Param Type',
             source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements
+            success : this.update_elements,
+            mode: 'popup'
         });
     } else {
         container.find('.param_paramType').editable({
             emptytext: '+ Set Param Type',
             source: [{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements
+            success : this.update_elements,
+            mode: 'popup'
         });
     }
 
     container.find('.param_type').editable({
         emptytext: '+ Empty',
-        success : this.update_elements
+        success : this.update_elements,
+        mode: 'popup'
     });
     container.find('.param_required').editable({
         emptytext: '+ Empty',
@@ -681,7 +695,8 @@ APIDesigner.prototype.render_resource = function(container){
                 $(this).text("False");
         },
         source: [ { value:true, text:"True" },{ value:false, text:"False"} ],
-        success : this.update_elements_boolean
+        success : this.update_elements_boolean,
+        mode: 'popup'
     });   
 };
 

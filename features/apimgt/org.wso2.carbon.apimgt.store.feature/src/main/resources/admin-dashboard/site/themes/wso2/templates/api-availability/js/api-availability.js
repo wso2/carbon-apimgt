@@ -43,7 +43,14 @@ $( document ).ready(function() {
             "serverSide": true,
             "columns" : [
                 { title: "Api Version"},
-                { title: "Status" , "orderable": false },
+                { title: "Status" , "orderable": false , "render":function(data){
+                    if(data == "Available"){
+                        return '<i class="icon fw fw-success text-success add-margin-right-1x"></i>' + data;
+                    } else {
+                        return '<i class="icon fw fw-disabled text-muted add-margin-right-1x"></i>' + data;
+                    }
+                }
+                },
             ],
             ajax: {
                 "url" : "site/blocks/api-availability/ajax/api-availability.jag",
@@ -56,19 +63,8 @@ $( document ).ready(function() {
                 error:function(xhr,status,error){
                     console.log('Error while trying to connect to the DAS endpoint');
                 }
-            },
-            "drawCallback": function(){
-                var nodes = table.column(1).nodes();
-                var numOfRows = nodes.length;
-                for (i=0; i<numOfRows; i++) {
-                    cellValue = nodes[i].innerText;
-                    if(cellValue == 'Available'){
-                        $(nodes[i]).prepend('<i class="icon fw fw-success text-success add-margin-right-1x"></i>');
-                    } else {
-                        $(nodes[i]).prepend('<i class="icon fw fw-disabled text-muted add-margin-right-1x"></i>');
-                    }
-                }
             }
+
         });
 
     }
