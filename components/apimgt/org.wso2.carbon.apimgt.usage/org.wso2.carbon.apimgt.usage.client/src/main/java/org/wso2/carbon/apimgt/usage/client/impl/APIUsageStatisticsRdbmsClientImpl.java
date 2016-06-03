@@ -2566,7 +2566,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
+            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,os,browser " +
                     "FROM ");
             String tableName = APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY;
             query.append(tableName).append(" WHERE ");
