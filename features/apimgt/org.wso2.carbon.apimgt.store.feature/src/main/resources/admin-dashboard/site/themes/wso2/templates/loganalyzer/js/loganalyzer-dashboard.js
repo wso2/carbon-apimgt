@@ -517,7 +517,7 @@ var loganalyzerDashboard = {
         },
         {
             "id": "page3",
-            "title": "Login Stats",
+            "title": "Login Errors",
             "layout": {
                 "content": {
                     "loggedIn": {
