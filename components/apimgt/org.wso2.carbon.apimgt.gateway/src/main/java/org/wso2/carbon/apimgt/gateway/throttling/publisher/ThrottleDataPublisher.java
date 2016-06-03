@@ -67,37 +67,39 @@ public class ThrottleDataPublisher {
             dataPublisherPool = ThrottleDataPublisherPool.getInstance();
             ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
                     .getThrottleProperties().getDataPublisher();
-            ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
-                    .getInstance().getThrottleProperties().getDataPublisherThreadPool();
+            if (dataPublisherConfiguration.isEnabled()){
+                ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
+                        .getInstance().getThrottleProperties().getDataPublisherThreadPool();
 
-            try {
-                executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
-                        dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
-                        .getKeepAliveTime(),
-                        TimeUnit
-                                .SECONDS,
-                        new LinkedBlockingDeque<Runnable>() {
-                        });
-                dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
-                        .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
-                        .getUsername(),
-                        dataPublisherConfiguration.getPassword());
+                try {
+                    executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
+                            dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
+                            .getKeepAliveTime(),
+                            TimeUnit
+                                    .SECONDS,
+                            new LinkedBlockingDeque<Runnable>() {
+                            });
+                    dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
+                            .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
+                            .getUsername(),
+                            dataPublisherConfiguration.getPassword());
 
-            } catch (DataEndpointAgentConfigurationException e) {
-                log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                        e.getMessage(), e);
-            } catch (DataEndpointException e) {
-                log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                        e.getMessage(), e);
-            } catch (DataEndpointConfigurationException e) {
-                log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                        e.getMessage(), e);
-            } catch (DataEndpointAuthenticationException e) {
-                log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                        e.getMessage(), e);
-            } catch (TransportException e) {
-                log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                        e.getMessage(), e);
+                } catch (DataEndpointAgentConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointAuthenticationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (TransportException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                }
             }
         }
     }
