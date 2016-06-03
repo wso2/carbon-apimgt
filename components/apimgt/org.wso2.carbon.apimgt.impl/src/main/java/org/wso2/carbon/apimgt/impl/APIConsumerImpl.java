@@ -103,8 +103,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private boolean isTagCacheEnabled;
     private Set<Tag> tagSet;
     private long tagCacheValidityTime;
-    private static long lastUpdatedTime;
-    private static long lastUpdatedTimeForTagApi;
+    private volatile long lastUpdatedTime;
+    private volatile long lastUpdatedTimeForTagApi;
     private Object tagCacheMutex = new Object();
     private Object tagWithAPICacheMutex = new Object();
     private APIMRegistryService apimRegistryService;
