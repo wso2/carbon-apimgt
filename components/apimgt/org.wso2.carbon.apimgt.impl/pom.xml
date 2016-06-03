@@ -310,7 +310,7 @@
                             org.apache.poi.*,
                             org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
-                            org.apache.velocity.*,
+                            org.apache.velocity.*; version="1.7",
                             org.apache.solr.common,
                             javax.cache,
                             javax.naming,
