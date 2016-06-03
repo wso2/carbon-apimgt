@@ -1,6 +1,6 @@
 .api-wrapper {
-    background-color: #EFEFEF;
-    position: relative;
+	background-color: #EFEFEF;
+	position: relative;
 }
 
 .apim-form {
@@ -20,7 +20,11 @@ div.image-container {
 .app-data h4 {
     margin-bottom: 0px;
 }
-
+.app-data h4 a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
 .launch-app-data h4 {
     margin-top: 0px;
 }
@@ -54,7 +58,7 @@ div.image-container {
     background: rgba(0, 0, 0, .6);
     cursor: pointer;
 }
-.thumbnail.icon>.after>a>span.fw-stack.fw-lg {
+.thumbnail.icon>a>.after>span.fw-stack.fw-lg {
     position: absolute;
     top: 0;
     left: 0;
@@ -104,19 +108,15 @@ div.image-container {
     text-decoration:none;
     font-weight:bold;
 }
-#accordion1 h4 .description a,#accordion2 h4 .description a{
-    display:inline-block;
-    font-weight:normal;
-    text-decoration: none;
-    border-bottom:1px dashed #333;
-    text-indent:0px;
-}
 #accordion1 h4 p,#accordion2 h4 p{
     padding:10px;
     margin-bottom:0px;
 }
 #accordion1 .panel,#accordion2 .panel{
     margin-bottom:10px;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 #accordion1 .panel-heading,#accordion2 .panel-heading{
     background:#e2e2e2;
@@ -192,6 +192,10 @@ div.image-container {
     padding-top:10px;
     padding-bottom:4px;
     text-indent:10px;
+}
+#accordion1 .panel-heading div .no-description,
+#accordion2 .panel-heading div .no-description{
+    padding-top:20px;
 }
 #accordion1 .panel-heading div .description,
 #accordion2 .panel-heading div .description{
@@ -281,11 +285,20 @@ div.image-container {
     display: table-cell;
     border-right: 1px solid #E5E5E5;
     text-align: center;
-    padding: 1.5% 2%;
     border-bottom: 2px solid #3598db;
+    max-height:100px;
 }
 .wiz-nav-inner li span {
+    display: inline-block;
+}
+.wiz-nav-inner li a{
+    padding: 15px;
     display: block;
+}
+.wiz-nav-inner li a:hover{
+      -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+      filter: alpha(opacity=70);
+      opacity: 0.7;
 }
 .wiz-nav-inner .wiz-control {
     padding: 1.5% 0.5%;
@@ -343,6 +356,40 @@ div.image-container {
     margin-top: -13px;
     z-index: 1;
 }
+.wiz-step-count{
+    width: 32px;
+    height: 32px;
+    color:#fff;
+    background: #5477A1;
+    -moz-border-radius: 16px;
+    -webkit-border-radius: 16px;
+    border-radius: 16px;
+    padding-top:7px;
+}
+.wiz-step.current .wiz-step-count{
+    color:#5477A1;
+    background: #fff;
+}
+.wiz-step.completed .wiz-step-count{
+    color:#344860;
+    background: #7ea9ce;
+}
+.wiz-step-title{
+    font-size:16px;
+    margin-left:10px;
+}
+.wiz-step.current .wiz-step-title{
+    color:#fff;
+}
+.wiz-step.completed .wiz-step-title{
+    color:#7ea9ce;
+}
+.wiz-step .wiz-step-title{
+    color:#5477A1;
+}
+.wiz-step.current{
+    color:#e2e2e2;
+}
 .with-controls li:nth-last-child(2):before, .with-controls li:nth-last-child(2):after{
     border: 0px;
 }
@@ -354,6 +401,9 @@ div.image-container {
     border-right: 1px solid #E5E5E5;
     border-bottom: 2px solid #3598db;
     margin-top: -1px;
+}
+.wiz-content .panel-body{
+    border:none!important;
 }
 
 .btn,a.btn{
@@ -424,7 +474,7 @@ div.image-container {
     background-color: #242932;
 }
 .secondary-nav li {
-    padding-left: 20px;
+    text-indent: 10px;
     float: none;
 }
 .secondary-nav-toggle{
@@ -432,6 +482,23 @@ div.image-container {
     vertical-align: middle;
     display: block;
     margin: 9px 10px 2px 10px !important;
+}
+
+.sidebar-nav li{
+    min-height: 40px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 400;
+}
+.sidebar-nav li a{
+    padding:5px 15px;
+    line-height:29px;
+}
+.nav-stacked > li + li{
+    margin-top:0px;
+}
+.sidebar-nav li{
+    border-bottom:1px solid #242932;
 }
 
 /* ========================================================================
@@ -594,7 +661,20 @@ body.login-bg {
 }
 
 
-
+.navbar-menu-toggle,.navbar-menu-toggle:hover, .navbar-menu-toggle:focus, .navbar-menu-toggle:active{
+    background:#222;
+}
+.navbar-menu-toggle[aria-expanded=true]{
+    background:#242932;
+}
+.form-group label>.requiredAstrix {
+    color: #E74C3C;
+    font-weight: 400;
+    margin-left:2px;
+}
+.api-search .input-group-btn button{
+    line-height:31px;
+}
 /* ========================================================================
  * execution flow panels
  * ======================================================================== */

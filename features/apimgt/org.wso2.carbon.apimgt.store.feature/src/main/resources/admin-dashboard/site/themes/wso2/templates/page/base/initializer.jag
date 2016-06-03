@@ -6,7 +6,7 @@ jagg.initializer("page/base", {
             context: jagg.url("")
         };
         //jagg.addHeaderCSS("page/base", "bootstrap3", "libs/bootstrap_3.3.5/css/bootstrap.min.css");
-        jagg.addHeaderCSS("page/base", "wso2-theme", "libs/theme-wso2_1.0/css/theme-wso2.min.css");
+        jagg.addHeaderCSS("page/base", "wso2-theme", "libs/theme-wso2_1.0/css/theme-wso2.css");
 		jagg.addHeaderCSS("page/base", "wso2-fonts", "libs/font-wso2_1.0.2/css/font-wso2.min.css");
         jagg.addHeaderCSS("page/base", "localstyles", "css/custom.css");
         jagg.addHeaderCSS("page/base", "bootstrap-datatables", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
