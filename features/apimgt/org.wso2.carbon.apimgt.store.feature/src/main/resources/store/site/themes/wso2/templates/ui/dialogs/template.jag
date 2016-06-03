@@ -29,36 +29,7 @@ i18n.init(request,localeResourcesBasePath);
 <!-- Login model -->
 <div id="login-data" class="hide">
 <% if(outputs.isSecure == true){%>
-<form id="mainLoginForm" autocomplete="off">    
-<div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"><%=i18n.localize("login")%></h4>
-      </div>
-      <div class="modal-body">
-        <!--Error message viewer-->
 
-        <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">
-            <div class="theMsg"></div>
-        </div>
-        <div class="form-group">
-            <label for="username"><%=i18n.localize("username")%>:</label>
-            <input type="text" id="username1" title="username" name="name" class="form-control" placeholder="<%=i18n.localize("usernamePlcHolder")%>"/>
-        </div>
-        <div class="form-group">
-            <label for="password"><%=i18n.localize("password")%></label>
-            <input type="password" id="password1" title="password" name="pass" class="form-control"/>
-        </div>
-        <input type="hidden" id="tenant" name="tenant" value="<%=request_tenant%>">        
-      </div>
-      <div class="modal-footer">
-        <a href="#" class="btn btn-default" title="<%=i18n.localize("cancel")%>" data-dismiss="modal"><%=i18n.localize("cancel")%></a>
-        <a href="#" class="btn btn-primary" title="<%=i18n.localize("login")%>" id="loginBtn"><%=i18n.localize("login")%></a>
-      </div>
-    </div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
-</form>
 <% } else { %>
 <form id="loginRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/login/redirector.jag"))%>" autocomplete="off">
     <input type="hidden" name="redirectToHTTPS" id="redirectToHTTPS" value="<%=httpsURL%>" />
