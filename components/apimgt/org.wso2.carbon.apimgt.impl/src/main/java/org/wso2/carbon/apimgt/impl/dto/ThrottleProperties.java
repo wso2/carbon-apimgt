@@ -163,6 +163,7 @@ public class ThrottleProperties {
         private String authUrlGroup = "ssl://localhost:9711";
         private String username = "admin";
         private String password = "admin";
+        private boolean enabled = false;
 
         public String getType() {
             return type;
@@ -202,6 +203,14 @@ public class ThrottleProperties {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
     }
 
