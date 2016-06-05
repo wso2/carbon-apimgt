@@ -1297,6 +1297,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
                 //rxt api media type
                 terms = GovernanceUtils.getTermDataList(Collections.EMPTY_MAP, APIConstants.API_OVERVIEW_TAG, APIConstants.API_RXT_MEDIA_TYPE, true);
