@@ -995,19 +995,6 @@ public final class APIUtil {
 
     }
 
-    public static final Map<String,String> getEventPublisherProperties(){
-        HashMap<String,String> propertiesMap = new HashMap<String, String>();
-
-        propertiesMap.put("java.naming.factory.initial","org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        //propertiesMap.put("transport.jms.UserName",null);
-        propertiesMap.put("java.naming.provider.url","repository/conf/jndi.properties");
-        //propertiesMap.put("transport.jms.Password",null);
-        propertiesMap.put("transport.jms.DestinationType","topic");
-        propertiesMap.put("transport.jms.Destination","throttleData");
-        propertiesMap.put("transport.jms.ConcurrentPublishers","allow");
-        propertiesMap.put("transport.jms.ConnectionFactoryJNDIName","TopicConnectionFactory");
-        return propertiesMap;
-    }
 
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com

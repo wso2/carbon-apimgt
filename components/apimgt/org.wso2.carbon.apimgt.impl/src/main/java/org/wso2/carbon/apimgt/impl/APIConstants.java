@@ -1152,7 +1152,6 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
 
-    public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
     public static final String BLOCKING_EVENT_TYPE = "jms";
     public static final String BLOCKING_EVENT_FORMAT = "map";
     public static final String THROTTLE_KEY = "throttleKey";
@@ -1191,6 +1190,7 @@ public final class APIConstants {
         public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String JMS_EVENT_PUBLISHER = "JMSEventPublisherName";
         public static final String DEFAULT_THROTTLE_LIMITS = "DefaultLimits";
         public static final String SUBSCRIPTION_THROTTLE_LIMITS = "SubscriptionTierLimits";
         public static final String APPLICATION_THROTTLE_LIMITS = "ApplicationTierLimits";

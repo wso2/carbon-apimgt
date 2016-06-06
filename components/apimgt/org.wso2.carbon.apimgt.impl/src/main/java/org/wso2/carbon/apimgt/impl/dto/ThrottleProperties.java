@@ -30,6 +30,7 @@ public class ThrottleProperties {
     private JMSConnectionProperties jmsConnectionProperties;
     private boolean enableUnlimitedTier;
     private String throttleDataSourceName;
+    private String jmsEventPublisherName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
     private boolean enableHeaderConditions;
@@ -51,6 +52,14 @@ public class ThrottleProperties {
 
     public void setDataPublisherThreadPool(DataPublisherThreadPool dataPublisherThreadPool) {
         this.dataPublisherThreadPool = dataPublisherThreadPool;
+    }
+
+    public void setJMSEventPublisher(String eventPublisherName){
+        this.jmsEventPublisherName = eventPublisherName;
+    }
+
+    public String getJmsEventPublisherName() {
+        return jmsEventPublisherName;
     }
 
     public BlockCondition getBlockCondition() {
