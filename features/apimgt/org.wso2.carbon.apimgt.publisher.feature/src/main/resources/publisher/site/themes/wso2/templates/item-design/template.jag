@@ -409,75 +409,72 @@
 </div>   
 
 <!-- Import Modal -->
-<div class="modal fade" id="swaggerUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content clearfix">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
-        <h3 class="modal-title" id="swaggerUploadLabel">Import API Definition</h3>
-      </div>
-      <div class="">      
-                            <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
-                            <div class="message message-warning">
-			                    <h4><i class="icon fw fw-warning"></i>Warning</h4>
-			                    <p>Existing API Definition will be overwritten by the imported definition.</p>
-			                </div>
-                            	<div id="swagger_help" class="alert alert-danger hide" role="alert">
-					                 Enter a valid url
-					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
-					            </div>
-					            <div class="form-group toggleRadios">
-					            	<label class="col-sm-3 control-label sub-select-label">Upload API definition as</label>
-					            <div class="col-sm-7">
-	                                <label class="radio">
-	                                    <input type="radio" class="select-file" name="import-definition" id="" value="swagger_import_file" checked> 
-	                                    <span class="helper">Swagger File</span>
-	                                </label>
-	                                <label class="radio">
-	                                    <input type="radio" class="select-url" name="import-definition" value="swagger_import_url">
-	                                    <span class="helper">Swagger Url</span>
-	                                </label>
-                                </div>
-					            </div>				            
-                                <br />
-                                <div class="toggleContainers">
-                                	<div class="form-group">
-										<div class="controls col-sm-8">
-											<div class="input-group input-wrap file-upload-control">
-												<input type="text" class="form-control" readonly> 
-												<input id="swagger_import_file" name="swagger_import_file" type="file" class="form-control" multiple>
-												<div class="input-group-btn">
-													<button class="btn browse" type="button" title="Browse File">
-														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
-															class="hidden-xs">Browse</span>
-													</button>
-												</div>
+		<div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="swaggerUpload" role="dialog" tabindex="-1">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content clearfix">
+					<div class="modal-header">
+						<button aria-label="Close" class="close" data-dismiss="modal" type="button"><i class="fw fw-cancel"></i></button>
+						<h3 class="modal-title" id="swaggerUploadLabel">
+							Import API Definition
+						</h3>
+					</div>
+					<div class="modal-body">
+						<div class="message message-warning remove-margin-top">
+							<h4>
+								<i class="icon fw fw-warning"></i>Warning
+							</h4>
+							<p>
+								Existing API Definition will be overwritten by the imported definition.
+							</p>
+						</div>
+						<div class="alert alert-danger hide" id="swagger_help" role="alert">
+							Enter a valid url <button class="close" id="errorMsgClose" type="button"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>
+						</div>
+						<div class="form-horizontal">
+							<div class="form-group toggleRadios">
+								<label class="col-sm-3 control-label sub-select-label">Upload API definition as</label>
+								<div class="col-sm-9">
+									<label class="radio">
+										<input checked class="select-file" id="" name="import-definition" type="radio" value="swagger_import_file">
+										<span class="helper">Swagger File</span>
+									</label>
+									<label class="radio">
+										<input class="select-url" name="import-definition" type="radio" value="swagger_import_url">
+										<span class="helper">Swagger Url</span>
+									</label>
+								</div>
+							</div>
+							<div class="toggleContainers">
+								<div class="form-group">
+									<label class="col-sm-3 control-label"></label>
+									<div class="controls col-sm-9">
+										<div class="input-group input-wrap file-upload-control">
+											<input class="form-control" readonly type="text">
+											<input class="form-control" id="swagger_import_file" multiple name="swagger_import_file" type="file">
+											<div class="input-group-btn">
+												<button class="btn btn-secondary browse" title="Browse File" type="button"><i aria-hidden="true" class="fw fw-file-browse"></i> <span class="hidden-xs">Browse</span></button>
 											</div>
 										</div>
 									</div>
-									<div class="form-group">
-										<div class="controls col-sm-8">
-											<div class="col-sm-10">
-												<input name="swagger-url" id="swagger_import_url" name="swagger_import_url"
-													type="text" class="form-control" placeholder="http://petstore.swagger.io/v2/swagger.json"/>
-											</div>
+								</div>
+								<div class="form-group" style="display:none;">
+									<label class="col-sm-3 control-label"></label>
+									<div class="controls col-sm-9">
+										<div>
+											<input class="form-control" id="swagger_import_url" name="swagger_import_url" placeholder="http://petstore.swagger.io/v2/swagger.json" type="text">
 										</div>
 									</div>
-						</div>	
-                            </div>
-                        </div>
-                        <div class="pull-right">
-                            <div class="modal-footer">
-                                <button type="button" id="import_swagger" class="btn btn-primary has-spinner">Import</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-        
+								</div>
+							</div>
+						</div>
+					</div>
 
-    </div>
-  </div>
-</div>
-
+					<div class="modal-footer">
+						<button class="btn btn-primary has-spinner" id="import_swagger" type="button">Import</button> <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
     </div>
     </div>
 </div>

@@ -53,7 +53,7 @@
 
         <div class="navbar-wrapper">
 		<nav class="navbar navbar-default" data-spy="affix"
-			data-offset-top="85" data-offset-bottom="40">
+			data-offset-top="80" data-offset-bottom="40">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed"

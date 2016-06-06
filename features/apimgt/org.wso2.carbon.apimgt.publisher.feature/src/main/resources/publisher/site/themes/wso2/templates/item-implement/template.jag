@@ -307,17 +307,16 @@
 														    <div class="modal-dialog">
 														    <div class="modal-content">
 														        <div class="modal-header">
-														        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-														        <h3>Advanced Endpoint Configuration</h3>
+																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
+																	<h3>Advanced Endpoint Configuration</h3>
 														        </div>
 														        <div class="modal-body">
-														        <div id="advance_form">
-														        </div>
+														        	<div id="advance_form"></div>
 														        </div>
 														        <div class="modal-footer">
-														        <div id="res" style="color:red;float:left"></div>
-														        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-														        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
+															        <div id="res" style="color:red;float:left"></div>
+																	<a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("save")%></a>
+																	<a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
 														        </div>
 														    </div>
 														    </div>
@@ -850,94 +849,110 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 		{{#if address }}
         <fieldset>
             <legend>Message Content</legend>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="format">Format</label>
-                <div class="col-sm-4">
-                    <select class="form-control selectpicker" id="format" name="format">
-                        <option value="soap11">SOAP 1.1</option>
-                        <option value="soap12">SOAP 1.2</option>
-                        <option value="POX">Plain Old XML (POX)</option>
-                        <option value="REST">REpresentational State Transer (REST)</option>
-                        <option value="GET">GET</option>
-                        <option selected value="leave-as-is">Leave As-Is</option>
-                    </select>
-                    <p class="help-block hide">Message format for the endpoint.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="optimize">Optimize</label>
-                <div class="col-sm-4">
-                    <select class="form-control selectpicker" id="optimize" name="optimize">
-                        <option value="SWA">SWA</option>
-                        <option value="MTOM">MTOM</option>
-                        <option selected value="leave-as-is">Leave As-Is</option>
-                    </select>
-                    <p class="help-block hide">Method to optimize the attachments.</p>
-                </div>
-            </div>
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="format">Format</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="format" name="format">
+							<option value="soap11">SOAP 1.1</option>
+							<option value="soap12">SOAP 1.2</option>
+							<option value="POX">Plain Old XML (POX)</option>
+							<option value="REST">REpresentational State Transer (REST)</option>
+							<option value="GET">GET</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Message format for the endpoint.</p>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="optimize">Optimize</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="optimize" name="optimize">
+							<option value="SWA">SWA</option>
+							<option value="MTOM">MTOM</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Method to optimize the attachments.</p>
+					</div>
+				</div>
+			</div>
         </fieldset>
         {{/if}}
         <fieldset>
             <legend>Endpoint Suspend State</legend>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="suspendErrorCode">Error Codes</label>
-                <div class="col-sm-4">
-                    <select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
-                        <option value="101000">101000 : Receiver IO error sending</option>
-                        <option value="101001">101001 : Receiver IO error receiving</option>
-                        <option value="101500">101500 : Sender IO error sending</option>
-                        <option value="101501">101501 : Sender IO error receiving</option>
-                        <option value="101503">101503 : Connection failed</option>
-                        <option value="101504">101504 : Connection timed out</option>
-                        <option value="101505">101505 : Connection closed</option>
-                        <option value="101506">101506 : HTTP protocol violation</option>
-                        <option value="101507">101507 : Connect cancel</option>
-                        <option value="101508">101508 : Connect timeout</option>
-                        <option value="101509">101509 : Send abort</option>
-                        <option value="101510">101510 : Response processing failure</option>
-                    </select>
-                    <p class="help-block">A list of error codes.If these
-                    error codes are received from the endpoint, the
-                    endpoint will be suspended.</p><span class=
-                    "help-block jsonform-errortext" style=
-                    "display:none;"></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
-                    <p class="help-block hide">The duration that the endpoint is
-                    suspended for the first time after the receiving the
-                    suspend error codes.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="suspendMaxDuration">Max Duration(ms)</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
-                    <p class="help-block hide">The maximum duration that the
-                    endpoint is suspended after the receiving the suspend
-                    error codes.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="factor">Factor</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="factor" name="factor" type="text" value="">  
-                    <p class="help-block">The duration to suspend can vary
-                    from the first time suspension to the subsequent time.
-                    The factor value decides the suspense duration variance
-                    between subsequent suspensions.</p>                 
-                </div>
-                
-            </div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="suspendErrorCode">Error Codes
+						<a class="help_popup" help_data="suspendErrorCode_help" data-trigger="hover" data-placement="bottom" title="suspendErrorCode_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendErrorCode_help" class="hide">A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.</p>
+					</label>
+					<div class="col-sm-6">
+						<select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
+							<option value="101000">101000 : Receiver IO error sending</option>
+							<option value="101001">101001 : Receiver IO error receiving</option>
+							<option value="101500">101500 : Sender IO error sending</option>
+							<option value="101501">101501 : Sender IO error receiving</option>
+							<option value="101503">101503 : Connection failed</option>
+							<option value="101504">101504 : Connection timed out</option>
+							<option value="101505">101505 : Connection closed</option>
+							<option value="101506">101506 : HTTP protocol violation</option>
+							<option value="101507">101507 : Connect cancel</option>
+							<option value="101508">101508 : Connect timeout</option>
+							<option value="101509">101509 : Send abort</option>
+							<option value="101510">101510 : Response processing failure</option>
+						</select>
+						<p class="help-block">A list of error codes.If these
+						error codes are received from the endpoint, the
+						endpoint will be suspended.</p><span class=
+						"help-block jsonform-errortext" style=
+						"display:none;"></span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)
+						<a class="help_popup" help_data="suspendDuration_help" data-trigger="hover" data-placement="bottom" title="suspendDuration_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendDuration_help" class="hide">The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.</p>
+					</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
+						<p class="help-block hide">The duration that the endpoint is
+						suspended for the first time after the receiving the
+						suspend error codes.</p>
+					</div>
+
+					<label class="control-label col-sm-2" for="suspendMaxDuration">Max Duration (ms)</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
+						<p class="help-block hide">The maximum duration that the
+						endpoint is suspended after the receiving the suspend
+						error codes.</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="factor">Factor</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="factor" name="factor" type="text" value="">
+						<p class="help-block hide">The duration to suspend can vary
+						from the first time suspension to the subsequent time.
+						The factor value decides the suspense duration variance
+						between subsequent suspensions.</p>
+					</div>
+				</div>
         </fieldset>
-        <fieldset class="control-group ">
+        <fieldset class="control-group add-margin-top-5x">
             <legend>Endpoint Timeout State</legend>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="">Error Codes</label>
-                <div class=" col-sm-4">
+                <div class=" col-sm-6">
                     <select class="form-control selectpicker" id="" multiple="multiple" name="retryErroCode">
                         <option value="101000">101000 : Receiver IO error sending</option>
                         <option value="101001">101001 : Receiver IO error receiving</option>
@@ -952,50 +967,46 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
                         <option value="101509">101509 : Send abort</option>
                         <option value="101510">101510 : Response processing failure</option>
                     </select>
-                    <p class="help-block">A list of error codes. If these
+                    <p class="help-block hide">A list of error codes. If these
                     error codes are received from the endpoint, the request
                     will be subjected to a timeout.</p>
                 </div>
-                                   
             </div>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="retryTimeOut">Retries Before Suspension</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
-                    <p class="help-block">The number of re-tries in case of
+                    <p class="help-block hide">The number of re-tries in case of
                     a timeout, caused by the above listed error
                     codes.</p>                
                 </div>
-                
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="retryDelay">Retry Delay(ms)</label>
-                <div class="col-sm-4">
+                <label class="control-label col-sm-2" for="retryDelay">Retry Delay(ms)</label>
+                <div class="col-sm-2">
                     <input class="form-control" id="retryDelay" name="retryDelay"
                     type="text" value="">                                    
-                <p class="help-block">The delay between retries, in milliseconds.</p>
+                <p class="help-block hide">The delay between retries, in milliseconds.</p>
                 </div>
             </div>
         </fieldset>
-        <fieldset class="control-group">
+        <fieldset class="control-group add-margin-top-5x">
             <legend>Connection Timeout</legend>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
                         <option value="neverTimeout">Never timeout</option>
                         <option value="discard">Discard message</option>
                         <option selected value="fault">Execute fault sequence</option>
                     </select>
-                    <p class="help-block">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
+                    <p class="help-block hide">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionDuration">Duration (ms)</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
-                    <p class="help-block">The duration in milliseconds before considering a request as timeout.</p>
+                    <p class="help-block hide">The duration in milliseconds before considering a request as timeout.</p>
                 </div>
             </div>
         </fieldset>

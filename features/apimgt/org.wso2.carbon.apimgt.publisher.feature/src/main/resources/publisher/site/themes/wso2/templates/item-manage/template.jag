@@ -636,13 +636,13 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h3>Congratulations</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+                <h3>Congratulations... What's Next?</h3>
               </div>
               <div class="modal-body">
-                <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
-                </br>
-                <label class="publish-label">What&#39;s Next</label>
+                <p>
+                    You have successfully published your API : <strong><%=api.name%>-<%=api.version%></strong>
+                </p>
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">

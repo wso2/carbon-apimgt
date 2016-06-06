@@ -771,7 +771,6 @@ $(document).ready(function(){
     $("#clearOutSeqFile").on("click", function () {
             $('#outSeqFileValue').val('');
     });
-	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
     $('#swagger_import_file').parent().parent().fadeIn();
     $('.toggleRadios input[type=radio]').click(function(){
@@ -785,9 +784,9 @@ $(document).ready(function(){
         }
         $('#swagger_help').hide();
         $('#swagger_file_help').hide();
-        $('.toggleContainers .controls').hide();
+        $('.toggleContainers .form-group').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).parent().parent().fadeIn();
+        $('#' + $(this).val()).parent().parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
