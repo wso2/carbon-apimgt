@@ -89,8 +89,17 @@ for(var i=0;i < outputs.tiers.length; i++){
       <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
       <div role="tabpanel" class="tab-pane fade" id="sdks">
-     <button class="btn btn-primary" onclick="generateAndroidSdk('<%=application.name%>','android')" type="button">Android</button>
-          <button class="btn btn-primary" onclick="generateAndroidSdk('<%=application.name%>','java')" type="button">Java</button>
+        <div class="row"> 
+          <div class="col-md-12"> <%=i18n.localize('sdk.description')%> </div>
+        </div>
+        <br>
+        <button class="btn btn-primary " onclick="generateAndroidSdk('<%=application.name%>','android')" type="button">
+          Android&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
+        </button>
+        <button class="btn btn-primary" onclick="generateAndroidSdk('<%=application.name%>','java')" type="button">
+          Java&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
+        </button>
+        
       </div>      
     </div>
   </div>
