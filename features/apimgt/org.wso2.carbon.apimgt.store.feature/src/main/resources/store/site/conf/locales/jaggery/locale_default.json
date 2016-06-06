@@ -280,7 +280,8 @@
     "applicationList" : "Application List",
     "addApplication" : "Add Application",
     "activePage":"Active Page",
-    "pagination":"Pagination"
+    "pagination":"Pagination",
+    "sdk.description":"Download client-side SDK for your Applications."
   
     
 }

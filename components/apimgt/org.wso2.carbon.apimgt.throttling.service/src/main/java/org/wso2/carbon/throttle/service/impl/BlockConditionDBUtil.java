@@ -31,25 +31,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 public final class BlockConditionDBUtil {
 
     private static final Log log = LogFactory.getLog(BlockConditionDBUtil.class);
 
     private static volatile DataSource dataSource = null;
-    private  static BlockConditionsDTO blockConditionsDTO = null;
-    private  static Set<String> keyTemplates;
-    private static long lastAccessed;
-    private static long timeBetweenUpdates = 10000;
-    private static final String GET_GLOBAL_POLICY_KEY_TEMPLATES =" SELECT KEY_TEMPLATE FROM AM_POLICY_GLOBAL";
+    private static BlockConditionsDTO blockConditionsDTO = null;
+    private static Set<String> keyTemplates;
+    private static final String GET_GLOBAL_POLICY_KEY_TEMPLATES = " SELECT KEY_TEMPLATE FROM AM_POLICY_GLOBAL";
+
     public static void initialize() throws Exception {
         if (dataSource != null) {
             return;
         }
-        Properties properties  = new Properties();
+        Properties properties = new Properties();
         properties.load(new ClassPathResource("../throttle.properties").getInputStream());
         String dataSourceName = (String) properties.get("block.datasource.name");
         synchronized (BlockConditionDBUtil.class) {
@@ -62,9 +63,6 @@ public final class BlockConditionDBUtil {
                     try {
                         Context ctx = new InitialContext();
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
-                        ExecutorService executor = Executors.newFixedThreadPool(1);
-                            Runnable worker = new WorkerThread("");
-                            executor.execute(worker);
                     } catch (NamingException e) {
                         throw new Exception("Error while looking up the data " +
                                 "source: " + dataSourceName, e);
@@ -84,8 +82,7 @@ public final class BlockConditionDBUtil {
     public static Connection getConnection() throws SQLException {
         if (dataSource != null) {
             return dataSource.getConnection();
-        }
-        else {
+        } else {
             try {
                 initialize();
                 return dataSource.getConnection();
@@ -122,11 +119,10 @@ public final class BlockConditionDBUtil {
                     } else if ("APPLICATION".equals(type)) {
                         application.add(value);
                     } else if ("IP".equals(type)) {
-                        ip.add(tenantDomain+":"+value);
+                        ip.add(tenantDomain + ":" + value);
                     } else if ("USER".equals(type)) {
                         user.add(value);
-                    }
-                    else if ("CUSTOM".equals(type)) {
+                    } else if ("CUSTOM".equals(type)) {
                         custom.add(value);
                     }
                 }
@@ -142,7 +138,7 @@ public final class BlockConditionDBUtil {
         blockConditionsDTO.setIp(ip);
         blockConditionsDTO.setUser(user);
         blockConditionsDTO.setCustom(custom);
-        return  blockConditionsDTO;
+        return blockConditionsDTO;
     }
 
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
@@ -201,71 +197,16 @@ public final class BlockConditionDBUtil {
 
     }
 
-
-    /**
-     * TODO This is not final implementation. This need to be revised and fix issues
-     * related to memory leaks caused due to web app stopping.
-     */
-    private static class WorkerThread implements Runnable {
-        private String command;
-        public WorkerThread(String s){
-            this.command=s;
-        }
-        @Override
-        public void run() {
-            if(lastAccessed <1){
-                lastAccessed = System.currentTimeMillis();
-            }
-            while(true) {
-                if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
-                    lastAccessed = System.currentTimeMillis();
-                    processCommand();
-                    try {
-                        Thread.sleep(timeBetweenUpdates);
-                    } catch (InterruptedException e) {
-                        log.warn("Worker Thread got interrupted",e);
-                    }
-                }
-            }
-        }
-
-        private void processCommand() {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (blockConditionsDTO){
-                        BlockConditionDBUtil.getBlockConditions();
-                    }
-                }
-            }).start();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (keyTemplates){
-                        BlockConditionDBUtil.getGlobalPolicyKeyTemplates();
-                    }
-                }
-            }).start();
-
-        }
-        @Override
-        public String toString(){
-            return this.command;
-        }
-    }
-
     public static BlockConditionsDTO getBlockConditionsDTO() {
-        if (blockConditionsDTO == null) {
-            getBlockConditions();
-        }
-        return blockConditionsDTO;
+        return getBlockConditions();
+
     }
+
     public static Set<String> getKeyTemplates() {
-        if (keyTemplates == null) {
-            getGlobalPolicyKeyTemplates();
-        }
-        return keyTemplates;
+        return getGlobalPolicyKeyTemplates();
+
     }
+
     /**
      * Retrieves global policy key templates for the given tenantID
      *
