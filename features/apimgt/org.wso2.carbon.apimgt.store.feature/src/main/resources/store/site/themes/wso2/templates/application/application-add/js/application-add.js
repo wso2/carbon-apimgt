@@ -46,7 +46,7 @@ $(document).ready(function () {
                     jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
                     window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
-                        window.location.reload(true);
+                        window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
                     }});
                 } else{
                     window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
