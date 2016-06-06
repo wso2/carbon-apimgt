@@ -102,10 +102,10 @@ $( document ).ready(function() {
                     });
         $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
-                        from = convertDate(picker.startDate);
-                        to = convertDate(picker.endDate);
-                        var fromStr = from.split(" ");
-                        var toStr = to.split(" ");
+                        from = picker.startDate;
+                        to = picker.endDate;
+                        var fromStr = convertDate(from).split(" ");
+                        var toStr = convertDate(to).split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         if ((to-from)>(3600000*24*2)) {
@@ -207,11 +207,11 @@ var populateMediations = function(data){
                     .selectpicker('refresh');
 };
 function renderGraph(fromDate,toDate,drillDown){
-    var to = convertTimeString(toDate);
-    var from = convertTimeString(fromDate);
+    var toDateString = convertTimeString(toDate);
+    var fromDateString = convertTimeString(fromDate);
     getDateTime(toDate,fromDate);
     if (statsEnabled) {
-        jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
+        jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown},
         function (json) {
             if (!json.error) {
             var data1 = {};
@@ -256,10 +256,10 @@ function renderGraph(fromDate,toDate,drillDown){
     }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
-   var to = convertTimeString(toDate);
-    var from = convertTimeString(fromDate);
-    getDateTime(to,from);
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : from , toDate : to,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
+   var toDateString = convertTimeString(toDate);
+    var fromDateString = convertTimeString(fromDate);
+    getDateTime(toDate,fromDate);
+           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
         function (json) {
             if (!json.error) {
                   drawGraphInArea(json.usage,drillDown);                    
@@ -370,10 +370,10 @@ var pickLegandColor = function(legand){
 }
 }
 function getDateTime(currentDay,fromDay){
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
-    var toDate = to.split(" ");
-    var fromDate = from.split(" ");
+    toStr = convertTimeString(currentDay);
+    fromStr = convertTimeString(fromDay);
+    var toDate = toStr.split(" ");
+    var fromDate = fromStr.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
