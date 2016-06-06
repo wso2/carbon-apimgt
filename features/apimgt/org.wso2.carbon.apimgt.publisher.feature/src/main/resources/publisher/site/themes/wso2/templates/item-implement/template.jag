@@ -606,7 +606,9 @@
 								                    <input type="hidden" name="action" value="implement" />
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+								                    <%if(permitted) { %>
 								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                    <%}%>
 								                </div>
 								                            </form>
 								                </div>
