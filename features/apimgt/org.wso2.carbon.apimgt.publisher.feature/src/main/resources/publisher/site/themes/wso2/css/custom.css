@@ -3,10 +3,6 @@
 	position: relative;
 }
 
-.apim-form {
-	max-width: 100% !important;
-}
-
 div.image-container {
 	width: auto;
 	height: 100%;
@@ -716,6 +712,12 @@ input.ep-field{ min-width: 50%;}
 #resource_policy_modal select{
     margin: -6px;
 }
-.panel-group .panel .form-horizontal{
+.panel-group .panel .form-horizontal,
+.wiz-content .form-horizontal,
+.modal-body .form-horizontal{
     max-width:100%;
+}
+
+.modal-header .close{
+    color:#222;
 }
