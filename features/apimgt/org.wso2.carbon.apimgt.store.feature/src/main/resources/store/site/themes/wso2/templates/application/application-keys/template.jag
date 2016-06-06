@@ -87,9 +87,8 @@
 		  <div class="form-group">		    
 		    <span>Scopes </span>
 		    <select class="selectpicker scope_select"  multiple title="Select..">
-			  <option title="sample" data-content="<strong>sample</strong><br /><span>sample scope.</span>">sample</option>
 			{{#each Scopes}}
-				<option title="{{scopeName}}" data-content="<strong>{{scopeName}}</strong><br /><span>{{scopeName}} scope.</span>">{{scopeKey}}</option>
+				<option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
 			{{/each}}
 			</select>	    
 		    <span>Validity period </span>

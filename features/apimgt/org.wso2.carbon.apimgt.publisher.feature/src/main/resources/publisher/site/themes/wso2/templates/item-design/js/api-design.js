@@ -735,6 +735,7 @@ APIDesigner.prototype.close_swagger_editor = function(){
 APIDesigner.prototype.update_swagger = function(){
     $("body").removeClass("modal-open");
     $("#se-iframe").remove();
+    $(".wizard").show();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
     var json = jsyaml.safeLoad(designer.yaml);
