@@ -32,7 +32,27 @@ $(document).ready(function() {
         }
 
     });
-    
+
+    // docTable column count differs based on permission.
+    // As we have a pre-defined structure here, added following condition to
+    // change the table structure based on column count
+    var docTableColCount = $( "#docTable tr:nth-child(1) th" ).length;
+    var docTableColumnStructure = null;
+    if (docTableColCount == 3) {
+        docTableColumnStructure = [
+        null,
+        null,
+        { "bSortable": false }
+        ];
+    } else {
+        docTableColumnStructure = [
+        null,
+        null,
+        null,
+        { "bSortable": false }
+        ];
+    }
+
     $('#docTable').datatables_extended({
 	     "fnDrawCallback": function(){
 	       if(this.fnSettings().fnRecordsDisplay()<=$("#docTable_length option:selected" ).val()
@@ -40,12 +60,7 @@ $(document).ready(function() {
 	       $('#docTable_paginate').hide();
 	       else $('#docTable_paginate').show();
 	     } ,
-        "aoColumns": [
-        null,
-        null,
-        null,
-        { "bSortable": false }
-        ]
+        "aoColumns": docTableColumnStructure
 	});
 
 

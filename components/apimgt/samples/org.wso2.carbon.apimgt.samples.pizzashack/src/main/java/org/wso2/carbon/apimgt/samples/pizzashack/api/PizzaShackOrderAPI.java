@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.samples.pizzashack.api;
 
 import org.wso2.carbon.apimgt.samples.pizzashack.api.beans.Order;
+import org.wso2.carbon.apimgt.samples.pizzashack.api.beans.ResponseMsg;
 
 import java.net.URI;
 
@@ -51,7 +52,9 @@ public class PizzaShackOrderAPI {
 		if (order != null) {
 			return Response.ok().entity(order).build();
 		} else {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			ResponseMsg responseMsg = new ResponseMsg();
+			responseMsg.setDescription("Order " + orderId +" not found");
+			return Response.status(Response.Status.NOT_FOUND).entity(responseMsg).build();
 		}
 	}
 	
@@ -63,7 +66,9 @@ public class PizzaShackOrderAPI {
 		if (cancelled) {
 			return Response.ok().build();
 		} else {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			ResponseMsg responseMsg = new ResponseMsg();
+			responseMsg.setDescription("Order " + orderId +" not found");
+			return Response.status(Response.Status.NOT_FOUND).entity(responseMsg).build();
 		}
 	}
 	
@@ -76,7 +81,9 @@ public class PizzaShackOrderAPI {
 		if (updated) {
 			return Response.ok().entity(order).build();
 		} else {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			ResponseMsg responseMsg = new ResponseMsg();
+			responseMsg.setDescription("Order " + orderId +" not found");
+			return Response.status(Response.Status.NOT_FOUND).entity(responseMsg).build();
 		}
 	}	
 

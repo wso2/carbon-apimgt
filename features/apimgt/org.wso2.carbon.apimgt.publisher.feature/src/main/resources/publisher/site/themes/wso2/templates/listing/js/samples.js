@@ -151,6 +151,10 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                             provider: username, version: "1.0.0", default_version_checked: " ",
                             tier: defaultTier, tiersCollection: defaultTier,
                             transport_http: "http", transport_https: "https",
+                            bizOwner: "PizzaShack Business Owner",
+                            bizOwnerMail: "marketing@PizzaShack.com",
+                            techOwner: "PizzaShack Technical Owner",
+                            techOwnerMail: "architecture@PizzaShack.com",
                             swagger: _this.sample_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
