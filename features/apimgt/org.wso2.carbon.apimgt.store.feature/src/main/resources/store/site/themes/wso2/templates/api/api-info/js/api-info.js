@@ -246,7 +246,7 @@ $('.rating-tooltip-manual').rating({
             function(){
                 if($(this).val() == "createNewApp"){
                     //$.cookie('apiPath','foo');
-                    window.location.href = '../site/pages/applications.jag?goBack=yes&'+urlPrefix;
+                    window.location.href = '../site/pages/application-add.jag?goBack=yes&'+urlPrefix;
                 }
             }
     );
