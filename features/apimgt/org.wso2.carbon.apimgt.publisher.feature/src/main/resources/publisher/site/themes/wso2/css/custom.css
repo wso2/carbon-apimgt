@@ -717,7 +717,15 @@ input.ep-field{ min-width: 50%;}
 .modal-body .form-horizontal{
     max-width:100%;
 }
-
 .modal-header .close{
     color:#222;
+}
+.form-group .label{
+    display:inline-block;
+    margin-top:2px;
+    padding:2px 10px;
+    line-height: 13px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
 }
