@@ -1,7 +1,8 @@
-{
+{   "apistoreHome":"APIStore Home",
     "rating" : "Rating",
     "context" : "Context",
     "version" : "Version",
+    "apiThumb": "API Thumbnail",
     "status" : "Status",
     "updated" : "Updated",
     "urls" : "URLs",
@@ -56,8 +57,7 @@
     "confirmPassword" : "Confirm Password",
     "validEmail" : "Please enter a valid email.",
 
-    "passwordNotMatch" : "Password did not match",
-
+    "listAPIs" : "List APIs",
     "listAPI" : "List APIs By",
     "listAPI.newest" : "Newest",
     "listAPI.catog" : "By Category",
@@ -68,6 +68,9 @@
     "searchAPI" : "Search API",
 
     "docSum" : "Summary",
+    "docInline" : "Inline Documentation",
+    "docFile" : "File based Documentation",
+    "docContent" : "Document Content",
     "viewDoc" : "View Content",
     "download" : "Download",
 
@@ -93,7 +96,6 @@
     "prodKeyRejectedMsg" : "This application has been rejected of creating Production keys.",
     "prodKeyApprovedMsg" : "This Application is approved to create Production Keys. Please click the Create Keys button to obtain an Access Token",
     "sandboxKeyMsg" : "Sandbox keys are not yet generated for this application.",
-    "sandboxKeyMsg" : "Sandbox keys are not yet generated for this application.",
     "sandboxKeyCreatedMsg" : "Request to register this application has been sent.",
     "sandboxKeyRejectedMsg" : "This application has been rejected of creating Sandbox keys.",
     "sandboxKeyApprovedMsg" : "This Application is approved to create Sandbox Keys. Please click the Create Keys button to obtain an Access Token",
@@ -103,7 +105,6 @@
     "edit" : "Edit",
     "delete" : "Delete",
     "submit":"Submit",
-	"save":"Save",
     "signup" : "Sign-up",
     "login" : "Sign In",
     "logout" : "Sign Out",
@@ -121,6 +122,7 @@
     "apiName": "API Name",
     "api" : "API",
     "apiOwner" : "Owner",
+    "apiProvider" : "API Provider",
     "subscriptionStatus" : "Subscription Status",
     "subscription" : "Subscription",
     "appName" : "Application Name",
@@ -137,6 +139,7 @@
     "apiUsage" : "API Usage",
     "apiUsageTitle" : "API Usage per Application",
     "subscriber": "Subscriber",
+    "callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
 
     "keysPro" : "Keys - Production",
     "keysSand" : "Keys - Sandbox",
@@ -164,6 +167,8 @@
     "pwHelpMsgLine4":"Add special characters (such as @, ?, %)",
     "pwHelpMsgLine5":"Mix capital and lowercase letters",
     "retypePassword":"Re-type Password",
+
+    "passwordNotMatch" : "Password did not match",
 
     "apisTooltip":"Browse the latest versions of published APIs, make subscriptions and generate API keys.",
     "prototypedApisTooltip":"Browse the Prototyped APIs available",
@@ -223,6 +228,7 @@
     "throttlingLimit":"Throttling Limit",
     "multipleAPIStoresHeading":"API Stores available on this server" ,
     "storeNameSuffix":"/store",
+    "tenantStore":"Tenant Store",
     "timeWarn":"Enter a valid number",
     "noTiers":"You may not be entitled to any of the available tiers",
 
@@ -230,7 +236,6 @@
 
     "SocialSites": "Social Sites",
     "embed":"Embed",
-    "email":"Email",
     "ShareonTwitter":"Share on Twitter",
     "ShareonGoogle":"Share on Google +",
     "ShareonLinkedIn":"Share on LinkedIn",
@@ -238,26 +243,26 @@
     "apipublisher":"API Publisher",
     "publicAPIStore":"Public API Store",
     "apistoreDesc":"'s API Store",
-    
-	"forum" : "Forum",
-	"forum.searchForum" : "Search Forum",
+
+    "forum" : "Forum",
+    "forum.searchForum" : "Search Forum",
     "forum.noTopicsFound" : "No topics found.",
     "forum.noTopicsFound.description" : "There are no forum topic available.",
-	"forum.createNewTopic" : "Create New Topic",
-	"forum.topic" : "Topic",
-	"forum.topic.list" : "Topic List",
-	"forum.replies" : "Replies",
-	"forum.by" : "By",
-	
-	"forum.topicCreation.title" : "Create New Topic",
-	"forum.topicCreation.subject" : "Subject",
-	"forum.topicCreation.create" : "Create",
+    "forum.createNewTopic" : "Create New Topic",
+    "forum.topic" : "Topic",
+    "forum.topic.list" : "Topic List",
+    "forum.replies" : "Replies",
+    "forum.by" : "By",
 
-	"forum.topicEdit.subject" : "Edit Subject",
-	"forum.topicEdit.description" : "Edit Topic Description",
+    "forum.topicCreation.title" : "Create New Topic",
+    "forum.topicCreation.subject" : "Subject",
+    "forum.topicCreation.create" : "Create",
 
-	"forum.addReply.title" : "Add reply",
-	"forum.addReply.replyToThread" : "Reply to Thread",
+    "forum.topicEdit.subject" : "Edit Subject",
+    "forum.topicEdit.description" : "Edit Topic Description",
+
+    "forum.addReply.title" : "Add reply",
+    "forum.addReply.replyToThread" : "Reply to Thread",
     "selectScopes" : "Select Scopes",
     "changePassword" : "Change Password",
     "currentPassword" : "Current Password",
@@ -269,10 +274,12 @@
     "subscribeToGetAccessToken" : "Please subscribe to the API to generate an access token.",
     "provideAccessToken" : "If you already have an access token please provide it below.",
     "requireAccessToken" : "You require an access token to try the API. Please login and subscribe to API to generate an access token.",
-    
+
     "goBack" : "Go Back",
     "applicationList" : "Application List",
     "addApplication" : "Add Application",
+    "activePage":"Active Page",
+    "pagination":"Pagination",
     "manageAlertTypes": "Manage Alert Types",
     "abnormalBackendTime": "Abnormal backend time",
     "abnormalResponseTime":"Abnormal response time",
@@ -303,5 +310,5 @@
 
     "healthAvailabilityPerMin_Desc":"This alert type should get triggered if at least one of the three cases below satisfied; Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600"
 
-   
+
 }
