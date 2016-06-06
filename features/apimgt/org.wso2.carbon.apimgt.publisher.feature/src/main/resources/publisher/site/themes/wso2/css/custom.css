@@ -381,7 +381,7 @@ div.image-container {
 }
 .wiz-step.completed .wiz-step-count{
     color:#344860;
-    background: #7ea9ce;
+    background: #C0D5FF;
 }
 .wiz-step-title{
     font-size:16px;
@@ -391,7 +391,7 @@ div.image-container {
     color:#fff;
 }
 .wiz-step.completed .wiz-step-title{
-    color:#7ea9ce;
+    color:#C0D5FF;
 }
 .wiz-step .wiz-step-title{
     color:#5477A1;
@@ -709,12 +709,13 @@ input.ep-field{ min-width: 50%;}
     position: relative; 
     margin: 0;
 }
-
 #resource_policy_modal.modal .modal-body {
     max-height: 600px !important;
     overflow-y: auto !important;
 }
-
 #resource_policy_modal select{
     margin: -6px;
+}
+.panel-group .panel .form-horizontal{
+    max-width:100%;
 }

@@ -7377,7 +7377,7 @@ body.inverse .fade-edge:after {
  * navbar styles
  * ======================================================================== */
 .navbar-wrapper {
-  min-height: 50px;
+  min-height: 40px;
 }
 
 .navbar.affix, .navbar.affix-bottom {
