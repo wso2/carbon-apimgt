@@ -4139,6 +4139,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
 
+        // Encoding the message into a map.
         HashMap<String, String> blockingMessage = new HashMap<String, String>();
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
@@ -4146,6 +4147,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+
+        // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
         if (throttleProperties.getJmsEventPublisherName() != null) {
             eventAdapterService.publish(throttleProperties.getJmsEventPublisherName(), new HashMap<String, String>()
                     , blockingMessage);
@@ -4162,6 +4166,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
 
+        // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
         if (throttleProperties.getJmsEventPublisherName() != null) {
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(throttleProperties
                                                                                                 .getJmsEventPublisherName(),
