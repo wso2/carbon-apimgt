@@ -309,7 +309,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
-
+        //ignoring sql injection for keyString since it construct locally and no public access
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -335,7 +335,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.TIME + ",SUM("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") "
                             + "AS net_total_requests FROM "  + tableName + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( ? )" +
+                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( " + keyString + " )" +
                             " AND time BETWEEN  ? AND ? " + " GROUP BY "
                             + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.API_VERSION + ","
@@ -355,7 +355,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
                             " FROM " + tableName +
-                            " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( ? )" +
+                            " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN ( " + keyString + " )" +
                             " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ? " +
                             " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
                             + APIUsageStatisticsClientConstants.USER_ID
@@ -364,7 +364,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 statement =connection.prepareStatement(query);
                 int index = 1;
-                statement.setString(index++, keyString);
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
                 resultSet = statement.executeQuery();
@@ -420,17 +419,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
+                //ignoring sql injection for keyString since it construct locally and no public access
                 query = "SELECT " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + ',' + APIUsageStatisticsClientConstants.API
                         + ",SUM(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
                         " FROM " + tableName +
-                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                        + " IN (?) AND time BETWEEN ? AND ? GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString
+                        + ") AND time BETWEEN ? AND ? GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
                         + "," + APIUsageStatisticsClientConstants.API;
 
                 statement = connection.prepareStatement(query);
                 int index = 1;
-                statement.setString(index++, keyString);
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
                 resultSet = statement.executeQuery();
@@ -515,7 +514,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
-
+                //ignoring sql injection for keyString since it construct locally and no public access
                 if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                     query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.VERSION + ","
@@ -528,7 +527,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + "," + APIUsageStatisticsClientConstants.MONTH + ","
                             + APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME
                             + " FROM " + tableName + "  WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                            + " IN (?) " + " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ? "
+                            + " IN (" + keyString + " ) " + " AND " + APIUsageStatisticsClientConstants.TIME
+                            + " BETWEEN ? AND ? "
                             + " GROUP BY " + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.VERSION + ","
                             + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
@@ -545,7 +545,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.METHOD + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
                             + APIUsageStatisticsClientConstants.RESOURCE + " FROM " + tableName + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (?) " +
+                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                             " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
                             + APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD
@@ -553,8 +553,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
 
                 statement = connection.prepareStatement(query);
-                int index =1;
-                statement.setString(index++, keyString);
+                int index = 1;
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
                 resultSet = statement.executeQuery();
@@ -642,7 +641,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
-
+                //ignoring sql injection for keyString since it construct locally and no public access
                 if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                     query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.API_VERSION + ","
@@ -659,7 +658,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.TIME + ",SUM("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " + " FROM "
                             + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (?) AND "
+                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") AND "
                             + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
                             + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.API_VERSION + ","
@@ -678,15 +677,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + "," + " SUM("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " + " FROM "
                             + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
-                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (?)  AND "
+                            + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")  AND "
                             + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
                             + APIUsageStatisticsClientConstants.API + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY;
                 }
 
                 statement = connection.prepareStatement(query);
-                int index =1;
-                statement.setString(index++, keyString);
+                int index = 1;
+                statement.setEscapeProcessing(true);
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
                 resultSet = statement.executeQuery();
