@@ -506,6 +506,7 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
+        <JMSEventPublisherName>jmsEventPublisher</JMSEventPublisherName>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
                 <Gold>5000</Gold>

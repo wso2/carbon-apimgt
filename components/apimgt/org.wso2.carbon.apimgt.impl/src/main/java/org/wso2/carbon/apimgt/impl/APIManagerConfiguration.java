@@ -887,6 +887,13 @@ public class APIManagerConfiguration {
                             .API_KEY_VALIDATOR_PASSWORD));
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
+
+                OMElement jmsEventPublisherConfiguration = throttleConfigurationElement.getFirstChildWithName(new
+                    QName(APIConstants.AdvancedThrottleConstants.JMS_EVENT_PUBLISHER));
+                if (jmsEventPublisherConfiguration != null) {
+                    throttleProperties.setJMSEventPublisher(jmsEventPublisherConfiguration.getText());
+                }
+
             }
         }
     }
