@@ -44,11 +44,6 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
                                         <label class="control-label">&nbsp;</label>
-                                        <% if(request_tenant != null) { %>
-                                        <div class="input-group input-wrap">
-                                            <p class="lblTenantDomainName form-control-static" for="newUsername"><strong>@<%=request_tenant%></strong></label>
-                                        </div>
-                                        <% } %>
                                     </div>
                                 </div>
                                 <div class="form-group">
