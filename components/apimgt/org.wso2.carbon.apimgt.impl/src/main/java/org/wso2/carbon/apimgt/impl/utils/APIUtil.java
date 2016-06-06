@@ -3781,19 +3781,23 @@ public final class APIUtil {
 
             // If the sequence not found the default sequences, check in custom sequences
 
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
-                                                                                                   sequenceType));
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
+            if (registry.resourceExists(getSequencePath(identifier,sequenceType)))  {
 
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        return true;
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                                                                                                       sequenceType));
+                if (seqCollection != null) {
+                    String[] childPaths = seqCollection.getChildren();
+
+                    for (String childPath : childPaths) {
+                        Resource sequence = registry.get(childPath);
+                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                            return true;
+                        }
                     }
                 }
             }
+
 
         } catch (RegistryException e) {
             String msg = "Error while retrieving registry for tenant " + tenantId;
