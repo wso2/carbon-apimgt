@@ -139,12 +139,19 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+	
+	private final String userNameWithoutChange;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
+        this.userNameWithoutChange = username;
     }
 
-    /**
+    protected String getUserNameWithoutChange() {
+		return userNameWithoutChange;
+	}
+
+	/**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
@@ -740,13 +747,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             
             if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
             	//api at least is in published status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
             		//user has publish permission
             		isValid = true;
             	}
             }else if(APIConstants.CREATED.equals(status) || APIConstants.PROTOTYPED.equals(status)){
             	//api in create status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
             		//user has creat or publish permission
             		isValid = true;
             	}
