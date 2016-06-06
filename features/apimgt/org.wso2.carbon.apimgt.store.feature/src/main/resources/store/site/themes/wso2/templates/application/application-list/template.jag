@@ -55,5 +55,11 @@
   </a>
 </script>
 
+<script id="application-name" type="text/x-handlebars-template">
+  <a href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>">
+    {{ name }} {{#if shared}}(Shared){{/if}}
+  </a>
+</script>
+
  
 <% }); %>
