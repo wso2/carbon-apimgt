@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
@@ -40,19 +41,18 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -64,6 +64,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+    private static final String CONFIG_ELEM_OAUTH = "OAuth";
 
     private KeyManagerConfiguration configuration;
 
@@ -479,6 +480,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         tokenScopes[0] = tokenScope;
         String clientSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
         oAuthApplicationInfo.setClientSecret(clientSecret);
+        //for the first time we set default time period.
+        oAuthApplicationInfo.addParameter(ApplicationConstants.VALIDITY_PERIOD,
+                configuration.getParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
 
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
@@ -522,6 +526,25 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             // APIKeyValidator section.
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
+            /**
+             * we need to read identity.xml here because we need to get default validity time for access_token in order
+             * to set in semi-manual.
+             */
+            IdentityConfigParser configParser;
+            configParser = IdentityConfigParser.getInstance();
+            OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
+
+            String validityPeriod = null;
+
+            if (oauthElem != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("identity configs have loaded. ");
+                }
+                // Primary/Secondary supported login mechanisms
+                OMElement loginConfigElem =  oauthElem.getFirstChildWithName(getQNameWithIdentityNS("AccessTokenDefaultValidityPeriod"));
+                validityPeriod = loginConfigElem.getText();
+            }
+
             if (this.configuration == null) {
                 this.configuration = new KeyManagerConfiguration();
                 this.configuration.setManualModeSupported(true);
@@ -534,6 +557,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 ;
                 this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
                         .REVOKE_API_URL));
+                this.configuration.addParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,validityPeriod);
                 String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
 
                 // Read the revoke url and replace revoke part to get token url.
@@ -544,6 +568,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClientPool.getInstance().setConfiguration(this.configuration);
 
+    }
+
+    private QName getQNameWithIdentityNS(String localPart) {
+        return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 
     @Override
