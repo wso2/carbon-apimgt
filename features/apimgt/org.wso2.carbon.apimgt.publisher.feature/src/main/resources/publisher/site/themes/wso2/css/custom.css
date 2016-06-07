@@ -729,3 +729,16 @@ input.ep-field{ min-width: 50%;}
     -moz-border-radius: 0px;
     border-radius: 0px;
 }
+
+#swaggerEditer {
+    overflow: hidden;
+   padding: 50px !important;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.swagger_editer_header{
+    top: auto !important;
+}
+
+.thumbnail.icon img {
+    width: 101%;
+} 
