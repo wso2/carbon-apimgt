@@ -895,7 +895,7 @@ $(document).ready(function(){
                     designer.saved_api.name = responseText.data.apiName;
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
-                    var n = noty({layout: "topRight",type:"success", text: 'API Saved' });
+                    var n = noty({theme:"bootstrapTheme", layout: "topCenter",type:"success", text: 'API Saved',closeWith   : ['button']});
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {

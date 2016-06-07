@@ -728,3 +728,10 @@ input.ep-field{ min-width: 50%;}
     -moz-border-radius: 0px;
     border-radius: 0px;
 }
+
+.list-group-item-success .noty_text,
+.list-group-item-info .noty_text,
+.list-group-item-warning .noty_text,
+.list-group-item-danger .noty_text{
+    color:#fff;
+}

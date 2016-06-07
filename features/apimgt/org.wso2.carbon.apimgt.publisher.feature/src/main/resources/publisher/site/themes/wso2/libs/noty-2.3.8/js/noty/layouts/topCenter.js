@@ -16,7 +16,7 @@ $.noty.layouts.topCenter = {
                 margin       : 0,
                 padding      : 0,
                 listStyleType: 'none',
-                zIndex       : 10000000
+                zIndex       : 999999999
             });
 
             $(this).css({
