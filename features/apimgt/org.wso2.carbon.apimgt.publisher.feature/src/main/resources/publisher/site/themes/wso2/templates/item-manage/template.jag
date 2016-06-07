@@ -999,39 +999,47 @@
     </div>
 </div>
 
-<div  id="environmentsRetry-modal" class="modal hide fade">
+<div  id="environmentsRetry-modal" class="modal fade">
+
+    <div class="modal-dialog">
+      <div class="modal-content">
         <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Gateway Failures</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Gateway Failures</h3>
         </div>
         <div class="modal-body">
-        <div id="modal-published-header">
-        Failed to Publish Environments
-        </div>
-        <div id="modal-published-content">
-        </div>
-        <div id="modal-unpublished-header">
+            <div id="modal-published-header">
+            Failed to Publish Environments
+            </div>
+            <div id="modal-published-content">
+            </div>
+            <div id="modal-unpublished-header">
                 Failed to UnPublish Environments
-                </div>
-                <div id="modal-unpublished-content">
-                </div>
-                <input type="hidden" id="retryType"/>
+            </div>
+            <div id="modal-unpublished-content">
+            </div>
+            <input type="hidden" id="retryType"/>
         </div>
         <div class="modal-footer">
-        <div id="res" class="hide" style="color:red;float:left"></div>
-        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
-       <script type="text/javascript">
-        function doGatewayAction() {
-            var type=$("#retryType").val();
-            if(type=="manage"){
-               $("#environmentsRetry-modal").modal('hide');
-               $( "body" ).trigger( "api_saved" );
-               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
-            }else{
-               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+            <div id="res" class="hide" style="color:red;float:left"></div>
+            <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
+           <script type="text/javascript">
+            function doGatewayAction() {
+                var type=$("#retryType").val();
+                if(type=="manage"){
+                   $("#environmentsRetry-modal").modal('hide');
+                   $( "body" ).trigger( "api_saved" );
+                   location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                }else{
+                   location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                }
             }
-        }
-
+            </script>
+        </div>
+      </div>  
+    </div>
+</div>
+       <script type="text/javascript">
         jQuery.validator.addMethod("characterValidation", function(value, element) {
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
@@ -1042,10 +1050,6 @@
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\t\n]*$/.test( value );
         }, 'Field Contain special characters');
-
-        
-
        </script>
-        </div>
-        </div>
+
 <% }); %>
