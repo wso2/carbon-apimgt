@@ -12,7 +12,22 @@ $(document).ready(function(){
         e.preventDefault();
     });
 
+    var mediaQuery = window.matchMedia('(max-width: 767px)');
 
+    if (mediaQuery.matches) {
+        $.sidebar_toggle('hide', '.sidebar-nav');
+        $('[data-toggle=sidebar]').trigger('click')
+    }
+
+    mediaQuery.addListener(function(e) {
+        if (e.matches) {
+            $.sidebar_toggle('hide', '.sidebar-nav');
+            $('[data-toggle=sidebar]').trigger('click')
+        } else {
+            $.sidebar_toggle('show', '.sidebar-nav')
+            $('[data-toggle=sidebar]').trigger('click')
+        }
+    });
 
     $('.rating-tooltip-manual').rating({
       extendSymbol: function () {
