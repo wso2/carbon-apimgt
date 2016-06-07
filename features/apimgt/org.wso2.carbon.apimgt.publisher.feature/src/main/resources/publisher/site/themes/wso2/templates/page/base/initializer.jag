@@ -45,7 +45,9 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "responsive-datatables-js", "libs/data-tables_1.10.7/extensions/Bootstrap/js/dataTables.bootstrap.js");
         jagg.addFooterJS("page/base", "datatables-js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
         jagg.addFooterJS("page/base", "common-js", "templates/utils/common/common.js");
-        jagg.addFooterJS("page/base", "noty", "libs/noty-2.3.8/js/noty/packaged/jquery.noty.packaged.min.js");
+        jagg.addFooterJS("page/base", "noty", "libs/noty-2.3.8/js/noty/packaged/jquery.noty.packaged.js");
+        jagg.addFooterJS("page/base", "bootstrapTheme", "libs/noty-2.3.8/js/noty/themes/bootstrap.js");
+        jagg.addFooterJS("page/base", "topCenter", "libs/noty-2.3.8/js/noty/layouts/topCenter.js");
     }
 });
 %>

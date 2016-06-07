@@ -222,13 +222,11 @@
 												 <h3>API Publisher - Error</h3>
 												 </div>
 												 <div class="modal-body">
-												 <table>
-													 <tbody>
-														 <tr>
-															 <td><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/error.png"))%>" align="center" hspace="10" alt="<%=i18n.localize("errorMsgThumb")%>"></td>
-															 <td><span class="messageText">Image file exceeds the maximum limit of 1MB.</span></td>
-													 </tbody>
-												 </table>
+												 <p>
+												 	<i class="fw fw-error"></i>
+												 	<span class="messageText">Image file exceeds the maximum limit of 1MB.</span>
+												 </p>
+
 												 </div>
 												 <div class="modal-footer successMsgFooter">
 													 <div class="pull-right">
