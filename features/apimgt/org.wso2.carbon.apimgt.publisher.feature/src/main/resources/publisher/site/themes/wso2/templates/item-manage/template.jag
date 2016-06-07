@@ -380,7 +380,68 @@
             <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
         </div>
 	</div>
-<%  }%>
+<%  } else { %>
+<hr />
+<div class="form-group">
+        <label class="control-label col-sm-3" for="resourceTiers">Resource Level Tiers:
+            <a class="help_popup" help_data="resource_policy_help" title="resource_policy_help" data-trigger="hover" data-placement="bottom">
+            	<span class="icon fw-stack fw-lg" style="font-size:6px">
+    				<i class="fw fw-circle fw-stack-2x"></i>
+    				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+    			</span>
+            </a>
+            <p id="api_policy_help" class="hide"><%=i18n.localize("enableResourceLevelPolicyHelpMsg")%></p>
+        </label>
+
+    <div id="resource-policy-select" class="controls col-sm-4">
+            <script id="resource-policy-ui-template" language="text/x-handlebars-template">
+                <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
+                <div id="resource_policy_modal" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h3>Select Policy per Resource</h3>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table">
+                                    <tr>
+                                        <td colspan="2">Resource</td>
+                                        <td>Policy</th>
+                                    </tr>
+                                    {{#each doc.paths}}
+                                        {{#each this}}
+                                        <tr class="resource_container" data-path="">
+                                            <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
+                                                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                                            </td>
+                                            <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
+                                            <td>
+                                                <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
+                                                    {{#each ../../tiers}}
+                                                        <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
+                                                    {{/each}}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        {{/each}}
+                                    {{/each}}
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                            <div id="res" style="color:red;float:left"></div>
+                            <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+                            <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </script>
+            <a class=" help_popup" help_data="tier_help"></a>
+            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+        </div>
+</div>
+<% } %>
               <div class="form-group">
                             <label class="control-label col-sm-3" for="throttle">                            
                             </label>

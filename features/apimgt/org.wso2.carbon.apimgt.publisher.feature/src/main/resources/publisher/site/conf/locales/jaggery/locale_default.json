@@ -23,6 +23,7 @@
     "apiPolicy" : "API level Policy" ,
     "enableApiLevelPolicy" : "Enable  API Level Policy" ,
     "enableApiLevelPolicyHelpMsg" : "Enabling API Level policy will apply the selected policy across all resources of API. Hence resources level tier selection will be disable and will not be take into consideration within handler if API Level Policy available" ,
+    "enableResourceLevelPolicyHelpMsg" : "Enabling resource level throttling tier will apply configured limits per resource" ,
     "subPolicy" : "Subscription Level Policy" ,
     "busiOwner" : "Business Owner" ,
     "busiOwnerMail" : "Business Owner Email" ,
