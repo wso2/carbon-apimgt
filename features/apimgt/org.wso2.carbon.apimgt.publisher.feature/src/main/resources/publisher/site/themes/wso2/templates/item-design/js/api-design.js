@@ -895,9 +895,7 @@ $(document).ready(function(){
                     designer.saved_api.name = responseText.data.apiName;
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
-                    $( "body" ).trigger( "api_saved" );
-                    $('#apiSaved').show();
-                    setTimeout("hideMsg()", 3000);
+                    var n = noty({layout: "topRight",type:"success", text: 'API Saved' });
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
@@ -912,7 +910,7 @@ $(document).ready(function(){
                              jagg.showLogin();
                         }
                     } else {
-                        jagg.message({content:responseText.message,type:"error"});
+                        jagg.message({ content:responseText.message,type:"error"});
                     }
                 }
             },
