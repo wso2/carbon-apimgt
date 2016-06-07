@@ -127,7 +127,7 @@
 
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
-								                            <label class="1111control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
