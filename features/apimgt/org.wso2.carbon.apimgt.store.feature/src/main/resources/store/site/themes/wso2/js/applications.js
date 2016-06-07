@@ -182,8 +182,8 @@
         regenerateToken: function(){            
             var validity_time = this.element.find(".validity_time").val();
             var scopes = "";
-            if(this.element.find(".scope_select").val() != null) {
-                scopes = this.element.find(".scope_select").val().join(" ");
+            if(this.element.find("select.scope_select").val() != null) {
+                scopes = this.element.find("select.scope_select").val().join(" ");
             }
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
