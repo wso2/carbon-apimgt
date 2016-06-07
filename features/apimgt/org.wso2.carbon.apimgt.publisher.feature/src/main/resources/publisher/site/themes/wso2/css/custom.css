@@ -530,7 +530,6 @@ div.image-container {
 }
 
 .tagContainer .bootstrap-tagsinput > .label{
-    font-size:100%;
     line-height:2.1;
     font-weight:normal;
 }
@@ -539,7 +538,7 @@ div.image-container {
 }
 
 .tagContainer .bootstrap-tagsinput .tag [data-role="remove"]{
-    color:#90BCDA;
+    color:#91D3FF;
 }
 .tagContainer .bootstrap-tagsinput .tag [data-role="remove"]:hover{
     -webkit-box-shadow: none;
@@ -728,4 +727,11 @@ input.ep-field{ min-width: 50%;}
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
     border-radius: 0px;
+}
+
+.list-group-item-success .noty_text,
+.list-group-item-info .noty_text,
+.list-group-item-warning .noty_text,
+.list-group-item-danger .noty_text{
+    color:#fff;
 }

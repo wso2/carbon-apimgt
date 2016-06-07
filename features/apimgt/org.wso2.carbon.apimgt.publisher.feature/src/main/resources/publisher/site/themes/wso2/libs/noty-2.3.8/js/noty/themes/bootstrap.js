@@ -17,8 +17,7 @@ $.noty.themes.bootstrapTheme = {
 
         var containerSelector = this.options.layout.container.selector;
         $(containerSelector).addClass('list-group');
-
-        this.$closeButton.append('<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>');
+        this.$closeButton.append('<span aria-hidden="true"><i class="fw fw-cancel" style="font-size:12px;"></i></span><span class="sr-only">Close</span>');
         this.$closeButton.addClass('close');
 
         this.$bar.addClass( "list-group-item" ).css('padding', '0px');
