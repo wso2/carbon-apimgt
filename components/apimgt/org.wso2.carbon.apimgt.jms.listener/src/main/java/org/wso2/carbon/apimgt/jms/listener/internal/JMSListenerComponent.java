@@ -22,11 +22,19 @@ package org.wso2.carbon.apimgt.jms.listener.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
-import org.wso2.carbon.apimgt.jms.listener.utils.JMSThrottleDataRetriever;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.jms.listener.utils.JMSThrottleDataRetriever;
+import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
 
 
 /**
@@ -44,7 +52,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 
-public class JMSListenerComponent {
+public class JMSListenerComponent implements ServiceListener {
 
     private static final Log log = LogFactory.getLog(JMSListenerComponent.class);
 
@@ -52,18 +60,54 @@ public class JMSListenerComponent {
         log.debug("Activating component...");
 
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-
         if (configuration != null) {
-            if (configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()) {
-                JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
-                jmsThrottleDataRetriever.startJMSThrottleDataRetriever();
+            if (!configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()) {
+                return;
             }
 
         } else {
             log.warn("API Manager Configuration not properly set.");
         }
 
+        BundleContext bundleContext = context.getBundleContext();
+        boolean andesBundlePresent = false;
+
+        for (Bundle bundle : bundleContext.getBundles()) {
+            if (ListenerConstants.ANDES_SYMBOLIC_NAME.equals(bundle.getSymbolicName())) {
+
+                // Searching for the QpidNotificationService. This service is exposed by andes,
+                // so if this service is exposed we know for sure andes has started properly.
+                String notificationServiceFilter = String.format("(%s=%s)", Constants.OBJECTCLASS,
+                                                                 ListenerConstants.QPID_SERVICE);
+                andesBundlePresent = true;
+                try {
+                    ServiceReference[] serviceReferences =
+                            bundleContext.getServiceReferences((String) null, notificationServiceFilter);
+                    // If the service is present we'd directly start the listener.
+                    if (serviceReferences != null) {
+                        startJMSListener();
+                    } else {
+                        bundleContext.addServiceListener(this, notificationServiceFilter);
+                    }
+                    break;
+                } catch (InvalidSyntaxException e) {
+                    log.error("Error while querying " + ListenerConstants.QPID_SERVICE + " service", e);
+                }
+            }
+        }
+
+        // If andes bundle is not in the environment, then listener should be configured to a jms publisher running
+        // in a remote machine. That's why we start the listener.
+        if (!andesBundlePresent) {
+            startJMSListener();
+        }
+
         return;
+    }
+
+    private void startJMSListener() {
+        JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
+        jmsThrottleDataRetriever.subscribeForJmsEvents();
     }
 
 
@@ -92,5 +136,15 @@ public class JMSListenerComponent {
             log.debug("Deactivating component");
         }
 
+    }
+
+    @Override
+    public void serviceChanged(ServiceEvent event) {
+        if (event.getType() == ServiceEvent.REGISTERED) {
+            if (log.isDebugEnabled()) {
+                log.debug("Service " + ListenerConstants.QPID_SERVICE + " fulfilled.");
+            }
+            startJMSListener();
+        }
     }
 }
