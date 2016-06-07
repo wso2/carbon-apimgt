@@ -28,11 +28,15 @@ states.push(key.toUpperCase());
 }
 
 // Automatically label each of the nodes
-states.forEach(function(state) { g.setNode(state, { label: state }); });
+states.forEach(function(state) { g.setNode(state, {
+                label: state.toUpperCase(),
+                shape: 'rect',
+                labelStyle: 'font-size: 12px;font-weight: lighter;fill: rgb(51, 51, 51);'
+            }); });
 
 
 // Set up the edges
-g.setEdge("CREATED",     "PUBLISHED",     { label: "PUBLISH",labelStyle: "fill: white",lineInterpolate: 'bundle',arrowheadClass: 'arrowhead' });
+g.setEdge("CREATED",     "PUBLISHED",     { label: "PUBLISH",labelStyle: "fill: white",lineInterpolate: 'cardinal',arrowheadClass: 'arrowhead' });
 for (var key in statesList) {
 var transition=statesList[key].transition;
 if(transition!=null){
@@ -42,7 +46,7 @@ if(transition!=null){
     var target=obj.target;
     // Set up the edges
 
-g.setEdge(key.toUpperCase(),     target.toUpperCase(),     { label: event.toUpperCase(),labelStyle: "fill: white",lineInterpolate: 'bundle',arrowheadClass: 'arrowhead' });}
+g.setEdge(key.toUpperCase(),     target.toUpperCase(),     { label: key.toUpperCase(),labelStyle: "fill: white",lineInterpolate: 'cardinal',arrowheadClass: 'arrowhead' });}
 }
 }
 g.nodes().forEach(function(v) {
@@ -71,11 +75,8 @@ var render = new dagreD3.render();
 render(inner, g);
 
 // Center the graph
-var initialScale = 0.90;
-zoom
-  .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
-  .scale(initialScale)
-  .event(svg);
+var initialScale = 1.2;
+
 svg.attr('height', g.graph().height * initialScale + 40);
 });
 
