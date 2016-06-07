@@ -36,10 +36,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
         </dependency>
-        <dependency>
-            <groupId>opensaml.wso2</groupId>
-            <artifactId>opensaml2</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -65,7 +61,6 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.jms.listener:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>opensaml.wso2:opensaml2:${opensaml2.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
