@@ -233,12 +233,12 @@
                 </label>
                 <div class="col-sm-8">
                     <label class="radio">
-                        <input type="radio" class="backend_tps" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
+                        <input type="radio" class="backend_tps" id ="backend_tps_unlimited" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
                         checked="checked"<%}%> value="unlimited">
                         <span class="helper">Unlimited</span>
                     </label>
                     <label class="radio">
-                        <input type="radio" class="backend_tps" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
+                        <input type="radio" class="backend_tps" id ="backend_tps_specify" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
                         checked="checked"<%}%> value="specify">
                         <span class="helper">Specify</span>
                     </label>                    
@@ -983,7 +983,7 @@
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
             thisID = $(this).attr('id');
-                if(!$("#toggleThrottle").is(":checked")) {
+                if(!$("#backend_tps_specify").is(":checked")) {
                 // Setting text field values to null if check box is not selected.
                     $('#productionTps').val(null);
                     $('#sandboxTps').val(null);
