@@ -115,17 +115,11 @@
 								                            <div class="form-group">
 								                            	<label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3"></label>
 								                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-																	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
-																		<span class="icon fw-stack fw-lg" style="font-size:8px">
-																		<i class="fw fw-circle-outline fw-stack-2x"></i>
-																		<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
-																		</span>
+																	<span class="add_ep btn btn-secondary" data-type="{{ ep_type }}" >
+																		<i class="fw fw-add"></i>
 																	</span>
-																	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
-																		<span class="icon fw-stack fw-lg" style="font-size:8px">
-																		<i class="fw fw-circle-outline fw-stack-2x"></i>
-																		<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
-																		</span>
+																	<span class="remove_ep btn btn-secondary" data-type="{{ ep_type }}" >
+																		<i class="fw fw-minus"></i>
 																	</span>
 								                            	</div>
 								                            </div>
@@ -133,7 +127,7 @@
 
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
-								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            <label class="1111control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
@@ -159,8 +153,7 @@
 																{{/if}}
 															</div>
 							                            </div>
-							                            {{/inline}}												
-
+							                            {{/inline}}
 								                        <div class="form-group">
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
@@ -231,7 +224,7 @@
 								                        	{{#if ../load_balance}}
 								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Message Mediation Policies"}}
 								                        	{{else}}
 								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
 								                        	{{/if}}								                        
@@ -379,9 +372,11 @@
 							
 							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6 form-inline">
-							                                <input type="text" class="col-sm-2 form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
-							                                <input type="password" class="col-sm-4 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
+							                            <div class="col-sm-2">
+							                                <input type="text" class="form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
+														</div>
+														<div class="col-sm-2">
+							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
 							                            </div>
 							                        </div>
 							
@@ -407,10 +402,10 @@
 							                        <% }%>
 							
 							                        </div><!-- more option endpoint -->
-							
+												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
-							                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
+							                        <legend ><%=i18n.localize("sequence")%></legend>
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
@@ -455,18 +450,18 @@
 							                                    </table>							                                    
 							                            	</div>
 							                            </div>
-							                            	<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-							                            		<div class="col-sm-3"></div>
-							                            		<div class="col-sm-3">
-							                            			 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
-							                            		</div>
-							                            	</div>
+														<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+															<div class="col-sm-3"></div>
+															<div class="col-sm-3">
+																 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
+															</div>
+														</div>
 
 														<% if(outputs.isCreatePermitted){
 														 %>
-
+														<br/><br/>
 														<div id="corsConfigsManaged">
-														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+															<legend>CORS configuration</legend>
                                                             <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
 															<div class="cors-ui-container"></div>
 
@@ -528,12 +523,14 @@
 								                                var hide_impl="hide";
 								                            } %>
 								
-								                            <label class="radio-inline">
-								                            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
+								                            <label class="radio add-margin-right-5x">
+								                            	<input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> >
+								                            	<span class="helper">Inline</span>
 								                            </label>
 								
-								                            <label class="radio-inline">
-								                            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
+								                            <label class="radio">
+								                            	<input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> >
+								                            	<span class="helper">Endpoint</span>
 								                            </label>
 								
 								                    </div>
@@ -541,7 +538,7 @@
 								                </fieldset>
 								
 								                <div id="api_designer">
-								                    <div id ="apidoc_details"></div>
+								                    <div id ="apidoc_details"></div><br/><br/>
 								                    <div id ="resource_details"></div>
 								                </div>
 								
@@ -550,8 +547,18 @@
 								
 								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
 								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
-								                    <div class="form-group form-inline">
-								                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
+								                    <div class="form-group">
+								                        <label class="control-label col-sm-3">Prototype Endpoint:
+								                        <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
+															<span class="icon fw-stack fw-lg" style="font-size:6px">
+																   <i class="fw fw-circle fw-stack-2x"></i>
+																   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+															</span>
+														</a>
+														<div id="endpoint_test_help" class="hide">
+															<p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+														</div>
+								                        </label>
 								                        <div class="col-sm-8">
 								                            <div class="input-group">
 								                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
@@ -560,15 +567,6 @@
 								                                        <span>Test</span>
 								                                    </button>
 								                                </span>
-								                            </div>
-								                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
-								                            	<span class="icon fw-stack fw-lg" style="font-size:6px">
-													                   <i class="fw fw-circle fw-stack-2x"></i>
-													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-													            </span>
-								                            </a>
-								                            <div id="endpoint_test_help" class="hide">
-								                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
 								                            </div>
 								                        </div>
 								                        <span style="display:none;" class="help-block jsonform-errortext"></span>
@@ -580,7 +578,8 @@
 														%>
 
 														<div id="corsConfigsPrototyped">
-															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+															<br/><br/>
+															<legend>CORS configuration</legend>
 
 															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
 
@@ -606,7 +605,7 @@
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
 								                    <%if(permitted) { %>
-								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                    <button class="btn btn-primary manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
 								                    <%}%>
 								                </div>
 								                            </form>
@@ -717,41 +716,49 @@
 </script>
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
-<div class="resource_body_padding">
-    <h5>Description :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
-    <br />
-    <br />        
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
-    <br />
-    <h5>Parameters :</h5>
-    {{#if parameters}}
-    <table class="table table-condensed table-hover table-bordered">
-        <tr>
-        <th width="200px">Parameter Name</th>
-        <th>Description</th>
-        <th width="100px">Parameter Type</th>
-        <th width="100px">Data Type</th>
-        <th width="100px">Required</th>            
-        </tr>    
-    {{#each parameters}}
-        <tr>
-        <td>{{ name }}</td>
-        <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
-        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
-        <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
-        <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
-        </tr> 
-    {{/each}}
-    {{/if}}
-    </table>   
-    <h5>Script :</h5>
-    <textarea class="editor col-sm-12" width="100%" style="height:150px;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
-    {{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
-{{/each}}
-mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
-/*Uncomment the above comment block to send a sample response.*/{{/if}}
-</textarea>
+<div class="resource_body_padding add-margin-bottom-2x">
+	<div class="add-margin-bottom-4x">
+    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
+	</div>
+	<div class="add-margin-bottom-4x">
+    	<strong>Response Content Type : </strong><a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
+    </div>
+    <div class="add-margin-bottom-4x">
+		<div class="add-margin-bottom-2x">
+			<strong>Parameters : </strong>
+		</div>
+		{{#if parameters}}
+		<table class="table table-condensed table-bordered">
+			<tr>
+				<th width="15%">Parameter Name</th>
+				<th width="40%">Description</th>
+				<th width="15%">Parameter Type</th>
+				<th width="15%">Data Type</th>
+				<th width="15%">Required</th>
+			</tr>
+		{{#each parameters}}
+			<tr>
+			<td>{{ name }}</td>
+			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
+			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+			</tr>
+		{{/each}}
+		{{/if}}
+		</table>
+  	</div>
+  	<div class="add-margin-bottom-4x">
+  		<div class="add-margin-bottom-2x">
+			<strong>Script : </strong>
+		</div>
+		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+		{{/each}}
+		mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+		/*Uncomment the above comment block to send a sample response.*/{{/if}}
+		</textarea>
+	</div>
 </div>  
 </script>
 <div  id="environmentsRetry-modal" class="modal hide fade">
