@@ -901,7 +901,9 @@ $(document).ready(function(){
                     designer.saved_api.name = responseText.data.apiName;
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
-                    var n = noty({layout: "topRight",type:"success", text: 'API Saved' });
+                    $( "body" ).trigger( "api_saved" );
+                    $('#apiSaved').show();
+                    setTimeout("hideMsg()", 3000);
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
