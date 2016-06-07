@@ -30,6 +30,7 @@ public class ThrottleProperties {
     private JMSConnectionProperties jmsConnectionProperties;
     private boolean enableUnlimitedTier;
     private String throttleDataSourceName;
+    private String jmsEventPublisherName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
     private boolean enableHeaderConditions;
@@ -51,6 +52,14 @@ public class ThrottleProperties {
 
     public void setDataPublisherThreadPool(DataPublisherThreadPool dataPublisherThreadPool) {
         this.dataPublisherThreadPool = dataPublisherThreadPool;
+    }
+
+    public void setJMSEventPublisher(String eventPublisherName){
+        this.jmsEventPublisherName = eventPublisherName;
+    }
+
+    public String getJmsEventPublisherName() {
+        return jmsEventPublisherName;
     }
 
     public BlockCondition getBlockCondition() {
@@ -163,6 +172,7 @@ public class ThrottleProperties {
         private String authUrlGroup = "ssl://localhost:9711";
         private String username = "admin";
         private String password = "admin";
+        private boolean enabled = false;
 
         public String getType() {
             return type;
@@ -202,6 +212,14 @@ public class ThrottleProperties {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
     }
 

@@ -43,7 +43,7 @@
                                     		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("apiThumb")%>">
                                     	</div>
                                     <% } %>
-                                     <a href="<%=path%>" title="<%=i18n.localize("browse")%>">
+                                     <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
                                      	<div class="after">                                       
 		                                    <span class="fw-stack fw-lg">
 		                                    <i class="fw fw-circle-outline fw-stack-2x"></i>

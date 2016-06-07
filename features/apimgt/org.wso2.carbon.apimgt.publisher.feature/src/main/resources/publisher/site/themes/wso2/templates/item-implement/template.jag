@@ -32,28 +32,12 @@
     var apiProvider = "<%=api.provider%>"
     var apiVersion = "<%=api.version%>"
     var apiName = "<%=api.name%>"
-</script>   
+</script>
 <div id="item-add">
 <%
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
     var manage_w_link = jagg.url('/manage?'+apiUrlId);    
-
-    /*var manage_wlabel = "";
-	if(mod.isGlobalCEPThrottlingEnabled()){
-         if( api != null && api.availableSubscriptionPolicy !="" ){
-            manage_wlabel = "completed";      
-        } else {
-            var manage_w_link = '#';        
-        }
-    } else {
-        
-        if( api.availableTiers !="" ){
-            manage_wlabel = "completed";      
-        } else {
-            var manage_w_link = '#';        
-        }
-    }*/
 
     var manage_wlabel = "";
     if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
@@ -62,28 +46,7 @@
         var manage_w_link = '#';        
     } 
 %>
-<!-- <center>
-<ul class="new-sub-menu-wizard" style="margin:0 auto">
-    <li>
-        <a href="<%= design_w_link %>" class="wizard-done" title="<%=i18n.localize("design")%>">
-            <div class="wizard-number">1</div>
-            <span>"<%=i18n.localize("design")%></span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= implement_w_link %>" class="wizard-active" title="<%=i18n.localize("implement")%>">
-            <div class="wizard-number">2</div>
-            <span>"<%=i18n.localize("implement")%></span>
-        </a>
-    </li>
-    <li>
-        <a href="<%= manage_w_link %>" class="<%= manage_wlabel%>" title="<%=i18n.localize("manage")%>">
-            <div class="wizard-number" >3</div>
-            <span>"<%=i18n.localize("manage")%></span>
-        </a>
-    </li>
-</ul>
-</center>-->
+
 
 	<div class="page-header">
 		<h2><%= encode.forHtml(api.name) %>: <%= encode.forHtml(api.context) %>
@@ -114,13 +77,11 @@
    </div>
 
 	<div class="">
-                <div class="row">
-                    <div class="wizard col-xs-12">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
-                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span>1</span><span class="hidden-xs"><%=i18n.localize("design")%></span></a></li>
-                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span>2</span><span class="hidden-xs"><%=i18n.localize("implement")%></span></a></li>
-                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span>3</span><span class="hidden-xs"><%=i18n.localize("manage")%></span></a></li>
+                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span class="wiz-step-count">1</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("design")%></span></a></li>
+                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span class="wiz-step-count">2</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("implement")%></span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span class="wiz-step-count">3</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("manage")%></span></a></li>
                             </ol>
                         </div>
                         <div class="wiz-content">
@@ -130,11 +91,6 @@
 									<div class="panel panel-default">
 							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
-											<label class="radio">
-						                            <span class="fw-stack fw-lg">
-					                                    <i class="fw fw-settings fw-stack-2x"></i>
-					                                </span>
-						                    </label>
 						                    <div>
 				                                <div class="heading">Managed API</div>
 				                                <div class="description truncate">Provide the production and sandbox endpoints of the API to be managed.</div>
@@ -149,43 +105,237 @@
 							            <div class="panel-body">
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
-							
-							                        <div class="form-group">
-							                            <label class="control-label col-sm-3" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
-							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
-												                   <i class="fw fw-circle fw-stack-2x"></i>
-												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-												                </span>
-							                            	</a>
-							                            </label>
-							                                <div class="col-sm-3">
+
+													<div id="endpoint-ui">													
+
+													</div>
+
+													<script id="endpoint-ui-template" type="text/x-handlebars-template">
+														{{#*inline "add_remove_ep"}}
+								                            <div class="form-group">
+								                            	<label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3"></label>
+								                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+																	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
+																		<span class="icon fw-stack fw-lg" style="font-size:8px">
+																		<i class="fw fw-circle-outline fw-stack-2x"></i>
+																		<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																		</span>
+																	</span>
+																	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
+																		<span class="icon fw-stack fw-lg" style="font-size:8px">
+																		<i class="fw fw-circle-outline fw-stack-2x"></i>
+																		<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
+																		</span>
+																	</span>
+								                            	</div>
+								                            </div>
+														{{/inline}}
+
+														{{#*inline "endpoint"}}
+								                        <div class="form-group">
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            	<a class="help_popup" help_data="" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													                </span>
+								                            	</a>{{/if}}{{/if}}
+								                            </label>
+								                            <div class=" col-xs-12 col-sm-8 col-md-8 col-lg-8">
+																<div class="input-group">
+																  {{#if label }}
+																  <span class="input-group-addon">{{ label }}</span>
+																  {{/if}}
+																  <input type="text" class="form-control endpoint_input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">																  
+																  <span class="input-group-btn">
+																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title="Advanced Options"><i class="fw fw-settings"></i></button>
+																    <button class="btn btn-secondary check_url_valid" type="button" >Test</button>
+																  </span>
+																</div>
+																{{#if invalid }}
+																{{#if invalid.endpoint}}
+																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
+																{{/if}}
+																{{/if}}
+															</div>
+							                            </div>
+							                            {{/inline}}												
+
+								                        <div class="form-group">
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
+								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
+								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
+													                   <i class="fw fw-circle fw-stack-2x"></i>
+													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+													                </span>
+								                            	</a>
+								                            </label>
+							                                <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
 							                                    <select class="form-control select required" id="endpoint_type" name="endpoint_type">
-							                                        <option value="http"  selected="selected">REST Endpoint</option>
-							                                        <option value="address">SOAP Endpoint</option>
-							                                        <option value="failover">Failover Endpoint</option>
-							                                        <option value="load_balance">Load balanced Endpoint</option>
-							                                        <option value="default">Default Endpoint</option>
+							                                        <option value="http"  {{#if http }}selected="selected"{{/if}}>HTTP/REST Endpoint</option>
+							                                        <option value="address" {{#if address }}selected="selected"{{/if}}>HTTP/SOAP Endpoint</option>
+							                                        <option value="default" {{#if default }}selected="selected"{{/if}}>Dynamic Endpoint</option>
 							                                    </select>
-							                                </div>							
-							                        </div>
+							                                </div>
+							                            </div>
+							                            {{#if default }}
+							                            <div class="form-group">
+							                            	<div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"></div>
+							                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															<div class="message message-info remove-margin">
+											                    <h4><i class="icon fw fw-info"></i>Notice</h4>
+											                    <p>You have selected "Dynamic Endpoint" which will send the message to the address specified in the "To" header. Please upload a mediation sequence file to Message Mediation Policies which sets the "To" header.</p>
+															</div>
+															</div>
+														</div>
+							                            {{else}}
+							                            <div class="form-group">    
+								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
+								                            </label>
+							                                <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+																<label class="checkbox">
+																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
+																  <span class="helper">Load Balanced</span>
+																</label>							                                							                                    
+							                                    <label class="checkbox">
+																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
+																  <span class="helper">Failover</span>
+																</label>																
+							                                </div>
+								                        </div>
+								                        <br />
+								                        {{#each production_endpoints}}
+								                        	{{#if ../load_balance}}
+								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label=(inc @index) invalid=../invalid}}
+								                        	{{else if ../failover}}
+								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label="Primary" invalid=../invalid}}
+								                        	{{else}}
+								                        		{{> endpoint this name="Production Endpoint" type="production_endpoints" invalid=../invalid}}
+								                        	{{/if}}
+							                            {{/each}}
+
+							                            {{#if load_balance }}
+							                            	{{> add_remove_ep ep_type="production_endpoints" }}
+							                            {{/if}}
+
+							                            {{#if failover }}
+								                            {{#each production_failovers}}
+									                        	{{> endpoint this name="" type="production_failovers" label=(concat "Failover " (inc @index))}}
+								                            {{/each}}
+							                            {{/if}}
+							                            {{#if failover }}
+							                            	{{> add_remove_ep ep_type="production_failovers" }}
+							                            {{/if}}		
+
+								                        {{#each sandbox_endpoints}}
+								                        	{{#if ../load_balance}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
+								                        	{{else if ../failover}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
+								                        	{{else}}
+								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
+								                        	{{/if}}								                        
+							                            {{/each}}
+
+							                       		{{#if load_balance }}
+							                            	{{> add_remove_ep ep_type="sandbox_endpoints" }}
+							                            {{/if}}
+
+							                         	{{#if failover }}
+								                            {{#each sandbox_failovers}}
+									                        	{{> endpoint this name="" type="sandbox_failovers" label=(concat "Failover " (inc @index))}}
+								                            {{/each}}
+							                            {{/if}}
+							                            {{#if failover }}
+							                            	{{> add_remove_ep ep_type="sandbox_failovers" }}
+							                            {{/if}}	
+							                            {{/if}}	
+
+							                            {{#if load_balance}}
+															<div class="form-group">
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="algoCombo">Algorithm
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
+															            <span class="icon fw-stack fw-lg" style="font-size:6px">
+															              <i class="fw fw-circle fw-stack-2x"></i>
+															              <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+															          	</span>
+															        </a>
+															    </label>
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
+															        <select class="form-control valid load_balance_property" name="algoCombo" id="algoCombo" aria-invalid="false">
+															            <option {{#ifCond algoCombo "==" "org.apache.synapse.endpoints.algorithms.RoundRobin" }}selected="selected"{{/ifCond}} value="org.apache.synapse.endpoints.algorithms.RoundRobin">Round-robin</option>
+															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other">Other</option>
+															        </select>
+															    </div>
+															</div>
+															{{#ifCond algoCombo "==" "other"}}
+															<div class="form-group">
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Class Name for Algorithm
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
+															        <input type="text" class="required form-control load_balance_property" name="algoClassName" value="{{algoClassName}}" id="algoClassName">
+															    </div>
+															</div>
+															{{/ifCond}}
+															<div class="form-group">
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="sessionManagement">Session Management
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
+															        <select class="form-control load_balance_property" name="sessionManagement" id="sessionManagement">
+															            <option {{#ifCond sessionManagement "==" "http" }}selected="selected"{{/ifCond}} value="http">Transport</option>
+															            <option {{#ifCond sessionManagement "==" "soap" }}selected="selected"{{/ifCond}} value="soap">SOAP</option>
+															            <option {{#ifCond sessionManagement "==" "simpleClientSession" }}selected="selected"{{/ifCond}} value="simpleClientSession">Client ID</option>
+															            <option {{#ifCond sessionManagement "==" "none" }}selected="selected"{{/ifCond}} value="none">None</option>
+															        </select>
+															    </div>
+															</div>
+															<div class="form-group">
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Session Timeout (Mills)
+															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        </a>
+															    </label>
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
+															        <input class="form-control load_balance_property" type="text" name="sessionTimeOut" value="{{sessionTimeOut}}" id="sessionTimeOut">
+															    </div>
+															</div>
+							                            {{/if}}	
+							                            <div  id="advance_endpoint_config" class="modal fade">
+														    <div class="modal-dialog">
+														    <div class="modal-content">
+														        <div class="modal-header">
+																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
+																	<h3>Advanced Endpoint Configuration</h3>
+														        </div>
+														        <div class="modal-body">
+														        	<div id="advance_form"></div>
+														        </div>
+														        <div class="modal-footer">
+															        <div id="res" style="color:red;float:left"></div>
+																	<a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("save")%></a>
+																	<a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+														        </div>
+														    </div>
+														    </div>
+														</div>				                            
+													</script>
 							
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 							
 							                        <div id="endpoint_help" class="hide">
-								                         <strong>REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
-								                         <strong>SOAP Endpoint</strong><p>The direct URL of the service</p>
-								                         <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
-								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
-								                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
-							                        </div>
-							
-							                        <div id="endpoint_form" class="endpoint_dives" >
-							                        </div>
+								                         <strong>HTTP/REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
+								                         <strong>HTTP/SOAP Endpoint</strong><p>The direct URL of the service</p>
+								                         <!-- strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
+								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p-->
+								                         <Strong>Dynamic Endpoint</strong><p>The dynamic endpoint will send the message to the address specified in the 'To' header.</p>
+							                        </div>							
 							
 							                         <div class="form-group">
-							                            <div class="controls">
-							                                <a href="#" class="more-options col-sm-3 col-sm-offset-3 but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
+							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
+							                                <a href="#" class="more-options but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
 							                             </div>
 							                         </div>
 							                        <div id="more-options-endpoints"  style="display:none">
@@ -317,97 +467,13 @@
 
 														<div id="corsConfigsManaged">
 														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+                                                            <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
+															<div class="cors-ui-container"></div>
 
-															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
-															<div class="form-group">
-																<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
-																<div class="controls col-sm-8">
-																	<label class="checkbox">
-																		<input type="checkbox" id="toggleCorsManaged" name="cors_check"
-																			<%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
-																						<span class="helper"><%=i18n.localize("corsMsg")%></span>
-																	</label>
-																</div>
-															</div>
 															   <div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
-																	<table class="table table-bordered table-striped" id="corsTableManaged" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
-																		<tr>
-																			<td class="col-sm-4">
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
-																			</td>
-																			<td>
-																				<div id="allOriginContainerManaged">
-																				<label class="checkbox">
-																					<input type="checkbox" id="toggleallOriginManaged" name="toggleallOriginManaged"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
-																					<span class="helper"><%=i18n.localize("allOrigins")%></span>
-																				</label>
-																				</div>
-																						<%
-																				var accessOriginManaged ="";
-																				for (var origin in corsJson.accessControlAllowOrigins){
-																					accessOriginManaged += corsJson.accessControlAllowOrigins[origin]+",";
-																				}
-																				if(accessOriginManaged != ""){
-																					accessOriginManaged=accessOriginManaged.substr(0,(accessOriginManaged.length-1));
-																				}
-																				var accessHeadersManaged ="";
-																				for (var headers in corsJson.accessControlAllowHeaders){
-																					accessHeadersManaged += corsJson.accessControlAllowHeaders[headers]+",";
-																				}
-																				if(accessHeadersManaged != ""){
-																					accessHeadersManaged=accessHeadersManaged.substr(0,(accessHeadersManaged.length-1));
-																				}
-																				var accessMethodsManaged="";
-																				for (var methods in corsJson.accessControlAllowMethods){
-																					accessMethodsManaged += corsJson.accessControlAllowMethods[methods]+",";
-																				}
-																				if(accessMethodsManaged != ""){
-																					accessMethodsManaged=accessMethodsManaged.substr(0,(accessMethodsManaged.length-1));
-																				}
-																				%>
-																				<div class="originContainerManaged tagContainer">
-																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginManaged" name="accessOriginManaged" value="<%=encode.forHtml(accessOriginManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersManaged" name="allowHeadersManaged" value="<%=encode.forHtml(accessHeadersManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsManaged" name="allowMethodsManaged" value="<%=encode.forHtml(accessMethodsManaged)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="controls credentialContainerManaged">
 
-																					<label class="checkbox">
-																						<input type="checkbox" id="allowCredentialsManaged" name="allowCredentialsManaged" placeholder="Access Control Allow Credentials"
-																						<% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
-																						<span class="helper">Check to send True</span>
-																					</label>
-																				</div>
-																			</td>
-																		</tr>
-																</table>
 															</div>
 														</div>
 
@@ -435,11 +501,6 @@
 							            <div class="panel panel-default">
 							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
-													<label class="radio">
-								                            <span class="fw-stack fw-lg">
-							                                    <i class="fw fw-settings fw-stack-2x"></i>
-							                                </span>
-								                    </label>
 								                    <div>
 						                                <div class="heading">Prototyped API</div>
 						                                <div class="description truncate" title="Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs">Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</div>
@@ -522,95 +583,13 @@
 															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
 
 															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
-															<div class="form-group">
-																<label class="control-label col-sm-3" for="corsConfigurationPrototyped"><%=i18n.localize("corsConfiguration")%></label>
-																<div class="controls col-sm-8">
-																	<label class="checkbox">
-																		<input type="checkbox" id="toggleCorsPrototyped" name="cors_check"
-																						 <%if(corsJson != null && corsJson.corsConfigurationEnabled){%> checked="checked"<%}%>>
-																			<span class="helper"><%=i18n.localize("corsMsg")%></span>
-																	</label>
-																</div>
-															</div>
+
+															<div class="cors-ui-prototype-container"></div>
+
 															<div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
-																	<table class="table table-bordered table-striped" id="corsTablePrototyped" <%  if(corsJson == null || !corsJson.corsConfigurationEnabled){ %>style="display:none"<%} %>>
-																		<tr>
-																			<td class="col-sm-4">
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p>
-																			</td>
-																			<td>
-																				<div id="allOriginContainerPrototyped">
-																					<label class="checkbox">
-																						<input type="checkbox" id="toggleallOriginPrototyped" name="toggleallOriginPrototyped"  <%if(corsJson.accessControlAllowOrigins =="*"){%>checked="checked"<%}%>>
-																						<span class="helper"><%=i18n.localize("allOrigins")%></span>
-																					</label>
-																				</div>
-																						<%
-																				var accessOriginPrototyped ="";
-																				for (var origin in corsJson.accessControlAllowOrigins){
-																					accessOriginPrototyped += corsJson.accessControlAllowOrigins[origin]+",";
-																				}
-																				if(accessOriginPrototyped != ""){
-																					accessOriginPrototyped=accessOriginPrototyped.substr(0,(accessOriginPrototyped.length-1));
-																				}
-																				var accessHeadersPrototyped ="";
-																				for (var headers in corsJson.accessControlAllowHeaders){
-																					accessHeadersPrototyped += corsJson.accessControlAllowHeaders[headers]+",";
-																				}
-																				if(accessHeadersPrototyped != ""){
-																					accessHeadersPrototyped=accessHeadersPrototyped.substr(0,(accessHeadersPrototyped.length-1));
-																				}
-																				var accessMethodsPrototyped="";
-																				for (var methods in corsJson.accessControlAllowMethods){
-																					accessMethodsPrototyped += corsJson.accessControlAllowMethods[methods]+",";
-																				}
-																				if(accessMethodsPrototyped != ""){
-																					accessMethodsPrototyped=accessMethodsPrototyped.substr(0,(accessMethodsPrototyped.length-1));
-																				}
-																				%>
-																				<div class="originContainerPrototyped tagContainer">
-																				<input type="text" placeholder="Access Control Allow Origins" id="accessOriginPrototyped" name="accessOriginPrototyped" value="<%=encode.forHtml(accessOriginPrototyped)%>" data-role="tagsinput"/>
-																									</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																					<input type="text" placeholder="Access Control Allow Headers" id="allowHeadersPrototyped" name="allowHeadersPrototyped" value="<%=encode.forHtml(accessHeadersPrototyped)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="headerContainer tagContainer">
-																				   <input type="text" placeholder="Access Control Allow Methods" id="allowMethodsPrototyped" name="allowMethodsPrototyped" value="<%=encode.forHtml(accessMethodsPrototyped)%>" data-role="tagsinput"/>
-																				</div>
-																			</td>
-																		</tr>
-																		<tr>
-																			<td>
-																				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
-																			</td>
-																			<td>
-																				<div class="controls credentialContainerPrototyped">
-
-																					<label class="checkbox">
-																						<input type="checkbox" id="allowCredentialsPrototyped" name="allowCredentialsPrototyped" placeholder="Access Control Allow Credentials"
-																							 <% if(corsJson != null && corsJson.accessControlAllowCredentials){ %> checked="checked"<%}%>>
-																								<span class="helper">Check to send True</span>
-																							</label>
-																				</div>
-																			</td>
-																		</tr>
-																	</table>
+																	
 																</div>
 															</div>
 
@@ -626,7 +605,9 @@
 								                    <input type="hidden" name="action" value="implement" />
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
+								                    <%if(permitted) { %>
 								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                    <%}%>
 								                </div>
 								                            </form>
 								                </div>
@@ -662,8 +643,6 @@
 							            </div>
 							            </div>
 							            </div>
-        </div>
-                        </div>
                     </div>
                 </div>
             </div>	
@@ -732,24 +711,7 @@
   </div>
 </div>
 
-<div  id="advance_endpoint_config" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Advanced Endpoint Configuration</h3>
-        </div>
-        <div class="modal-body">
-        <form id="advance_form"></form>
-        </div>
-        <div class="modal-footer">
-        <div id="res" style="color:red;float:left"></div>
-        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
-        </div>
-    </div>
-    </div>
-</div>
+
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
@@ -881,5 +843,235 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
     })
 </script>
 
+
+
+<script id="advance-endpoint-ui-template" type="text/x-handlebars-template">
+		{{#if address }}
+        <fieldset>
+            <legend>Message Content</legend>
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="format">Format</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="format" name="format">
+							<option value="soap11">SOAP 1.1</option>
+							<option value="soap12">SOAP 1.2</option>
+							<option value="POX">Plain Old XML (POX)</option>
+							<option value="REST">REpresentational State Transer (REST)</option>
+							<option value="GET">GET</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Message format for the endpoint.</p>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="optimize">Optimize</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="optimize" name="optimize">
+							<option value="SWA">SWA</option>
+							<option value="MTOM">MTOM</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Method to optimize the attachments.</p>
+					</div>
+				</div>
+			</div>
+        </fieldset>
+        {{/if}}
+        <fieldset>
+            <legend>Endpoint Suspend State</legend>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="suspendErrorCode">Error Codes
+						<a class="help_popup" help_data="suspendErrorCode_help" data-trigger="hover" data-placement="bottom" title="suspendErrorCode_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendErrorCode_help" class="hide">A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.</p>
+					</label>
+					<div class="col-sm-6">
+						<select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
+							<option value="101000">101000 : Receiver IO error sending</option>
+							<option value="101001">101001 : Receiver IO error receiving</option>
+							<option value="101500">101500 : Sender IO error sending</option>
+							<option value="101501">101501 : Sender IO error receiving</option>
+							<option value="101503">101503 : Connection failed</option>
+							<option value="101504">101504 : Connection timed out</option>
+							<option value="101505">101505 : Connection closed</option>
+							<option value="101506">101506 : HTTP protocol violation</option>
+							<option value="101507">101507 : Connect cancel</option>
+							<option value="101508">101508 : Connect timeout</option>
+							<option value="101509">101509 : Send abort</option>
+							<option value="101510">101510 : Response processing failure</option>
+						</select>
+						<p class="help-block">A list of error codes.If these
+						error codes are received from the endpoint, the
+						endpoint will be suspended.</p><span class=
+						"help-block jsonform-errortext" style=
+						"display:none;"></span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)
+						<a class="help_popup" help_data="suspendDuration_help" data-trigger="hover" data-placement="bottom" title="suspendDuration_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendDuration_help" class="hide">The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.</p>
+					</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
+						<p class="help-block hide">The duration that the endpoint is
+						suspended for the first time after the receiving the
+						suspend error codes.</p>
+					</div>
+
+					<label class="control-label col-sm-2" for="suspendMaxDuration">Max Duration (ms)</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
+						<p class="help-block hide">The maximum duration that the
+						endpoint is suspended after the receiving the suspend
+						error codes.</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="factor">Factor</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="factor" name="factor" type="text" value="">
+						<p class="help-block hide">The duration to suspend can vary
+						from the first time suspension to the subsequent time.
+						The factor value decides the suspense duration variance
+						between subsequent suspensions.</p>
+					</div>
+				</div>
+        </fieldset>
+        <fieldset class="control-group add-margin-top-5x">
+            <legend>Endpoint Timeout State</legend>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="">Error Codes</label>
+                <div class=" col-sm-6">
+                    <select class="form-control selectpicker" id="" multiple="multiple" name="retryErroCode">
+                        <option value="101000">101000 : Receiver IO error sending</option>
+                        <option value="101001">101001 : Receiver IO error receiving</option>
+                        <option value="101500">101500 : Sender IO error sending</option>
+                        <option value="101501">101501 : Sender IO error receiving</option>
+                        <option value="101503">101503 : Connection failed</option>
+                        <option value="101504">101504 : Connection timed out</option>
+                        <option value="101505">101505 : Connection closed</option>
+                        <option value="101506">101506 : HTTP protocol violation</option>
+                        <option value="101507">101507 : Connect cancel</option>
+                        <option value="101508">101508 : Connect timeout</option>
+                        <option value="101509">101509 : Send abort</option>
+                        <option value="101510">101510 : Response processing failure</option>
+                    </select>
+                    <p class="help-block hide">A list of error codes. If these
+                    error codes are received from the endpoint, the request
+                    will be subjected to a timeout.</p>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="retryTimeOut">Retries Before Suspension</label>
+                <div class="col-sm-2">
+                    <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
+                    <p class="help-block hide">The number of re-tries in case of
+                    a timeout, caused by the above listed error
+                    codes.</p>                
+                </div>
+                <label class="control-label col-sm-2" for="retryDelay">Retry Delay(ms)</label>
+                <div class="col-sm-2">
+                    <input class="form-control" id="retryDelay" name="retryDelay"
+                    type="text" value="">                                    
+                <p class="help-block hide">The delay between retries, in milliseconds.</p>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="control-group add-margin-top-5x">
+            <legend>Connection Timeout</legend>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="actionSelect">Action</label>
+                <div class="col-sm-6">
+                    <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
+                        <option value="neverTimeout">Never timeout</option>
+                        <option value="discard">Discard message</option>
+                        <option selected value="fault">Execute fault sequence</option>
+                    </select>
+                    <p class="help-block hide">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
+					<span class="help-block jsonform-errortext" style="display:none;"></span>
+                </div>
+            </div>
+            <div class="form-group ">
+                <label class="control-label col-sm-3" for="actionDuration">Duration (ms)</label>
+                <div class="col-sm-2">
+                    <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
+                    <p class="help-block hide">The duration in milliseconds before considering a request as timeout.</p>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</script>
+
+<script id="cors-ui-template" type="text/x-handlebars-template">
+
+    <div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+			<div class="controls col-sm-8">
+			<label class="checkbox">
+                <input type="checkbox" class="toggleCorsManaged" name="cors_check" {{#if corsConfigurationEnabled }} checked="checked"  {{/if}} />
+				<span class="helper"></span>
+			</label>
+	    </div>
+	</div>
+	{{#if corsConfigurationEnabled }}
+	<div id="corsFormElements">
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
+			<div class="headerContainer tagContainer col-sm-6">
+
+				{{#unless allowAll }}
+				<span id="accesseAllowOriginDiv">
+					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
+				</span>
+				{{/unless}}
+				<label class="checkbox">
+					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
+					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+				</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<input type="text" class="tagsinput form-control"  id="allowHeadersManaged" name="accessControlAllowHeaders" value="{{ accessControlAllowHeaders }}" data-role="tagsinput"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<input type="text"  class="tagsinput form-control"  id="allowMethodsManaged" name="accessControlAllowMethods" value="{{ accessControlAllowMethods }}" data-role="tagsinput"/>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-3" for="corsConfigurationManaged">
+				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
+			</label>
+			<div class="headerContainer tagContainer col-sm-6">
+				<label class="checkbox">
+					<input type="checkbox" class="allowCredentialsManaged" name="accessControlAllowCredentials"
+					{{#if accessControlAllowCredentials }} checked="checked" {{/if}} />
+					<span class="helper"></span>
+				</label>
+			</div>
+		</div>
+	</div>
+	{{/if}}
+</script>
 
 <% }); %>

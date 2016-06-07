@@ -209,7 +209,7 @@ var addQueryParam = function (id) {
         queryParamName = $tds.eq(0).text();
         queryParamVal = $tds.eq(1).text();
         if(queryParamName == paramName) {
-            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Query Param");
+            addDuplicateError("duplicate", $('#query-param-name-' + id), "Duplicate Query Param");
             isDuplicate = true;
         }
     });
@@ -327,7 +327,7 @@ var addJwtClaim = function (id) {
         jwtClaimName = $tds.eq(0).text();
         jwtClaimValue = $tds.eq(1).text();
         if(jwtClaimName == claimName) {
-            addDuplicateError("duplicate", $('#header-name-' + id), "Duplicate Claim");
+            addDuplicateError("duplicate", $('#jwt-claim-name-' + id), "Duplicate Claim");
             isDuplicate = true;
         }
     });
@@ -455,7 +455,7 @@ var addPolicyToBackend = function () {
         apiPolicyNew.executionFlows[i].enabled = true;
         for (var j = 0; j < apiPolicyNew.executionFlows[i].conditions.length; j++) {
             if (apiPolicyNew.executionFlows[i].conditions[j].type == "IP") {
-                checked = $('#ip-condition-checkbox-' + executionFlowId).is(':checked')
+                checked = $('#ip-condition-checkbox-' + executionFlowId).is(':checked');
                 //Ip condition related properties
                 if (checked) {
                     var ipConditionType = $("#ip-condition-type-" + executionFlowId + " option:selected").val();
@@ -483,9 +483,11 @@ var addPolicyToBackend = function () {
                         apiPolicyNew.executionFlows[i].conditions[j].endingIP = endIp;
                     }
 
-                    var ipInvertCondition = $('#ip-condition-invert-' + executionFlowId).attr('checked');
+                    var ipInvertCondition = $('#ip-condition-invert-' + executionFlowId).is(':checked');
                     if (ipInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
+                    } else {
+                        apiPolicyNew.executionFlows[i].conditions[j].invertCondition = false;
                     }
                 } else {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
@@ -510,9 +512,11 @@ var addPolicyToBackend = function () {
                         };
                         apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
                     });
-                    var headerInvertCondition = $('#header-condition-invert-' + executionFlowId).attr('checked');
+                    var headerInvertCondition = $('#header-condition-invert-' + executionFlowId).is(':checked');
                     if (headerInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
+                    } else {
+                        apiPolicyNew.executionFlows[i].conditions[j].invertCondition = false;
                     }
                 } else {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
@@ -537,9 +541,11 @@ var addPolicyToBackend = function () {
                         };
                         apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
                     });
-                    var queryParamInvertCondition = $('#query-param-condition-invert-' + executionFlowId).attr('checked');
+                    var queryParamInvertCondition = $('#query-param-condition-invert-' + executionFlowId).is(':checked');
                     if (queryParamInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
+                    } else {
+                        apiPolicyNew.executionFlows[i].conditions[j].invertCondition = false;
                     }
                 } else {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = false;
@@ -564,9 +570,11 @@ var addPolicyToBackend = function () {
                         };
                         apiPolicyNew.executionFlows[i].conditions[j].keyValPairs.push(keyValPair);
                     });
-                    var jwtClaimInvertCondition = $('#jwt-claim-condition-invert-' + executionFlowId).attr('checked');
+                    var jwtClaimInvertCondition = $('#jwt-claim-condition-invert-' + executionFlowId).is(':checked');
                     if (jwtClaimInvertCondition) {
                         apiPolicyNew.executionFlows[i].conditions[j].invertCondition = true;
+                    } else {
+                        apiPolicyNew.executionFlows[i].conditions[j].invertCondition = false;
                     }
                 } else {
                     apiPolicyNew.executionFlows[i].conditions[j].enabled = false;

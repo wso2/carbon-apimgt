@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -69,6 +70,7 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteri
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -139,12 +141,19 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+	
+	private final String userNameWithoutChange;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
+        this.userNameWithoutChange = username;
     }
 
-    /**
+    protected String getUserNameWithoutChange() {
+		return userNameWithoutChange;
+	}
+
+	/**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
@@ -727,6 +736,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+    
+    public boolean isAPIUpdateValid(API api) throws APIManagementException{
+    	String apiSourcePath = APIUtil.getAPIPath(api.getId());
+    	boolean isValid = false;
+    	
+    	try{
+    		Resource apiSourceArtifact = registry.get(apiSourcePath);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
+            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            
+            if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
+            	//api at least is in published status
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
+            		//user has publish permission
+            		isValid = true;
+            	}
+            }else if(APIConstants.CREATED.equals(status) || APIConstants.PROTOTYPED.equals(status)){
+            	//api in create status
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
+            		//user has creat or publish permission
+            		isValid = true;
+            	}
+            }
+            
+    	}catch(RegistryException ex){
+    		 handleException("Error while validate user for API publishing", ex);
+    	}    	
+    	return isValid;
+    	
+    }
 
 
     /**
@@ -739,6 +779,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
+    	
+    	boolean isValid = isAPIUpdateValid(api);
+    	if(!isValid){
+    		throw new APIManagementException(" User doesn't have permission for update");
+    	}
+    	
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
@@ -4100,13 +4146,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
 
+        // Encoding the message into a map.
         HashMap<String, String> blockingMessage = new HashMap<String, String>();
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
-        eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
-                , blockingMessage);
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+
+        // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
+        if (throttleProperties.getJmsEventPublisherName() != null) {
+            eventAdapterService.publish(throttleProperties.getJmsEventPublisherName(), new HashMap<String, String>()
+                    , blockingMessage);
+        }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
@@ -4116,9 +4170,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         keyTemplateMap.put(APIConstants.POLICY_TEMPLATE_KEY, templateValue);
         keyTemplateMap.put(APIConstants.TEMPLATE_KEY_STATE, state);
 
-        ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
-                                                                                    APIUtil.getEventPublisherProperties()
-                , keyTemplateMap);
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+
+        // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
+        if (throttleProperties.getJmsEventPublisherName() != null) {
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(throttleProperties
+                                                                                                .getJmsEventPublisherName(),
+                                                                                        new HashMap<String, String>()
+                    , keyTemplateMap);
+        }
     }
 
     public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {

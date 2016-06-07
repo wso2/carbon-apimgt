@@ -62,40 +62,45 @@ public class ThrottleDataPublisher {
      * publisher which we used to publish throttle data.
      */
     public ThrottleDataPublisher() {
-        dataPublisherPool = ThrottleDataPublisherPool.getInstance();
-        ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
-                .getThrottleProperties().getDataPublisher();
-        ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
-                .getInstance().getThrottleProperties().getDataPublisherThreadPool();
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
+        if (throttleProperties != null) {
+            dataPublisherPool = ThrottleDataPublisherPool.getInstance();
+            ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
+                    .getThrottleProperties().getDataPublisher();
+            if (dataPublisherConfiguration.isEnabled()){
+                ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder
+                        .getInstance().getThrottleProperties().getDataPublisherThreadPool();
 
-        try {
-            executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
-                    dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
-                    .getKeepAliveTime(),
-                    TimeUnit
-                            .SECONDS,
-                    new LinkedBlockingDeque<Runnable>() {
-                    });
-            dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
-                    .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
-                    .getUsername(),
-                    dataPublisherConfiguration.getPassword());
+                try {
+                    executor = new DataPublisherThreadPoolExecutor(dataPublisherThreadPoolConfiguration.getCorePoolSize(),
+                            dataPublisherThreadPoolConfiguration.getMaximumPoolSize(), dataPublisherThreadPoolConfiguration
+                            .getKeepAliveTime(),
+                            TimeUnit
+                                    .SECONDS,
+                            new LinkedBlockingDeque<Runnable>() {
+                            });
+                    dataPublisher = new DataPublisher(dataPublisherConfiguration.getType(), dataPublisherConfiguration
+                            .getReceiverUrlGroup(), dataPublisherConfiguration.getAuthUrlGroup(), dataPublisherConfiguration
+                            .getUsername(),
+                            dataPublisherConfiguration.getPassword());
 
-        } catch (DataEndpointAgentConfigurationException e) {
-            log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
-        } catch (DataEndpointException e) {
-            log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
-        } catch (DataEndpointConfigurationException e) {
-            log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
-        } catch (DataEndpointAuthenticationException e) {
-            log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
-        } catch (TransportException e) {
-            log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
+                } catch (DataEndpointAgentConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointAuthenticationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (TransportException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -115,11 +120,11 @@ public class ThrottleDataPublisher {
         try {
             DataProcessAndPublishingAgent agent = dataPublisherPool.get();
             agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
-                                   apiLevelThrottleKey, apiLevelTier,
-                                   subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                   resourceLevelThrottleKey, resourceLevelTier,
-                                   authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
-                                   authenticationContext);
+                    apiLevelThrottleKey, apiLevelTier,
+                    subscriptionLevelThrottleKey, subscriptionLevelTier,
+                    resourceLevelThrottleKey, resourceLevelTier,
+                    authorizedUser, apiContext, apiVersion, appTenant, apiTenant, appId, messageContext,
+                    authenticationContext);
             executor.execute(agent);
         } catch (Exception e) {
             log.error("Error while publishing throttling events to global policy server", e);

@@ -156,43 +156,52 @@
 }
 
 .resource_container{
-      background-color:#F5F5F5;
-  /*    line-height: 12px;*/
+  background-color:#f5f5f5;
 }
 
 .resource_container td{
-    padding: 5px;
-    vertical-align: top;
+    height:32px;
+    vertical-align: middle;
+    padding:0px 4px;
 }
-
-.resource_expand { cursor: pointer; word-wrap:none;}
-
+.resource_expand {
+    cursor: pointer;
+    word-wrap:none;
+    width:50%;
+}
 .resource_container .editable{ padding-top: 0px !important;}
 
-.resource-method-td{ padding-left: 0px !important; vertical-align: top;}
+.resource-method-td{
+    padding: 0px!important;
+    width:100px;
+}
+.delete_resource_td {
+    width:34px;
+}
 .vtoptd{ vertical-align: top;}
 
-.resource_container input {  padding: 2px 24px 2px 4px !important; }
-.resource_container button { padding-top: 2px; padding-bottom: 2px;}
 .resource_container .editable-container{  }
 .resource_container .control-group{ margin-bottom: 0px !important;}
 
 .resource-method{
-    width: 65px;
-    display: inline-block;
+    width: 100px;
+    height:32px;
+    display: table-cell;
     font-size: 14px;
-    padding: 5px;
     text-align: center;
     cursor: pointer;
     margin-right: 5px;
     color:white;
     font-weight: bolder;
-    margin-top: -5px;
     text-transform: uppercase;
+    vertical-align: middle;
+    padding:0px 8px;
 }
-
-.resource_container td{
-    border-top: 2px #FFF solid;
+.table-fullwidth{
+    width:100%;
+}
+.resource_container{
+    border-bottom: 2px solid #fff;
 }
 
 .resource-method-get{
@@ -224,13 +233,14 @@
 .resource-path {
     font-weight: bolder;
     font-size: 14px;
+    padding-left:8px;
 }
 
 .resource_body_padding{
     padding: 10px;
 }
 
-.resource_body{
+.resource_body > div{
     background-color: #F5F5F5;
 }
 
@@ -241,7 +251,9 @@ margin: 20px 0px 10px 10px;
 .resource_summary{
     width: 400px;
 }
-
+.resource_summary{
+    height:30px;
+}
 #apiEditThumb{
     width: 100px;
     height:100px;

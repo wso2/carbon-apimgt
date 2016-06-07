@@ -1,0 +1,10 @@
+<%
+jagg.initializer("stats-list", {
+
+     preInitialize:function () {
+
+         jagg.addHeaderCSS("statList", "statList", "templates/stats-list/css/statList.css");
+
+     }
+});
+%>

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import java.util.*;
@@ -70,7 +71,10 @@ public class KeyTemplateRetriever extends TimerTask {
                     (StandardCharsets.UTF_8));
             HttpGet method = new HttpGet(url);
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-            HttpClient httpClient = HttpClientBuilder.create().build();
+            URL keyMgtURL = new URL(url);
+            int keyMgtPort = keyMgtURL.getPort();
+            String keyMgtProtocol = keyMgtURL.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpResponse httpResponse = httpClient.execute(method);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");

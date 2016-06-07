@@ -274,7 +274,6 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_FIELD_TIER_ID = "TIER_ID";
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
-    public static final String SUBSCRIPTION_FIELD_LAST_ACCESS = "LAST_ACCESSED";
     public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
 
     public static final String SUBSCRIPTION_KEY_TYPE = "KEY_TYPE";
@@ -418,7 +417,7 @@ public final class APIConstants {
     public static final String GATEWAY_RESOURCE_CACHE_ENABLED = CACHE_CONFIGS + "EnableGatewayResourceCache";
     public static final String JWT_CLAIM_CACHE_EXPIRY = CACHE_CONFIGS + "JWTClaimCacheExpiry";
     public static final String KEY_MANAGER_TOKEN_CACHE = CACHE_CONFIGS + "EnableKeyManagerTokenCache";
-    public static final String KEY_MANAGER_TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "KeyManagerTokenCacheExpiry";
+    public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
 
@@ -460,7 +459,7 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
     public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
-    public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
+    public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
     public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS
@@ -1153,7 +1152,6 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
 
-    public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
     public static final String BLOCKING_EVENT_TYPE = "jms";
     public static final String BLOCKING_EVENT_FORMAT = "map";
     public static final String THROTTLE_KEY = "throttleKey";
@@ -1192,6 +1190,7 @@ public final class APIConstants {
         public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
+        public static final String JMS_EVENT_PUBLISHER = "JMSEventPublisherName";
         public static final String DEFAULT_THROTTLE_LIMITS = "DefaultLimits";
         public static final String SUBSCRIPTION_THROTTLE_LIMITS = "SubscriptionTierLimits";
         public static final String APPLICATION_THROTTLE_LIMITS = "ApplicationTierLimits";
@@ -1214,6 +1213,7 @@ public final class APIConstants {
         public static final String ENABLE_HEADER_CONDITIONS = "EnableHeaderConditions";
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
+        public static final String ENABLED = "Enabled";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";

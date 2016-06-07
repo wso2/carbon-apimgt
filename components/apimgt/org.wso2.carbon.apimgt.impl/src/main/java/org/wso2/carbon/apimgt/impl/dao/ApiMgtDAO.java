@@ -1430,7 +1430,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
-                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setApplication(application);
             }
@@ -1474,7 +1473,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
-                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
                 subscribedAPI.setApplication(application);
             }
             return subscribedAPI;
@@ -1619,7 +1617,6 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setUUID(result.getString("SUB_UUID"));
                 subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                 Application application = new Application(result.getString("APP_NAME"), subscriber);
                 application.setUUID(result.getString("APP_UUID"));
@@ -1750,7 +1747,6 @@ public class ApiMgtDAO {
                     subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                     subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                     subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                    subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                     Application application = new Application(result.getString("APP_NAME"), subscriber);
                     subscribedAPI.setApplication(application);
@@ -1835,9 +1831,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 String tierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
                 subscribedAPI.setTier(new Tier(tierName));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
                 subscribedAPI.setUUID(result.getString("SUB_UUID"));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
                 //setting NULL for subscriber. If needed, Subscriber object should be constructed &
                 // passed in
                 int applicationId = result.getInt("APP_ID");
@@ -5869,6 +5863,7 @@ public class ApiMgtDAO {
                     script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
                 }
                 uriTemplate.setMediationScript(script);
+                uriTemplate.getThrottlingConditions().add("_default");
                 uriTemplates.add(uriTemplate);
             }
         } catch (SQLException e) {
@@ -9410,7 +9405,7 @@ public class ApiMgtDAO {
         String startingIP = null;
         String endingIP = null;
         String specificIP = null;
-
+        boolean invert;
         try {
             connection = APIMgtDBUtil.getConnection();
             conditionsStatement = connection.prepareStatement(SQLConstants.ThrottleSQLConstants.GET_IP_CONDITIONS_SQL);
@@ -9421,9 +9416,12 @@ public class ApiMgtDAO {
                 startingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_STARTING_IP);
                 endingIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_ENDING_IP);
                 specificIP = resultSet.getString(ThrottlePolicyConstants.COLUMN_SPECIFIC_IP);
+                invert = resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_WITHIN_IP_RANGE);
+
                 if (specificIP != null && !"".equals(specificIP)) {
                     IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
                     ipCondition.setSpecificIP(specificIP);
+                    ipCondition.setInvertCondition(invert);
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
@@ -9433,6 +9431,7 @@ public class ApiMgtDAO {
                     IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);
                     ipRangeCondition.setEndingIP(endingIP);
+                    ipRangeCondition.setInvertCondition(invert);
                     conditions.add(ipRangeCondition);
                 }
             }

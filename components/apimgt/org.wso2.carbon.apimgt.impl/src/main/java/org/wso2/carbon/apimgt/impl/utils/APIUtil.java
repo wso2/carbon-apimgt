@@ -995,19 +995,6 @@ public final class APIUtil {
 
     }
 
-    public static final Map<String,String> getEventPublisherProperties(){
-        HashMap<String,String> propertiesMap = new HashMap<String, String>();
-
-        propertiesMap.put("java.naming.factory.initial","org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        //propertiesMap.put("transport.jms.UserName",null);
-        propertiesMap.put("java.naming.provider.url","repository/conf/jndi.properties");
-        //propertiesMap.put("transport.jms.Password",null);
-        propertiesMap.put("transport.jms.DestinationType","topic");
-        propertiesMap.put("transport.jms.Destination","throttleData");
-        propertiesMap.put("transport.jms.ConcurrentPublishers","allow");
-        propertiesMap.put("transport.jms.ConnectionFactoryJNDIName","TopicConnectionFactory");
-        return propertiesMap;
-    }
 
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
@@ -2070,6 +2057,67 @@ public final class APIUtil {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+    
+    
+    /**
+     * Checks whether the specified user has the specified permission.
+     *
+     * @param userNameWithoutChange   A username
+     * @param permission A valid Carbon permission
+     * @throws APIManagementException If the user does not have the specified permission or if an error occurs
+     */
+    public static boolean hasPermission(String userNameWithoutChange, String permission) throws APIManagementException {
+    	boolean authorized = false;
+        if (userNameWithoutChange == null) {
+            throw new APIManagementException("Attempt to execute privileged operation as" +
+                    " the anonymous user");
+        }
+
+        if (isPermissionCheckDisabled()) {
+            log.debug("Permission verification is disabled by APIStore configuration");
+            authorized = true;
+            return authorized;
+        }
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userNameWithoutChange);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                org.wso2.carbon.user.api.AuthorizationManager manager =
+                        ServiceReferenceHolder.getInstance()
+                                .getRealmService()
+                                .getTenantUserRealm(tenantId)
+                                .getAuthorizationManager();
+                authorized =
+                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                                CarbonConstants.UI_PERMISSION_ACTION);
+            } else {
+                // On the first login attempt to publisher (without browsing the
+                // store), the user realm will be null.
+                if (ServiceReferenceHolder.getUserRealm() == null) {
+                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
+                            .getRealmService()
+                            .getTenantUserRealm(tenantId));
+                }
+                authorized =
+                        AuthorizationManager.getInstance()
+                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
+                                        permission);
+            }
+            
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        
+        return authorized;
     }
 
     /**
@@ -3720,19 +3768,23 @@ public final class APIUtil {
 
             // If the sequence not found the default sequences, check in custom sequences
 
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
-                                                                                                   sequenceType));
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
+            if (registry.resourceExists(getSequencePath(identifier,sequenceType)))  {
 
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        return true;
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                                                                                                       sequenceType));
+                if (seqCollection != null) {
+                    String[] childPaths = seqCollection.getChildren();
+
+                    for (String childPath : childPaths) {
+                        Resource sequence = registry.get(childPath);
+                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                            return true;
+                        }
                     }
                 }
             }
+
 
         } catch (RegistryException e) {
             String msg = "Error while retrieving registry for tenant " + tenantId;

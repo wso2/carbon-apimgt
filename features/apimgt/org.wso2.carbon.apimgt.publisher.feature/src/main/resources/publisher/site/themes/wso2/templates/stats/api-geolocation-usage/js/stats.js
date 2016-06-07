@@ -85,10 +85,10 @@ $( document ).ready(function() {
                     });
         $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
-                        from = convertDate(picker.startDate);
-                        to = convertDate(picker.endDate);
-                        var fromStr = from.split(" ");
-                        var toStr = to.split(" ");
+                        from = picker.startDate;
+                        to = picker.endDate;
+                        var fromStr = convertTimeString(from).split(" ");
+                        var toStr = convertTimeString(to).split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         renderGraph(from, to);
@@ -142,11 +142,11 @@ var populateVersionList = function(apiName,compare){
         };
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
-   var to = convertTimeString(toDate);
-    var from = convertTimeString(fromDate);
-        getDateTime(to,from);
+    var toDateString = convertTimeString(toDate);
+    var fromDateString = convertTimeString(fromDate);
+    getDateTime(toDate,fromDate);
     var data = [];
-           jagg.post("/site/blocks/stats/api-geolocation-usage/ajax/stats.jag", { action : "getGeolocationUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drilldown},
+           jagg.post("/site/blocks/stats/api-geolocation-usage/ajax/stats.jag", { action : "getGeolocationUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drilldown},
         function (json) {
             if (!json.error) {
                 if (json.usage && json.usage.length > 0) {
@@ -258,10 +258,10 @@ var configUsa = {
     $('#chartContainer').show();
         };
 function getDateTime(currentDay,fromDay){
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
-    var toDate = to.split(" ");
-    var fromDate = from.split(" ");
+    toDateString = convertTimeString(currentDay);
+    fromDateString = convertTimeString(fromDay);
+    var toDate = toDateString.split(" ");
+    var fromDate = fromDateString.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);

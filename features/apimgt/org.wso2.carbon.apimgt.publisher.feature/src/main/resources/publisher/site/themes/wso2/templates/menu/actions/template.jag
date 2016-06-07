@@ -41,14 +41,19 @@
                 
                 var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
                 var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
-                
+
+		var allStaticUrl = jagg.getAbsoluteUrl("/site/pages/all-statistics.jag") + urlPrefix;
+		var allStaticMappedUrl = jagg.getMappedUrl("/site/pages/all-statistics.jag") + urlPrefix;
+
+		var goBackStatsURL = jagg.getAbsoluteUrl("/site/pages/stats-menu-list.jag") + urlPrefix;
+
                 isCreatePermitted = jagg.getCreatePermitted().permitted;
                 isPublishPermitted = jagg.getPublishPermitted().permitted;
             %>
-            
+
         <div class="navbar-wrapper">
 		<nav class="navbar navbar-default" data-spy="affix"
-			data-offset-top="85" data-offset-bottom="40">
+			data-offset-top="80" data-offset-bottom="40">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed"
@@ -144,6 +149,19 @@
 	                            </a>
 	                        </li>
 	                        <%} %>	                        
+                        <%} %>
+
+                        <% if(reqUrl.indexOf(allStaticUrl)>=0 ||reqUrl.indexOf(allStaticMappedUrl)>=0){ %>
+
+	                      <li>
+	                            <a title="<%=i18n.localize("goBack")%>" href="<%=goBackStatsURL%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
                         <%} %>
                         <% if(reqUrl.indexOf(versionUrl)>=0 ||reqUrl.indexOf(versionMappedUrl)>=0){ %>
                         	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>

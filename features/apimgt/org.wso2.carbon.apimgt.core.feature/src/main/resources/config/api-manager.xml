@@ -111,7 +111,7 @@
 	    <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
-        <!--KeyManagerTokenCacheExpiry>900</KeyManagerTokenCacheExpiry-->
+        <!--TokenCacheExpiry>900</TokenCacheExpiry-->
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified
              time duration gets elapsed ,tag cache will get re-generated. -->
@@ -460,6 +460,7 @@
     <ThrottlingConfigurations>
         <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
         <DataPublisher>
+            <Enabled>true</Enabled>
             <Type>Binary</Type>
             <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
             <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
@@ -481,13 +482,12 @@
             <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
-            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
-            <Username>${admin.username}</Username>
-            <Password>${admin.password}</Password>
+            <Enabled>true</Enabled>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->
         </BlockCondition>
         <JMSConnectionDetails>
+            <Enabled>true</Enabled>
             <ServiceURL>tcp://${carbon.local.ip}:${jms.port}</ServiceURL>
             <Username>${admin.username}</Username>
             <Password>${admin.password}</Password>
@@ -506,22 +506,23 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
+        <JMSEventPublisherName>jmsEventPublisher</JMSEventPublisherName>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
-                <Gold>20</Gold>
-                <Silver>5</Silver>
-                <Bronze>1</Bronze>
+                <Gold>5000</Gold>
+                <Silver>2000</Silver>
+                <Bronze>1000</Bronze>
                 <Unauthenticated>60</Unauthenticated>
             </SubscriptionTierLimits>
             <ApplicationTierLimits>
-                <Large>20</Large>
-                <Medium>5</Medium>
-                <Small>1</Small>
+                <50PerMin>50</50PerMin>
+                <20PerMin>20</20PerMin>
+                <10PerMin>10</10PerMin>
             </ApplicationTierLimits>
             <ResourceLevelTierLimits>
-                <Ultimate>20</Ultimate>
-                <Plus>5</Plus>
-                <Basic>1</Basic>
+                <50KPerMin>50000</50KPerMin>
+                <20KPerMin>20000</20KPerMin>
+                <10KPerMin>10000</10KPerMin>
             </ResourceLevelTierLimits>
         </DefaultLimits-->
         <EnableUnlimitedTier>true</EnableUnlimitedTier>

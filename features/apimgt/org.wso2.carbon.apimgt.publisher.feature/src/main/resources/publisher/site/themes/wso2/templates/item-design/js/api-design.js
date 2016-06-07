@@ -61,6 +61,7 @@ function checkNested(obj) {
 
 //Create a designer class
 function APIDesigner(){
+
     //implement singleton pattern
     this.baseURLValue = "";
 
@@ -216,7 +217,8 @@ function APIDesigner(){
         $(".http_verb_select").attr("checked",false);
     });
 
- 
+    isAPIUpdateValid();
+    
 }
 
 APIDesigner.prototype.check_if_resource_exist = function(path, method){
@@ -578,22 +580,22 @@ APIDesigner.prototype.render_resources = function(){
         success : this.update_elements
     });
 
-    if(typeof(TIERS) !== 'undefined'  && this.apiLevelPolicy.isAPILevel == true){
+    /*if(typeof(TIERS) !== 'undefined'  && this.apiLevelPolicy.isAPILevel == true){
         $('#resource_details').find('.throttling_select').editable({
             emptytext: '+ Throttling',        
             source: TIERS,
             success : this.update_elements,
             disabled : 'disabled'
         });
-    }   
+    }*/   
 
-     if(typeof(TIERS) !== 'undefined' && this.apiLevelPolicy.isAPILevel == false){
+    /*if(typeof(TIERS) !== 'undefined' && this.apiLevelPolicy.isAPILevel == false){
         $('#resource_details').find('.throttling_select').editable({
             emptytext: '+ Throttling',        
             source: TIERS,
             success : this.update_elements
         });
-    }   
+    }*/   
 
     if(typeof(AUTH_TYPES) !== 'undefined'){
         $('#resource_details').find('.auth_type_select').editable({
@@ -609,7 +611,14 @@ APIDesigner.prototype.render_resources = function(){
         emptytext: '+ Summary',        
         success : this.update_elements,
         inputclass : 'resource_summary'
-    });  
+    });
+    $.fn.editableform.buttons =
+          '<button type="submit" class="btn btn-primary btn-sm editable-submit">'+
+            '<i class="fw fw-check"></i>'+
+          '</button>'+
+          '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
+            '<i class="fw fw-cancel"></i>'+
+          '</button>';
 };
 
 APIDesigner.prototype.render_resource = function(container){
@@ -637,7 +646,10 @@ APIDesigner.prototype.render_resource = function(container){
     container.find('.notes').editable({
         type: 'textarea',
         emptytext: '+ Add Implementation Notes',
-        success : this.update_elements
+        success : this.update_elements,
+        rows: 1,
+        tpl: '<textarea cols="50"></textarea>',
+        mode: 'popup'
     });
     container.find('.produces').editable({
         source: content_types,
@@ -649,25 +661,29 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.param_desc').editable({
         emptytext: '+ Empty',
-        success : this.update_elements
+        success : this.update_elements,
+        mode: 'popup'
     });
     if(isBodyRequired){
         container.find('.param_paramType').editable({
             emptytext: '+ Set Param Type',
             source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements
+            success : this.update_elements,
+            mode: 'popup'
         });
     } else {
         container.find('.param_paramType').editable({
             emptytext: '+ Set Param Type',
             source: [{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements
+            success : this.update_elements,
+            mode: 'popup'
         });
     }
 
     container.find('.param_type').editable({
         emptytext: '+ Empty',
-        success : this.update_elements
+        success : this.update_elements,
+        mode: 'popup'
     });
     container.find('.param_required').editable({
         emptytext: '+ Empty',
@@ -679,7 +695,8 @@ APIDesigner.prototype.render_resource = function(container){
                 $(this).text("False");
         },
         source: [ { value:true, text:"True" },{ value:false, text:"False"} ],
-        success : this.update_elements_boolean
+        success : this.update_elements_boolean,
+        mode: 'popup'
     });   
 };
 
@@ -718,6 +735,7 @@ APIDesigner.prototype.close_swagger_editor = function(){
 APIDesigner.prototype.update_swagger = function(){
     $("body").removeClass("modal-open");
     $("#se-iframe").remove();
+    $(".wizard").show();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
     var json = jsyaml.safeLoad(designer.yaml);
@@ -753,7 +771,6 @@ $(document).ready(function(){
     $("#clearOutSeqFile").on("click", function () {
             $('#outSeqFileValue').val('');
     });
-	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
     $('#swagger_import_file').parent().parent().fadeIn();
     $('.toggleRadios input[type=radio]').click(function(){
@@ -767,9 +784,9 @@ $(document).ready(function(){
         }
         $('#swagger_help').hide();
         $('#swagger_file_help').hide();
-        $('.toggleContainers .controls').hide();
+        $('.toggleContainers .form-group').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).parent().parent().fadeIn();
+        $('#' + $(this).val()).parent().parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
@@ -1023,5 +1040,70 @@ function updateContextPattern(){
 
 var hideMsg = function () {
     $('#apiSaved').hide("slow");
+}
+
+var isAPIUpdateValid = function(){
+    var isValid = false;
+    var name = $("input[name=name]").val();
+    var version = $("input[name=version]").val();
+    var provider = $("input[name=provider]").val();
+    var context = $("input[name=context]").val();
+
+    if(!name || !provider){
+        return;
+    }
+
+    jagg.post("/site/blocks/item-design/ajax/add.jag",
+            {
+                action:"validateAPIUpdate",
+                name:name,
+                version:version,
+                provider:provider,
+                context:context
+            },
+            function (result) {
+                if (!result.error) {
+                    isValid = result.data;
+                    if(!isValid){
+                        disableForm();
+                    }
+                }else{
+                    jagg.message({
+                        content : "API Update validation error ",
+                        type : "error"
+                    });
+                    disableForm();
+                    
+                }
+                
+                 
+
+        }, "json");
+
+
+
+    return;
+}
+
+var disableForm = function(){
+    //var form = $('#design_form');
+    $("form").each(function(){
+     var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
+     var elements = $(this).find(':input');
+     for (var i = 0, len = elements.length; i < len; ++i) {
+        elements[i].disabled = true;
+     }
+    });
+
+    $("#api_designer").each(function(){
+      $(this).find('a').each(function() {
+       $(this).attr('disabled','true');
+  
+       });     
+    });
+
+    $('.btn-secondary').prop('disabled', true);
+    $('#swaggerEditor').unbind('click');
+
 }
 

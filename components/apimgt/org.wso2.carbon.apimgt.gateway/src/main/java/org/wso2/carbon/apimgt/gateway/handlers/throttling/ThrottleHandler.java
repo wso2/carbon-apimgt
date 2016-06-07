@@ -419,7 +419,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
+        long executionStartTime = System.currentTimeMillis();
         boolean state = doThrottle(messageContext);
+        Utils.publishExecutionTime(messageContext, executionStartTime,"Throttling");
         context3.stop();
         return state;
     }

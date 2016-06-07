@@ -100,7 +100,8 @@
     "allow":"Allow",
     "deny":"Deny",
     "updatePermissions":"Update Permissions",
-
+    "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics' target='_blank' title='WSO2 wiki documentation on APIM statistics' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
+    "notConfiguredDAS" : "Not Configured",
     "addNewDoc":"Add New Document",
     "summary":"Summary",
     "type":"Type",
