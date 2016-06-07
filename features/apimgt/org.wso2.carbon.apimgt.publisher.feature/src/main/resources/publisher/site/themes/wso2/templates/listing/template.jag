@@ -18,7 +18,9 @@
     //Fetch tier information to create sample API
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
-    var defaultTier = tiers[0].tierName;
+    var defaultApiLevelTier = tiers[0].tierName;
+    var resourceTiers = mod.getResourceTiers().tiers;
+    var defaultResourceLevelTier =  resourceTiers[0].tierName;
     var gatewayURL = mod.getGatewayURL().gatewayURL;
     %>
     <%
@@ -257,7 +259,7 @@
                     <p><%=i18n.localize("noAPIsMsg1")%></p>
                 </div>
                 <div style="display: inline"><a title="<%=i18n.localize("addAPI")%>" class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
-        		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultTier%>', '<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
+        		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultApiLevelTier%>', '<%=defaultResourceLevelTier%>', '<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
         <%}else{%>
         		<div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>

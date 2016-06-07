@@ -33,6 +33,8 @@ public class ThrottleTimeBatchWindowTestCase {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
+    private Event lastRemoveEvent;
+
 
     @Before
     public void init() {
@@ -112,7 +114,7 @@ public class ThrottleTimeBatchWindowTestCase {
                     inEventCount = inEventCount + inEvents.length;
                 } else if(removeEvents != null){
                     removeEventCount = removeEventCount + removeEvents.length;
-
+                    lastRemoveEvent = removeEvents[removeEvents.length - 1];
                 }
                 eventArrived = true;
             }
@@ -122,11 +124,10 @@ public class ThrottleTimeBatchWindowTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
-        Thread.sleep(500);
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         Thread.sleep(10000);
         Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(1, removeEventCount);
+        Assert.assertEquals(0.0d, lastRemoveEvent.getData()[1]);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 

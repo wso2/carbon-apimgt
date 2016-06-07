@@ -182,8 +182,8 @@
         regenerateToken: function(){            
             var validity_time = this.element.find(".validity_time").val();
             var scopes = "";
-            if(this.element.find(".scope_select").val() != null) {
-                scopes = this.element.find(".scope_select").val().join(" ");
+            if(this.element.find("select.scope_select").val() != null) {
+                scopes = this.element.find("select.scope_select").val().join(" ");
             }
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
@@ -215,7 +215,7 @@
             this.app.provide_keys = this.options.provide_keys;
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
-            this.element.find(".selectpicker").selectpicker(); 
+            this.element.find(".selectpicker").selectpicker({dropupAuto:false}); 
             this.element.find(".curl_command").codeHighlight();           
         }
     };
@@ -308,6 +308,9 @@ $("#application-actions").each(function(){
     var source   = $("#application-actions").html();
     var application_actions = Handlebars.compile(source);
 
+    var source   = $("#application-name").html();
+    var application_name = Handlebars.compile(source);    
+
     var app_list = $('#application-table').datatables_extended({
         "ajax": {
             "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplications",
@@ -324,10 +327,12 @@ $("#application-actions").each(function(){
         "columns": [
             { "data": "name",
               "render": function(data, type, rec, meta){
+                var context = rec ;
                 if(rec.groupId !="" && rec.groupId != undefined)
-                    return data+ " (Shared)";
+                    context.shared = true;
                 else
-                    return data;
+                    context.shared = false;
+                return application_name(context);             
               }
             },
             { "data": "tier" },

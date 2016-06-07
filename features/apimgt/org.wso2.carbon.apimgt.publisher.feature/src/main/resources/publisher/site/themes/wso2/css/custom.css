@@ -3,10 +3,6 @@
 	position: relative;
 }
 
-.apim-form {
-	max-width: 100% !important;
-}
-
 div.image-container {
 	width: auto;
 	height: 100%;
@@ -381,7 +377,7 @@ div.image-container {
 }
 .wiz-step.completed .wiz-step-count{
     color:#344860;
-    background: #7ea9ce;
+    background: #C0D5FF;
 }
 .wiz-step-title{
     font-size:16px;
@@ -391,7 +387,7 @@ div.image-container {
     color:#fff;
 }
 .wiz-step.completed .wiz-step-title{
-    color:#7ea9ce;
+    color:#C0D5FF;
 }
 .wiz-step .wiz-step-title{
     color:#5477A1;
@@ -534,7 +530,6 @@ div.image-container {
 }
 
 .tagContainer .bootstrap-tagsinput > .label{
-    font-size:100%;
     line-height:2.1;
     font-weight:normal;
 }
@@ -543,7 +538,7 @@ div.image-container {
 }
 
 .tagContainer .bootstrap-tagsinput .tag [data-role="remove"]{
-    color:#90BCDA;
+    color:#91D3FF;
 }
 .tagContainer .bootstrap-tagsinput .tag [data-role="remove"]:hover{
     -webkit-box-shadow: none;
@@ -709,12 +704,34 @@ input.ep-field{ min-width: 50%;}
     position: relative; 
     margin: 0;
 }
-
 #resource_policy_modal.modal .modal-body {
     max-height: 600px !important;
     overflow-y: auto !important;
 }
-
 #resource_policy_modal select{
     margin: -6px;
+}
+.panel-group .panel .form-horizontal,
+.wiz-content .form-horizontal,
+.modal-body .form-horizontal{
+    max-width:100%;
+}
+.modal-header .close{
+    color:#222;
+}
+.form-group .label{
+    display:inline-block;
+    margin-top:2px;
+    padding:2px 10px;
+    line-height: 13px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.list-group-item-success .noty_text,
+.list-group-item-info .noty_text,
+.list-group-item-warning .noty_text,
+.list-group-item-danger .noty_text{
+    color:#fff;
 }

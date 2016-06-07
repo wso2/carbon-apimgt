@@ -39,8 +39,8 @@
             <artifactId>h2-database-engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>opensaml.wso2</groupId>
-            <artifactId>opensaml2</artifactId>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -194,7 +194,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>opensaml.wso2:opensaml2:${opensaml2.version}</bundleDef>
+                                <bundleDef>org.apache.velocity:velocity:${velocity.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

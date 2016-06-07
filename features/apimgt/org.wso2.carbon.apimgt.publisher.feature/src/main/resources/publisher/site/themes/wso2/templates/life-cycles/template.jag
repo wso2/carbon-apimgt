@@ -192,7 +192,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      	  <span class="badge badge-warning">!</span> <%=i18n.localize("removeAPIFromExternalStoresWarning")%>
      </div>
      <div class="row">
-		<div class="form-group form-inline">
+		<div class="form-group">
 		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
 		        <div class="controls col-sm-8">
 					<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>

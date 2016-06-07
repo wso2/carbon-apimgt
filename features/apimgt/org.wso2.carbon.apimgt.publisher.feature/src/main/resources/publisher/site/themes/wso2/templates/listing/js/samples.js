@@ -1,6 +1,6 @@
-function APISamples(defaultTier, gatewayURL) {
+function APISamples (defaultResourceLevelTier) {
     this.sample_swagger = "{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
+    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
     ":[{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":" +
     "\"Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
     "\"responses\":{\"201\":{\"headers\":{\"ETag\":{\"description\":" +
@@ -14,7 +14,7 @@ function APISamples(defaultTier, gatewayURL) {
     ",\"415\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}}}}," +
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
+    "\"" + defaultResourceLevelTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
     "[{\"default\":25,\"description\":\"Maximum size of menu items to return.\",\"name\":\"limit\"" +
     ",\"format\":\"double\",\"type\":\"number\",\"in\":\"query\"},{\"default\":0,\"description\":" +
     "\"Starting point of the item list.\",\"name\":\"offset\",\"format\":\"double\",\"type\":" +
@@ -32,7 +32,7 @@ function APISamples(defaultTier, gatewayURL) {
     "resource.\"},\"406\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Not Acceptable. The requested media type is not supported\"}}}},\"/order/{orderId}\"" +
     ":{\"put\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultTier + "\",\"description\":\"Update an existing Order\",\"parameters\":[{\"description\"" +
+    "\"" + defaultResourceLevelTier + "\",\"description\":\"Update an existing Order\",\"parameters\":[{\"description\"" +
     ":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\",\"type\":\"number\",\"required\"" +
     ":true,\"in\":\"path\"},{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"" +
     "Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
@@ -48,7 +48,7 @@ function APISamples(defaultTier, gatewayURL) {
     ",\"description\":\"Not Found. The resource to be updated does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
     "not been performed because one of the preconditions is not met.\"}}},\"get\":{\"x-auth-type\"" +
-    ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"" +
+    ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
     "\"format\":\"integer\",\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
     "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{\"ETag\":{\"description\"" +
@@ -62,7 +62,7 @@ function APISamples(defaultTier, gatewayURL) {
     ":\"Not Found. Requested API does not exist.\"},\"406\":{\"schema\":{\"$ref\":" +
     "\"#/definitions/Error\"},\"description\":\"Not Acceptable. The requested media type is" +
     " not supported\"}}},\"delete\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"Delete an existing Order\"," +
+    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Delete an existing Order\"," +
     "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\"," +
     "\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
     ":\"OK. Resource successfully deleted.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
@@ -94,7 +94,7 @@ function APISamples(defaultTier, gatewayURL) {
     "\"http://PizzaShack.lk\"},\"version\":\"1.0.0\"}}";
     }
 
-APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
+APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
     var addAPIData = {action: 'sampleDesign', name: 'PizzaShackAPI', provider: username,
         version: '1.0.0', description: 'This is a simple API for Pizza Shack online pizza delivery store.', tags: 'pizza',
@@ -149,7 +149,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                     function (result) {
                         jagg.post(urlDesign, {action: "manage", name: "PizzaShackAPI",
                             provider: username, version: "1.0.0", default_version_checked: " ",
-                            tier: defaultTier, tiersCollection: defaultTier,
+                            tier: defaultApiLevelTier, tiersCollection: defaultApiLevelTier,
                             transport_http: "http", transport_https: "https",
                             bizOwner: "PizzaShack Business Owner",
                             bizOwnerMail: "marketing@PizzaShack.com",
@@ -201,7 +201,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
         }, 'json');
 };
 
-var deploySampleApi = function (defaultTier, gatewayURL) {
-    var deployer = new APISamples(defaultTier, gatewayURL);
-    deployer.deploySample(defaultTier, gatewayURL);
+var deploySampleApi = function (defaultApiLevelTier, defaultResourceLevelTier, gatewayURL) {
+    var deployer = new APISamples(defaultResourceLevelTier);
+    deployer.deploySample(defaultApiLevelTier, gatewayURL);
 };
