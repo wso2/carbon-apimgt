@@ -995,19 +995,6 @@ public final class APIUtil {
 
     }
 
-    public static final Map<String,String> getEventPublisherProperties(){
-        HashMap<String,String> propertiesMap = new HashMap<String, String>();
-
-        propertiesMap.put("java.naming.factory.initial","org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        //propertiesMap.put("transport.jms.UserName",null);
-        propertiesMap.put("java.naming.provider.url","repository/conf/jndi.properties");
-        //propertiesMap.put("transport.jms.Password",null);
-        propertiesMap.put("transport.jms.DestinationType","topic");
-        propertiesMap.put("transport.jms.Destination","throttleData");
-        propertiesMap.put("transport.jms.ConcurrentPublishers","allow");
-        propertiesMap.put("transport.jms.ConnectionFactoryJNDIName","TopicConnectionFactory");
-        return propertiesMap;
-    }
 
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
@@ -2076,13 +2063,13 @@ public final class APIUtil {
     /**
      * Checks whether the specified user has the specified permission.
      *
-     * @param username   A username
+     * @param userNameWithoutChange   A username
      * @param permission A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
-    public static boolean hasPermission(String username, String permission) throws APIManagementException {
+    public static boolean hasPermission(String userNameWithoutChange, String permission) throws APIManagementException {
     	boolean authorized = false;
-        if (username == null) {
+        if (userNameWithoutChange == null) {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                     " the anonymous user");
         }
@@ -2093,7 +2080,7 @@ public final class APIUtil {
             return authorized;
         }
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userNameWithoutChange);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
@@ -2108,7 +2095,7 @@ public final class APIUtil {
                                 .getTenantUserRealm(tenantId)
                                 .getAuthorizationManager();
                 authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
+                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
                                 CarbonConstants.UI_PERMISSION_ACTION);
             } else {
                 // On the first login attempt to publisher (without browsing the
@@ -2120,12 +2107,12 @@ public final class APIUtil {
                 }
                 authorized =
                         AuthorizationManager.getInstance()
-                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
+                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
                                         permission);
             }
             
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + username + " authorized or not", e);
+            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

@@ -86,7 +86,7 @@
 	  	<form class="form-inline">
 		  <div class="form-group">		    
 		    <span>Scopes </span>
-		    <select class="selectpicker scope_select"  multiple title="Select..">
+		    <select class="selectpicker scope_select dropup"  multiple title="Select..">
 			{{#each Scopes}}
 				<option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
 			{{/each}}
