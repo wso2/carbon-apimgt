@@ -16,11 +16,13 @@ for(var i=0;i < outputs.tiers.length; i++){
   <!-- Nav tabs -->
   <div class="white-wrapper">
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a title="Details" href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>
+      <li role="presentation" class="active"><a title="Details" href="#details" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>          
+      <% if(application.status == "APPROVED"){ %>
       <li role="presentation"><a title="Production Keys" href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
       <li role="presentation"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>
       <li role="presentation"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
       <li role="presentation"><a title="SDKs"  href="#sdks" aria-controls="profile" role="tab" data-toggle="tab">SDKs</a></li>
+      <% } %>
     </ul>
 
     <!-- Tab panes -->
@@ -28,35 +30,37 @@ for(var i=0;i < outputs.tiers.length; i++){
       <div role="tabpanel" class="tab-pane fade in active" id="details">
 <form class="form-horizontal">
   <div class="form-group">
-    <label class="col-sm-2 control-label">Status</label>
-    <div class="col-sm-10">
-      <p class="form-control-static"><strong><%= encode.forHtml(application.status) %></strong></p>
+    <label class="col-sm-3 control-label">Status</label>
+    <div class="col-sm-9">
+      <p class="form-control-static"><strong><% if(application.status != "APPROVED" && application.status != "REJECTED" ){%> INACTIVE <%} else { %><%=encode.forHtml(application.status) %><%}%></strong></p>
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">Throttling Tier</label>
-    <div class="col-sm-10">
+    <label class="col-sm-3 control-label">Per Token Quota</label>
+    <div class="col-sm-9">
       <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;&nbsp;<%=app_tier.tierDescription %></p>
-      <p>An application is available at different levels of service. The maximum number of requests you can make to an API is determined by this tier.</p>
+      <p>This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.</p>
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">Callback URL</label>
-    <div class="col-sm-10">
+    <label class="col-sm-3 control-label">Callback URL</label>
+    <div class="col-sm-9">
       <p class="form-control-static"><%if(application.callbackUrl){%><strong><%= encode.forHtml(application.callbackUrl) %></strong><% }else{%>Not Given<%}%></p>
       <p>This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize.</p>
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">Description</label>
-    <div class="col-sm-10">
+    <label class="col-sm-3 control-label">Description</label>
+    <div class="col-sm-9">
       <p class="form-control-static"><%if(application.description){%><%=encode.forHtml(application.description) %><% }else{%>Not Given<%}%></p>
     </div>
   </div>  
 </form>      
       </div>
+      <% if(application.status == "APPROVED"){ %>
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
+
         jagg.log(application);
         var prodapp = {
             name: application.name,
@@ -100,9 +104,11 @@ for(var i=0;i < outputs.tiers.length; i++){
           Java&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
         </button>
         
-      </div>      
+      </div>
+      <% } %>      
     </div>
   </div>
+  <% if(application.status == "APPROVED"){ %>
   <script language="javascript">
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
@@ -117,4 +123,5 @@ for(var i=0;i < outputs.tiers.length; i++){
     });
   </script>
   <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>
+  <% } %>
 <% }); %>
