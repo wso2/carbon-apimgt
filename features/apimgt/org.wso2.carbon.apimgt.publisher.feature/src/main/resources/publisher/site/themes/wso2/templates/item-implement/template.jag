@@ -1036,16 +1036,15 @@
 		<div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
 			<div class="headerContainer tagContainer col-sm-6">
-
-				{{#unless allowAll }}
-				<span id="accesseAllowOriginDiv">
-					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
-				</span>
-				{{/unless}}
 				<label class="checkbox">
 					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
 					<span class="helper"><%=i18n.localize("allOrigins")%></span>
 				</label>
+				{{#unless allowAll }}
+				<div id="accesseAllowOriginDiv" class="add-margin-top-2x">
+					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
+				</div>
+				{{/unless}}
 			</div>
 		</div>
 		<div class="form-group">
