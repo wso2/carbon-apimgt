@@ -729,15 +729,6 @@ input.ep-field{ min-width: 50%;}
     border-radius: 0px;
 }
 
-#swaggerEditer {
-    overflow: hidden;
-   padding: 50px !important;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-.swagger_editer_header{
-    top: auto !important;
-}
-
 .thumbnail.icon img {
     width: 101%;
 } 
@@ -759,5 +750,6 @@ input.ep-field{ min-width: 50%;}
 .list-group-item-warning .noty_text,
 .list-group-item-danger .noty_text{
     color:#fff;
+=======
+>>>>>>> parent of 587f2e5... fix for swagger ui layout
 }
-
