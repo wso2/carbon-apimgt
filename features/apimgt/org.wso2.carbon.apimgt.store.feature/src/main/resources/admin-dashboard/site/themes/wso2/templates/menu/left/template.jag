@@ -1,257 +1,281 @@
 <% jagg.template("menu/left", function(inputs, outputs, jagg) { %>
 <%  var site = require("/site/conf/site.json");
-    var ssoEnabled = site.ssoConfiguration.enabled;
-
-    var reqUrl = request.getRequestURI();
-    var listUrl=jagg.url("/site/pages/index.jag");
-    var listMappedUrl=jagg.url("/site/pages/index.jag");
- 	var liveLogViewer=jagg.url("/loganalyzer/page6");
-    var loganalyzerOverview = jagg.url("/loganalyzer/page0");
-    var loganalyzerApplicationErrors = jagg.url("/loganalyzer/page1");
-    var loganalyzerApiDeploymentStats = jagg.url("/loganalyzer/page2");
-    var loganalyzerLoginStats = jagg.url("/loganalyzer/page3");
-    var loganalyzerNumberOfAPIFailures = jagg.url("/loganalyzer/page4");
-    var loganalyzerAccessTokenErrors = jagg.url("/loganalyzer/page5");
-    var subsUrl=jagg.url("/site/pages/index.jag");
-    var subsMappedUrl=jagg.url("/site/pages/index.jag");
-    var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
-    var apiAvailability =jagg.url("/analytics-api-availability");
-    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-    var partWithContext = request.getRequestURL().split(
-                    request.getRequestURI()
-            )[0]+request.getContextPath();
-
-    var encode = require('encode');
-    encode = new encode.Encode();
-    var task = encode.forJavaScript(request.getParameter("task"));
-
-    var mod = jagg.module("manager");
-    var user = jagg.getUser().username;
-    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    var tenantDomain = MultitenantUtils.getTenantDomain(user);
-
-%>
-
-     <script type="text/javascript">
-          $(function() {
-          $('.js_toggler').click(function(){
-                var clicked = this;
-                $(clicked).parent().attr("clicking","yes");
-
-
-                $('.js_toggler').each(function(){
-                    if($(this).parent().attr("clicking") != "yes"){
-                        if($(this).parent().next().hasClass("child-nodes")){
-                            $(this).parent().next().hide();
-                        }
-                    }
-                });
-
-                                var  $next =$(clicked).parent().next();
-
-                if($next.hasClass("child-nodes")){
-                    $next.toggle();
+  var ssoEnabled = site.ssoConfiguration.enabled;
+  
+  var reqUrl = request.getRequestURI();
+  var listUrl=jagg.url("/site/pages/index.jag");
+  var listMappedUrl=jagg.url("/site/pages/index.jag");
+  var liveLogViewer=jagg.url("/loganalyzer/page6");
+  var loganalyzerOverview = jagg.url("/loganalyzer/page0");
+  var loganalyzerApplicationErrors = jagg.url("/loganalyzer/page1");
+  var loganalyzerApiDeploymentStats = jagg.url("/loganalyzer/page2");
+  var loganalyzerLoginStats = jagg.url("/loganalyzer/page3");
+  var loganalyzerNumberOfAPIFailures = jagg.url("/loganalyzer/page4");
+  var loganalyzerAccessTokenErrors = jagg.url("/loganalyzer/page5");
+  var subsUrl=jagg.url("/site/pages/index.jag");
+  var subsMappedUrl=jagg.url("/site/pages/index.jag");
+  var throttlePolicyUrl=jagg.getMappedUrl("/site/pages/policy-list.jag");
+  var apiAvailability =jagg.url("/analytics-api-availability");
+  var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+  
+  var partWithContext = request.getRequestURL().split(
+                  request.getRequestURI()
+          )[0]+request.getContextPath();
+  
+  var encode = require('encode');
+  encode = new encode.Encode();
+  var task = encode.forJavaScript(request.getParameter("task"));
+  
+  var mod = jagg.module("manager");
+  var user = jagg.getUser().username;
+  var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+  var tenantDomain = MultitenantUtils.getTenantDomain(user);
+  
+  %>
+<script type="text/javascript">
+  $(function() {
+  $('.js_toggler').click(function(){
+        var clicked = this;
+        $(clicked).parent().attr("clicking","yes");
+  
+  
+        $('.js_toggler').each(function(){
+            if($(this).parent().attr("clicking") != "yes"){
+                if($(this).parent().next().hasClass("child-nodes")){
+                    $(this).parent().next().hide();
                 }
-
-          });
-
-
-        $('#auctions').click(function(){
-          $('.submenu').slideToggle();
+            }
         });
-    });
-
-       </script>
-       <div class="sidebar-wrapper sidebar-nav " id="left-sidebar" data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="80" style="width: 300px; left: 0px;">
-            <div class="nano">
-                <div class="nano-content">
-                <ul class="nav nav-pills  nav-stacked pages"">
-                    <li class="sidebar-brand"><a href="#"><i class="fw fw-task fw-2x"></i><%=i18n.localize("tasks")%></a>
-					<ul class="nav nav-pills secondary-nav collapse in">
-						<li
-					<% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && (task == null || task == "null" ||
-            task=="signup")){%>
-					class="active" <% } %>><a
-					href="<%=subsMappedUrl%>?task=signup"
-					onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=signup',e:event,ssoEnabled:<%=ssoEnabled%>})">
-					<i class="fw fw-task"></i>
-					<%=i18n.localize("userCreation")%></a></li>
-				<li <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task == "application"){%>
-					class="active" <% } %>><a
-					href="<%=subsMappedUrl%>?task=application"
-					onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=application',e:event,ssoEnabled:<%=ssoEnabled%>})">
-					<i class="fw fw-task"></i>
-					<%=i18n.localize("appCreation")%></a></li>
-				<li <%if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="subscription"){%>
-					class="active" <% } %>><a
-					href="<%=listMappedUrl%>?task=subscription"
-					onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=subscription',e:event,ssoEnabled:<%=ssoEnabled%>})">
-					<i class="fw fw-task"></i>
-					<%=i18n.localize("subscriptionCreation")%></a></li>
-				<li <%if((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="appRegistration"){%>
-					class="active" <% } %>><a
-					href="<%=listMappedUrl%>?task=appRegistration"
-					onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})">
-					<i class="fw fw-task"></i>
-					<%="Application Registration"%></a></li>
-					</ul>
-				</li>
-				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("settings")%></a>
-					<ul class="nav nav-pills secondary-nav collapse in">
-					    <li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
-                              href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="fw fw-settings"></i>
-                              <%= i18n.localize("AnalyticsMenu") %></a>
-                        </li>
-						<li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/themeupload") %>"
-							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-html"></i>
-							<%= i18n.localize("themeUpload") %></a></li>
-
-					</ul>
-				</li>
-				<li class="nav-header"><a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%></a>
-					<ul class="nav nav-pills secondary-nav collapse in">
-
-					    <%
-    if(!APIUtil.isAdvanceThrottlingEnabled()){
-        %>
-        <li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/tier-manage") %>"
-							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-							<%= i18n.localize("tierManagement") %></a></li>
-						<%}
-    else if(APIUtil.isAdvanceThrottlingEnabled()){
-        %>
-            <li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/api-policy-list") %>"
-							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-							Advanced Throttling</a></li>
-
-					        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
-					        href="<%= jagg.url("/app-policy-manage") %>"
-					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-					        <%= i18n.localize("applicationTiers") %></a></li>
-
-					        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a
-					        href="<%= jagg.url("/subscription-policy-manage") %>"
-					        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-					        <%= i18n.localize("subscriptionTiers") %></a></li>
-
-					        <% if(tenantDomain == 'carbon.super') { %>
-							    <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a
-							    href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
-							    onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="fw fw-settings"></i>
-							    <%= i18n.localize("customRules") %></a></li>
-
-					        <%}%>
-
-						<li <%if (reqUrl.match("conditions-manage")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/site/pages/conditions-manage.jag") %>"
-							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>Black List</a></li>
-
-					     <%}%>
-					</ul>
-				</li>
-				<li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer</a>
-                    <ul class="nav nav-pills secondary-nav collapse in">
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page6")){%>class="active"<% } %>><a href="<%=liveLogViewer%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Live log viewer</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page0")){%>class="active"<% } %>><a href="<%=loganalyzerOverview%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerOverview%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Overview</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page1")){%>class="active"<% } %>><a href="<%=loganalyzerApplicationErrors%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApplicationErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Application Errors</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page2")){%>class="active"<% } %>><a href="<%=loganalyzerApiDeploymentStats%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApiDeploymentStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Api Deployment Stats</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page3")){%>class="active"<% } %>><a href="<%=loganalyzerLoginStats%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerLoginStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Login Errors</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page4")){%>class="active"<% } %>><a href="<%=loganalyzerNumberOfAPIFailures%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerNumberOfAPIFailures%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Number of API Failures</a>
-                        </li>
-                        <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page5")){%>class="active"<% } %>><a href="<%=loganalyzerAccessTokenErrors%>"
-                               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerAccessTokenErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                            <i class="fw fw-task"></i>
-                            Access Token Errors</a>
-                        </li>
-                    </ul>
-                 </li>
-               <li class="nav-header"><a href="#"><i class="fw fw-task fw-2x""></i>Analytics</a>
-                    <ul class="nav nav-pills secondary-nav collapse in">
-                         <li><a href="<%=apiAvailability%>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=apiAvailability%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="fw fw-task"></i>
-                              API Availability</a></li>
-
-												<%
-    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
-    if(isAnalyticsEnabled) {
-        %>
-        <li <%if (reqUrl.match("manage-alert-type")){%> class="active" <% } %>><a
-							href="<%= jagg.url("/manage-alert-type") %>"
-							onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-							<i class="fw fw-settings"></i>
-							<%= i18n.localize("manageAlertTypes") %></a></li>
-							<li> &nbsp; </li>
-							<li> &nbsp; </li>
-							<li> &nbsp; </li>
-							<%
-    }
-    %>
-
-     </li>
-</ul>
-</li>
-</ul>
-</li>
-
-<script>
-var mediaQuery = window.matchMedia('(max-width: 767px)');
- 
-if(mediaQuery.matches){
-$.sidebar_toggle('hide','.sidebar-nav');
-$('[data-toggle=sidebar]').trigger('click')
-}
-
-mediaQuery.addListener(function(e){
-if(e.matches){
-$.sidebar_toggle('hide','.sidebar-nav');
-$('[data-toggle=sidebar]').trigger('click')
-}else{
-$.sidebar_toggle('show','.sidebar-nav')
-$('[data-toggle=sidebar]').trigger('click')
-}
-})
+  
+                        var  $next =$(clicked).parent().next();
+  
+        if($next.hasClass("child-nodes")){
+            $next.toggle();
+        }
+  
+  });
+  
+  
+  $('#auctions').click(function(){
+  $('.submenu').slideToggle();
+  });
+  });
+  
 </script>
-</ul>
+<div class="sidebar-wrapper sidebar-nav " id="left-sidebar" data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="80" style="width: 300px; left: 0px;">
+  <div class="nano">
+    <div class="nano-content">
+      <ul class="nav nav-pills  nav-stacked pages"">
+        <li class="sidebar-brand nav-header">
+          <a href="#"><i class="fw fw-task fw-2x"></i><%=i18n.localize("tasks")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret  remove-float"></i></a>
+          <ul class="nav nav-pills secondary-nav collapse">
+            <li
+              <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && (task == null || task == "null" ||
+                task=="signup")){%>
+              class="active" <% } %>><a
+              href="<%=subsMappedUrl%>?task=signup"
+              onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=signup',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              <%=i18n.localize("userCreation")%></a>
+            </li>
+            <li <% if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task == "application"){%>
+              class="active" <% } %>><a
+              href="<%=subsMappedUrl%>?task=application"
+              onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>?task=application',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              <%=i18n.localize("appCreation")%></a>
+            </li>
+            <li <%if ((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="subscription"){%>
+              class="active" <% } %>><a
+              href="<%=listMappedUrl%>?task=subscription"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=subscription',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              <%=i18n.localize("subscriptionCreation")%></a>
+            </li>
+            <li <%if((reqUrl.match("index.jag") || reqUrl.match("tasks")) && task =="appRegistration"){%>
+              class="active" <% } %>><a
+              href="<%=listMappedUrl%>?task=appRegistration"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              <%="Application Registration"%></a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-header">
+          <a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("settings")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+          <ul class="nav nav-pills secondary-nav collapse">
+            <li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("AnalyticsMenu") %></a>
+            </li>
+            <li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/themeupload") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-html"></i>
+              <%= i18n.localize("themeUpload") %></a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-header">
+          <a href="#"><i class="fw fw-settings fw-2x"></i><%=i18n.localize("throttlePolicies")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+          <ul class="nav nav-pills secondary-nav collapse">
+            <%
+              if(!APIUtil.isAdvanceThrottlingEnabled()){
+                  %>
+            <li <%if (reqUrl.match("tier-manage")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/tier-manage") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("tierManagement") %></a>
+            </li>
+            <%}
+              else if(APIUtil.isAdvanceThrottlingEnabled()){
+                  %>
+            <li <%if (reqUrl.match("api-policy-list")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/api-policy-list") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              Advanced Throttling</a>
+            </li>
+            <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a
+              href="<%= jagg.url("/app-policy-manage") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("applicationTiers") %></a>
+            </li>
+            <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a
+              href="<%= jagg.url("/subscription-policy-manage") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("subscriptionTiers") %></a>
+            </li>
+            <% if(tenantDomain == 'carbon.super') { %>
+            <li <%if (reqUrl.match("global-policy-manage")){%>class="active"<% } %>><a
+              href="<%= jagg.url("/site/pages/global-policy-manage.jag") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("customRules") %></a>
+            </li>
+            <%}%>
+            <li <%if (reqUrl.match("conditions-manage")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/site/pages/conditions-manage.jag") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>Black List</a>
+            </li>
+            <%}%>
+          </ul>
+        </li>
+        <li class="nav-header">
+          <a href="#"><i class="fw fw-task fw-2x""></i>Log Analyzer<i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+          <ul class="nav nav-pills secondary-nav collapse">
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page6")){%>class="active"<% } %>><a href="<%=liveLogViewer%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewer%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Live log viewer</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page0")){%>class="active"<% } %>><a href="<%=loganalyzerOverview%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerOverview%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Overview</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page1")){%>class="active"<% } %>><a href="<%=loganalyzerApplicationErrors%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApplicationErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Application Errors</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page2")){%>class="active"<% } %>><a href="<%=loganalyzerApiDeploymentStats%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApiDeploymentStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Api Deployment Stats</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page3")){%>class="active"<% } %>><a href="<%=loganalyzerLoginStats%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerLoginStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Login Errors</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page4")){%>class="active"<% } %>><a href="<%=loganalyzerNumberOfAPIFailures%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerNumberOfAPIFailures%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Number of API Failures</a>
+            </li>
+            <li <%if (reqUrl.match("/admin-dashboard/loganalyzer/page5")){%>class="active"<% } %>><a href="<%=loganalyzerAccessTokenErrors%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerAccessTokenErrors%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              Access Token Errors</a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-header">
+          <a href="#"><i class="fw fw-task fw-2x""></i>Analytics<i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+          <ul class="nav nav-pills secondary-nav collapse">
+            <li><a href="<%=apiAvailability%>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=apiAvailability%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-task"></i>
+              API Availability</a>
+            </li>
+            <%
+              var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+              var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+              if(isAnalyticsEnabled) {
+                  %>
+            <li <%if (reqUrl.match("manage-alert-type")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/manage-alert-type") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-settings"></i>
+              <%= i18n.localize("manageAlertTypes") %></a>
+            </li>
+            <li> &nbsp; </li>
+            <li> &nbsp; </li>
+            <li> &nbsp; </li>
+            <%
+              }
+              %>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      </li>
+      <script>
+        var mediaQuery = window.matchMedia('(max-width: 767px)');
+        
+        if (mediaQuery.matches) {
+            $.sidebar_toggle('hide', '.sidebar-nav');
+            $('[data-toggle=sidebar]').trigger('click')
+        }
+        
+        mediaQuery.addListener(function(e) {
+            if (e.matches) {
+                $.sidebar_toggle('hide', '.sidebar-nav');
+                $('[data-toggle=sidebar]').trigger('click')
+            } else {
+                $.sidebar_toggle('show', '.sidebar-nav')
+                $('[data-toggle=sidebar]').trigger('click')
+            }
+        })
+        
+        $('.nav-header a').click(function(){
+          var secondaryNav = $(this).parent().find('.secondary-nav');
+          var navCaret = $(this).parent().find('.toggle-caret');
+        
+          if(secondaryNav.length > 0){
+            if(secondaryNav.hasClass('in')){
+              secondaryNav.slideUp(function(){
+                navCaret.removeClass('fw-up').addClass('fw-down');
+                secondaryNav.removeClass('in');
+              })
+            }else{
+              secondaryNav.slideDown(function(){
+                navCaret.removeClass('fw-down').addClass('fw-up');
+                secondaryNav.addClass('in');
+              })
+            }
+          }
+        })
+      </script>
+      </ul>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-
 <%});%>
