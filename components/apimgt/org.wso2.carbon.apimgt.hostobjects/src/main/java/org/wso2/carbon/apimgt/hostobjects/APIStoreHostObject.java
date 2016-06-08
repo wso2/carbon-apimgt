@@ -1252,10 +1252,11 @@ public class APIStoreHostObject extends ScriptableObject {
         NativeArray apiArray = new NativeArray(0);
         if (args != null && isStringArray(args)) {
             String tagName = args[0].toString();
+            String tenant = args[1].toString();
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                apiSet = apiConsumer.getAPIsWithTag(tagName);
+                apiSet = apiConsumer.getAPIsWithTag(tagName, tenant);
             } catch (APIManagementException e) {
                 log.error("Error from Registry API while getting APIs With Tag Information", e);
                 return apiArray;
@@ -1307,15 +1308,16 @@ public class APIStoreHostObject extends ScriptableObject {
             String tagName = args[0].toString();
             int start = Integer.parseInt(args[1].toString());
             int end = Integer.parseInt(args[2].toString());
+            String tenant = args[3].toString();
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                resultMap = apiConsumer.getPaginatedAPIsWithTag(tagName, start, end);
+                resultMap = apiConsumer.getPaginatedAPIsWithTag(tagName, start, end, tenant);
                 apiSet = (Set<API>) resultMap.get("apis");
             } catch (APIManagementException e) {
                 log.error("Error from Registry API while getting APIs With Tag Information", e);
                 return resultObj;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("Error while getting APIs With Tag Information", e);
                 return resultObj;
             }
