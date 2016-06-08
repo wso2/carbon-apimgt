@@ -153,7 +153,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-	public Set<API> getAPIsWithTag(String tagName) throws APIManagementException {
+	public Set<API> getAPIsWithTag(String tagName, String requestedTenantDomain) throws APIManagementException {
     	
     	 /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
          */
@@ -176,10 +176,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		 * taggedAPIs.get(tag); }
 		 */
 
-		this.isTenantModeStoreView = (this.tenantDomain != null);
+		this.isTenantModeStoreView = (requestedTenantDomain != null);
 
-		if (this.tenantDomain != null) {
-			this.requestedTenant = this.tenantDomain;
+		if (requestedTenantDomain != null) {
+			this.requestedTenant = requestedTenantDomain;
 		}
 
 		Registry userRegistry = null;
@@ -190,7 +190,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			// as a tenant, I'm browsing my own Store or I'm browsing a Store of
 			// another tenant..
 			if ((this.isTenantModeStoreView && this.tenantDomain == null)
-					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(this.tenantDomain))) {
+					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {
 				
 				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 						.getTenantId(this.requestedTenant);
@@ -246,11 +246,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException {
+    public Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException {
         List<API> apiList = new ArrayList<API>();
         Set<API> resultSet = new TreeSet<API>(new APIVersionComparator());
         Map<String, Object> results = new HashMap<String, Object>();
-        Set<API> taggedAPISet = this.getAPIsWithTag(tag);
+        Set<API> taggedAPISet = this.getAPIsWithTag(tag,tenantDomain);
         if (taggedAPISet != null) {
             if (taggedAPISet.size() < end) {
                 end = taggedAPISet.size();
