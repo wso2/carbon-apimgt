@@ -395,7 +395,7 @@ var loadLC = function () {
                             var target = obj.target;
                             // Set up the edges
 
-                            g.setEdge(key.toUpperCase(), target.toUpperCase(), { label: key.toUpperCase(), labelStyle: "fill: white", lineInterpolate: 'cardinal' });
+                            g.setEdge(key.toUpperCase(), target.toUpperCase(), { label: event.toUpperCase(), labelStyle: "fill: white", lineInterpolate: 'cardinal' });
                         }
                     }
                 }
