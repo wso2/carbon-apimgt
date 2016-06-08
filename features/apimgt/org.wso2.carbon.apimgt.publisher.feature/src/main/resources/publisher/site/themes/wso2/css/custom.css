@@ -713,7 +713,8 @@ input.ep-field{ min-width: 50%;}
 }
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
-.modal-body .form-horizontal{
+.modal-body .form-horizontal,
+.tab-pane .form-horizontal{
     max-width:100%;
 }
 .modal-header .close{
@@ -735,3 +736,9 @@ input.ep-field{ min-width: 50%;}
 .list-group-item-danger .noty_text{
     color:#fff;
 }
+
+.lifecycle-state .btn-group > .btn{
+    border-right:1px solid #999;
+    height:40px;
+}
+
