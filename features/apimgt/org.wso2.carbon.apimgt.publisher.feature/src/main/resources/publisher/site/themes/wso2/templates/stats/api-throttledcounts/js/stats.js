@@ -77,12 +77,14 @@ $( document ).ready(function() {
                     $("#apiSelect").change(function (e) {
                         apiName = this.value;
                         pupulateAppList(apiName);
-                        getDateTime(picker.endDate, picker.startDate);
+                        var datePicker=$('#date-range').data('daterangepicker');
+                        getDateTime(datePicker.endDate, datePicker.startDate);
                     });
 
                     $("#appSelect").change(function (e) {
                         appName = this.value;
-                        getDateTime(picker.endDate, picker.startDate);
+                        var datePicker=$('#date-range').data('daterangepicker');
+                        getDateTime(datePicker.endDate, datePicker.startDate);
                     });
 
                     pupulateAPIList();

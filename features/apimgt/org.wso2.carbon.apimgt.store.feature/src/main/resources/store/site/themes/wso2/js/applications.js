@@ -182,8 +182,8 @@
         regenerateToken: function(){            
             var validity_time = this.element.find(".validity_time").val();
             var scopes = "";
-            if(this.element.find(".scope_select").val() != null) {
-                scopes = this.element.find(".scope_select").val().join(" ");
+            if(this.element.find("select.scope_select").val() != null) {
+                scopes = this.element.find("select.scope_select").val().join(" ");
             }
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
@@ -363,8 +363,8 @@ $("#application-actions").each(function(){
     });
 
     $('#application-table').on( 'click', 'a.deleteApp', function () {
-    	var appName = $(this).parents('tr').find("td:nth-child(1)").text();
-    	var apiCount = $(this).parents('tr').find("td:nth-child(4)").text();
+    	var appName = $(this).attr("data-id");
+    	var apiCount = $(this).attr("data-count");
     	$('#messageModal').html($('#confirmation-data').html());
         if(apiCount > 0){
             $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));

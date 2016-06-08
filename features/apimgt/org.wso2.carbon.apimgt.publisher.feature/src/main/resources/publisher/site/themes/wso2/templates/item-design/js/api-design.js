@@ -135,6 +135,12 @@ function APIDesigner(){
             jagg.message({content:"URL pattern cannot be empty.",type:"error"});
             return;
         }
+        // checking for white spaces in URL template
+        if (/\s/.test( $("#resource_url_pattern").val() )) {
+            jagg.message({content:"URL pattern cannot contain whitespace",type:"error"});
+            return;
+        }
+
         var path = $("#resource_url_pattern").val();
         if(path.charAt(0) != "/")
             path = "/"+path;
@@ -912,7 +918,7 @@ $(document).ready(function(){
                              jagg.showLogin();
                         }
                     } else {
-                        jagg.message({content:responseText.message,type:"error"});
+                        jagg.message({ content:responseText.message,type:"error"});
                     }
                 }
             },

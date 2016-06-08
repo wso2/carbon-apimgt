@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import java.io.IOException;
 import java.util.*;
 
-public class JMSThrottleDataRetriever extends TimerTask {
+public class JMSThrottleDataRetriever {
     private static final Log log = LogFactory.getLog(JMSThrottleDataRetriever.class);
     private ThrottleProperties.JMSConnectionProperties jmsConnectionProperties;
 
@@ -38,14 +38,6 @@ public class JMSThrottleDataRetriever extends TimerTask {
                     ServiceReferenceHolder.getInstance().getAPIMConfiguration().getThrottleProperties()
                             .getJmsConnectionProperties();
         }
-    }
-
-    @Override
-    public void run() {
-        if (log.isDebugEnabled()) {
-            log.debug("Starting JMS based throttle data retrieving process.");
-        }
-        subscribeForJmsEvents();
     }
 
     /**
@@ -59,7 +51,7 @@ public class JMSThrottleDataRetriever extends TimerTask {
             if (jmsConnectionProperties.getJmsConnectionProperties().isEmpty()) {
                 properties = new Properties();
                 ClassLoader classLoader = getClass().getClassLoader();
-                properties.load(classLoader.getResourceAsStream("mb.properties"));
+                properties.load(classLoader.getResourceAsStream(ListenerConstants.MB_PROPERTIES));
             } else {
                 properties = jmsConnectionProperties.getJmsConnectionProperties();
             }
@@ -67,7 +59,9 @@ public class JMSThrottleDataRetriever extends TimerTask {
                 parameters.put(name, properties.getProperty(name));
             }
             String destination = jmsConnectionProperties.getDestination();
-            JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters, "Siddhi-JMS-Consumer");
+            JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters,
+                                                                                 ListenerConstants
+                                                                                         .CONNECTION_FACTORY_NAME);
             Map<String, String> messageConfig = new HashMap<String, String>();
             messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
             int minThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMinThreadPoolSize();
@@ -76,13 +70,14 @@ public class JMSThrottleDataRetriever extends TimerTask {
                     .getKeepAliveTimeInMillis();
             int jobQueueSize = jmsConnectionProperties.getJmsTaskManagerProperties().getJobQueueSize();
             JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory,
-                                                                                              "Siddhi-JMS-Consumer", new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
-                                                                                                                                          keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
-                                                                                                                                          "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+                                      ListenerConstants.CONNECTION_FACTORY_NAME,
+                                      new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                                                           keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                                                           "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
             jmsTaskManager.setJmsMessageListener(new JMSMessageListener(ServiceReferenceHolder.getInstance()
                                                                                 .getThrottleDataHolder()));
 
-            JMSListener jmsListener = new JMSListener("Siddhi-JMS-Consumer" + "#" + destination,
+            JMSListener jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
                                                       jmsTaskManager);
             jmsListener.startListener();
             log.info("Starting jms topic consumer thread...");
@@ -92,7 +87,4 @@ public class JMSThrottleDataRetriever extends TimerTask {
         }
     }
 
-    public void startJMSThrottleDataRetriever() {
-        new Timer().schedule(this, jmsConnectionProperties.getInitialDelay());
-    }
 }
