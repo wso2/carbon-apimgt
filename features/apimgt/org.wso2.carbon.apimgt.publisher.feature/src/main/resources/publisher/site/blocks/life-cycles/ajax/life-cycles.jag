@@ -118,6 +118,19 @@ if(jagg.isCSRFTokenValid())
                  obj = { error:false };
              }
              print(obj);
+    } else if (action === "getAPILC") {
+            mod = jagg.module("api");
+
+            result = mod.getAPILC();;
+            if (result.error==true) {
+                obj = {
+                    error:true,
+                    message:result.message
+                };
+            } else {
+                obj = result;
+            }
+            print(obj);
 
     }else {
         print({
