@@ -57,8 +57,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * Base64 encoded custom attributes string
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Base64 encoded custom attributes string")
   @JsonProperty("customAttributes")
   public String getCustomAttributes() {
     return customAttributes;

@@ -31,9 +31,9 @@ public class ApplicationThrottlePolicyListDTO  {
 
   
   /**
-   * Number of API throttle policies returned.\n
+   * Number of Application throttle policies returned.\n
    **/
-  @ApiModelProperty(value = "Number of API throttle policies returned.\n")
+  @ApiModelProperty(value = "Number of Application throttle policies returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

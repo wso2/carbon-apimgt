@@ -31,9 +31,9 @@ public class AdvancedThrottlePolicyListDTO  {
 
   
   /**
-   * Number of API throttle policies returned.\n
+   * Number of Advanced throttle policies returned.\n
    **/
-  @ApiModelProperty(value = "Number of API throttle policies returned.\n")
+  @ApiModelProperty(value = "Number of Advanced throttle policies returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -44,9 +44,9 @@ public class AdvancedThrottlePolicyListDTO  {
 
   
   /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/api?limit=1&offset=2&query=\"\n
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=2&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/api?limit=1&offset=2&query=\"\n")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=2&query=\"\n")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -57,9 +57,9 @@ public class AdvancedThrottlePolicyListDTO  {
 
   
   /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/api?limit=1&offset=0&query=\"\n
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=0&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/api?limit=1&offset=0&query=\"\n")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=0&query=\"\n")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;
