@@ -2,7 +2,7 @@
 jagg.initializer("tag/tag-cloud", {
 
     preInitialize:function () {
-        jagg.addFooterJS("tag/tag-cloud", "jqcloudjs", "lib/jquery.tagcloud.js");
+        jagg.addFooterJS("tag/tag-cloud", "jqcloudjs", "libs/jquery.tagcloud.js");
     }
 });
 %>
