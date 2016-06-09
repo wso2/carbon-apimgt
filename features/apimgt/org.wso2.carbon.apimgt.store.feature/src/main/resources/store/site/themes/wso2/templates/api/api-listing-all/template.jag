@@ -245,7 +245,7 @@ var reqUrl = request.getRequestURI();
             
             <%  if(numberOfPages > 1) { %>
                 <div class="col-sm-12">
-                <ul class="pagination " id="apiListingPagination">
+                <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"
                                 <% if(page != 1) { %>
