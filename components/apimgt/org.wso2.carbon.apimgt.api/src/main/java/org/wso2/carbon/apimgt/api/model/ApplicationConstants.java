@@ -26,7 +26,7 @@ public final class  ApplicationConstants {
     public static final String OAUTH_CLIENT_SECRET = "client_secret";
     public static final String OAUTH_REDIRECT_URIS = "redirect_uris";
     public static final String OAUTH_CALLBACK_URIS = "callback_url";
-    public static final String OAUTH_CLIENT_NAME = "client_name";
+    public static final String OAUTH_CLIENT_NAME= "client_name";
     public static final String OAUTH_CLIENT_TYPE = "client_type";
     public static final String APP_KEY_TYPE = "key_type";
     public static final String APP_CALLBACK_URL = "callback_url";
@@ -49,4 +49,8 @@ public final class  ApplicationConstants {
     public static final String OAUTH_CLIENT_APPLICATION = "application";
     public static final String VALIDITY_PERIOD = "validityPeriod";
     public static final String OAUTH_APP_DETAILS = "appDetails";
+    public static final String OAUTH_TYPE = "oauth2";
+    
+    public static final String AUTHORIZATION_CODE="authorization_code";
+    public static final String IMPLICIT="implicit";
 }
