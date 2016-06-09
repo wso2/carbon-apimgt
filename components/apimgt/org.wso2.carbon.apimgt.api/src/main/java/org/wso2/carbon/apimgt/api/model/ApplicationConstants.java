@@ -50,6 +50,7 @@ public final class  ApplicationConstants {
     public static final String VALIDITY_PERIOD = "validityPeriod";
     public static final String OAUTH_APP_DETAILS = "appDetails";
     public static final String OAUTH_TYPE = "oauth2";
+    
     public static final String AUTHORIZATION_CODE="authorization_code";
     public static final String IMPLICIT="implicit";
 }
