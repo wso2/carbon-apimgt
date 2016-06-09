@@ -26,7 +26,6 @@ for(var i=0;i < outputs.tiers.length; i++){
     </ul>
 
     <!-- Tab panes -->
-    <div class="tab-content">
       <div role="tabpanel" class="tab-pane fade in active" id="details">
 <form class="form-horizontal">
   <div class="form-group">
@@ -106,7 +105,6 @@ for(var i=0;i < outputs.tiers.length; i++){
         
       </div>
       <% } %>      
-    </div>
   </div>
   <% if(application.status == "APPROVED"){ %>
   <script language="javascript">

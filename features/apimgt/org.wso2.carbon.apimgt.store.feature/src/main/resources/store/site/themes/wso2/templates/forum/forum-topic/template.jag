@@ -4,7 +4,7 @@
 
   <div id="forum_topic_details_page">
     <div id="forum_topic_title_bar" class="title-section"></div>
-    <div id="forum_topic_content" class="content-data"></div>
+    <div id="forum_topic_content"></div>
   </div>
 
 <!-- STRAT : Handlebars templates -->

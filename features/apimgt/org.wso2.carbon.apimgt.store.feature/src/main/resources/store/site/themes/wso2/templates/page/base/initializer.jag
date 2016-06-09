@@ -14,8 +14,8 @@ jagg.initializer("page/base", {
         jagg.addHeaderCSS("page/base", "wso2-theme", "libs/theme-wso2_1.0/css/theme-wso2.css");
         jagg.addHeaderCSS("page/base", "wso2-fonts", "libs/font-wso2_1.0.2/css/font-wso2.min.css");
 
-        jagg.addHeaderCSS("page/base", "font-awesome", "lib/font-awesome/css/font-awesome.min.css");
-        jagg.addHeaderCSS("page/base", "bootstrap-select-css", "lib/bootstrap-select/css/bootstrap-select.min.css");
+        jagg.addHeaderCSS("page/base", "font-awesome", "libs/font-awesome/css/font-awesome.min.css");
+        jagg.addHeaderCSS("page/base", "bootstrap-select-css", "libs/bootstrap-select/css/bootstrap-select.min.css");
         jagg.addHeaderCSS("page/base", "custom", "css/custom.css");
         jagg.addHeaderCSS("page/base", "bootstrap-rating.css", "libs/bootstrap-rating/bootstrap-rating.css");
         jagg.addHeaderCSS("page/base", "bootstrap-datatables", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
