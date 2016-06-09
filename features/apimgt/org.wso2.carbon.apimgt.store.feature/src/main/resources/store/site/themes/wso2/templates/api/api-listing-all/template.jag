@@ -185,7 +185,7 @@ var reqUrl = request.getRequestURI();
 
                 <%} else {%>
                 
-                	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="white-wrapper add-margin-bottom-4x">
                             	<%if(outputs.isMonetizationEnabled) {%>
 				                    <div class="ribbon-wrapper">
