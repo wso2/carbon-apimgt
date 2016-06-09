@@ -16,12 +16,9 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.TiersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApi"/>
-            
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.ThrottlingApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <!--<bean class="org.wso2.carbon.apimgt.rest.api.util.handlers.BasicAuthenticationHandler"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.util.handlers.XACMLAuthenticationHandler"/>-->
-
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
         </jaxrs:providers>

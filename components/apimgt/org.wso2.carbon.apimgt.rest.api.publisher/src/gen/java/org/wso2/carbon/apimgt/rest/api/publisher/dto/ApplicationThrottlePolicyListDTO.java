@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationThrottlePolicyDTO;
 
 import io.swagger.annotations.*;
 import org.codehaus.jackson.annotate.*;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class DocumentListDTO  {
+public class ApplicationThrottlePolicyListDTO  {
   
   
   
@@ -27,13 +27,13 @@ public class DocumentListDTO  {
   private String previous = null;
   
   
-  private List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+  private List<ApplicationThrottlePolicyDTO> list = new ArrayList<ApplicationThrottlePolicyDTO>();
 
   
   /**
-   * Number of Documents returned.\n
+   * Number of API throttle policies returned.\n
    **/
-  @ApiModelProperty(value = "Number of Documents returned.\n")
+  @ApiModelProperty(value = "Number of API throttle policies returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -44,9 +44,9 @@ public class DocumentListDTO  {
 
   
   /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/application?limit=1&offset=2&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/application?limit=1&offset=2&query=\"\n")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -57,9 +57,9 @@ public class DocumentListDTO  {
 
   
   /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/application?limit=1&offset=0&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/application?limit=1&offset=0&query=\"\n")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;
@@ -73,10 +73,10 @@ public class DocumentListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<DocumentDTO> getList() {
+  public List<ApplicationThrottlePolicyDTO> getList() {
     return list;
   }
-  public void setList(List<DocumentDTO> list) {
+  public void setList(List<ApplicationThrottlePolicyDTO> list) {
     this.list = list;
   }
 
@@ -85,7 +85,7 @@ public class DocumentListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DocumentListDTO {\n");
+    sb.append("class ApplicationThrottlePolicyListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");
