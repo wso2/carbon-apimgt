@@ -64,7 +64,11 @@ public class PolicyConstants {
 
     public static final String START_QUERY = "cast(map:get(propertiesMap,'";
 
+    public static final String NULL_START_QUERY = "map:get(propertiesMap,'";
+
     public static final String END_QUERY = "'),'string')";
+
+    public static final String NULL_END_QUERY = "') is null";
 
     public static final String END_QUERY_LONG = "'),'Long')";
 

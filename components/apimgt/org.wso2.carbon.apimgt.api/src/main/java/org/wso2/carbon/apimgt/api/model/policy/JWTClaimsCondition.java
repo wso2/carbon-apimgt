@@ -34,6 +34,8 @@ public class JWTClaimsCondition extends Condition{
         this.claimUrl = claimUrl;
         this.queryAttributeName = PolicyConstants.START_QUERY + this.claimUrl + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
+        nullFilterQueryString =  PolicyConstants.NULL_START_QUERY + this.claimUrl + PolicyConstants.NULL_END_QUERY;
+        // "map:get(properties,’"+value+"’) is null";
     }
 
     public String getAttribute() {
@@ -52,6 +54,11 @@ public class JWTClaimsCondition extends Condition{
             condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
+    }
+
+    @Override
+    public String getNullCondition() {
+        return nullFilterQueryString;
     }
 
     @Override

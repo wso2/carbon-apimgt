@@ -58,6 +58,11 @@ public class DateRangeCondition extends Condition {
     }
 
     @Override
+    public String getNullCondition() {
+        return null;
+    }
+
+    @Override
     public String toString() {
         return "DateRangeCondition [startingDate=" + startingDate + ", endingDate=" + endingDate + ", toString()="
                 + super.toString() + "]";
