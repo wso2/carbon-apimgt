@@ -1,0 +1,39 @@
+<%
+include("/jagg/jagg.jag");
+response.contentType = "application/json; charset=UTF-8";
+var site = require("/site/conf/site.json");
+var msg = require("/site/conf/ui-messages.jag");
+var log = new Log();
+
+(function () {
+    /* Filters */
+    var provider = jagg.getUser().username;
+    var apiFilter = request.getParameter("apiFilter");
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    }
+    else{
+		mod = jagg.module("statistics");
+		var limit = 50;
+		result = mod.getApisList(provider, apiFilter, limit);
+
+		if (result.error == "true") {
+			obj = {
+				error: result.error,
+				message: msg.error.backendError(action)
+			};
+		} else {
+			obj = {
+				error: false,
+				data: result.usage
+			}
+		}
+		   print(obj);
+    }
+
+}());
+%>

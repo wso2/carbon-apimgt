@@ -38,12 +38,17 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
+import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
+import org.wso2.carbon.apimgt.usage.client.bean.Result;
+import org.wso2.carbon.apimgt.usage.client.bean.UserAgentUsageCount;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.*;
+import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
@@ -64,6 +69,9 @@ import java.io.InputStream;
 import java.sql.*;
 import java.text.*;
 import java.util.*;
+import java.util.Date;
+
+import static java.util.Collections.sort;
 
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
@@ -96,7 +104,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         try {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            if (apiManagerAnalyticsConfiguration.isAnalyticsEnabled() && dataSource == null) {
+            if (APIUtil.isAnalyticsEnabled() && dataSource == null) {
                 initializeDataSource();
             }
             // text = config.getFirstProperty("BillingConfig");
@@ -2362,5 +2370,256 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     @Override
     public String getClientType() {
         return APIUsageStatisticsClientConstants.RDBMS_STATISTICS_CLIENT_TYPE;
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException {
+
+        return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
+            APIMgtUsageQueryServiceClientException {
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+        List<Result<ExecutionTimeOfAPIValues>> result = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            StringBuilder query = new StringBuilder("SELECT * FROM ");
+            String tableName = getExecutionTimeTableByView(drillDown);
+            query.append(tableName).append(" WHERE ");
+            query.append("api='" + apiName).append("'");
+            if (version != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
+                        .append("'");
+            }
+            if (tenantDomain != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
+                        (tenantDomain).append("'");
+            }
+            if (fromDate != null && toDate != null) {
+                try {
+                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append(" " +
+                            "" + APIUsageStatisticsClientConstants.TIME + " ").append(" AND ").append(" " +
+                            "" + APIUsageStatisticsClientConstants.TIME + " ").append("<=").append(getDateToLong
+                            (toDate));
+                } catch (ParseException e) {
+                    handleException("Error occurred while Error parsing date", e);
+                }
+            }
+            if (mediationType != null && mediationType != "ALL") {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(" = '").append
+                        (mediationType).append("'");
+            }
+            if (isTableExist(tableName, connection)) { //Tables exist
+                preparedStatement = connection.prepareStatement(query.toString());
+                rs = preparedStatement.executeQuery();
+                int hour = 0;
+                int minute = 0;
+                int seconds = 0;
+                while (rs.next()) {
+                    if ("HOUR".equals(drillDown)) {
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                    } else if ("MINUTES".equals(drillDown)) {
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
+                    } else if ("SECONDS".equals(drillDown)) {
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
+                        seconds = rs.getInt(APIUsageStatisticsClientConstants.SECONDS);
+                    }
+                    Result<ExecutionTimeOfAPIValues> result1 = new Result<ExecutionTimeOfAPIValues>();
+                    ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
+                    executionTimeOfAPIValues.setApi(rs.getString(APIUsageStatisticsClientConstants.API));
+                    executionTimeOfAPIValues.setContext(rs.getString(APIUsageStatisticsClientConstants.CONTEXT));
+                    executionTimeOfAPIValues.setApiPublisher(rs.getString(APIUsageStatisticsClientConstants
+                            .API_PUBLISHER));
+                    executionTimeOfAPIValues.setVersion(rs.getString(APIUsageStatisticsClientConstants.VERSION));
+                    executionTimeOfAPIValues.setYear(rs.getInt(APIUsageStatisticsClientConstants.YEAR));
+                    executionTimeOfAPIValues.setMonth(rs.getInt(APIUsageStatisticsClientConstants.MONTH));
+                    executionTimeOfAPIValues.setDay(rs.getInt(APIUsageStatisticsClientConstants.DAY));
+                    executionTimeOfAPIValues.setHour(hour);
+                    executionTimeOfAPIValues.setMinutes(minute);
+                    executionTimeOfAPIValues.setSeconds(seconds);
+                    executionTimeOfAPIValues.setMediationName(rs.getString(APIUsageStatisticsClientConstants
+                            .MEDIATION));
+                    executionTimeOfAPIValues.setExecutionTime(rs.getInt(APIUsageStatisticsClientConstants
+                            .EXECUTION_TIME));
+                    result1.setValues(executionTimeOfAPIValues);
+                    result1.setTableName(tableName);
+                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                    result.add(result1);
+                }
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + tableName +
+                                " does not exist.");
+            }
+            if (!result.isEmpty()) {
+                insertZeroElementsAndSort(result, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse the date", e);
+        } finally {
+            closeDatabaseLinks(rs, preparedStatement, connection);
+        }
+        return result;
+    }
+
+    @Override
+    public List<Result<PerGeoLocationUsageCount>> getGeoLocationsByApi(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
+            APIMgtUsageQueryServiceClientException {
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("DAS data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+        List<Result<PerGeoLocationUsageCount>> result = new ArrayList<Result<PerGeoLocationUsageCount>>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
+                    "FROM ");
+            String tableName = APIUsageStatisticsClientConstants.API_REQUEST_GEO_LOCATION_SUMMARY;
+            query.append(tableName).append(" WHERE ");
+            query.append("api='" + apiName).append("'");
+            if (version != null && !"ALL".equals(version)) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
+                        .append("'");
+            }
+            if (tenantDomain != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
+                        (tenantDomain).append("'");
+            }
+            if (fromDate != null && toDate != null) {
+                try {
+                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append("requestTime")
+                            .append(" AND ").append(" requestTime ").append("<=").append(getDateToLong(toDate));
+                } catch (ParseException e) {
+                    handleException("Error occurred while Error parsing date", e);
+                }
+            }
+            if (!"ALL".equals(drillDown)) {
+                query.append(" AND country ='").append(drillDown).append("'");
+            }
+            query.append(" GROUP BY country ");
+            if (!"ALL".equals(drillDown)) {
+                query.append(",city");
+            }
+            if (isTableExist(tableName, connection)) { //Tables exist
+                preparedStatement = connection.prepareStatement(query.toString());
+                rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    Result<PerGeoLocationUsageCount> result1 = new Result<PerGeoLocationUsageCount>();
+                    int count = rs.getInt("count");
+                    String country1 = rs.getString("country");
+                    String city = rs.getString("city");
+                    List<String> facetValues = new ArrayList<String>();
+                    facetValues.add(country1);
+                    facetValues.add(city);
+                    PerGeoLocationUsageCount perGeoLocationUsageCount = new PerGeoLocationUsageCount(count,
+                            facetValues);
+                    result1.setValues(perGeoLocationUsageCount);
+                    result1.setTableName(tableName);
+                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                    result.add(result1);
+                }
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + tableName +
+                                " does not exist.");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            closeDatabaseLinks(rs, preparedStatement, connection);
+        }
+        return result;
+
+    }
+
+    @Override
+    public List<Result<UserAgentUsageCount>> getUserAgentUsageByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown) throws APIMgtUsageQueryServiceClientException {
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("DAS data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+        List<Result<UserAgentUsageCount>> result = new ArrayList<Result<UserAgentUsageCount>>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            StringBuilder query = new StringBuilder("SELECT sum(total_request_count) as count,country,city " +
+                    "FROM ");
+            String tableName = APIUsageStatisticsClientConstants.API_REQUEST_USER_BROWSER_SUMMARY;
+            query.append(tableName).append(" WHERE ");
+            query.append("api='" + apiName).append("'");
+            if (version != null && !"ALL".equals(version)) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
+                        .append("'");
+            }
+            if (tenantDomain != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
+                        (tenantDomain).append("'");
+            }
+            if (fromDate != null && toDate != null) {
+                try {
+                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append("requestTime")
+                            .append(" AND ").append(" requestTime ").append("<=").append(getDateToLong(toDate));
+                } catch (ParseException e) {
+                    handleException("Error occurred while Error parsing date", e);
+                }
+            }
+            if (!"ALL".equals(drillDown)) {
+                query.append(" AND os ='").append(drillDown).append("'");
+            }
+            query.append(" GROUP BY os ");
+            if (!"ALL".equals(drillDown)) {
+                query.append(",browser");
+            }
+            if (isTableExist(tableName, connection)) { //Tables exist
+                preparedStatement = connection.prepareStatement(query.toString());
+                rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    Result<UserAgentUsageCount> result1 = new Result<UserAgentUsageCount>();
+                    int count = rs.getInt("count");
+                    String country1 = rs.getString("os");
+                    String city = rs.getString("browser");
+                    List<String> facetValues = new ArrayList<String>();
+                    facetValues.add(country1);
+                    facetValues.add(city);
+                    UserAgentUsageCount perGeoLocationUsageCount = new UserAgentUsageCount(count,
+                            facetValues);
+                    result1.setValues(perGeoLocationUsageCount);
+                    result1.setTableName(tableName);
+                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                    result.add(result1);
+                }
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + tableName +
+                                " does not exist.");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            closeDatabaseLinks(rs, preparedStatement, connection);
+        }
+        return result;
     }
 }

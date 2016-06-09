@@ -1,0 +1,7 @@
+<%
+jagg.initializer("policy/app/edit", {
+    preInitialize:function () {
+        jagg.addHeaderJS("policy/app/edit", "jagg", "templates/policy/app/edit/js/edit.js");
+    }
+});
+%>

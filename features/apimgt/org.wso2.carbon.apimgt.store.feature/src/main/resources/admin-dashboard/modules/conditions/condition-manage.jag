@@ -1,0 +1,44 @@
+<%
+var log = new Log();
+
+var getAllconditions = function(){
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var conditions = apiProvider.getBlockConditions();
+        return {
+            error: false,
+            conditions: conditions
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while retrieving conditions (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+var deleteCondition = function(conditionId){
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var conditions = apiProvider.deleteBlockCondition(conditionId);
+        return {
+            error: false,
+            result: conditions
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while retrieving conditions (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+%>

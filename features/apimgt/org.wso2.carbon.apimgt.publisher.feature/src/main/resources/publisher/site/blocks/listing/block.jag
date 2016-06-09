@@ -23,7 +23,7 @@ jagg.block("listing", {
         if (page == null) {
             page = 1;
         }
-        var itemsPerPage = 10;
+        var itemsPerPage = 12;
         var currentPage = page;
         var start = itemsPerPage*(page-1);
         if (query) {

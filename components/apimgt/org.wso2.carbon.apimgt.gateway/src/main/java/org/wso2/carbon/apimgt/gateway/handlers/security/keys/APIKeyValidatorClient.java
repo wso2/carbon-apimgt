@@ -127,7 +127,7 @@ public class APIKeyValidatorClient {
         dto.setApplicationName(generatedDto.getApplicationName());
         dto.setEndUserName(generatedDto.getEndUserName());
         dto.setConsumerKey(generatedDto.getConsumerKey());
-        dto.setAuthorizedDomains(Arrays.asList(generatedDto.getAuthorizedDomains()));
+        //dto.setAuthorizedDomains(Arrays.asList(generatedDto.getAuthorizedDomains()));
         dto.setValidationStatus(generatedDto.getValidationStatus());
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
@@ -135,7 +135,14 @@ public class APIKeyValidatorClient {
         dto.setApiName(generatedDto.getApiName());
         dto.setValidityPeriod(generatedDto.getValidityPeriod());
         dto.setIssuedTime(generatedDto.getIssuedTime());
+        dto.setApiTier(generatedDto.getApiTier());
+        dto.setContentAware(generatedDto.getContentAware());
         dto.setScopes(generatedDto.getScopes() == null ? null : new HashSet<String>(Arrays.asList(generatedDto.getScopes())));
+        dto.setThrottlingDataList(Arrays.asList(generatedDto.getThrottlingDataList()));
+        dto.setSpikeArrestLimit(generatedDto.getSpikeArrestLimit());
+        dto.setSpikeArrestUnit(generatedDto.getSpikeArrestUnit());
+        dto.setSubscriberTenantDomain(generatedDto.getSubscriberTenantDomain());
+        dto.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
         return dto;
     }
 
@@ -172,6 +179,7 @@ public class APIKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+        template.setThrottlingConditions((Arrays.asList(dto.getThrottlingConditions())));
         return template;
     }
 }

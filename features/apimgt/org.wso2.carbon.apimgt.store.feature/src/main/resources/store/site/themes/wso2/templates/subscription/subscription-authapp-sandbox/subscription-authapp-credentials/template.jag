@@ -1,0 +1,64 @@
+<% jagg.template("subscription/subscription-authapp-sandbox/subscription-authapp-credentials", function (inputs, outputs, jagg) { %>
+    <%
+    var log = new Log();
+    var application = inputs.application;
+
+    if(typeof(inputs.app.jsonParametersSandBox) != "undefined"){
+        var jsonParametersSandBox = parse(inputs.app.jsonParametersSandBox);
+        if(typeof(jsonParametersSandBox.token_endpoint_auth_method) !="undefined"  && jsonParametersSandBox.token_endpoint_auth_method){
+            var authMethodSandBox = jsonParametersSandBox.token_endpoint_auth_method;
+
+        }else{
+            var authMethodSandBox=null;
+        }
+        var cancleBtnClass = "iBtnCancleUpdateSandbox";
+    }else{
+
+            var authMethodSandBox=null;
+        var cancleBtnClass = "btnCancleCreateSandBox";
+    }
+
+
+    %>
+<fieldset>
+
+        <div class="tabElementset">
+            <div class="cDivTabLabel cDivAuthMethodLbl">
+                <label class="control-label" for="">Token endpoint authentication method:</label>
+            </div>
+            <div class="grantGroup">
+                <div class="cDivAuthMethodElementSandBox">
+                    <input class="input-xlarge iAuthMethodSandBox" title="Client_Secret_over_HTTP_Basic" type="radio" <% if(authMethodSandBox=="client_secret_basic") print("Checked"); %>  name=iAuthMethodSandBox" value="client_secret_basic"> Client Secret over HTTP Basic
+                </div>
+                <div class="cDivAuthMethodElementSandBox">
+                    <input title="Client_Secret_over_HTTP_POST" class="input-xlarge iAuthMethodSandBox" type="radio" <% if(authMethodSandBox=="client_secret_post") print("Checked"); %>  name=iAuthMethodSandBox" value="client_secret_post"> Client Secret over HTTP POST
+                </div>
+                <div class="cDivAuthMethodElementSandBox">
+                    <input title="Client_Secret_via_symmetrically-signed_JWT_assertion" class="input-xlarge iAuthMethodSandBox" type="radio" <% if(authMethodSandBox=="client_secret_jwt") print("Checked"); %>  name=iAuthMethodSandBox" value="client_secret_jwt"> Client Secret via symmetrically-signed JWT assertion
+                </div>
+                <div class="cDivAuthMethodElementSandBox">
+                    <input title="Asymmetrically_signed_JWT_assertion" class="input-xlarge iAuthMethodSandBox" type="radio" <% if(authMethodSandBox=="private_key_jwt") print("Checked"); %> name=iAuthMethodSandBox" value="private_key_jwt"> Asymmetrically-signed JWT assertion
+                </div>
+                <div class="cDivAuthMethodElementSandBox">
+                    <input title="No_authentication" class="input-xlarge iAuthMethodSandBox" type="radio" <% if(authMethodSandBox=="none") print("Checked"); %> name=iAuthMethodSandBox" value="none"> No authentication
+                </div>
+            </div>
+
+        </div>
+
+        <div class="control-group">
+
+            <button  class="cDivActionList btnRegisterClientSandbox  btn btn-primary">
+                Save
+            </button>
+            <button  class="cDivActionList <%= cancleBtnClass %>  btn btn-primary">
+                Cancel
+            </button>
+
+        </div>
+    </fieldset>
+
+
+
+<%
+}); %>

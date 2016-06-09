@@ -1,6 +1,0 @@
-<% jagg.template("footer", function(inputs, outputs, jagg) { %>
-<footer class="page-footer text-center">                                   
-  &copy; WSO2  2015 All Rights Reserved. | 
-  <a href="http://wso2.com/products/api-manager" target="_blank">API Manager</a>
-</footer>
-<% }); %>

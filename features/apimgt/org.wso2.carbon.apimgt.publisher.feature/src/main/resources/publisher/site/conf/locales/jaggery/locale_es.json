@@ -13,6 +13,7 @@
     "icon" : "Icono" ,
     "tags" : "Etiquetas" ,
     "tier" : "Nivel Disponibilidad" ,
+    "subTier" : "Niveles de suscripción" ,
     "busiOwner" : "Empresa propietaria" ,
     "busiOwnerMail" : "Email de la empresa" ,
     "techOwner" : "Equipo técnico " ,
@@ -176,7 +177,7 @@
     "lifecycleHistory": "Historia del ciclo de vida",
     "testURI": "Probar URI",
 
-    "tierHelpMsg" : "Niveles que regulan la velocidad a la cual un suscriptor puede enviar solicitudes a la API. Una API puede ser expuesta en una o varias capas y los suscriptores pueden elegir uno de los niveles permitidos cuando se suscribe a una API." ,
+    "tierHelpMsg" : "Los niveles que seleccione aquí son los que están disponibles para los suscriptores para suscribirse a esta API." ,
     "roleHelpMsg" : "Esta opción controla la visibilidad API se basa en la función de usuario en ambas aplicaciones. Si la API se puede acceder por todos, incluyendo a los usuarios anónimos, a continuación, seleccione la visibilidad como 'Pública'. Si desea restringir el visiblity de API para los usuarios registrados en su dominio, a continuación, seleccione 'Visible a mi dominio'. Else seleccionarlo como 'restringido' y entrar en las funciones de los usuarios a los que el API se puede acceder desde las dos aplicaciones. ",
     "tenantRoleHelpMsg" : "Esta opción controla la visibilidad de la API en función del usuario." ,
     "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ",
@@ -243,7 +244,12 @@
     "demote to prototyped" : "Degradar a Prototipado",
     "deprecate" : "desaprobar",
     "re-publish" : "Volver a publicar",
-    "retire" : "Retirarse"
+    "retire" : "Retirarse",
+
+    "applicationsOverTime" : "Applications Time",
+    "userSubscriptionsOverTime" : "Subscriptions Time",
+    "developersOverTime" : "Developers Time"
+
     
     
 

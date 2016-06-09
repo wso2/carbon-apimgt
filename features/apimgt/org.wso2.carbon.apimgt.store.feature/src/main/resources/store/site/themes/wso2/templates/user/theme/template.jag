@@ -1,0 +1,11 @@
+<%
+include("/jagg/jagg.jag");
+var site = require("/site/conf/site.json");
+
+var subtheme = request.getParameter("subthemeToApply");
+session.put("theme", {
+	"base" : request.getParameter("themeToApply") || 'wso2',
+    "subtheme" : (subtheme && subtheme != "") ? subtheme : null
+});
+response.sendRedirect(jagg.urlTenanted("/"));
+%>

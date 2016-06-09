@@ -16,13 +16,23 @@ i18n.init(request,localeResourcesBasePath);
         "name":"page/base",
         "inputs":{
             "title":title,
+            "header":{
+                "name":"menu/primary"
+            },
             "pagePath":"/site/pages/doc-viewer.jag",
             "body":[
                 {
                     "name":"layout/base",
                     "inputs":{
                         "top":null,
-                        "left":null,
+                        "left":[{
+                            "name":"menu/left",
+                             "inputs":{"tenant":tenantDomain}
+                        }],
+                        "breadcrumb":[{
+                            "name":"breadcumb",
+                            "inputs":{"tenant":tenantDomain}
+                        }],
                         "middle":{
                             "name":"documentation/view"
                         },

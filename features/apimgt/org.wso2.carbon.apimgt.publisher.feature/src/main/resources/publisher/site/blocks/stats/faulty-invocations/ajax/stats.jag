@@ -22,7 +22,9 @@ include("/jagg/jagg.jag");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
             var currentLocation = request.getParameter("currentLocation");
-            if (currentLocation.indexOf("all-statistics") >= 0) {
+            var apiFilter = request.getParameter("apiFilter");
+            
+            if (currentLocation.indexOf("all-statistics") >= 0  && (!apiFilter || (apiFilter != "myAPIs"))) {
                 result = mod.getAPIResponseFaultCount(allProviders, from, to);
             } else {
                 result = mod.getAPIResponseFaultCount(provider, from, to);
@@ -49,25 +51,6 @@ include("/jagg/jagg.jag");
             } else {
                 result = mod.getFirstAccessTime(provider);
             }
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-
-        else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
             if (result.error == "true") {
                 obj = {
                     error: result.error,

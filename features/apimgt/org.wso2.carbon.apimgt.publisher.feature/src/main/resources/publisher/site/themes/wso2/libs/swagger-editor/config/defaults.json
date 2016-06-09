@@ -1,0 +1,32 @@
+{
+  "codegen": {
+
+  },
+  "analytics": {
+    "google": {
+      "id": ""
+    }
+  },
+  "disableCodeGen": true,
+  "disableExamples":true,
+  "disableImport":true,
+  "examplesFolder": "spec-files/",
+  "editorOptions": {
+    "theme": "ace/theme/atom_dark"
+  },
+  "exampleFiles": [
+  ],
+  "autocompleteExtension": {},
+  "useBackendForStorage": false,
+  "backendThrottle": 200,
+  "keyPressDebounceTime": 200,
+  "backendEndpoint": "/editor/spec",
+  "useYamlBackend": false,
+  "disableFileMenu": false,
+  "headerBranding": true,
+  "disableNewUserIntro": false,
+  "enableTryIt": false,
+  "brandingCssClass": "wso2apim",
+  "importProxyUrl": "",
+  "disableNewUserIntro": true
+}

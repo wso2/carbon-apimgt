@@ -21,7 +21,9 @@ include("/jagg/jagg.jag");
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
         var mode = request.getParameter("mode");
-        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+        var apiFilter = request.getParameter("apiFilter");
+        
+        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
             result = mod.getProviderAPIServiceTime(allProviders,from,to);
         } else if (mode != null && mode == "browse") {
             provider = request.getParameter("provider");
@@ -64,25 +66,7 @@ include("/jagg/jagg.jag");
         }
         print(obj);
 
-    } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
-            if (result.error == "true") {
-                obj = {
-                    error: result.error,
-                    message: msg.error.backendError(action)
-                };
-            } else {
-                obj = {
-                    error: false,
-                    usage: result.usage
-                }
-            }
-            print(obj);
-
-        }
-        
+    }         
     else {
         print({
                   error:true,

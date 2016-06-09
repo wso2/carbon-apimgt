@@ -1,0 +1,191 @@
+<% jagg.template("menu/actions", function(inputs, outputs, jagg) { %>
+            <%
+                var encode = require('encode');
+                encode = new encode.Encode();
+                var tenantDomain = encode.forUriComponent(request.getParameter("tenant"));
+                var site = require("/site/conf/site.json");
+                var ssoEnabled = site.ssoConfiguration.enabled;
+                var urlPrefix = '', urlPostfix = '', isCreatePermitted, isPublishPermitted, api;
+
+                if(tenantDomain!='null'){
+                	urlPrefix = "?tenant=" + tenantDomain;
+                	urlPostfix = "&tenant=" + tenantDomain;
+                }
+                
+                api = outputs.api;
+                
+                var reqUrl = jagg.getAbsoluteReqUrl(request.getRequestURI()) + urlPrefix;       
+                
+                
+                var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
+                var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;
+                
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;;
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;;
+                
+                var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag") + urlPrefix;
+                var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag") + urlPrefix;
+                
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag") + urlPrefix;
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag") + urlPrefix;
+                
+                var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
+                var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
+                                
+                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag") + urlPrefix;
+                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag") + urlPrefix;
+                
+                var addDesignUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+                var addImplementUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
+                var addManageUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
+                
+                var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+                var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
+                
+                isCreatePermitted = jagg.getCreatePermitted().permitted;
+                isPublishPermitted = jagg.getPublishPermitted().permitted;
+            %>
+            
+        <div class="navbar-wrapper">
+		<nav class="navbar navbar-default" data-spy="affix"
+			data-offset-top="85" data-offset-bottom="40">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-menu-toggle collapsed hidden"
+						data-toggle="collapse" data-target="#navbar2" aria-expanded="false"
+						aria-controls="navbar2" title="navigator bar"> <span class="icon fw-stack"> <i
+							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i>
+					</span>
+					
+					</a> 
+					
+<a class="navbar-menu-toggle active" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="true" rel="leftmenu-sidebar">
+                        <span class="icon fw-stack">
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+                        </span>
+                        </a>
+					
+					
+				</div>
+				<!-- Actions Bar -->
+				<div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                    	<% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){ %>
+	                        <%if(isCreatePermitted) {%>
+	                        <li>
+	                            <a title="<%=i18n.localize("addAPI")%>" href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("addAPI")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("addAPI")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("addAPI")%>
+	                            </a>
+	                        </li>
+	                        <%} %>
+                        <%} %>
+                        <% if(reqUrl.indexOf(addUrl)>=0 ||reqUrl.indexOf(addMappedUrl)>=0){ %>
+	                        <li>
+	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("goBack")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                        <% if(reqUrl.indexOf(infoUrl)>=0 ||reqUrl.indexOf(infoMappedUrl)>=0){%>
+	                        <%
+	                        	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+	                        	if(isCreatePermitted) {	                            
+	                        %>
+	                        <li>
+	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("goBack")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
+	                        <li>
+	                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("editAPI")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("editAPI")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("editAPI")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("editAPI")%>
+	                            </a>
+	                        </li>
+	                        <li>
+	                            <a href="<%=jagg.url("/version")%>?<%=apiUrlId%>" title="<%=i18n.localize("CreateNewVersion")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("CreateNewVersion")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("CreateNewVersion")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("CreateNewVersion")%>
+	                            </a>
+	                        </li>
+	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        
+	                        <li>
+	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>" title="<%=i18n.localize("manageAPI")%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-settings fw-stack-1x" title="<%=i18n.localize("manageAPI")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("manageAPI")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("manageAPI")%>
+	                            </a>
+	                        </li>
+	                        <%} %>	                        
+                        <%} %>
+                        <% if(reqUrl.indexOf(versionUrl)>=0 ||reqUrl.indexOf(versionMappedUrl)>=0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a title="<%=i18n.localize("goBack")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goBack")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                        <% if(reqUrl.indexOf(addDesignUrl) >= 0 || reqUrl.indexOf(addImplementUrl) >= 0 || reqUrl.indexOf(addManageUrl) >= 0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goToOverView")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                        <% if(reqUrl.indexOf(docViewerMappedUrl) >= 0 || reqUrl.indexOf(docViewerUrl) >= 0){ %>
+                        	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
+	                      <li>
+	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                </span>
+	                                <%=i18n.localize("goToOverView")%>
+	                            </a>
+	                        </li>
+                        <%} %>
+                    </ul>
+           </div>
+				<!-- End Actions Bar -->
+			</div>	
+		</nav>
+</div>
+            
+        
+
+<% }); %>

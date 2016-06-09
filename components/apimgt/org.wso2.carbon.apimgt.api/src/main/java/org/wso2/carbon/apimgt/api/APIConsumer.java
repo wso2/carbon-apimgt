@@ -182,12 +182,11 @@ public interface APIConsumer extends APIManager {
      * @param clientId this is the consumer key of oAuthApplication
      * @param applicationName this is the APIM appication name.
      * @param keyType
-     *@param allowedDomainArray @return
+     * @return
      * @throws APIManagementException
      */
     Map<String,Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-                                                     String applicationName, String keyType,
-                                                     String[] allowedDomainArray) throws APIManagementException;
+                                                     String applicationName, String keyType) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -440,6 +439,20 @@ public interface APIConsumer extends APIManager {
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
+    
+    
+    /**
+     * Returns API Search result based on the provided query
+     * @param searchQuery search query
+     * @param tenantDomain tenant domain 
+     * @param start starting number
+     * @param end ending number
+     * @param limitAttributes whether or not to limit attributes in the search result
+     * @return API result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
+                                           boolean limitAttributes) throws APIManagementException;
 
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
@@ -473,23 +486,6 @@ public interface APIConsumer extends APIManager {
      */
     boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
-    /**
-     * Add allowed domains for given application which is identified by OAuth consumer key
-     * This will directly add allowed domains in to API Manager database
-     * @param oAuthConsumerKey OAuth consumer key
-     * @return
-     * @throws APIManagementException
-     */
-    void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws APIManagementException;
-
-    /**
-     * Update exiting access allowing domain list
-     * @param accessToken
-     * @param accessAllowDomains
-     * @throws APIManagementException
-     */
-    void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains) throws APIManagementException;
-    
     /**
      * Returns a list of Tiers denied for the current user
      *
@@ -548,6 +544,20 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
                                                           boolean returnAPITags) throws APIManagementException;
+    
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @param Status One or more Statuses
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
+                                                   boolean returnAPITags) throws APIManagementException;
 
     /**
      * Revokes the oldAccessToken generating a new one.
@@ -556,13 +566,12 @@ public interface APIConsumer extends APIManager {
      * @param clientId                Consumer Key for the Application
      * @param clientSecret            Consumer Secret for the Application
      * @param validityTime            Desired Validity time for the token
-     * @param accessAllowDomainsArray List of domains that this access token should be allowed to.
      * @param jsonInput               Additional parameters if Authorization server needs any.
      * @return Details of the newly generated Access Token.
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] accessAllowDomainsArray,String[] requestedScopes, String jsonInput) throws
+                                     String[] requestedScopes, String jsonInput) throws
             APIManagementException;
 
 	/**
@@ -598,4 +607,5 @@ public interface APIConsumer extends APIManager {
 	JSONObject resumeWorkflow(Object[] args);
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
+
 }

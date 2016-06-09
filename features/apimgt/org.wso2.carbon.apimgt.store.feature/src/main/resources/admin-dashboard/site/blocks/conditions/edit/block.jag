@@ -1,0 +1,16 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("conditions/edit", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+
+        getOutputs:function (inputs) {
+        }
+});
+%>

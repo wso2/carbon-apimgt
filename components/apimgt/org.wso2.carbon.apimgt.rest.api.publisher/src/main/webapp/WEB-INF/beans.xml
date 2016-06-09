@@ -10,6 +10,7 @@
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.SwaggerJsonApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApi"/>
@@ -29,10 +30,13 @@
             <entry key="map.cxf.interceptor.fault" value="true" />
         </jaxrs:properties>
     </jaxrs:server>
+
+    <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
     <cxf:bus>
         <cxf:inInterceptors>
+            <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
         </cxf:inInterceptors>

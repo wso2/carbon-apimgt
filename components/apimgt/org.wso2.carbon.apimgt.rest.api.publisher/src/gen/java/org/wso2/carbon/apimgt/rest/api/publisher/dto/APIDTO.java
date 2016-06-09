@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import java.util.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
@@ -95,6 +96,9 @@ public class APIDTO  {
   
   
   private APIBusinessInformationDTO businessInformation = null;
+  
+  
+  private APICorsConfigurationDTO corsConfiguration = null;
 
   
   /**
@@ -402,6 +406,18 @@ public class APIDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("corsConfiguration")
+  public APICorsConfigurationDTO getCorsConfiguration() {
+    return corsConfiguration;
+  }
+  public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
+    this.corsConfiguration = corsConfiguration;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -433,6 +449,7 @@ public class APIDTO  {
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
+    sb.append("  corsConfiguration: ").append(corsConfiguration).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

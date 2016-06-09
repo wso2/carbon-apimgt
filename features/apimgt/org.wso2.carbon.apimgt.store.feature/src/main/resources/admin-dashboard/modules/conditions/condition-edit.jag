@@ -1,0 +1,43 @@
+<%
+var log = new Log();
+var updateCondition = function (conditionId, conditionState) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var conditions = apiProvider.updateBlockCondition(conditionId, conditionState);
+        return {
+            error: false,
+            result: conditions
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while updating conditions (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+var addCondition = function (conditionType, conditionValue) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var conditions = apiProvider.addBlockCondition(conditionType, conditionValue);
+        return {
+            error: false,
+            result: conditions
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while adding conditions: " + ex.message.split("APIManagementException:")[1];
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+%>

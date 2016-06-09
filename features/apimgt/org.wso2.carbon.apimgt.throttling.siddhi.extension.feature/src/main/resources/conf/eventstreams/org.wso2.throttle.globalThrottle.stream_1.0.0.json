@@ -1,0 +1,20 @@
+{
+  "name": "org.wso2.throttle.globalThrottle.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "throttleKey",
+      "type": "STRING"
+    },
+    {
+      "name": "isThrottled",
+      "type": "BOOL"
+    },
+    {
+      "name": "expiryTimeStamp",
+      "type": "LONG"
+    }
+  ]
+}

@@ -655,4 +655,297 @@ function getThrottleDataOfAPIAndApplication(apiName, providerName, appName, from
         };
     }
 }
+function getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByAPI for : " + providerName);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+function getExecutionTimeByMediationType(apiName,version,tenantDomain,fromDate,toDate,drilldown,mediationType) {
+    var usage;
+    try {
+              usage = usageClient.getExecutionTimeByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown,mediationType);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+function getGeolocationUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getGeoLocationsByApi(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+function getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown) {
+    var usage;
+    try {
+              usage = usageClient.getUserAgentUsageByAPI(apiName,version,tenantDomain,fromDate,toDate,drilldown);            
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+//Adding new graps from the analytics app
+function getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getDeveloperSignUpsOverTime(apiName, provider, apiFilter, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getApplicationRegistrationOverTime(subscribedApi, provider, developer, apiFilter, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getAPISubscriptionsPerApp(apiName, provider, apiFilter, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getDeveloperList(provider, apiFilter, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getDeveloperList(provider, apiFilter, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getApisList(provider, apiFilter, limit) {
+    var usage;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getApisList(provider, apiFilter, limit);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + tenantDomain);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage = JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>

@@ -362,11 +362,8 @@ return getThemePath() + path;
 
     var getAbsoluteUrl = function (path) {
         var host = "" 
-        if(isReverseProxyEnabled()){
-            host = "https://" + site.reverseProxy.host ;
-        }else{
-            var match = getRequestSegments();
-            var host = match.protocol + "//" + match.host;
+       	if(isReverseProxyEnabled()){
+        	host = "https://" + site.reverseProxy.host ;
         }
         return host + url(path);
     };
