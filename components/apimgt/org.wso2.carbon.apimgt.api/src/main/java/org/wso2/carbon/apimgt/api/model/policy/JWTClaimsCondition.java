@@ -58,7 +58,9 @@ public class JWTClaimsCondition extends Condition{
 
     @Override
     public String getNullCondition() {
-        return nullFilterQueryString;
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                + PolicyConstants.QUOTE + PolicyConstants.NULL_CHECK + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
+        return condition;
     }
 
     @Override

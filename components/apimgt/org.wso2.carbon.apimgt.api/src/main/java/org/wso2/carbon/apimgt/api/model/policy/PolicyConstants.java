@@ -62,6 +62,8 @@ public class PolicyConstants {
     
     public static final String QUOTE = "'";
 
+    public static final String NULL_CHECK = "null";
+
     public static final String START_QUERY = "cast(map:get(propertiesMap,'";
 
     public static final String NULL_START_QUERY = "map:get(propertiesMap,'";
