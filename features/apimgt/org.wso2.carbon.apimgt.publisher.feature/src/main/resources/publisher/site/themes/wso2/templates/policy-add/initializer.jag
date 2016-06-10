@@ -17,9 +17,9 @@ jagg.initializer("policy-add", {
          jagg.addFooterJS("bootstrap-editable.min", "jagg", "templates/item-design/js/bootstrap-editable.js");
          jagg.addFooterJS("jsonpath-0.8.0", "jagg", "templates/item-design/js/jsonpath-0.8.0.js");
 
-         jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
+         jagg.addHeaderCSS("tagscss", "jagg", "libs/bootstrap-taginput/bootstrap-tagsinput.css");
 
-         jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
+         jagg.addFooterJS("tagsjs", "jagg", "libs/bootstrap-taginput/bootstrap-tagsinput.min.js");
 
 
          jagg.addFooterJS("yaml2json", "jagg", "templates/item-design/js/js-yaml.min.js");
