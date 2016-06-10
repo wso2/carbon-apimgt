@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.*;
+
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RegistrationServiceImpl implements RegistrationService {
@@ -69,7 +71,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private ServiceProvider appServiceProvider;
     private String loggedInUserTenantDomain, applicationName, authUserName, appName, callbackUrl, userName;
     private String grantTypes;
-    private String consumerKey;
+    //private String consumerKey;
     private String errorMsg;
     private String userNameForSP;
     private static final String OAUTH_TYPE= "oauth2";
@@ -94,7 +96,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         ErrorDTO errorDTO;
         try {
             //KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            AMDefaultKeyManagerImpl amdKeyManager = new AMDefaultKeyManagerImpl();
+            //AMDefaultKeyManagerImpl amdKeyManager = new AMDefaultKeyManagerImpl();
             OAuthAppRequest appRequest = new OAuthAppRequest();
             applicationInfo = new OAuthApplicationInfo();
             OAuthApplicationInfo returnedAPP;
@@ -114,7 +116,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 //getting client credentials from the payload
                 applicationInfo.setClientName(profile.getClientName());
                 applicationInfo.setCallBackURL(profile.getCallbackUrl());
-                applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                applicationInfo.addParameter(OAUTH_CLIENT_USERNAME, owner);
                 applicationInfo.setClientId("");
                 applicationInfo.setClientSecret("");
                 applicationInfo.setIsSaasApplication(profile.isSaasApp());
@@ -122,7 +124,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                String userId = (String) applicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+                String userId = (String) applicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 userName = MultitenantUtils.getTenantAwareUsername(userId);
                 userNameForSP = userName;
                 applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
@@ -139,10 +141,10 @@ public class RegistrationServiceImpl implements RegistrationService {
                     log.error(errorMsg);
                 }
                 if (appServiceProvider != null) {
-                    consumerKey = this.getConsumerKey(appServiceProvider);
+                    //consumerKey = this.getConsumerKey(appServiceProvider);
 
                     //retirving the existing application
-                    retrivedApp = amdKeyManager.retrieveApplication(consumerKey);
+                    retrivedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
 
                     //check if the client request values and existing application's values are different
                     if (retrivedApp.getIsSaasApplication() != applicationInfo.getIsSaasApplication() ||
@@ -158,7 +160,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                         }
                         //parameter values are input insert into a map
                         HashMap<String, String> returnMap = new HashMap<String,String>();
-                        returnMap.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                        returnMap.put(OAUTH_CLIENT_USERNAME, owner);
 
                         //mapping updated values to a OAuthApplicationInfo object
                         returnedAPP = this.settingUpdatingValues(retrivedApp.getClientId(), retrivedApp.getClientName(),
@@ -192,11 +194,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                 errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg);
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-        } catch (APIManagementException e) {
-            String msg = "Error occurred while registering client '" + profile.getClientName() + "'";
-            errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, msg);
-            response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-            log.error(msg, e);
         } catch (APIKeyMgtException e) {
             errorMsg = "Error occured while trying to create the client application " + applicationName;
             log.error(errorMsg);
@@ -264,7 +261,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         OAuthConsumerAppDTO oAuthConsumerAppdto = new OAuthConsumerAppDTO();
 
-        oAuthConsumerAppdto.setOauthConsumerKey(consumerKey);
+        oAuthConsumerAppdto.setOauthConsumerKey(retrivedApp.getClientId());
         oAuthConsumerAppdto.setOauthConsumerSecret(retrivedApp.getClientSecret());
         oAuthConsumerAppdto.setApplicationName(applicationName);
         oAuthConsumerAppdto.setCallbackUrl(applicationInfo.getCallBackURL());
@@ -336,33 +333,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     /**
-     *
-     * @return the consumer key of the service provider
-     */
-    private String getConsumerKey(ServiceProvider serviceprovider) {
-
-        String key = null;
-
-        if (serviceprovider.getInboundAuthenticationConfig() != null &&
-                serviceprovider.getInboundAuthenticationConfig().getInboundAuthenticationRequestConfigs() != null) {
-
-            InboundAuthenticationRequestConfig[] configs = serviceprovider.getInboundAuthenticationConfig()
-                    .getInboundAuthenticationRequestConfigs();
-
-            //getting the consumer key of the existing application
-            for (InboundAuthenticationRequestConfig config : configs) {
-                if (IdentityApplicationConstants.OAuth2.NAME.equalsIgnoreCase(config.getInboundAuthType()) &&
-                        config.getInboundAuthKey() != null) {
-
-                    key = config.getInboundAuthKey();
-                    break;
-                }
-            }
-        }
-        return key;
-    }
-
-    /**
      *create a new client application
      * @param appRequest Client request credentials
      * @return created Application
@@ -374,7 +344,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         callbackUrl = applicationInfo.getCallBackURL();
         appName = applicationInfo.getClientName();
-        String userId = (String) applicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+        String userId = (String) applicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
         boolean isTenantFlowStarted = false;
 
         if (userId == null || userId.isEmpty()) {
@@ -415,7 +385,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             }
 
             //creating the OAuth app
-            OAuthConsumerAppDTO createdOauthApp = this.createoAuthApp();
+            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp();
 
             // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
@@ -446,9 +416,9 @@ public class RegistrationServiceImpl implements RegistrationService {
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
 
             Map<String, String> valueMap = new HashMap<String,String>();
-            valueMap.put(ApplicationConstants.OAUTH_REDIRECT_URIS, createdOauthApp.getCallbackUrl());
-            valueMap.put(ApplicationConstants.OAUTH_CLIENT_NAME, createdOauthApp.getApplicationName());
-            valueMap.put(ApplicationConstants.OAUTH_CLIENT_GRANT, createdOauthApp.getGrantTypes());
+            valueMap.put(OAUTH_REDIRECT_URIS, createdOauthApp.getCallbackUrl());
+            valueMap.put(OAUTH_CLIENT_NAME, createdOauthApp.getApplicationName());
+            valueMap.put(OAUTH_CLIENT_GRANT, createdOauthApp.getGrantTypes());
 
             //adjusting values to be return in to the user
             return this.settingUpdatingValues(createdOauthApp.getOauthConsumerKey(),
@@ -471,7 +441,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * @return created client App
      */
-    private OAuthConsumerAppDTO createoAuthApp() {
+    private OAuthConsumerAppDTO createOAuthApp() {
 
         OAuthConsumerAppDTO createdApp = null;
         OAuthAdminService oauthAdminService = new OAuthAdminService();
@@ -503,5 +473,31 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         log.debug("created OAuth App " + appName);
         return createdApp;
+    }
+
+    /**
+     * retrieve the existing client application
+     * @param applicationName client application name
+     * @param saasApp value of retrived IsSaasApp attribute.
+     * @return existing Application data
+     */
+    private OAuthApplicationInfo getExistingApp(String applicationName, boolean saasApp){
+
+        OAuthApplicationInfo appToReturn=null;
+        OAuthAdminService oAuthAdminService = new OAuthAdminService();
+        try {
+            OAuthConsumerAppDTO consumerAppDTO = oAuthAdminService.getOAuthApplicationDataByAppName(applicationName);
+            Map<String, String> valueMap = new HashMap<String,String>();
+            valueMap.put(OAUTH_CLIENT_GRANT, consumerAppDTO.getGrantTypes());
+
+                    appToReturn = this.settingUpdatingValues(consumerAppDTO.getOauthConsumerKey(),
+                    consumerAppDTO.getApplicationName(),consumerAppDTO.getCallbackUrl(),
+                    consumerAppDTO.getOauthConsumerSecret(),saasApp,null,valueMap);
+
+        } catch (IdentityOAuthAdminException e) {
+          errorMsg="error occur while tryng to get OAuth Application data";
+            log.error(errorMsg);
+        }
+        return appToReturn;
     }
 }
