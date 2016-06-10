@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -2311,37 +2312,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private void invalidateCachedKeys(int applicationId) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config.getApiGatewayEnvironments().isEmpty()) {
-            return;
-        }
-
-        Set<String> consumerKeys = apiMgtDAO.getConsumerKeysOfApplication(applicationId);
-
-        Set<String> activeTokens = new HashSet<String>();
-        for (String consumerKey : consumerKeys) {
-            Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
-                    getActiveTokensByConsumerKey(consumerKey);
-            if (tempTokens != null) {
-                activeTokens.addAll(tempTokens);
-            }
-        }
-
-        if (activeTokens.isEmpty()) {
-            return;
-        }
-
-        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-        try {
-            for (Environment environment : gatewayEnvs.values()) {
-                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-                client.invalidateCachedTokens(activeTokens);
-            }
-        } catch (AxisFault axisFault) {
-            //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
-            log.error("Error occurred while invalidating the Gateway Token Cache ", axisFault);
-        }
+        CacheInvalidator.getInstance().invalidateCacheForApp(applicationId);
     }
 
     @Override
