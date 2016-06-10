@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -40,7 +39,6 @@ import org.wso2.carbon.identity.application.common.model.InboundAuthenticationCo
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
-import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.application.mgt.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
@@ -71,7 +69,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     private ServiceProvider appServiceProvider;
     private String loggedInUserTenantDomain, applicationName, authUserName, appName, callbackUrl, userName;
     private String grantTypes;
-    //private String consumerKey;
     private String errorMsg;
     private String userNameForSP;
     private static final String OAUTH_TYPE= "oauth2";
@@ -95,8 +92,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         String errorMsg;
         ErrorDTO errorDTO;
         try {
-            //KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            //AMDefaultKeyManagerImpl amdKeyManager = new AMDefaultKeyManagerImpl();
             OAuthAppRequest appRequest = new OAuthAppRequest();
             applicationInfo = new OAuthApplicationInfo();
             OAuthApplicationInfo returnedAPP;
@@ -141,8 +136,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                     log.error(errorMsg);
                 }
                 if (appServiceProvider != null) {
-                    //consumerKey = this.getConsumerKey(appServiceProvider);
-
                     //retirving the existing application
                     retrivedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
 
@@ -455,8 +448,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         grantTypeString.append(grantTypes).append(" ");
 
         if (!StringUtils.isBlank(callbackUrl)) {
-            grantTypeString.append(ApplicationConstants.AUTHORIZATION_CODE).append(" ");
-            grantTypeString.append(ApplicationConstants.IMPLICIT).append(" ");
+            grantTypeString.append(AUTHORIZATION_CODE).append(" ");
+            grantTypeString.append(IMPLICIT).append(" ");
         }
 
         oauthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
