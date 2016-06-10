@@ -3,7 +3,7 @@ jagg.initializer("api/api-info", {
 
     preInitialize:function () {
         jagg.addFooterJS("api/api-info", "api-info", "templates/api/api-info/js/api-info.js");
-        jagg.addFooterJS("api/api-info", "common-js", "libs/common.js");
+        jagg.addFooterJS("api/api-info", "common-js", "js/common.js");
     },
 
     postInitialize:function(inputs, outputs) {

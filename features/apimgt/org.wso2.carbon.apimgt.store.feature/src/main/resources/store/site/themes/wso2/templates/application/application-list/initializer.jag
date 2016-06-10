@@ -2,7 +2,7 @@
 jagg.initializer("application/application-list", {
 
     preInitialize:function () {
-        jagg.addFooterJS("application/view", "applications", "libs/applications.js");
+        jagg.addFooterJS("application/view", "applications", "js/applications.js");
     }
 });
 %>

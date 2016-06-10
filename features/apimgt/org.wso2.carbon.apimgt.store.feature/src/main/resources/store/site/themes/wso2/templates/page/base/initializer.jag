@@ -35,12 +35,12 @@ jagg.initializer("page/base", {
         jagg.addHeaderJSCode("page/base", "jagg.site", 'jagg.site = ' + stringify(jaggi) + ';');
         jagg.addHeaderJSCode("page/base", "jagg.loggedIn", 'jagg.loggedIn = ' + Boolean(jagg.getUser()) + ';');
 
-        jagg.addFooterJS("page/base", "handlebars", "libs/main.js");
+        jagg.addFooterJS("page/base", "handlebars", "js/main.js");
         jagg.addFooterJS("page/base", "bootstrap3js", "libs/bootstrap_3.3.5/js/bootstrap.min.js");
         jagg.addFooterJS("page/base", "theme-wso2-js", "libs/theme-wso2_1.0/js/theme-wso2.js");
         jagg.addFooterJS("page/base", "bootstrap-selectjs", "libs/bootstrap-select/js/bootstrap-select.min.js");
-        jagg.addFooterJS("page/base", "left-nav", "libs/left-navigation.js");
-        jagg.addFooterJS("page/base", "custom-script", "libs/script.js");
+        jagg.addFooterJS("page/base", "left-nav", "js/left-navigation.js");
+        jagg.addFooterJS("page/base", "custom-script", "js/script.js");
         jagg.addFooterJS("page/base", "jquery.validator", "libs/jquery-validate/jquery.validate.min.js");
         jagg.addFooterJS("page/base", "jquery.validate.password", "libs/jquery-validate-password/jquery.validate.password.js");
         jagg.addFooterJS("page/base", "jquery.cookie", "libs/jquery-cookie/jquery.cookie.js");
