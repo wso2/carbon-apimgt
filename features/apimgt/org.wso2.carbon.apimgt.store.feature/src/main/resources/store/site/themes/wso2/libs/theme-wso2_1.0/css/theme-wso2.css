@@ -9724,4 +9724,39 @@ nav.navigation .second_level > .left-menu-item {
   background-color: #efefef;
 }
 
+.btn-primary {
+  background-color: #064973;
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #085b8f;
+  color: #fff;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #444;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #686868;
+  color: #fff;
+}
+
+.white-wrapper {
+  background-color: #ffffff;
+  position: relative;
+}
+
+.tab-content {
+  padding: 20px 17px;
+}
+
+.tab-content h3 {
+  margin-top: 0px;
+}
+
 /*# sourceMappingURL=apim-store.css.map */

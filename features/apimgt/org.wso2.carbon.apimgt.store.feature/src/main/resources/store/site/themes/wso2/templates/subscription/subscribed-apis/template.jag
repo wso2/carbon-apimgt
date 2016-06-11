@@ -48,7 +48,7 @@
 				</div> 
 			{{/if}}
 	    </div>
-        <h4>{{apiName}} - {{apiVersion}}</h4>
+        <h4 class="truncate">{{apiName}} - {{apiVersion}}</h4>
         <i class="fw fw-publish fw-1x"></i> {{status}}
   	</a>
 </script>
