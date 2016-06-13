@@ -6,7 +6,7 @@ jagg.initializer("policy-add", {
          jagg.addHeaderCSS("bootstrap-editable.css", "jagg", "templates/policy-add/css/bootstrap-editable.css");
          jagg.addHeaderCSS("docs.min.css", "jagg", "templates/policy-add/css/docs.min.css");
          jagg.addHeaderJS("custom-validate", "jagg", "templates/utils/custom-validation/custom-validation.js");
-         jagg.addFooterJS("handlebars", "jagg", "templates/item-design/js/handlebars-v1.3.0.js");
+         jagg.addFooterJS("handlebars", "jagg", "libs/handlebars.min.js");
          //jagg.addFooterJS("ace", "jagg", "templates/item-design/js/src-noconflict/ace.js");
          //jagg.addFooterJS("ace-theme", "jagg", "templates/item-design/js/src-noconflict/theme-textmate.js");
          //jagg.addFooterJS("ace-mode", "jagg", "templates/item-design/js/src-noconflict/mode-json.js");
