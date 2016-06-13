@@ -59,7 +59,7 @@
     "description":"Description",
     "addConfiguration":"Add Configuration",
     "editConfigurations":"Edit Configurations",
-    "domainTableColumnName":"Configuration Name",
+    "domainTableColumnName":"Scenario Type",
     "domainTableColumnDescription":"Description",
     "templateType":"Template Type",
     "actions":"Actions",
