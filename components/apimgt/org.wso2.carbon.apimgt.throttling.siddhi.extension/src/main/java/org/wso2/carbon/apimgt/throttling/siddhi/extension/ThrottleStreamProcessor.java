@@ -215,7 +215,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     }
 
     private long addTimeShift(long currentTime) {
-        long timePassedUntilNow = currentTime % timeInMilliSeconds;
+        long timePassedUntilNow = (currentTime - startTime) % timeInMilliSeconds;
         return currentTime + (timeInMilliSeconds - timePassedUntilNow);
     }
 
