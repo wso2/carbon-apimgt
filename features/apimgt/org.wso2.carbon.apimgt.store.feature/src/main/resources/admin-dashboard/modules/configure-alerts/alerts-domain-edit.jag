@@ -83,7 +83,7 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         var valueSeparator = "::";
         
        
-        var ScenarioConfigurationDTO = Packages.org.wso2.carbon.event.execution.manager.admin.dto.configuration.ScenarioConfigurationDTO;
+        var ScenarioConfigurationDTO = Packages.org.wso2.carbon.event.execution.manager.admin.dto.configuration.xsd.ScenarioConfigurationDTO;
         
         var ParameterDTO = Packages.org.wso2.carbon.event.execution.manager.admin.dto.configuration.xsd.ConfigurationParameterDTO;
         
@@ -107,7 +107,7 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
           }
         }
 
-        templateConfigurationDTO.setParameterDTOs(parameters);
+        scenarioConfigurationDTO.setConfigurationParameterDTOs(parameters);
         
         var carbon = require('carbon');
         var process = require('process');
