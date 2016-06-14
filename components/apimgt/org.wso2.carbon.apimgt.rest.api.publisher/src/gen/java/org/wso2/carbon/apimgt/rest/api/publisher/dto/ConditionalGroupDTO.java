@@ -2,8 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
 
 import io.swagger.annotations.*;
 import org.codehaus.jackson.annotate.*;
@@ -31,7 +31,7 @@ public class ConditionalGroupDTO  {
   private List<ThrottleConditionDTO> conditions = new ArrayList<ThrottleConditionDTO>();
   
   
-  private QuotaPolicyDTO quotaPolicy = null;
+  private ThrottleLimitDTO limit = null;
 
   
   /**
@@ -85,12 +85,12 @@ public class ConditionalGroupDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("quotaPolicy")
-  public QuotaPolicyDTO getQuotaPolicy() {
-    return quotaPolicy;
+  @JsonProperty("limit")
+  public ThrottleLimitDTO getLimit() {
+    return limit;
   }
-  public void setQuotaPolicy(QuotaPolicyDTO quotaPolicy) {
-    this.quotaPolicy = quotaPolicy;
+  public void setLimit(ThrottleLimitDTO limit) {
+    this.limit = limit;
   }
 
   
@@ -104,7 +104,7 @@ public class ConditionalGroupDTO  {
     sb.append("  enabled: ").append(enabled).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  conditions: ").append(conditions).append("\n");
-    sb.append("  quotaPolicy: ").append(quotaPolicy).append("\n");
+    sb.append("  limit: ").append(limit).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -27,8 +27,11 @@ import javax.validation.constraints.NotNull;
 public class ThrottleConditionDTO  {
   
   
+  public enum TypeEnum {
+     DateCondition,  DateRangeCondition,  HTTPVerbCondition,  HeaderCondition,  IPCondition,  JWTClaimsCondition,  QueryParameterCondition, 
+  };
   @NotNull
-  private String type = null;
+  private TypeEnum type = null;
   
   
   private Boolean invertCondition = null;
@@ -41,10 +44,10 @@ public class ThrottleConditionDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("type")
-  public String getType() {
+  public TypeEnum getType() {
     return type;
   }
-  public void setType(String type) {
+  public void setType(TypeEnum type) {
     this.type = type;
   }
 

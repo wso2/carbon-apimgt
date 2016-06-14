@@ -5,7 +5,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyDTO;
@@ -25,7 +24,7 @@ import javax.ws.rs.core.Response;
 
 public abstract class ThrottlingApiService {
     public abstract Response throttlingBlockingConditionsGet(String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response throttlingBlockingConditionsPost(QuotaPolicyDTO body,String contentType);
+    public abstract Response throttlingBlockingConditionsPost(BlockingConditionDTO body,String contentType);
     public abstract Response throttlingBlockingConditionsConditionIdPut(String conditionId,BlockingConditionDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response throttlingBlockingConditionsConditionIdDelete(String conditionId,String ifMatch,String ifUnmodifiedSince);
     public abstract Response throttlingPoliciesAdvancedPoliciesGet(String accept,String ifNoneMatch,String ifModifiedSince);

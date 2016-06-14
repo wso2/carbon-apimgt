@@ -2,18 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ConditionalGroupDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlePolicyDTO;
 
 import io.swagger.annotations.*;
 import org.codehaus.jackson.annotate.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
 
 @ApiModel(description = "")
 public class APIThrottlePolicyDTO extends ThrottlePolicyDTO {

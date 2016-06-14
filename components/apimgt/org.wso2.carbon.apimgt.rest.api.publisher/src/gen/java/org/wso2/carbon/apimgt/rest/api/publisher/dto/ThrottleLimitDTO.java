@@ -18,8 +18,11 @@ import javax.validation.constraints.NotNull;
 public class ThrottleLimitDTO  {
   
   
+  public enum TypeEnum {
+     RequestCountLimit,  BandwidthLimit, 
+  };
   @NotNull
-  private String type = null;
+  private TypeEnum type = null;
   
   
   private String timeUnit = null;
@@ -32,10 +35,10 @@ public class ThrottleLimitDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("type")
-  public String getType() {
+  public TypeEnum getType() {
     return type;
   }
-  public void setType(String type) {
+  public void setType(TypeEnum type) {
     this.type = type;
   }
 

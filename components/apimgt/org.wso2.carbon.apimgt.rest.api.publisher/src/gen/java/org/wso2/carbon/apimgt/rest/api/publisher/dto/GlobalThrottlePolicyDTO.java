@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlePolicyDTO;
 
 import io.swagger.annotations.*;

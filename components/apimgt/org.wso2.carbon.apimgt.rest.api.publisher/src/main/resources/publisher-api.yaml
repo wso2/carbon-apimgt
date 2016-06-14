@@ -2645,7 +2645,7 @@ paths:
             Blocking condition object that should to be added
           required: true
           schema:
-            $ref: '#/definitions/QuotaPolicy'
+            $ref: '#/definitions/BlockingCondition'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Throttling
@@ -3689,27 +3689,13 @@ definitions:
         type: string
       description:
         type: string
-      defaultQuotaPolicy:
-        $ref: '#/definitions/QuotaPolicy'
+      defaultLimit:
+        $ref: '#/definitions/ThrottleLimit'
       tenantDomain:
         type: string
       isDeployed:
         type: boolean
   
-#-----------------------------------------------------
-# The Quota Policy resource
-#-----------------------------------------------------
-  QuotaPolicy :
-    title: Quota policies for Throttling
-    properties:
-      type:
-        type: string
-        description: Applicable throttling level
-        enum:        
-          - bandwidthVolume
-          - requestCount
-      limit:
-        $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
 # The Advanced Throttle Policy resource
@@ -3905,8 +3891,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ThrottleCondition'
-      quotaPolicy:
-        $ref: '#/definitions/QuotaPolicy'
+      limit:
+        $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
 # The Throttle Condition resource
@@ -3928,6 +3914,14 @@ definitions:
     properties:
       type:
         type: string
+        enum:
+          - DateCondition
+          - DateRangeCondition
+          - HTTPVerbCondition
+          - HeaderCondition
+          - IPCondition
+          - JWTClaimsCondition
+          - QueryParameterCondition
       invertCondition:
         type: boolean
       enabled:
@@ -3989,6 +3983,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/ThrottleCondition'
       - properties:
+          ipConditionType:
+            type: string
+            enum:
+              - IPRange
+              - IPSpecific
           specificIP:
             type: string
           startingIP:
@@ -4035,6 +4034,9 @@ definitions:
     properties:
       type:
         type: string
+        enum:
+          - RequestCountLimit
+          - BandwidthLimit
       timeUnit:
         type: string
       unitTime:

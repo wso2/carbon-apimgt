@@ -15,6 +15,12 @@ import javax.validation.constraints.NotNull;
 public class IPConditionDTO extends ThrottleConditionDTO {
   
   
+  public enum IpConditionTypeEnum {
+     IPRange,  IPSpecific, 
+  };
+  
+  private IpConditionTypeEnum ipConditionType = null;
+  
   
   private String specificIP = null;
   
@@ -23,6 +29,18 @@ public class IPConditionDTO extends ThrottleConditionDTO {
   
   
   private String endingIP = null;
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("ipConditionType")
+  public IpConditionTypeEnum getIpConditionType() {
+    return ipConditionType;
+  }
+  public void setIpConditionType(IpConditionTypeEnum ipConditionType) {
+    this.ipConditionType = ipConditionType;
+  }
 
   
   /**
@@ -67,6 +85,7 @@ public class IPConditionDTO extends ThrottleConditionDTO {
     StringBuilder sb = new StringBuilder();
     sb.append("class IPConditionDTO {\n");
     sb.append("  " + super.toString()).append("\n");
+    sb.append("  ipConditionType: ").append(ipConditionType).append("\n");
     sb.append("  specificIP: ").append(specificIP).append("\n");
     sb.append("  startingIP: ").append(startingIP).append("\n");
     sb.append("  endingIP: ").append(endingIP).append("\n");

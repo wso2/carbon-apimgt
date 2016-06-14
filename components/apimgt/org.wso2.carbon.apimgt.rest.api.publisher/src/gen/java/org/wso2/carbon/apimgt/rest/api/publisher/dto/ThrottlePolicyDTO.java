@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
 
 import io.swagger.annotations.*;
 import org.codehaus.jackson.annotate.*;
@@ -25,7 +25,7 @@ public class ThrottlePolicyDTO  {
   private String description = null;
   
   
-  private QuotaPolicyDTO defaultQuotaPolicy = null;
+  private ThrottleLimitDTO defaultLimit = null;
   
   
   private String tenantDomain = null;
@@ -73,12 +73,12 @@ public class ThrottlePolicyDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("defaultQuotaPolicy")
-  public QuotaPolicyDTO getDefaultQuotaPolicy() {
-    return defaultQuotaPolicy;
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
   }
-  public void setDefaultQuotaPolicy(QuotaPolicyDTO defaultQuotaPolicy) {
-    this.defaultQuotaPolicy = defaultQuotaPolicy;
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
   
@@ -115,7 +115,7 @@ public class ThrottlePolicyDTO  {
     sb.append("  policyName: ").append(policyName).append("\n");
     sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  defaultQuotaPolicy: ").append(defaultQuotaPolicy).append("\n");
+    sb.append("  defaultLimit: ").append(defaultLimit).append("\n");
     sb.append("  tenantDomain: ").append(tenantDomain).append("\n");
     sb.append("  isDeployed: ").append(isDeployed).append("\n");
     sb.append("}\n");

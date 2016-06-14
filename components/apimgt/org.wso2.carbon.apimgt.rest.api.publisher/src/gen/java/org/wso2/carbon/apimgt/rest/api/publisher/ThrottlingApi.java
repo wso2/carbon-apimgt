@@ -8,7 +8,6 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QuotaPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyDTO;
@@ -66,7 +65,7 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response throttlingBlockingConditionsPost(@ApiParam(value = "Blocking condition object that should to be added\n" ,required=true ) QuotaPolicyDTO body,
+    public Response throttlingBlockingConditionsPost(@ApiParam(value = "Blocking condition object that should to be added\n" ,required=true ) BlockingConditionDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.throttlingBlockingConditionsPost(body,contentType);
