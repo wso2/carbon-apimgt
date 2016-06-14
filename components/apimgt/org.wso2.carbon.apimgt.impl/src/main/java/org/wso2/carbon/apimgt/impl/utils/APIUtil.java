@@ -2960,38 +2960,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Add BAM Server Profile Configuration which is used for southbound statistics
-     * publishing
-     *
-     * @throws APIManagementException
-     */
-    public static void addBamServerProfile(String bamServerURL, String bamServerUser,
-                                           String bamServerPassword, int tenantId) throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            log.debug("Adding Bam Server Profile to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
-            String bamProfile = IOUtils.toString(inputStream);
-
-            String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-                    replaceAll("\\[2\\]", bamServerUser).
-                    replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
-
-            Resource resource = registry.newResource();
-            resource.setContent(bamProfileConfig);
-            registry.put(APIConstants.BAM_SERVER_PROFILE_LOCATION, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while adding BAM Server Profile configuration " +
-                    "information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading BAM Server Profile configuration " +
-                    "configuration file content", e);
-        }
-    }
-
     public static boolean isAnalyticsEnabled() {
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }

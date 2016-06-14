@@ -115,18 +115,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         } catch (Exception e) {
             log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
-        try {
-            APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIAnalyticsConfiguration();
-            boolean enabled = APIUtil.isAnalyticsEnabled();
-            if (enabled) {
-                APIUtil.addBamServerProfile(configuration.getDasReceiverUrlGroups(),
-                        configuration.getDasReceiverServerUser(), configuration.getDasReceiverServerPassword(),
-                        tenantId);
-            }
-        } catch (APIManagementException e) {
-            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry", e);
-        }
 
         try {
             APIUtil.loadTenantConf(tenantId);
