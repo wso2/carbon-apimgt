@@ -96,8 +96,12 @@ public class IPCondition extends Condition {
         
         return condition;
     }
-    
-   
+
+    @Override
+    public String getNullCondition() {
+        return null;
+    }
+
 
     @Override
     public String toString() {

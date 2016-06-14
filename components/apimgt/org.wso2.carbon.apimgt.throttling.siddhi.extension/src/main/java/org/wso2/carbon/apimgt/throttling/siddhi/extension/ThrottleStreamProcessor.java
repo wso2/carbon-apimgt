@@ -66,7 +66,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
-                                   ExecutionPlanContext executionPlanContext, boolean outputExpectsExpiredEvents) {
+                                   ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
 
         if (attributeExpressionExecutors.length == 1) {
@@ -215,7 +215,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     }
 
     private long addTimeShift(long currentTime) {
-        long timePassedUntilNow = currentTime % timeInMilliSeconds;
+        long timePassedUntilNow = (currentTime - startTime) % timeInMilliSeconds;
         return currentTime + (timeInMilliSeconds - timePassedUntilNow);
     }
 

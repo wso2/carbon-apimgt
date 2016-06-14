@@ -47,6 +47,11 @@ public class DateCondition extends Condition{
     }
 
     @Override
+    public String getNullCondition() {
+        return null;
+    }
+
+    @Override
     public String toString() {
         return "DateCondition [specificDate=" + specificDate + ", toString()=" + super.toString() + "]";
     }
