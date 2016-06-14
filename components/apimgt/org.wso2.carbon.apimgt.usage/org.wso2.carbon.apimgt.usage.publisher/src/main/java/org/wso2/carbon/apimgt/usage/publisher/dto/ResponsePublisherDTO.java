@@ -28,6 +28,15 @@ public class ResponsePublisherDTO extends PublisherDTO {
     private long eventTime;
     private long responseSize;
     private int responseCode;
+    private String destination;
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
 
     public int getResponse(){
         return response;

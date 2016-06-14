@@ -209,11 +209,6 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            if (analyticsConfiguration.isAnalyticsEnabled()) {
-                APIUtil.addBamServerProfile(analyticsConfiguration.getDasReceiverUrlGroups(),
-                        analyticsConfiguration.getDasReceiverServerUser(),
-                        analyticsConfiguration.getDasReceiverServerPassword(), MultitenantConstants.SUPER_TENANT_ID);
-            }
             //Adding default throttle policies
             boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
             if(advancedThrottlingEnabled) {

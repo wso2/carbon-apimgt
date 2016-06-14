@@ -44,16 +44,16 @@
     <div class="row">
         <div class="col-md-12 form-horizontal">
             <%
-                if (domain.getTemplateDTOs() != null && !templateType.equals("")) {
-                    var templateDTOs =  domain.getTemplateDTOs();
-                    for (var i in templateDTOs) {
-                        if (configurationName == null || templateDTOs[i].getName().equals(templateType)) {
-                            currentTemplate = templateDTOs[i];
+                if (domain.getScenarioInfoDTOs() != null && !templateType.equals("")) {
+                    var scenarioInfoDTOs =  domain.getScenarioInfoDTOs();
+                    for (var i in scenarioInfoDTOs) {
+                        if (configurationName == null || scenarioInfoDTOs[i].getType().equals(templateType)) {
+                            currentTemplate = scenarioInfoDTOs[i];
                             break;
                         }
                     }
-                } else if (domain.getTemplateDTOs() != null && domain.getTemplateDTOs().length > 0) {
-                    currentTemplate = domain.getTemplateDTOs()[0];
+                } else if (domain.getScenarioInfoDTOs() != null && domain.getScenarioInfoDTOs().length > 0) {
+                    currentTemplate = domain.getScenarioInfoDTOs()[0];
                 }
 
                 if (currentTemplate != null) {
@@ -68,16 +68,16 @@
                             onchange="document.location.href=document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].value">
                         <%
 
-                            var templateDTOs = domain.getTemplateDTOs();
-                            for (var i in templateDTOs) {
+                            var scenarioInfoDTOs = domain.getScenarioInfoDTOs();
+                            for (var i in scenarioInfoDTOs) {
                                 var selectedValue = "";
-                                if (templateDTOs[i].getName().trim().equals(currentTemplate.getName())) {
+                                if (scenarioInfoDTOs[i].getType().trim().equals(currentTemplate.getType())) {
                                     selectedValue = "selected=true";
                                 }
                         %>
                         <option <%=selectedValue%>
-                                value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+configurationName+"&templateType="+templateDTOs[i].getName())%>">
-                            <%=templateDTOs[i].getName()%>
+                                value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+configurationName+"&templateType="+scenarioInfoDTOs[i].getType())%>">
+                            <%=scenarioInfoDTOs[i].getType()%>
                         </option>
                         <%}%>
                     </select>
@@ -90,7 +90,7 @@
                     configurationName = configurationDTO.getName().trim();
                     saveButtonText = "template.update.button.text";
                 } else {
-                    configurationName = currentTemplate.getName().replace(" ", "");
+                    configurationName = currentTemplate.getType().replace(" ", "");
                 }
             %>
             
@@ -124,7 +124,7 @@
             <%
                 
                 var indexParam = 0;
-                var parameterDTOs = currentTemplate.getParameterDTOs();
+                var parameterDTOs = currentTemplate.getDomainParameterDTOs();
                 if (parameterDTOs.length > 0 && (parameterDTOs[1])) {
             %>
             <h4>Parameter Configurations</h4>
@@ -139,8 +139,8 @@
                     }
                     if (!isExistingConfig) {
                         parameterValue = parameterDTOs[i].getDefaultValue().trim();
-                    } else if (configurationDTO.getParameterDTOs() != null) {
-                    	var configParameterDTOs = configurationDTO.getParameterDTOs();
+                    } else if (configurationDTO.getConfigurationParameterDTOs() != null) {
+                    	var configParameterDTOs = configurationDTO.getConfigurationParameterDTOs();
                         for (var j in configParameterDTOs) {
                             if (configParameterDTOs[j].getName().equals(parameterDTOs[i].getName())) {
                                 parameterValue = configParameterDTOs[j].getValue().trim();
@@ -202,7 +202,7 @@
                                 + parameterDTOs[i].getName() + "').value";
 
                         indexParam++;
-                        if (indexParam < currentTemplate.getParameterDTOs().length) {
+                        if (indexParam < currentTemplate.getDomainParameterDTOs().length) {
                             parameterString += "+ ',' +";
                         }
 
@@ -212,59 +212,13 @@
 
             <hr class="wr-separate"/>
 
-
-<%
-
-var executionParamString = null;
-if ("batch".equals(currentTemplate.getExecutionType())) {
-%>
-           <h4><%=i18n.localize("schedulerConfiguration")%></h4>
-
-<div class="form-group">
- <label class="control-label col-md-3">
- <%=i18n.localize("cronExpression")%>
- </label>
- 
- <div class="col-md-9">
-
-<%
-if (isExistingConfig && (configurationDTO.getExecutionParameters() != null)) {
-%>
-
-                    <input type="text" id="cronExpressionValue" class="form-control"
-                                           value="<%=configurationDTO.getExecutionParameters()%>"/>
-
-                    <%
-                } else {
-                %>
- <input type="text" id="cronExpressionValue" class="form-control"
-                       value="0 0 23 * * ?"/>
-
-<%
-}
-%>
-               </div>
-
-<%
- executionParamString =  "document.getElementById('cronExpressionValue').value";
-
- if (parameterString.length < 1) {
-        parameterString = "''";
- }
- 
-}
-%>
-</div>
-
-
-
             <div class="action-container form-group">
 
                 <button type="button" class="btn btn-default btn-add"
                         onclick="saveConfiguration('<%=domainName%>',
                                 document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].text,
                                 document.getElementById('txtName').value, document.getElementById('txtDescription').value,
-                                <%=parameterString%>, <%=executionParamString%>)">
+                                <%=parameterString%>)">
                     <%=i18n.localize("saveConfiguration")%>
                 </button>
             </div>
