@@ -50,7 +50,9 @@ public class ThrottleDataPublisherPool {
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {
-                log.debug("Initializing new ThrottleDataPublisher instance");
+                if(log.isDebugEnabled()) {
+                    log.debug("Initializing new ThrottleDataPublisher instance");
+                }
                 return new DataProcessAndPublishingAgent();
             }
         }, dataPublisherPoolConfiguration.getMaxIdle(), dataPublisherPoolConfiguration.getInitIdleCapacity());
