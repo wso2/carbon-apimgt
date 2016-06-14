@@ -174,7 +174,7 @@
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
     "usageResourcePath" : "Usage by Resource Path",
-    "apiLatencyTime" : "API Latency Time",
+    "apiLatencyTime" : "API Latency",
     "apiGeoLocationUsage" : "API Usage Across Geo Locations",
     "apiUserAgentUsage" : "API Usage Across User Agent",
     "apiUsageFromDestination" : "API Usage by Destination",
