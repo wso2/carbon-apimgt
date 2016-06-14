@@ -139,6 +139,9 @@ var select_environment = function(){
     if(key && key.trim() != "") {
       swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     }
+    else{
+      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+    }
   });
 
   $(".subapp").change(change_token);
