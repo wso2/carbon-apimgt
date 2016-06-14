@@ -243,8 +243,13 @@ public class UsageClient {
             String groupAndOrder = " group by sub.created_time order by sub.created_time asc";
             String time = " and sub.created_time between '" + fromDate + "' and '" + toDate + "' ";
 
-            if ("All".equals(apiName)) {
+            /*if ("All".equals(apiName)) {
                 from = "from AM_SUBSCRIBER sub ";
+                if (!"allAPIs".equals(apiFilter)) {
+                    from += " ,AM_API as api,AM_APPLICATION AS app, AM_SUBSCRIPTION as subc  ";
+                    where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
+                            + "sub.subscriber_id=app.subscriber_id and api.api_provider='" + provider + "'";
+                }
             } else {
                 from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
                 where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
@@ -252,7 +257,9 @@ public class UsageClient {
                 if (!"allAPIs".equals(apiFilter)) {
                     where += " and api.api_provider = '" + provider + "' ";
                 }
-            }
+            }*/
+            
+            from = "from AM_SUBSCRIBER sub "; 
 
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);

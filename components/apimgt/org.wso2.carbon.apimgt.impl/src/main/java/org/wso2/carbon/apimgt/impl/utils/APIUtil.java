@@ -158,6 +158,8 @@ public final class APIUtil {
 
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
+    private static final Log audit = CarbonConstants.AUDIT_LOG;
+
     private static boolean isContextCacheInitialized = false;
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
@@ -2957,38 +2959,6 @@ public final class APIUtil {
             throw new APIManagementException("Error while getting Self signup role information from the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while getting Self signup role information from the registry", e);
-        }
-    }
-
-    /**
-     * Add BAM Server Profile Configuration which is used for southbound statistics
-     * publishing
-     *
-     * @throws APIManagementException
-     */
-    public static void addBamServerProfile(String bamServerURL, String bamServerUser,
-                                           String bamServerPassword, int tenantId) throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            log.debug("Adding Bam Server Profile to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
-            String bamProfile = IOUtils.toString(inputStream);
-
-            String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-                    replaceAll("\\[2\\]", bamServerUser).
-                    replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
-
-            Resource resource = registry.newResource();
-            resource.setContent(bamProfileConfig);
-            registry.put(APIConstants.BAM_SERVER_PROFILE_LOCATION, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while adding BAM Server Profile configuration " +
-                    "information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading BAM Server Profile configuration " +
-                    "configuration file content", e);
         }
     }
 
@@ -5927,5 +5897,33 @@ public final class APIUtil {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+    /**
+     * Logs an audit message on actions performed on entities (APIs, Applications, etc). The log is printed in the
+     * following JSON format
+     *  {
+         "typ": "API",
+         "action": "update",
+         "performedBy": "admin@carbon.super",
+         "info": {
+         "name": "Twitter",
+         "context": "/twitter",
+         "version": "1.0.0",
+         "provider": "nuwan"
+         }
+         }
+     * @param entityType - The entity type. Ex: API, Application
+     * @param entityInfo - The details of the entity. Ex: API Name, Context
+     * @param action - The type of action performed. Ex: Create, Update
+     * @param performedBy - The user who performs the action.
+     */
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("typ", entityType);
+        jsonObject.put("action", action);
+        jsonObject.put("performedBy", performedBy);
+        jsonObject.put("info", entityInfo);
+        audit.info(jsonObject.toString());
     }
 }
