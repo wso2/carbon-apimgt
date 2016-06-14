@@ -70,6 +70,26 @@ public class ThrottlingApi  {
     {
     return delegate.throttlingBlockingConditionsPost(body,contentType);
     }
+    @GET
+    @Path("/blocking-conditions/{conditionId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a Blocking Condition", notes = "Retrieve a Blocking Condition providing the condition Id\n", response = BlockingConditionDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
+
+    public Response throttlingBlockingConditionsConditionIdGet(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.throttlingBlockingConditionsConditionIdGet(conditionId,ifMatch,ifUnmodifiedSince);
+    }
     @PUT
     @Path("/blocking-conditions/{conditionId}")
     @Consumes({ "application/json" })
@@ -144,6 +164,26 @@ public class ThrottlingApi  {
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.throttlingPoliciesAdvancedPoliciesPost(body,contentType);
+    }
+    @GET
+    @Path("/policies/advanced-policies/{policyName}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve an Advanced Policy", notes = "Retrieve a Advanced Policy providing the policy name.\n", response = AdvancedThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
+
+    public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
     }
     @PUT
     @Path("/policies/advanced-policies/{policyName}")
@@ -220,6 +260,26 @@ public class ThrottlingApi  {
     {
     return delegate.throttlingPoliciesApplicationPost(body,contentType);
     }
+    @GET
+    @Path("/policies/application/{policyName}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve an Application Policy", notes = "Retrieve an Application Policy providing the policy name.\n", response = ApplicationThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
+
+    public Response throttlingPoliciesApplicationPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.throttlingPoliciesApplicationPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    }
     @PUT
     @Path("/policies/application/{policyName}")
     @Consumes({ "application/json" })
@@ -295,6 +355,26 @@ public class ThrottlingApi  {
     {
     return delegate.throttlingPoliciesGlobalPost(body,contentType);
     }
+    @GET
+    @Path("/policies/global/{policyName}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a Global Policy", notes = "Retrieve a Global Policy providing the policy name.\n", response = GlobalThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
+
+    public Response throttlingPoliciesGlobalPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.throttlingPoliciesGlobalPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    }
     @PUT
     @Path("/policies/global/{policyName}")
     @Consumes({ "application/json" })
@@ -369,6 +449,26 @@ public class ThrottlingApi  {
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.throttlingPoliciesSubscriptionPost(body,contentType);
+    }
+    @GET
+    @Path("/policies/subscription/{policyName}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a Subscription Policy", notes = "Retrieve a Subscription Policy providing the policy name.\n", response = SubscriptionThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
+
+    public Response throttlingPoliciesSubscriptionPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.throttlingPoliciesSubscriptionPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
     }
     @PUT
     @Path("/policies/subscription/{policyName}")

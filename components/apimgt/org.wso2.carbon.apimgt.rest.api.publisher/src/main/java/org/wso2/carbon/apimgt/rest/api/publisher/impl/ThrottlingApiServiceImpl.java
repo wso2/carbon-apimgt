@@ -46,6 +46,11 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    @Override public Response throttlingBlockingConditionsConditionIdGet(String conditionId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response throttlingBlockingConditionsConditionIdPut(String conditionId,BlockingConditionDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
@@ -87,6 +92,12 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         }
         return null;
     }
+
+    @Override public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response throttlingPoliciesAdvancedPoliciesPolicyNamePut(String policyName,AdvancedThrottlePolicyDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
@@ -107,6 +118,12 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+    @Override public Response throttlingPoliciesApplicationPolicyNameGet(String policyName, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response throttlingPoliciesApplicationPolicyNamePut(String policyName,ApplicationThrottlePolicyDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
@@ -127,6 +144,12 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+    @Override public Response throttlingPoliciesGlobalPolicyNameGet(String policyName, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response throttlingPoliciesGlobalPolicyNamePut(String policyName,GlobalThrottlePolicyDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
@@ -147,6 +170,12 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+    @Override public Response throttlingPoliciesSubscriptionPolicyNameGet(String policyName, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response throttlingPoliciesSubscriptionPolicyNamePut(String policyName,SubscriptionThrottlePolicyDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!

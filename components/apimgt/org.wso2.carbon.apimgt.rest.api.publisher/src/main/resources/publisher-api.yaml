@@ -1817,6 +1817,61 @@ paths:
   '/throttling/policies/application/{policyName}': 
   
 #-----------------------------------------------------
+# Retrieve a certain Application Policy
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Retrieve an Application Policy
+      description: |
+        Retrieve an Application Policy providing the policy name.
+      parameters:
+        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Throttling
+      responses:
+        200:
+          description: |
+            OK.
+            Tier returned
+          schema:
+            $ref: '#/definitions/ApplicationThrottlePolicy'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Tier does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
 # Delete an API level throttle policy
 #-----------------------------------------------------  
     delete:
@@ -2036,6 +2091,61 @@ paths:
   '/throttling/policies/subscription/{policyName}': 
   
 #-----------------------------------------------------
+# Retrieve a certain Subscription Policy
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Retrieve a Subscription Policy
+      description: |
+        Retrieve a Subscription Policy providing the policy name.
+      parameters:
+        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Throttling
+      responses:
+        200:
+          description: |
+            OK.
+            Tier returned
+          schema:
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Tier does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
 # Delete a Subscription level throttle policy
 #-----------------------------------------------------  
     delete:
@@ -2252,6 +2362,61 @@ paths:
 ######################################################
   '/throttling/policies/global/{policyName}': 
   
+#-----------------------------------------------------
+# Retrieve a certain Global Throttling Policy
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Retrieve a Global Policy
+      description: |
+        Retrieve a Global Policy providing the policy name.
+      parameters:
+        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Throttling
+      responses:
+        200:
+          description: |
+            OK.
+            Tier returned
+          schema:
+            $ref: '#/definitions/GlobalThrottlePolicy'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Tier does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
 #-----------------------------------------------------
 # Delete a Global level throttle policy
 #-----------------------------------------------------  
@@ -2471,6 +2636,61 @@ paths:
   '/throttling/policies/advanced-policies/{policyName}': 
   
 #-----------------------------------------------------
+# Retrieve a certain Advanced Throttling Policy
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Retrieve an Advanced Policy
+      description: |
+        Retrieve a Advanced Policy providing the policy name.
+      parameters:
+        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Throttling
+      responses:
+        200:
+          description: |
+            OK.
+            Tier returned
+          schema:
+            $ref: '#/definitions/AdvancedThrottlePolicy'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Tier does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
 # Delete an Advanced level throttle policy
 #-----------------------------------------------------  
     delete:
@@ -2687,6 +2907,61 @@ paths:
 ######################################################
   '/throttling/blocking-conditions/{conditionId}': 
   
+#-----------------------------------------------------
+# Retrieve a Blocking condition
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
+#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
+      summary: Retrieve a Blocking Condition
+      description: |
+        Retrieve a Blocking Condition providing the condition Id
+      parameters:
+        - $ref: '#/parameters/conditionId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Throttling
+      responses:
+        200:
+          description: |
+            OK.
+            Tier returned
+          schema:
+            $ref: '#/definitions/BlockingCondition'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Tier does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
 #-----------------------------------------------------
 # Delete a Blocking condition
 #-----------------------------------------------------  
