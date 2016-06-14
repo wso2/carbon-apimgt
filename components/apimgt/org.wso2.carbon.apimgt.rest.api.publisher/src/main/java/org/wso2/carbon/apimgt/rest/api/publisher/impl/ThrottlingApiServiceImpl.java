@@ -26,11 +26,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.ThrottlingApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.BlockingConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.GlobalThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ThrottleMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -68,7 +64,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             APIPolicy[] apiPolicies = (APIPolicy[])apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
-            return Response.ok().entity(apiPolicies).build();
+            AdvancedThrottlePolicyListDTO listDTO = ThrottleMappingUtil.fromAPIPolicyArrayToListDTO(apiPolicies);
+            return Response.ok().entity(listDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Advanced level policies";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

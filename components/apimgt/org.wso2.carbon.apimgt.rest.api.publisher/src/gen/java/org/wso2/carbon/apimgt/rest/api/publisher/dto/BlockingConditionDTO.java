@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 import io.swagger.annotations.ApiModel;
 
 import io.swagger.annotations.*;
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 

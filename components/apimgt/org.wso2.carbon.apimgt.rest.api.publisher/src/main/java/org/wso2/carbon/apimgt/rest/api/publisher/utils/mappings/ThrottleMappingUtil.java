@@ -38,20 +38,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.BandwidthLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ConditionalGroupDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DateConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DateRangeConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.HTTPVerbConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.HeaderConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.IPConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.JWTClaimsConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.QueryParameterConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.RequestCountLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.base.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -61,6 +48,25 @@ public class ThrottleMappingUtil {
 
     private static final Log log = LogFactory.getLog(ThrottleMappingUtil.class);
 
+    
+    public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(APIPolicy[] apiPolicies)
+            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+        AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
+        List <AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
+        if (apiPolicies != null) {
+            for (APIPolicy apiPolicy : apiPolicies) {
+                advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(apiPolicy));
+            }
+        }
+        listDTO.setList(advancedPolicyDTOs);
+        listDTO.setCount(advancedPolicyDTOs.size());
+
+        //listDTO.setNext(); todo
+        //listDTO.setPrevious(); todo
+        
+        return listDTO;
+    }
+    
     public static APIPolicy fromAdvancedPolicyDTOToPolicy (AdvancedThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         APIPolicy apiPolicy = new APIPolicy(dto.getPolicyName());
@@ -100,8 +106,10 @@ public class ThrottleMappingUtil {
             List<Pipeline> pipelines)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException { //done
         List<ConditionalGroupDTO> groupDTOs = new ArrayList<>();
-        for (Pipeline pipeline : pipelines) {
-            groupDTOs.add(fromPipelineToConditionalGroupDTO(pipeline));
+        if (pipelines!= null) {
+            for (Pipeline pipeline : pipelines) {
+                groupDTOs.add(fromPipelineToConditionalGroupDTO(pipeline));
+            }
         }
         return groupDTOs;
     }
@@ -134,11 +142,13 @@ public class ThrottleMappingUtil {
 
     /////////////////////////// Condition LIST <---> DTO LIST ////////////////
     
-    public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs) //done
+    public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
             throws UnsupportedThrottleConditionTypeException {
         List<Condition> conditions = new ArrayList<>();
-        for (ThrottleConditionDTO dto : throttleConditionDTOs) {
-            conditions.add(fromDTOToCondition(dto));
+        if (throttleConditionDTOs!=null) {
+            for (ThrottleConditionDTO dto : throttleConditionDTOs) {
+                conditions.add(fromDTOToCondition(dto));
+            }
         }
         return conditions;
     }
@@ -146,8 +156,10 @@ public class ThrottleMappingUtil {
     public static List<ThrottleConditionDTO> fromConditionListToDTOList(List<Condition> conditions)
             throws UnsupportedThrottleConditionTypeException {
         List<ThrottleConditionDTO> dtoList = new ArrayList<>();
-        for (Condition condition : conditions) {
-            dtoList.add(fromConditionToDTO(condition));
+        if (conditions!=null) {
+            for (Condition condition : conditions) {
+                dtoList.add(fromConditionToDTO(condition));
+            }
         }
         return dtoList;
     }
@@ -337,7 +349,7 @@ public class ThrottleMappingUtil {
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO (Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {  //todo tenantId
 
-        dto.setTenantDomain(policy.getTenantDomain());
+        dto.setTenantDomain(policy.getTenantDomain());  //todo becomes null
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());

@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThrottlePolicyDTO;
 
 import io.swagger.annotations.*;
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 

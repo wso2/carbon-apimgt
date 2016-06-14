@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.annotations.*;
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 

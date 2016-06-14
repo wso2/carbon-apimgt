@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 import io.swagger.annotations.ApiModel;
 
 import io.swagger.annotations.*;
-import org.codehaus.jackson.annotate.*;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  * Throttling Conditions
  **/
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.publisher.dto.DateConditionDTO.class, name = "DateCondition"),
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.publisher.dto.DateRangeConditionDTO.class, name = "DateRangeCondition"),
