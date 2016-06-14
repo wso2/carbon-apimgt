@@ -103,8 +103,8 @@ public final class SelfSignUpUtil {
 	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
-	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
-			throws APIManagementException {
+    private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
+                                                                                      throws APIManagementException {
 
         UserRegistrationConfigDTO config = null;
 
