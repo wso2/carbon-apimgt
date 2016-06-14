@@ -65,8 +65,6 @@
     "actions":"Actions",
     "common.button.edit":"Edit",
     "common.button.delete":"Delete",
-    "schedulerConfiguration":"Scheduler Configuration",
-    "cronExpression":"Cron Expression",
     "domains":"Domains",
     "tier" : "Tier Availability" ,
     "apiPolicy" : "API level Policy" ,
