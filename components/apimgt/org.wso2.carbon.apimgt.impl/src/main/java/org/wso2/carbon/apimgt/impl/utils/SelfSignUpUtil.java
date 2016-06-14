@@ -155,7 +155,7 @@ public final class SelfSignUpUtil {
 		    throw new APIManagementException("Error while parsing configuration " +
                     APIConstants.SELF_SIGN_UP_CONFIG_LOCATION, e);
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error in retrieving Tenant Information while while reading SignUp "
+            throw new APIManagementException("Error in retrieving Tenant Information while reading SignUp "
                                              + "configuration", e);
         }
 		return config;
