@@ -1907,6 +1907,62 @@
             }
         },
         "/throttling/policies/application/{policyName}": {
+            "get": {
+                "x-scope": "apim:tier_view",
+                "summary": "Retrieve an Application Policy",
+                "description": "Retrieve an Application Policy providing the policy name.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/policyName"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "Throttling"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nTier returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationThrottlePolicy"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Tier does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "x-scope": "apim:tier_manage",
                 "summary": "Delete an Application level throttle policy",
@@ -2125,6 +2181,62 @@
             }
         },
         "/throttling/policies/subscription/{policyName}": {
+            "get": {
+                "x-scope": "apim:tier_view",
+                "summary": "Retrieve a Subscription Policy",
+                "description": "Retrieve a Subscription Policy providing the policy name.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/policyName"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "Throttling"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nTier returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/SubscriptionThrottlePolicy"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Tier does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "x-scope": "apim:tier_manage",
                 "summary": "Delete a Subscription level throttle policy",
@@ -2343,6 +2455,62 @@
             }
         },
         "/throttling/policies/global/{policyName}": {
+            "get": {
+                "x-scope": "apim:tier_view",
+                "summary": "Retrieve a Global Policy",
+                "description": "Retrieve a Global Policy providing the policy name.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/policyName"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "Throttling"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nTier returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/GlobalThrottlePolicy"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Tier does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "x-scope": "apim:tier_manage",
                 "summary": "Delete a Global level throttle policy",
@@ -2561,6 +2729,62 @@
             }
         },
         "/throttling/policies/advanced-policies/{policyName}": {
+            "get": {
+                "x-scope": "apim:tier_view",
+                "summary": "Retrieve an Advanced Policy",
+                "description": "Retrieve a Advanced Policy providing the policy name.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/policyName"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "Throttling"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nTier returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/AdvancedThrottlePolicy"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Tier does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "x-scope": "apim:tier_manage",
                 "summary": "Delete an Advanced level throttle policy",
@@ -2779,6 +3003,62 @@
             }
         },
         "/throttling/blocking-conditions/{conditionId}": {
+            "get": {
+                "x-scope": "apim:tier_view",
+                "summary": "Retrieve a Blocking Condition",
+                "description": "Retrieve a Blocking Condition providing the condition Id\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/conditionId"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "Throttling"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nTier returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/BlockingCondition"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Tier does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "x-scope": "apim:tier_manage",
                 "summary": "Delete a Blocking condition",
