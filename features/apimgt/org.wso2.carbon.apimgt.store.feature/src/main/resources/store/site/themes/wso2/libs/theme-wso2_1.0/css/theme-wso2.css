@@ -7294,8 +7294,7 @@ body.inverse .fade-edge:after {
  * navbar styles
  * ======================================================================== */
 .navbar-wrapper {
-  min-height: 50px;
-  width:100%;
+  min-height: 40px;
 }
 
 .navbar.affix, .navbar.affix-bottom {
@@ -9720,10 +9719,37 @@ nav.navigation .second_level > .left-menu-item {
   margin-right: 11px;
 }
 
+/* ========================================================================
+ * Misc customizations
+ * ======================================================================== */
 .media-body {
   background-color: #efefef;
 }
 
+.white-wrapper {
+  background-color: #ffffff;
+  position: relative;
+}
+
+.tab-content {
+  padding: 20px 17px;
+}
+
+.tab-content h3 {
+  margin-top: 0px;
+}
+
+.help_popup {
+  display: block;
+}
+
+.thumbnail.icon img {
+  width: 101%;
+}
+
+/* ========================================================================
+ * Button color customizations
+ * ======================================================================== */
 .btn-primary {
   background-color: #064973;
   color: #fff;
@@ -9746,17 +9772,70 @@ nav.navigation .second_level > .left-menu-item {
   color: #fff;
 }
 
-.white-wrapper {
-  background-color: #ffffff;
+/* ========================================================================
+ * Thumbnail icon customizations
+ * ======================================================================== */
+.thumbnail.icon {
   position: relative;
 }
 
-.tab-content {
-  padding: 20px 17px;
+.thumbnail.icon .after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  color: #FFF;
 }
 
-.tab-content h3 {
-  margin-top: 0px;
+.thumbnail.icon:hover .after {
+  display: block;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
+.thumbnail.icon > a > .after > span.fw-stack.fw-lg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+  font-size: 26px;
+}
+
+/* ========================================================================
+ * Dropdown customizations
+ * ======================================================================== */
+.dropdown-menu-right .divider {
+  background-color: #1f1f1f;
+}
+
+.dropdown-menu .divider {
+  background-color: #c5c5c5;
+  margin: 0px;
+}
+
+.dropdown-menu > li > a {
+  padding: 7px 20px;
+}
+
+.dropdown-menu > li:not(.divider) {
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.dropdown-menu > li.dropdown-header, .dropdown-menu > li:first-child {
+  border-bottom: none;
+}
+
+.dropdown-menu-right .dropdown-header {
+  font-size: inherit;
+  color: #cbcbcb;
+}
+
+header .nav .dropdown-menu > li:not(.divider) {
+  border-bottom: 1px solid #444;
 }
 
 /*# sourceMappingURL=apim-store.css.map */
