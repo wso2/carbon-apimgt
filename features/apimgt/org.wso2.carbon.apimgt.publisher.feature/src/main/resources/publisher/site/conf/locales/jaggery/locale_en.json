@@ -176,7 +176,7 @@
     "usageResourcePath" : "Usage by Resource Path",
     "apiLatencyTime" : "API Latency",
     "apiGeoLocationUsage" : "API Usage Across Geo Locations",
-    "apiUserAgentUsage" : "API Usage Across User Agent",
+    "apiUserAgentUsage" : "API Usage Across Usage Agent",
     "apiUsageFromDestination" : "API Usage by Destination",
     "usageFromDestination" : "Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
