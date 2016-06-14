@@ -2137,6 +2137,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
+            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
+
             try {
                 WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -2178,9 +2180,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
                         + ", Subscription Status: " + addedSubscription.getSubStatus() + " subscribe by " + userId
-                        + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
+                        + " for app " + applicationName;
                 log.debug(logMessage);
             }
+
+            JSONObject subsLogObject = new JSONObject();
+            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+            subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
 
             return new SubscriptionResponse(addedSubscription.getSubStatus(), addedSubscription.getUUID(),
                     workflowResponse);
@@ -2202,6 +2214,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
                 replaceEmailDomainBack(identifier.getProviderName()));
+
+        String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
         try {
             if (providerTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
@@ -2234,7 +2248,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setApiContext(api.getContext());
             workflowDTO.setApiName(identifier.getApiName());
             workflowDTO.setApiVersion(identifier.getVersion());
-            workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+            workflowDTO.setApplicationName(applicationName);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
@@ -2258,6 +2272,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
             removeSubscriptionWFExecutor.execute(workflowDTO);
+
+            JSONObject subsLogObject = new JSONObject();
+            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION +
                               " for apiID " + identifier.getApiName();
@@ -2272,9 +2296,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             invalidateCachedKeys(applicationId);
         }
         if (log.isDebugEnabled()) {
-            String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
             String logMessage = "API Name: " + identifier.getApiName() + ", API Version " +
-                    identifier.getVersion() + " subscription removed from app " + appName + " by " + userId;
+                    identifier.getVersion() + " subscription removed from app " + applicationName + " by " + userId;
             log.debug(logMessage);
         }
     }
@@ -2359,6 +2382,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
+
         boolean isTenantFlowStarted = false;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = true;
@@ -2432,6 +2463,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() +" in the database.");
         }
+
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+        appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
+        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         APIKey[] apiKeys = null;
 
@@ -2603,6 +2643,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
 
             removeApplicationWFExecutor.execute(workflowDTO);
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+            appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+            appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
                     "for applicationID " + application.getId();
