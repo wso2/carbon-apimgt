@@ -179,8 +179,6 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE =  "signup-config";
 
-    public static final String BAM_SERVER_PROFILE_LOCATION = "bamServerProfiles/bam-profile";
-    
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
     
     public static final String DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD = "mediaType";
@@ -864,10 +862,6 @@ public final class APIConstants {
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
     
-    public static final String  API_MANAGER_DESTINATION_STATS_BAM_PROFILE_NAME = "bam-profile";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_NAME = "org_wso2_apimgt_statistics_destination";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_VERSION = "1.0.0";
-
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
