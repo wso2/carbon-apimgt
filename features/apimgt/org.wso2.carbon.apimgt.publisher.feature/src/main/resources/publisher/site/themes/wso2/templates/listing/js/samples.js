@@ -3,9 +3,7 @@ function APISamples (defaultResourceLevelTier) {
     "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
     ":[{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":" +
     "\"Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
-    "\"responses\":{\"201\":{\"headers\":{\"ETag\":{\"description\":" +
-    "\"Entity Tag of the response resource. Used by caches, or in conditional request\",\"type\":" +
-    "\"string\"},\"Location\":{\"description\":\"The URL of the newly created resource.\",\"type\":" +
+    "\"responses\":{\"201\":{\"headers\":{\"Location\":{\"description\":\"The URL of the newly created resource.\",\"type\":" +
     "\"string\"},\"Content-Type\":{\"description\":\"The content type of the body.\",\"type\":" +
     "\"string\"}},\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created." +
     " Successful response with the newly created object as entity in the body. Location header" +
@@ -15,17 +13,7 @@ function APISamples (defaultResourceLevelTier) {
     "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}}}}," +
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
     "\"" + defaultResourceLevelTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
-    "[{\"default\":25,\"description\":\"Maximum size of menu items to return.\",\"name\":\"limit\"" +
-    ",\"format\":\"double\",\"type\":\"number\",\"in\":\"query\"},{\"default\":0,\"description\":" +
-    "\"Starting point of the item list.\",\"name\":\"offset\",\"format\":\"double\",\"type\":" +
-    "\"number\",\"in\":\"query\"},{\"description\":\"Search by menu item name or ingredients\\n\"" +
-    ",\"name\":\"query\",\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{\"headers\"" +
-    ":{\"ETag\":{\"description\":\"Entity Tag of the response resource. Used by caches, or " +
-    "in conditional requests.\",\"type\":\"string\"},\"Content-Type\":{\"description\":" +
-    "\"The content type of the body.\",\"type\":\"string\"}},\"schema\":{\"title\":\"Menu\"," +
-    "\"properties\":{\"previous\":{\"description\":\"Link for previous page. Undefined if no " +
-    "previous page.\",\"type\":\"string\"},\"count\":{\"type\":\"string\"},\"next\":" +
-    "{\"description\":\"Link for next page. Undefined if no next page.\",\"type\":\"string\"}," +
+    "[],\"responses\":{\"200\":{\"headers\"" + ":{},\"schema\":{\"title\":\"Menu\"," + "\"properties\":{" +
     "\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"},\"type\":\"array\"}},\"type\":" +
     "\"object\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the requested " +
@@ -36,10 +24,7 @@ function APISamples (defaultResourceLevelTier) {
     ":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\",\"type\":\"number\",\"required\"" +
     ":true,\"in\":\"path\"},{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"" +
     "Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
-    "\"responses\":{\"200\":{\"headers\":{\"ETag\":{\"description\":\"Entity Tag of the response " +
-    "resource. Used by caches, or in conditional request\",\"type\":\"string\"},\"Last-Modified\"" +
-    ":{\"description\":\"Date and time the resource has been modifed the last time. Used by caches," +
-    " or in conditional reuquests.\",\"type\":\"string\"},\"Location\":{\"description\":\"The URL " +
+    "\"responses\":{\"200\":{\"headers\":{\"Location\":{\"description\":\"The URL " +
     "of the newly created resource.\",\"type\":\"string\"},\"Content-Type\":{\"description\":\"The" +
     " content type of the body.\",\"type\":\"string\"}},\"schema\":{\"$ref\":" +
     "\"#/definitions/Order\"},\"description\":\"OK. Successful response with updated Order\"}," +
@@ -51,11 +36,7 @@ function APISamples (defaultResourceLevelTier) {
     ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
     "\"format\":\"integer\",\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
-    "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{\"ETag\":{\"description\"" +
-    ":\"Entity Tag of the response resource. Used by caches, or in conditional requests.\",\"type\"" +
-    ":\"string\"},\"Last-Modified\":{\"description\":\"Date and time the resource has been modifed " +
-    "the last time. Used by caches, or in conditional reuquests.\",\"type\":\"string\"}," +
-    "\"Content-Type\":{\"description\":\"The content type of the body.\",\"type\":\"string\"}}," +
+    "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{}," +
     "\"description\":\"OK Requested Order will be returned\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the " +
     "requested resource.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\"" +
@@ -172,6 +153,8 @@ APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
                                                     type: "info",
                                                     title: "Success"
                                                 });
+                                                //Add document for the published sample
+                                                addSampleAPIDoc();
                                             }
                                         }, 'json');
                                 } else {
@@ -197,6 +180,28 @@ APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
                         title: "Error"
                     });
                 }
+            }
+        }, 'json');
+};
+
+addSampleAPIDoc = function () {
+    var addDocUrl = "/site/blocks/documentation/ajax/docs.jag";
+    var addDocData = {action: 'addSampleDocumentation', provider: username,
+        apiName: 'PizzaShackAPI',version: '1.0.0',
+        docName: 'PizzaShack API Documentation',
+        docType: 'how to', sourceType: 'file',
+        summary: 'This is the API documentation for Pizza Shack API',
+        docLocation: '/samples/PizzaShack/PizzaShackAPIDoc.pdf'
+    };
+    jagg.post(addDocUrl, addDocData,
+        function (apiDocResult) {
+            if (apiDocResult.error) {
+                $(".modal-body").removeClass("loadingButton");
+                jagg.message({
+                    content: "Error occurred while adding sample API documentation",
+                    type: "error",
+                    title: "Error"
+                });
             }
         }, 'json');
 };
