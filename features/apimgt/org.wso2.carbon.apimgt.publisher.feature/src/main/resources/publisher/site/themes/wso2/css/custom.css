@@ -729,9 +729,27 @@ input.ep-field{ min-width: 50%;}
     border-radius: 0px;
 }
 
+.thumbnail.icon img {
+    width: 101%;
+} 
+
+
+.input-group {
+    position: relative;
+    display: table;
+    border-collapse: separate;
+    margin-top: 3px;
+}
+
+#mainLoginForm {
+    max-width: 100%;
+}
+
 .list-group-item-success .noty_text,
 .list-group-item-info .noty_text,
 .list-group-item-warning .noty_text,
 .list-group-item-danger .noty_text{
     color:#fff;
+=======
+>>>>>>> parent of 587f2e5... fix for swagger ui layout
 }

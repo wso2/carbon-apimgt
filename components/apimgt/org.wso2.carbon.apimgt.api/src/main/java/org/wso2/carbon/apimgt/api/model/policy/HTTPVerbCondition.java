@@ -47,6 +47,11 @@ public class HTTPVerbCondition extends Condition {
     }
 
     @Override
+    public String getNullCondition() {
+        return null;
+    }
+
+    @Override
     public String toString() {
         return "HTTPVerbCondition [httpVerb=" + httpVerb + ", toString()=" + super.toString() + "]";
     }

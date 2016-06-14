@@ -487,9 +487,11 @@ public class APIManagerConfiguration {
                 ThrottleProperties.DataPublisher dataPublisher = new ThrottleProperties.DataPublisher();
                 OMElement dataPublisherConfigurationElement = throttleConfigurationElement.getFirstChildWithName(new
                         QName(APIConstants.AdvancedThrottleConstants.DATA_PUBLISHER_CONFIGURATION));
-                OMElement dataPublisherEnabledElement = dataPublisherConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
-                dataPublisher.setEnabled(JavaUtils.isTrueExplicitly(dataPublisherEnabledElement.getText()));
+                if (dataPublisherConfigurationElement != null) {
+                    OMElement dataPublisherEnabledElement = dataPublisherConfigurationElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
+                    dataPublisher.setEnabled(JavaUtils.isTrueExplicitly(dataPublisherEnabledElement.getText()));
+                }
                 if (dataPublisher.isEnabled()) {
 
                     OMElement receiverUrlGroupElement = dataPublisherConfigurationElement.getFirstChildWithName(new
