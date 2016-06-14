@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.publisher.dto.RequestCountLimitDTO.class, name = "RequestCountLimit"),
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.publisher.dto.BandwidthLimitDTO.class, name = "BandwidthLimit"),
