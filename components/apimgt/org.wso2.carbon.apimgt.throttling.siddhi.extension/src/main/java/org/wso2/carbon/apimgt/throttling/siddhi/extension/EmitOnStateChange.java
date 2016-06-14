@@ -83,7 +83,7 @@ public class EmitOnStateChange extends StreamProcessor {
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
-                                   ExecutionPlanContext executionPlanContext, boolean outputExpectsExpiredEvents) {
+                                   ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 2) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to throttler:emitOnStateChange" +
                                                        "(key,isThrottled), required 2, but found "
