@@ -179,11 +179,6 @@
                 <Name>org.wso2.apimgt.statistics.fault</Name>
                 <Version>1.0.0</Version>
             </Fault>
-            <Destination>
-                <Name>org_wso2_apimgt_statistics_destination</Name>
-                <Version>1.0.0</Version>
-                <BAMProfileName>bam-profile</BAMProfileName>
-            </Destination>
             <Throttle>
                 <Name>org.wso2.apimgt.statistics.throttle</Name>
                 <Version>1.0.0</Version>
@@ -506,6 +501,7 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
+        <JMSEventPublisherName>jmsEventPublisher</JMSEventPublisherName>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
                 <Gold>5000</Gold>

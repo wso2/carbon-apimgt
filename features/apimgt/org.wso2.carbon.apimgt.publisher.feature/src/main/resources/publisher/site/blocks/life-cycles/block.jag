@@ -23,8 +23,7 @@ jagg.block("life-cycles", {
     apiData.provider = api.provider;
     apiData.name = api.name;
     apiData.version = api.version;
-    var resultData = modApi.getAPILCData(apiData);
-    var lcData = modApi.getAPILC();
+    var resultData = modApi.getAPILCData(apiData);   ;
     var result = modApi.getLifeCyclesEvents(apiData);
     var lcs = result.lcs;
     var lcStatus = modApi.getAPILCStatus(apiData);
@@ -47,8 +46,7 @@ jagg.block("life-cycles", {
             "oldExist":oldExist,
             "isPublishPermitted":permitted,
             "publishedInExternalStores":publishedInExternalStores,
-            "lcStatus":lcStatus,
-            "apiLc":lcData
+            "lcStatus":lcStatus
            
         }
     },

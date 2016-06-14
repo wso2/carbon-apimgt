@@ -1,5 +1,5 @@
 var currentLocation;
-currentLocation = window.location.pathname;
+var currentLocation = "allAPIs";
 var statsEnabled = isDataPublishingEnabled();
 var apiNameVersionMap = {};
 var mediationName;
@@ -22,15 +22,19 @@ $( document ).ready(function() {
       version = this.value;
       comparedVersion[version] = version;
       if (versionComparison) {
-             populateVersionList(apiName,true);  
+             populateVersionList(apiName,true);
       }else{
-      renderGraph(from,to,depth);        
+      renderGraph(from,to,depth);
       }
+    });
+    $("#apiFilter").change(function (e) {
+      currentLocation = this.value;
+      populateAPIList();
     });
     $("#mediationType").change(function (e) {
       mediationName = this.value;
       versionComparison = true;
-      renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));      
+      renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
     });
     $("#compareVersion").change(function (e) {
       var tempArray = {};
@@ -56,12 +60,12 @@ $( document ).ready(function() {
         to = currentDay;
         depth = "MINUTES";
         versionComparison = false;
-        renderGraph(from,to,depth);     
+        renderGraph(from,to,depth);
         btnActiveToggle(this);
       });
       $('#clear-btn').on('click', function () {
          versionComparison = false;
-         renderGraph(from,to,depth);  
+         renderGraph(from,to,depth);
          $('#compare-selection').css("display", "none");
          $('#compare-selection-label').css("display", "none");
          $('#compare-version-btn').css("display", "inline");
@@ -102,15 +106,15 @@ $( document ).ready(function() {
                     });
         $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
-                        from = convertDate(picker.startDate);
-                        to = convertDate(picker.endDate);
-                        var fromStr = from.split(" ");
-                        var toStr = to.split(" ");
+                        from = picker.startDate;
+                        to = picker.endDate;
+                        var fromStr = convertDate(from).split(" ");
+                        var toStr = convertDate(to).split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         if ((to-from)>(3600000*24*2)) {
                            depth = "DAY";
-                           renderGraph(from, to,depth);                        
+                           renderGraph(from, to,depth);
                            }else{
                            depth = "HOUR";
                            renderGraph(from, to,depth);
@@ -136,7 +140,7 @@ var populateAPIList = function(){
            $('#apiSelect')
                     .empty()
                     .append(apis)
-                    .selectpicker('refresh')                    
+                    .selectpicker('refresh')
                     .trigger('change');
             }
             else {
@@ -149,7 +153,7 @@ var populateAPIList = function(){
 var populateVersionList = function(apiName,compare){
         var i=0;
         if (compare) {
-          $('#compareVersion').multiselect();      
+          $('#compareVersion').multiselect();
            $('#compareVersion option').each(function(index, option) {
               $(option).remove();
             });
@@ -164,7 +168,7 @@ var populateVersionList = function(apiName,compare){
                 i++;
               }
         }
-        $('#compareVersion').multiselect('rebuild');          
+        $('#compareVersion').multiselect('rebuild');
         $('#compareVersion').trigger('change');
         }else{
           var selectVersions = '';
@@ -180,12 +184,12 @@ var populateVersionList = function(apiName,compare){
 if (versionComparison){
         if (apiNameVersionMap[apiName].length == 1) {
             $('#clear-btn').trigger('click');
-        }  
+        }
 }
            $('#versionSelect')
                     .empty()
                     .append(selectVersions)
-                    .selectpicker('refresh')                    
+                    .selectpicker('refresh')
                     .trigger('change');
         }
 };
@@ -207,11 +211,11 @@ var populateMediations = function(data){
                     .selectpicker('refresh');
 };
 function renderGraph(fromDate,toDate,drillDown){
-    var to = convertTimeString(toDate);
-    var from = convertTimeString(fromDate);
+    var toDateString = convertTimeString(toDate);
+    var fromDateString = convertTimeString(fromDate);
     getDateTime(toDate,fromDate);
     if (statsEnabled) {
-        jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
+        jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown},
         function (json) {
             if (!json.error) {
             var data1 = {};
@@ -256,13 +260,13 @@ function renderGraph(fromDate,toDate,drillDown){
     }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
-   var to = convertTimeString(toDate);
-    var from = convertTimeString(fromDate);
-    getDateTime(to,from);
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : from , toDate : to,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
+   var toDateString = convertTimeString(toDate);
+    var fromDateString = convertTimeString(fromDate);
+    getDateTime(toDate,fromDate);
+           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
         function (json) {
             if (!json.error) {
-                  drawGraphInArea(json.usage,drillDown);                    
+                  drawGraphInArea(json.usage,drillDown);
           }
         }, "json");
 }
@@ -334,7 +338,7 @@ nv.addGraph(function() {
      to = new Date(e.x).setHours(date.getHours()+1);
     }
     if (versionComparison) {
-       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));      
+       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));
     }else{
     renderGraph(from,to,depth);
     }
@@ -370,10 +374,10 @@ var pickLegandColor = function(legand){
 }
 }
 function getDateTime(currentDay,fromDay){
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
-    var toDate = to.split(" ");
-    var fromDate = from.split(" ");
+    toStr = convertTimeString(currentDay);
+    fromStr = convertTimeString(fromDay);
+    var toDate = toStr.split(" ");
+    var fromDate = fromStr.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);

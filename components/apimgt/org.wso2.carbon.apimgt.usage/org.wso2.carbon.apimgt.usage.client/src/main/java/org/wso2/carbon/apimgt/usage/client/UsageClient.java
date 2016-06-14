@@ -41,9 +41,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -241,8 +243,13 @@ public class UsageClient {
             String groupAndOrder = " group by sub.created_time order by sub.created_time asc";
             String time = " and sub.created_time between '" + fromDate + "' and '" + toDate + "' ";
 
-            if ("All".equals(apiName)) {
+            /*if ("All".equals(apiName)) {
                 from = "from AM_SUBSCRIBER sub ";
+                if (!"allAPIs".equals(apiFilter)) {
+                    from += " ,AM_API as api,AM_APPLICATION AS app, AM_SUBSCRIPTION as subc  ";
+                    where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
+                            + "sub.subscriber_id=app.subscriber_id and api.api_provider='" + provider + "'";
+                }
             } else {
                 from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
                 where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
@@ -250,7 +257,9 @@ public class UsageClient {
                 if (!"allAPIs".equals(apiFilter)) {
                     where += " and api.api_provider = '" + provider + "' ";
                 }
-            }
+            }*/
+            
+            from = "from AM_SUBSCRIBER sub "; 
 
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
@@ -501,7 +510,7 @@ public class UsageClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
 
-            String query = "select count(api.api_id) as y, api.created_time as x from AM_API as api, AM_APPLICATION "
+           /* String query = "select count(api.api_id) as y, api.created_time as x from AM_API as api, AM_APPLICATION "
                     + "as app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
             String group = "group by api.created_time,api.api_id ";
             String order = " order by api.created_time asc ";
@@ -526,10 +535,38 @@ public class UsageClient {
                 }
                 apis.append(") ");
                 where += apis.toString();
-            }
+            }*/
+            
+			String query = "select COUNT(lc.API_ID) as y,lc.EVENT_DATE as x  from AM_API_LC_EVENT lc, \n "
+					+ " (SELECT le.API_ID,max(le.EVENT_DATE) as latest  from AM_API_LC_EVENT le where \n ";
+			if (!"All".equals(developer)) {
+				query += " le.USER_ID= ? and \n ";
+			}
 
-            query = query + where + group + order;
+			query += " le.EVENT_DATE between '"+fromDate+"' and '"+toDate+"' group by le.API_ID order by latest DESC )x \n ";
+
+			if (!"allAPIs".equals(apiFilter)) {
+				query += " ,AM_API ai ";
+			}
+			query += " where lc.NEW_STATE ='PUBLISHED' and  lc.API_ID = x.API_ID and lc.EVENT_DATE = x.latest \n ";
+
+			if (!"allAPIs".equals(apiFilter)) {
+				query += " and ai.API_ID = lc.API_ID and ai.API_PROVIDER = ? \n ";
+			}
+			query += " group by lc.API_ID,lc.EVENT_DATE order by lc.EVENT_DATE ASC \n ";
+
             statement = connection.prepareStatement(query);
+            
+            if (!"All".equals(developer)) {
+            	statement.setString(1, developer);
+			}
+            
+            if (!"All".equals(developer) && !"allAPIs".equals(apiFilter)) {
+            	statement.setString(2, provider);
+			}else if(!"allAPIs".equals(apiFilter)){
+				statement.setString(1, provider);
+			}
+            
             //execute
             rs = statement.executeQuery();
             List<ApisByTimeDTO> list = new ArrayList<ApisByTimeDTO>();

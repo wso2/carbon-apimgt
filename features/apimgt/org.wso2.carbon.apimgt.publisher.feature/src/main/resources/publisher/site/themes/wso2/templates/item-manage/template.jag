@@ -233,12 +233,12 @@
                 </label>
                 <div class="col-sm-8">
                     <label class="radio">
-                        <input type="radio" class="backend_tps" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
+                        <input type="radio" class="backend_tps" id ="backend_tps_unlimited" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
                         checked="checked"<%}%> value="unlimited">
                         <span class="helper">Unlimited</span>
                     </label>
                     <label class="radio">
-                        <input type="radio" class="backend_tps" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
+                        <input type="radio" class="backend_tps" id ="backend_tps_specify" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
                         checked="checked"<%}%> value="specify">
                         <span class="helper">Specify</span>
                     </label>                    
@@ -380,7 +380,68 @@
             <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
         </div>
 	</div>
-<%  }%>
+<%  } else { %>
+<hr />
+<div class="form-group">
+        <label class="control-label col-sm-3" for="resourceTiers">Resource Level Tiers:
+            <a class="help_popup" help_data="resource_policy_help" title="resource_policy_help" data-trigger="hover" data-placement="bottom">
+            	<span class="icon fw-stack fw-lg" style="font-size:6px">
+    				<i class="fw fw-circle fw-stack-2x"></i>
+    				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+    			</span>
+            </a>
+            <p id="api_policy_help" class="hide"><%=i18n.localize("enableResourceLevelPolicyHelpMsg")%></p>
+        </label>
+
+    <div id="resource-policy-select" class="controls col-sm-4">
+            <script id="resource-policy-ui-template" language="text/x-handlebars-template">
+                <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
+                <div id="resource_policy_modal" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h3>Select Policy per Resource</h3>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table">
+                                    <tr>
+                                        <td colspan="2">Resource</td>
+                                        <td>Policy</th>
+                                    </tr>
+                                    {{#each doc.paths}}
+                                        {{#each this}}
+                                        <tr class="resource_container" data-path="">
+                                            <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
+                                                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                                            </td>
+                                            <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
+                                            <td>
+                                                <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
+                                                    {{#each ../../tiers}}
+                                                        <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
+                                                    {{/each}}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        {{/each}}
+                                    {{/each}}
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                            <div id="res" style="color:red;float:left"></div>
+                            <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+                            <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </script>
+            <a class=" help_popup" help_data="tier_help"></a>
+            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+        </div>
+</div>
+<% } %>
               <div class="form-group">
                             <label class="control-label col-sm-3" for="throttle">                            
                             </label>
@@ -636,13 +697,13 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h3>Congratulations</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
+                <h3>Congratulations... What&#39;s Next?</h3>
               </div>
               <div class="modal-body">
-                <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
-                </br>
-                <label class="publish-label">What&#39;s Next</label>
+                <p>
+                    You have successfully published your API : <strong><%=api.name%>-<%=api.version%></strong>
+                </p>
               </div>
               <div class="modal-footer successMsgFooter">
                 <div class="pull-right">
@@ -922,7 +983,7 @@
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
             thisID = $(this).attr('id');
-                if(!$("#toggleThrottle").is(":checked")) {
+                if(!$("#backend_tps_specify").is(":checked")) {
                 // Setting text field values to null if check box is not selected.
                     $('#productionTps').val(null);
                     $('#sandboxTps').val(null);
@@ -973,7 +1034,7 @@
         <div class="form-group">
             <label class="control-label col-sm-3" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
             <div class="col-sm-4">
-            <input type="text" id="scopeName" name="scopeName"  class="form-control required characterValidation" placeholder="Eg: Read My Data">
+            <input type="text" id="scopeName" name="scopeName"  class="form-control required characterValidationExceptSpace" placeholder="Eg: Read My Data">
             </div>
         </div>
         <div class="form-group">
@@ -999,39 +1060,47 @@
     </div>
 </div>
 
-<div  id="environmentsRetry-modal" class="modal hide fade">
+<div  id="environmentsRetry-modal" class="modal fade">
+
+    <div class="modal-dialog">
+      <div class="modal-content">
         <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Gateway Failures</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Gateway Failures</h3>
         </div>
         <div class="modal-body">
-        <div id="modal-published-header">
-        Failed to Publish Environments
-        </div>
-        <div id="modal-published-content">
-        </div>
-        <div id="modal-unpublished-header">
+            <div id="modal-published-header">
+            Failed to Publish Environments
+            </div>
+            <div id="modal-published-content">
+            </div>
+            <div id="modal-unpublished-header">
                 Failed to UnPublish Environments
-                </div>
-                <div id="modal-unpublished-content">
-                </div>
-                <input type="hidden" id="retryType"/>
+            </div>
+            <div id="modal-unpublished-content">
+            </div>
+            <input type="hidden" id="retryType"/>
         </div>
         <div class="modal-footer">
-        <div id="res" class="hide" style="color:red;float:left"></div>
-        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
-       <script type="text/javascript">
-        function doGatewayAction() {
-            var type=$("#retryType").val();
-            if(type=="manage"){
-               $("#environmentsRetry-modal").modal('hide');
-               $( "body" ).trigger( "api_saved" );
-               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
-            }else{
-               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+            <div id="res" class="hide" style="color:red;float:left"></div>
+            <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="ok">OK</a>
+           <script type="text/javascript">
+            function doGatewayAction() {
+                var type=$("#retryType").val();
+                if(type=="manage"){
+                   $("#environmentsRetry-modal").modal('hide');
+                   $( "body" ).trigger( "api_saved" );
+                   location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                }else{
+                   location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                }
             }
-        }
-
+            </script>
+        </div>
+      </div>  
+    </div>
+</div>
+       <script type="text/javascript">
         jQuery.validator.addMethod("characterValidation", function(value, element) {
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
@@ -1042,10 +1111,6 @@
             // not allow any special charaters
             return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\t\n]*$/.test( value );
         }, 'Field Contain special characters');
-
-        
-
        </script>
-        </div>
-        </div>
+
 <% }); %>

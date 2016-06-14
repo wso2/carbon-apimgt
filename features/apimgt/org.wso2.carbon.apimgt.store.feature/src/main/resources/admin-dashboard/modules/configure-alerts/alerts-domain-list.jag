@@ -27,7 +27,7 @@ var carbon = require('carbon'),
         authenticator.setPreemptiveAuthentication(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
-        var domainDTOs = stub.getAllDomainsInfo();
+        var domainDTOs = stub.getAllDomainInfos();
         return domainDTOs;
     } catch (ex) {
         var message = "Error occurred while Retrieving Information related to Domains (Cause:" + ex.message + ")";

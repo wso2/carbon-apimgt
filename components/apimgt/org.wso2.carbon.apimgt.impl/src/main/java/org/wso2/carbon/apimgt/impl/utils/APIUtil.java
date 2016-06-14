@@ -158,6 +158,8 @@ public final class APIUtil {
 
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
+    private static final Log audit = CarbonConstants.AUDIT_LOG;
+
     private static boolean isContextCacheInitialized = false;
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
@@ -995,19 +997,6 @@ public final class APIUtil {
 
     }
 
-    public static final Map<String,String> getEventPublisherProperties(){
-        HashMap<String,String> propertiesMap = new HashMap<String, String>();
-
-        propertiesMap.put("java.naming.factory.initial","org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        //propertiesMap.put("transport.jms.UserName",null);
-        propertiesMap.put("java.naming.provider.url","repository/conf/jndi.properties");
-        //propertiesMap.put("transport.jms.Password",null);
-        propertiesMap.put("transport.jms.DestinationType","topic");
-        propertiesMap.put("transport.jms.Destination","throttleData");
-        propertiesMap.put("transport.jms.ConcurrentPublishers","allow");
-        propertiesMap.put("transport.jms.ConnectionFactoryJNDIName","TopicConnectionFactory");
-        return propertiesMap;
-    }
 
     /**
      * Prepends the Tenant Prefix to a registry path. ex: /t/test1.com
@@ -2076,13 +2065,13 @@ public final class APIUtil {
     /**
      * Checks whether the specified user has the specified permission.
      *
-     * @param username   A username
+     * @param userNameWithoutChange   A username
      * @param permission A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
-    public static boolean hasPermission(String username, String permission) throws APIManagementException {
+    public static boolean hasPermission(String userNameWithoutChange, String permission) throws APIManagementException {
     	boolean authorized = false;
-        if (username == null) {
+        if (userNameWithoutChange == null) {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                     " the anonymous user");
         }
@@ -2093,7 +2082,7 @@ public final class APIUtil {
             return authorized;
         }
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userNameWithoutChange);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
@@ -2108,7 +2097,7 @@ public final class APIUtil {
                                 .getTenantUserRealm(tenantId)
                                 .getAuthorizationManager();
                 authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
+                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
                                 CarbonConstants.UI_PERMISSION_ACTION);
             } else {
                 // On the first login attempt to publisher (without browsing the
@@ -2120,12 +2109,12 @@ public final class APIUtil {
                 }
                 authorized =
                         AuthorizationManager.getInstance()
-                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
+                                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
                                         permission);
             }
             
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while checking the user:" + username + " authorized or not", e);
+            throw new APIManagementException("Error while checking the user:" + userNameWithoutChange + " authorized or not", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -2973,38 +2962,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Add BAM Server Profile Configuration which is used for southbound statistics
-     * publishing
-     *
-     * @throws APIManagementException
-     */
-    public static void addBamServerProfile(String bamServerURL, String bamServerUser,
-                                           String bamServerPassword, int tenantId) throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            log.debug("Adding Bam Server Profile to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
-            String bamProfile = IOUtils.toString(inputStream);
-
-            String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-                    replaceAll("\\[2\\]", bamServerUser).
-                    replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
-
-            Resource resource = registry.newResource();
-            resource.setContent(bamProfileConfig);
-            registry.put(APIConstants.BAM_SERVER_PROFILE_LOCATION, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while adding BAM Server Profile configuration " +
-                    "information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading BAM Server Profile configuration " +
-                    "configuration file content", e);
-        }
-    }
-
     public static boolean isAnalyticsEnabled() {
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
@@ -3781,19 +3738,23 @@ public final class APIUtil {
 
             // If the sequence not found the default sequences, check in custom sequences
 
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
-                                                                                                   sequenceType));
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
+            if (registry.resourceExists(getSequencePath(identifier,sequenceType)))  {
 
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        return true;
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                                                                                                       sequenceType));
+                if (seqCollection != null) {
+                    String[] childPaths = seqCollection.getChildren();
+
+                    for (String childPath : childPaths) {
+                        Resource sequence = registry.get(childPath);
+                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                            return true;
+                        }
                     }
                 }
             }
+
 
         } catch (RegistryException e) {
             String msg = "Error while retrieving registry for tenant " + tenantId;
@@ -5936,5 +5897,33 @@ public final class APIUtil {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+    /**
+     * Logs an audit message on actions performed on entities (APIs, Applications, etc). The log is printed in the
+     * following JSON format
+     *  {
+         "typ": "API",
+         "action": "update",
+         "performedBy": "admin@carbon.super",
+         "info": {
+         "name": "Twitter",
+         "context": "/twitter",
+         "version": "1.0.0",
+         "provider": "nuwan"
+         }
+         }
+     * @param entityType - The entity type. Ex: API, Application
+     * @param entityInfo - The details of the entity. Ex: API Name, Context
+     * @param action - The type of action performed. Ex: Create, Update
+     * @param performedBy - The user who performs the action.
+     */
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("typ", entityType);
+        jsonObject.put("action", action);
+        jsonObject.put("performedBy", performedBy);
+        jsonObject.put("info", entityInfo);
+        audit.info(jsonObject.toString());
     }
 }

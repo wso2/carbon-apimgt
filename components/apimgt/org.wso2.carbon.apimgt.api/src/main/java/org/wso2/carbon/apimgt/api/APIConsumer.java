@@ -44,7 +44,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API having the given tag name
      * @throws APIManagementException if failed to get set of API
      */
-    Set<API> getAPIsWithTag(String tag) throws APIManagementException;
+    Set<API> getAPIsWithTag(String tag, String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a paginated list of #{@link org.wso2.carbon.apimgt.api.model.API} bearing the selected tag
@@ -55,7 +55,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API having the given tag name
      * @throws APIManagementException if failed to get set of API
      */
-    Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException;
+    Map<String,Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a list of all published APIs. If a given API has multiple APIs,

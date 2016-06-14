@@ -209,11 +209,6 @@ public class APIManagerComponent {
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
-            if (analyticsConfiguration.isAnalyticsEnabled()) {
-                APIUtil.addBamServerProfile(analyticsConfiguration.getDasReceiverUrlGroups(),
-                        analyticsConfiguration.getDasReceiverServerUser(),
-                        analyticsConfiguration.getDasReceiverServerPassword(), MultitenantConstants.SUPER_TENANT_ID);
-            }
             //Adding default throttle policies
             boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
             if(advancedThrottlingEnabled) {
@@ -333,24 +328,6 @@ public class APIManagerComponent {
                 throw new APIManagementException(msg, e);
             }
         }
-    }
-
-    /*
-    Registers the JMS OutputEventAdapter
-     */
-    private void configureJMSPublisher(){
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-        adapterConfiguration.setStaticProperties(APIUtil.getEventPublisherProperties());
-
-        try {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-        } catch (OutputEventAdapterException e) {
-            log.warn("Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly", e);
-        }
-
     }
 
     private void setupImagePermissions() throws APIManagementException {
@@ -573,7 +550,6 @@ public class APIManagerComponent {
      */
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
-        configureJMSPublisher();
     }
 
     /**

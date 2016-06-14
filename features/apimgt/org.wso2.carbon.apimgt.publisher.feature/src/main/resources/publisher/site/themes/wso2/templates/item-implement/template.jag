@@ -115,17 +115,11 @@
 								                            <div class="form-group">
 								                            	<label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3"></label>
 								                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-																	<span class="add_ep btn btn-default" data-type="{{ ep_type }}" >
-																		<span class="icon fw-stack fw-lg" style="font-size:8px">
-																		<i class="fw fw-circle-outline fw-stack-2x"></i>
-																		<i class="fw fw-add fw-stack-1x fw-inverse" style="font-size:8px"></i>
-																		</span>
+																	<span class="add_ep btn btn-secondary" data-type="{{ ep_type }}" >
+																		<i class="fw fw-add"></i>
 																	</span>
-																	<span class="remove_ep btn btn-default" data-type="{{ ep_type }}" >
-																		<span class="icon fw-stack fw-lg" style="font-size:8px">
-																		<i class="fw fw-circle-outline fw-stack-2x"></i>
-																		<i class="fw fw-minus fw-stack-1x fw-inverse" style="font-size:8px"></i>
-																		</span>
+																	<span class="remove_ep btn btn-secondary" data-type="{{ ep_type }}" >
+																		<i class="fw fw-minus"></i>
 																	</span>
 								                            	</div>
 								                            </div>
@@ -159,8 +153,7 @@
 																{{/if}}
 															</div>
 							                            </div>
-							                            {{/inline}}												
-
+							                            {{/inline}}
 								                        <div class="form-group">
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">Endpoint Type :<span class="requiredAstrix">*</span>
 								                            	<a class="help_popup" help_data="endpoint_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
@@ -231,7 +224,7 @@
 								                        	{{#if ../load_balance}}
 								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Message Mediation Policies"}}
 								                        	{{else}}
 								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
 								                        	{{/if}}								                        
@@ -261,7 +254,7 @@
 															          	</span>
 															        </a>
 															    </label>
-															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
 															        <select class="form-control valid load_balance_property" name="algoCombo" id="algoCombo" aria-invalid="false">
 															            <option {{#ifCond algoCombo "==" "org.apache.synapse.endpoints.algorithms.RoundRobin" }}selected="selected"{{/ifCond}} value="org.apache.synapse.endpoints.algorithms.RoundRobin">Round-robin</option>
 															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other">Other</option>
@@ -274,7 +267,7 @@
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
 															        <input type="text" class="required form-control load_balance_property" name="algoClassName" value="{{algoClassName}}" id="algoClassName">
 															    </div>
 															</div>
@@ -284,7 +277,7 @@
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
 															        <select class="form-control load_balance_property" name="sessionManagement" id="sessionManagement">
 															            <option {{#ifCond sessionManagement "==" "http" }}selected="selected"{{/ifCond}} value="http">Transport</option>
 															            <option {{#ifCond sessionManagement "==" "soap" }}selected="selected"{{/ifCond}} value="soap">SOAP</option>
@@ -298,7 +291,7 @@
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
-															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
 															        <input class="form-control load_balance_property" type="text" name="sessionTimeOut" value="{{sessionTimeOut}}" id="sessionTimeOut">
 															    </div>
 															</div>
@@ -307,17 +300,16 @@
 														    <div class="modal-dialog">
 														    <div class="modal-content">
 														        <div class="modal-header">
-														        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-														        <h3>Advanced Endpoint Configuration</h3>
+																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
+																	<h3>Advanced Endpoint Configuration</h3>
 														        </div>
 														        <div class="modal-body">
-														        <div id="advance_form">
-														        </div>
+														        	<div id="advance_form"></div>
 														        </div>
 														        <div class="modal-footer">
-														        <div id="res" style="color:red;float:left"></div>
-														        <a href="#" class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-														        <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a>
+															        <div id="res" style="color:red;float:left"></div>
+																	<a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("save")%></a>
+																	<a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
 														        </div>
 														    </div>
 														    </div>
@@ -380,38 +372,19 @@
 							
 							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
-							                            <div class="col-sm-6 form-inline">
-							                                <input type="text" class="col-sm-2 form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
-							                                <input type="password" class="col-sm-4 form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
+							                            <div class="col-sm-2">
+							                                <input type="text" class="form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
+														</div>
+														<div class="col-sm-2">
+							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
 							                            </div>
 							                        </div>
-							
-							                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
-							                        <!--Southboud statistics -->
-							                        <div class="form-group">
-							                            <label class="control-label col-sm-3" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
-							                              <div class="col-sm-4">
-							                               <select class="select required form-control" id="destinationStats" name="destinationStats">
-							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
-							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
-							                                </select>
-							                                <a class="help_popup" help_data="stats_help" data-trigger="hover" title="stats_help">
-							                                	<span class="icon fw-stack fw-lg" style="font-size:6px">
-												                   <i class="fw fw-circle fw-stack-2x"></i>
-												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-												                </span>
-							                                </a>
-							                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
-							                             </div>
-							                        </div>
-							                        <!--Southboud statistics End -->
-							                        <% }%>
-							
+
 							                        </div><!-- more option endpoint -->
-							
+												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
-							                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
+							                        <legend ><%=i18n.localize("sequence")%></legend>
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
@@ -456,18 +429,18 @@
 							                                    </table>							                                    
 							                            	</div>
 							                            </div>
-							                            	<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-							                            		<div class="col-sm-3"></div>
-							                            		<div class="col-sm-3">
-							                            			 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
-							                            		</div>
-							                            	</div>
+														<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+															<div class="col-sm-3"></div>
+															<div class="col-sm-3">
+																 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
+															</div>
+														</div>
 
 														<% if(outputs.isCreatePermitted){
 														 %>
-
+														<br/><br/>
 														<div id="corsConfigsManaged">
-														<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+															<legend>CORS configuration</legend>
                                                             <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
 															<div class="cors-ui-container"></div>
 
@@ -529,12 +502,14 @@
 								                                var hide_impl="hide";
 								                            } %>
 								
-								                            <label class="radio-inline">
-								                            <input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> > Inline
+								                            <label class="radio add-margin-right-5x">
+								                            	<input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> >
+								                            	<span class="helper">Inline</span>
 								                            </label>
 								
-								                            <label class="radio-inline">
-								                            <input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> > Endpoint
+								                            <label class="radio">
+								                            	<input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> >
+								                            	<span class="helper">Endpoint</span>
 								                            </label>
 								
 								                    </div>
@@ -542,7 +517,7 @@
 								                </fieldset>
 								
 								                <div id="api_designer">
-								                    <div id ="apidoc_details"></div>
+								                    <div id ="apidoc_details"></div><br/><br/>
 								                    <div id ="resource_details"></div>
 								                </div>
 								
@@ -551,8 +526,18 @@
 								
 								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
 								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
-								                    <div class="form-group form-inline">
-								                        <label class="control-label col-sm-3">Prototype Endpoint:</label>
+								                    <div class="form-group">
+								                        <label class="control-label col-sm-3">Prototype Endpoint:
+								                        <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
+															<span class="icon fw-stack fw-lg" style="font-size:6px">
+																   <i class="fw fw-circle fw-stack-2x"></i>
+																   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+															</span>
+														</a>
+														<div id="endpoint_test_help" class="hide">
+															<p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+														</div>
+								                        </label>
 								                        <div class="col-sm-8">
 								                            <div class="input-group">
 								                                <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control" placeholder="E.g.: http://appserver/resource"/>
@@ -561,15 +546,6 @@
 								                                        <span>Test</span>
 								                                    </button>
 								                                </span>
-								                            </div>
-								                            <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
-								                            	<span class="icon fw-stack fw-lg" style="font-size:6px">
-													                   <i class="fw fw-circle fw-stack-2x"></i>
-													                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-													            </span>
-								                            </a>
-								                            <div id="endpoint_test_help" class="hide">
-								                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
 								                            </div>
 								                        </div>
 								                        <span style="display:none;" class="help-block jsonform-errortext"></span>
@@ -581,7 +557,8 @@
 														%>
 
 														<div id="corsConfigsPrototyped">
-															<legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>
+															<br/><br/>
+															<legend>CORS configuration</legend>
 
 															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
 
@@ -606,7 +583,9 @@
 								                    <input type="hidden" name="action" value="implement" />
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>
-								                    <button class="btn btn-warning manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                    <%if(permitted) { %>
+								                    <button class="btn btn-primary manageSaveButton has-spinner" id="prototyped_api" >Deploy as a Prototype</button>
+								                    <%}%>
 								                </div>
 								                            </form>
 								                </div>
@@ -716,41 +695,49 @@
 </script>
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
-<div class="resource_body_padding">
-    <h5>Description :</h5>
-    <a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
-    <br />
-    <br />        
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
-    <br />
-    <h5>Parameters :</h5>
-    {{#if parameters}}
-    <table class="table table-condensed table-hover table-bordered">
-        <tr>
-        <th width="200px">Parameter Name</th>
-        <th>Description</th>
-        <th width="100px">Parameter Type</th>
-        <th width="100px">Data Type</th>
-        <th width="100px">Required</th>            
-        </tr>    
-    {{#each parameters}}
-        <tr>
-        <td>{{ name }}</td>
-        <td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
-        <td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
-        <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
-        <td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
-        </tr> 
-    {{/each}}
-    {{/if}}
-    </table>   
-    <h5>Script :</h5>
-    <textarea class="editor col-sm-12" width="100%" style="height:150px;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
-    {{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
-{{/each}}
-mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
-/*Uncomment the above comment block to send a sample response.*/{{/if}}
-</textarea>
+<div class="resource_body_padding add-margin-bottom-2x">
+	<div class="add-margin-bottom-4x">
+    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
+	</div>
+	<div class="add-margin-bottom-4x">
+    	<strong>Response Content Type : </strong><a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
+    </div>
+    <div class="add-margin-bottom-4x">
+		<div class="add-margin-bottom-2x">
+			<strong>Parameters : </strong>
+		</div>
+		{{#if parameters}}
+		<table class="table table-condensed table-bordered">
+			<tr>
+				<th width="15%">Parameter Name</th>
+				<th width="40%">Description</th>
+				<th width="15%">Parameter Type</th>
+				<th width="15%">Data Type</th>
+				<th width="15%">Required</th>
+			</tr>
+		{{#each parameters}}
+			<tr>
+			<td>{{ name }}</td>
+			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
+			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+			</tr>
+		{{/each}}
+		{{/if}}
+		</table>
+  	</div>
+  	<div class="add-margin-bottom-4x">
+  		<div class="add-margin-bottom-2x">
+			<strong>Script : </strong>
+		</div>
+		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+		{{/each}}
+		mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+		/*Uncomment the above comment block to send a sample response.*/{{/if}}
+		</textarea>
+	</div>
 </div>  
 </script>
 <div  id="environmentsRetry-modal" class="modal hide fade">
@@ -848,94 +835,110 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 		{{#if address }}
         <fieldset>
             <legend>Message Content</legend>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="format">Format</label>
-                <div class="col-sm-4">
-                    <select class="form-control selectpicker" id="format" name="format">
-                        <option value="soap11">SOAP 1.1</option>
-                        <option value="soap12">SOAP 1.2</option>
-                        <option value="POX">Plain Old XML (POX)</option>
-                        <option value="REST">REpresentational State Transer (REST)</option>
-                        <option value="GET">GET</option>
-                        <option selected value="leave-as-is">Leave As-Is</option>
-                    </select>
-                    <p class="help-block hide">Message format for the endpoint.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="optimize">Optimize</label>
-                <div class="col-sm-4">
-                    <select class="form-control selectpicker" id="optimize" name="optimize">
-                        <option value="SWA">SWA</option>
-                        <option value="MTOM">MTOM</option>
-                        <option selected value="leave-as-is">Leave As-Is</option>
-                    </select>
-                    <p class="help-block hide">Method to optimize the attachments.</p>
-                </div>
-            </div>
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="format">Format</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="format" name="format">
+							<option value="soap11">SOAP 1.1</option>
+							<option value="soap12">SOAP 1.2</option>
+							<option value="POX">Plain Old XML (POX)</option>
+							<option value="REST">REpresentational State Transer (REST)</option>
+							<option value="GET">GET</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Message format for the endpoint.</p>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="optimize">Optimize</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="optimize" name="optimize">
+							<option value="SWA">SWA</option>
+							<option value="MTOM">MTOM</option>
+							<option selected value="leave-as-is">Leave As-Is</option>
+						</select>
+						<p class="help-block hide">Method to optimize the attachments.</p>
+					</div>
+				</div>
+			</div>
         </fieldset>
         {{/if}}
         <fieldset>
             <legend>Endpoint Suspend State</legend>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="suspendErrorCode">Error Codes</label>
-                <div class="col-sm-4">
-                    <select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
-                        <option value="101000">101000 : Receiver IO error sending</option>
-                        <option value="101001">101001 : Receiver IO error receiving</option>
-                        <option value="101500">101500 : Sender IO error sending</option>
-                        <option value="101501">101501 : Sender IO error receiving</option>
-                        <option value="101503">101503 : Connection failed</option>
-                        <option value="101504">101504 : Connection timed out</option>
-                        <option value="101505">101505 : Connection closed</option>
-                        <option value="101506">101506 : HTTP protocol violation</option>
-                        <option value="101507">101507 : Connect cancel</option>
-                        <option value="101508">101508 : Connect timeout</option>
-                        <option value="101509">101509 : Send abort</option>
-                        <option value="101510">101510 : Response processing failure</option>
-                    </select>
-                    <p class="help-block">A list of error codes.If these
-                    error codes are received from the endpoint, the
-                    endpoint will be suspended.</p><span class=
-                    "help-block jsonform-errortext" style=
-                    "display:none;"></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
-                    <p class="help-block hide">The duration that the endpoint is
-                    suspended for the first time after the receiving the
-                    suspend error codes.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="suspendMaxDuration">Max Duration(ms)</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
-                    <p class="help-block hide">The maximum duration that the
-                    endpoint is suspended after the receiving the suspend
-                    error codes.</p>
-                </div>
-            </div>
-            <div class="form-group ">
-                <label class="control-label col-sm-3" for="factor">Factor</label>
-                <div class="col-sm-4">
-                    <input class="form-control" id="factor" name="factor" type="text" value="">  
-                    <p class="help-block">The duration to suspend can vary
-                    from the first time suspension to the subsequent time.
-                    The factor value decides the suspense duration variance
-                    between subsequent suspensions.</p>                 
-                </div>
-                
-            </div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="suspendErrorCode">Error Codes
+						<a class="help_popup" help_data="suspendErrorCode_help" data-trigger="hover" data-placement="bottom" title="suspendErrorCode_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendErrorCode_help" class="hide">A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.</p>
+					</label>
+					<div class="col-sm-6">
+						<select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
+							<option value="101000">101000 : Receiver IO error sending</option>
+							<option value="101001">101001 : Receiver IO error receiving</option>
+							<option value="101500">101500 : Sender IO error sending</option>
+							<option value="101501">101501 : Sender IO error receiving</option>
+							<option value="101503">101503 : Connection failed</option>
+							<option value="101504">101504 : Connection timed out</option>
+							<option value="101505">101505 : Connection closed</option>
+							<option value="101506">101506 : HTTP protocol violation</option>
+							<option value="101507">101507 : Connect cancel</option>
+							<option value="101508">101508 : Connect timeout</option>
+							<option value="101509">101509 : Send abort</option>
+							<option value="101510">101510 : Response processing failure</option>
+						</select>
+						<p class="help-block">A list of error codes.If these
+						error codes are received from the endpoint, the
+						endpoint will be suspended.</p><span class=
+						"help-block jsonform-errortext" style=
+						"display:none;"></span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="suspendDuration">Intial Duration (ms)
+						<a class="help_popup" help_data="suspendDuration_help" data-trigger="hover" data-placement="bottom" title="suspendDuration_help">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+							   <i class="fw fw-circle fw-stack-2x"></i>
+							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+							</span>
+						</a>
+						<p id="suspendDuration_help" class="hide">The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.</p>
+					</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
+						<p class="help-block hide">The duration that the endpoint is
+						suspended for the first time after the receiving the
+						suspend error codes.</p>
+					</div>
+
+					<label class="control-label col-sm-2" for="suspendMaxDuration">Max Duration (ms)</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
+						<p class="help-block hide">The maximum duration that the
+						endpoint is suspended after the receiving the suspend
+						error codes.</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="factor">Factor</label>
+					<div class="col-sm-2">
+						<input class="form-control" id="factor" name="factor" type="text" value="">
+						<p class="help-block hide">The duration to suspend can vary
+						from the first time suspension to the subsequent time.
+						The factor value decides the suspense duration variance
+						between subsequent suspensions.</p>
+					</div>
+				</div>
         </fieldset>
-        <fieldset class="control-group ">
+        <fieldset class="control-group add-margin-top-5x">
             <legend>Endpoint Timeout State</legend>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="">Error Codes</label>
-                <div class=" col-sm-4">
+                <div class=" col-sm-6">
                     <select class="form-control selectpicker" id="" multiple="multiple" name="retryErroCode">
                         <option value="101000">101000 : Receiver IO error sending</option>
                         <option value="101001">101001 : Receiver IO error receiving</option>
@@ -950,50 +953,46 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
                         <option value="101509">101509 : Send abort</option>
                         <option value="101510">101510 : Response processing failure</option>
                     </select>
-                    <p class="help-block">A list of error codes. If these
+                    <p class="help-block hide">A list of error codes. If these
                     error codes are received from the endpoint, the request
                     will be subjected to a timeout.</p>
                 </div>
-                                   
             </div>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="retryTimeOut">Retries Before Suspension</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
-                    <p class="help-block">The number of re-tries in case of
+                    <p class="help-block hide">The number of re-tries in case of
                     a timeout, caused by the above listed error
                     codes.</p>                
                 </div>
-                
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="retryDelay">Retry Delay(ms)</label>
-                <div class="col-sm-4">
+                <label class="control-label col-sm-2" for="retryDelay">Retry Delay(ms)</label>
+                <div class="col-sm-2">
                     <input class="form-control" id="retryDelay" name="retryDelay"
                     type="text" value="">                                    
-                <p class="help-block">The delay between retries, in milliseconds.</p>
+                <p class="help-block hide">The delay between retries, in milliseconds.</p>
                 </div>
             </div>
         </fieldset>
-        <fieldset class="control-group">
+        <fieldset class="control-group add-margin-top-5x">
             <legend>Connection Timeout</legend>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
                         <option value="neverTimeout">Never timeout</option>
                         <option value="discard">Discard message</option>
                         <option selected value="fault">Execute fault sequence</option>
                     </select>
-                    <p class="help-block">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
+                    <p class="help-block hide">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionDuration">Duration (ms)</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
-                    <p class="help-block">The duration in milliseconds before considering a request as timeout.</p>
+                    <p class="help-block hide">The duration in milliseconds before considering a request as timeout.</p>
                 </div>
             </div>
         </fieldset>
@@ -1016,16 +1015,15 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 		<div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
 			<div class="headerContainer tagContainer col-sm-6">
-
-				{{#unless allowAll }}
-				<span id="accesseAllowOriginDiv">
-					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
-				</span>
-				{{/unless}}
 				<label class="checkbox">
 					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
 					<span class="helper"><%=i18n.localize("allOrigins")%></span>
 				</label>
+				{{#unless allowAll }}
+				<div id="accesseAllowOriginDiv" class="add-margin-top-2x">
+					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
+				</div>
+				{{/unless}}
 			</div>
 		</div>
 		<div class="form-group">

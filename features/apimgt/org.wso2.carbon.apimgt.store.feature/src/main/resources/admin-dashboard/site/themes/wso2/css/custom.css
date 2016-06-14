@@ -489,6 +489,7 @@ div.image-container {
     color: #fff;
     text-decoration: none;
     font-weight: 400;
+    position: relative;
 }
 .sidebar-nav li a{
     padding:5px 15px;
@@ -887,4 +888,12 @@ body.login-bg {
 
 table.table-bordered th:last-child, table.table-bordered td:last-child {
     border-right-width: 1px;
+}
+
+.toggle-caret{
+    margin: 0px;
+    position: absolute;
+    width: auto;
+    left: auto;
+    right: 20px;
 }

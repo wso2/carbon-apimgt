@@ -1,11 +1,9 @@
-function APISamples(defaultTier, gatewayURL) {
+function APISamples (defaultResourceLevelTier) {
     this.sample_swagger = "{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
+    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
     ":[{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":" +
     "\"Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
-    "\"responses\":{\"201\":{\"headers\":{\"ETag\":{\"description\":" +
-    "\"Entity Tag of the response resource. Used by caches, or in conditional request\",\"type\":" +
-    "\"string\"},\"Location\":{\"description\":\"The URL of the newly created resource.\",\"type\":" +
+    "\"responses\":{\"201\":{\"headers\":{\"Location\":{\"description\":\"The URL of the newly created resource.\",\"type\":" +
     "\"string\"},\"Content-Type\":{\"description\":\"The content type of the body.\",\"type\":" +
     "\"string\"}},\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"Created." +
     " Successful response with the newly created object as entity in the body. Location header" +
@@ -14,32 +12,19 @@ function APISamples(defaultTier, gatewayURL) {
     ",\"415\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}}}}," +
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
-    "[{\"default\":25,\"description\":\"Maximum size of menu items to return.\",\"name\":\"limit\"" +
-    ",\"format\":\"double\",\"type\":\"number\",\"in\":\"query\"},{\"default\":0,\"description\":" +
-    "\"Starting point of the item list.\",\"name\":\"offset\",\"format\":\"double\",\"type\":" +
-    "\"number\",\"in\":\"query\"},{\"description\":\"Search by menu item name or ingredients\\n\"" +
-    ",\"name\":\"query\",\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{\"headers\"" +
-    ":{\"ETag\":{\"description\":\"Entity Tag of the response resource. Used by caches, or " +
-    "in conditional requests.\",\"type\":\"string\"},\"Content-Type\":{\"description\":" +
-    "\"The content type of the body.\",\"type\":\"string\"}},\"schema\":{\"title\":\"Menu\"," +
-    "\"properties\":{\"previous\":{\"description\":\"Link for previous page. Undefined if no " +
-    "previous page.\",\"type\":\"string\"},\"count\":{\"type\":\"string\"},\"next\":" +
-    "{\"description\":\"Link for next page. Undefined if no next page.\",\"type\":\"string\"}," +
+    "\"" + defaultResourceLevelTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
+    "[],\"responses\":{\"200\":{\"headers\"" + ":{},\"schema\":{\"title\":\"Menu\"," + "\"properties\":{" +
     "\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"},\"type\":\"array\"}},\"type\":" +
     "\"object\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the requested " +
     "resource.\"},\"406\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Not Acceptable. The requested media type is not supported\"}}}},\"/order/{orderId}\"" +
     ":{\"put\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultTier + "\",\"description\":\"Update an existing Order\",\"parameters\":[{\"description\"" +
+    "\"" + defaultResourceLevelTier + "\",\"description\":\"Update an existing Order\",\"parameters\":[{\"description\"" +
     ":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\",\"type\":\"number\",\"required\"" +
     ":true,\"in\":\"path\"},{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"" +
     "Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
-    "\"responses\":{\"200\":{\"headers\":{\"ETag\":{\"description\":\"Entity Tag of the response " +
-    "resource. Used by caches, or in conditional request\",\"type\":\"string\"},\"Last-Modified\"" +
-    ":{\"description\":\"Date and time the resource has been modifed the last time. Used by caches," +
-    " or in conditional reuquests.\",\"type\":\"string\"},\"Location\":{\"description\":\"The URL " +
+    "\"responses\":{\"200\":{\"headers\":{\"Location\":{\"description\":\"The URL " +
     "of the newly created resource.\",\"type\":\"string\"},\"Content-Type\":{\"description\":\"The" +
     " content type of the body.\",\"type\":\"string\"}},\"schema\":{\"$ref\":" +
     "\"#/definitions/Order\"},\"description\":\"OK. Successful response with updated Order\"}," +
@@ -48,21 +33,17 @@ function APISamples(defaultTier, gatewayURL) {
     ",\"description\":\"Not Found. The resource to be updated does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
     "not been performed because one of the preconditions is not met.\"}}},\"get\":{\"x-auth-type\"" +
-    ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"" +
+    ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
     "\"format\":\"integer\",\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
-    "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{\"ETag\":{\"description\"" +
-    ":\"Entity Tag of the response resource. Used by caches, or in conditional requests.\",\"type\"" +
-    ":\"string\"},\"Last-Modified\":{\"description\":\"Date and time the resource has been modifed " +
-    "the last time. Used by caches, or in conditional reuquests.\",\"type\":\"string\"}," +
-    "\"Content-Type\":{\"description\":\"The content type of the body.\",\"type\":\"string\"}}," +
+    "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{}," +
     "\"description\":\"OK Requested Order will be returned\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the " +
     "requested resource.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\"" +
     ":\"Not Found. Requested API does not exist.\"},\"406\":{\"schema\":{\"$ref\":" +
     "\"#/definitions/Error\"},\"description\":\"Not Acceptable. The requested media type is" +
     " not supported\"}}},\"delete\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultTier + "\",\"description\":\"Delete an existing Order\"," +
+    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Delete an existing Order\"," +
     "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\"," +
     "\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
     ":\"OK. Resource successfully deleted.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
@@ -94,7 +75,7 @@ function APISamples(defaultTier, gatewayURL) {
     "\"http://PizzaShack.lk\"},\"version\":\"1.0.0\"}}";
     }
 
-APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
+APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
     var addAPIData = {action: 'sampleDesign', name: 'PizzaShackAPI', provider: username,
         version: '1.0.0', description: 'This is a simple API for Pizza Shack online pizza delivery store.', tags: 'pizza',
@@ -149,8 +130,12 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                     function (result) {
                         jagg.post(urlDesign, {action: "manage", name: "PizzaShackAPI",
                             provider: username, version: "1.0.0", default_version_checked: " ",
-                            tier: defaultTier, tiersCollection: defaultTier,
+                            tier: defaultApiLevelTier, tiersCollection: defaultApiLevelTier,
                             transport_http: "http", transport_https: "https",
+                            bizOwner: "PizzaShack Business Owner",
+                            bizOwnerMail: "marketing@PizzaShack.com",
+                            techOwner: "PizzaShack Technical Owner",
+                            techOwnerMail: "architecture@PizzaShack.com",
                             swagger: _this.sample_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
@@ -168,6 +153,8 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                                                     type: "info",
                                                     title: "Success"
                                                 });
+                                                //Add document for the published sample
+                                                addSampleAPIDoc();
                                             }
                                         }, 'json');
                                 } else {
@@ -197,7 +184,29 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
         }, 'json');
 };
 
-var deploySampleApi = function (defaultTier, gatewayURL) {
-    var deployer = new APISamples(defaultTier, gatewayURL);
-    deployer.deploySample(defaultTier, gatewayURL);
+addSampleAPIDoc = function () {
+    var addDocUrl = "/site/blocks/documentation/ajax/docs.jag";
+    var addDocData = {action: 'addSampleDocumentation', provider: username,
+        apiName: 'PizzaShackAPI',version: '1.0.0',
+        docName: 'PizzaShack API Documentation',
+        docType: 'how to', sourceType: 'file',
+        summary: 'This is the API documentation for Pizza Shack API',
+        docLocation: '/samples/PizzaShack/PizzaShackAPIDoc.pdf'
+    };
+    jagg.post(addDocUrl, addDocData,
+        function (apiDocResult) {
+            if (apiDocResult.error) {
+                $(".modal-body").removeClass("loadingButton");
+                jagg.message({
+                    content: "Error occurred while adding sample API documentation",
+                    type: "error",
+                    title: "Error"
+                });
+            }
+        }, 'json');
+};
+
+var deploySampleApi = function (defaultApiLevelTier, defaultResourceLevelTier, gatewayURL) {
+    var deployer = new APISamples(defaultResourceLevelTier);
+    deployer.deploySample(defaultApiLevelTier, gatewayURL);
 };

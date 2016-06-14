@@ -49,6 +49,14 @@ var getResponseTime = function(name) {
 
 $(document).ready(function() {
 
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var currentTab = $(e.target).attr("title"); // get current tab
+        if (currentTab == 'Lifecycle') {
+            loadLC();
+        }
+    });
+
+
     // Converting dates from timestamp to date string
     jagg.printDate();
 
@@ -348,6 +356,90 @@ function drawVersionChart(chartID,data) {
     nv.utils.windowResize(chart.update);
     return chart;
     });
+};
+
+var loadLC = function () {
+
+    jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action: "getAPILC" },
+        function (json) {
+            if (!json.error) {
+                var statesList = json.definition.configuration.lifecycle.scxml.state;
+                var states = [];
+
+// Create a new directed graph
+                var g = new dagreD3.graphlib.Graph().setGraph({});
+
+                for (var key in statesList) {
+// States and transitions from RFC 793
+                    states.push(key.toUpperCase());
+                }
+
+// Automatically label each of the nodes
+                states.forEach(function (state) {
+                    g.setNode(state, {
+                        label: state.toUpperCase(),
+                        shape: 'rect',
+                        labelStyle: 'font-size: 12px;font-weight: lighter;fill: rgb(51, 51, 51);'
+                    });
+                });
+
+
+// Set up the edges
+                g.setEdge("CREATED", "PUBLISHED", { label: "PUBLISH", labelStyle: "fill: white", lineInterpolate: 'cardinal' });
+                for (var key in statesList) {
+                    var transition = statesList[key].transition;
+                    if (transition != null) {
+                        for (var i = 0; i < transition.length; i++) {
+                            var obj = transition[i];
+                            var event = obj.event;
+                            var target = obj.target;
+                            // Set up the edges
+
+                            g.setEdge(key.toUpperCase(), target.toUpperCase(), { label: event.toUpperCase(), labelStyle: "fill: white", lineInterpolate: 'cardinal' });
+                        }
+                    }
+                }
+                g.nodes().forEach(function (v) {
+                    var node = g.node(v);
+                    node.rx = node.ry = 5;
+                });
+
+                var status = $('#status').text().trim();
+
+// Add some custom colors based on state
+                g.node(status).style = "fill: #5D76E4";
+
+
+                var svg = d3.select("svg"),
+                    inner = svg.select("g");
+
+// Set up zoom support
+                var zoom = d3.behavior.zoom().on("zoom", function () {
+                    inner.attr("transform", "translate(" + d3.event.translate + ")" +
+                        "scale(" + d3.event.scale + ")");
+                });
+                svg.call(zoom);
+
+// Create the renderer
+                var render = new dagreD3.render();
+
+// Run the renderer. This is what draws the final graph.
+                render(inner, g);
+
+// Center the graph
+                var initialScale = 1.2;
+
+                svg.attr('height', g.graph().height * initialScale + 40);
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");
+
+
 };
 
 

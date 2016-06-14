@@ -2,14 +2,15 @@
 jagg.initializer("item-info", {
 
     preInitialize:function () {
-        jagg.addHeaderJS("item-info", "item-info", "templates/item-info/js/load-tabs.js");
-        jagg.addHeaderJS("chrome.lifecycle.fix.js", "jagg", "templates/item-info/js/chrome.lifecycle.fix.js");
-                jagg.addHeaderJS("dagre", "jagg", "templates/item-info/js/dagre-d3.min.js");
-                jagg.addHeaderJS("graphlib", "jagg", "templates/item-info/js/graphlib.core.min.js");
-                jagg.addHeaderJS("graph", "jagg", "templates/item-info/js/graphlib.min.js");
-                jagg.addHeaderJS("lodash", "jagg", "templates/item-info/js/lodash.min.js");
-                jagg.addHeaderCSS("liecycle", "jagg", "templates/item-info/css/lifecycles.css");
-                jagg.addHeaderJS("dagre2", "jagg", "templates/item-info/js/dagre-d3.core.min.js");
+        jagg.addHeaderJS("item-info", "item-info", "templates/item-info/js/load-tabs.js");             
+             jagg.addHeaderJS("lodash", "jagg", "templates/item-info/js/lodash.min.js");
+              jagg.addHeaderJS("graphlib", "jagg", "templates/item-info/js/graphlib.core.min.js");               
+             jagg.addHeaderJS("chrome.lifecycle.fix.js", "jagg", "templates/item-info/js/chrome.lifecycle.fix.js");
+                jagg.addHeaderJS("graph", "jagg", "templates/item-info/js/d3.min.js");
+                jagg.addHeaderJS("dagre", "jagg", "templates/item-info/js/dagre-d3.min.js");                
+               
+                jagg.addHeaderCSS("liecycle", "jagg", "templates/item-info/css/lifecycles.css");             
+               
     }
 });
 %>

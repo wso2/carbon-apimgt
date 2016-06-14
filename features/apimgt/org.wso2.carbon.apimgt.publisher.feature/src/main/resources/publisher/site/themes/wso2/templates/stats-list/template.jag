@@ -58,125 +58,113 @@
 	 }
 	%>
 
-    <div class="row">
+	<div class="col-sm-4">
+		<h3>APIs</h3>
+		<ul class="nav nav-pills secondary-nav collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
+			<li><a class="substats" "<%=i18n.localize("apiTime")%>"
+				href="<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiTime")%>"></i>
+			<%=i18n.localize("apiTime")%></a></li>
 
-        <div class="col-xs-3">
-            <h3>APIs</h3>
-                <ul class="nav nav-pills secondary-nav collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
+			<li><a class="substats" title="<%=i18n.localize("apiUsage")%>"
+				href="<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiUsage")%>"></i>
+				<%=i18n.localize("apiUsage")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("apiResponseTimes")%>"
+				href="<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiResponseTimes")%>"></i>
+				<%=i18n.localize("apiResponseTimes")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("apiLastAccessTimes")%>"
+				href="<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-table" title="<%=i18n.localize("apiLastAccessTimes")%>"></i>
+				<%=i18n.localize("apiLastAccessTimes")%></a></li>
+			<li><a class="substats"  title="<%=i18n.localize("usageResourcePath")%>"
+				href="<%=allStatsMappedUrl%>?page=api-usage-resource-path&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-resource-path&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-table" title="<%=i18n.localize("usageResourcePath")%>"></i>
+				<%=i18n.localize("usageResourcePath")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("usageFromDestination")%>"
+				href="<%=allStatsMappedUrl%>?page=api-usage-destination&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-destination&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-table" title="<%=i18n.localize("usageFromDestination")%>"></i>
+				<%=i18n.localize("usageFromDestination")%></a></li>
+			<li><a
+				class="substats"  title="<%=i18n.localize("apiUsageComparison")%>"
+				href="<%=allStatsMappedUrl%>?page=api-usage&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiUsageComparison")%>"></i>
+				<%=i18n.localize("apiUsageComparison")%></a></li>
+			<li><a class="substats"  title="<%=i18n.localize("apiThrottledRequests")%>"
+				href="<%=allStatsMappedUrl%>?page=api-throttledcounts&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-throttledcounts&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiThrottledRequests")%>"></i>
+				<%=i18n.localize("apiThrottledRequests")%></a></li>
 
-							<li><a class="substats" "<%=i18n.localize("apiTime")%>"
-								href="<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=apis-time&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiTime")%>"></i>
-							<%=i18n.localize("apiTime")%></a></li>
+			<li><a class="substats"  title="<%=i18n.localize("faultyInvocations")%>"
+				href="<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("faultyInvocations")%>"></i>
+				<%=i18n.localize("faultyInvocations")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("apiLatencyTime")%>"
+				href="<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>"
+				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+				<i class="icon fw fw-statistics" title="<%=i18n.localize("apiLatencyTime")%>"></i>
+				<%=i18n.localize("apiLatencyTime")%></a></li>
+			 <li><a class="substats" title="<%=i18n.localize("apiGeoLocationUsage")%>"
+			  href="<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>"
+			  onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+			  <i class="icon fw fw-globe" title="<%=i18n.localize("apiGeoLocationUsage")%>"></i>
+			  <%=i18n.localize("apiGeoLocationUsage")%></a></li>
+			 <li><a class="substats" "<%=i18n.localize("apiUserAgentUsage")%>"
+			  href="<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>"
+			  onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+			  <i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiUserAgentUsage")%>"></i>
+			  <%=i18n.localize("apiUserAgentUsage")%></a></li>
+		</ul>
+	</div>
+	<div class="col-sm-4">
+		<h3>Applications</h3>
+		<ul class="nav nav-pills secondary-nav  collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
+			<li><a class="substats" title="<%=i18n.localize("applicationThrottledRequests")%>"
+							href="<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-bar-chart" title="<%=i18n.localize("applicationThrottledRequests")%>"></i>
+							<%=i18n.localize("applicationThrottledRequests")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("applicationsOverTime")%>"
+							href="<%=allStatsMappedUrl%>?page=applications-time&stat=all-stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=applications-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-table" title="<%=i18n.localize("applicationsOverTime")%>"></i>
+							<%=i18n.localize("applicationsOverTime")%></a></li>
+		</ul>
+	</div>
+	<div class="col-sm-4">
+		<h3>Subscriptions</h3>
+		<ul class="nav nav-pills secondary-nav  collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
 
-							<li><a class="substats" title="<%=i18n.localize("apiUsage")%>"
-								href="<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiUsage")%>"></i>
-								<%=i18n.localize("apiUsage")%></a></li>
-							<li><a class="substats" title="<%=i18n.localize("apiResponseTimes")%>"
-								href="<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiResponseTimes")%>"></i>
-								<%=i18n.localize("apiResponseTimes")%></a></li>
-							<li><a class="substats" title="<%=i18n.localize("apiLastAccessTimes")%>"
-								href="<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("apiLastAccessTimes")%>"></i>
-								<%=i18n.localize("apiLastAccessTimes")%></a></li>
-							<li><a class="substats"  title="<%=i18n.localize("usageResourcePath")%>"
-								href="<%=allStatsMappedUrl%>?page=api-usage-resource-path&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-resource-path&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("usageResourcePath")%>"></i>
-								<%=i18n.localize("usageResourcePath")%></a></li>
-							<li><a class="substats" title="<%=i18n.localize("usageFromDestination")%>"
-								href="<%=allStatsMappedUrl%>?page=api-usage-destination&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-destination&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("usageFromDestination")%>"></i>
-								<%=i18n.localize("usageFromDestination")%></a></li>
-							<li><a
-								class="substats"  title="<%=i18n.localize("apiUsageComparison")%>"
-								href="<%=allStatsMappedUrl%>?page=api-usage&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiUsageComparison")%>"></i>
-								<%=i18n.localize("apiUsageComparison")%></a></li>
-							<li><a class="substats"  title="<%=i18n.localize("apiThrottledRequests")%>"
-								href="<%=allStatsMappedUrl%>?page=api-throttledcounts&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-throttledcounts&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiThrottledRequests")%>"></i>
-								<%=i18n.localize("apiThrottledRequests")%></a></li>
-
-							<li><a class="substats"  title="<%=i18n.localize("faultyInvocations")%>"
-								href="<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=faulty-invocations&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-bar-chart" title="<%=i18n.localize("faultyInvocations")%>"></i>
-								<%=i18n.localize("faultyInvocations")%></a></li>
-							<li><a class="substats" title="<%=i18n.localize("apiLatencyTime")%>"
-							    href="<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>"
-							    onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-latencytime&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-statistics" title="<%=i18n.localize("apiLatencyTime")%>"></i>
-							    <%=i18n.localize("apiLatencyTime")%></a></li>
-                             <li><a class="substats" title="<%=i18n.localize("apiGeoLocationUsage")%>"
-                              href="<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-geolocation-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="icon fw fw-globe" title="<%=i18n.localize("apiGeoLocationUsage")%>"></i>
-                              <%=i18n.localize("apiGeoLocationUsage")%></a></li>
-                             <li><a class="substats" "<%=i18n.localize("apiUserAgentUsage")%>"
-                              href="<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>"
-                              onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-                              <i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiUserAgentUsage")%>"></i>
-                              <%=i18n.localize("apiUserAgentUsage")%></a></li>
-						</ul>
-
-        </div>
-        <div class="col-xs-3">
-            <h3>Applications</h3>
-
-            <ul class="nav nav-pills secondary-nav  collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
-
-                <li><a class="substats" title="<%=i18n.localize("applicationThrottledRequests")%>"
-								href="<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=application-throttledcounts&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-bar-chart" title="<%=i18n.localize("applicationThrottledRequests")%>"></i>
-								<%=i18n.localize("applicationThrottledRequests")%></a></li>
-                <li><a class="substats" title="<%=i18n.localize("applicationsOverTime")%>"
-								href="<%=allStatsMappedUrl%>?page=applications-time&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=applications-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("applicationsOverTime")%>"></i>
-								<%=i18n.localize("applicationsOverTime")%></a></li>
-
-
-
-
-
-            </ul>
-
-
-            <h3>Subscriptions</h3>
-            <ul class="nav nav-pills secondary-nav  collapse <%if(reqUrl.indexOf(allStatsListURL) >= 0 || reqUrl.indexOf(allStatsListMappedUrl) >= 0) {%>in <%} %>" id="secondaryMenu" role="menu" aria-labelledby="btn-1">
-
-                <li><a class="substats" title="<%=i18n.localize("apiSubscriptons")%>"
-								href="<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiSubscriptons")%>"></i>
-								<%=i18n.localize("apiSubscriptons")%></a></li>
-                <li><a class="substats" title="<%=i18n.localize("developersOverTime")%>"
-								href="<%=allStatsMappedUrl%>?page=developers-time&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=developers-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("developersOverTime")%>"></i>
-								<%=i18n.localize("developersOverTime")%></a></li>
-                <li><a class="substats" title="<%=i18n.localize("userSubscriptionsOverTime")%>"
-								href="<%=allStatsMappedUrl%>?page=subscriptions-time&stat=all-stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=subscriptions-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-								<i class="icon fw fw-table" title="<%=i18n.localize("userSubscriptionsOverTime")%>"></i>
-								<%=i18n.localize("userSubscriptionsOverTime")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("apiSubscriptons")%>"
+							href="<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-subscriptions&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-pie-chart" title="<%=i18n.localize("apiSubscriptons")%>"></i>
+							<%=i18n.localize("apiSubscriptons")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("developersOverTime")%>"
+							href="<%=allStatsMappedUrl%>?page=developers-time&stat=all-stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=developers-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-table" title="<%=i18n.localize("developersOverTime")%>"></i>
+							<%=i18n.localize("developersOverTime")%></a></li>
+			<li><a class="substats" title="<%=i18n.localize("userSubscriptionsOverTime")%>"
+							href="<%=allStatsMappedUrl%>?page=subscriptions-time&stat=all-stat<%=urlPrefix%>"
+							onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=subscriptions-time&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+							<i class="icon fw fw-table" title="<%=i18n.localize("userSubscriptionsOverTime")%>"></i>
+							<%=i18n.localize("userSubscriptionsOverTime")%></a></li>
 
 
 
-            </ul>
-        </div>
-    </div>
+		</ul>
+	</div>
 
 
 <%});%>

@@ -34,7 +34,7 @@
 
 <form class="form-inline">
   <div class="form-group">
-    <label class="control-label">API Subscribed by&nbsp;&nbsp;</label>
+    <label class="control-label">API Published by&nbsp;&nbsp;</label>
     <select id="developerSelect" class="selectpicker" data-live-search="true">
        <option>All</option>
     </select>

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao.test;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -26,8 +25,29 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.DateCondition;
+import org.wso2.carbon.apimgt.api.model.policy.DateRangeCondition;
+import org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
+import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -42,7 +62,6 @@ import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -429,31 +448,43 @@ public class APIMgtDAOTest extends TestCase {
         }
     }
     public void testInsertApplicationPolicy() throws APIManagementException {
-        apiMgtDAO.addApplicationPolicy((ApplicationPolicy) getApplicationPolicy());
+        String policyName = "TestInsertAppPolicy";
+        apiMgtDAO.addApplicationPolicy((ApplicationPolicy) getApplicationPolicy(policyName));
     }
 
     public void testInsertSubscriptionPolicy() throws APIManagementException {
-        apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) getSubscriptionPolicy());
+        String policyName = "TestInsertSubPolicy";
+        apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) getSubscriptionPolicy(policyName));
     }
 
     public void testInsertAPIPolicy() throws APIManagementException {
-        apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser());
+        String policyName = "TestInsertAPIPolicy";
+        apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser(policyName));
     }
 
     public void testUpdateApplicationPolicy() throws APIManagementException {
-        ApplicationPolicy policy = (ApplicationPolicy) getApplicationPolicy();
+        String policyName = "TestUpdateAppPolicy";
+        ApplicationPolicy policy = (ApplicationPolicy) getApplicationPolicy(policyName);
+        apiMgtDAO.addApplicationPolicy(policy);
+        policy = (ApplicationPolicy) getApplicationPolicy(policyName);
         policy.setDescription("Updated application description");
         apiMgtDAO.updateApplicationPolicy(policy);
     }
 
     public void testUpdateSubscriptionPolicy() throws APIManagementException {
-        SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy();
+        String policyName = "TestUpdateSubPolicy";
+        SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
+        apiMgtDAO.addSubscriptionPolicy(policy);
+        policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
         policy.setDescription("Updated subscription description");
         apiMgtDAO.updateSubscriptionPolicy(policy);
     }
 
     public void testUpdateAPIPolicy() throws APIManagementException {
-        APIPolicy policy = (APIPolicy) getPolicyAPILevelPerUser();
+        String policyName = "TestUpdateApiPolicy";
+        APIPolicy policy = (APIPolicy) getPolicyAPILevelPerUser(policyName);
+        apiMgtDAO.addAPIPolicy(policy);
+        policy = (APIPolicy) getPolicyAPILevelPerUser(policyName);
         policy.setDescription("New Description");
 
         ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
@@ -524,19 +555,25 @@ public class APIMgtDAOTest extends TestCase {
     }
 
     public void testGetApplicationPolicy() throws APIManagementException {
-        apiMgtDAO.getApplicationPolicy("Bronze", 4);
+        String policyName = "TestGetAppPolicy";
+        apiMgtDAO.addApplicationPolicy((ApplicationPolicy) getApplicationPolicy(policyName));
+        apiMgtDAO.getApplicationPolicy(policyName, 4);
     }
 
     public void testGetSubscriptionPolicy() throws APIManagementException {
-        apiMgtDAO.getSubscriptionPolicy("Silver", 6);
+        String policyName = "TestGetSubPolicy";
+        apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) getSubscriptionPolicy(policyName));
+        apiMgtDAO.getSubscriptionPolicy(policyName, 6);
     }
 
     public void testGetApiPolicy() throws APIManagementException {
-        apiMgtDAO.getAPIPolicy("Bronze", -1234);
+        String policyName = "TestGetAPIPolicy";
+        apiMgtDAO.addAPIPolicy((APIPolicy) getPolicyAPILevelPerUser(policyName));
+        apiMgtDAO.getAPIPolicy(policyName, -1234);
     }
 
-    private Policy getPolicyAPILevelPerUser(){
-        APIPolicy policy = new APIPolicy("Bronze");
+    private Policy getPolicyAPILevelPerUser(String policyName){
+        APIPolicy policy = new APIPolicy(policyName);
 
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");
@@ -650,9 +687,9 @@ public class APIMgtDAOTest extends TestCase {
         return policy;
     }
 
-    private Policy getApplicationPolicy(){
-        ApplicationPolicy policy = new ApplicationPolicy("Bronze");
-        policy.setDescription("Bronze");
+    private Policy getApplicationPolicy(String policyName){
+        ApplicationPolicy policy = new ApplicationPolicy(policyName);
+        policy.setDescription(policyName);
         policy.setDescription("Application policy Description");
         policy.setTenantId(4);
 
@@ -670,9 +707,9 @@ public class APIMgtDAOTest extends TestCase {
         return policy;
     }
 
-    private Policy getSubscriptionPolicy(){
-        SubscriptionPolicy policy = new SubscriptionPolicy("Silver");
-        policy.setDisplayName("Silver");
+    private Policy getSubscriptionPolicy(String policyName){
+        SubscriptionPolicy policy = new SubscriptionPolicy(policyName);
+        policy.setDisplayName(policyName);
         policy.setDescription("Subscription policy Description");
         policy.setTenantId(6);
         policy.setBillingPlan("FREE");

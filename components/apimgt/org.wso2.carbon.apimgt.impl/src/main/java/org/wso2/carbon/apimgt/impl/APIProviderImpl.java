@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -68,7 +69,9 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManag
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -140,11 +143,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
+	private final String userNameWithoutChange;
+
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
+        this.userNameWithoutChange = username;
     }
 
-    /**
+    protected String getUserNameWithoutChange() {
+		return userNameWithoutChange;
+	}
+
+	/**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
@@ -608,6 +618,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             apiMgtDAO.addAPI(api,tenantId);
 
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
+
             if (log.isDebugEnabled()) {
                 log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
                         .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
@@ -727,36 +746,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
-    
+
     public boolean isAPIUpdateValid(API api) throws APIManagementException{
     	String apiSourcePath = APIUtil.getAPIPath(api.getId());
     	boolean isValid = false;
-    	
+
     	try{
     		Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
             String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            
+
             if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
             	//api at least is in published status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
             		//user has publish permission
             		isValid = true;
             	}
             }else if(APIConstants.CREATED.equals(status) || APIConstants.PROTOTYPED.equals(status)){
             	//api in create status
-            	if(APIUtil.hasPermission(username, APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(username, APIConstants.Permissions.API_PUBLISH)){
+            	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_CREATE) || APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
             		//user has creat or publish permission
             		isValid = true;
             	}
             }
-            
+
     	}catch(RegistryException ex){
     		 handleException("Error while validate user for API publishing", ex);
-    	}    	
+    	}
     	return isValid;
-    	
+
     }
 
 
@@ -770,12 +789,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-    	
+
     	boolean isValid = isAPIUpdateValid(api);
     	if(!isValid){
     		throw new APIManagementException(" User doesn't have permission for update");
     	}
-    	
+
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
@@ -834,6 +853,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully updated the API: " + api.getId() + " in the database");
                 }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -2192,7 +2220,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
-            
+
             GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);
             clearResourcePermissions(docPath, apiId);
@@ -2501,7 +2529,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
             artifactManager.removeGenericArtifact(apiArtifact);
             artifactManager.removeGenericArtifact(artifactId);
-            
+
 
             String thumbPath = APIUtil.getIconPath(identifier);
             if (registry.resourceExists(thumbPath)) {
@@ -2565,6 +2593,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug(logMessage);
             }
 
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
@@ -2582,7 +2618,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                    identifier.getProviderName();
-            
+
             if(registry.resourceExists(apiProviderPath)){
             	Resource providerCollection=registry.get(apiProviderPath);
             	CollectionImpl collection=(CollectionImpl)providerCollection;
@@ -3193,14 +3229,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                 }
-            }           
+            }
 
         } catch (Exception e) {
             handleException("Issue is in getting custom Fault Sequences from the Registry", e);
         }
         return sequenceList;
     }
-    
+
     /**
      * Get stored custom fault sequences from governanceSystem registry
      *
@@ -3227,8 +3263,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 }
             }
-            
-            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, 
+
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
                                                                       APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
             if(registry.resourceExists(customOutSeqFileLocation))    {
@@ -3249,7 +3285,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT 
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT
                                                             + " sequences of " + apiIdentifier + " in the registry";
             log.error(msg);
             throw new APIManagementException(msg, e);
@@ -3998,7 +4034,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
             policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
             //add default policy file name
-            policyFileNames.add(policyFile + "_default");           
+            policyFileNames.add(policyFile + "_default");
             for (Pipeline pipeline : policy.getPipelines()) {
                 policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
             }
@@ -4031,7 +4067,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg, e);
             throw new APIManagementException(msg);
         }
-        
+
         GlobalPolicy globalPolicy = null;
         if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
             globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -4044,7 +4080,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
     }
-    
+
     public boolean hasAttachments(String username, String policyName, String policyType)throws APIManagementException{
     	int tenantID = APIUtil.getTenantId(username);
     	String tenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -4052,7 +4088,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(APIUtil.getSuperTenantId() != tenantID){
         	tenantDomainWithAt = "@"+tenantDomain;
         }
-       
+
         boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt, policyType);
         return hasSubscription;
     }
@@ -4137,13 +4173,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
 
+        // Encoding the message into a map.
         HashMap<String, String> blockingMessage = new HashMap<String, String>();
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_KEY, conditionType);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_VALUE, conditionValue);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_STATE, state);
         blockingMessage.put(APIConstants.BLOCKING_CONDITION_DOMAIN, tenantDomain);
-        eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, APIUtil.getEventPublisherProperties()
-                , blockingMessage);
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+
+        // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
+        if (throttleProperties.getJmsEventPublisherName() != null) {
+            eventAdapterService.publish(throttleProperties.getJmsEventPublisherName(), new HashMap<String, String>()
+                    , blockingMessage);
+        }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
@@ -4153,9 +4197,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         keyTemplateMap.put(APIConstants.POLICY_TEMPLATE_KEY, templateValue);
         keyTemplateMap.put(APIConstants.TEMPLATE_KEY_STATE, state);
 
-        ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
-                                                                                    APIUtil.getEventPublisherProperties()
-                , keyTemplateMap);
+        ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties();
+
+        // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
+        // .Header value.
+        if (throttleProperties.getJmsEventPublisherName() != null) {
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(throttleProperties
+                                                                                                .getJmsEventPublisherName(),
+                                                                                        new HashMap<String, String>()
+                    , keyTemplateMap);
+        }
     }
 
     public String getLifecycleConfiguration(String tenantDomain) throws APIManagementException {

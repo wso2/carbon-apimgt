@@ -74,10 +74,10 @@ var changePassword = function (username, currentPassword, newPassword) {
         else {
         	return {
         		error:true,
-        		message:"Wrong username or password. Please retry with correct info"
+        		message:"The current password you entered is incorrect. Please retry with correct info"
         	};
         	
-        }        
+        }
 
     } catch (e) {
         log.error(e.message);

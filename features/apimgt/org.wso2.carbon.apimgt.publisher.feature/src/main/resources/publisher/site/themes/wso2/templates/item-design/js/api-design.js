@@ -135,6 +135,12 @@ function APIDesigner(){
             jagg.message({content:"URL pattern cannot be empty.",type:"error"});
             return;
         }
+        // checking for white spaces in URL template
+        if (/\s/.test( $("#resource_url_pattern").val() )) {
+            jagg.message({content:"URL pattern cannot contain whitespace",type:"error"});
+            return;
+        }
+
         var path = $("#resource_url_pattern").val();
         if(path.charAt(0) != "/")
             path = "/"+path;
@@ -735,6 +741,7 @@ APIDesigner.prototype.close_swagger_editor = function(){
 APIDesigner.prototype.update_swagger = function(){
     $("body").removeClass("modal-open");
     $("#se-iframe").remove();
+    $(".wizard").show();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
     var json = jsyaml.safeLoad(designer.yaml);
@@ -770,7 +777,6 @@ $(document).ready(function(){
     $("#clearOutSeqFile").on("click", function () {
             $('#outSeqFileValue').val('');
     });
-	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');
     $('#swagger_import_file').parent().parent().fadeIn();
     $('.toggleRadios input[type=radio]').click(function(){
@@ -784,9 +790,9 @@ $(document).ready(function(){
         }
         $('#swagger_help').hide();
         $('#swagger_file_help').hide();
-        $('.toggleContainers .controls').hide();
+        $('.toggleContainers .form-group').hide();
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).parent().parent().fadeIn();
+        $('#' + $(this).val()).parent().parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 
@@ -912,7 +918,7 @@ $(document).ready(function(){
                              jagg.showLogin();
                         }
                     } else {
-                        jagg.message({content:responseText.message,type:"error"});
+                        jagg.message({ content:responseText.message,type:"error"});
                     }
                 }
             },

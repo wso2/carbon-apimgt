@@ -34,6 +34,8 @@ public class QueryParameterCondition extends Condition {
         this.parameter = parameter;
         this.queryAttributeName = PolicyConstants.START_QUERY + this.parameter + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
+        nullFilterQueryString =  PolicyConstants.NULL_START_QUERY + this.parameter + PolicyConstants.NULL_END_QUERY;
+        // "map:get(properties,’"+value+"’) is null";
     }
 
     public String getValue() {
@@ -51,6 +53,13 @@ public class QueryParameterCondition extends Condition {
         if(isInvertCondition()){
             condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
+        return condition;
+    }
+
+    @Override
+    public String getNullCondition() {
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                + PolicyConstants.QUOTE + PolicyConstants.NULL_CHECK + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
         return condition;
     }
 
