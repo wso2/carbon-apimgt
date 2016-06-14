@@ -61,24 +61,20 @@
         }
 	%>
 
-<div id='tier-add-container' class="row-fluid"  style="display:inline">
+<div id='tier-add-container' style="display:inline">
 
 	<div class="page-header">
-                <div class="page-title">
-                    <h1><%=pageTitle%></h1>
-                 </div>
-         </div>
+        <h1><%=pageTitle%></h1>
+    </div>
 
 
-    <div class="content-section shadow-up">
-        <div class="content-data">
             <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
                 value='<%=i18n.localize("errorMsgRequired")%>'/>
                 <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
                 value='<%=i18n.localize("errorMessageInvalid")%>'/>
                 <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
                 value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
-            <div class="row-fluid">
+            <div class="row">
                 <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                     action="/admin-dashboard/site/blocks/tier/edit/ajax/tier-edit.jag">
                         <legend>General Details</legend>
@@ -196,8 +192,6 @@
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
 </div>
 
 <script>

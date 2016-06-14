@@ -41,6 +41,7 @@
                 <div class="title-section"><h2><%=i18n.localize("editConfigurations")%>
                 </h2></div>
             </div>
+
         </div>
 
         <div class="row">

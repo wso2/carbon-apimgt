@@ -1,21 +1,17 @@
 <% jagg.template("tier/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     	<div class="page-header">
-                <div class="page-title">
-                    <h1>Tier List</h1>
-                 </div>
-         </div>
+            <h1>Tier List</h1>
+        </div>
 
-    <div class="content-section shadow-up">
-    <div class="content-data">
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class="userSpecialCell"><%=i18n.localize("tierName")%></th>
-                <th class="appSpecialCell"><%=i18n.localize("requestCount")%></th>
-                <th class="appSpecialCell"><%=i18n.localize("unitTime")%></th>
-                <th class="userSpecialCell"><%=i18n.localize("stopOnQuotaReach")%></th>
-                <th class="userSpecialCell"></th>
+                <th class=""><%=i18n.localize("tierName")%></th>
+                <th class=""><%=i18n.localize("requestCount")%></th>
+                <th class=""><%=i18n.localize("unitTime")%></th>
+                <th class=""><%=i18n.localize("stopOnQuotaReach")%></th>
+                <th class=""></th>
             </tr>
         </thead>
 
@@ -72,9 +68,6 @@
             }
             %>  
     </table>
-    </div>
-
-    </div>
 </div>
 
 <script>

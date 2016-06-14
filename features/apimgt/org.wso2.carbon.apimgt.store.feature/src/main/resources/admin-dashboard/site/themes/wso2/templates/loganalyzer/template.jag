@@ -32,7 +32,7 @@ if(httpsUriMatcher.match('/{hostname}:{port}')) {
 
 <div id="loganalyzer">
 
-    <div id ="title-section" class="title-section">
+    <div id ="title-section" class="page-header">
     </div>
 
     <!-- page content -->
