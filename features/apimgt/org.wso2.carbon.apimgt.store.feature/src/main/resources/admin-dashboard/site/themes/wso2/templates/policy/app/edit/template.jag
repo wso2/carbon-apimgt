@@ -35,7 +35,7 @@
 
 <div id='tier-add-container'>
     <div class="page-header">
-        <h2 id="tierTopic"><%=pageTitle%></h2>
+        <h1 id="tierTopic"><%=pageTitle%></h1>
         <p class="lead"></p>
     </div>
 
@@ -45,10 +45,7 @@
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
 
     <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data" action="/admin-dashboard/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
-        <div class="page-header">
-            <h2><br></h2>
-            <p class="lead"><%=i18n.localize("generalDetails")%></p>
-        </div>
+        <h3><%=i18n.localize("generalDetails")%></h3>
         <div class="form-group">
             <label class="control-label col-sm-3"><%="Name"%>  <span class="requiredAstrix">*</span></label>
             <div class="col-md-9">

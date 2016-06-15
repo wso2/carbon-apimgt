@@ -35,7 +35,7 @@
 <div id="throttle-policies">
 
 	<div class="page-header">
-        <h2 id="tierTopic"><%=pageTitle%></h2>
+        <h1 id="tierTopic"><%=pageTitle%></h1>
         <p class="lead"></p>
     </div>
 
