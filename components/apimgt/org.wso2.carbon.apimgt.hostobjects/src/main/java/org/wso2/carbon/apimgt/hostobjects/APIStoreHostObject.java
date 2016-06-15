@@ -3087,6 +3087,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("description", row, application.getDescription());
                     row.put("apiCount", row, subscriptionCount);
                     row.put("groupId", row, application.getGroupId());
+                    row.put("isBlacklisted", row, application.getIsBlackListed());
                     myn.put(i++, myn, row);
                 }
             }
