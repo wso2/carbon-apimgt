@@ -757,3 +757,12 @@ input.ep-field{ min-width: 50%;}
 .help_popup{
     display:inline-block;
 }
+
+#swaggerEditer {
+    overflow: hidden;
+    padding-top: 40px !important;
+}
+
+.main-header {
+    padding-left: 5px !important;
+}
