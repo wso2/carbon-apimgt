@@ -223,7 +223,7 @@
         <ThriftClientPort>10397</ThriftClientPort>
         <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
         <ThriftServerPort>10397</ThriftServerPort>
-        <!--ThriftServerHost>localhost</ThriftServerHost-->
+        <ThriftServerHost>localhost</ThriftServerHost>
         <EnableThriftServer>true</EnableThriftServer>
         <!--ConnectionPool>
             <MaxIdle>100</MaxIdle>
