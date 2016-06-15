@@ -22,7 +22,7 @@ var reqUrl = request.getRequestURI();
 
 %>
 
-<div id="forum_topics_list_page" class="forum-page">
+<div id="forum_topics_list_page">
     <div class="title-section">
         <h2><%=i18n.localize('forum')%></h2>
     </div>

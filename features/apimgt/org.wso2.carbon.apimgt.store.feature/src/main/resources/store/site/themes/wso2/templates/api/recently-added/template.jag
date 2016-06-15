@@ -16,7 +16,7 @@
     <script id="recently-added-template" type="text/x-handlebars-template">
     {{#each apis}}
 
-<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="white-wrapper add-margin-bottom-4x">
                                 <div class="thumbnail icon">
 									{{#if thumbnailurl}}
@@ -41,7 +41,7 @@
 									</a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a title="API Browse" href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
+                                    <h4 class="truncate"><a title="API Browse" href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
                                     <h5>{{ displayOwner }}</h5>
 									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
                                 </div>

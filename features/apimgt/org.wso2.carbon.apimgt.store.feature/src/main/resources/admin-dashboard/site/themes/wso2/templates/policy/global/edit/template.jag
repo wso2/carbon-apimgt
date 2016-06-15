@@ -25,8 +25,8 @@
 
 <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
-    <div class="title-section">
-        <label id="tierTopic" class='control-label' style='display:inline;'><h2><%=pageTitle%></h2></label>
+    <div class="page-header">
+        <h1><%=pageTitle%></h1>
     </div>
 
     <div class="content-section shadow-up">

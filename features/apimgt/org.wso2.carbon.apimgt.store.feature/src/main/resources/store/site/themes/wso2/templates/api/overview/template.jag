@@ -22,7 +22,7 @@
                 // The reason is that the context will have the version now
                 for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-small api_urls"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-small"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
                         <br><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
@@ -55,7 +55,7 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
-	    	            <div  class="endpoint-copybtn well well-small api_urls"><a data-clipboard-text="<%=environmenturls[urltype]%><%=api.context%>" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=api.context%>
+	    	            <div  class="endpoint-copybtn well well-small"><a data-clipboard-text="<%=environmenturls[urltype]%><%=api.context%>" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=api.context%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");

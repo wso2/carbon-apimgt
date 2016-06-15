@@ -2,13 +2,13 @@
 jagg.initializer("stats/faultCount", {
 
     preInitialize:function () {
-        jagg.addHeaderCSS("stats", " dataTable","lib/dataTables/css/dataTables.bootstrap.css");
-        jagg.addHeaderCSS("stats", "datepicker","lib/datepicker/css/daterangepicker-bs3.css");
+        jagg.addHeaderCSS("stats", " dataTable","libs/dataTables/css/dataTables.bootstrap.css");
+        jagg.addHeaderCSS("stats", "datepicker","libs/datepicker/css/daterangepicker-bs3.css");
 
-        jagg.addHeaderJS("stats", "jquery-dataTable","lib/dataTables/js/jquery.dataTables.min.js");
-        jagg.addHeaderJS("stats", "dataTable","lib/dataTables/js/dataTables.bootstrap.js");
-        jagg.addHeaderJS("stats", "moment", "lib/datepicker/js/moment.js");
-        jagg.addHeaderJS("stats", "datepicker", "lib/datepicker/js/daterangepicker.js");
+        jagg.addHeaderJS("stats", "jquery-dataTable","libs/dataTables/js/jquery.dataTables.min.js");
+        jagg.addHeaderJS("stats", "dataTable","libs/dataTables/js/dataTables.bootstrap.js");
+        jagg.addHeaderJS("stats", "moment", "libs/datepicker/js/moment.js");
+        jagg.addHeaderJS("stats", "datepicker", "libs/datepicker/js/daterangepicker.js");
         jagg.addHeaderJS("stats", "jplot", "templates/stats/faultCount/js/stats.js");
     }
 });

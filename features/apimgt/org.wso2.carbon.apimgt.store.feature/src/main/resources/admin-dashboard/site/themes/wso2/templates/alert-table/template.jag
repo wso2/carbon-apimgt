@@ -8,8 +8,8 @@
 
 <div id="alerts-page">
 
-<div class="title-section">
-    <h2>Alerts History</h2>
+<div class="page-header">
+    <h1>Alerts History</h1>
 </div> 
 
 <br /> 

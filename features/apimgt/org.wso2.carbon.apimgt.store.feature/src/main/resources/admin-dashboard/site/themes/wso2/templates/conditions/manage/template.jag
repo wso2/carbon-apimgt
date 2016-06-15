@@ -31,11 +31,11 @@
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class="userSpecialCell"><%=i18n.localize("conditionIdHead")%></th>
-                <th class="appSpecialCell"><%=i18n.localize("conditionTypeHead")%></th>
-                <th class="appSpecialCell"><%=i18n.localize("conditionValueHead")%></th>
-                <th class="appSpecialCell"><%=i18n.localize("conditionStatus")%></th>
-                <th class="userSpecialCell"><%=i18n.localize("conditionActions")%></th>
+                <th class=""><%=i18n.localize("conditionIdHead")%></th>
+                <th class=""><%=i18n.localize("conditionTypeHead")%></th>
+                <th class=""><%=i18n.localize("conditionValueHead")%></th>
+                <th class=""><%=i18n.localize("conditionStatus")%></th>
+                <th class=""><%=i18n.localize("conditionActions")%></th>
             </tr>
         </thead>
 

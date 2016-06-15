@@ -16,27 +16,23 @@ var tenantDomains=outputs.tenantDomains;
                             <h2><%=i18n.localize("multipleAPIStoresHeading")%></h2>
                         </div>
                         <div class="clear"></div>
-                        <div class="content-section shadow-up">
-                            <div class="content-data">
-                                <center><div class="pagination" id="tenant_pages"><ul id="holder"></ul></div></center>
-                                <ul id="tenant_container">
-                                <%for(var i=0;i< tenantDomains.length;i++){
-                                    var site = require("/site/conf/site.json");
-                                %>
-                                    <a href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
-                                    <li class="thumbnail span3 tenent-thumb">
-                                    <center>
-                                    <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="<%=i18n.localize("tenantStore")%>">
-                                    <h3><%=tenantDomains[i]%></h3>
-                                    <span>Visit Store</span>
-                                    </center>
-                                    </a>
-                                    </li>
-                                <%}%>
-                                </ul>
-                                <div class="clearfix" ></div>
-                            </div>
-                        </div>
+                        <center><div class="pagination" id="tenant_pages"><ul id="holder"></ul></div></center>
+                        <ul id="tenant_container">
+                        <%for(var i=0;i< tenantDomains.length;i++){
+                            var site = require("/site/conf/site.json");
+                        %>
+                            <a href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
+                            <li class="thumbnail span3 tenent-thumb">
+                            <center>
+                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="<%=i18n.localize("tenantStore")%>">
+                            <h3><%=tenantDomains[i]%></h3>
+                            <span>Visit Store</span>
+                            </center>
+                            </a>
+                            </li>
+                        <%}%>
+                        </ul>
+                        <div class="clearfix" ></div>
                     </div>
                 </div>
             </div>

@@ -176,16 +176,6 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
     }
 };
 
-var editJSONContent = function (provider, apiName, version, docName, mode,tenantDomain) {
-    var current = window.location.pathname;
-    if (current.indexOf("item-info.jag") >= 0) {
-        window.open("json-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
-    } else {
-        window.open("site/pages/json-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
-    }
-
-};
-
 var editInlineContent = function (provider, apiName, version, docName, mode,tenantDomain) {
     var current = window.location.pathname;
     if (current.indexOf("item-info.jag") >= 0) {
