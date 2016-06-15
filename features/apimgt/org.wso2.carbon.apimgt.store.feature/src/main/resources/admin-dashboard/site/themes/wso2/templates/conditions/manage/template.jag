@@ -1,14 +1,8 @@
 <% jagg.template("conditions/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     	<div class="page-header">
-                <div class="page-title">
-                    <h1>Black Listed Entities</h1>                    
-                 </div>
-         </div>
-
-    <div class="content-section shadow-up">
-    <div class="content-data">
-    
+            <h1>Black Listed Entities</h1>                    
+        </div>  
    
     <%
           var conditionslist =  outputs.conditions;
@@ -78,17 +72,14 @@
             }
             %>  
     </table>
-        <%} else {%>
-        		<div class="message message-info">
-					<h4><i class="icon fw fw-info"></i><%=i18n.localize("noBlockedEntities")%></h4>
-					<p><%=i18n.localize("noBlockedEntitiesDescription")%></p>
-				</div>
-        <%} %>
-         <div class="form-actions">
-	        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("blockNew")%>">
-	    </div>
-    </div>
-
+    <%} else {%>
+    		<div class="message message-info">
+				<h4><i class="icon fw fw-info"></i><%=i18n.localize("noBlockedEntities")%></h4>
+				<p><%=i18n.localize("noBlockedEntitiesDescription")%></p>
+			</div>
+    <%} %>
+    <div class="form-actions">
+        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("blockNew")%>">
     </div>
 </div>
 

@@ -3,7 +3,7 @@
 		<div id="col-sm-12">
         <div id="manageAlerts">
 			<div class="page-header">
-				<h2><%=i18n.localize("manageAlertTypes")%></h2>
+				<h1><%=i18n.localize("manageAlertTypes")%></h1>
 			</div>
 			<div class="control-group">
                <%

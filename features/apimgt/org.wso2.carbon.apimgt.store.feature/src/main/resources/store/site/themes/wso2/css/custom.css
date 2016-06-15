@@ -208,3 +208,9 @@ a.remove_rating:hover{ color: #C00}
  white-space: -o-pre-wrap;    /* Opera 7 */
  word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+.social_links img{
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+}
