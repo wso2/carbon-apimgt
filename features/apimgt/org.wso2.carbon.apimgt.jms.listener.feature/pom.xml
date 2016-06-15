@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.jms.listener.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - JMS Listener for API Management Components</name>
+    <name>WSO2 Carbon - Api Management JMS Listener Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for JMS Listener</description>
 
