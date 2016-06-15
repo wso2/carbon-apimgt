@@ -4508,7 +4508,9 @@ public class ApiMgtDAO {
         }
         try {
             connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
+            String blockingFilerSql = " select distinct x.*,bl.* from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name))";
+            prepStmt = connection.prepareStatement(blockingFilerSql);
+            
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 prepStmt.setString(1, groupingId);
                 prepStmt.setString(2, subscriber.getName());
@@ -4527,6 +4529,7 @@ public class ApiMgtDAO {
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
+                application.setIsBlackListed(rs.getBoolean("ENABLED"));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
