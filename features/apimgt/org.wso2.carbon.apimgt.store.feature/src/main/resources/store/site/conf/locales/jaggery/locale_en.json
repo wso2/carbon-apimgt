@@ -4,6 +4,7 @@
     "version" : "Version",
     "apiThumb": "API Thumbnail",
     "status" : "Status",
+    "workflowStatus" : "Workflow Status",
     "updated" : "Updated",
     "urls" : "URLs",
     "wsdl" : "Download WSDL",
