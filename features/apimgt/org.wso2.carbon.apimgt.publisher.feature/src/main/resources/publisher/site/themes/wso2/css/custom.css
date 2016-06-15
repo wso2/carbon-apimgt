@@ -714,11 +714,8 @@ input.ep-field{ min-width: 50%;}
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
 .modal-body .form-horizontal,
-<<<<<<< Updated upstream
-.tab-pane .form-horizontal{
-=======
+.tab-pane .form-horizontal,
 .login-form-wrapper .form-horizontal{
->>>>>>> Stashed changes
     max-width:100%;
 }
 .modal-header .close{
