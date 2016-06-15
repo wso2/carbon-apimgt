@@ -4957,9 +4957,12 @@ public final class APIUtil {
      */
     public static HttpClient getHttpClient(int port, String protocol) {
         SchemeRegistry registry = new SchemeRegistry();
-        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        socketFactory.setHostnameVerifier(hostnameVerifier);
+        String ignoreHostnameVerification = System.getProperty("org.wso2.ignoreHostnameVerification");
+        if (ignoreHostnameVerification != null && "true".equalsIgnoreCase(ignoreHostnameVerification)) {
+            X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+            socketFactory.setHostnameVerifier(hostnameVerifier);
+        }
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
                 registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
