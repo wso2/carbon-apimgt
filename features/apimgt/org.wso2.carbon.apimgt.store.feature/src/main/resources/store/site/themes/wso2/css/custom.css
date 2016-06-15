@@ -13,21 +13,15 @@
 .input-group {
     margin-top: 3px;
 }
-
 a.btn .icon-caret, .btn .icon-caret {
     margin-left: 49px;
     border: none;
 }
-
-
-
-/*========================*/
-
 .body-wrapper a:hover {
     text-decoration: underline;
 }
 .body-wrapper a.btn:hover {
-    text-decoration: underline;
+    text-decoration: none;
 }
 .search-wrap>.form-control, .search-wrap .btn.wrap-input-right  {
     background-color: #215080;
@@ -41,7 +35,6 @@ a.btn .icon-caret, .btn .icon-caret {
     opacity: 0.9;
     font-weight: 400;
 }
-
 #left-sidebar{
     background-color: inherit;
     color: inherit;
@@ -133,7 +126,6 @@ ul.nav.nav-tabs {
         text-indent:0px;
     }
 }
-
 .average-rating {
     background: transparent url("../images/bigstar.png") no-repeat scroll 0 0;
     background-size : 40px 40px;
@@ -145,12 +137,20 @@ ul.nav.nav-tabs {
     width: 40px;
 }
 /* Rating color */
-.rating-symbol { color: orange; cursor: pointer;}
-.glyphicon-star-empty { color: #aaa;}
-a.remove_rating{ color: gray; cursor: pointer;}
-a.remove_rating:hover{ color: #C00}
-
-
+.rating-symbol {
+    color: orange;
+    cursor: pointer
+}
+.glyphicon-star-empty {
+    color: #aaa;
+}
+a.remove_rating{
+    color: gray;
+    cursor: pointer;
+}
+a.remove_rating:hover{
+    color: #C00;
+}
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
 .modal-body .form-horizontal,
