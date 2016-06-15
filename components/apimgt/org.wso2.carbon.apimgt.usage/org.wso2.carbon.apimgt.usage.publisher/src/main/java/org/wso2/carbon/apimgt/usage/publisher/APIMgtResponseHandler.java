@@ -145,7 +145,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             responsePublisherDTO.setCacheHit(cacheHit);
             responsePublisherDTO.setResponseSize(responseSize);
             responsePublisherDTO.setEventTime(endTime);//This is the timestamp response event published
-
+            responsePublisherDTO
+                    .setDestination((String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS));
             responsePublisherDTO.setResponseCode((Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC));
 
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);

@@ -4,7 +4,7 @@
 %>
 <h2><%=encode.forHtml(doc.docName)%></h2>
 <br/>
-<div class="documentation">
+<div>
     <div class="span11">
     <%if(!doc.content && doc.content==""){%>
     No document content have been added yet.

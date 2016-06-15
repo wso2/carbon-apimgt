@@ -714,7 +714,11 @@ input.ep-field{ min-width: 50%;}
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
 .modal-body .form-horizontal,
+<<<<<<< Updated upstream
 .tab-pane .form-horizontal{
+=======
+.login-form-wrapper .form-horizontal{
+>>>>>>> Stashed changes
     max-width:100%;
 }
 .modal-header .close{
@@ -730,6 +734,18 @@ input.ep-field{ min-width: 50%;}
     border-radius: 0px;
 }
 
+.thumbnail.icon img {
+    width: 101%;
+} 
+
+
+.input-group {
+    position: relative;
+    display: table;
+    border-collapse: separate;
+    margin-top: 3px;
+}
+
 .list-group-item-success .noty_text,
 .list-group-item-info .noty_text,
 .list-group-item-warning .noty_text,
@@ -741,4 +757,6 @@ input.ep-field{ min-width: 50%;}
     border-right:1px solid #999;
     height:40px;
 }
-
+.help_popup{
+    display:inline-block;
+}

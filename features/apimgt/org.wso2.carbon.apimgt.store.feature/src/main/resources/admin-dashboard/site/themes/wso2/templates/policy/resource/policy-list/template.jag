@@ -1,18 +1,18 @@
 <% jagg.template("policy/resource/policy-list", function(inputs, outputs, jagg) {%>
     <div id="listing">
-    <div class="title-section">
-        <h2>Advanced Throttling Policies</h2>
+    <div class="page-header">
+        <h1>Advanced Throttling Policies</h1>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
     <table class="table table-responsive table-striped" id="api-policy">
         <thead>
             <tr>
-                <th class="userSpecialCell"><%="Name"%></th>
-                <th class="appSpecialCell"><%="Quota Policy"%></th>
-                <th class="appSpecialCell"><%="Quota"%></th>
-                <th class="appSpecialCell"><%="Unit Time"%></th>
-                <th class="userSpecialCell"></th>
+                <th class=""><%="Name"%></th>
+                <th class=""><%="Quota Policy"%></th>
+                <th class=""><%="Quota"%></th>
+                <th class=""><%="Unit Time"%></th>
+                <th class=""></th>
             </tr>
         </thead>
 

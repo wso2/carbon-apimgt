@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -153,7 +154,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-	public Set<API> getAPIsWithTag(String tagName) throws APIManagementException {
+	public Set<API> getAPIsWithTag(String tagName, String requestedTenantDomain) throws APIManagementException {
     	
     	 /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
          */
@@ -176,10 +177,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		 * taggedAPIs.get(tag); }
 		 */
 
-		this.isTenantModeStoreView = (this.tenantDomain != null);
+		this.isTenantModeStoreView = (requestedTenantDomain != null);
 
-		if (this.tenantDomain != null) {
-			this.requestedTenant = this.tenantDomain;
+		if (requestedTenantDomain != null) {
+			this.requestedTenant = requestedTenantDomain;
 		}
 
 		Registry userRegistry = null;
@@ -190,7 +191,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			// as a tenant, I'm browsing my own Store or I'm browsing a Store of
 			// another tenant..
 			if ((this.isTenantModeStoreView && this.tenantDomain == null)
-					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(this.tenantDomain))) {
+					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {
 				
 				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 						.getTenantId(this.requestedTenant);
@@ -246,11 +247,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end) throws APIManagementException {
+    public Map<String, Object> getPaginatedAPIsWithTag(String tag, int start, int end, String tenantDomain) throws APIManagementException {
         List<API> apiList = new ArrayList<API>();
         Set<API> resultSet = new TreeSet<API>(new APIVersionComparator());
         Map<String, Object> results = new HashMap<String, Object>();
-        Set<API> taggedAPISet = this.getAPIsWithTag(tag);
+        Set<API> taggedAPISet = this.getAPIsWithTag(tag,tenantDomain);
         if (taggedAPISet != null) {
             if (taggedAPISet.size() < end) {
                 end = taggedAPISet.size();
@@ -2136,6 +2137,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
+            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
+
             try {
                 WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -2177,9 +2180,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
                         + ", Subscription Status: " + addedSubscription.getSubStatus() + " subscribe by " + userId
-                        + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
+                        + " for app " + applicationName;
                 log.debug(logMessage);
             }
+
+            JSONObject subsLogObject = new JSONObject();
+            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+            subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
 
             return new SubscriptionResponse(addedSubscription.getSubStatus(), addedSubscription.getUUID(),
                     workflowResponse);
@@ -2201,6 +2214,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
                 replaceEmailDomainBack(identifier.getProviderName()));
+
+        String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
         try {
             if (providerTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
@@ -2233,7 +2248,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setApiContext(api.getContext());
             workflowDTO.setApiName(identifier.getApiName());
             workflowDTO.setApiVersion(identifier.getVersion());
-            workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+            workflowDTO.setApplicationName(applicationName);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
@@ -2257,6 +2272,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
             removeSubscriptionWFExecutor.execute(workflowDTO);
+
+            JSONObject subsLogObject = new JSONObject();
+            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION +
                               " for apiID " + identifier.getApiName();
@@ -2271,9 +2296,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             invalidateCachedKeys(applicationId);
         }
         if (log.isDebugEnabled()) {
-            String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
             String logMessage = "API Name: " + identifier.getApiName() + ", API Version " +
-                    identifier.getVersion() + " subscription removed from app " + appName + " by " + userId;
+                    identifier.getVersion() + " subscription removed from app " + applicationName + " by " + userId;
             log.debug(logMessage);
         }
     }
@@ -2311,37 +2335,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private void invalidateCachedKeys(int applicationId) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config.getApiGatewayEnvironments().isEmpty()) {
-            return;
-        }
-
-        Set<String> consumerKeys = apiMgtDAO.getConsumerKeysOfApplication(applicationId);
-
-        Set<String> activeTokens = new HashSet<String>();
-        for (String consumerKey : consumerKeys) {
-            Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
-                    getActiveTokensByConsumerKey(consumerKey);
-            if (tempTokens != null) {
-                activeTokens.addAll(tempTokens);
-            }
-        }
-
-        if (activeTokens.isEmpty()) {
-            return;
-        }
-
-        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
-        try {
-            for (Environment environment : gatewayEnvs.values()) {
-                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
-                client.invalidateCachedTokens(activeTokens);
-            }
-        } catch (AxisFault axisFault) {
-            //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
-            log.error("Error occurred while invalidating the Gateway Token Cache ", axisFault);
-        }
+        CacheInvalidator.getInstance().invalidateCacheForApp(applicationId);
     }
 
     @Override
@@ -2387,6 +2381,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setCallbackUrl(null);
         }
         int applicationId = apiMgtDAO.addApplication(application, userId);
+
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
 
         boolean isTenantFlowStarted = false;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2461,6 +2463,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() +" in the database.");
         }
+
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+        appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
+        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         APIKey[] apiKeys = null;
 
@@ -2632,6 +2643,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
 
             removeApplicationWFExecutor.execute(workflowDTO);
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+            appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+            appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
                     "for applicationID " + application.getId();

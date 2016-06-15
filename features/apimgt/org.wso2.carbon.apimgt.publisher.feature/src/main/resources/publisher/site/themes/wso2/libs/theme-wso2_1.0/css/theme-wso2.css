@@ -3139,6 +3139,15 @@ input[type="button"].btn-block {
   background-color: #fff;
 }
 
+.btn-mobile {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .btn-mobile {
+    width: auto;
+  }
+}
 header {
   min-height: 50px;
   position: relative;
@@ -4929,38 +4938,56 @@ a.thumbnail.active {
   color: #e6e6e6;
 }
 
-.alert {
-  position: relative;
+/* ========================================================================
+ * message styles
+ * ======================================================================== */
+.message {
+  padding: 20px;
+  margin: 20px 0;
+  border-left: 5px solid transparent;
+  background: #f9f9f9;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
 }
-.alert > .icon {
+.message h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+.message h4 .icon {
   padding-bottom: 3px;
-  margin-right: 6px;
+  margin-right: 5px;
 }
-.alert > .close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 50px;
-  width: 50px;
-  line-height: 1;
-  padding: 0 10px;
-  font-size: 12px;
+.message p:last-child {
+  margin-bottom: 0;
 }
-.alert.alert-success > .close {
-  color: #fff;
-  background: #060f06;
+.message + .message {
+  margin-top: -5px;
 }
-.alert.alert-info > .close {
-  color: #fff;
-  background: black;
+
+.message-success {
+  border-left-color: #5cb85c;
 }
-.alert.alert-warning > .close {
-  color: #fff;
-  background: #3a2405;
+.message-success h4 {
+  color: #5cb85c;
 }
-.alert.alert-danger > .close {
-  color: #fff;
-  background: #220807;
+.message-info {
+  border-left-color: #009DA7;
+}
+.message-info h4 {
+  color: #009DA7;
+}
+.message-warning {
+  border-left-color: #f0ad4e;
+}
+.message-warning h4 {
+  color: #f0ad4e;
+}
+.message-danger {
+  border-left-color: #d9534f;
+}
+.message-danger h4 {
+  color: #d9534f;
 }
 
 @-webkit-keyframes progress-bar-stripes {

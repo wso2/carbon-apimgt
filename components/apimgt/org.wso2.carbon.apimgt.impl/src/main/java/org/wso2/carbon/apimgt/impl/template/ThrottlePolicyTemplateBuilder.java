@@ -170,7 +170,7 @@ public class ThrottlePolicyTemplateBuilder {
 
             if (pipelines != null) {
                 for (Pipeline pipeline : pipelines) {
-                    String conditionString = getPolicyCondition(pipeline.getConditions());
+                    String conditionString = getPolicyConditionForDefault(pipeline.getConditions());
                     conditionsSet.add(conditionString);
                 }
             }
@@ -393,6 +393,28 @@ public class ThrottlePolicyTemplateBuilder {
     }
 
     /**
+     * Produces final condition inside a pipeline for default policy with null string
+     * @param conditions
+     * @return
+     */
+    private static String getPolicyConditionForDefault(List<Condition> conditions) {
+        String conditionString = null;
+        int i = 0;
+        for (Condition condition : conditions) {
+            String conditionStringComplete = PolicyConstants.OPEN_BRACKET + condition.getCondition() + " OR " +
+                                             condition.getNullCondition() + PolicyConstants.CLOSE_BRACKET;
+
+            if (i == 0) {
+                conditionString = conditionStringComplete;
+            } else {
+                conditionString = conditionString + " AND " + conditionStringComplete;
+            }
+            i++;
+        }
+        return conditionString;
+    }
+
+    /**
      * Generate the condition for the default query. This returns the condition to check thing that are not in 
      * any of the other conditions
      * @param conditionsSet
@@ -402,10 +424,11 @@ public class ThrottlePolicyTemplateBuilder {
         String conditionString = "";
         int i = 0;
         for (String condition : conditionsSet) {
+            String conditionIsolated = PolicyConstants.OPEN_BRACKET + condition + PolicyConstants.CLOSE_BRACKET;
             if (i == 0) {
-                conditionString = condition;
+                conditionString = conditionIsolated;
             } else {
-                conditionString = conditionString + " OR " + condition;
+                conditionString = conditionString + " OR " + conditionIsolated;
             }
             i++;
         }

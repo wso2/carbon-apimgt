@@ -24,4 +24,9 @@ public class ContextCondition extends Condition {
     public String getCondition() {
         return null;
     }
+
+    @Override
+    public String getNullCondition() {
+        return null;
+    }
 }

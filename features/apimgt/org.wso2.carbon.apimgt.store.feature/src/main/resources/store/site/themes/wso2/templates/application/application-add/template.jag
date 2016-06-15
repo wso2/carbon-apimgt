@@ -21,19 +21,18 @@
 <div class="page-header" id="Message">
     <h1>Add Application</h1>
 </div>
-<div class="content-section">
-<div class="content-data">
 <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
-        
-<div class="alert alert-success" id="appAddMessage" style="display:none">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>
-</div>
-<div class="alert alert-success" id="appAddPendingMessage" style="display:none">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong><%=i18n.localize("preAddPendingMsg")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("afterAddPendingMsg")%></strong>
-</div>        
-<br />
+          
+  <div class="alert alert-success" id="appAddMessage" style="display:none">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>
+  </div>
+  <div class="alert alert-success" id="appAddPendingMessage" style="display:none">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong><%=i18n.localize("preAddPendingMsg")%> "<span id="applicationPendingShowName"></span>" <%=i18n.localize("afterAddPendingMsg")%></strong>
+  </div>   
+
+  <br />
 <form class="form-horizontal" id="appAddForm">
   <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
   <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
@@ -102,6 +101,4 @@
     </div>
   </div>
 </form>
-</div>
-</div>
 <% }); %>

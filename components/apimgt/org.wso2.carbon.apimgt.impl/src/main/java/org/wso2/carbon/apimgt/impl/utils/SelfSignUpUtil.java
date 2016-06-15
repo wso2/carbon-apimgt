@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -102,20 +103,23 @@ public final class SelfSignUpUtil {
 	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
-	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
-			throws APIManagementException {
+    private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
+                                                                                      throws APIManagementException {
 
+        UserRegistrationConfigDTO config = null;
 
-		UserRegistrationConfigDTO config = null;
-	
-		try {
+        try {
 
-			Registry registry =
-					(Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext()
-					.getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-			if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
-				Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
-				String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+            int tenantId =
+                           ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                 .getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
+            Registry registry =
+                                (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                                                  .getRegistry(RegistryType.SYSTEM_GOVERNANCE);
+            if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
+                Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 OMElement element = AXIOMUtil.stringToOM(content);
                 config = new UserRegistrationConfigDTO();
                 
@@ -150,6 +154,9 @@ public final class SelfSignUpUtil {
 		} catch (XMLStreamException e) {
 		    throw new APIManagementException("Error while parsing configuration " +
                     APIConstants.SELF_SIGN_UP_CONFIG_LOCATION, e);
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in retrieving Tenant Information while reading SignUp "
+                                             + "configuration", e);
         }
 		return config;
 	}

@@ -1,4 +1,5 @@
 <%
+    //@todo : Security check
     var fileName =request.getParameter("fileName");
     var process = require('process');
     var path = process.getProperty('carbon.home');

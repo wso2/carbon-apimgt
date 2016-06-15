@@ -34,7 +34,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -79,6 +78,7 @@
         <p>WSO2 API Manager 2.0.0 | &copy; <script>document.write(new Date().getFullYear());</script> <a title="WSO2" href="http://wso2.com/" target="_blank"><i class="icon fw fw-wso2"></i> Inc</a>.</p>
       </div>
     </footer>
+    
 <%
 if(data.footer) {
     jagg.printData(data.footer.js);

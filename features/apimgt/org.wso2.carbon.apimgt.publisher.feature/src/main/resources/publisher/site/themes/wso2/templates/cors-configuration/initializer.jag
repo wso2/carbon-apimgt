@@ -2,8 +2,8 @@
 jagg.initializer("cors-configuration", {
 
     preInitialize:function () {
-        jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
-        jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
+        jagg.addFooterJS("tagsjs", "jagg", "libs/bootstrap-taginput/bootstrap-tagsinput.min.js");
+        jagg.addHeaderCSS("tagscss", "jagg", "libs/bootstrap-taginput/bootstrap-tagsinput.css");
     }
 });
 %>

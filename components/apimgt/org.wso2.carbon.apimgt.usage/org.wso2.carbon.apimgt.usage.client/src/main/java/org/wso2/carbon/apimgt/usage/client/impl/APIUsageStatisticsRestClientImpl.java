@@ -851,8 +851,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (Result<ResponseTimesByAPIsValue> result : obj) {
             ResponseTimesByAPIsValue v = result.getValues();
             usage = new APIResponseTime();
-            usage.setApiName(v.getColumnNames().get(0).split(":v")[0]);
-            usage.setApiVersion(v.getColumnNames().get(0).split(":v")[1]);
+            String apiVersion = v.getColumnNames().get(0).split("--")[1];
+            usage.setApiName(apiVersion.split(":v")[0]);
+            usage.setApiVersion(apiVersion.split(":v")[1]);
             usage.setContext(v.getColumnNames().get(1));
             usage.setResponseTime(v.getTotalServiceTime());
             usage.setResponseCount(v.getTotalResponseCount());

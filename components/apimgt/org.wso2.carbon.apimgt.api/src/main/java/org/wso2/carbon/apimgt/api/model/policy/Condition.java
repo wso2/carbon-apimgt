@@ -24,6 +24,7 @@ import java.io.Serializable;
 public abstract class Condition implements Serializable {
     private String type;       //type of each condition: eg:IP, DATE, DATE RANGE etc.
     protected String queryAttributeName;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')
+    protected String nullFilterQueryString;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')
     private boolean invertCondition;     //To check if the condition to be included or excluded
     private String conditionEnabled;
 
@@ -56,6 +57,8 @@ public abstract class Condition implements Serializable {
     }
 
     public abstract String getCondition();
+
+    public abstract String getNullCondition();
 
     @Override
     public String toString() {
