@@ -22,6 +22,6 @@
 
 
 .status-bar{ display:none !important }
-.main-header{ height:40px !important ; padding-left:140px;}
+.main-header{ height:40px !important ; padding-left:6px;}
 .menu-bar { height:40px !important; padding-top:5px; }
 main {top:40px !important;}

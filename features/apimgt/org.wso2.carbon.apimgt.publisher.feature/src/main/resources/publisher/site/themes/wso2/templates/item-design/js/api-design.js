@@ -728,13 +728,32 @@ APIDesigner.prototype.edit_swagger = function(){
     $(".wizard").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
+
+    //Added temparory navebar on top of the swagger editor
+    var tempNav = $('.navbar').clone();
+    tempNav.find('.navbar-header').remove();
+    tempNav.find('#navbar').removeClass('collapse').find('.navbar-nav li').remove();
+    $('.swagger_editer_header').prepend($('.swagger_editer_header .btn-secondary'));
+    tempNav.find('.navbar-nav').append($('.swagger_editer_header'));
+    tempNav.hide().addClass('tempNav').css({
+        'position':'fixed',
+        'top':'0px',
+        'left': '0px',
+        'width':'100%',
+        'z-index':'10000'
+    });
+
+    tempNav.appendTo('body');
     $("#swaggerEditer").fadeIn("fast");
+    tempNav.show('fast');
 };
 
 APIDesigner.prototype.close_swagger_editor = function(){
     $("body").removeClass("modal-open");
     $(".wizard").show();
     $("#se-iframe").remove();
+    $('#swaggerEditer').append($('.swagger_editer_header'));
+    $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");
 };
 
@@ -742,6 +761,8 @@ APIDesigner.prototype.update_swagger = function(){
     $("body").removeClass("modal-open");
     $("#se-iframe").remove();
     $(".wizard").show();
+    $('#swaggerEditer').append($('.swagger_editer_header'));
+    $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
     var json = jsyaml.safeLoad(designer.yaml);
