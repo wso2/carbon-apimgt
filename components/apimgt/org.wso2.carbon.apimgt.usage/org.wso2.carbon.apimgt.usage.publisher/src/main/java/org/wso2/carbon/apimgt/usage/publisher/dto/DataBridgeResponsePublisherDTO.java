@@ -44,6 +44,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setResponseSize(responsePublisherDTO.getResponseSize());
         setProtocol(responsePublisherDTO.getProtocol());
         setResponseCode(responsePublisherDTO.getResponseCode());
+        setDestination(responsePublisherDTO.getDestination());
     }
 
     public static String getStreamDefinition() {
@@ -82,6 +83,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'responseSize','type':'LONG'}," +
                "          {'name':'protocol','type':'STRING'}," +
                "          {'name':'responseCode','type':'INT'}" +
+               "          {'name':'destination','type':'STRING'}" +
                "  ]" +
 
                "}";
@@ -93,7 +95,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                             getVersion(), getResponse(), getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
                             getEventTime(), getTenantDomain(), getHostName(),
                             getApiPublisher(), getApplicationName(), getApplicationId(), getCacheHit(),
-                            getResponseSize(), getProtocol(), getResponseCode()};
+                            getResponseSize(), getProtocol(), getResponseCode(), getDestination()};
     }
 
 }

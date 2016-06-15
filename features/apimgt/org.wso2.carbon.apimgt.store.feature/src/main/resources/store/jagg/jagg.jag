@@ -700,22 +700,22 @@ var jagg = jagg || (function () {
     };
 
     var addHeaderCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
+        css = '    <link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>\n';
         insertData(this, template, "header", "css", key, css);
     };
 
     var addHeaderCSSCode = function (template, key, css) {
-        css = '<style type="text/css">' + css + '</style>';
+        css = '    <style type="text/css">' + css + '</style>\n';
         insertData(this, template, "header", "css", key, css);
     };
 
     var addHeaderJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
+        js = '    <script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "header", "js", key, js);
     };
 
     var addHeaderJSCode = function (template, key, js) {
-        js = '<script type="text/javascript">' + js + '</script>';
+        js = '    <script type="text/javascript">' + js + '</script>\n';
         insertData(this, template, "header", "js", key, js);
     };
 
@@ -724,22 +724,22 @@ var jagg = jagg || (function () {
     };
 
     var addFooterCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
+        css = '    <link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
         insertData(this, template, "footer", "css", key, css);
     };
 
     var addFooterCSSCode = function (template, key, css) {
-        css = '<style type="text/css">' + css + '</style>';
+        css = '    <style type="text/css">' + css + '</style>\n';
         insertData(this, template, "footer", "css", key, css);
     };
 
     var addFooterJS = function (template, key, js) {
-        js = '\t<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
+        js = '    <script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "footer", "js", key, js);
     };
 
     var addFooterJSCode = function (template, key, js) {
-        js = '<script type="text/javascript">' + js + '</script>';
+        js = '    <script type="text/javascript">' + js + '</script>\n';
         insertData(this, template, "footer", "js", key, js);
     };
 

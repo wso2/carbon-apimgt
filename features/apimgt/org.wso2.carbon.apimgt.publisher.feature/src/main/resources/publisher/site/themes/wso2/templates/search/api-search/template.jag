@@ -25,7 +25,7 @@ var query=request.getParameter("query");
                     </div>
                 </div>
             </div>
-            <div id="searchAPIHelp" class="hide help-popover-content">
+            <div id="searchAPIHelp" class="hide">
                 <div><strong><%=i18n.localize("searchAPIHelpMsg1")%></strong></div>
                 <ol>
                 <li><%=i18n.localize("searchAPIHelpMsg2")%></li>

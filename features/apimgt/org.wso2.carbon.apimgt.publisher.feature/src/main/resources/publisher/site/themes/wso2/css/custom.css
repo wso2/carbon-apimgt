@@ -713,7 +713,9 @@ input.ep-field{ min-width: 50%;}
 }
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
-.modal-body .form-horizontal{
+.modal-body .form-horizontal,
+.tab-pane .form-horizontal,
+.login-form-wrapper .form-horizontal{
     max-width:100%;
 }
 .modal-header .close{
@@ -741,15 +743,26 @@ input.ep-field{ min-width: 50%;}
     margin-top: 3px;
 }
 
-#mainLoginForm {
-    max-width: 100%;
-}
-
 .list-group-item-success .noty_text,
 .list-group-item-info .noty_text,
 .list-group-item-warning .noty_text,
 .list-group-item-danger .noty_text{
     color:#fff;
-=======
->>>>>>> parent of 587f2e5... fix for swagger ui layout
+}
+
+.lifecycle-state .btn-group > .btn{
+    border-right:1px solid #999;
+    height:40px;
+}
+.help_popup{
+    display:inline-block;
+}
+
+#swaggerEditer {
+    overflow: hidden;
+    padding-top: 40px !important;
+}
+
+.main-header {
+    padding-left: 5px !important;
 }

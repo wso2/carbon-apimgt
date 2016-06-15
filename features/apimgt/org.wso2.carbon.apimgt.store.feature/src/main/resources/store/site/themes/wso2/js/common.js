@@ -5,7 +5,6 @@
 */
 (function ( $ ) {
 $.fn.generateBgcolor = function(options){
-	console.log("cccc1");
 
     var defaultPalette = [
     "#F44336","#D32F2F","#B71C1C","#E91E63","#F06292","#D81B60","#AD1457","#880E4F","#9C27B0","#BA68C8",

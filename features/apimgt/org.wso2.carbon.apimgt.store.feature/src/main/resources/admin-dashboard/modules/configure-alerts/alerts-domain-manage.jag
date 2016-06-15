@@ -27,7 +27,7 @@ var getDomainSpecificConfigurationsInfo = function (domainName) {
         authenticator.setPreemptiveAuthentication(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
-        var configInfo = stub.getConfigurationsInfo(domainName);
+        var configInfo = stub.getConfigurationInfos(domainName);
         return configInfo;
 
     } catch (ex) {
@@ -68,7 +68,7 @@ var getDomainTemplates = function (domainName) {
         authenticator.setPreemptiveAuthentication(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
-        var domainTemplates = stub.getDomain(domainName).getTemplateDTOs();
+        var domainTemplates = stub.getDomainInfo(domainName).getScenarioInfoDTOs();
         return domainTemplates;
 
     } catch (ex) {
@@ -108,12 +108,12 @@ var deleteConfiguration = function (domainName, configurationName) {
         authenticator.setPreemptiveAuthentication(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
-        stub.deleteConfiguration(domainName, configurationName);   
+        stub.deleteConfiguration(domainName, configurationName);
 
         var deletionSuccessMessage = "Domain Configuration successfully deleted. Name of the configuration : "+ configurationName;
         return {
             error: false
-        }       
+        }
 
     } catch (ex) {
         var message = "Error occurred while Deleting Alert Configuration (Cause:" + ex.message + ")";

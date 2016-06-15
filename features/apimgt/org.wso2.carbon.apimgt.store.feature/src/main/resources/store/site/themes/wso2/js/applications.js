@@ -332,7 +332,12 @@ $("#application-actions").each(function(){
                     context.shared = true;
                 else
                     context.shared = false;
-                return application_name(context);             
+                var value = application_name(context);
+                if(rec.isBlacklisted == 'true' || rec.isBlacklisted == true){
+                    value = value.replace((">"+rec.name+"<"),("><font color='red'>"+rec.name+" (Blacklisted) <"));
+
+                }
+                return  value;            
               }
             },
             { "data": "tier" },

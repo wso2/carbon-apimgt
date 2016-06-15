@@ -72,11 +72,11 @@
 				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-user&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiUsage")%>"></i>
 				<%=i18n.localize("apiUsage")%></a></li>
-			<li><a class="substats" title="<%=i18n.localize("apiResponseTimes")%>"
+			<!--li><a class="substats" title="<%=i18n.localize("apiResponseTimes")%>"
 				href="<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-response-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 				<i class="icon fw fw-bar-chart" title="<%=i18n.localize("apiResponseTimes")%>"></i>
-				<%=i18n.localize("apiResponseTimes")%></a></li>
+				<%=i18n.localize("apiResponseTimes")%></a></li-->
 			<li><a class="substats" title="<%=i18n.localize("apiLastAccessTimes")%>"
 				href="<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-last-access-times&stat=all-stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
