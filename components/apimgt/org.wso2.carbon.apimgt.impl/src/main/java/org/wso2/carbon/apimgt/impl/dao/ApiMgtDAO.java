@@ -1136,7 +1136,6 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(checkDuplicateQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
-            ps.setString(3, identifier.getTier());
 
             resultSet = ps.executeQuery();
 
@@ -1147,8 +1146,10 @@ public class ApiMgtDAO {
 
                 String applicationName = getApplicationNameFromId(applicationId);
 
-                if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
-                        .SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+                if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                        APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                        APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                        APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
 
                     //Throw error saying subscription already exists.
                     log.error("Subscription already exists for API " + identifier.getApiName() + " in Application " +
