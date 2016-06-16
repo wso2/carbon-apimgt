@@ -750,8 +750,6 @@ input.ep-field{ min-width: 50%;}
     color:#fff;
 }
 
-<<<<<<< HEAD
-=======
 .lifecycle-state .btn-group > .btn{
     border-right:1px solid #999;
     height:40px;
@@ -760,7 +758,6 @@ input.ep-field{ min-width: 50%;}
     display:inline-block;
 }
 
->>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e
 #swaggerEditer {
     overflow: hidden;
     padding-top: 40px !important;
@@ -769,7 +766,7 @@ input.ep-field{ min-width: 50%;}
 .main-header {
     padding-left: 5px !important;
 }
-<<<<<<< HEAD
+
 .swagger_editer_header{
     padding:0px !important;
 }
@@ -779,5 +776,4 @@ input.ep-field{ min-width: 50%;}
 .swagger_editer_header .fw-stack{
     margin: 1px 7px 0px 0px;
 }
-=======
->>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e
+
