@@ -760,3 +760,12 @@ input.ep-field{ min-width: 50%;}
 .main-header {
     padding-left: 5px !important;
 }
+.swagger_editer_header{
+    padding:0px !important;
+}
+.swagger_editer_header .btn{
+    height: 100% !important;
+}
+.swagger_editer_header .fw-stack{
+    margin: 1px 7px 0px 0px;
+}
