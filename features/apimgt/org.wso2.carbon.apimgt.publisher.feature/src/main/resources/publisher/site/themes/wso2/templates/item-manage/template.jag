@@ -500,9 +500,9 @@
                         <% } %>
 
 <!-- End of configuration panel -->
-<div id="accordion1" class="panel-group" role="tablist" aria-multiselectable="true">
+<div class="panel-group accordion" role="tablist" aria-multiselectable="true">
 	<div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
+    <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
 			<h4 class="panel-title">
 				<label class="radio">
 				</label>
@@ -597,7 +597,7 @@
   </div><!-- Gateway environments -->
 
   <div class="panel panel-default">
-  	<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-controls="accordion1-collapse2">
+  	<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-controls="accordion1-collapse2">
 			<h4 class="panel-title">
 				<label class="radio">
 				</label>

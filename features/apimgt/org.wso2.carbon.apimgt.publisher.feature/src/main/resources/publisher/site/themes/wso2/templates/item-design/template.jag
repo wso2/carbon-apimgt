@@ -99,7 +99,7 @@
 					<form class="form-horizontal apim-form" method="POST"
 					  id="design_form"
 					  enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
-					<div id="accordion1" class="panel-group">
+					<div class="panel-group accordion">
                     	<div class="panel panel-default">
 							<div class="panel-heading">
 								<h4 class="panel-title">
