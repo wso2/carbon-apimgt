@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.keymgt.service.thrift;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIManagementException;
@@ -252,6 +254,36 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
         template.setThrottlingConditions(dto.getThrottlingConditions());
+
+        // Converting ConditionGroupDTO s to the type compatible with thrift.
+        ConditionGroupDTO[] conditionGroups = dto.getConditionGroups();
+        if (conditionGroups != null) {
+            ArrayList<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionGroupDTO> conditionGroupsThrift = new
+                    ArrayList<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionGroupDTO>(conditionGroups.length);
+
+            for (ConditionGroupDTO conditionGroup : conditionGroups) {
+                org.wso2.carbon.apimgt.impl.generated.thrift.ConditionGroupDTO conditionGroupThrift = new org.wso2
+                        .carbon.apimgt.impl.generated.thrift.ConditionGroupDTO();
+                conditionGroupThrift.setConditionGroupId(conditionGroup.getConditionGroupId());
+                ConditionDTO[] conditions = conditionGroup.getConditions();
+                if (conditions != null) {
+                    ArrayList<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO> conditionsThrift = new
+                            ArrayList<org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO>(conditions.length);
+                    for (ConditionDTO condition : conditions) {
+                        org.wso2.carbon.apimgt.impl.generated.thrift.ConditionDTO conditionThrift = new org.wso2
+                                .carbon.apimgt.impl.generated.thrift.ConditionDTO();
+                        conditionThrift.setConditionType(condition.getConditionType());
+                        conditionThrift.setConditionName(condition.getConditionName());
+                        conditionThrift.setConditionValue(condition.getConditionValue());
+                        conditionThrift.setIsInverted(condition.isInverted());
+                        conditionsThrift.add(conditionThrift);
+                    }
+                    conditionGroupThrift.setConditions(conditionsThrift);
+                }
+                conditionGroupsThrift.add(conditionGroupThrift);
+            }
+            template.setConditionGroups(conditionGroupsThrift);
+        }
         template.setApplicableLevel(dto.getApplicableLevel());
         return template;
     }

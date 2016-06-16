@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.Serializable;
@@ -19,6 +20,8 @@ public class VerbInfoDTO implements Serializable {
     private List<String> throttlingConditions = new ArrayList<String>();
 
     private String requestKey;
+
+    private ConditionGroupDTO[] conditionGroups;
 
     public String getThrottling() {
         return throttling;
@@ -88,5 +91,13 @@ public class VerbInfoDTO implements Serializable {
 
     public void setApplicableLevel(String applicableLevel) {
         this.applicableLevel = applicableLevel;
+    }
+
+    public void setConditionGroups(ConditionGroupDTO[] conditionGroups) {
+        this.conditionGroups = conditionGroups;
+    }
+
+    public ConditionGroupDTO[] getConditionGroups() {
+        return conditionGroups;
     }
 }

@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONValue;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,6 +40,15 @@ public class URITemplate implements Serializable{
     private String mediationScript;
     private List<Scope> scopes = new ArrayList<Scope>();
     private Map<String, String> mediationScripts = new HashMap<String, String>();
+    private ConditionGroupDTO[] conditionGroups;
+
+    public ConditionGroupDTO[] getConditionGroups() {
+        return conditionGroups;
+    }
+
+    public void setConditionGroups(ConditionGroupDTO[] conditionGroups) {
+        this.conditionGroups = conditionGroups;
+    }
 
     public String getMediationScript() {
         return mediationScript;
