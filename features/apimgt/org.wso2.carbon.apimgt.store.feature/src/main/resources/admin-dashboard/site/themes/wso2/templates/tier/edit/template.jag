@@ -92,14 +92,14 @@
                                 <span class="requiredAstrix">*</span>
                              </label>
                             <div class="col-sm-2">
-                                <input class="form-control" type="text" id="requestCount" name="requestCount" />
+                                <input class="form-control positiveInteger" type="text" id="requestCount" name="requestCount" />
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label"><%=i18n.localize("unitTime")%>
                                 <span class="requiredAstrix">*</span></label>
                             <div class="col-sm-3">
-                                <input class="form-control" type="text" id="unitTime" name="unitTime" />
+                                <input class="form-control positiveInteger" type="text" id="unitTime" name="unitTime" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -112,7 +112,7 @@
 
                         <legend>Policy Flags (WSO2 Specific Attributes)</legend>
 
-                        <div class="form-group">                        	
+                        <div class="form-group">
                             <label class="col-sm-3 control-label"><%=i18n.localize("stopOnQuotaReach")%></label>
                             <div class="col-sm-6">
 								<label class="checkbox">
@@ -152,10 +152,10 @@
                             </table>
                         	</div>
                         </div>
-                        
+
                         <legend>Permissions</legend>
-                        
-                        <div class="form-group">					            
+
+                        <div class="form-group">
                                 <label class="col-sm-3 control-label">Roles<span class="requiredAstrix">*</span></label>
                                 <div class="col-sm-3">
                                 	<input class="form-control" type="text" id="roles" name="roles" value="<%=roleList%>"/>
@@ -165,7 +165,7 @@
                                 				<%=i18n.localize("denied")%>
                                 			<%} else { %>
                                 				<%=i18n.localize("allowed")%>
-                                		<%} %></span> 
+                                		<%} %></span>
                                 		<%=i18n.localize("tierPermissionMessagePart2")%>
                                 	</p>
                                 </div>
@@ -174,7 +174,7 @@
 					    	<div class="col-sm-3"></div>
 						    <div class="col-sm-3" id="permissionTypes">
 		                                <label class="radio">
-		                                    <input type="radio" name="permissionAction" value="allow" <%if(!denied) { %>checked<%} %>> 
+		                                    <input type="radio" name="permissionAction" value="allow" <%if(!denied) { %>checked<%} %>>
 		                                    <span class="helper"><%=i18n.localize("allow")%></span>
 		                                </label>
 		                                <label class="radio">
@@ -183,7 +183,7 @@
 		                                </label>
 	                        </div>
 	                    </div>
-                        
+
 					<br class="spacer">
                     <div class="form-actions">
                         <input id="add-tier-btn" onclick="addTier()" name="save-tier-btn" type="button"
