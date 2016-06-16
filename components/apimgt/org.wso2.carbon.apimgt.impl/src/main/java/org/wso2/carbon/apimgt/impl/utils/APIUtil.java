@@ -4957,9 +4957,12 @@ public final class APIUtil {
      */
     public static HttpClient getHttpClient(int port, String protocol) {
         SchemeRegistry registry = new SchemeRegistry();
-        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        socketFactory.setHostnameVerifier(hostnameVerifier);
+        String ignoreHostnameVerification = System.getProperty("org.wso2.ignoreHostnameVerification");
+        if (ignoreHostnameVerification != null && "true".equalsIgnoreCase(ignoreHostnameVerification)) {
+            X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+            socketFactory.setHostnameVerifier(hostnameVerifier);
+        }
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
                 registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
@@ -5925,5 +5928,21 @@ public final class APIUtil {
         jsonObject.put("performedBy", performedBy);
         jsonObject.put("info", entityInfo);
         audit.info(jsonObject.toString());
+    }
+
+    public static int getPortOffset() {
+        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        String portOffset = System.getProperty(APIConstants.PORT_OFFSET_SYSTEM_VAR,
+                                               carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
+        try {
+            if ((portOffset != null)) {
+                return Integer.parseInt(portOffset.trim());
+            } else {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            log.error("Invalid Port Offset: " + portOffset + ". Default value 0 will be used.", e);
+            return 0;
+        }
     }
 }

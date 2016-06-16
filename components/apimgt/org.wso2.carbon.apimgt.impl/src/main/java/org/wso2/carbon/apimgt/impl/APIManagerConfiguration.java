@@ -99,7 +99,7 @@ public class APIManagerConfiguration {
             return;
         }
         InputStream in = null;
-        int offset = getPortOffset();
+        int offset = APIUtil.getPortOffset();
         int receiverPort = 9611 + offset;
         int authUrlPort = 9711 + offset;
         int jmsPort = 5672 + offset;
@@ -899,20 +899,7 @@ public class APIManagerConfiguration {
             }
         }
     }
-    private int getPortOffset() {
-        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
-        String portOffset = System.getProperty("portOffset",
-                carbonConfig.getFirstProperty("Ports.Offset"));
-        try {
-            if ((portOffset != null)) {
-                return Integer.parseInt(portOffset.trim());
-            } else {
-                return 0;
-            }
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
+
     public ThrottleProperties getThrottleProperties() {
         return throttleProperties;
     }
