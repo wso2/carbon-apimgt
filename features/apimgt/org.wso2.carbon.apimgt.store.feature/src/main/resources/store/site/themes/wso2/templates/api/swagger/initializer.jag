@@ -21,7 +21,6 @@ jagg.initializer("api/swagger", {
     },
 
     postInitialize:function(inputs, outputs) {
-        jagg.addFooterJSCode("api/api-info", "api", "jagg.api = " + encode.forJavaScript(stringify(inputs.api)) + ";");
     }
 });
 
