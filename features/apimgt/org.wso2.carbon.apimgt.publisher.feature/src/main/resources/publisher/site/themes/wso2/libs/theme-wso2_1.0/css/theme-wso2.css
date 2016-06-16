@@ -4938,56 +4938,38 @@ a.thumbnail.active {
   color: #e6e6e6;
 }
 
-/* ========================================================================
- * message styles
- * ======================================================================== */
-.message {
-  padding: 20px;
-  margin: 20px 0;
-  border-left: 5px solid transparent;
-  background: #f9f9f9;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
+.alert {
+  position: relative;
 }
-.message h4 {
-  margin-top: 0;
-  margin-bottom: 5px;
-}
-.message h4 .icon {
+.alert > .icon {
   padding-bottom: 3px;
-  margin-right: 5px;
+  margin-right: 6px;
 }
-.message p:last-child {
-  margin-bottom: 0;
+.alert > .close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 50px;
+  width: 50px;
+  line-height: 1;
+  padding: 0 10px;
+  font-size: 12px;
 }
-.message + .message {
-  margin-top: -5px;
+.alert.alert-success > .close {
+  color: #fff;
+  background: #060f06;
 }
-
-.message-success {
-  border-left-color: #5cb85c;
+.alert.alert-info > .close {
+  color: #fff;
+  background: black;
 }
-.message-success h4 {
-  color: #5cb85c;
+.alert.alert-warning > .close {
+  color: #fff;
+  background: #3a2405;
 }
-.message-info {
-  border-left-color: #009DA7;
-}
-.message-info h4 {
-  color: #009DA7;
-}
-.message-warning {
-  border-left-color: #f0ad4e;
-}
-.message-warning h4 {
-  color: #f0ad4e;
-}
-.message-danger {
-  border-left-color: #d9534f;
-}
-.message-danger h4 {
-  color: #d9534f;
+.alert.alert-danger > .close {
+  color: #fff;
+  background: #220807;
 }
 
 @-webkit-keyframes progress-bar-stripes {
@@ -9273,6 +9255,208 @@ a.list-group-item:hover {
   .tab-content > .active {
     display: block !important;
   }
+}
+/* ========================================================================
+ * Misc customizations
+ * ======================================================================== */
+.truncate {
+  max-width: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.help_popup {
+  display: block;
+}
+
+.thumbnail.icon img {
+  width: 101%;
+}
+
+.tab-content {
+  border-width: 0px 1px 1px 1px;
+  border-style: solid;
+  border-color: #ddd;
+  padding: 20px;
+  min-height: 300px;
+}
+
+/* ========================================================================
+ * Thumbnail icon customizations
+ * ======================================================================== */
+.thumbnail.icon {
+  position: relative;
+}
+
+.thumbnail.icon .after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  color: #FFF;
+}
+
+.thumbnail.icon:hover .after {
+  display: block;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
+.thumbnail.icon > a > .after > span.fw-stack.fw-lg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+  font-size: 26px;
+}
+
+.thumbnail.icon .square-element img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.api-name-icon {
+  color: #fff;
+  width: 100%;
+  font-size: 9em;
+  text-align: center;
+  font-weight: 200;
+  text-transform: capitalize;
+}
+
+/* ========================================================================
+ * Accordion and Collapse styles
+ * ======================================================================== */
+.accordion h4 a, .collapse h4 a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.accordion h4 p, .collapse h4 p {
+  padding: 10px;
+  margin-bottom: 0px;
+}
+
+.accordion .panel, .collapse .panel {
+  margin-bottom: 10px;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.accordion .panel-heading, .collapse .panel-heading {
+  background: #e2e2e2;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  border: none;
+  cursor: pointer;
+}
+
+.accordion .panel-heading:hover, .collapse .panel-heading:hover {
+  background: #efefef;
+}
+
+.accordion .panel-body, .collapse .panel-body {
+  padding: 10px;
+  border: 1px solid #e2e2e2;
+}
+
+.accordion h4 input[type=checkbox], .accordion h4 input[type=radio],
+.collapse h4 input[type=checkbox], .collapse h4 input[type=radio] {
+  margin-top: 0px;
+  margin-right: 4px;
+}
+
+.accordion .panel-heading .radio, .collapse .panel-heading .radio {
+  width: 60px;
+  height: 60px;
+  float: left;
+  margin-right: 0px;
+  background: #ccc;
+}
+
+.accordion .panel-heading .panel-title, .collapse .panel-heading .panel-title {
+  height: 60px;
+}
+
+.accordion .panel-heading .radio .helper,
+.collapse .panel-heading .radio .helper {
+  padding-top: 0px;
+  top: 20px;
+  left: 20px;
+}
+
+.accordion .panel-heading .radio > i,
+.collapse .panel-heading .radio > i {
+  position: relative;
+  top: 20px;
+  left: 20px;
+}
+
+.accordion .panel-heading .radio > span,
+.collapse .panel-heading .radio > span {
+  position: relative;
+  top: 10px;
+  left: 10px;
+}
+
+.accordion .panel-heading div .status,
+.collapse .panel-heading div .status {
+  margin-top: -42px;
+}
+
+.accordion .panel-heading div .status i,
+.collapse .panel-heading div .status i {
+  position: relative;
+  top: 16px;
+  left: calc(100% - 40px);
+}
+
+.accordion .panel-heading .radio + div .status i,
+.collapse .panel-heading .radio + div .status i {
+  position: relative;
+  top: 16px;
+  left: calc(100% - 100px);
+}
+
+.accordion .panel-heading p, .collapse .panel-heading p,
+.collapse .panel-heading p, .collapse .panel-heading p {
+  float: none;
+  width: auto;
+}
+
+.accordion .panel-heading div .heading,
+.collapse .panel-heading div .heading {
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  text-indent: 10px;
+}
+
+.accordion .panel-heading div .no-description,
+.collapse .panel-heading div .no-description {
+  padding-top: 20px;
+}
+
+.accordion .panel-heading div .description,
+.collapse .panel-heading div .description {
+  text-indent: 10px;
+  margin-right: 60px;
+}
+
+.accordion h4 a i, .collapse h4 a i {
+  margin-top: -4px;
 }
 
 /*# sourceMappingURL=apim-publisher.css.map */
