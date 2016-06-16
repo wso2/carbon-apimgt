@@ -41,13 +41,14 @@ function handleLogin() {
     appName = window.swaggerUi.api.info.title;
   }
 
+  $('.api-popup-dialog').remove(); 
   popupDialog = $(
     [
       '<div class="api-popup-dialog">',
       '<div class="api-popup-title">Select OAuth2.0 Scopes</div>',
       '<div class="api-popup-content">',
         '<p>Scopes are used to grant an application different levels of access to data on behalf of the end user. Each API may declare one or more scopes.',
-          '<a title="Learn how to us" href="#">Learn how to use</a>',
+          '<a href="#">Learn how to use</a>',
         '</p>',
         '<p><strong>' + appName + '</strong> API requires the following scopes. Select which ones you want to grant to Swagger UI.</p>',
         '<ul class="api-popup-scopes">',
@@ -62,7 +63,7 @@ function handleLogin() {
   popup = popupDialog.find('ul.api-popup-scopes').empty();
   for (i = 0; i < scopes.length; i ++) {
     scope = scopes[i];
-    str = '<li><input type="checkbox" title="scope" id="scope_' + i + '" scope="' + scope.scope + '"' +'" oauthtype="' + scope.OAuthSchemeKey +'"/>' + '<label for="scope_' + i + '">' + scope.scope ;
+    str = '<li><input type="checkbox" id="scope_' + i + '" scope="' + scope.scope + '"' +'" oauthtype="' + scope.OAuthSchemeKey +'"/>' + '<label for="scope_' + i + '">' + scope.scope ;
     if (scope.description) {
       if ($.map(auths, function(n, i) { return i; }).length > 1) //if we have more than one scheme, display schemes
 	    str += '<br/><span class="api-scope-desc">' + scope.description + ' ('+ scope.OAuthSchemeKey+')' +'</span>';
@@ -165,7 +166,7 @@ function handleLogin() {
     url += '&redirect_uri=' + encodeURIComponent(redirectUrl);
     url += '&realm=' + encodeURIComponent(realm);
     url += '&client_id=' + encodeURIComponent(clientId);
-    url += '&scope=' + encodeURIComponent(scopes.join(' '));
+    url += '&scope=' + encodeURIComponent(scopes.join(scopeSeparator));
     url += '&state=' + encodeURIComponent(state);
     for (var key in additionalQueryStringParams) {
         url += '&' + key + '=' + encodeURIComponent(additionalQueryStringParams[key]);
@@ -201,7 +202,9 @@ function initOAuth(opts) {
   popupMask = (o.popupMask||$('#api-common-mask'));
   popupDialog = (o.popupDialog||$('.api-popup-dialog'));
   clientId = (o.clientId||errors.push('missing client id'));
+  clientSecret = (o.clientSecret||null);
   realm = (o.realm||errors.push('missing realm'));
+  scopeSeparator = (o.scopeSeparator||' ');
   additionalQueryStringParams = (o.additionalQueryStringParams||{});
 
   if(errors.length > 0){
@@ -291,7 +294,7 @@ window.onOAuthComplete = function onOAuthComplete(token,OAuthSchemeKey) {
       if(b){
         // if all roles are satisfied
         var o = null;
-        $.each($('.auth #api_information_panel'), function(k, v) {
+        $.each($('.auth .api-ic .api_information_panel'), function(k, v) { 
           var children = v;
           if(children && children.childNodes) {
             var requiredScopes = [];
@@ -308,7 +311,7 @@ window.onOAuthComplete = function onOAuthComplete(token,OAuthSchemeKey) {
               }
             }
             if(diff.length > 0){
-              o = v.parentNode;
+              o = v.parentNode.parentNode;
               $(o.parentNode).find('.api-ic.ic-on').addClass('ic-off');
               $(o.parentNode).find('.api-ic.ic-on').removeClass('ic-on');
 
@@ -317,7 +320,7 @@ window.onOAuthComplete = function onOAuthComplete(token,OAuthSchemeKey) {
               $(o).find('.api-ic').removeClass('ic-error');
             }
             else {
-              o = v.parentNode;
+              o = v.parentNode.parentNode;
               $(o.parentNode).find('.api-ic.ic-off').addClass('ic-on');
               $(o.parentNode).find('.api-ic.ic-off').removeClass('ic-off');
 
@@ -328,7 +331,8 @@ window.onOAuthComplete = function onOAuthComplete(token,OAuthSchemeKey) {
             }
           }
         });
-        window.swaggerUi.api.clientAuthorizations.add(OAuthSchemeKey, new SwaggerClient.ApiKeyAuthorization('Authorization', 'Bearer ' + b, 'header'));
+        window.swaggerUi.api.clientAuthorizations.add(window.OAuthSchemeKey, new SwaggerClient.ApiKeyAuthorization('Authorization', 'Bearer ' + b, 'header'));
+        window.swaggerUi.load();
       }
     }
   }
