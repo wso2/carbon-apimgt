@@ -713,7 +713,9 @@ input.ep-field{ min-width: 50%;}
 }
 .panel-group .panel .form-horizontal,
 .wiz-content .form-horizontal,
-.modal-body .form-horizontal{
+.modal-body .form-horizontal,
+.tab-pane .form-horizontal,
+.login-form-wrapper .form-horizontal{
     max-width:100%;
 }
 .modal-header .close{
@@ -741,10 +743,6 @@ input.ep-field{ min-width: 50%;}
     margin-top: 3px;
 }
 
-#mainLoginForm {
-    max-width: 100%;
-}
-
 .list-group-item-success .noty_text,
 .list-group-item-info .noty_text,
 .list-group-item-warning .noty_text,
@@ -752,6 +750,17 @@ input.ep-field{ min-width: 50%;}
     color:#fff;
 }
 
+<<<<<<< HEAD
+=======
+.lifecycle-state .btn-group > .btn{
+    border-right:1px solid #999;
+    height:40px;
+}
+.help_popup{
+    display:inline-block;
+}
+
+>>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e
 #swaggerEditer {
     overflow: hidden;
     padding-top: 40px !important;
@@ -760,6 +769,7 @@ input.ep-field{ min-width: 50%;}
 .main-header {
     padding-left: 5px !important;
 }
+<<<<<<< HEAD
 .swagger_editer_header{
     padding:0px !important;
 }
@@ -769,3 +779,5 @@ input.ep-field{ min-width: 50%;}
 .swagger_editer_header .fw-stack{
     margin: 1px 7px 0px 0px;
 }
+=======
+>>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e

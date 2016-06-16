@@ -3,14 +3,10 @@ var tasks=outputs.tasks;
 %>
 <div id="listing">
       <div class="page-header">
-                <div class="page-title">
-                    <h1><%=i18n.localize("myTasks")%></h1>
-                 </div>
-    </div>
+          <h1><%=i18n.localize("myTasks")%></h1>
+      </div>
 
-    <div class="content-section shadow-up">
 
-        <div class="content-data">
         <%  var length;
 if(tasks!=null && tasks != 'null'){
     length = tasks.length;
@@ -122,7 +118,5 @@ else{
              <!--START Pagination links-->
                <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages,taskType:"subscription"}); %>
              <!--END Pagination links-->
-        </div>
-    </div>
 </div>
 <% }); %>

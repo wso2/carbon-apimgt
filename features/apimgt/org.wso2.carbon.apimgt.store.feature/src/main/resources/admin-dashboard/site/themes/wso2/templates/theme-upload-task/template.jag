@@ -2,13 +2,10 @@
 %>
 <div id="listing">
     <div class="page-header">
-                <div class="page-title">
-                    <h1><%=i18n.localize("themeUpload")%></h1>
-                 </div>
-            </div>
+        <h1><%=i18n.localize("themeUpload")%></h1>
+    </div>
   
-    <div class="content-section shadow-up">
-        <div class="content-data">
+
         <% if(outputs.error != false){ %>
         	 <div class="message message-danger">
                     <h4><i class="icon fw fw-error"></i>Error!</h4>
@@ -57,7 +54,5 @@
                     </div>
                 </div>
           </form>
-        </div>
-    </div>
 </div>
 <% }); %>

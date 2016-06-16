@@ -29,9 +29,6 @@
 <div class="page-header" id="Message">
     <h1>Edit Application</h1>
 </div>
-<div class="content-section">
-<div class="content-data">
-        
 <div class="alert alert-success" id="appAddMessage" style="display:none">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong><%=i18n.localize("app")%> "<span id="applicationShowName"></span>" <%=i18n.localize("addMsg")%></strong>
@@ -109,6 +106,4 @@
   </div>
   <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>      
 </form>
-</div>
-</div>
 <% }); %>

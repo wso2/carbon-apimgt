@@ -70,7 +70,7 @@
                             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
                             
                         %>
-                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                             <div class="white-wrapper add-margin-bottom-4x">
                                 <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
@@ -95,14 +95,14 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a href="<%=path%>" title="<%=i18n.localize("name")%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("name")%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
-                                    	<p><%=api.apiOwner%></p>
+                                    	<p class="truncate"><%=api.apiOwner%></p>
                                     <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-                                    	<p><%=api.apiBusinessOwner%></p>
+                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
                                     <%} else { %>
-                                    	<p><%=api.provider%></p>
+                                    	<p class="truncate"><%=api.provider%></p>
                                     <% } %>
                                     <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
                                 </div>
@@ -115,7 +115,7 @@
             <%
                      if(numberOfPages > 1) { %>
             <div class="col-sm-12">
-                <ul class="pagination " id="apiListingPagination">
+                <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"
                                 <% if(page != 1) { %>

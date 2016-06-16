@@ -11,7 +11,7 @@ if(tenantDomain === null){
 }
 var urlPrefix = jagg.getTenantURLPrefix("&");
 %>
-<div id="accordion1" class="api-documentation panel-group" role="tablist" aria-multiselectable="true">
+<div class="api-documentation panel-group accordion" role="tablist" aria-multiselectable="true">
     <%
     var i, type, length, doc, docs, empty = true, documentations = outputs.documentations,index,count = 0, icon;
     var urlPrefix = jagg.getTenantURLPrefix();
@@ -32,7 +32,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
             }
     %>
     <div class="panel panel-default">
-    	<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse<%=index%>" aria-expanded="true" aria-controls="accordion1-collapse1">
+    	<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse<%=index%>" aria-expanded="true" aria-controls="accordion1-collapse1">
 				<h4 class="panel-title">
 					<label class="radio">
 						<span class="fw-stack">

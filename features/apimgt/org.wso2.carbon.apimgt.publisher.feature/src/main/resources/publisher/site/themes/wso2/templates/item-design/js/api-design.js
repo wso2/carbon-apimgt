@@ -734,9 +734,12 @@ APIDesigner.prototype.edit_swagger = function(){
     tempNav.find('.navbar-header').remove();
     tempNav.find('#navbar').removeClass('collapse').find('.navbar-nav li').remove();
     $('.swagger_editer_header').prepend($('.swagger_editer_header .btn-secondary'));
+<<<<<<< HEAD
     $('.swagger_editer_header .btn-secondary .fw-stack').remove();
     $('.swagger_editer_header .btn-secondary').prepend('<span class="icon fw-stack"><i class="fw fw-left fw-stack-1x" ' +
                 '+ title="Go to Overview"></i><i class="fw fw-circle-outline fw-stack-2x" title="Go Back"></i></span>');
+=======
+>>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e
     tempNav.find('.navbar-nav').append($('.swagger_editer_header'));
     tempNav.hide().addClass('tempNav').css({
         'position':'fixed',
@@ -746,8 +749,11 @@ APIDesigner.prototype.edit_swagger = function(){
         'z-index':'10000'
     });
 
+<<<<<<< HEAD
     
 
+=======
+>>>>>>> f4ff530e5e4e577c6ec3aa7bcab12e328a16f18e
     tempNav.appendTo('body');
     $("#swaggerEditer").fadeIn("fast");
     tempNav.show('fast');

@@ -10,7 +10,7 @@
     </div>
     <div class="col-md-10">
     <%if(api.description!=''){%>
-        <div class="well" id="apiView"><%=api.description%>
+        <div class="well" id="apiView"><%=encode.forHtml(api.description)%>
         </div>
     <%}%>
         <table class="table table-bordered">
@@ -139,8 +139,8 @@
             }if(api.bizOwner!=''){%>
              <tr>
                 <td><%=i18n.localize("busiOwner")%></td>
-                <td id="bizOwnerData"><%=api.bizOwner%> <% if(api.bizOwnerMail!=''){%>
-                [<a title="mailto" href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+                <td id="bizOwnerData"><%=encode.forHtml(api.bizOwner)%> <% if(api.bizOwnerMail!=''){%>
+                [<a title="mailto" href="mailto:<%=api.bizOwnerMail%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
                 <%}%>
                 </td>
             </tr>
@@ -148,8 +148,8 @@
              }if(api.techOwner!=''){%>
              <tr>
                 <td><%=i18n.localize("techOwner")%></td>
-                <td id="techOwnerData"><%=api.techOwner%><% if(api.techOwnerMail!=''){%>
-                [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=api.techOwnerMail%></a>]
+                <td id="techOwnerData"><%=encode.forHtml(api.techOwner)%><% if(api.techOwnerMail!=''){%>
+                [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=encode.forHtml(api.techOwnerMail)%></a>]
                 <%}%>
                 </td>
             </tr>

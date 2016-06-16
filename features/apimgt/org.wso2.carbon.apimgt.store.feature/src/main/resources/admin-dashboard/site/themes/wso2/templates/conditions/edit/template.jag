@@ -8,75 +8,69 @@
 
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
-	<div class="page-header">
-                <div class="page-title">
-                    <h1><%=i18n.localize("selectBlockingEntity")%></h1>
-                 </div>
-         </div>
+    	<div class="page-header">
+            <h1><%=i18n.localize("selectBlockingEntity")%></h1>
+        </div>
 
 
-    <div class="content-section shadow-up">
-        <div class="content-data">
-            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
-                value='<%=i18n.localize("errorMsgRequired")%>'/>
-                <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
-                value='<%=i18n.localize("errorMessageInvalid")%>'/>
-                <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
-                value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
-            <div class="row-fluid">
-                <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
-                    action="/admin-dashboard/site/blocks/conditions/edit/ajax/conditions-edit.jag">
-                        <div class="form-group" id="selected-type">
-                            <label class="col-sm-3 control-label">
-                            Select Condition Type<span class="requiredAstrix">*</span></label>
-                           <div class="col-sm-9">
+        <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+            value='<%=i18n.localize("errorMsgRequired")%>'/>
+            <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+            value='<%=i18n.localize("errorMessageInvalid")%>'/>
+            <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+            value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+        <div class="row-fluid">
+            <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
+                action="/admin-dashboard/site/blocks/conditions/edit/ajax/conditions-edit.jag">
+                    <div class="form-group" id="selected-type">
+                        <label class="col-sm-3 control-label">
+                        Select Condition Type<span class="requiredAstrix">*</span></label>
+                       <div class="col-sm-9">
+                        <label class="radio">
+                            <input type="radio" name="select-option" value="API" checked onclick="changeToolTip('api')">
+                            <span class="helper">API Context</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="select-option" value="APPLICATION" onclick="changeToolTip('app')">
+                            <span class="helper">Application</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="select-option" value="IP" onclick="changeToolTip('ip')">
+                            <span class="helper">IP Address</span>
+                        </label>
                             <label class="radio">
-                                <input type="radio" name="select-option" value="API" checked onclick="changeToolTip('api')">
-                                <span class="helper">API Context</span>
-                            </label>
-                            <label class="radio">
-                                <input type="radio" name="select-option" value="APPLICATION" onclick="changeToolTip('app')">
-                                <span class="helper">Application</span>
-                            </label>
-                            <label class="radio">
-                                <input type="radio" name="select-option" value="IP" onclick="changeToolTip('ip')">
-                                <span class="helper">IP Address</span>
-                            </label>
-                                <label class="radio">
-                                <input type="radio" name="select-option" value="USER" onclick="changeToolTip('user')">
-                                <span class="helper">User</span>
-                            </label>
-                        </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Value :
-                            <span class="requiredAstrix">*</span></label>
-                            <div class="col-sm-4">
-                                <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
-                                <input class="form-control  required validInput noSpace" type="text" id="value"/>
-                                    <div id="errorMsgDiv" style="display:none">
-                                           <span><p id="invalidInput" style="color:red;">Invalid Input</p></span>
-                                    </div>
-                                    <% if(tenantDomain == "carbon.super") { %>
-                                        <span><p id="formatTip" style="color:green;">Format : ${context}</p></span>
-                                        <span><p id="sampleformatTip" style="color:green;">Eg : test/1.0.0</p></span>
-                                    <%} else  { %>
-                                        <span><p id="formatTip" style="color:green;">Format : /t/${tenantDomain}/${context}</p></span>
-                                        <span><p id="sampleformatTip" style="color:green;">Eg : /t/<%=tenantDomain%>/test/1.0.0</p></span>
-                                    <% } %>
-                            </div>
-                        </div>
-                        <br class="spacer">
-                    <div class="form-actions">
-                        <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
-                            class="btn btn-primary" value='<%=i18n.localize("block")%>'/>
-                        <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                            <input type="radio" name="select-option" value="USER" onclick="changeToolTip('user')">
+                            <span class="helper">User</span>
+                        </label>
                     </div>
-                </form>
-            </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Value :
+                        <span class="requiredAstrix">*</span></label>
+                        <div class="col-sm-4">
+                            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
+                            <input class="form-control  required validInput noSpace" type="text" id="value"/>
+                                <div id="errorMsgDiv" style="display:none">
+                                       <span><p id="invalidInput" style="color:red;">Invalid Input</p></span>
+                                </div>
+                                <% if(tenantDomain == "carbon.super") { %>
+                                    <span><p id="formatTip" style="color:green;">Format : ${context}</p></span>
+                                    <span><p id="sampleformatTip" style="color:green;">Eg : test/1.0.0</p></span>
+                                <%} else  { %>
+                                    <span><p id="formatTip" style="color:green;">Format : /t/${tenantDomain}/${context}</p></span>
+                                    <span><p id="sampleformatTip" style="color:green;">Eg : /t/<%=tenantDomain%>/test/1.0.0</p></span>
+                                <% } %>
+                        </div>
+                    </div>
+                    <br class="spacer">
+                <div class="form-actions">
+                    <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
+                        class="btn btn-primary" value='<%=i18n.localize("block")%>'/>
+                    <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
 <script>
     function changeToolTip(type) {

@@ -3,7 +3,6 @@ jagg.initializer("api/swagger", {
 
     preInitialize:function () {
         jagg.addFooterJS("api/api-info", "api-info", "templates/api/api-info/js/api-info.js");
-        jagg.addHeaderCSS("api/api-info", "api-info", "templates/api/api-info/css/divStyle.css");
 
 		jagg.addHeaderJS("api/api-info", "api-info1", "templates/api/swagger/swagger/lib/jquery.slideto.min.js");
 		jagg.addHeaderJS("api/api-info", "api-info2", "templates/api/swagger/swagger/lib/jquery.wiggle.min.js");
@@ -22,7 +21,6 @@ jagg.initializer("api/swagger", {
     },
 
     postInitialize:function(inputs, outputs) {
-        jagg.addFooterJSCode("api/api-info", "api", "jagg.api = " + stringify(inputs.api) + ";");
     }
 });
 

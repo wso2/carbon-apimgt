@@ -36,11 +36,14 @@
 
     <div class="container c-both">
 
+
         <div class="row">
             <div class="container col-md-12">
                 <div class="title-section"><h2><%=i18n.localize("editConfigurations")%>
                 </h2></div>
             </div>
+
+
         </div>
 
         <div class="row">

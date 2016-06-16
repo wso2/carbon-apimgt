@@ -8,8 +8,8 @@
 
 <div id="api-availability-page">
 
-<div class="title-section">
-    <h2>Availability of APIs</h2>
+<div class="page-header">
+    <h1>Availability of APIs</h1>
 </div> 
 
 <br /> 

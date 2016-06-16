@@ -101,17 +101,6 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("documentation.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
                                     "title": i18n.localize("apiconsole.title"),
                                     "body": [
                                         {
@@ -119,6 +108,17 @@ jagg.block("api/api-info", {
                                             "inputs": {
                                                 "api": api,
                                                 "subscriptions": subscriptions
+                                            }
+                                        }
+                                    ]
+                                },                                
+                                {
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
+                                        {
+                                            "name": "api/documentation",
+                                            "inputs": {
+                                                "api": api
                                             }
                                         }
                                     ]
@@ -227,17 +227,6 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("documentation.title"),
-                                    "body": [
-                                        {
-                                            "name": "api/documentation",
-                                            "inputs": {
-                                                "api": api
-                                            }
-                                        }
-                                    ]
-                                },
-                                {
                                     "title": i18n.localize("apiconsole.title"),
                                     "body": [
                                         {
@@ -245,6 +234,17 @@ jagg.block("api/api-info", {
                                             "inputs": {
                                                 "api": api,
                                                 "subscriptions": subscriptions
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
+                                        {
+                                            "name": "api/documentation",
+                                            "inputs": {
+                                                "api": api
                                             }
                                         }
                                     ]
