@@ -9623,6 +9623,10 @@ nav.navigation .second_level > .left-menu-item {
   text-overflow: ellipsis;
 }
 
+.tag-content .truncate {
+  max-width: 160px;
+}
+
 .media-body {
   background-color: #efefef;
 }
