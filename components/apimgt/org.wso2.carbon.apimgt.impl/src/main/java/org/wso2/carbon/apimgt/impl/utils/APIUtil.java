@@ -5929,4 +5929,20 @@ public final class APIUtil {
         jsonObject.put("info", entityInfo);
         audit.info(jsonObject.toString());
     }
+
+    public static int getPortOffset() {
+        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        String portOffset = System.getProperty(APIConstants.PORT_OFFSET_SYSTEM_VAR,
+                                               carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
+        try {
+            if ((portOffset != null)) {
+                return Integer.parseInt(portOffset.trim());
+            } else {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            log.error("Invalid Port Offset: " + portOffset + ". Default value 0 will be used.", e);
+            return 0;
+        }
+    }
 }
