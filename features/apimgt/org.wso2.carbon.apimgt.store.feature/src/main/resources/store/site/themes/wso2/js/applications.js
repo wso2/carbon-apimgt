@@ -199,7 +199,8 @@
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
                     this.app.KeyScope = result.data.key.tokenScope.join();                    
-                    this.render();                    
+                    this.render();
+                    this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);                    
                 } else {
                     jagg.message({content:result.message,type:"error"});
                 }
