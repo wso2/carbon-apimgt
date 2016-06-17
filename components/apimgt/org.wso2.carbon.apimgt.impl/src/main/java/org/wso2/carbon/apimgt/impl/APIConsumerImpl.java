@@ -107,7 +107,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private volatile long lastUpdatedTime;
     private volatile long lastUpdatedTimeForTagApi;
     private Object tagCacheMutex = new Object();
-    private Object tagWithAPICacheMutex = new Object();
+    private final Object tagWithAPICacheMutex = new Object();
     private APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
@@ -170,28 +170,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
             }
         	
-        }    	
-        
-		/*
-		 * this.getAllTags(this.tenantDomain); if (taggedAPIs != null) { return
-		 * taggedAPIs.get(tag); }
-		 */
+        }
 
-		this.isTenantModeStoreView = (requestedTenantDomain != null);
+		isTenantModeStoreView = requestedTenantDomain != null && !"null".equals(requestedTenantDomain);
 
-		if (requestedTenantDomain != null) {
+		if (requestedTenantDomain != null && !"null".equals(requestedTenantDomain)) {
 			this.requestedTenant = requestedTenantDomain;
 		}
 
-		Registry userRegistry = null;
+		Registry userRegistry;
 		boolean isTenantFlowStarted = false;
-		String tagsQueryPath = null;
 		Set<API> apisWithTag = null;
 		try {
 			// as a tenant, I'm browsing my own Store or I'm browsing a Store of
 			// another tenant..
-			if ((this.isTenantModeStoreView && this.tenantDomain == null)
-					|| (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {
+			if ((isTenantModeStoreView && tenantDomain == null)
+					|| (isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {
 				
 				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 						.getTenantId(this.requestedTenant);
@@ -201,7 +195,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 				userRegistry = registry;
 			}
 
-			List<TermData> terms = null;
 			try {
 				if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
 					isTenantFlowStarted = true;
