@@ -252,5 +252,4 @@ public class Utils {
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);
     }
-
 }
