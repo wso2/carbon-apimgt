@@ -131,7 +131,7 @@
                 </div>
 
                 <%
-                    if (configurationName == "APIM_GEO_LOCATION_STATS") {
+                    if (configurationName != "APIM_GEO_LOCATION_STATS") {
                         var indexParam = 0;
                         var parameterDTOs = currentTemplate.getDomainParameterDTOs();
                         if (parameterDTOs.length > 0 && (parameterDTOs[1])) {
