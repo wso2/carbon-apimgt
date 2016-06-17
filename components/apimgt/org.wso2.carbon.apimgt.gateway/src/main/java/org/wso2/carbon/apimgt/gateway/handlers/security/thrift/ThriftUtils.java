@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 
 import java.lang.String;
@@ -61,15 +62,21 @@ public class ThriftUtils {
                 thriftServerHost = remoteServerURL.split(":")[1].split("//")[1];
             }
             remoteServerIP = remoteServerURL.split(":")[1].split("//")[1];
+
             String thriftPortString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT_PORT);
-            String clientTimeOutString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
-            if (thriftPortString == null || clientTimeOutString == null) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                               "Thrift client can not be created. Required details are not provided..");
+            if (thriftPortString == null) {
+                thriftPort = APIConstants.DEFAULT_THRIFT_PORT + APIUtil.getPortOffset();
+            } else {
+                thriftPort = Integer.parseInt(thriftPortString);
             }
 
-            thriftPort = Integer.parseInt(thriftPortString);
-            thriftClientConnectionTimeOut = Integer.parseInt(clientTimeOutString);
+            String clientTimeOutString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
+            if (clientTimeOutString == null) {
+                thriftClientConnectionTimeOut = APIConstants.DEFAULT_THRIFT_CLIENT_CONNECTION_TIMEOUT;
+            } else {
+                thriftClientConnectionTimeOut = Integer.parseInt(clientTimeOutString);
+            }
+
             userName = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
             password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
             if (remoteServerIP == null || userName == null || password == null) {

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
@@ -218,13 +219,15 @@ public class APIKeyMgtServiceComponent {
             String keyStorePath = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Location");
             String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
 
-            String thriftPortString =
-                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                            APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
+            String thriftPortString = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
+
+            int thriftReceivePort;
 
             if (thriftPortString == null) {
-                thriftPortString = "10398";
-                log.info("Setting default port for thrift key management service: " + "10398");
+                thriftReceivePort = APIConstants.DEFAULT_THRIFT_PORT + APIUtil.getPortOffset();
+            } else {
+                thriftReceivePort = Integer.parseInt(thriftPortString);
             }
 
             String thriftHostString =
@@ -243,13 +246,12 @@ public class APIKeyMgtServiceComponent {
                 throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
             }
 
-            int receivePort = Integer.parseInt(thriftPortString);
             int clientTimeOut = Integer.parseInt(thriftClientTimeOut);
             //set it in parameters
             transportParam.setKeyStore(keyStorePath, keyStorePassword);
 
             TServerSocket serverTransport =
-                    TSSLTransportFactory.getServerSocket(receivePort,
+                    TSSLTransportFactory.getServerSocket(thriftReceivePort,
                             clientTimeOut,
                             getHostAddress(thriftHostString),
                             transportParam);
@@ -268,14 +270,12 @@ public class APIKeyMgtServiceComponent {
             Runnable serverThread = new ServerRunnable(server);
             executor.submit(serverThread);
 
-            log.info("Started thrift key mgt service at port:" + receivePort);
-        } catch (TTransportException
-                e) {
+            log.info("Started thrift key mgt service at port:" + thriftReceivePort);
+        } catch (TTransportException e) {
             String transportErrorMsg = "Error in initializing thrift transport";
             log.error(transportErrorMsg, e);
             throw new Exception(transportErrorMsg);
-        } catch (UnknownHostException
-                e) {
+        } catch (UnknownHostException e) {
             String hostErrorMsg = "Error in obtaining host name";
             log.error(hostErrorMsg, e);
             throw new Exception(hostErrorMsg);

@@ -425,6 +425,8 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
             + "ApplicationTokenDefaultValidityPeriod";
+    public static final int DEFAULT_THRIFT_PORT = 10397;
+    public static final int DEFAULT_THRIFT_CLIENT_CONNECTION_TIMEOUT = 10000;
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
@@ -440,6 +442,9 @@ public final class APIConstants {
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
+
+    public static final String PORT_OFFSET_SYSTEM_VAR = "portOffset";
+    public static final String PORT_OFFSET_CONFIG = "Ports.Offset";
 
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";

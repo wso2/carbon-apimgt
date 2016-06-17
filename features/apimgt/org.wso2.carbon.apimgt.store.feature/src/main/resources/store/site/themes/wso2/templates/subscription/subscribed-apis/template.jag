@@ -33,24 +33,26 @@
 </script>
 
 <script id="subscription-api-name" type="text/x-handlebars-template">
-    <a title="API browse" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
         <div class="thumbnail icon pull-left add-margin-right-2x" style="width:80px;">
-			{{#if thumburl}}
-				<div class="square-element">
-					<img class="" src="{{ thumburl }}" alt="<%=i18n.localize("apiThumb")%>">
-                </div>										                               		
+      <a title="API browse" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">  
+			{{#if thumburl}}        
+				<div class="square-element">          
+					<img class="" src="{{ thumburl }}" alt="<%=i18n.localize("apiThumb")%>">          
+        </div>        										                               		
 			{{else}}     
-                <div class="square-element setbgcolor">
+          <div class="square-element setbgcolor">
 					<div class="api-name-icon" style="font-size:4em;"></div>
 					<div style="display: none">
 						<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ apiName }}</a>
 					</div>
 				</div> 
 			{{/if}}
+      </a>
 	    </div>
+        <a title="API browse" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">
         <h4>{{apiName}} - {{apiVersion}}</h4>
-        <i class="fw fw-publish fw-1x"></i> {{status}}
-  	</a>
+        </a>
+        <i class="fw fw-publish fw-1x"></i> {{status}}  	
 </script>
 
 

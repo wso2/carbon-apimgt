@@ -55,5 +55,9 @@ $(document).ready(function() {
         return productionEP != "" || sandboxEP != "";
     }, 'A Production or Sandbox URL must be provided.');
 
+    $.validator.addMethod("positiveInteger", function(value, element) {
+            return this.optional( element ) || /^[1-9]\d*$/.test( value );
+    }, 'Inavlid value');
+
 
 });
