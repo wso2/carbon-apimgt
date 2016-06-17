@@ -19,7 +19,10 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -134,6 +137,30 @@ public interface APIProvider extends APIManager {
     void addTier(Tier tier) throws APIManagementException;
 
     void addPolicy(Policy policy) throws APIManagementException;
+
+
+    /**
+     * Get application throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get subscription throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get global throttling policy by name
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
 
     /**
      * Updates throttle policy in global CEP, gateway and database.
@@ -628,6 +655,12 @@ public interface APIProvider extends APIManager {
      */
     List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
 
+    /**
+     *
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException;
 
     /**
      *
