@@ -9645,7 +9645,7 @@ nav.navigation .second_level > .left-menu-item {
 }
 
 .help_popup {
-  display: block;
+  display: inline-block;
 }
 
 .thumbnail.icon img {
@@ -9842,6 +9842,11 @@ header .nav .dropdown-menu > li:not(.divider) {
 .accordion .panel-heading div .status,
 .collapse .panel-heading div .status {
   margin-top: -42px;
+}
+
+.accordion .panel-heading div .no-description + .status,
+.collapse .panel-heading div .no-description + .status {
+  margin-top: -36px;
 }
 
 .accordion .panel-heading div .status i,
