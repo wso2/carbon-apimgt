@@ -68,8 +68,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
-
 /**
  * This API handler is responsible for evaluating authenticated user requests against their
  * corresponding access tiers (SLAs) and deciding whether the requests should be accepted
@@ -162,7 +160,8 @@ public class APIThrottleHandler extends AbstractHandler {
         try {
             return doThrottle(messageContext);
         } finally {
-            publishExecutionTime(messageContext,executionStartTime,"Throttling");
+            messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
+                    System.currentTimeMillis() - executionStartTime);
             context.stop();
         }
     }

@@ -48,8 +48,6 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 // import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO_TokenValidationContextParam;
 
 
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -266,14 +264,13 @@ public class Utils {
                 (messageContext));
         executionTimePublisherDTO.setApiName(APIUtil.getAPINamefromRESTAPI(apiName));
         if (executionStartTime == 0) {
-            executionTimePublisherDTO.setExecutionTime(0);
+            executionTimePublisherDTO.setApiResponseTime(0);
         }
         if(StringUtils.isEmpty(tenantDomain)){
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
-        executionTimePublisherDTO.setExecutionTime(executionTime);
-        executionTimePublisherDTO.setMediationType(mediationType);
+        executionTimePublisherDTO.setApiResponseTime(executionTime);
         executionTimePublisherDTO.setVersion(apiVersion);
         executionTimePublisherDTO.setContext(apiContext);
         String provider = APIUtil.getAPIProviderFromRESTAPI(apiName, tenantDomain);

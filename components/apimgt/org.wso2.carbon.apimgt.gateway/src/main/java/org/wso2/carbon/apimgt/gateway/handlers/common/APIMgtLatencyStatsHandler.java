@@ -44,14 +44,12 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
                 long executionStartTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants
                         .BACKEND_REQUEST_START_TIME));
-                messageContext.setProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME, Long.toString(System
-                        .currentTimeMillis
-                                ()));
-                publishExecutionTime(messageContext, executionStartTime, "BackEnd");
+                messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY, System.currentTimeMillis() -
+                        executionStartTime);
+                messageContext.setProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME, System.currentTimeMillis());
             }
         }
         return true;
     }
-
 
 }
