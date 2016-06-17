@@ -69,8 +69,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                     APIMgtGatewayConstants.REQUEST_START_TIME)));
             long backendStartTime = Long.parseLong((String) (mc.getProperty(
                     APIMgtGatewayConstants.BACKEND_REQUEST_START_TIME)));
-            long backendEndTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME)));
+            long backendEndTime = ((Number) (mc.getProperty(
+                    APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME))).longValue();
             //Check the config property is set to true to build the response message in-order
             //to get the response message size
             boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()

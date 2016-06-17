@@ -49,6 +49,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -450,7 +451,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         Timer.Context context3 = timer3.start();
         long executionStartTime = System.currentTimeMillis();
         boolean state = doThrottle(messageContext);
-        Utils.publishExecutionTime(messageContext, executionStartTime,"Throttling");
+        messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
+                System.currentTimeMillis() - executionStartTime);
         context3.stop();
         return state;
     }
