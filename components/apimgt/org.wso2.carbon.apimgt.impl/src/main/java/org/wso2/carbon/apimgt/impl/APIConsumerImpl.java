@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,11 +38,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
-import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
@@ -72,10 +63,7 @@ import org.wso2.carbon.registry.common.TermData;
 
 import javax.cache.Caching;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -106,7 +94,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private long tagCacheValidityTime;
     private volatile long lastUpdatedTime;
     private volatile long lastUpdatedTimeForTagApi;
-    private Object tagCacheMutex = new Object();
+    private final Object tagCacheMutex = new Object();
     private final Object tagWithAPICacheMutex = new Object();
     private APIMRegistryService apimRegistryService;
 
@@ -535,9 +523,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
             int start, int end, final String[] apiStatus, boolean returnAPITags) throws APIManagementException {
-        
-        Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
 
         Map<String,Object> result=new HashMap<String, Object>();
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
@@ -1015,7 +1000,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (genericArtifactsForDeprecatedAPIs != null) {
                         for (GenericArtifact artifact : genericArtifactsForDeprecatedAPIs) {
                             // adding the API provider can mark the latest API .
-                            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                             API api  = APIUtil.getAPI(artifact);
 
