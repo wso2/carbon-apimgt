@@ -67,7 +67,7 @@
 		  <div class="form-group">
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("accessToken")%></label>
 		    <div class="input-group">
-		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("accessToken")%>" class="form-control" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
+		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("accessToken")%>" class="form-control access_token" id="<%=type%>Key" placeholder="<%=i18n.localize("accessToken")%>" value="{{Key}}">
 		      <div class="input-group-btn">
 		      	<button class="btn btn-default copy-button" data-clipboard-text="{{Key}}"  type="button" title="Copy">
                     <i class="fw fw-copy"></i>
@@ -93,7 +93,7 @@
 			</select>	    
 		    <span>Validity period </span>
 		    <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time"> Seconds.
-			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>		    
+			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("regenerate")%></button>
 		  </div> 		  
 		</form>		  	
 	  </div>

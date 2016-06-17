@@ -48,6 +48,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -182,6 +183,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String subscriberTenantDomain = "";
         String apiTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         List<String> resourceLevelThrottleConditions;
+        ConditionGroupDTO [] conditionGroupDTOs;
         String applicationId = authContext.getApplicationId();
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
@@ -247,6 +249,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         }
                         //If tier is not unlimited only throttling will apply.
                         resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
+                        conditionGroupDTOs = verbInfoDTO.getConditionGroups();
 
                         Timer timer1 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO,
                                                           MetricManager.name(
@@ -254,6 +257,31 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         Timer.Context
                                 context1 = timer1.start();
 
+                        if (conditionGroupDTOs != null && conditionGroupDTOs.length > 0) {
+                            //Then we will apply resource level throttling
+                            for (ConditionGroupDTO conditionGroup : conditionGroupDTOs) {
+                                String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroup.getConditionGroupId();
+                                resourceLevelTier = verbInfoDTO.getThrottling();
+                                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                        isThrottled(combinedResourceLevelThrottleKey)) {
+                                    if(!apiLevelThrottledTriggered) {
+                                        isResourceLevelThrottled = isThrottled = true;
+                                    } else {
+                                        isApiLevelThrottled = isThrottled = true;
+                                    }
+                                    long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+                                            getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
+                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
+                                    break;
+                                }
+                            }
+
+                        } else {
+                            log.warn("Unable to find throttling information for resource and http verb. Throttling "
+                                     + "will not apply");
+                        }
+
+                        /*
                         if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
                             //Then we will apply resource level throttling
                             for (String conditionId : resourceLevelThrottleConditions) {
@@ -277,6 +305,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             log.warn("Unable to find throttling information for resource and http verb. Throttling "
                                     + "will not apply");
                         }
+                        */
 
                         context1.stop();
                     }
