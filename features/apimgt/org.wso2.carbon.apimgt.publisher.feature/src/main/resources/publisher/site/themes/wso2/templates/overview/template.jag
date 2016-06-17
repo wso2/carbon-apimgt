@@ -10,7 +10,7 @@
     </div>
     <div class="col-md-10">
     <%if(api.description!=''){%>
-        <div class="well" id="apiView"><%=encode.forHtml(api.description)%>
+        <div class="well" id="apiView"><%=api.description%>
         </div>
     <%}%>
         <table class="table table-bordered">
