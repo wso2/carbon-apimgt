@@ -569,3 +569,17 @@ input.ep-field{ min-width: 50%;}
 .main-header {
     padding-left: 5px !important;
 }
+
+.scopes-list{
+    margin:0px;
+    padding:0px;
+    list-style:none;
+}
+.scopes-list li{
+    margin-bottom:4px;
+    padding:10px;
+    background:#f2f2f2;
+}
+.scopes-list li p{
+    margin:0px;
+}
