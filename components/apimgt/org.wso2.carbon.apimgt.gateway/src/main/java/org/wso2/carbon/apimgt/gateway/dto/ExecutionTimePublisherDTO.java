@@ -18,10 +18,22 @@
 package org.wso2.carbon.apimgt.gateway.dto;
 
 public class ExecutionTimePublisherDTO {
-    private String apiName,version,tenantDomain,provider,mediationType,context;
-    private long executionTime;
+    private String apiName,version,tenantDomain,provider,context;
+    private long apiResponseTime;
     private int tenantId;
     private long eventTime;
+
+    private long securityLatency;
+
+    private long throttlingLatency;
+
+    private long requestMediationLatency;
+
+    private long responseMediationLatency;
+
+    private long backEndLatency;
+
+    private long otherLatency;
 
     public long getEventTime() {
         return eventTime;
@@ -31,12 +43,12 @@ public class ExecutionTimePublisherDTO {
         this.eventTime = eventTime;
     }
 
-    public long getExecutionTime() {
-        return executionTime;
+    public long getApiResponseTime() {
+        return apiResponseTime;
     }
 
-    public void setExecutionTime(long executionTime) {
-        this.executionTime = executionTime;
+    public void setApiResponseTime(long apiResponseTime) {
+        this.apiResponseTime = apiResponseTime;
     }
 
     public String getApiName() {
@@ -79,19 +91,59 @@ public class ExecutionTimePublisherDTO {
         this.provider = provider;
     }
 
-    public String getMediationType() {
-        return mediationType;
-    }
-
-    public void setMediationType(String mediationType) {
-        this.mediationType = mediationType;
-    }
-
     public String getContext() {
         return context;
     }
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public long getSecurityLatency() {
+        return securityLatency;
+    }
+
+    public void setSecurityLatency(long securityLatency) {
+        this.securityLatency = securityLatency;
+    }
+
+    public long getThrottlingLatency() {
+        return throttlingLatency;
+    }
+
+    public void setThrottlingLatency(long throttlingLatency) {
+        this.throttlingLatency = throttlingLatency;
+    }
+
+    public long getRequestMediationLatency() {
+        return requestMediationLatency;
+    }
+
+    public void setRequestMediationLatency(long requestMediationLatency) {
+        this.requestMediationLatency = requestMediationLatency;
+    }
+
+    public long getBackEndLatency() {
+        return backEndLatency;
+    }
+
+    public void setBackEndLatency(long backEndLatency) {
+        this.backEndLatency = backEndLatency;
+    }
+
+    public long getOtherLatency() {
+        return otherLatency;
+    }
+
+    public void setOtherLatency(long otherLatency) {
+        this.otherLatency = otherLatency;
+    }
+
+    public long getResponseMediationLatency() {
+        return responseMediationLatency;
+    }
+
+    public void setResponseMediationLatency(long responseMediationLatency) {
+        this.responseMediationLatency = responseMediationLatency;
     }
 }

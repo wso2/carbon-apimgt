@@ -51,8 +51,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
-
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
  * drop the requests if an authentication failure occurs. But before a message is dropped
@@ -149,7 +147,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             handleAuthFailure(messageContext, e);
         } finally {
-            publishExecutionTime(messageContext, executionStartTime,"Authentication");
+            messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
+                    System.currentTimeMillis() - executionStartTime);
             context.stop();
 
         }
