@@ -24,8 +24,6 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
-
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
 

@@ -14,10 +14,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Map;
-
-import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
-
 public class APIMgtCommonExecutionPublisher extends AbstractMediator {
     protected boolean enabled;
 
@@ -74,6 +70,7 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
                     ((Number)messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY)).longValue());
             executionTimePublisherDTO.setBackEndLatency(
                     ((Number)messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY)).longValue());
+            executionTimePublisherDTO.setEventTime(System.currentTimeMillis());
             publisher.publishEvent(executionTimePublisherDTO);
 
         }
