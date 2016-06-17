@@ -58,6 +58,19 @@ public final class RestApiConstants {
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
+    public static final String RESOURCE_PATH_THROTTLING = "/throttling";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
+    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING 
+            + "/blocking-conditions";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/advanced-policies";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/application";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/subscription";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/global";
+
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";
     public static final String SERVER_PASSWORD = "/applications";
