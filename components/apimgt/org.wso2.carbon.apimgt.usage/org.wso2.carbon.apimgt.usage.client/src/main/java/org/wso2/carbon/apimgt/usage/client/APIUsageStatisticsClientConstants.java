@@ -181,4 +181,12 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_REQUEST_GEO_LOCATION_SUMMARY = "API_REQ_GEO_LOC_SUMMARY";
     public static final String API_REQUEST_USER_BROWSER_SUMMARY = "API_REQ_USER_BROW_SUMMARY";
     public static String OS_BROWSER_FACET = "key_os_browser_facet";
+
+    public static final String API_RESPONSE_TIME = "apiResponseTime";
+    public static final String SECURITY_LATENCY = "securityLatency";
+    public static final String THROTTLING_LATENCY = "throttlingLatency";
+    public static final String REQ_MEDIATION_LATENCY = "requestMediationLatency";
+    public static final String RES_MEDIATION_LATENCY = "responseMediationLatency";
+    public static final String BACKEND_LATENCY = "backendLatency";
+    public static final String OTHER_LATENCY = "otherLatency";
 }
