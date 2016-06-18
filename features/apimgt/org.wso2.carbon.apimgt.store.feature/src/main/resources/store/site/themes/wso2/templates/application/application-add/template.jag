@@ -80,7 +80,7 @@
     </div>
   </div>
   <div class="form-group">
-    <label class="col-lg-3 col-md-3 control-label" for="callback-url"><%=i18n.localize("callbackUrl")%>
+    <label class="col-lg-3 col-md-3 control-label" for="callback-url">OAuth Callback URL
     <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
     </label>    
     <div class="col-lg-9 col-md-9">
