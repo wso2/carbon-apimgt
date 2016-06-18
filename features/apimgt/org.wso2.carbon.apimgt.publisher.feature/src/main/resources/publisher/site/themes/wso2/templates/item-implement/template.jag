@@ -87,9 +87,9 @@
                         <div class="wiz-content">
 							    <div class="row">
 							        <div class="col-sm-12">
-									<div id="accordion1" class="panel-group" role="tablist">
+									<div class="panel-group accordion" role="tablist">
 									<div class="panel panel-default">
-							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
 						                    <div>
 				                                <div class="heading">Managed API</div>
@@ -473,7 +473,7 @@
 							            </div>
 							            </div>							
 							            <div class="panel panel-default">
-							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
 								                    <div>
 						                                <div class="heading">Prototyped API</div>
