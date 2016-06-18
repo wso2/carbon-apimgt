@@ -224,7 +224,7 @@
 								                        	{{#if ../load_balance}}
 								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Message Mediation Policies"}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
 								                        	{{else}}
 								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
 								                        	{{/if}}								                        
