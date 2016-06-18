@@ -399,8 +399,7 @@ public class SQLConstants {
             "   AM_SUBSCRIPTION " +
             " WHERE " +
             "   API_ID = ? " +
-            "   AND APPLICATION_ID = ? " +
-            "   AND TIER_ID = ?";
+            "   AND APPLICATION_ID = ?";
 
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +

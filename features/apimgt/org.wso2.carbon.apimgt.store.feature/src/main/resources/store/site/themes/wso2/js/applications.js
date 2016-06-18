@@ -199,7 +199,8 @@
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
                     this.app.KeyScope = result.data.key.tokenScope.join();                    
-                    this.render();                    
+                    this.render();
+                    this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);                    
                 } else {
                     jagg.message({content:result.message,type:"error"});
                 }
@@ -332,7 +333,12 @@ $("#application-actions").each(function(){
                     context.shared = true;
                 else
                     context.shared = false;
-                return application_name(context);             
+                var value = application_name(context);
+                if(rec.isBlacklisted == 'true' || rec.isBlacklisted == true){
+                    value = value.replace((">"+rec.name+"<"),("><font color='red'>"+rec.name+" (Blacklisted) <"));
+
+                }
+                return  value;            
               }
             },
             { "data": "tier" },

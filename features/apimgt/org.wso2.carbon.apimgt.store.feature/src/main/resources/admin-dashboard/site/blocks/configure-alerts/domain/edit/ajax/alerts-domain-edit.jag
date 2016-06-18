@@ -21,7 +21,19 @@ include("/jagg/jagg.jag");
             var description =  request.getParameter("description", "UTF-8");
             var parameters =  request.getParameter("parameters", "UTF-8");
             mod = jagg.module("configure-alerts");
-            result = mod.saveConfiguration(domainName, templateType, configurationName, description, parameters);
+            result = '' + mod.saveConfiguration(domainName, templateType, configurationName, description, parameters);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    response:result
+                }
+            }
+            print(obj);
         }
     }
  }());

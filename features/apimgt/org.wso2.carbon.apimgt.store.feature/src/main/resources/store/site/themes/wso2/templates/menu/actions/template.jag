@@ -1,7 +1,7 @@
 <% jagg.template("menu/actions", function(inputs, outputs, jagg) { %>
 <%var siteConf = require("/site/conf/site.json"); %>
     <!-- navbar -->
-    <div class="navbar-wrapper <% if(inputs.page == "api/listing"){%>   navbar-search <%}%>">
+    <div class="navbar-wrapper <% if(inputs.page == "api/listing"){%>navbar-search<%}%>">
         <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
         	<a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="false" rel="leftmenu-sidebar">
                         <span class="icon fw-stack">

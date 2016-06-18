@@ -18,19 +18,16 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 
-import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -39,12 +36,15 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.sql.Time;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class KeyTemplateRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(KeyTemplateRetriever.class);
+    private static final int keyTemplateRetrievalTimeoutInSeconds = 15;
+    private static final int keyTemplateRetrievalRetries = 15;
 
     @Override
     public void run() {
@@ -75,16 +75,32 @@ public class KeyTemplateRetriever extends TimerTask {
             int keyMgtPort = keyMgtURL.getPort();
             String keyMgtProtocol = keyMgtURL.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-            HttpResponse httpResponse = httpClient.execute(method);
+            HttpResponse httpResponse = null;
+            int retryCount = 0;
+            boolean retry;
+            do {
+                try {
+                    httpResponse = httpClient.execute(method);
+                    retry = false;
+                } catch (IOException ex) {
+                    retryCount++;
+                    if (retryCount < keyTemplateRetrievalRetries) {
+                        retry = true;
+                        log.warn("Failed retrieving throttling data from remote endpoint: " + ex.getMessage()
+                                 + ". Retrying after " + keyTemplateRetrievalTimeoutInSeconds + " seconds...");
+                        Thread.sleep(keyTemplateRetrievalTimeoutInSeconds * 1000);
+                    } else {
+                        throw ex;
+                    }
+                }
+            } while(retry);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
                 JSONArray jsonArray = (JSONArray) new JSONParser().parse(responseString);
                 return (String[]) jsonArray.toArray(new String[jsonArray.size()]);
             }
-        } catch (IOException e) {
-            log.error("Exception when retrieving throttling data from remote endpoint ", e);
-        } catch (ParseException e) {
+        } catch (IOException | InterruptedException | ParseException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
         }
         return null;

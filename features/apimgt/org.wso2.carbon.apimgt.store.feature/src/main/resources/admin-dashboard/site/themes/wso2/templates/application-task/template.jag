@@ -2,15 +2,11 @@
 var tasks=outputs.tasks;
 %>
 <div id="listing">
-       <div class="page-header">
-                <div class="page-title">
-                    <h1><%=i18n.localize("myTasks")%></h1>
-                 </div>
+    <div class="page-header">
+        <h1><%=i18n.localize("myTasks")%></h1>
     </div>
 
-    <div class="content-section shadow-up">
 
-        <div class="content-data">
         <%
 if(tasks!=null && tasks!='null'){
     var length = tasks.length;
@@ -40,7 +36,7 @@ if(tasks!=null && tasks!='null'){
     if(tasks.length==0){%>
     <div class="message message-info">
 		<h4><i class="icon fw fw-info"></i><%=i18n.localize("noCustomRules")%></h4>
-	</div>
+	  </div>
 
   <%}else if(currentPage > numberOfPages){
                 var previousPage = currentPage-1;
@@ -117,8 +113,8 @@ else{
                 </tbody>
             </table>
             <%}}else{%>
-            	<div class="message message-info">
-					<h4><i class="icon fw fw-info"></i><%=i18n.localize("noTasksMsg")%></h4>
+    <div class="message message-info">
+				<h4><i class="icon fw fw-info"></i><%=i18n.localize("noTasksMsg")%></h4>
 				</div> 
             <%}%>
               <!--START Pagination links-->

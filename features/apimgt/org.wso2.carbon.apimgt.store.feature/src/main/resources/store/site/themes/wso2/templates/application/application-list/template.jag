@@ -16,7 +16,7 @@
           <tr>
               <th><%=i18n.localize("name")%></th>            
               <th class="col-md-2"><%=i18n.localize("throttlingTier")%></th>      
-              <th class="col-md-2"><%=i18n.localize("status")%></th>
+              <th class="col-md-2"><%=i18n.localize("workflowStatus")%></th>
               <th class="col-md-2">Subscriptions</th>
               <th class="col-md-3"><%=i18n.localize("actions")%></th>      
           </tr>
