@@ -74,7 +74,6 @@
     Plugin.prototype = {
 
         init: function() {  
-            console.log(this.config);                      
             this.render();
             if(this._get_production_endpoint_type())
                 this._set_selected_ep(this._get_production_endpoint_type());
@@ -230,7 +229,6 @@
             }else{
                 config.algoClassName = config.algoCombo ;                
             }
-            console.log(config);
             return config;
         },
 
