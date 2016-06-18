@@ -1,6 +1,7 @@
 <% jagg.template("item-add", function(inputs, outputs, jagg) { %>
 
 <div class="page-header">
+	<h1>New API</h1>
 	<p class="lead">Let's get started!</p>
 </div>
 
