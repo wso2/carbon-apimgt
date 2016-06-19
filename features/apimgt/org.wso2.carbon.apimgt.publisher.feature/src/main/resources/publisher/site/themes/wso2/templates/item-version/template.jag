@@ -29,7 +29,8 @@
 <div id="item-version">
 
 	<div class="page-header">
-		<h2><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h2>
+		<h1><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h1>
+		<p class="lead">Create New Version</p>
 	</div>
 	<div class="content-section shadow-up">
 		<div class="content-data">
@@ -38,7 +39,7 @@
 				<div class="col-sm-12">
 					<form class="form-horizontal apim-form" method="POST"
 						id="copyApiForm">
-						<h4 class="add-margin-bottom-5x">Create New Version</h4>
+						
 						<div id="copy-api">
 							<input type="hidden" id="overviewAPIVersion"
 								value="<%=api.version%>" /> <input type="hidden" id="overviewAPIName" value="<%=api.name%>" />
