@@ -207,6 +207,17 @@
             if(this.config[ep_type] == undefined) this.config[ep_type] = [];
             if(this.config[ep_type][index] == undefined) this.config[index] = { url:"" , endpoint_type:this._get_selected_ep() };            
             this.config[ep_type][index].url = $(e.target).val();
+
+            //validate for templates
+            var re = /\{.*\}/; 
+            if (this.config[ep_type][index].endpoint_type == "address" && (m = re.exec(this.config[ep_type][index].url)) !== null) {
+                this.config[ep_type][index].template_not_supported = true;
+                this.invalid = true;
+            }else{
+                this.config[ep_type][index].template_not_supported = false;
+                this.invalid = false;
+            }   
+
             this.validate();
         },     
 
@@ -294,7 +305,14 @@
                 this.config.invalid.endpoint = true;
                 r = false;
             }
+
             this.render();            
+
+            //if template is given for address endpoint
+            if(this.invalid != undefined && this.invalid){
+                return false;
+            }
+
             return r;            
         },
 

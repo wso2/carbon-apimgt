@@ -149,7 +149,10 @@
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
 																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
+																{{/if}}																
 																{{/if}}
+																{{#if template_not_supported }}
+																<label class="error" for="name">Address endpoint do not support URI Templates.</label>
 																{{/if}}
 															</div>
 							                            </div>
