@@ -163,14 +163,16 @@
                 keytype: this.type,
                 callbackUrl: this.app.callbackUrl,
                 validityTime: validity_time,
-                tokenScope:"",
+                tokenScope:""
             }, $.proxy(function (result) {
                 if (!result.error) {
+                    
                     this.app.ConsumerKey = result.data.key.consumerKey,
                     this.app.ConsumerSecret = result.data.key.consumerSecret,
                     this.app.Key = result.data.key.accessToken,
                     this.app.KeyScope = result.data.key.tokenScope,
-                    this.app.ValidityTime = result.data.key.validityTime
+                    this.app.ValidityTime = result.data.key.validityTime,
+                    this.app.keyState = result.data.key.keyState,
                     this.render();
                 } else {
                     jagg.message({content: result.message, type: "error"});
