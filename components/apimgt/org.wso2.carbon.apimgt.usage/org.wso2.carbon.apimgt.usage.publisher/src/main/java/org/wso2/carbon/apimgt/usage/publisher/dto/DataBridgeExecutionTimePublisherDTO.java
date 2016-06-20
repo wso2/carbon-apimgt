@@ -26,11 +26,16 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
         setContext(executionTimePublisherDTO.getContext());
         setVersion(executionTimePublisherDTO.getVersion());
         setProvider(executionTimePublisherDTO.getProvider());
-        setMediationType(executionTimePublisherDTO.getMediationType());
         setTenantDomain(executionTimePublisherDTO.getTenantDomain());
         setTenantId(executionTimePublisherDTO.getTenantId());
-        setExecutionTime(executionTimePublisherDTO.getExecutionTime());
+        setApiResponseTime(executionTimePublisherDTO.getApiResponseTime());
         setEventTime(executionTimePublisherDTO.getEventTime());
+        setSecurityLatency(executionTimePublisherDTO.getSecurityLatency());
+        setThrottlingLatency(executionTimePublisherDTO.getThrottlingLatency());
+        setRequestMediationLatency(executionTimePublisherDTO.getRequestMediationLatency());
+        setResponseMediationLatency(executionTimePublisherDTO.getResponseMediationLatency());
+        setBackEndLatency(executionTimePublisherDTO.getBackEndLatency());
+        setOtherLatency(executionTimePublisherDTO.getOtherLatency());
     }
 
     public static String getStreamDefinition() {
@@ -66,16 +71,36 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
                 "      \"type\": \"STRING\"\n" +
                 "    },\n" +
                 "    {\n" +
-                "      \"name\": \"mediationName\",\n" +
-                "      \"type\": \"STRING\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"name\": \"executionTime\",\n" +
+                "      \"name\": \"apiResponseTime\",\n" +
                 "      \"type\": \"LONG\"\n" +
                 "    },\n" +
                 "    {\n" +
                 "      \"name\": \"context\",\n" +
                 "      \"type\": \"STRING\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"securityLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"throttlingLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"requestMediationLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"responseMediationLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"backendLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"otherLatency\",\n" +
+                "      \"type\": \"LONG\"\n" +
                 "    },\n" +
                 "    {\n" +
                 "      \"name\": \"eventTime\",\n" +
@@ -88,6 +113,8 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
 
     public Object createPayload() {
         return new Object[]{getApiName(), getVersion(),
-                getTenantDomain(), getProvider(), getMediationType(), getExecutionTime(), getContext(), getEventTime()};
+                getTenantDomain(), getProvider(), getApiResponseTime(), getContext(), getSecurityLatency(),
+                getThrottlingLatency(), getRequestMediationLatency(), getResponseMediationLatency(),
+                getBackEndLatency(), getOtherLatency(), getEventTime()};
     }
 }

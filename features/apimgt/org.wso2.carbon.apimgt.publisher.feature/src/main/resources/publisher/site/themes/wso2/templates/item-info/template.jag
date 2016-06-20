@@ -12,7 +12,7 @@ if(api != null) {
 <!-- link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/dojo-release-1.8.3/dijit/themes/claro/claro.css"))%>"  media="screen"/-->
 <div id="item-info">
 	<div class="page-header">
-		<h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;</h2>
+		<h1><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;</h1>
 	</div>
 
     <div class="content-section shadow-up">
