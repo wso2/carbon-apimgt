@@ -115,7 +115,7 @@ paths:
             Eg. "provider:wso2" will match an API if the provider of the API contains "wso2".
 
             Supported attribute modifiers are [**version, context, status,
-            description, subcontext, doc, provider, tag **]
+            description, subcontext, doc, provider**]
 
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
