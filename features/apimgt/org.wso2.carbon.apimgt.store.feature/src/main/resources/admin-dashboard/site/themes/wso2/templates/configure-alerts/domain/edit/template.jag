@@ -181,12 +181,12 @@
 
                                 var selectedValue = "";
 
-                                if (option.trim().equals(parameterValue)) {
+                                if (options[option].trim().equals(parameterValue)) {
                                     selectedValue = "selected=true";
                                 }
                             %>
-                            <option <%=selectedValue%> value=<%=option%>>
-                                <%=option%>
+                            <option <%=selectedValue%> value=<%=options[option]%>>
+                                <%=options[option]%>
                             </option>
                             <%}%>
                         </select>
