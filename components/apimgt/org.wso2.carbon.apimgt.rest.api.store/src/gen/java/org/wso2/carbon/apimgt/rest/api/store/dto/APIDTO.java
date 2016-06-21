@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
 import java.util.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 
@@ -52,6 +53,9 @@ public class APIDTO  {
   
   
   private String thumbnailUrl = null;
+  
+  
+  private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
   
   
   private APIBusinessInformationDTO businessInformation = null;
@@ -219,6 +223,18 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("endpointURLs")
+  public List<APIEndpointURLsDTO> getEndpointURLs() {
+    return endpointURLs;
+  }
+  public void setEndpointURLs(List<APIEndpointURLsDTO> endpointURLs) {
+    this.endpointURLs = endpointURLs;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
   public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -247,6 +263,7 @@ public class APIDTO  {
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
+    sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");
     return sb.toString();

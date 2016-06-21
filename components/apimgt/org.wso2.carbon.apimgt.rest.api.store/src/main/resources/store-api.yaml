@@ -1499,6 +1499,27 @@ definitions:
       thumbnailUrl:
         type: string
         example: ""
+      endpointURLs:
+        type: array
+        items:
+          $ref: '#/definitions/APIEndpointURLs'
+          properties:
+            environmentName:
+              type: string
+              example: Production and Sandbox
+            environmentType:
+              type: string
+              example: hybrid
+            environmentURLs:
+              properties:
+                http:
+                  type: string
+                  description: HTTP environment URL
+                  example: "http://192.168.56.1:8280/phoneverify/1.0.0"
+                https:
+                  type: string
+                  description: HTTPS environment URL
+                  example: "https://192.168.56.1:8243/phoneverify/1.0.0"
       businessInformation:
         properties:
           businessOwner:
