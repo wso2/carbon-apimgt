@@ -119,11 +119,13 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        if (basePath.contains("/api/am/publisher/")) {
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT)) {
             //this is publisher API so pick that API
             uriTemplates = RestApiUtil.getPublisherAppResourceMapping();
-        } else if (basePath.contains("/api/am/store/")) {
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping();
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
         } else {
             log.error("No matching scope validation logic found for app request with path: " + basePath);
         }

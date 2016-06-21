@@ -83,10 +83,12 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
-    public static final String REST_API_STORE_CONTEXT="store_rest_api";
-    public static final String REST_API_STORE_VERSION="v1";
-    public static final String REST_API_PUBLISHER_VERSION="v1";
-    public static final String REST_API_PUBLISHER_CONTEXT="publisher_rest_api";
+    public static final String REST_API_STORE_CONTEXT="/api/am/store/";
+    public static final String REST_API_STORE_VERSION="v0.9";
+    public static final String REST_API_PUBLISHER_VERSION="v0.9";
+    public static final String REST_API_PUBLISHER_CONTEXT="/api/am/publisher/";
+    public static final String REST_API_ADMIN_CONTEXT="/api/am/admin";
+    public static final String REST_API_ADMIN_VERSION="v0.9";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
@@ -122,6 +124,9 @@ public final class RestApiConstants {
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
