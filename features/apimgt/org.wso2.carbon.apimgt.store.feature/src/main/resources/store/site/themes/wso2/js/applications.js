@@ -104,6 +104,7 @@
             this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
             this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
             this.element.on( "click", ".show_keys", $.proxy(this.toggleKeyVisibility, this));
+            this.element.on( "click", ".generateAgainBtn", $.proxy(this.generateAgainBtn, this));
         },
 
         toggleKeyVisibility: function(el, options) {
@@ -153,7 +154,26 @@
                 }
             },this), "json");
             return false;
-        },                
+        },
+
+        generateAgainBtn: function(){
+
+            var elem = this.element.find(".generateAgainBtn");
+            var keyType = elem.attr("data-keyType");
+            var applicationName = elem.attr("data-applicationName");
+
+            jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+                action:"cleanUpApplicationRegistration",
+                applicationName:applicationName,
+                keyType:keyType
+            }, function (result) {
+                if (!result.error) {
+                    location.reload();
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }, "json");
+        },
 
         generateKeys: function(){
             var validity_time = this.element.find(".validity_time").val();
