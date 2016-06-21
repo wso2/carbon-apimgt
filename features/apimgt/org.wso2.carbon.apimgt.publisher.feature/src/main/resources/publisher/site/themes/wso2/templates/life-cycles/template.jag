@@ -121,7 +121,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <%=i18n.localize("lifecycleSuccessMsg")%>
 </div>
  <form class="form-horizontal lifecycle-state">
-    <div class="well remove-padding">
+    <div class="well remove-padding-top remove-padding-bottom">
      <input type="hidden" name="action" id="action" value="updateStatus"/>
      <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
      <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>

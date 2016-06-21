@@ -43,7 +43,7 @@ for(var i=0;i < outputs.tiers.length; i++){
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-3 control-label">Callback URL</label>
+    <label class="col-sm-3 control-label">OAuth Callback URL</label>
     <div class="col-sm-9">
       <p class="form-control-static"><%if(application.callbackUrl){%><strong><%= encode.forHtml(application.callbackUrl) %></strong><% }else{%>Not Given<%}%></p>
       <p>This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize.</p>

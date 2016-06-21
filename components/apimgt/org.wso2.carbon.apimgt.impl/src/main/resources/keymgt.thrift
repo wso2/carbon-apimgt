@@ -35,6 +35,19 @@ struct APIKeyValidationInfoDTO {
     24: optional bool stopOnQuotaReach;
 }
 
+
+struct ConditionDTO {
+    1: optional string conditionType;
+    2: optional string conditionName;
+    3: optional string conditionValue;
+    4: optional bool isInverted;
+}
+
+struct ConditionGroupDTO {
+    1: optional string conditionGroupId;
+    2: optional list<ConditionDTO> conditions;
+}
+
 struct URITemplate {
     1: optional string uriTemplate;
     2: optional string resourceURI;
@@ -44,8 +57,8 @@ struct URITemplate {
     6: optional string throttlingTier;
     7: optional list<string>  throttlingConditions;
     8: optional string applicableLevel;
+    9: optional list<ConditionGroupDTO> conditionGroups;
 }
-
 
 service APIKeyValidationService {
 APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain, 7:required string matchingResource, 8:required string httpVerb) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)

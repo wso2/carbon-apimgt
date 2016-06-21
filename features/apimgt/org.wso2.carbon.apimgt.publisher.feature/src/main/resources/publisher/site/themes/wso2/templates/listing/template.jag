@@ -109,7 +109,7 @@
         	<div class="col-sm-12">
         		<div class="col-sm-5">
         			 <div class="add-padding-2x app-data ">
-                                    <h4><a href="#" title="<%= encode.forHtml(api.docName)%>"><%= encode.forHtml(api.docName)%></a></h4>
+                                    <h4 class="truncate"><a href="#" title="<%= encode.forHtml(api.docName)%>"><%= encode.forHtml(api.docName)%></a></h4>
                                     <% if(api.docSummary && api.docSummary != ""){ %>
                                     	<h5><a href="#" title="<%=i18n.localize("docSum")%>"><%=i18n.localize("docSum")%>:<%=  encode.forHtml(api.docSummary)%></a></h5>
                                     <%} %>
@@ -149,9 +149,9 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a title="<%=api.version%>"><%=api.version%></a></h5>
-                                    <p><%=api.provider%></p>
+                                    <p class="truncate"><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("apiBrowse")%>" >
 			                                <span id="noOfUsers">
@@ -207,9 +207,9 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><%=api.version%></h5>
-                                    <p><%=api.provider%></p>
+                                    <p class="truncate"><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("users")%>">
 			                                <span id="noOfUsers">

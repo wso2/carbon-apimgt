@@ -27,6 +27,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
+import org.wso2.carbon.apimgt.api.dto.xsd.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.xsd.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -52,7 +54,7 @@ public class APIKeyValidatorClient {
     private String cookie;
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS",
-            justification = "It is required to set two options on the Options object")
+                                                      justification = "It is required to set two options on the Options object")
     public APIKeyValidatorClient() throws APISecurityException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
@@ -60,7 +62,7 @@ public class APIKeyValidatorClient {
         password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Required connection details for the key management server not provided");
+                                           "Required connection details for the key management server not provided");
         }
 
         try {
@@ -77,7 +79,7 @@ public class APIKeyValidatorClient {
 
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while initializing the API key validation stub", axisFault);
+                                           "Error while initializing the API key validation stub", axisFault);
         }
     }
 
@@ -86,32 +88,31 @@ public class APIKeyValidatorClient {
                                                  String matchingResource, String httpVerb) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, keyValidationServiceStub._getServiceClient());
+                                                  true, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
         try {
-            List headerList = (List)keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
+            List headerList = (List) keyValidationServiceStub._getServiceClient().getOptions().getProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS);
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                headerList.add(new Header(APIConstants.ACTIVITY_ID, (String)headers.get(APIConstants.ACTIVITY_ID)));
+                headerList.add(new Header(APIConstants.ACTIVITY_ID, (String) headers.get(APIConstants.ACTIVITY_ID)));
             }
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             /**/
 
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    keyValidationServiceStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
-                                           matchingResource, httpVerb);
+                    keyValidationServiceStub.validateKey(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
+                                                         matchingResource, httpVerb);
 
             ServiceContext serviceContext = keyValidationServiceStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return toDTO(dto);
-        }
-       catch (Exception e) {
+        } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while accessing backend services for API key validation", e);
+                                           "Error while accessing backend services for API key validation", e);
         }
     }
 
@@ -150,7 +151,7 @@ public class APIKeyValidatorClient {
     ) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, keyValidationServiceStub._getServiceClient());
+                                                  true, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
@@ -171,6 +172,7 @@ public class APIKeyValidatorClient {
                                            "Error while accessing backend services for API key validation", e);
         }
     }
+
     private URITemplate toTemplates(
             org.wso2.carbon.apimgt.api.model.xsd.URITemplate dto) {
         URITemplate template = new URITemplate();
@@ -179,6 +181,38 @@ public class APIKeyValidatorClient {
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
         template.setThrottlingTier(dto.getThrottlingTier());
+
+        ConditionGroupDTO[] xsdConditionGroups = dto.getConditionGroups();
+        org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO[] conditionGroups = new org.wso2.carbon.apimgt
+                .api.dto.ConditionGroupDTO[xsdConditionGroups.length];
+
+        for (short groupCounter = 0; groupCounter < xsdConditionGroups.length; groupCounter++) {
+            org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO conditionGroup = new org.wso2.carbon.apimgt.api.dto
+                    .ConditionGroupDTO();
+            ConditionGroupDTO xsdConditionGroup = xsdConditionGroups[groupCounter];
+            conditionGroup.setConditionGroupId(xsdConditionGroup.getConditionGroupId());
+            ConditionDTO[] xsdConditions = xsdConditionGroup.getConditions();
+
+            if(xsdConditions != null) {
+                org.wso2.carbon.apimgt.api.dto.ConditionDTO[] conditions = new org.wso2.carbon.apimgt.api.dto
+                        .ConditionDTO[xsdConditions.length];
+                for (short conditionCounter = 0; conditionCounter < xsdConditions.length; conditionCounter++) {
+
+                    ConditionDTO xsdCondition = xsdConditions[conditionCounter];
+                    if (xsdCondition != null) {
+                        org.wso2.carbon.apimgt.api.dto.ConditionDTO condition = new org.wso2.carbon.apimgt.api.dto
+                                .ConditionDTO();
+                        condition.setConditionName(xsdCondition.getConditionName());
+                        condition.setConditionType(xsdCondition.getConditionType());
+                        condition.setConditionValue(xsdCondition.getConditionValue());
+                        conditions[conditionCounter] = condition;
+                    }
+                }
+                conditionGroup.setConditions(conditions);
+            }
+            conditionGroups[groupCounter] = conditionGroup;
+        }
+        template.setConditionGroups(conditionGroups);
         template.setThrottlingConditions((Arrays.asList(dto.getThrottlingConditions())));
         return template;
     }

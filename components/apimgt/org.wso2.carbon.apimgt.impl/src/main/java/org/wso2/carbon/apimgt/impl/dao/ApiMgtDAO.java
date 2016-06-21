@@ -25,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -51,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
+import org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -5893,7 +5896,7 @@ public class ApiMgtDAO {
 			prepStmt.setString(2, version);
 
 			rs = prepStmt.executeQuery();
-			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
+			Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
 			while (rs != null && rs.next()) {
 
 				String httpVerb = rs.getString("HTTP_METHOD");
@@ -5909,7 +5912,13 @@ public class ApiMgtDAO {
                     if (StringUtils.isEmpty(conditionGroupId)) {
                         continue;
 					}
-					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+
+                    // Converting ConditionGroup to a lightweight ConditionGroupDTO.
+                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                    groupDTO.setConditionGroupId(policyConditionGroupId);
+//					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+                    mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
+
 				} else {
 					String script = null;
 					URITemplate uriTemplate = new URITemplate();
@@ -5924,13 +5933,16 @@ public class ApiMgtDAO {
 					}
 
 					uriTemplate.setMediationScript(script);
-					Set<String> conditionGroupIdSet = new HashSet<String>();
+					Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
 					if (StringUtils.isEmpty(conditionGroupId)) {
 						continue;
 					}
-					conditionGroupIdSet.add(policyConditionGroupId);
+                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                    groupDTO.setConditionGroupId(policyConditionGroupId);
+					conditionGroupIdSet.add(groupDTO);
+
 				}
 
 			}
@@ -5939,14 +5951,22 @@ public class ApiMgtDAO {
 				String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
 					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
-						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
-                        uriTemplate.getThrottlingConditions().add("_default");
+                        Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
+                        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                        conditionGroupDTOs.add(defaultGroup);
+//						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+                      uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                        uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
 					}
 
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("_default");
+					uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
 				}
 
 			}
@@ -5957,6 +5977,55 @@ public class ApiMgtDAO {
 		}
 		return uriTemplates;
 	}
+
+    /**
+     * Converts an {@code Pipeline} object into a {@code ConditionGroupDTO}.{@code ConditionGroupDTO} class tries to
+     * contain the same information held by  {@code Pipeline}, but in a much lightweight fashion.
+     * @param conditionGroup Id of the condition group ({@code Pipeline}) to be converted
+     * @return An object of {@code ConditionGroupDTO} type.
+     * @throws APIManagementException
+     */
+    private ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+        List<Condition> conditions = getConditions(conditionGroup);
+        ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
+        for(Condition condition:conditions){
+            ConditionDTO conditionDTO = new ConditionDTO();
+            conditionDTO.setConditionType(condition.getType());
+
+            conditionDTO.isInverted(condition.isInvertCondition());
+            if(PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())){
+                IPCondition ipRangeCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(ipRangeCondition.getStartingIP());
+                conditionDTO.setConditionValue(ipRangeCondition.getEndingIP());
+
+            }else if(PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())){
+                IPCondition ipCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(PolicyConstants.IP_SPECIFIC_TYPE);
+                conditionDTO.setConditionValue(ipCondition.getSpecificIP());
+
+            }else if(PolicyConstants.HEADER_TYPE.equals(condition.getType())){
+                HeaderCondition headerCondition = (HeaderCondition) condition;
+                conditionDTO.setConditionName(headerCondition.getHeaderName());
+                conditionDTO.setConditionValue(headerCondition.getValue());
+
+            }else if(PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())){
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                conditionDTO.setConditionName(jwtClaimsCondition.getClaimUrl());
+                conditionDTO.setConditionValue(jwtClaimsCondition.getAttribute());
+
+            }else if(PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())){
+                QueryParameterCondition parameterCondition = (QueryParameterCondition) condition;
+                conditionDTO.setConditionName(parameterCondition.getParameter());
+                conditionDTO.setConditionValue(parameterCondition.getValue());
+            }
+            conditionDTOs.add(conditionDTO);
+        }
+
+        ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
+        conditionGroupDTO.setConditions(conditionDTOs.toArray(new ConditionDTO[]{}));
+
+        return conditionGroupDTO;
+    }
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
@@ -9429,8 +9498,9 @@ public class ApiMgtDAO {
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
-                     /* Assumes availability of starting ip means ip range is enforced.
-                       Therefore availability of ending ip is not checked.
+                     /*
+                     Assumes availability of starting ip means ip range is enforced.
+                     Therefore availability of ending ip is not checked.
                     */
                     IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);

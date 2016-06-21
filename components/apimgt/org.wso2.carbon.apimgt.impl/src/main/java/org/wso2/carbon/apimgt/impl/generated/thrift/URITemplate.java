@@ -38,6 +38,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   private static final org.apache.thrift.protocol.TField THROTTLING_TIER_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingTier", org.apache.thrift.protocol.TType.STRING, (short)6);
   private static final org.apache.thrift.protocol.TField THROTTLING_CONDITIONS_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingConditions", org.apache.thrift.protocol.TType.LIST, (short)7);
   private static final org.apache.thrift.protocol.TField APPLICABLE_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("applicableLevel", org.apache.thrift.protocol.TType.STRING, (short)8);
+  private static final org.apache.thrift.protocol.TField CONDITION_GROUPS_FIELD_DESC = new org.apache.thrift.protocol.TField("conditionGroups", org.apache.thrift.protocol.TType.LIST, (short)9);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -53,6 +54,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   public String throttlingTier; // optional
   public List<String> throttlingConditions; // optional
   public String applicableLevel; // optional
+  public List<ConditionGroupDTO> conditionGroups; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -63,7 +65,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     AUTH_TYPE((short)5, "authType"),
     THROTTLING_TIER((short)6, "throttlingTier"),
     THROTTLING_CONDITIONS((short)7, "throttlingConditions"),
-    APPLICABLE_LEVEL((short)8, "applicableLevel");
+    APPLICABLE_LEVEL((short)8, "applicableLevel"),
+    CONDITION_GROUPS((short)9, "conditionGroups");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -94,6 +97,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           return THROTTLING_CONDITIONS;
         case 8: // APPLICABLE_LEVEL
           return APPLICABLE_LEVEL;
+        case 9: // CONDITION_GROUPS
+          return CONDITION_GROUPS;
         default:
           return null;
       }
@@ -134,7 +139,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
   }
 
   // isset id assignments
-  private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE,_Fields.THROTTLING_TIER,_Fields.THROTTLING_CONDITIONS,_Fields.APPLICABLE_LEVEL};
+  private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE,_Fields.THROTTLING_TIER,_Fields.THROTTLING_CONDITIONS,_Fields.APPLICABLE_LEVEL,_Fields.CONDITION_GROUPS};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -155,6 +160,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
     tmpMap.put(_Fields.APPLICABLE_LEVEL, new org.apache.thrift.meta_data.FieldMetaData("applicableLevel", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.CONDITION_GROUPS, new org.apache.thrift.meta_data.FieldMetaData("conditionGroups", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+            new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ConditionGroupDTO.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(URITemplate.class, metaDataMap);
   }
@@ -194,6 +202,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     if (other.isSetApplicableLevel()) {
       this.applicableLevel = other.applicableLevel;
     }
+    if (other.isSetConditionGroups()) {
+      List<ConditionGroupDTO> __this__conditionGroups = new ArrayList<ConditionGroupDTO>();
+      for (ConditionGroupDTO other_element : other.conditionGroups) {
+        __this__conditionGroups.add(new ConditionGroupDTO(other_element));
+      }
+      this.conditionGroups = __this__conditionGroups;
+    }
   }
 
   public URITemplate deepCopy() {
@@ -210,6 +225,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     this.throttlingTier = null;
     this.throttlingConditions = null;
     this.applicableLevel = null;
+    this.conditionGroups = null;
   }
 
   public String getUriTemplate() {
@@ -419,6 +435,45 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     }
   }
 
+  public int getConditionGroupsSize() {
+    return (this.conditionGroups == null) ? 0 : this.conditionGroups.size();
+  }
+
+  public java.util.Iterator<ConditionGroupDTO> getConditionGroupsIterator() {
+    return (this.conditionGroups == null) ? null : this.conditionGroups.iterator();
+  }
+
+  public void addToConditionGroups(ConditionGroupDTO elem) {
+    if (this.conditionGroups == null) {
+      this.conditionGroups = new ArrayList<ConditionGroupDTO>();
+    }
+    this.conditionGroups.add(elem);
+  }
+
+  public List<ConditionGroupDTO> getConditionGroups() {
+    return this.conditionGroups;
+  }
+
+  public URITemplate setConditionGroups(List<ConditionGroupDTO> conditionGroups) {
+    this.conditionGroups = conditionGroups;
+    return this;
+  }
+
+  public void unsetConditionGroups() {
+    this.conditionGroups = null;
+  }
+
+  /** Returns true if field conditionGroups is set (has been assigned a value) and false otherwise */
+  public boolean isSetConditionGroups() {
+    return this.conditionGroups != null;
+  }
+
+  public void setConditionGroupsIsSet(boolean value) {
+    if (!value) {
+      this.conditionGroups = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case URI_TEMPLATE:
@@ -485,6 +540,14 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       break;
 
+    case CONDITION_GROUPS:
+      if (value == null) {
+        unsetConditionGroups();
+      } else {
+        setConditionGroups((List<ConditionGroupDTO>)value);
+      }
+      break;
+
     }
   }
 
@@ -514,6 +577,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     case APPLICABLE_LEVEL:
       return getApplicableLevel();
 
+    case CONDITION_GROUPS:
+      return getConditionGroups();
+
     }
     throw new IllegalStateException();
   }
@@ -541,6 +607,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       return isSetThrottlingConditions();
     case APPLICABLE_LEVEL:
       return isSetApplicableLevel();
+    case CONDITION_GROUPS:
+      return isSetConditionGroups();
     }
     throw new IllegalStateException();
   }
@@ -627,6 +695,15 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (!(this_present_applicableLevel && that_present_applicableLevel))
         return false;
       if (!this.applicableLevel.equals(that.applicableLevel))
+        return false;
+    }
+
+    boolean this_present_conditionGroups = true && this.isSetConditionGroups();
+    boolean that_present_conditionGroups = true && that.isSetConditionGroups();
+    if (this_present_conditionGroups || that_present_conditionGroups) {
+      if (!(this_present_conditionGroups && that_present_conditionGroups))
+        return false;
+      if (!this.conditionGroups.equals(that.conditionGroups))
         return false;
     }
 
@@ -722,6 +799,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     }
     if (isSetApplicableLevel()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.applicableLevel, typedOther.applicableLevel);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetConditionGroups()).compareTo(typedOther.isSetConditionGroups());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetConditionGroups()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.conditionGroups, typedOther.conditionGroups);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -825,6 +912,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       first = false;
     }
+    if (isSetConditionGroups()) {
+      if (!first) sb.append(", ");
+      sb.append("conditionGroups:");
+      if (this.conditionGroups == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.conditionGroups);
+      }
+      first = false;
+    }
     sb.append(")");
     return sb.toString();
   }
@@ -918,13 +1015,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           case 7: // THROTTLING_CONDITIONS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list24 = iprot.readListBegin();
-                struct.throttlingConditions = new ArrayList<String>(_list24.size);
-                for (int _i25 = 0; _i25 < _list24.size; ++_i25)
+                org.apache.thrift.protocol.TList _list32 = iprot.readListBegin();
+                struct.throttlingConditions = new ArrayList<String>(_list32.size);
+                for (int _i33 = 0; _i33 < _list32.size; ++_i33)
                 {
-                  String _elem26; // required
-                  _elem26 = iprot.readString();
-                  struct.throttlingConditions.add(_elem26);
+                  String _elem34; // required
+                  _elem34 = iprot.readString();
+                  struct.throttlingConditions.add(_elem34);
                 }
                 iprot.readListEnd();
               }
@@ -937,6 +1034,25 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
               struct.applicableLevel = iprot.readString();
               struct.setApplicableLevelIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 9: // CONDITION_GROUPS
+            if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+              {
+                org.apache.thrift.protocol.TList _list35 = iprot.readListBegin();
+                struct.conditionGroups = new ArrayList<ConditionGroupDTO>(_list35.size);
+                for (int _i36 = 0; _i36 < _list35.size; ++_i36)
+                {
+                  ConditionGroupDTO _elem37; // required
+                  _elem37 = new ConditionGroupDTO();
+                  _elem37.read(iprot);
+                  struct.conditionGroups.add(_elem37);
+                }
+                iprot.readListEnd();
+              }
+              struct.setConditionGroupsIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -1003,9 +1119,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
           oprot.writeFieldBegin(THROTTLING_CONDITIONS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.throttlingConditions.size()));
-            for (String _iter27 : struct.throttlingConditions)
+            for (String _iter38 : struct.throttlingConditions)
             {
-              oprot.writeString(_iter27);
+              oprot.writeString(_iter38);
             }
             oprot.writeListEnd();
           }
@@ -1016,6 +1132,20 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         if (struct.isSetApplicableLevel()) {
           oprot.writeFieldBegin(APPLICABLE_LEVEL_FIELD_DESC);
           oprot.writeString(struct.applicableLevel);
+          oprot.writeFieldEnd();
+        }
+      }
+      if (struct.conditionGroups != null) {
+        if (struct.isSetConditionGroups()) {
+          oprot.writeFieldBegin(CONDITION_GROUPS_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.conditionGroups.size()));
+            for (ConditionGroupDTO _iter39 : struct.conditionGroups)
+            {
+              _iter39.write(oprot);
+            }
+            oprot.writeListEnd();
+          }
           oprot.writeFieldEnd();
         }
       }
@@ -1061,7 +1191,10 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (struct.isSetApplicableLevel()) {
         optionals.set(7);
       }
-      oprot.writeBitSet(optionals, 8);
+      if (struct.isSetConditionGroups()) {
+        optionals.set(8);
+      }
+      oprot.writeBitSet(optionals, 9);
       if (struct.isSetUriTemplate()) {
         oprot.writeString(struct.uriTemplate);
       }
@@ -1083,21 +1216,30 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (struct.isSetThrottlingConditions()) {
         {
           oprot.writeI32(struct.throttlingConditions.size());
-          for (String _iter28 : struct.throttlingConditions)
+          for (String _iter40 : struct.throttlingConditions)
           {
-            oprot.writeString(_iter28);
+            oprot.writeString(_iter40);
           }
         }
       }
       if (struct.isSetApplicableLevel()) {
         oprot.writeString(struct.applicableLevel);
       }
+      if (struct.isSetConditionGroups()) {
+        {
+          oprot.writeI32(struct.conditionGroups.size());
+          for (ConditionGroupDTO _iter41 : struct.conditionGroups)
+          {
+            _iter41.write(oprot);
+          }
+        }
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, URITemplate struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
-      BitSet incoming = iprot.readBitSet(8);
+      BitSet incoming = iprot.readBitSet(9);
       if (incoming.get(0)) {
         struct.uriTemplate = iprot.readString();
         struct.setUriTemplateIsSet(true);
@@ -1124,13 +1266,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       }
       if (incoming.get(6)) {
         {
-          org.apache.thrift.protocol.TList _list29 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-          struct.throttlingConditions = new ArrayList<String>(_list29.size);
-          for (int _i30 = 0; _i30 < _list29.size; ++_i30)
+          org.apache.thrift.protocol.TList _list42 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.throttlingConditions = new ArrayList<String>(_list42.size);
+          for (int _i43 = 0; _i43 < _list42.size; ++_i43)
           {
-            String _elem31; // required
-            _elem31 = iprot.readString();
-            struct.throttlingConditions.add(_elem31);
+            String _elem44; // required
+            _elem44 = iprot.readString();
+            struct.throttlingConditions.add(_elem44);
           }
         }
         struct.setThrottlingConditionsIsSet(true);
@@ -1138,6 +1280,20 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
       if (incoming.get(7)) {
         struct.applicableLevel = iprot.readString();
         struct.setApplicableLevelIsSet(true);
+      }
+      if (incoming.get(8)) {
+        {
+          org.apache.thrift.protocol.TList _list45 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+          struct.conditionGroups = new ArrayList<ConditionGroupDTO>(_list45.size);
+          for (int _i46 = 0; _i46 < _list45.size; ++_i46)
+          {
+            ConditionGroupDTO _elem47; // required
+            _elem47 = new ConditionGroupDTO();
+            _elem47.read(iprot);
+            struct.conditionGroups.add(_elem47);
+          }
+        }
+        struct.setConditionGroupsIsSet(true);
       }
     }
   }

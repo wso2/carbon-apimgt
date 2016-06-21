@@ -126,6 +126,9 @@ public class CacheInvalidator {
 
             for (Environment environment : gatewayEnvs.values()) {
                 try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Started invalidation tokens for environment: " + environment.getName());
+                    }
                     APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                     client.invalidateCachedTokens(activeTokens);
                     if (log.isDebugEnabled()) {
