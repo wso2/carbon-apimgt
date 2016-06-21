@@ -5656,7 +5656,7 @@ public final class APIUtil {
             if (needDeployment) {
                 String policyString;
                 try {
-                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
                     if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
