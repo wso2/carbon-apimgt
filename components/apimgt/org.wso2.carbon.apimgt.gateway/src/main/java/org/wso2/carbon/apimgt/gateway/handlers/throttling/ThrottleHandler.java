@@ -259,8 +259,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 context1 = timer1.start();
 
                         if (conditionGroupDTOs != null && conditionGroupDTOs.length > 0) {
+
                             //Then we will apply resource level throttling
-                            for (ConditionGroupDTO conditionGroup : conditionGroupDTOs) {
+
+                            List<ConditionGroupDTO> applicableConditions = ThrottleConditionEvaluator.getInstance()
+                                    .getApplicableConditions(synCtx,authContext,conditionGroupDTOs);
+                            for (ConditionGroupDTO conditionGroup : applicableConditions) {
                                 String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroup.getConditionGroupId();
                                 resourceLevelTier = verbInfoDTO.getThrottling();
                                 if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
@@ -281,33 +285,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             log.warn("Unable to find throttling information for resource and http verb. Throttling "
                                      + "will not apply");
                         }
-
-                        /*
-                        if (resourceLevelThrottleConditions != null && resourceLevelThrottleConditions.size() > 0) {
-                            //Then we will apply resource level throttling
-                            for (String conditionId : resourceLevelThrottleConditions) {
-                                String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionId;
-                                resourceLevelTier = verbInfoDTO.getThrottling();
-                                if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                        isThrottled(combinedResourceLevelThrottleKey)) {
-                                    if(!apiLevelThrottledTriggered) {
-                                        isResourceLevelThrottled = isThrottled = true;
-                                    } else {
-                                        isApiLevelThrottled = isThrottled = true;
-                                    }
-                                    long timestamp = ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                                                            getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
-                                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
-                                    break;
-                                }
-                            }
-
-                        } else {
-                            log.warn("Unable to find throttling information for resource and http verb. Throttling "
-                                    + "will not apply");
-                        }
-                        */
-
                         context1.stop();
                     }
 
