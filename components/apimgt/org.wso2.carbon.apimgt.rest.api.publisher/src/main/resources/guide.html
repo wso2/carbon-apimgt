@@ -81,8 +81,14 @@
         validate the token. Generate the access token using the already created OAuth application. A sample call to
         generate the access token is shown below.
     </p>
+    <p>
+        <b>
+            <i>Note:</i> Access token must be generated using correct scope for the resource.
+            Scope for each resource is given in resource documentation.
+        </b>
+    </p>
 
-    <div class="pre"><code class="bash">curl -k -d "grant_type=password&username=admin&password=admin&scope=apim:api_view" -H "Authorization: Basic SGZFbDFqSlBkZzV0YnRyeGhBd3liTjA1UUdvYTpsNmMwYW9MY1dSM2Z3ZXpIaGM3WG9HT2h0NUFh" https://127.0.0.1:8243/token</code></div>
+    <div class="pre"><code class="bash">curl -k -d "grant_type=password&username=admin&password=admin&<b>scope=apim:api_view</b>" -H "Authorization: Basic SGZFbDFqSlBkZzV0YnRyeGhBd3liTjA1UUdvYTpsNmMwYW9MY1dSM2Z3ZXpIaGM3WG9HT2h0NUFh" https://127.0.0.1:8243/token</code></div>
     <br/>
 
     <p>
