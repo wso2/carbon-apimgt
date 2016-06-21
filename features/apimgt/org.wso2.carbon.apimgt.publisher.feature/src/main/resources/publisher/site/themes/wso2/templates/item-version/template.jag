@@ -29,7 +29,8 @@
 <div id="item-version">
 
 	<div class="page-header">
-		<h2><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h2>
+		<h1><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h1>
+		<p class="lead">Create New Version</p>
 	</div>
 	<div class="content-section shadow-up">
 		<div class="content-data">
@@ -38,79 +39,63 @@
 				<div class="col-sm-12">
 					<form class="form-horizontal apim-form" method="POST"
 						id="copyApiForm">
+						
+						<div id="copy-api">
+							<input type="hidden" id="overviewAPIVersion"
+								value="<%=api.version%>" /> <input type="hidden" id="overviewAPIName" value="<%=api.name%>" />
 
-						<div id="accordion" role="tablist" aria-multiselectable="true">
-							<div class="panel panel-default">
-									<div class="form-heading">
-											      <h4 class="panel-title">
-											      	 <div>
-	                   									<div class="heading">Create New Version</div>
-													</div>
-	                    							<div class="clearfix"></div>										        
-											      </h4>
-								 	</div>
-								<div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
-									<div class="panel-body">
-										<div id="copy-api">
-											<input type="hidden" id="overviewAPIVersion"
-												value="<%=api.version%>" /> <input type="hidden" id="overviewAPIName" value="<%=api.name%>" />
-												
-											<div class="form-group">
-												<label class="col-sm-4 control-label" for="new-version"><%=i18n.localize("newVersion")%>:<span class="requiredAstrix">*</span>
-												<a class="help_popup" help_data="versionCopy_help" data-trigger="hover" data-placement="bottom" title="versionCopy_help">
-													<span class="icon fw-stack fw-lg" style="font-size:6px">
-														<i class="fw fw-circle fw-stack-2x" title="api-version"></i>
-														<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-													</span>
-												</a>
-												<p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
-												</label>
-												<div class="col-sm-2">
-													<input type="text" placeholder="e.g: v1.0.1"
-														class="form-control required validInput noSpace"
-														id="new-version" name="new-version" autofocus="autofocus"
-														value="" /> 													
-												</div>
-											</div>
-											<div class="form-group">
-												<label class="col-sm-4 control-label">Make this the
-													Default Version
-													<a class="help_popup" help_data=default_api_help data-trigger="hover" data-placement="bottom" title="default_api_help">
-														<span class="icon fw-stack fw-lg" style="font-size:6px">
-															<i class="fw fw-circle fw-stack-2x"></i>
-															<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-														</span>
-													</a>
-													<p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>	
-												</label>
-												<div class="col-sm-4">
-													<label class="checkbox">
-							                        	<input type="checkbox" id="default_version_cp" name="default_version_cp" class="default_version_check_cp" value="default_version">
-							                            <span class="helper"></span>
-							                         </label>
-													<input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value="" />																									
-												</div>
-											</div>
-											<div class="message message-info">
-							                    <h4><i class="icon fw fw-info"></i>Info!</h4>
-							                    <p>
-							                    <%if(api.hasDefaultVersion){%>
-										                	Default version currently set to : <%=api.currentDefaultVersion%>
-										                <%} else { %>
-										                	No default version defined for the current API
-										                <%} %>
-										        </p>							                   
-							                </div>
-											<div class="copy-buttons" id="saveButtons">
-												<button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
-												<button type="button" class="btn btn-default cancel-button"
-													onclick="location.href='<%=jagg.url("/info")%>?<%=apiUrlId%>'"><%=i18n.localize("cancel")%></button>
-											</div>
-
-										</div>
-									</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" for="new-version"><%=i18n.localize("newVersion")%>:<span class="requiredAstrix">*</span>
+								<a class="help_popup" help_data="versionCopy_help" data-trigger="hover" data-placement="bottom" title="versionCopy_help">
+									<span class="icon fw-stack fw-lg" style="font-size:6px">
+										<i class="fw fw-circle fw-stack-2x" title="api-version"></i>
+										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+									</span>
+								</a>
+								<p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
+								</label>
+								<div class="col-sm-4">
+									<input type="text" placeholder="e.g: v1.0.1"
+										class="form-control required validInput noSpace"
+										id="new-version" name="new-version" autofocus="autofocus"
+										value="" />
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">Make this the
+									Default Version
+									<a class="help_popup" help_data=default_api_help data-trigger="hover" data-placement="bottom" title="default_api_help">
+										<span class="icon fw-stack fw-lg" style="font-size:6px">
+											<i class="fw fw-circle fw-stack-2x"></i>
+											<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+										</span>
+									</a>
+									<p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+								</label>
+								<div class="col-sm-4">
+									<label class="checkbox">
+										<input type="checkbox" id="default_version_cp" name="default_version_cp" class="default_version_check_cp" value="default_version">
+										<span class="helper"></span>
+									 </label>
+									<input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value="" />
+								</div>
+							</div>
+							<div class="message message-info">
+								<h4><i class="icon fw fw-info"></i>Info!</h4>
+								<p>
+								<%if(api.hasDefaultVersion){%>
+											Default version currently set to : <%=api.currentDefaultVersion%>
+										<%} else { %>
+											No default version defined for the current API
+										<%} %>
+								</p>
+							</div>
+							<div class="copy-buttons" id="saveButtons">
+								<button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
+								<button type="button" class="btn btn-secondary cancel-button"
+									onclick="location.href='<%=jagg.url("/info")%>?<%=apiUrlId%>'"><%=i18n.localize("cancel")%></button>
+							</div>
+
 						</div>
 					</form>
 

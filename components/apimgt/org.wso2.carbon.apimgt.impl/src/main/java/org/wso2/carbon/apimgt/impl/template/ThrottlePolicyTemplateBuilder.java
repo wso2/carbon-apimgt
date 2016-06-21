@@ -401,9 +401,12 @@ public class ThrottlePolicyTemplateBuilder {
         String conditionString = null;
         int i = 0;
         for (Condition condition : conditions) {
-            String conditionStringComplete = PolicyConstants.OPEN_BRACKET + condition.getCondition() + " OR " +
-                                             condition.getNullCondition() + PolicyConstants.CLOSE_BRACKET;
-
+            String conditionStringComplete = PolicyConstants.OPEN_BRACKET + condition.getCondition();
+            if(condition.getNullCondition() != null) {
+                conditionStringComplete += " OR " + condition.getNullCondition() + PolicyConstants.CLOSE_BRACKET;
+            } else {
+                conditionStringComplete += PolicyConstants.CLOSE_BRACKET;
+            }
             if (i == 0) {
                 conditionString = conditionStringComplete;
             } else {
