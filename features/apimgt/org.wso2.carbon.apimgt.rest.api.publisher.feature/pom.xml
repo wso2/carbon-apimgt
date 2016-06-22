@@ -98,7 +98,7 @@
                     </execution>
                     <execution>
                         <id>copy-doc-resources</id>
-                        <phase>generate-resources</phase>
+                        <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -118,7 +118,7 @@
                     </execution>
                     <execution>
                         <id>copy-doc-guide</id>
-                        <phase>generate-resources</phase>
+                        <phase>site</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -171,6 +171,7 @@
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <phase>site</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
