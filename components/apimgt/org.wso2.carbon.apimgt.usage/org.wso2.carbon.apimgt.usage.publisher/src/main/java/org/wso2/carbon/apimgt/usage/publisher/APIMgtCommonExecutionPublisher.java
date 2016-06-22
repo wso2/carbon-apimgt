@@ -38,7 +38,7 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
             if (totalTimeObject != null) {
                 totalTime = Long.parseLong((String) totalTimeObject);
             }
-
+            totalTime = System.currentTimeMillis() - totalTime;
             String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
