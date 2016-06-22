@@ -161,7 +161,7 @@ public class ThrottleConditionEvaluator {
             if(value == null){
                 return false;
             }
-            return value.equals(condition.getConditionValue());
+            return value.matches(condition.getConditionValue());
         }
         return false;
     }
@@ -172,8 +172,12 @@ public class ThrottleConditionEvaluator {
         Object value = assertions.get(condition.getConditionName());
         if (value == null) {
             return false;
+        } else if(value instanceof String) {
+            String valueString = (String) value;
+            return valueString.matches(condition.getConditionValue());
+        } else {
+            return false;
         }
-        return value.equals(condition.getConditionValue());
     }
 
     private boolean isQueryParamPresent(MessageContext messageContext, ConditionDTO condition) {
