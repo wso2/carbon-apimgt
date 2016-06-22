@@ -42,6 +42,7 @@ public class ThrottleDataHolder {
     private boolean isBlockingConditionsPresent = false;
     private boolean isKeyTemplatesPresent = false;
     private Map<String, Long> throttleDataMap = new ConcurrentHashMap<String, Long>();
+    private Map<String,Long> throttledAPIKeysMap = new ConcurrentHashMap<String, Long>();
 
     public void addThrottleData(String key, Long value) {
         throttleDataMap.put(key, value);
@@ -49,6 +50,30 @@ public class ThrottleDataHolder {
 
     public void addThrottleDataFromMap(Map<String, Long> data) {
         throttleDataMap.putAll(data);
+    }
+
+    public void addThrottledAPIKey(String key, Long value){
+        throttledAPIKeysMap.put(key,value);
+    }
+
+    public void removeThrottledAPIKey(String key){
+        throttledAPIKeysMap.remove(key);
+    }
+
+    public boolean isAPIThrottled(String apiKey){
+        boolean isThrottled = this.throttledAPIKeysMap.containsKey(apiKey);
+        if(isThrottled) {
+            long currentTime = System.currentTimeMillis();
+            long timestamp = this.throttledAPIKeysMap.get(apiKey);
+            if(timestamp >= currentTime) {
+                return isThrottled;
+            } else {
+                this.throttledAPIKeysMap.remove(apiKey);
+                return false;
+            }
+        } else {
+            return isThrottled;
+        }
     }
 
     public void removeThrottleData(String key) {

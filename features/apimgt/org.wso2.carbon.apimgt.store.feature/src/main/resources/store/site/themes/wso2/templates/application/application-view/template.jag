@@ -61,7 +61,6 @@ for(var i=0;i < outputs.tiers.length; i++){
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
 
-        jagg.log(application);
         var prodapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,
@@ -70,12 +69,13 @@ for(var i=0;i < outputs.tiers.length; i++){
             Key: oauthapp.prodKey,
             KeyScope: oauthapp.prodKeyScopeValue,
             Scopes: outputs.scopes,
-            ValidityTime: oauthapp.prodValidityTime
+            ValidityTime: oauthapp.prodValidityTime,
+            keyState: oauthapp.prodKeyState
         }
       %>
       </div>
       <%
-        jagg.log(oauthapp);
+
         var sandapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,            
@@ -84,7 +84,8 @@ for(var i=0;i < outputs.tiers.length; i++){
             Key: oauthapp.sandboxKey,
             KeyScope: oauthapp.sandKeyScope,
             Scopes: outputs.scopes,
-            ValidityTime: oauthapp.sandValidityTime
+            ValidityTime: oauthapp.sandValidityTime,
+            keyState: oauthapp.sandboxKeyState
         }
       %>      
       <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
@@ -119,6 +120,14 @@ for(var i=0;i < outputs.tiers.length; i++){
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
     $(document).ready(function() {
+
+    Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+        if(v1 === v2) {
+            return options.fn(this);
+        }
+        return options.inverse(this);
+    });
+
       $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %> });
       $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX", provide_keys: <%= site.mapExistingAuthApps %>}); 
 
