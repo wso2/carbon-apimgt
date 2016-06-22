@@ -87,9 +87,9 @@
                         <div class="wiz-content">
 							    <div class="row">
 							        <div class="col-sm-12">
-									<div id="accordion1" class="panel-group" role="tablist">
+									<div class="panel-group accordion" role="tablist">
 									<div class="panel panel-default">
-							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
 						                    <div>
 				                                <div class="heading">Managed API</div>
@@ -149,7 +149,10 @@
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
 																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
+																{{/if}}																
 																{{/if}}
+																{{#if template_not_supported }}
+																<label class="error" for="name">Address endpoint do not support URI Templates.</label>
 																{{/if}}
 															</div>
 							                            </div>
@@ -224,7 +227,7 @@
 								                        	{{#if ../load_balance}}
 								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Message Mediation Policies"}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
 								                        	{{else}}
 								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
 								                        	{{/if}}								                        
@@ -473,7 +476,7 @@
 							            </div>
 							            </div>							
 							            <div class="panel panel-default">
-							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
 								                    <div>
 						                                <div class="heading">Prototyped API</div>

@@ -102,9 +102,8 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Token details object
    **/
-  @ApiModelProperty(value = "Token details object")
+  @ApiModelProperty(value = "")
   @JsonProperty("token")
   public TokenDTO getToken() {
     return token;

@@ -41,9 +41,9 @@ public class DocumentListDTO  {
 
   
   /**
-   * Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.
    **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -54,9 +54,9 @@ public class DocumentListDTO  {
 
   
   /**
-   * Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.
    **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

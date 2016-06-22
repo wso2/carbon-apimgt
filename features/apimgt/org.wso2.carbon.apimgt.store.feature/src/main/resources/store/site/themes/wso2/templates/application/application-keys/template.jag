@@ -99,7 +99,25 @@
 	  </div>
 	</div>
 	<br />
-	
+  {{else if keyState}}
+
+  	{{#ifCond keyState 'CREATED'}}
+    	<%=i18n.localize("prodKeyCreatedMsg")%>
+	{{/ifCond}}
+
+	{{#ifCond keyState 'REJECTED'}}
+    	<%=i18n.localize("prodKeyRejectedMsg")%>
+	{{/ifCond}}
+
+	{{#ifCond keyState 'COMPLETED'}}
+		<%=i18n.localize("cleanUpSubscriptions")%>
+		<button title="<%=i18n.localize("cleanUpSubscriptions")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
+					data-keyType="PRODUCTION"
+					data-applicationName={{name}}>
+					Clean up
+		</button>
+	{{/ifCond}}
+
 
   {{else}}
     <div class="message message-info">

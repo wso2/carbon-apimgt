@@ -5953,19 +5953,19 @@ public class ApiMgtDAO {
 					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
                         Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
                         ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                        defaultGroup.setConditionGroupId("_default");
+                        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
                         conditionGroupDTOs.add(defaultGroup);
 //						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
-                      uriTemplate.getThrottlingConditions().add("_default");
+                      uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
                         uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
 					}
 
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("_default");
+					uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
                     ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                    defaultGroup.setConditionGroupId("_default");
+                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
                     uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
 				}
 

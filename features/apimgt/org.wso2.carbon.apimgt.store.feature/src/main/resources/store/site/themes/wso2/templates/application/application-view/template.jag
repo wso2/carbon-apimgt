@@ -43,7 +43,7 @@ for(var i=0;i < outputs.tiers.length; i++){
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-3 control-label">Callback URL</label>
+    <label class="col-sm-3 control-label">OAuth Callback URL</label>
     <div class="col-sm-9">
       <p class="form-control-static"><%if(application.callbackUrl){%><strong><%= encode.forHtml(application.callbackUrl) %></strong><% }else{%>Not Given<%}%></p>
       <p>This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize.</p>
@@ -61,7 +61,6 @@ for(var i=0;i < outputs.tiers.length; i++){
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
 
-        jagg.log(application);
         var prodapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,
@@ -70,12 +69,13 @@ for(var i=0;i < outputs.tiers.length; i++){
             Key: oauthapp.prodKey,
             KeyScope: oauthapp.prodKeyScopeValue,
             Scopes: outputs.scopes,
-            ValidityTime: oauthapp.prodValidityTime
+            ValidityTime: oauthapp.prodValidityTime,
+            keyState: oauthapp.prodKeyState
         }
       %>
       </div>
       <%
-        jagg.log(oauthapp);
+
         var sandapp = {
             name: application.name,
             callbackUrl:application.callbackUrl,            
@@ -84,7 +84,8 @@ for(var i=0;i < outputs.tiers.length; i++){
             Key: oauthapp.sandboxKey,
             KeyScope: oauthapp.sandKeyScope,
             Scopes: outputs.scopes,
-            ValidityTime: oauthapp.sandValidityTime
+            ValidityTime: oauthapp.sandValidityTime,
+            keyState: oauthapp.sandboxKeyState
         }
       %>      
       <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
@@ -113,6 +114,14 @@ for(var i=0;i < outputs.tiers.length; i++){
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
     $(document).ready(function() {
+
+    Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+        if(v1 === v2) {
+            return options.fn(this);
+        }
+        return options.inverse(this);
+    });
+
       $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %> });
       $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX", provide_keys: <%= site.mapExistingAuthApps %>}); 
 
