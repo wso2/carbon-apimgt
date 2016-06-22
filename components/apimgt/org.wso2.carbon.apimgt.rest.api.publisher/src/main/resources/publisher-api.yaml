@@ -2348,6 +2348,9 @@ definitions:
         type: integer
         format: int64
         example: 60000
+      timeUnit:
+        type: string
+        example: "min"
       tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
