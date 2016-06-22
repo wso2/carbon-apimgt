@@ -143,7 +143,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public String getThrottlePolicyForAPILevelDefualt(APIPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForAPILevelDefault(APIPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
             log.debug("Generating policy for apiLevel :" + policy.toString());
@@ -401,9 +401,7 @@ public class ThrottlePolicyTemplateBuilder {
         String conditionString = null;
         int i = 0;
         for (Condition condition : conditions) {
-            String conditionStringComplete = PolicyConstants.OPEN_BRACKET + condition.getCondition() + " OR " +
-                                             condition.getNullCondition() + PolicyConstants.CLOSE_BRACKET;
-
+            String conditionStringComplete = condition.getCondition();
             if (i == 0) {
                 conditionString = conditionStringComplete;
             } else {

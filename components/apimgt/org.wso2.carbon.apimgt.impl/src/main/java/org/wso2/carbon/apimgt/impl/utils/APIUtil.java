@@ -5656,7 +5656,7 @@ public final class APIUtil {
             if (needDeployment) {
                 String policyString;
                 try {
-                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
                     if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
@@ -5730,12 +5730,16 @@ public final class APIUtil {
                 tier.setDescription(policy.getDescription());
                 tier.setDisplayName(policy.getDisplayName());
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                tier.setTimeUnit(limit.getTimeUnit());
+                tier.setUnitTime(limit.getUnitTime());
                 if(limit instanceof RequestCountLimit) {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
+                    tier.setRequestCount(countLimit.getRequestCount());
                 } else {
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
+                    tier.setRequestCount(bandwidthLimit.getDataAmount());
                 }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
@@ -5744,6 +5748,7 @@ public final class APIUtil {
                     tier.setDescription(policy.getDescription());
                     tier.setDisplayName(policy.getDisplayName());
                     tier.setRequestsPerMin(Integer.MAX_VALUE);
+                    tier.setRequestCount(Integer.MAX_VALUE);
                     tierMap.put(policy.getPolicyName(), tier);
                 }
             }

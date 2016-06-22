@@ -52,12 +52,26 @@ var log = new Log();
                 var mediation = decodeURI(request.getParameter("mediationName"));
                 for(var i in versionArray){
                 var tempVersion = versionArray[i];
-                var tempResult = mod.getExecutionTimeByMediationType(apiName,tempVersion,tenantDomain,fromDate,toDate,drilldown,mediation); 
+                var tempResult = mod.getExecutionTimeByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
                if (tempResult.usage && tempResult.usage.length > 0) {
                 var tempdata = [];
                   for(var usage1 in tempResult.usage ){
                     var d = new Date(tempResult.usage[usage1].values.year, (tempResult.usage[usage1].values.month-1), tempResult.usage[usage1].values.day, tempResult.usage[usage1].values.hour,tempResult.usage[usage1].values.minutes,tempResult.usage[usage1].values.seconds,"00");
-                    tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.executionTime});
+                    if(mediation == "Total Time"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.apiResponseTime});
+                    }else if(mediation == "BackEnd"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.backendLatency});
+                    }else if(mediation == "Other"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.otherLatency});
+                    }else if(mediation == "Request Mediation"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.requestMediationLatency});
+                    }else if(mediation == "Response Mediation"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.responseMediationLatency});
+                    }else if(mediation == "Authentication"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.securityLatency});
+                    }else if(mediation == "Throttling"){
+                       tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.throttlingLatency});
+                    }
                   }
                    data[tempVersion] = tempdata;           
                 }                

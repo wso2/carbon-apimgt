@@ -35,6 +35,9 @@ public class TierDTO  {
   @NotNull
   private Long unitTime = null;
   
+  
+  private String timeUnit = null;
+  
   public enum TierPlanEnum {
      FREE,  COMMERCIAL, 
   };
@@ -120,6 +123,18 @@ public class TierDTO  {
 
   
   /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("timeUnit")
+  public String getTimeUnit() {
+    return timeUnit;
+  }
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+  }
+
+  
+  /**
    * This attribute declares whether this tier is available under commercial or free
    **/
   @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free")
@@ -157,6 +172,7 @@ public class TierDTO  {
     sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("  requestCount: ").append(requestCount).append("\n");
     sb.append("  unitTime: ").append(unitTime).append("\n");
+    sb.append("  timeUnit: ").append(timeUnit).append("\n");
     sb.append("  tierPlan: ").append(tierPlan).append("\n");
     sb.append("  stopOnQuotaReach: ").append(stopOnQuotaReach).append("\n");
     sb.append("}\n");

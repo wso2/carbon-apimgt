@@ -1850,9 +1850,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
             //Here we have to set permission specifically to image icon we added
             String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-            if (iconPath != null) {
-            	iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
-                APIUtil.copyResourcePermissions(api.getId().getProviderName(),thumbUrl,iconPath);
+            if (iconPath != null && iconPath.lastIndexOf("/apimgt") != -1) {
+                iconPath = iconPath.substring(iconPath.lastIndexOf("/apimgt"));
+                APIUtil.copyResourcePermissions(api.getId().getProviderName(), thumbUrl, iconPath);
             }
             // Retain the tags
             org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
@@ -3806,7 +3806,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName();
                 String defaultPolicyName = policyFile + "_default";
                 executionFlows.put(defaultPolicyName, defaultPolicy);
@@ -3913,7 +3913,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 //TODO rename level to  resource or appropriate name
                 String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
                 String defaultPolicyName = policyFile + "_default";

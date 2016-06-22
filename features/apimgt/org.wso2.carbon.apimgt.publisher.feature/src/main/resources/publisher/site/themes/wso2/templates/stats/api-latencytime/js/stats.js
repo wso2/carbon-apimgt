@@ -221,14 +221,28 @@ function renderGraph(fromDate,toDate,drillDown){
             var data1 = {};
                 if (json.usage && json.usage.length > 0) {
                   for(var usage1 in json.usage ){
-                    var mediationName = json.usage[usage1].values.mediationName;
-                    var tempdata = data1[mediationName];
-                    if (!tempdata) {
-                        tempdata = [];
-                    }
+                    var apiResponseTimeData = (data1["Total Time"]) ? data1["Total Time"] : [];
+                    var backendLatencyData  = (data1["BackEnd"])? data1["BackEnd"] : [] ;
+                    var otherLatencyData    = (data1["Other"]) ? data1["Other"] :[];
+                    var requestMediationLatencyData = (data1["Request Mediation"]) ? data1["Request Mediation"] :[];
+                    var responseMediationLatencyData = (data1["Response Mediation"]) ? data1["Response Mediation"] : [];
+                    var securityLatencyData = (data1["Authentication"]) ? data1["Authentication"] : [];
+                    var throttlingLatencyData = (data1["Throttling"])? data1["Throttling"] : [];
                     var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month -1), json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,json.usage[usage1].values.seconds,"00");
-                    tempdata.push({x:d,y:json.usage[usage1].values.executionTime});
-                     data1[mediationName] = tempdata;
+                    apiResponseTimeData.push({x:d,y:json.usage[usage1].values.apiResponseTime});
+                    backendLatencyData.push({x:d,y:json.usage[usage1].values.backendLatency});
+                    otherLatencyData.push({x:d,y:json.usage[usage1].values.otherLatency});
+                    requestMediationLatencyData.push({x:d,y:json.usage[usage1].values.requestMediationLatency});
+                    responseMediationLatencyData.push({x:d,y:json.usage[usage1].values.responseMediationLatency});
+                    securityLatencyData.push({x:d,y:json.usage[usage1].values.securityLatency});
+                    throttlingLatencyData.push({x:d,y:json.usage[usage1].values.throttlingLatency});
+                     data1["Total Time"] = apiResponseTimeData;
+                     data1["BackEnd"] = backendLatencyData;
+                     data1["Other"] = otherLatencyData;
+                     data1["Request Mediation"] = requestMediationLatencyData;
+                     data1["Response Mediation"] = responseMediationLatencyData;
+                     data1["Authentication"] = securityLatencyData;
+                     data1["Throttling"] = throttlingLatencyData;
                   }
                     populateMediations(data1);
                     drawGraphInArea(data1,drillDown);
@@ -293,7 +307,7 @@ function drawGraphInArea(rdata,drilldown){
       xAxisLabel = 'Time (Seconds)';
     }
     for(var legand in rdata){
-        renderdata.push({values: rdata[legand],key: legand,color: pickLegandColor(legand)});
+        renderdata.push({values: rdata[legand],key: legand});
     }
 nv.addGraph(function() {
   var chart = nv.models.lineChart()
@@ -346,32 +360,6 @@ nv.addGraph(function() {
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();
-}
-
-var pickLegandColor = function(legand){
- switch (legand) {
-    case "BackEnd":
-        return "#0B38AF";
-        break;
-    case "Throttling":
-          return "#FF0000";
-          break;
-    case "Authentication":
-          return "#008000";
-          break;
-    case "Total Time":
-          return "#DA4806";
-          break;
-    case "CORS":
-          return "#06DA0A";
-        break;
-    case "1.0.0":
-         return "#DA4806";
-          break;
-    case "2.0.0":
-          return "#06DA0A";
-        break;
-}
 }
 function getDateTime(currentDay,fromDay){
     toStr = convertTimeString(currentDay);

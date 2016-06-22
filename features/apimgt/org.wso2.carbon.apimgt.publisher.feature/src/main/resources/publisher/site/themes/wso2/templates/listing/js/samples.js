@@ -146,12 +146,12 @@ APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
                                         requireResubscription: true},
                                         function (result) {
                                             if (!result.error) {
-                                                window.location.assign(siteContext + "/site/pages/index.jag");
                                                 $(".modal-body").removeClass("loadingButton");
                                                 jagg.message({
                                                     content: "Sample PizzaShackAPI is Deployed Successfully",
                                                     type: "info",
-                                                    title: "Success"
+                                                    title: "Success",
+                                                    cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                                 });
                                                 //Add document for the published sample
                                                 addSampleAPIDoc();

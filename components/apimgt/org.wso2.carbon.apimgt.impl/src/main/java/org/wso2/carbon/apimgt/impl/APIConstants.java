@@ -1064,6 +1064,8 @@ public final class APIConstants {
     public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
     public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
 
+    public static final String THROTTLE_POLICY_DEFAULT = "_default";
+
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
