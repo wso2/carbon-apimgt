@@ -20,9 +20,13 @@
             <DisplayName>Manage Tiers</DisplayName>
             <ResourceId>/permission/admin/manage/manage_tiers</ResourceId>
         </ManagementPermission>
-	<ManagementPermission>
+	    <ManagementPermission>
             <DisplayName>Workflows</DisplayName>
             <ResourceId>/permission/admin/manage/workflowadmin</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>API-M Admin</DisplayName>
+            <ResourceId>/permission/admin/manage/apim_admin</ResourceId>
         </ManagementPermission>
     </ManagementPermissions>
 </component>
