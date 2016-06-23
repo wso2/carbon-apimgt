@@ -6,8 +6,7 @@
     "context" : "/admin-dashboard",
     "request_url":"READ_FROM_REQUEST",
     "tasksPerPage": 10,
-    "allowedRole":"admin",
-    "allowedRoles":"admin,subscriber",
+    "allowedPermission": "/permission/admin/manage/apim_admin",
     "workflows":{
      "workFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
     },
