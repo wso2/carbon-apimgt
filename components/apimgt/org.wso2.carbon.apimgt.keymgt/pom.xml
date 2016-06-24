@@ -79,6 +79,16 @@
 					<excludes>
 						<exclude>**/Abstract*</exclude>
 					</excludes>
+                        <systemProperties>
+                            <property>
+                                <name>APIManagerDBConfigurationPath</name>
+                                <value>${basedir}/src/test/resources/amConfig.xml</value>
+                            </property>
+                            <property>
+                                <name>IdentityConfigurationPath</name>
+                                <value>${basedir}/src/test/resources/identity.xml</value>
+                            </property>
+                        </systemProperties>
 				</configuration>
 			</plugin>
 			<plugin>

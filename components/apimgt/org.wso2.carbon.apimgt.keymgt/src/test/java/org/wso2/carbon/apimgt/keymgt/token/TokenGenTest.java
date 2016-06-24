@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
 import junit.framework.TestCase;
 import org.apache.axiom.util.base64.Base64Utils;
@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
 
 
@@ -43,6 +45,13 @@ public class TokenGenTest extends TestCase {
     public void testAbstractJWTGenerator() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator();
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
+
+        TokenValidationContext validationContext = new TokenValidationContext();
+        validationContext.setValidationInfoDTO(dto);
+        validationContext.setContext("testAPI");
+        validationContext.setVersion("1.5.0");
+        validationContext.setAccessToken("DUMMY_TOKEN_STRING");
+
         dto.setSubscriber("sanjeewa");
         dto.setApplicationName("sanjeewa-app");
         dto.setApplicationId("1");
@@ -50,7 +59,7 @@ public class TokenGenTest extends TestCase {
         dto.setEndUserName("malalgoda");
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
         //Here we will call generate token method with 4 argument.
-        String token = jwtGen.generateToken(dto, "testAPI", "1.5.0","DUMMY_TOKEN_STRING");
+        String token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         String header = token.split("\\.")[0];
         String decodedHeader = new String(Base64Utils.decode(header));
@@ -59,7 +68,7 @@ public class TokenGenTest extends TestCase {
         String decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
         // With end user name not included
-        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -68,7 +77,7 @@ public class TokenGenTest extends TestCase {
         decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
         dto.setUserType(APIConstants.SUBSCRIPTION_USER_TYPE);
-        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -77,7 +86,7 @@ public class TokenGenTest extends TestCase {
         decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
 
-        token = jwtGen.generateToken(dto, "testAPI", "1.5.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -96,7 +105,11 @@ public class TokenGenTest extends TestCase {
         dto.setApplicationTier("UNLIMITED");
         dto.setEndUserName("denis");
         dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
-        String token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
+        TokenValidationContext validationContext = new TokenValidationContext();
+        validationContext.setValidationInfoDTO(dto);
+        validationContext.setContext("cricScore");
+        validationContext.setVersion("1.9.0");
+        String token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         String header = token.split("\\.")[0];
         String decodedHeader = new String(Base64Utils.decode(header));
@@ -107,7 +120,7 @@ public class TokenGenTest extends TestCase {
 
 
         // With end user name not included
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -118,7 +131,7 @@ public class TokenGenTest extends TestCase {
 
 
         dto.setUserType(APIConstants.SUBSCRIPTION_USER_TYPE);
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
@@ -127,7 +140,7 @@ public class TokenGenTest extends TestCase {
         decodedBody = new String(Base64Utils.decode(body));
         System.out.println("Body: " + decodedBody);
 
-        token = jwtGen.generateToken(dto, "cricScore", "1.9.0");
+        token = jwtGen.generateToken(validationContext);
         System.out.println("Generated Token: " + token);
         header = token.split("\\.")[0];
         decodedHeader = new String(Base64Utils.decode(header));
