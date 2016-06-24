@@ -48,12 +48,12 @@ public class JWTClaimsCondition extends Condition{
 
     @Override
     public String getCondition() {
-        //"regex:find('+value+', cast(map:get(propertiesMap,'+name+'),'string')))"
-        String condition = PolicyConstants.OPEN_BRACKET + PolicyConstants.REGEX_PREFIX_QUERY  +
+        //"( not(map:get(properties,’"+value+"’) is null) and regex:find('+value+', cast(map:get(propertiesMap,'+name+'),'string'))))"
+        String condition = PolicyConstants.OPEN_BRACKET + getInvertNullCheck() + PolicyConstants.AND + PolicyConstants.REGEX_PREFIX_QUERY  +
                            PolicyConstants.QUOTE + getAttribute() + PolicyConstants.QUOTE + PolicyConstants.COMMA +
                            getQueryAttributeName() + PolicyConstants.CLOSE_BRACKET + PolicyConstants.CLOSE_BRACKET;
         if(isInvertCondition()){
-            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "not "+condition
         }
         return condition;
     }
@@ -70,5 +70,8 @@ public class JWTClaimsCondition extends Condition{
         return "JWTClaimsCondition [claimUrl=" + claimUrl + ", attribute=" + attribute + ", toString()="
                 + super.toString() + "]";
     }
-    
+
+    private String getInvertNullCheck() {
+         return PolicyConstants.INVERT_CONDITION + PolicyConstants.OPEN_BRACKET + nullFilterQueryString + PolicyConstants.CLOSE_BRACKET;
+    }
 }
