@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl.token;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
@@ -24,13 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.test.TestRealmService;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+
 
 public class TokenGenTest extends TestCase {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
