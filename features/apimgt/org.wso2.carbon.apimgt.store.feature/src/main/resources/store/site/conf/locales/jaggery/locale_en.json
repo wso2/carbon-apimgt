@@ -293,6 +293,7 @@
     "healthAvailabilityPerMin":"Availability of APIs",
 
     "sdk.description":"Download client-side SDK for your Applications.",
+    "sdk.not.configured": "No SDK configured",
     "android":  "Android",
     "java": "Java",
     "scala":  "Scala",
