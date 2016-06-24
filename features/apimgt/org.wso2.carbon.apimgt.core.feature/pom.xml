@@ -78,7 +78,7 @@
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql" />
+                                    <fileset file="${basedir}/src/main/resources/sql/apimgt/h2.sql" />
                                 </sql>
                                 <echo message="##################### END ########################" />
                             </tasks>
