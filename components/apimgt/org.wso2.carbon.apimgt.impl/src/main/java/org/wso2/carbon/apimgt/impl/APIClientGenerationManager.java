@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 
 import java.util.*;
 import java.io.File;
@@ -51,6 +50,36 @@ import io.swagger.codegen.DefaultGenerator;
  */
 public class APIClientGenerationManager {
     private static final Log log = LogFactory.getLog(APIClientGenerationManager.class);
+
+    private static final Map<String, String> langCodeGen= new HashMap<String, String>();
+
+    public APIClientGenerationManager() {
+        langCodeGen.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
+        langCodeGen.put("android", "io.swagger.codegen.languages.JavaClientCodegen");
+        langCodeGen.put("csharp", "io.swagger.codegen.languages.CSharpClientCodegen");
+        langCodeGen.put("cpp", "io.swagger.codegen.languages.CppRestClientCodegen");
+        langCodeGen.put("dart", "io.swagger.codegen.languages.DartClientCodegen");
+        langCodeGen.put("flash", "io.swagger.codegen.languages.FlashClientCodegen");
+        langCodeGen.put("go", "io.swagger.codegen.languages.GoClientCodegen");
+        langCodeGen.put("groovy", "io.swagger.codegen.languages.GroovyClientCodegen");
+        langCodeGen.put("javascript", "io.swagger.codegen.languages.JavascriptClientCodegen");
+        langCodeGen.put("jmeter", "io.swagger.codegen.languages.JMeterCodegen");
+        langCodeGen.put("nodejs", "io.swagger.codegen.languages.NodeJSServerCodegen");
+        langCodeGen.put("perl", "io.swagger.codegen.languages.PerlClientCodegen");
+        langCodeGen.put("php", "io.swagger.codegen.languages.PhpClientCodegen");
+        langCodeGen.put("python", "io.swagger.codegen.languages.PythonClientCodegen");
+        langCodeGen.put("ruby", "io.swagger.codegen.languages.RubyClientCodegen");
+        langCodeGen.put("scala", "io.swagger.codegen.languages.ScalaClientCodegen");
+        langCodeGen.put("swift", "io.swagger.codegen.languages.SwiftCodegen");
+        langCodeGen.put("clojure", "io.swagger.codegen.languages.ClojureClientCodegen");
+        langCodeGen.put("aspNet5", "io.swagger.codegen.languages.AspNet5ServerCodegen");
+        langCodeGen.put("asyncScala", "io.swagger.codegen.languages.AsyncScalaClientCodegen");
+        langCodeGen.put("spring", "io.swagger.codegen.languages.SpringCodegen");
+        langCodeGen.put("csharpDotNet2", "io.swagger.codegen.languages.CsharpDotNet2ClientCodegen");
+        langCodeGen.put("haskell", "io.swagger.codegen.languages.HaskellServantCodegen");
+
+
+    }
 
     /**
      * Get access token key for given userId and API Identifier
@@ -235,16 +264,18 @@ public class APIClientGenerationManager {
         return appName + "_" + sdkLanguage;
     }
 
+    public String getSupportedSDKLanguages()    {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String supportedLanguages = config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
+
+        return supportedLanguages;
+
+    }
+
     private void generateClient(String appName, String spec, String lang, String outPutDir) {
 
-        String configClass;
-        if (lang.equals("java")) {
-            configClass = "io.swagger.codegen.languages.JavaClientCodegen";
-        } else if (lang.equals("android")) {
-            configClass = "io.swagger.codegen.languages.AndroidClientCodegen";
-        } else {
-            configClass = null;
-        }
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
 
@@ -255,7 +286,7 @@ public class APIClientGenerationManager {
                 .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + appName);
         codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + appName);
         codegenConfigurator.setInputSpec(spec);
-        codegenConfigurator.setLang(configClass);
+        codegenConfigurator.setLang(langCodeGen.get(lang));
         codegenConfigurator.setOutputDir(outPutDir);
         final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
