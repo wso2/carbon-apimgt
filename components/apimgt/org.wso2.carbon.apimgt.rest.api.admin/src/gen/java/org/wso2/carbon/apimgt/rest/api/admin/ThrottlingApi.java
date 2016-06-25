@@ -87,10 +87,10 @@ public class ThrottlingApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response throttlingBlockingConditionsConditionIdGet(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingBlockingConditionsConditionIdGet(conditionId,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingBlockingConditionsConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/blocking-conditions/{conditionId}")
@@ -184,10 +184,10 @@ public class ThrottlingApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/policies/advanced-policies/{policyName}")
@@ -281,10 +281,10 @@ public class ThrottlingApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response throttlingPoliciesApplicationPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesApplicationPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesApplicationPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/policies/application/{policyName}")
@@ -378,10 +378,10 @@ public class ThrottlingApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response throttlingPoliciesGlobalPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesGlobalPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesGlobalPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/policies/global/{policyName}")
@@ -475,10 +475,10 @@ public class ThrottlingApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response throttlingPoliciesSubscriptionPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesSubscriptionPolicyNameGet(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesSubscriptionPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/policies/subscription/{policyName}")

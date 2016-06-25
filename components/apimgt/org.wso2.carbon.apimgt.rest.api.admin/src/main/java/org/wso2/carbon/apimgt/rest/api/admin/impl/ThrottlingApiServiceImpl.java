@@ -47,7 +47,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
-            APIPolicy[] apiPolicies = (APIPolicy[])apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
+            APIPolicy[] apiPolicies = (APIPolicy[]) apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
             AdvancedThrottlePolicyListDTO listDTO = AdvancedThrottlePolicyMappingUtil
                     .fromAPIPolicyArrayToListDTO(apiPolicies);
             return Response.ok().entity(listDTO).build();
@@ -60,7 +60,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
 
 
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPost(AdvancedThrottlePolicyDTO body,String contentType){
+    public Response throttlingPoliciesAdvancedPoliciesPost(AdvancedThrottlePolicyDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -85,8 +85,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -188,8 +188,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
 
     
     @Override
-    public Response throttlingPoliciesApplicationPolicyNameGet(String policyName, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response throttlingPoliciesApplicationPolicyNameGet(String policyName, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -289,8 +289,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyNameGet(String policyName, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response throttlingPoliciesSubscriptionPolicyNameGet(String policyName, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -391,8 +391,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     @Override
-    public Response throttlingPoliciesGlobalPolicyNameGet(String policyName, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response throttlingPoliciesGlobalPolicyNameGet(String policyName, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -484,8 +484,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     @Override
-    public Response throttlingBlockingConditionsConditionIdGet(String conditionId, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response throttlingBlockingConditionsConditionIdGet(String conditionId, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             BlockConditionsDTO blockCondition = apiProvider.getBlockCondition(Integer.parseInt(conditionId)); //todo use uuid?

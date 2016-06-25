@@ -196,8 +196,8 @@ paths:
         Retrieve an Application Policy providing the policy name.
       parameters:
         - $ref: '#/parameters/policyName'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Throttling
       responses:
@@ -472,8 +472,8 @@ paths:
         Retrieve a Subscription Policy providing the policy name.
       parameters:
         - $ref: '#/parameters/policyName'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Throttling
       responses:
@@ -746,8 +746,8 @@ paths:
         Retrieve a Global Policy providing the policy name.
       parameters:
         - $ref: '#/parameters/policyName'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Throttling
       responses:
@@ -1021,8 +1021,8 @@ paths:
         Retrieve a Advanced Policy providing the policy name.
       parameters:
         - $ref: '#/parameters/policyName'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Throttling
       responses:
@@ -1295,8 +1295,8 @@ paths:
         Retrieve a Blocking Condition providing the condition Id
       parameters:
         - $ref: '#/parameters/conditionId'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Throttling
       responses:
