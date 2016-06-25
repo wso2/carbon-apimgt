@@ -165,10 +165,10 @@
             "$ref": "#/parameters/policyName"
           },
           {
-            "$ref": "#/parameters/If-Match"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/If-Unmodified-Since"
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
@@ -445,10 +445,10 @@
             "$ref": "#/parameters/policyName"
           },
           {
-            "$ref": "#/parameters/If-Match"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/If-Unmodified-Since"
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
@@ -725,10 +725,10 @@
             "$ref": "#/parameters/policyName"
           },
           {
-            "$ref": "#/parameters/If-Match"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/If-Unmodified-Since"
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
@@ -1005,10 +1005,10 @@
             "$ref": "#/parameters/policyName"
           },
           {
-            "$ref": "#/parameters/If-Match"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/If-Unmodified-Since"
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
@@ -1285,10 +1285,10 @@
             "$ref": "#/parameters/conditionId"
           },
           {
-            "$ref": "#/parameters/If-Match"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/If-Unmodified-Since"
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
@@ -1641,17 +1641,6 @@
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
-        },
-        {
-          "properties": {
-            "applicationId": {
-              "type": "string"
-            },
-            "customAttributes": {
-              "type": "string",
-              "description": "Base64 encoded custom attributes string"
-            }
-          }
         }
       ]
     },
@@ -1694,8 +1683,15 @@
               "type": "string"
             },
             "customAttributes": {
-              "type": "string",
-              "description": "Base64 encoded custom attributes string"
+              "description": "Custom attributes added to the Subscription Throttle policy\n",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CustomAttribute"
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "example": {}
             },
             "stopOnQuotaReach": {
               "type": "boolean"
@@ -2060,6 +2056,17 @@
           "items": {
             "$ref": "#/definitions/BlockingCondition"
           }
+        }
+      }
+    },
+    "CustomAttribute": {
+      "title": "Name-Value pair",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
         }
       }
     }
