@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class NameValuePairDTO  {
+public class CustomAttributeDTO  {
   
   
   
@@ -49,7 +49,7 @@ public class NameValuePairDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class NameValuePairDTO {\n");
+    sb.append("class CustomAttributeDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  value: ").append(value).append("\n");

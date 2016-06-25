@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.NameValuePairDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
 
@@ -26,7 +26,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   private String rateLimitTimeUnit = null;
   
   
-  private List<NameValuePairDTO> customAttributes = new ArrayList<NameValuePairDTO>();
+  private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
   
   
   private Boolean stopOnQuotaReach = null;
@@ -64,10 +64,10 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
    **/
   @ApiModelProperty(value = "Custom attributes added to the Subscription Throttle policy\n")
   @JsonProperty("customAttributes")
-  public List<NameValuePairDTO> getCustomAttributes() {
+  public List<CustomAttributeDTO> getCustomAttributes() {
     return customAttributes;
   }
-  public void setCustomAttributes(List<NameValuePairDTO> customAttributes) {
+  public void setCustomAttributes(List<CustomAttributeDTO> customAttributes) {
     this.customAttributes = customAttributes;
   }
 

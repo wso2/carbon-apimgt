@@ -21,16 +21,24 @@ package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa
+ */
 public class BlockingConditionMappingUtil {
 
-    
+    /**
+     * Converts a List of Block Condition in to REST API LIST DTO Object
+     *
+     * @param blockConditionList A List of Block Conditions
+     * @return REST API List DTO object derived from Block Condition list
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     public static BlockingConditionListDTO fromBlockConditionListToListDTO(
             List<BlockConditionsDTO> blockConditionList) throws UnsupportedThrottleLimitTypeException {
         BlockingConditionListDTO listDTO = new BlockingConditionListDTO();
@@ -48,13 +56,19 @@ public class BlockingConditionMappingUtil {
         return listDTO;
     }
 
-    
+    /**
+     * Converts a single Block Condition model object into REST API DTO object
+     *
+     * @param blockCondition Block condition model object
+     * @return Block condition DTO object derived from block condition model object
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     public static BlockingConditionDTO fromBlockingConditionToDTO(
             BlockConditionsDTO blockCondition) throws UnsupportedThrottleLimitTypeException {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getConditionId() + ""); //todo change to uuid
         dto.setConditionType(blockCondition.getConditionType());
-        
+
         String conditionValue = blockCondition.getConditionValue();
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
             int index = conditionValue.indexOf(":");
@@ -68,13 +82,4 @@ public class BlockingConditionMappingUtil {
         return dto;
     }
 
-    public static BlockConditionsDTO fromBlockingConditionDTOToModel(BlockingConditionDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
-        BlockConditionsDTO blockCondition = new BlockConditionsDTO();
-        blockCondition.setConditionType(dto.getConditionType());
-        blockCondition.setConditionValue(dto.getConditionValue());
-        blockCondition.setEnabled(dto.getEnabled());
-        blockCondition.setConditionId(Integer.parseInt(dto.getConditionId())); //todo set properly using uuid
-        return blockCondition;
-    }
 }

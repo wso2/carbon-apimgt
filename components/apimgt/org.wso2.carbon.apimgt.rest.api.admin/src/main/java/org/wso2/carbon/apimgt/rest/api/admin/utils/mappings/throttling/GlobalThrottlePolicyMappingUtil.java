@@ -26,8 +26,19 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyListDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is responsible for mapping Global Level Throttling model and its sub components into REST API DTOs
+ * and vice-versa
+ */
 public class GlobalThrottlePolicyMappingUtil {
 
+    /**
+     * Converts an array of Global policy model objects into REST API DTO objects
+     *
+     * @param GlobalPolicies An array of Global Policy model objects
+     * @return A List DTO of Global Policy DTOs derived from the array of model objects
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     public static GlobalThrottlePolicyListDTO fromGlobalPolicyArrayToListDTO(
             GlobalPolicy[] GlobalPolicies) throws UnsupportedThrottleLimitTypeException {
         GlobalThrottlePolicyListDTO listDTO = new GlobalThrottlePolicyListDTO();
@@ -45,6 +56,13 @@ public class GlobalThrottlePolicyMappingUtil {
         return listDTO;
     }
 
+    /**
+     * Converts a single Global Policy model object into DTO object
+     *
+     * @param globalPolicy Global Policy model object
+     * @return DTO object derived from the Policy model object
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     public static GlobalThrottlePolicyDTO fromGlobalThrottlePolicyToDTO(
             GlobalPolicy globalPolicy) throws UnsupportedThrottleLimitTypeException {
         GlobalThrottlePolicyDTO policyDTO = new GlobalThrottlePolicyDTO();
@@ -54,6 +72,13 @@ public class GlobalThrottlePolicyMappingUtil {
         return policyDTO;
     }
 
+    /**
+     * Converts a single Global policy DTO object into model object
+     *
+     * @param dto Global policy DTO object
+     * @return Model object derived from DTO
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(GlobalThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
 

@@ -30,12 +30,24 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is responsible for mapping Advanced Level Throttling model and its sub components into REST API DTOs
+ * and vice-versa
+ */
 public class AdvancedThrottlePolicyMappingUtil {
 
+    /**
+     * Converts an array of Advanced Policy objects into a List DTO
+     *
+     * @param apiPolicies Array of Advanced Policies
+     * @return A List DTO of converted Advanced Policies
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleConditionTypeException
+     */
     public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(APIPolicy[] apiPolicies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
-        List <AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
+        List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
         if (apiPolicies != null) {
             for (APIPolicy apiPolicy : apiPolicies) {
                 advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(apiPolicy));
@@ -43,16 +55,20 @@ public class AdvancedThrottlePolicyMappingUtil {
         }
         listDTO.setList(advancedPolicyDTOs);
         listDTO.setCount(advancedPolicyDTOs.size());
-
-        //listDTO.setNext(); todo
-        //listDTO.setPrevious(); todo
-        
+        listDTO.setNext(""); //todo
+        listDTO.setPrevious(""); //todo
         return listDTO;
     }
 
-    /////////////////  AdvancedPolicyDTO <---> APIPolicy ///////////////////////////////////////
-    
-    public static APIPolicy fromAdvancedPolicyDTOToPolicy (AdvancedThrottlePolicyDTO dto)
+    /**
+     * Converts a single Advanced Policy DTO into a model object
+     *
+     * @param dto Advanced policy DTO object
+     * @return Converted Advanced policy model object
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleConditionTypeException
+     */
+    public static APIPolicy fromAdvancedPolicyDTOToPolicy(AdvancedThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
 
         //update mandatory fields such as tenantDomain etc.
@@ -68,7 +84,15 @@ public class AdvancedThrottlePolicyMappingUtil {
         return apiPolicy;
     }
 
-    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO (APIPolicy apiPolicy)
+    /**
+     * Converts a single Advanced Policy model into REST API DTO
+     *
+     * @param apiPolicy Advanced Policy model object
+     * @return Converted Advanced policy REST API DTO object
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleConditionTypeException
+     */
+    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(APIPolicy apiPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
@@ -79,7 +103,14 @@ public class AdvancedThrottlePolicyMappingUtil {
         return policyDTO;
     }
 
-    private static String mapAdvancedPolicyUserLevelFromDTOToModel(AdvancedThrottlePolicyDTO.UserLevelEnum userLevelEnum ) {
+    /**
+     * Maps User Level in Advanced policy from REST API DTO to Model
+     *
+     * @param userLevelEnum User Level as Enum
+     * @return Converted user level into values used in model
+     */
+    private static String mapAdvancedPolicyUserLevelFromDTOToModel(
+            AdvancedThrottlePolicyDTO.UserLevelEnum userLevelEnum) {
         switch (userLevelEnum) {
         case apiLevel:
             return PolicyConstants.ACROSS_ALL;
@@ -90,7 +121,12 @@ public class AdvancedThrottlePolicyMappingUtil {
         }
     }
 
-
+    /**
+     * Maps User Level in Advanced Policy model into DTO
+     *
+     * @param userLevel User Level values used in Advanced policy model object
+     * @return Converted user level into particular Enum used in Advanced Policy DTO
+     */
     private static AdvancedThrottlePolicyDTO.UserLevelEnum mapAdvancedPolicyUserLevelFromModelToDTO(String userLevel) {
         switch (userLevel) {
         case PolicyConstants.ACROSS_ALL:

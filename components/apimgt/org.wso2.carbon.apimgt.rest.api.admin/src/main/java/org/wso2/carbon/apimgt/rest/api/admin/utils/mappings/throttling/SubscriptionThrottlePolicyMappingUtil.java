@@ -18,25 +18,34 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.NameValuePairDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * This class is responsible for mapping Subscription Level Throttling model and its sub components into REST API DTOs
+ * and vice-versa
+ */
 public class SubscriptionThrottlePolicyMappingUtil {
 
+    /**
+     * Converts an array of Subscription Policy objects into a List DTO
+     *
+     * @param subscriptionPolicies Array of Subscription Policies
+     * @return A List DTO of converted Subscription Policies
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws ParseException
+     */
     public static SubscriptionThrottlePolicyListDTO fromSubscriptionPolicyArrayToListDTO(
             SubscriptionPolicy[] subscriptionPolicies) throws UnsupportedThrottleLimitTypeException, ParseException {
         SubscriptionThrottlePolicyListDTO listDTO = new SubscriptionThrottlePolicyListDTO();
@@ -54,6 +63,14 @@ public class SubscriptionThrottlePolicyMappingUtil {
         return listDTO;
     }
 
+    /**
+     * Converts a single Subscription Policy model into REST API DTO
+     *
+     * @param subscriptionPolicy Subscription Policy model object
+     * @return Converted Subscription policy REST API DTO object
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws ParseException
+     */
     public static SubscriptionThrottlePolicyDTO fromSubscriptionThrottlePolicyToDTO(
             SubscriptionPolicy subscriptionPolicy) throws UnsupportedThrottleLimitTypeException, ParseException {
         SubscriptionThrottlePolicyDTO policyDTO = new SubscriptionThrottlePolicyDTO();
@@ -65,21 +82,28 @@ public class SubscriptionThrottlePolicyMappingUtil {
 
         byte[] customAttributes = subscriptionPolicy.getCustomAttributes();
         if (customAttributes != null) {
-            List<NameValuePairDTO> nameValuePairDTOs = new ArrayList<>();
+            List<CustomAttributeDTO> customAttributeDTOs = new ArrayList<>();
             JSONParser parser = new JSONParser();
             JSONArray attributeArray = (JSONArray) parser.parse(new String(subscriptionPolicy.getCustomAttributes()));
             for (Object attributeObj : attributeArray) {
                 JSONObject attribute = (JSONObject) attributeObj;
-                NameValuePairDTO pairDTO = CommonThrottleMappingUtil
-                        .getNameValuePair(attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME).toString(),
+                CustomAttributeDTO customAttributeDTO = CommonThrottleMappingUtil
+                        .getCustomAttribute(attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME).toString(),
                                 attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE).toString());
-                nameValuePairDTOs.add(pairDTO);
+                customAttributeDTOs.add(customAttributeDTO);
             }
-            policyDTO.setCustomAttributes(nameValuePairDTOs);
+            policyDTO.setCustomAttributes(customAttributeDTOs);
         }
         return policyDTO;
     }
 
+    /**
+     * Converts a single Subscription Policy DTO into a model object
+     *
+     * @param dto Subscription policy DTO object
+     * @return Converted Subscription policy model object
+     * @throws UnsupportedThrottleLimitTypeException
+     */
     @SuppressWarnings("unchecked")
     public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(SubscriptionThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
@@ -94,13 +118,13 @@ public class SubscriptionThrottlePolicyMappingUtil {
         subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
         subscriptionPolicy.setStopOnQuotaReach(dto.getStopOnQuotaReach());
 
-        List<NameValuePairDTO> customAttributes = dto.getCustomAttributes();
+        List<CustomAttributeDTO> customAttributes = dto.getCustomAttributes();
         if (customAttributes != null && customAttributes.size() > 0) {
             JSONArray customAttrJsonArray = new JSONArray();
-            for (NameValuePairDTO pairDTO : customAttributes) {
+            for (CustomAttributeDTO customAttributeDTO : customAttributes) {
                 JSONObject attrJsonObj = new JSONObject();
-                attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME, pairDTO.getName());
-                attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE, pairDTO.getValue());
+                attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME, customAttributeDTO.getName());
+                attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE, customAttributeDTO.getValue());
                 customAttrJsonArray.add(attrJsonObj);
             }
             subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes());

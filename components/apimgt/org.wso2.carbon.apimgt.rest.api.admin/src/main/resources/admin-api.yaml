@@ -1717,7 +1717,7 @@ definitions:
               Custom attributes added to the Subscription Throttle policy
             type: array
             items:
-              $ref: '#/definitions/NameValuePair'
+              $ref: '#/definitions/CustomAttribute'
             additionalProperties:
               type: string
             example: {}
@@ -2031,9 +2031,9 @@ definitions:
           $ref: '#/definitions/BlockingCondition'
 
 #-----------------------------------------------------
-# Name-Value pair object
+# Custom Attribute object
 #-----------------------------------------------------
-  NameValuePair:
+  CustomAttribute:
     title: Name-Value pair
     properties:
       name:
