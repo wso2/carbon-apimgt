@@ -24,9 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -383,36 +385,41 @@ public class CommonThrottleMappingUtil {
     }
 
     public static <T extends ThrottlePolicyDTO> T updateDefaultMandatoryFieldsOfThrottleDTO(T dto)
-            throws UnsupportedThrottleLimitTypeException {  //todo tenantId
+            throws UnsupportedThrottleLimitTypeException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         dto.setTenantDomain(tenantDomain);
         return dto;
     }
 
-    public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy) //todo tenantId
+    public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy) 
             throws UnsupportedThrottleLimitTypeException {
-
-        policy.setTenantDomain(dto.getTenantDomain());
-        policy.setTenantId(MultitenantConstants.SUPER_TENANT_ID);   // todo check if this needed
+        String tenantDomain = dto.getTenantDomain();
+        policy.setTenantDomain(tenantDomain);
+        policy.setTenantId(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
         policy.setDisplayName(dto.getDisplayName());
         policy.setDeployed(dto.getIsDeployed());
         policy.setDescription(dto.getDescription());
         policy.setPolicyName(dto.getPolicyName());
-        policy.setDefaultQuotaPolicy(fromDTOToQuotaPolicy(dto.getDefaultLimit()));
-
+        if (dto.getDefaultLimit() != null) {
+            policy.setDefaultQuotaPolicy(fromDTOToQuotaPolicy(dto.getDefaultLimit()));
+        }
         return policy;
     }
 
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO (Policy policy, T dto)
-            throws UnsupportedThrottleLimitTypeException {  //todo tenantId
+            throws UnsupportedThrottleLimitTypeException {
 
-        dto.setTenantDomain(policy.getTenantDomain());  //todo becomes null
+        if (policy.getTenantDomain() == null) {
+            dto.setTenantDomain(RestApiUtil.getLoggedInUserTenantDomain());
+        }
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());
         dto.setPolicyName(policy.getPolicyName());
-        dto.setDefaultLimit(fromQuotaPolicyToDTO(policy.getDefaultQuotaPolicy()));
-
+        //DefaultQuotaPolicy is null in Global Policy
+        if (policy.getDefaultQuotaPolicy() != null) {
+            dto.setDefaultLimit(fromQuotaPolicyToDTO(policy.getDefaultQuotaPolicy()));
+        }
         return dto;
     }
 

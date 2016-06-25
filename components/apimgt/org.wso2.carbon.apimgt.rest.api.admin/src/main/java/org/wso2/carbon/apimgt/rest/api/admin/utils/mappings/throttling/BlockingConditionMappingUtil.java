@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
 
@@ -52,7 +54,16 @@ public class BlockingConditionMappingUtil {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getConditionId() + ""); //todo change to uuid
         dto.setConditionType(blockCondition.getConditionType());
-        dto.setConditionValue(blockCondition.getConditionValue());
+        
+        String conditionValue = blockCondition.getConditionValue();
+        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
+            int index = conditionValue.indexOf(":");
+            if (index > -1) {
+                // Removing Tenant Domain from IP
+                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
+            }
+        }
+        dto.setConditionValue(conditionValue);
         dto.setEnabled(blockCondition.isEnabled());
         return dto;
     }

@@ -56,6 +56,10 @@ public class GlobalThrottlePolicyMappingUtil {
 
     public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(GlobalThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
+
+        //update mandatory fields such as tenantDomain etc.
+        dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
+
         GlobalPolicy globalPolicy = new GlobalPolicy(dto.getPolicyName());
         globalPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, globalPolicy);
         globalPolicy.setKeyTemplate(dto.getKeyTemplate());

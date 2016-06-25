@@ -83,6 +83,10 @@ public class SubscriptionThrottlePolicyMappingUtil {
     @SuppressWarnings("unchecked")
     public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(SubscriptionThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
+
+        //update mandatory fields such as tenantDomain etc.
+        dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
+
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(dto.getPolicyName());
         subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
         subscriptionPolicy.setBillingPlan(dto.getBillingPlan());

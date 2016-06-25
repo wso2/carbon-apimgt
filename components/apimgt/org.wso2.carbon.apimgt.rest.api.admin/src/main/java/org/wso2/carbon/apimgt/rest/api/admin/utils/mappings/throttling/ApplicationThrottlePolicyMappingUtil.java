@@ -55,7 +55,9 @@ public class ApplicationThrottlePolicyMappingUtil {
 
     public static ApplicationPolicy fromApplicationThrottlePolicyDTOToModel (ApplicationThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
-        Base64  base64 = new Base64(false);
+        //update mandatory fields such as tenantDomain etc.
+        dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
+
         ApplicationPolicy appPolicy = new ApplicationPolicy(dto.getPolicyName());
         appPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, appPolicy);
         return appPolicy;

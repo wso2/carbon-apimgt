@@ -123,7 +123,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
-
+    //todo  test this. This failed in 24/06 pack
     @Override
     public Response throttlingPoliciesAdvancedPoliciesPolicyNameDelete(String policyName,String ifMatch,String ifUnmodifiedSince){
         try {
@@ -226,7 +226,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
-
+    //todo  test this. This failed in 24/06 pack
     @Override
     public Response throttlingPoliciesApplicationPolicyNameDelete(String policyName,String ifMatch,String ifUnmodifiedSince){
         try {
@@ -306,7 +306,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
-    //************* NOT CHECKED ***************/  todo START HERE
+
     @Override
     public Response throttlingPoliciesSubscriptionPolicyNamePut(String policyName,SubscriptionThrottlePolicyDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         try {
@@ -328,6 +328,9 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         }
         return null;
     }
+
+
+    //todo  test this. This failed in 24/06 pack
     @Override
     public Response throttlingPoliciesSubscriptionPolicyNameDelete(String policyName,String ifMatch,String ifUnmodifiedSince){
         try {
@@ -342,6 +345,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         }
         return null;
     }
+
 
     @Override
     public Response throttlingPoliciesGlobalGet(Integer limit, Integer offset, String accept,
@@ -439,6 +443,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+
     @Override
     public Response throttlingBlockingConditionsGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
@@ -461,7 +466,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
-
+            //todo implement UUID for retrieving
             //retrieve the new blocking condition and send back as the response
             /*BlockConditionsDTO newBlockingCondition = apiProvider.getBlockCondition();
             GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
