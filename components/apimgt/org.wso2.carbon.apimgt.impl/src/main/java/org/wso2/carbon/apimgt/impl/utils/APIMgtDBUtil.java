@@ -18,10 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -186,28 +188,12 @@ public final class APIMgtDBUtil {
      * @return - The inputStream as a String
      */
     public static String getStringFromInputStream(InputStream is) {
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-
-        String line;
+        String str = null;
         try {
-
-            br = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset()));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
+            str = IOUtils.toString(is, "UTF-8");
         } catch (IOException e) {
-            log.error("Error occurred while reading from buffered reader.", e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    log.error("Error occurred while closing the buffered reader.", e);
-                }
-            }
+            log.error("Error occurred while converting input stream to string.", e);
         }
-        return sb.toString();
-
+        return str;
     }
 }
