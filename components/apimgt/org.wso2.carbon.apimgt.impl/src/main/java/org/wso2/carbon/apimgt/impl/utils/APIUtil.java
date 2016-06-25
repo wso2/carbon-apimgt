@@ -3583,20 +3583,29 @@ public final class APIUtil {
     /**
      * Helper method to get tenantId from userName
      *
-     * @param userName
+     * @param userName user name
      * @return tenantId
-     * @throws APIManagementException
      */
     public static int getTenantId(String userName) {
         //get tenant domain from user name
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        return getTenantIdFromTenantDomain(tenantDomain);
+    }
+
+    /**
+     * Helper method to get tenantId from tenantDomain
+     *
+     * @param tenantDomain tenant Domain
+     * @return tenantId
+     */
+    public static int getTenantIdFromTenantDomain(String tenantDomain) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
 
         if (realmService == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
 
-        try {           
+        try {
             return realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
             log.error(e.getMessage(), e);
