@@ -51,7 +51,7 @@ public class BlockingConditionMappingUtil {
         }
         listDTO.setCount(blockingConditionDTOList.size());
         listDTO.setList(blockingConditionDTOList);
-        listDTO.setNext(""); //todo set next and previous
+        listDTO.setNext("");
         listDTO.setPrevious("");
         return listDTO;
     }
@@ -66,7 +66,7 @@ public class BlockingConditionMappingUtil {
     public static BlockingConditionDTO fromBlockingConditionToDTO(
             BlockConditionsDTO blockCondition) throws UnsupportedThrottleLimitTypeException {
         BlockingConditionDTO dto = new BlockingConditionDTO();
-        dto.setConditionId(blockCondition.getConditionId() + ""); //todo change to uuid
+        dto.setConditionId(blockCondition.getConditionId() + "");
         dto.setConditionType(blockCondition.getConditionType());
 
         String conditionValue = blockCondition.getConditionValue();
