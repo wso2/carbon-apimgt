@@ -16,19 +16,19 @@
 *under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+public enum JWTSignatureAlg {
 
-/**
- * This interface can be used to Generate a Token with the invoking user's details.
- */
-public interface TokenGenerator {
+    SHA256_WITH_RSA("RS256"), NONE("none");
 
+    private String jwsCompliantCode;
 
-    @Deprecated
-    String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version) throws APIManagementException;
-    String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
-                                String accessToken) throws APIManagementException;
+    JWTSignatureAlg(String s){
+        jwsCompliantCode = s;
+    }
+
+    public String getJwsCompliantCode() {
+        return jwsCompliantCode;
+    }
 }

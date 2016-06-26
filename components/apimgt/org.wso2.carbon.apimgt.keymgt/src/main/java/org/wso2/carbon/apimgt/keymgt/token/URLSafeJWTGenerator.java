@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;

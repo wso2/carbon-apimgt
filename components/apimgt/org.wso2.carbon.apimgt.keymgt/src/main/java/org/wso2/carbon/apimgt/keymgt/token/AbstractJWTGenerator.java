@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
@@ -30,10 +30,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -81,7 +82,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public AbstractJWTGenerator() {
 
-
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
         if (dialectURI == null) {
@@ -93,7 +93,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                                             || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
-
 
         String claimsRetrieverImplClass =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -123,33 +122,25 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return claimsRetriever;
     }
 
-    public abstract Map<String, String> populateStandardClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
+    public abstract Map<String, String> populateStandardClaims(TokenValidationContext validationContext)
             throws APIManagementException;
 
-    public abstract Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
-            String version, String accessToken) throws APIManagementException;
-
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
-            throws APIManagementException {
-        //To have backward compatibility with implementations done based on TokenGenerator interface
-        return generateToken(keyValidationInfoDTO, apiContext, version,null);
-    }
+    public abstract Map<String, String> populateCustomClaims(TokenValidationContext validationContext) throws APIManagementException;
 
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
         return Base64Utils.encode(stringToBeEncoded);
     }
 
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
-                                String accessToken) throws APIManagementException {
+    public String generateToken(TokenValidationContext validationContext) throws APIManagementException{
 
-        String jwtHeader = buildHeader(keyValidationInfoDTO);
+        String jwtHeader = buildHeader(validationContext);
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
             base64UrlEncodedHeader = encode(jwtHeader.getBytes(Charset.defaultCharset()));
         }
 
-        String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version, accessToken);
+        String jwtBody = buildBody(validationContext);
         String base64UrlEncodedBody = "";
         if (jwtBody != null) {
             base64UrlEncodedBody = encode(jwtBody.getBytes());
@@ -159,7 +150,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
 
             //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
+            byte[] signedAssertion = signJWT(assertion, validationContext.getValidationInfoDTO().getEndUserName());
 
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
@@ -173,8 +164,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     }
 
 
-
-    public String buildHeader(APIKeyValidationInfoDTO keyValidationInfoDTO) throws APIManagementException {
+    public String buildHeader(TokenValidationContext tokenValidationContext) throws APIManagementException {
         String jwtHeader = null;
 
         //if signature algo==NONE, header without cert
@@ -189,18 +179,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             jwtHeader = jwtHeaderBuilder.toString();
 
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            jwtHeader = addCertToHeader(keyValidationInfoDTO.getEndUserName());
+            jwtHeader = addCertToHeader(tokenValidationContext.getValidationInfoDTO().getEndUserName());
         }
         return jwtHeader;
     }
 
-    public String buildBody(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
-                            String accessToken) throws APIManagementException {
-        Map<String, String> standardClaims = populateStandardClaims(keyValidationInfoDTO, apiContext, version);
-        Map<String, String> customClaims = populateCustomClaims(keyValidationInfoDTO, apiContext, version, accessToken);
+    public String buildBody(TokenValidationContext validationContext) throws APIManagementException {
+
+        Map<String, String> standardClaims = populateStandardClaims(validationContext);
+        Map<String, String> customClaims = populateCustomClaims(validationContext);
 
         //get tenantId
-        int tenantId = APIUtil.getTenantId(keyValidationInfoDTO.getEndUserName());
+        int tenantId = APIUtil.getTenantId(validationContext.getValidationInfoDTO().getEndUserName());
 
         String claimSeparator = getMultiAttributeSeparator(tenantId);
         if (StringUtils.isNotBlank(claimSeparator)) {
@@ -243,6 +233,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
         return null;
     }
+
 
     private byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 

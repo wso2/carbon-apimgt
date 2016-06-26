@@ -16,13 +16,14 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 
 public class JWTSignatureAlgTestCase extends TestCase {
 

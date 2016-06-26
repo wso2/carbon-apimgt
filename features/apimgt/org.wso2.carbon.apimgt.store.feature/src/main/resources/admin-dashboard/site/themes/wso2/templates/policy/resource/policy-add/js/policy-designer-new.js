@@ -66,11 +66,11 @@ var addPolicy = function () {
         "quotaPolicy": {
             "type": "",
             "limit": {
-                "requestCount": 0,
-                "unitTime": 60,
-                "timeUnit": "sec",
-                "dataAmount": 0,
-                "dataUnit": ""
+                "requestCount": 5,
+                "unitTime": 1,
+                "timeUnit": "min",
+                "dataAmount": 1,
+                "dataUnit": "KB"
             }
         },
         "conditions": [

@@ -1970,7 +1970,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("oracle")) {
                 query = "SELECT " + APIUsageStatisticsClientConstants.TIME + ','
                         + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + "FROM (SELECT "
+                        + APIUsageStatisticsClientConstants.DAY + " FROM (SELECT "
                         + APIUsageStatisticsClientConstants.TIME + ',' + APIUsageStatisticsClientConstants.YEAR + ','
                         + APIUsageStatisticsClientConstants.MONTH + ',' + APIUsageStatisticsClientConstants.DAY
                         + " FROM " + columnFamily + " order by " + APIUsageStatisticsClientConstants.TIME

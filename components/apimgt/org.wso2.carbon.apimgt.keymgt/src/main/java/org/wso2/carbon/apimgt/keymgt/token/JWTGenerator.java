@@ -15,24 +15,26 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.apimgt.impl.token;
+package org.wso2.carbon.apimgt.keymgt.token;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class JWTGenerator extends AbstractJWTGenerator {
 
     private static final Log log = LogFactory.getLog(JWTGenerator.class);
 
 
-    public Map<String, String> populateStandardClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
+    @Override
+    public Map<String, String> populateStandardClaims(TokenValidationContext validationContext)
             throws APIManagementException {
 
         //generating expiring timestamp
@@ -42,19 +44,19 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String dialect;
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            dialect = claimsRetriever.getDialectURI(keyValidationInfoDTO.getEndUserName());
+            dialect = claimsRetriever.getDialectURI(validationContext.getValidationInfoDTO().getEndUserName());
         } else {
             dialect = getDialectURI();
         }
 
-        String subscriber = keyValidationInfoDTO.getSubscriber();
-        String applicationName = keyValidationInfoDTO.getApplicationName();
-        String applicationId = keyValidationInfoDTO.getApplicationId();
-        String tier = keyValidationInfoDTO.getTier();
-        String endUserName = keyValidationInfoDTO.getEndUserName();
-        String keyType = keyValidationInfoDTO.getType();
-        String userType = keyValidationInfoDTO.getUserType();
-        String applicationTier = keyValidationInfoDTO.getApplicationTier();
+        String subscriber = validationContext.getValidationInfoDTO().getSubscriber();
+        String applicationName = validationContext.getValidationInfoDTO().getApplicationName();
+        String applicationId = validationContext.getValidationInfoDTO().getApplicationId();
+        String tier = validationContext.getValidationInfoDTO().getTier();
+        String endUserName = validationContext.getValidationInfoDTO().getEndUserName();
+        String keyType = validationContext.getValidationInfoDTO().getType();
+        String userType = validationContext.getValidationInfoDTO().getUserType();
+        String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
 
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
@@ -65,25 +67,24 @@ public class JWTGenerator extends AbstractJWTGenerator {
         claims.put(dialect + "/applicationid", applicationId);
         claims.put(dialect + "/applicationname", applicationName);
         claims.put(dialect + "/applicationtier", applicationTier);
-        claims.put(dialect + "/apicontext", apiContext);
-        claims.put(dialect + "/version", version);
+        claims.put(dialect + "/apicontext", validationContext.getContext());
+        claims.put(dialect + "/version", validationContext.getVersion());
         claims.put(dialect + "/tier", tier);
         claims.put(dialect + "/keytype", keyType);
         claims.put(dialect + "/usertype", userType);
         claims.put(dialect + "/enduser",
-                UserCoreUtil.removeDomainFromName(APIUtil.getUserNameWithTenantSuffix(endUserName)));
+                   UserCoreUtil.removeDomainFromName(APIUtil.getUserNameWithTenantSuffix(endUserName)));
         claims.put(dialect + "/enduserTenantId", enduserTenantId);
 
         return claims;
     }
 
-
-    public Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
-                                                    String version, String accessToken) throws APIManagementException {
-
+    @Override
+    public Map<String, String> populateCustomClaims(TokenValidationContext validationContext)
+            throws APIManagementException {
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            String tenantAwareUserName = keyValidationInfoDTO.getEndUserName();
+            String tenantAwareUserName = validationContext.getValidationInfoDTO().getEndUserName();
             try {
                 return claimsRetriever.getClaims(tenantAwareUserName);
 
@@ -91,7 +92,6 @@ public class JWTGenerator extends AbstractJWTGenerator {
                 log.error("Error while retrieving claims ", e);
             }
         }
-
         return null;
     }
 }
