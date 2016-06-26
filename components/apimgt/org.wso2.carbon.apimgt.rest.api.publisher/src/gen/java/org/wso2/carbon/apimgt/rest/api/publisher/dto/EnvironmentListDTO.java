@@ -1,15 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentDTO;
+import java.util.*;
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-
-
 
 
 
@@ -25,9 +22,9 @@ public class EnvironmentListDTO  {
 
   
   /**
-   * Number of Environments returned.\n
+   * Number of Environments returned.
    **/
-  @ApiModelProperty(value = "Number of Environments returned.\n")
+  @ApiModelProperty(value = "Number of Environments returned.")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

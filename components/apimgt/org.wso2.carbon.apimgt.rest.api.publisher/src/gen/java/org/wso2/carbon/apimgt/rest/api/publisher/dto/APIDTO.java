@@ -1,17 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
+import java.util.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-
-
 
 
 
@@ -105,9 +102,9 @@ public class APIDTO  {
 
   
   /**
-   * UUID of the api registry artifact\n
+   * UUID of the api registry artifact
    **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+  @ApiModelProperty(value = "UUID of the api registry artifact")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -166,9 +163,9 @@ public class APIDTO  {
 
   
   /**
-   * If the provider value is not given user invoking the api will be used as the provider.\n
+   * If the provider value is not given user invoking the api will be used as the provider.
    **/
-  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.\n")
+  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -179,9 +176,9 @@ public class APIDTO  {
 
   
   /**
-   * Swagger definition of the API which contains details about URI templates and scopes\n
+   * Swagger definition of the API which contains details about URI templates and scopes
    **/
-  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes\n")
+  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes")
   @JsonProperty("apiDefinition")
   public String getApiDefinition() {
     return apiDefinition;
@@ -252,9 +249,9 @@ public class APIDTO  {
 
   
   /**
-   * Supported transports for the API (http and/or https).\n
+   * Supported transports for the API (http and/or https).
    **/
-  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).\n")
+  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -349,9 +346,9 @@ public class APIDTO  {
 
   
   /**
-   * Comma separated list of gateway environments.\n
+   * Comma separated list of gateway environments.
    **/
-  @ApiModelProperty(value = "Comma separated list of gateway environments.\n")
+  @ApiModelProperty(value = "Comma separated list of gateway environments.")
   @JsonProperty("gatewayEnvironments")
   public String getGatewayEnvironments() {
     return gatewayEnvironments;

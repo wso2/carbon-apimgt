@@ -1,15 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorListItemDTO;
+import java.util.*;
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-
-
 
 
 
@@ -59,9 +56,9 @@ public class ErrorDTO  {
 
   
   /**
-   * A detail description about the error message.\n
+   * A detail description about the error message.
    **/
-  @ApiModelProperty(value = "A detail description about the error message.\n")
+  @ApiModelProperty(value = "A detail description about the error message.")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -72,9 +69,9 @@ public class ErrorDTO  {
 
   
   /**
-   * Preferably an url with more details about the error.\n
+   * Preferably an url with more details about the error.
    **/
-  @ApiModelProperty(value = "Preferably an url with more details about the error.\n")
+  @ApiModelProperty(value = "Preferably an url with more details about the error.")
   @JsonProperty("moreInfo")
   public String getMoreInfo() {
     return moreInfo;
@@ -85,9 +82,9 @@ public class ErrorDTO  {
 
   
   /**
-   * If there are more than one error list them out.\nFor example, list out validation errors by each field.\n
+   * If there are more than one error list them out.\nFor example, list out validation errors by each field.
    **/
-  @ApiModelProperty(value = "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n")
+  @ApiModelProperty(value = "If there are more than one error list them out.\nFor example, list out validation errors by each field.")
   @JsonProperty("error")
   public List<ErrorListItemDTO> getError() {
     return error;

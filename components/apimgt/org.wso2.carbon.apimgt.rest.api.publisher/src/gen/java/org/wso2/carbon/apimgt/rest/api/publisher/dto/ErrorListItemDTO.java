@@ -2,11 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-
-
 
 
 
@@ -34,9 +32,9 @@ public class ErrorListItemDTO  {
 
   
   /**
-   * Description about individual errors occurred\n
+   * Description about individual errors occurred
    **/
-  @ApiModelProperty(required = true, value = "Description about individual errors occurred\n")
+  @ApiModelProperty(required = true, value = "Description about individual errors occurred")
   @JsonProperty("message")
   public String getMessage() {
     return message;
