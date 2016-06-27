@@ -7820,6 +7820,10 @@ ul.sidebar-messages > li {
   text-decoration: underline;
 }
 
+.body-wrapper a.btn:hover {
+  text-decoration: none;
+}
+
 @media (max-width: 767px) {
   .body-wrapper {
     padding: 40px 0px;
