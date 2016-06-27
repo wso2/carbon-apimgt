@@ -26,7 +26,7 @@ var loganalyzerDashboard = {
     },
     "pages": [
         {
-            "id": "page0",
+            "id": "overview",
             "title": "Overview",
             "layout": {
                 "content": {
@@ -136,7 +136,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page1",
+            "id": "application-errors",
             "title": "Application Errors",
             "layout": {
                 "content": {
@@ -356,7 +356,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page2",
+            "id": "api-deployment-stats",
             "title": "API Deployment Stats",
             "layout": {
                 "content": {
@@ -516,7 +516,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page3",
+            "id": "login-errors",
             "title": "Login Errors",
             "layout": {
                 "content": {
@@ -632,7 +632,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page4",
+            "id": "number-of-api-failures",
             "title": "Number of API Failures",
             "layout": {
                 "content": {
@@ -736,7 +736,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page5",
+            "id": "access-token-errors",
             "title": "Access Token Errors",
             "layout": {
                 "content": {
@@ -942,7 +942,7 @@ var loganalyzerDashboard = {
             }
         },
         {
-            "id": "page6",
+            "id": "live-log-viewer",
             "title": "Live Log Viewer",
             "layout": {
                 "content": {
