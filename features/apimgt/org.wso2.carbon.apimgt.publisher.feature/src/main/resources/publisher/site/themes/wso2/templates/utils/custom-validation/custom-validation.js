@@ -134,6 +134,11 @@ $(document).ready(function() {
         return !regexForwardSlashAtEnd.test(value);
     }, 'Name or Context contains / at the end');
 
+    $.validator.addMethod('validateAPIVersion', function(value, element)    {
+        var illegalChars = /([~!@#;%^*+=\|\\<>\"\'\/,])/;
+        return !illegalChars.test(value);
+    }, 'Version contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; &gt;, \' " \\) .');
+
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;
     }, 'maximum support 20000 characters only');
