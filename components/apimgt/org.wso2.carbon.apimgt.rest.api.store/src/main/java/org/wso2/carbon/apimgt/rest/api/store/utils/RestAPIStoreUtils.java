@@ -94,9 +94,7 @@ public class RestAPIStoreUtils {
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
         if (apiIdentifier != null && application != null) {
             try {
-                String tenantDomain = MultitenantUtils
-                        .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                if (!isUserAccessAllowedForAPI(apiIdentifier.toString(), tenantDomain)) {
+                if (!isUserAccessAllowedForAPI(apiIdentifier)) {
                     return false;
                 }
             } catch (APIManagementException e) {
@@ -128,6 +126,37 @@ public class RestAPIStoreUtils {
         //this is just to check whether the user has access to the api or the api exists. 
         try {
             APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                String message =
+                        "user " + username + " failed to access the API " + apiId + " due to an authorization failure";
+                log.info(message);
+                return false;
+            } else {
+                //This is an unexpected failure
+                String message =
+                        "Failed to retrieve the API " + apiId + " to check user " + username + " has access to the API";
+                throw new APIManagementException(message, e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check whether the specified API exists and the current logged in user has access to it.
+     *
+     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user 
+     * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
+     *
+     * @param apiId API identifier
+     * @throws APIManagementException
+     */
+    public static boolean isUserAccessAllowedForAPI(APIIdentifier apiId) throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        //this is just to check whether the user has access to the api or the api exists. 
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            apiConsumer.getLightweightAPI(apiId);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =
