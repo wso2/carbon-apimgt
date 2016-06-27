@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
-import org.wso2.carbon.apimgt.api.model.policy.IPRangeCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -74,8 +73,8 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
+//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -139,34 +138,11 @@ import java.util.regex.Pattern;
 public class ApiMgtDAO {
     private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
 
-    private TokenGenerator tokenGenerator = null;
     private boolean forceCaseInsensitiveComparisons = false;
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized");
-        } else {
-            String enableJWTGeneration = configuration.getFirstProperty(APIConstants.ENABLE_JWT_GENERATION);
-            if (enableJWTGeneration != null && JavaUtils.isTrueExplicitly(enableJWTGeneration)) {
-                String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
-                if (clazz == null) {
-                    tokenGenerator = new JWTGenerator();
-                } else {
-                    try {
-                        tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz).newInstance();
-                    } catch (InstantiationException e) {
-                        log.error("Error while instantiating class " + clazz, e);
-                    } catch (IllegalAccessException e) {
-                        log.error(e);
-                    } catch (ClassNotFoundException e) {
-                        log.error("Cannot find the class " + clazz + e);
-                    }
-                }
-            }
-        }
 
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
@@ -717,11 +693,6 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else {
                         keyValidationInfoDTO.setAuthorized(true);
-
-                        if (tokenGenerator != null) {
-                            String jwtToken = generateJWTToken(keyValidationInfoDTO, context, version, accessToken);
-                            keyValidationInfoDTO.setEndUserToken(jwtToken);
-                        }
                     }
                 } else {
                     keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus
@@ -982,19 +953,6 @@ public class ApiMgtDAO {
 		}
 		return isAnyContentAware;
 	}
-
-
-
-    private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
-            throws APIManagementException {
-        return tokenGenerator.generateToken(keyValidationInfoDTO, context, version);
-    }
-
-
-    private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version,
-                                    String accessToken) throws APIManagementException {
-        return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
-    }
 
     private void updateTokenState(String accessToken, Connection conn, PreparedStatement ps)
             throws SQLException, APIManagementException, CryptoException {
@@ -6344,53 +6302,6 @@ public class ApiMgtDAO {
         throw new APIManagementException(msg, t);
     }
 
-    /**
-     * Generates fresh JWT token for given information of validation information
-     *
-     * @param context              String context for API
-     * @param version              version of API
-     * @param keyValidationInfoDTO APIKeyValidationInfoDTO
-     * @return signed JWT token string
-     * @throws APIManagementException error in generating token
-     */
-    @Deprecated
-    public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO)
-            throws APIManagementException {
-        String calleeToken = null;
-
-        if (tokenGenerator != null) {
-            calleeToken = generateJWTToken(keyValidationInfoDTO, context, version);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("JWT generator not properly initialized. JWT token will not present in validation info");
-            }
-        }
-        return calleeToken;
-    }
-
-    /**
-     * Generates fresh JWT token for given information of validation information
-     *
-     * @param context              String context for API
-     * @param version              version of API
-     * @param keyValidationInfoDTO APIKeyValidationInfoDTO
-     * @return signed JWT token string
-     * @throws APIManagementException error in generating token
-     */
-    @Deprecated
-    public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO,
-                                       String accessToken) throws APIManagementException {
-        String calleeToken = null;
-
-        if (tokenGenerator != null) {
-            calleeToken = generateJWTToken(keyValidationInfoDTO, context, version, accessToken);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("JWT generator not properly initialized. JWT token will not present in validation info");
-            }
-        }
-        return calleeToken;
-    }
 
     public HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
             throws APIManagementException {
@@ -8252,9 +8163,9 @@ public class ApiMgtDAO {
         return tokens;
     }
 
-    public TokenGenerator getTokenGenerator() {
-        return tokenGenerator;
-    }
+//    public TokenGenerator getTokenGenerator() {
+//        return tokenGenerator;
+//    }
 
     private String getAccessTokenStoreTableNameOfUserId(String userId, String accessTokenStoreTable)
             throws APIManagementException {
@@ -9205,7 +9116,7 @@ public class ApiMgtDAO {
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-
+                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
                     siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
@@ -9250,7 +9161,7 @@ public class ApiMgtDAO {
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-
+                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
                     siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
@@ -9384,6 +9295,8 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (blob != null) {
                     byte[] customAttrib = blob.getBytes(1, (int) blob.length());

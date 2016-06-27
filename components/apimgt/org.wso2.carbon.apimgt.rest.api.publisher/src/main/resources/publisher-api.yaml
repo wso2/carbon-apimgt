@@ -1094,7 +1094,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application
+        - Applications
       responses:
         200:
           description: |
@@ -2570,6 +2570,3 @@ definitions:
         type: string
         description: HTTPS environment URL
         example: "https://localhost:8244"
-#-----------------------------------------------------
-# END-OF-FILE
-#-----------------------------------------------------

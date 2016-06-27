@@ -4097,6 +4097,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
+        return apiMgtDAO.getBlockCondition(conditionId);
+    }
+
+    @Override
     public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
 
         boolean updateState = apiMgtDAO.updateBlockConditionState(conditionId,state);
@@ -4158,9 +4163,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
+    @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-        return policy;
+        return apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
+        return apiMgtDAO.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+        return apiMgtDAO.getGlobalPolicy(policyName);
     }
 
     /**

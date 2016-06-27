@@ -226,6 +226,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriptionLevelTier = authContext.getTier();
                 resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                 apiLevelTier = authContext.getApiTier();
+                resourceLevelTier = verbInfoDTO.getThrottling();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -279,7 +280,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
                                     }
 
-                                    resourceLevelTier = verbInfoDTO.getThrottling();
                                     if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                             isThrottled(combinedResourceLevelThrottleKey)) {
                                         if (!apiLevelThrottledTriggered) {

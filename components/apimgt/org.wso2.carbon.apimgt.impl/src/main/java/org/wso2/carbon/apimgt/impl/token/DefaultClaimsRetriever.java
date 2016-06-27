@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
-import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultClaimsRetriever implements ClaimsRetriever {
     //TODO refactor caching implementation
 
-    private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
+    private String dialectURI = DEFAULT_DIALECT_URI;
 
     private  boolean isClaimsCacheInitialized = false;
     /**
@@ -59,7 +59,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
         if (dialectURI == null) {
-            dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
+            dialectURI = DEFAULT_DIALECT_URI;
         }
     }
 

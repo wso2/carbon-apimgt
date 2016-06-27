@@ -227,15 +227,15 @@ var jsonToObject = function (policy) {
         // Extracting basic policy info
         var policyName = policy.policyName;
         var policyLevel = policy.policyLevel;
+        if(policyLevel == null || policyLevel == "") {
+            policyLevel = "apiLevel";
+        }
         var policyDescription = policy.policyDescription;
         var pipeline = policy.executionFlows;
         var apiPolicyobj = new APIPolicy(policyName);
         apiPolicyobj.setUserLevel(policyLevel);
         apiPolicyobj.setDescription(policyDescription);
         //exract pipeline info
-        log.info("start");
-        log.info(policy);
-        log.info(pipeline.length);
         var isPipelinePresent = false;
         var pipeLines = new ArrayList();
         for (var i = 0 ; i < pipeline.length; i++) {
@@ -527,7 +527,6 @@ var objectToJson = function (policy) {
             apiPolicy.executionFlows.push(executionFlow);
         }
     }
-    log.info(apiPolicy);
     return apiPolicy;
 };
 %>

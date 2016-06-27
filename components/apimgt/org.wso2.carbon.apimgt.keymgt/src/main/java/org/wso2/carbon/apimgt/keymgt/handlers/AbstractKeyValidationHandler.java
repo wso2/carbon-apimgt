@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -137,8 +137,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
       TokenGenerator generator = APIKeyMgtDataHolder.getTokenGenerator();
 
         try {
-            String jwt = generator.generateToken(validationContext.getValidationInfoDTO(),
-                    validationContext.getContext(), validationContext.getVersion(), validationContext.getAccessToken());
+            String jwt = generator.generateToken(validationContext);
             validationContext.getValidationInfoDTO().setEndUserToken(jwt);
             return true;
 
