@@ -143,6 +143,9 @@ function removeCustomAttribute(count){
 }
 
 function htmlEscape(str) {
+    if(str == null || str == "") {
+        return "";
+    }
     return String(str)
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')

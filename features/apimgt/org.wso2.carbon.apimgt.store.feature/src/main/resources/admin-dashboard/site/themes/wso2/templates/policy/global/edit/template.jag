@@ -113,6 +113,8 @@ var isNewPolicy = true;
           $('#description').val("<%=encode.forJavaScript(String(description))%>");
           $('#keyTemplate').val("<%=encode.forJavaScript(String(keyTemplate))%>");
           $('#siddhiQuery').val("<%=encode.forJavaScript(String(siddhiQuery))%>");
+        } else {
+            $('#description').val('');
         }
       
       var parameterArray = ("<%=streamParameters%>").split(',');

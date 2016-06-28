@@ -842,6 +842,8 @@ $(document).ready(function() {
     	    else if("<%=defaultQuotaPolicy%>" == ("bandwidthVolume")){
             	   $('#bandwidthType').prop('checked',true);
              }
+        } else {
+            $('#description').val('');
         }
         showHideDefaultQuotaPolicy();
     });

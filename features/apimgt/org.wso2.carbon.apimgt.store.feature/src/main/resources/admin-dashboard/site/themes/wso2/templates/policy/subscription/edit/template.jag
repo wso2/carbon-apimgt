@@ -335,6 +335,7 @@
           $('#tierPlan').val("<%=tierPlan%>");
         } else {
              $('#stopOnQuotaReach').attr('checked', true);
+             $('#description').val('');
         }
         showHideDefaultQuotaPolicy();
 
