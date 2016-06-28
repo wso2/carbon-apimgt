@@ -386,11 +386,12 @@ public class RestApiUtil {
     /**
      * Returns a new ConflictException
      * 
+     * @param message summary of the error
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
      */
-    public static ConflictException buildConflictException(String description) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_CONFLCIT_MESSAGE_DEFAULT, 409l, description);
+    public static ConflictException buildConflictException(String message, String description) {
+        ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
         return new ConflictException(errorDTO);
     }
 
@@ -585,7 +586,23 @@ public class RestApiUtil {
      */
     public static void handleResourceAlreadyExistsError(String description, Log log)
             throws ConflictException {
-        ConflictException conflictException = buildConflictException(description);
+        ConflictException conflictException = buildConflictException(
+                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
+        log.error(description);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleConflict(String description, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(RestApiConstants.STATUS_CONFLICT_MESSAGE_DEFAULT,
+                description);
         log.error(description);
         throw conflictException;
     }
@@ -600,7 +617,8 @@ public class RestApiUtil {
      */
     public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
             throws ConflictException {
-        ConflictException conflictException = buildConflictException(description);
+        ConflictException conflictException = buildConflictException(
+                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
         log.error(description, t);
         throw conflictException;
     }
