@@ -72,6 +72,9 @@ a.btn .icon-caret, .btn .icon-caret {
 ul.nav.nav-tabs {
     background-color: #ddd;
 }
+.nav-tabs > li > a{
+    color: #222;
+}
 .white-wrapper>.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover .nav-tabs>li.active>a:visited .nav-tabs>li.active>a:active {
     background-color: #fff;
     border: 1px solid #fff;
