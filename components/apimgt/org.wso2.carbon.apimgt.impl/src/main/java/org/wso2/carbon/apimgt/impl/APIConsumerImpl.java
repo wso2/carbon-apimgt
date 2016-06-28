@@ -2661,10 +2661,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
-        // we should have unique names for applications. There for we will
-        // append, the word 'production' or 'sandbox'
-        // according to the token type.
-        StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
+
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         try {
@@ -2742,9 +2739,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
-                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
+                    ApplicationUtils.createOauthAppRequest(applicationName, null,
                             callbackUrl, authScopeString, jsonString);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
+            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related
@@ -3139,6 +3137,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //Create OauthAppRequest object by passing json String.
         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
                                                                                  tokenScope, jsonString);
+
+        oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
 
         String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
                                                                            groupingId);
