@@ -157,8 +157,24 @@ a.remove_rating:hover{
 .login-form-wrapper .form-horizontal{
     max-width:100%;
 }
-
-
+.modal-content{
+    background: #FFF;
+    color:#000;
+ }
+ .modal-header h3{
+    padding: 0px;
+ }
+ .modal-header{
+    background: #f1f1f1;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+ }
+ .modal-header .close{
+    color:#222;
+    margin-top: 6px;
+    font-size: 16px;
+ }
 .extended-form{
     display: none;
 }

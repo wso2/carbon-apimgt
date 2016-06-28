@@ -7838,6 +7838,10 @@ ul.sidebar-messages > li {
   text-decoration: underline;
 }
 
+.body-wrapper a.btn:hover {
+  text-decoration: none;
+}
+
 @media (max-width: 767px) {
   .body-wrapper {
     padding: 40px 0px;
@@ -9553,22 +9557,30 @@ nav.navigation .second_level > .left-menu-item {
 }
 
 .tag-content {
+  display: inline-block;
   word-wrap: break-word;
   width: 200px;
-  padding-left: 10px;
+  padding: 10px;
   line-height: 30px;
   border-right: 1px solid #e9e9e9;
   border-bottom: 2px solid #e9e9e9;
-  padding-bottom: 15px;
   background-color: #FBFBFB;
-  padding-top: 7px;
-  display: inline-block;
 }
 
 .tag-content a {
   display: block;
   float: left;
-  padding: 0px 5px;
+  padding: 0px 6px;
+  margin: 4px;
+  line-height: 24px;
+  background: #f1f1f1;
+  border: 1px solid #e6e6e6;
+}
+
+.tag-content a:hover, .tag-content a:active {
+  background: #FBFBFB;
+  border: 1px solid #FBFBFB;
+  text-decoration: underline;
 }
 
 .tag-content > label {

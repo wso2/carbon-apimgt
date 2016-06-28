@@ -527,7 +527,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div  id="advance_endpoint_config" class="modal hide fade">
                          <div class="modal-header">
                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                         <h3>Advanced Endpoint Configuration</h3>
+                         <h3 class="modal-title">Advanced Endpoint Configuration</h3>
                          </div>
                          <div class="modal-body form-horizontal">
                          <form id="advance_form"></form>
