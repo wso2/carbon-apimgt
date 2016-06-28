@@ -932,7 +932,8 @@ $(document).ready(function(){
                         theme: 'wso2',
                         text: $('#apiSaved').text(),
                         layout:'top',
-                        type:'success'
+                        type:'success',
+                        timeout : '3000'
                     });
                 } else {
                     if (responseText.message == "timeout") {

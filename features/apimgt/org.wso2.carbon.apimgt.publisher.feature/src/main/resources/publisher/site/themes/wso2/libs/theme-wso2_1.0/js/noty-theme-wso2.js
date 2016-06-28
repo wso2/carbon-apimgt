@@ -19,7 +19,7 @@ $.noty.themes.wso2 = {
         this.$bar.css({
             overflow    : 'hidden',
             margin      : '4px 0',
-            borderRadius: '2px'
+            borderRadius: '0px'
         });
 
         this.$message.css({
@@ -66,11 +66,6 @@ $.noty.themes.wso2 = {
 
         switch(this.options.layout.name) {
             case 'top':
-                console.log(this.options.layout);
-                this.$bar.css({
-                        top          : '80px!important',
-                        zIndex       : '9999999!important'
-                    });
                 this.$bar.css({
                     borderBottom: '2px solid #eee',
                     borderLeft  : '2px solid #eee',
@@ -151,7 +146,11 @@ $.noty.themes.wso2 = {
     },
     callback: {
         onShow : function() {
-            console.log($(this).css("z-index","999999999"));
+            var msgBar = this.$bar;
+            $(msgBar).parent().css({
+                top: '20px',
+                zIndex: 999999999
+            });
         },
         onClose: function() {
 
