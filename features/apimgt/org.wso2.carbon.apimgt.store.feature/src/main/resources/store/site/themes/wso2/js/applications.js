@@ -108,6 +108,13 @@ GrantTypes.prototype.getMap = function(selected){
             password: "Password"           
         };
 
+    Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+        if(v1 === v2) {
+            return options.fn(this);
+        }
+        return options.inverse(this);
+    });
+
     // The actual plugin constructor
     function Plugin( element, options ) {
         this.element = $(element);
@@ -140,9 +147,7 @@ GrantTypes.prototype.getMap = function(selected){
             this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
             this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
             this.element.on( "click", ".show_keys", $.proxy(this.toggleKeyVisibility, this));
-<<<<<<< HEAD
             this.element.on( "click", ".generateAgainBtn", $.proxy(this.generateAgainBtn, this));
-=======
             this.element.on( "click", ".update_grants", $.proxy(this.updateGrants, this));
             this.element.on( "change", ".callback_url", $.proxy(this.change_callback_url, this));
         },
@@ -177,7 +182,6 @@ GrantTypes.prototype.getMap = function(selected){
                     }                 
                 }                
             } 
->>>>>>> add grant type selecting to key generation
         },
 
         toggleKeyVisibility: function(el, options) {
@@ -259,12 +263,8 @@ GrantTypes.prototype.getMap = function(selected){
                 keytype: this.type,
                 callbackUrl: this.app.callbackUrl,
                 validityTime: validity_time,
-<<<<<<< HEAD
-                tokenScope:""
-=======
                 tokenScope:"",
                 jsonParams:'{"grant_types":"'+selected+'"}',
->>>>>>> add grant type selecting to key generation
             }, $.proxy(function (result) {
                 if (!result.error) {
                     
