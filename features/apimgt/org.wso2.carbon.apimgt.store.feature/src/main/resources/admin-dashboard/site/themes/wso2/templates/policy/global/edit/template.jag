@@ -26,7 +26,7 @@
 <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
     <div class="page-header">
-        <h1><%=pageTitle%></h1>
+        <h2><%=pageTitle%></h2>
     </div>
 
     <div class="content-section shadow-up">

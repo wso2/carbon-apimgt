@@ -1,7 +1,7 @@
 <% jagg.template("conditions/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     	<div class="page-header">
-            <h1>Black Listed Entities</h1>                    
+            <h2>Black Listed Entities</h2>
         </div>  
    
     <%

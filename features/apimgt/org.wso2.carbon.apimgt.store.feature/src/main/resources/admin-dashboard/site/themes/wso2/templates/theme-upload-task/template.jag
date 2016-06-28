@@ -2,7 +2,7 @@
 %>
 <div id="listing">
     <div class="page-header">
-        <h1><%=i18n.localize("themeUpload")%></h1>
+        <h2><%=i18n.localize("themeUpload")%></h2>
     </div>
   
 

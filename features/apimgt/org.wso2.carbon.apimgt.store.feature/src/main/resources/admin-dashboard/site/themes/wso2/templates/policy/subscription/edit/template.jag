@@ -81,7 +81,7 @@
         <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
 
         <div class="page-header">
-	        <h1 id="tierTopic"><%=pageTitle%></h1>
+	        <h2 id="tierTopic"><%=pageTitle%></h2>
 	        <p class="lead"></p>
 	    </div>
 	    
