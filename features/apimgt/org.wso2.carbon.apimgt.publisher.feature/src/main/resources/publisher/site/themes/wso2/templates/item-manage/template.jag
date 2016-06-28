@@ -849,6 +849,7 @@
             designer.set_default_management_values();
             designer.render_resources();
             $("#swaggerUpload").modal('hide');
+            showHideResourceLevelTierSelection();
         });
 
         var publish_api = function(e){
