@@ -26,7 +26,6 @@ $(document).ready(function () {
     var updateApplication = function(){
         var application = $("#application-name").val();
         var tier = $("#appTier").val();
-        var callbackUrl = $("#callback-url").val();
         var apiPath = $("#apiPath").val();
         var goBack = $("#goBack").val();
         var description = $("#description").val();
@@ -37,7 +36,6 @@ $(document).ready(function () {
             applicationNew:application,
             applicationOld:applicationOld,
             tier:tier,
-            callbackUrlNew:callbackUrl,
             descriptionNew:description
         }, function (result) {
             if (result.error == false) {                

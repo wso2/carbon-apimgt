@@ -55,5 +55,26 @@ var getApplicationByName = function (username, applicationName, groupId) {
     }
 };
 
+
+var getAllowedGrantTypes = function(){
+    var log = new Log(),store = jagg.module("manager").getAPIStoreObj();
+    try {
+
+        grant_types = store.getAllowedGrantTypes();
+        if (log.isDebugEnabled()) {
+            log.debug("getAllowedGrantTypes : " + stringify(grant_types));
+        }
+        return {
+            error: false,
+            grant_types: grant_types
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e,
+            grant_types: null
+        };
+    }    
+};
 %>
 

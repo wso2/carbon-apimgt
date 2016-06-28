@@ -9,6 +9,7 @@ jagg.block("application/application-view", {
         var application = null;
         var oauthapp = null;
         var scopes = [];
+        var grant_types = [];
         if (user) {
             username = user.username;
             var applicationName = request.getParameter("name");
@@ -32,6 +33,8 @@ jagg.block("application/application-view", {
                     }
                 }
             }
+
+            grant_types = mod.getAllowedGrantTypes();
         }
 
         var tiers, result;
@@ -46,7 +49,8 @@ jagg.block("application/application-view", {
             "gatewayurl":gatewayURL[0],
             "application" : application,
             "scopes": scopes,
-            "oauthapp": oauthapp
+            "oauthapp": oauthapp,
+            "grant_types":grant_types
         };
     }
 });
