@@ -8,7 +8,7 @@ var addSubscriptionPolicy = function () {
     jagg.post("/site/blocks/policy/subscription/edit/ajax/subscription-policy-edit.jag", {
         action:$('#policyAction').val(),
         policyName:$('#policyName').val(),
-        description:$('#description').val(),
+        description:htmlEscape($('#description').val()),
         defaultQuotaPolicy:$('input[name=select-quota-type]:checked').val(),
         defaultRequestCount:$('#defaultRequestCount').val(),
         defaultBandwidth:$('#defaultBandwidth').val(),
@@ -39,7 +39,8 @@ var getCustomAttributesArray = function(){
     $('#custom-attribute-tbody tr').each(function() {
         var attributeName = $(this).find('input[name^=attributeName]').val();
         var attributeValue = $(this).find('input[name^=attributeValue]').val();
-
+        attributeName = htmlEscape(attributeName);
+        attributeValue = htmlEscape(attributeValue);
         var attributeObj = {};
         attributeObj.name = attributeName;
         attributeObj.value = attributeValue;
@@ -139,6 +140,15 @@ function validateNullableNumbersInput(text, element, invalidErrorMsg){
 
 function removeCustomAttribute(count){
     $('#attribute'+count).remove();
+}
+
+function htmlEscape(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 function populateCustomerAttributes(attributesList){
