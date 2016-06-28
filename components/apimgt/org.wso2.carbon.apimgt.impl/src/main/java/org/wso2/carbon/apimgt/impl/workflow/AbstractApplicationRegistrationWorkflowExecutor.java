@@ -133,11 +133,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //get new key manager
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
-            StringBuilder applicationNameAfterAppend = new StringBuilder(application.getName());
-            String keyType = workflowDTO.getKeyType();
-            applicationNameAfterAppend.append('_').append(keyType);
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
-                       .setClientName(applicationNameAfterAppend.toString());
+                       .setClientName(application.getName());
             //createApplication on oAuthorization server.
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
 
