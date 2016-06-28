@@ -274,7 +274,11 @@ $("#toggleThrottle").change(function(e){
     }
 });
 
-$(".api_level_policy").click(function() {     
+$(".api_level_policy").click(function() {
+    showHideResourceLevelTierSelection();
+});
+
+function showHideResourceLevelTierSelection() {
     if($("input[name=api_level_policy]:checked").val() == "api_level_policy"){
         $('#api-level-policy-section').show();
         $("#resource-policy-select").addClass("hide");
@@ -287,7 +291,7 @@ $(".api_level_policy").click(function() {
         $('#enableApiLevelPolicy').val("false");
         $('.throttling_select').show();
     }
-});
+}
 
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
