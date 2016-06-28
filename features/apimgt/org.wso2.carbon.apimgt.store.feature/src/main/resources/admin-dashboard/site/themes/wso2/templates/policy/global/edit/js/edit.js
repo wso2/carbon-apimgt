@@ -7,7 +7,7 @@ var saveGlobalPolicy = function () {
     jagg.post("/site/blocks/policy/global/edit/ajax/global-policy-edit.jag", {
             action: action,
             policyName:$('#policyName').val(),
-            description:$('#description').val().trim(),
+            description: htmlEscape($('#description').val().trim()),
             siddhiQuery:$('#siddhiQuery').val(),
             keyTemplate:$('#keyTemplate').val()
 
@@ -67,6 +67,18 @@ function validateInput(text, element, errorMsg){
         element.css("border", "1px solid #cccccc");
         return true;
     }
+}
+
+function htmlEscape(str) {
+    if(str == null || str == "") {
+        return "";
+    }
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 function validateInputCharactors(text, element, errorMsg){

@@ -163,6 +163,8 @@
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
             $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
           }
+        } else {
+            $('#description').val('');
         }
         showHideDefaultQuotaPolicy();
     });
