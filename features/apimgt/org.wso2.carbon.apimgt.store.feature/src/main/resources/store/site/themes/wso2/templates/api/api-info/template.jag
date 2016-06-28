@@ -71,7 +71,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h1><%=api.name%> - <%=api.version%></h1>
+    <h2><%=api.name%> - <%=api.version%></h2>
     <%
             var tagDisplayName = "";
             var tag = "";

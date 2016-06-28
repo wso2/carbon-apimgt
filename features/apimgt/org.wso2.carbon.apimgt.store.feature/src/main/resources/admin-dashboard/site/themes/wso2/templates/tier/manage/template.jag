@@ -1,7 +1,7 @@
 <% jagg.template("tier/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     	<div class="page-header">
-            <h1>Tier List</h1>
+            <h2>Tier List</h2>
         </div>
 
     <table class="table table-responsive table-striped" id="manage-tiers">

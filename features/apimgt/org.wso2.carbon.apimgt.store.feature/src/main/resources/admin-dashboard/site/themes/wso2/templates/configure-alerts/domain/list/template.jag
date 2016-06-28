@@ -12,7 +12,7 @@
        <!--div class="container col-lg-12 col-md-12 col-sm-12"    class="row-fluid"  style="display:inline"-->
         <!-- content/body -->
         <div class="page-header">
-                <h1><%=i18n.localize("domains")%></h1>
+                <h2><%=i18n.localize("domains")%></h2>
             </div>
         <div class="content-section shadow-up">
         
