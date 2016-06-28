@@ -43,13 +43,6 @@ for(var i=0;i < outputs.tiers.length; i++){
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-3 control-label">OAuth Callback URL</label>
-    <div class="col-sm-9">
-      <p class="form-control-static"><%if(application.callbackUrl){%><strong><%= encode.forHtml(application.callbackUrl) %></strong><% }else{%>Not Given<%}%></p>
-      <p>This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize.</p>
-    </div>
-  </div>
-  <div class="form-group">
     <label class="col-sm-3 control-label">Description</label>
     <div class="col-sm-9">
       <p class="form-control-static"><%if(application.description){%><%=encode.forHtml(application.description) %><% }else{%>Not Given<%}%></p>
@@ -61,31 +54,49 @@ for(var i=0;i < outputs.tiers.length; i++){
       <div role="tabpanel" class="tab-pane fade production-keys" id="production">
       <%
 
+        jagg.log(application);
+        var prodGrants = "";
+        var redirect_uris = "";        
+        if(oauthapp.prodJsonString != undefined){
+          var tmp = parse(oauthapp.prodJsonString);
+          prodGrants = tmp["grant_types"];
+          redirect_uris = tmp["redirect_uris"];          
+        }
         var prodapp = {
             name: application.name,
-            callbackUrl:application.callbackUrl,
+            callbackUrl:redirect_uris,
             ConsumerKey: oauthapp.prodConsumerKey,
             ConsumerSecret: oauthapp.prodConsumerSecret,
             Key: oauthapp.prodKey,
             KeyScope: oauthapp.prodKeyScopeValue,
             Scopes: outputs.scopes,
             ValidityTime: oauthapp.prodValidityTime,
-            keyState: oauthapp.prodKeyState
+            keyState: oauthapp.prodKeyState,
+            grants: prodGrants
         }
       %>
       </div>
       <%
-
+        jagg.log(oauthapp);
+        
+        var sandboxGrants = "";
+        var redirect_uris = "";
+        if(oauthapp.sandboxJsonString != undefined){
+          var sandboxJson = parse(oauthapp.sandboxJsonString);
+          sandboxGrants = sandboxJson["grant_types"];
+          redirect_uris = sandboxJson["redirect_uris"];
+        }        
         var sandapp = {
             name: application.name,
-            callbackUrl:application.callbackUrl,            
+            callbackUrl: redirect_uris,            
             ConsumerKey: oauthapp.sandboxConsumerKey,
             ConsumerSecret: oauthapp.sandboxConsumerSecret,
             Key: oauthapp.sandboxKey,
             KeyScope: oauthapp.sandKeyScope,
             Scopes: outputs.scopes,
             ValidityTime: oauthapp.sandValidityTime,
-            keyState: oauthapp.sandboxKeyState
+            keyState: oauthapp.sandboxKeyState,
+            grants:sandboxGrants
         }
       %>      
       <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
@@ -127,19 +138,13 @@ for(var i=0;i < outputs.tiers.length; i++){
   </div>
   <% if(application.status == "APPROVED"){ %>
   <script language="javascript">
+    var grant_types = <%= stringify(grant_types)%>;
     var prodapp = <%= stringify(prodapp)%>;
     var sandapp = <%= stringify(sandapp)%>;
     $(document).ready(function() {
 
-    Handlebars.registerHelper('ifCond', function(v1, v2, options) {
-        if(v1 === v2) {
-            return options.fn(this);
-        }
-        return options.inverse(this);
-    });
-
-      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %> });
-      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX", provide_keys: <%= site.mapExistingAuthApps %>}); 
+      $(".production-keys").keyWidget({ app: prodapp, type:"PRODUCTION", provide_keys: <%= site.mapExistingAuthApps %>, grant_types: grant_types });
+      $(".sandbox-keys").keyWidget({ app: sandapp, type:"SANDBOX", provide_keys: <%= site.mapExistingAuthApps %>, grant_types: grant_types}); 
 
       //activate a tab based on hash
       if(location.hash != undefined || location.hash !=""){

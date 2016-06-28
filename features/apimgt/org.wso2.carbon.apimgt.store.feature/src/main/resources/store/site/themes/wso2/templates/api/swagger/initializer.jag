@@ -10,7 +10,7 @@ jagg.initializer("api/swagger", {
    		jagg.addHeaderJS("api/api-info", "api-info2", "templates/api/swagger/swagger/lib/jquery.slideto.min.js");
    		jagg.addHeaderJS("api/api-info", "api-info3", "templates/api/swagger/swagger/lib/jquery.wiggle.min.js");
    		jagg.addHeaderJS("api/api-info", "api-info4", "templates/api/swagger/swagger/lib/jquery.ba-bbq.min.js");
-   		jagg.addHeaderJS("api/api-info", "api-info5", "templates/api/swagger/swagger/lib/handlebars-2.0.0.js");
+      jagg.addHeaderJS("page/base", "handlebars", "libs/handlebars.min.js");
    		jagg.addHeaderJS("api/api-info", "api-info6", "templates/api/swagger/swagger/lib/js-yaml.min.js");
    		jagg.addHeaderJS("api/api-info", "api-info7", "templates/api/swagger/swagger/lib/lodash.min.js");
    		jagg.addHeaderJS("api/api-info", "api-info8", "templates/api/swagger/swagger/lib/backbone-min.js");

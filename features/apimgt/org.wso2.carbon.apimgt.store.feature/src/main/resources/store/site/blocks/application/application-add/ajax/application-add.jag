@@ -13,7 +13,6 @@ include("/jagg/jagg.jag");
     var validation = {
         "action": { type: "safetext"},
         "application": { type: "name"},
-        "callbackUrl" : { type: "url"},
     };
 
     var validation_errors = jagg.validateInputs(validation);
@@ -43,7 +42,11 @@ include("/jagg/jagg.jag");
         application = request.getParameter("application", "UTF-8");
         username = user.username;
         tier = request.getParameter("tier");
-        callbackUrl = request.getParameter("callbackUrl");
+        if(null == request.getParameter("callbackUrl")){
+            callbackUrl = "";
+        }else{
+            callbackUrl = request.getParameter("callbackUrl");
+        }        
         description = request.getParameter("description");       
         mod = jagg.module("application");
         result = mod.addApplication(username, application, tier, callbackUrl, description);
