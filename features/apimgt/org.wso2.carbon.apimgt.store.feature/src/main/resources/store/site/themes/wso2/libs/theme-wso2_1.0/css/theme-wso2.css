@@ -676,27 +676,27 @@ h6 .small, .h6 small,
 }
 
 h1, .h1 {
-  font-size: 31px;
+  font-size: 36px;
 }
 
 h2, .h2 {
-  font-size: 25px;
+  font-size: 30px;
 }
 
 h3, .h3 {
-  font-size: 21px;
+  font-size: 24px;
 }
 
 h4, .h4 {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 h5, .h5 {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 h6, .h6 {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 p {
@@ -3204,7 +3204,7 @@ header .nav .dropdown-menu a {
   color: #fff;
 }
 header .fw-inverse, header .fa-inverse {
-  color: #191919;
+  color: #1f1f1f;
 }
 
 footer {
@@ -4938,56 +4938,38 @@ a.thumbnail.active {
   color: #e6e6e6;
 }
 
-/* ========================================================================
- * message styles
- * ======================================================================== */
-.message {
-  padding: 20px;
-  margin: 20px 0;
-  border-left: 5px solid transparent;
-  background: #f9f9f9;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
+.alert {
+  position: relative;
 }
-.message h4 {
-  margin-top: 0;
-  margin-bottom: 5px;
-}
-.message h4 .icon {
+.alert > .icon {
   padding-bottom: 3px;
-  margin-right: 5px;
+  margin-right: 6px;
 }
-.message p:last-child {
-  margin-bottom: 0;
+.alert > .close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 50px;
+  width: 50px;
+  line-height: 1;
+  padding: 0 10px;
+  font-size: 12px;
 }
-.message + .message {
-  margin-top: -5px;
+.alert.alert-success > .close {
+  color: #fff;
+  background: #060f06;
 }
-
-.message-success {
-  border-left-color: #5cb85c;
+.alert.alert-info > .close {
+  color: #fff;
+  background: black;
 }
-.message-success h4 {
-  color: #5cb85c;
+.alert.alert-warning > .close {
+  color: #fff;
+  background: #3a2405;
 }
-.message-info {
-  border-left-color: #009DA7;
-}
-.message-info h4 {
-  color: #009DA7;
-}
-.message-warning {
-  border-left-color: #f0ad4e;
-}
-.message-warning h4 {
-  color: #f0ad4e;
-}
-.message-danger {
-  border-left-color: #d9534f;
-}
-.message-danger h4 {
-  color: #d9534f;
+.alert.alert-danger > .close {
+  color: #fff;
+  background: #220807;
 }
 
 @-webkit-keyframes progress-bar-stripes {

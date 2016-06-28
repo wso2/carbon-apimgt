@@ -26,7 +26,7 @@ $.noty.themes.wso2 = {
             fontSize  : '14px',
             lineHeight: '16px',
             textAlign : 'center',
-            padding   : '10px',
+            padding   : '0px',
             width     : 'auto',
             position  : 'relative'
         });
@@ -66,12 +66,17 @@ $.noty.themes.wso2 = {
 
         switch(this.options.layout.name) {
             case 'top':
+                console.log(this.options.layout);
+                this.$bar.css({
+                        top          : '80px!important',
+                        zIndex       : '9999999!important'
+                    });
                 this.$bar.css({
                     borderBottom: '2px solid #eee',
                     borderLeft  : '2px solid #eee',
                     borderRight : '2px solid #eee',
                     borderTop   : '2px solid #eee',
-                    boxShadow   : "0 2px 4px rgba(0, 0, 0, 0.1)"
+                    boxShadow   : "0 2px 4px rgba(0, 0, 0, 0.3)"
                 });
                 break;
             case 'topCenter':
@@ -117,9 +122,11 @@ $.noty.themes.wso2 = {
             case 'alert':
             case 'notification':
                 this.$bar.css({backgroundColor: '#FFF', borderColor: '#dedede', color: '#444'});
+                this.$message.css({fontWeight: '400'});
                 break;
             case 'warning':
                 this.$bar.css({backgroundColor: '#FFEAA8', borderColor: '#FFC237', color: '#826200'});
+                this.$message.css({fontWeight: '400'});
                 this.$buttons.css({borderTop: '1px solid #FFC237'});
                 break;
             case 'error':
@@ -129,10 +136,12 @@ $.noty.themes.wso2 = {
                 break;
             case 'information':
                 this.$bar.css({backgroundColor: '#78C5E7', borderColor: '#3badd6', color: '#FFF'});
+                this.$message.css({fontWeight: '400'});
                 this.$buttons.css({borderTop: '1px solid #0B90C4'});
                 break;
             case 'success':
-                this.$bar.css({backgroundColor: '#40D47E', borderColor: '#40D47E', color: '#fff'});
+                this.$bar.css({backgroundColor: '#40D47E', borderColor: '#4caf50', color: '#fff'});
+                this.$message.css({fontWeight: '400'});
                 this.$buttons.css({borderTop: '1px solid #50C24E'});
                 break;
             default:
@@ -142,7 +151,7 @@ $.noty.themes.wso2 = {
     },
     callback: {
         onShow : function() {
-
+            console.log($(this).css("z-index","999999999"));
         },
         onClose: function() {
 
