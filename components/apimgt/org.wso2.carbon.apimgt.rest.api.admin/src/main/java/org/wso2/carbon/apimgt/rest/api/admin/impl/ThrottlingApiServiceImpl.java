@@ -683,19 +683,20 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
-            //todo implement UUID for retrieving
+            String uuid = apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
+
             //retrieve the new blocking condition and send back as the response
-            /*BlockConditionsDTO newBlockingCondition = apiProvider.getBlockCondition();
-            GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
-                    .fromGlobalThrottlePolicyToDTO(newBlockingCondition);*/
-            return Response.created(
-                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + "")).entity("").build();
+            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
+            BlockingConditionDTO newBlockCondition = BlockingConditionMappingUtil
+                    .fromBlockingConditionToDTO(newBlockingCondition);
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + uuid))
+                    .entity(newBlockCondition).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding Blocking Condition: " + ""; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving Blocking Condition resource location : " + "";
+            String errorMessage = "Error while retrieving Blocking Condition resource location. Condition type: " + body
+                    .getConditionType() + ", value: " + body.getConditionValue();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

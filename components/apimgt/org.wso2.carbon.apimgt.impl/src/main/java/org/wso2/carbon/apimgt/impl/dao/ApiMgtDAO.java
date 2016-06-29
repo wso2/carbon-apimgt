@@ -10047,12 +10047,23 @@ public class ApiMgtDAO {
         return isDeployed;
     }
 
-    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+    /**
+     * Add a block condition
+     * 
+     * @param conditionType Type of the block condition
+     * @param conditionValue value related to the type
+     * @param tenantDomain tenant domain the block condition should be effective
+     * @return uuid of the block condition if successfully added
+     * @throws APIManagementException
+     */
+    public String addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
             APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
+        ResultSet rs = null;
+        String uuid = null;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
@@ -10094,12 +10105,13 @@ public class ApiMgtDAO {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 if(!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                    uuid = UUID.randomUUID().toString();
                     insertPreparedStatement = connection.prepareStatement(query);
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
                     insertPreparedStatement.setString(3, "TRUE");
                     insertPreparedStatement.setString(4, tenantDomain);
-                    insertPreparedStatement.setString(5, UUID.randomUUID().toString());
+                    insertPreparedStatement.setString(5, uuid);
                     status = insertPreparedStatement.execute();
                     connection.commit();
                     status = true;
@@ -10121,7 +10133,11 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
-        return status;
+        if (status) {
+            return uuid;
+        } else {
+            return null;
+        }
     }
 
     /**

@@ -4128,14 +4128,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
+    public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
             conditionValue = tenantDomain + ":" + conditionValue.trim();
         }
-        boolean state = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
+        String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
-        if (state) {
+        if (uuid != null) {
             if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
                 conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
                 conditionValue = conditionValue + "@" + tenantDomain;
@@ -4143,7 +4143,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
-        return state;
+        return uuid;
     }
 
     @Override

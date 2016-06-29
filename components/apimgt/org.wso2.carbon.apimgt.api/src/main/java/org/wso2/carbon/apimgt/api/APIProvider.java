@@ -699,7 +699,7 @@ public interface APIProvider extends APIManager {
      * @return UUID of the new Block Condition
      * @throws APIManagementException
      */
-    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+    String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
 
     /**
      * Deletes a block condition given its Id
