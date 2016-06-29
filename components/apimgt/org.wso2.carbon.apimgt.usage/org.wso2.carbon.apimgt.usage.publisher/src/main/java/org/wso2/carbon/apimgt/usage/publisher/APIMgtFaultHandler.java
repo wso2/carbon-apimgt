@@ -60,12 +60,8 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                     APIMgtGatewayConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(
                     APIMgtGatewayConstants.APPLICATION_ID));
-            String url = (String) messageContext.getProperty(
-                    RESTConstants.REST_URL_PREFIX);
-            URL apiurl = new URL(url);
-            int port = apiurl.getPort();
-            String protocol = messageContext.getProperty(
-                    SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
+            String protocol = (String) messageContext.getProperty(
+                    SynapseConstants.TRANSPORT_IN_NAME);
             faultPublisherDTO.setProtocol(protocol);
 
             publisher.publishEvent(faultPublisherDTO);

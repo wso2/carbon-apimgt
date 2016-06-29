@@ -441,11 +441,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
         long executionStartTime = System.currentTimeMillis();
-        boolean state = doThrottle(messageContext);
-        messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
-                                   System.currentTimeMillis() - executionStartTime);
-        context3.stop();
-        return state;
+        try {
+            return doThrottle(messageContext);
+        } finally {
+            messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
+                    System.currentTimeMillis() - executionStartTime);
+            context3.stop();
+        }
     }
 
     /**

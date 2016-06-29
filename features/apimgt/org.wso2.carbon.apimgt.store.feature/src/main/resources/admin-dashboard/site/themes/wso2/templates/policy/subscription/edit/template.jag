@@ -330,7 +330,8 @@
             $('#stopOnQuotaReach').attr('checked', false);
           }
           if('<%=isCustomAttributesExist%>' == 'true'){
-            populateCustomerAttributes(<%=customAttributeJSON%>);
+            populat
+            eCustomerAttributes(<%=customAttributeJSON%>);
         	}
           $('#tierPlan').val("<%=tierPlan%>");
         } else {
