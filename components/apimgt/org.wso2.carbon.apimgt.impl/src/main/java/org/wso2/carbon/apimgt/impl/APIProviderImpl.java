@@ -4102,27 +4102,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getBlockConditionByUUID(uuid);
+    }
+
+    @Override
     public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
-
         boolean updateState = apiMgtDAO.updateBlockConditionState(conditionId,state);
-
+        BlockConditionsDTO blockConditionsDTO = apiMgtDAO.getBlockCondition(conditionId);
         if(updateState){
-            BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
-
-            if(blockCondition != null) {
-
-                String blockingConditionType = blockCondition.getConditionType();
-                String blockingConditionValue = blockCondition.getConditionValue();
-                if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                    blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
-                    blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
-                }
-
-                publishBlockingEvent(blockingConditionType, blockingConditionValue,  Boolean.toString(blockCondition
-                        .isEnabled()));
-            }
+            publishBlockingEventUpdate(blockConditionsDTO);
         }
+        return updateState;
+    }
 
+    @Override
+    public boolean updateBlockConditionByUUID(String uuid, String state) throws APIManagementException {
+
+        boolean updateState = apiMgtDAO.updateBlockConditionStateByUUID(uuid, state);
+        BlockConditionsDTO blockConditionsDTO = apiMgtDAO.getBlockConditionByUUID(uuid);
+        if (updateState && blockConditionsDTO != null) {
+            publishBlockingEventUpdate(blockConditionsDTO);
+        }
         return updateState;
     }
 
@@ -4150,18 +4151,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
         boolean deleteState = apiMgtDAO.deleteBlockCondition(conditionId);
-        if(deleteState && blockCondition != null){
-            String blockingConditionType = blockCondition.getConditionType();
-            String blockingConditionValue = blockCondition.getConditionValue();
-            if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
-                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
-            }
-            publishBlockingEvent(blockingConditionType, blockingConditionValue ,"delete");
+        if (deleteState && blockCondition != null) {
+            unpublishBlockCondition(blockCondition);
         }
         return deleteState;
     }
 
+    @Override
+    public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
+        boolean deleteState = false;
+        BlockConditionsDTO blockCondition = apiMgtDAO.getBlockConditionByUUID(uuid);
+        if (blockCondition != null) {
+            deleteState = apiMgtDAO.deleteBlockCondition(blockCondition.getConditionId());
+            if (deleteState) {
+                unpublishBlockCondition(blockCondition);
+            }
+        }
+        return deleteState;
+    }
+
+    /**
+     * Unpublish a blocking condition.
+     *
+     * @param blockCondition Block Condition object
+     */
+    private void unpublishBlockCondition (BlockConditionsDTO blockCondition) {
+        String blockingConditionType = blockCondition.getConditionType();
+        String blockingConditionValue = blockCondition.getConditionValue();
+        if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+            blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+            blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+        }
+        publishBlockingEvent(blockingConditionType, blockingConditionValue, "delete");
+    }
 
     @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
@@ -4181,6 +4203,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
         return apiMgtDAO.getGlobalPolicy(policyName);
+    }
+
+    /**
+     * Publishes the changes on blocking conditions.
+     *
+     * @param blockCondition Block Condition object
+     * @throws APIManagementException
+     */
+    private void publishBlockingEventUpdate(BlockConditionsDTO blockCondition) throws APIManagementException {
+        if (blockCondition != null) {
+            String blockingConditionType = blockCondition.getConditionType();
+            String blockingConditionValue = blockCondition.getConditionValue();
+            if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+            }
+
+            publishBlockingEvent(blockingConditionType, blockingConditionValue, Boolean.toString(blockCondition
+                    .isEnabled()));
+        }
     }
 
     /**
