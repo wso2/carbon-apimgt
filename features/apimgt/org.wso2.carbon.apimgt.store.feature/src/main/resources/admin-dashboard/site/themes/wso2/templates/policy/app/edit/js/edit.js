@@ -8,7 +8,7 @@ var addAppPolicy = function () {
     jagg.post("/site/blocks/policy/app/edit/ajax/app-policy-edit.jag", {
         action:$('#policyAction').val(),
         policyName:$('#policyName').val(),
-        description:$('#description').val(),
+        description:htmlEscape($('#description').val()),
         defaultQuotaPolicy:$('input[name=select-quota-type]:checked').val(),
         defaultRequestCount:$('#defaultRequestCount').val(),
         defaultBandwidth:$('#defaultBandwidth').val(),
@@ -131,6 +131,18 @@ function populateCustomerAttributes(attributesList){
             addCustomAttributeInitially(tBody, attributeCount,index, value);
         });
     }
+}
+
+function htmlEscape(str) {
+    if(str == null || str == "") {
+        return "";
+    }
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 function addCustomAttribute(element, count){

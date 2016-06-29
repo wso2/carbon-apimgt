@@ -226,6 +226,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 subscriptionLevelTier = authContext.getTier();
                 resourceLevelThrottleKey = verbInfoDTO.getRequestKey();
                 apiLevelTier = authContext.getApiTier();
+                resourceLevelTier = verbInfoDTO.getThrottling();
                 //If API level throttle policy is present then it will apply and no resource level policy will apply for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
@@ -279,7 +280,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
                                     }
 
-                                    resourceLevelTier = verbInfoDTO.getThrottling();
                                     if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                                             isThrottled(combinedResourceLevelThrottleKey)) {
                                         if (!apiLevelThrottledTriggered) {
@@ -441,11 +441,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
         Timer.Context context3 = timer3.start();
         long executionStartTime = System.currentTimeMillis();
-        boolean state = doThrottle(messageContext);
-        messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
-                                   System.currentTimeMillis() - executionStartTime);
-        context3.stop();
-        return state;
+        try {
+            return doThrottle(messageContext);
+        } finally {
+            messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
+                    System.currentTimeMillis() - executionStartTime);
+            context3.stop();
+        }
     }
 
     /**

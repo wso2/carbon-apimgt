@@ -58,6 +58,19 @@ public final class RestApiConstants {
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
+    public static final String RESOURCE_PATH_THROTTLING = "/throttling";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
+    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING 
+            + "/blocking-conditions";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/advanced-policies";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/application";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/subscription";
+    public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
+            + "/global";
+
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";
     public static final String SERVER_PASSWORD = "/applications";
@@ -70,10 +83,12 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
-    public static final String REST_API_STORE_CONTEXT="store_rest_api";
-    public static final String REST_API_STORE_VERSION="v1";
-    public static final String REST_API_PUBLISHER_VERSION="v1";
-    public static final String REST_API_PUBLISHER_CONTEXT="publisher_rest_api";
+    public static final String REST_API_STORE_CONTEXT="/api/am/store/";
+    public static final String REST_API_STORE_VERSION="v0.9";
+    public static final String REST_API_PUBLISHER_VERSION="v0.9";
+    public static final String REST_API_PUBLISHER_CONTEXT="/api/am/publisher/";
+    public static final String REST_API_ADMIN_CONTEXT="/api/am/admin";
+    public static final String REST_API_ADMIN_VERSION="v0.9";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
@@ -110,13 +125,17 @@ public final class RestApiConstants {
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
 
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
+
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
     public static final String STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT = "Internal server error";
     public static final String STATUS_METHOD_NOT_ALLOWED_MESSAGE_DEFAULT = "Method Not Allowed";
     public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
-    public static final String STATUS_CONFLCIT_MESSAGE_DEFAULT = "Resource Already Exists";
+    public static final String STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS = "Resource Already Exists";
+    public static final String STATUS_CONFLICT_MESSAGE_DEFAULT = "Conflict";
 
     public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered " 
             + "an internal error. Please contact administrator.";

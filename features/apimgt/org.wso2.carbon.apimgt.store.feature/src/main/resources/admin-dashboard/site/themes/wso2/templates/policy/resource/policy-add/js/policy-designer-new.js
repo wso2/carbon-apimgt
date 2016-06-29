@@ -66,11 +66,11 @@ var addPolicy = function () {
         "quotaPolicy": {
             "type": "",
             "limit": {
-                "requestCount": 0,
-                "unitTime": 60,
-                "timeUnit": "sec",
-                "dataAmount": 0,
-                "dataUnit": ""
+                "requestCount": 5,
+                "unitTime": 1,
+                "timeUnit": "min",
+                "dataAmount": 1,
+                "dataUnit": "KB"
             }
         },
         "conditions": [
@@ -380,7 +380,7 @@ var addPolicyToBackend = function () {
     var apiPolicyString = JSON.stringify(apiPolicy);
     var apiPolicyNew = JSON.parse(apiPolicyString)
     var policyName = $('#policy-name').val();
-    var policyDescription = $('#policy-description').val();
+    var policyDescription = htmlEscape($('#policy-description').val());
     var policyLevel = $("#policy-level option:selected").val();
     //var defaultPolicyType = $("#default-policy-level option:selected").val();
     var defaultPolicyType = $('input[name=select-quota-type]:checked').val();
@@ -628,6 +628,18 @@ function validateInput(text, element, errorMsg){
         element.css("border", "1px solid #cccccc");
         return true;
     }
+}
+
+function htmlEscape(str) {
+    if(str == null || str == "") {
+        return "";
+    }
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 function addDuplicateError(text, element, errorMsg){

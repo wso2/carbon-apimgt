@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is used by {@code ThrottleHandler} to determine Applicability of Throttling Conditions.
@@ -161,7 +163,9 @@ public class ThrottleConditionEvaluator {
             if(value == null){
                 return false;
             }
-            return value.matches(condition.getConditionValue());
+            Pattern pattern = Pattern.compile(condition.getConditionValue());
+            Matcher matcher = pattern.matcher(value);
+            return matcher.find();
         }
         return false;
     }

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
+import org.wso2.carbon.apimgt.impl.internal.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
@@ -82,14 +83,6 @@ public class APIKeyMgtServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         try {
-            APIManagerConfiguration configuration = new APIManagerConfiguration();
-            String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                    File.separator + "conf" + File.separator + "api-manager.xml";
-            configuration.load(filePath);
-
-            APIManagerConfigurationServiceImpl configurationService =
-                    new APIManagerConfigurationServiceImpl(configuration);
-            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
             APIKeyMgtDataHolder.initData();
 
@@ -111,14 +104,21 @@ public class APIKeyMgtServiceComponent {
             // loading white listed scopes
             List<String> whitelist = null;
 
-            // Read scope whitelist from Configuration.
-            whitelist = configuration.getProperty(APIConstants.WHITELISTED_SCOPES);
+            APIManagerConfigurationService configurationService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                                                            .getInstance().getAPIManagerConfigurationService();
 
-            // If whitelist is null, default scopes will be put.
-            if (whitelist == null) {
-                whitelist = new ArrayList<String>();
-                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
-                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+            if(configurationService != null) {
+                // Read scope whitelist from Configuration.
+                whitelist = configurationService.getAPIManagerConfiguration().getProperty(APIConstants.WHITELISTED_SCOPES);
+
+                // If whitelist is null, default scopes will be put.
+                if (whitelist == null) {
+                    whitelist = new ArrayList<String>();
+                    whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                    whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+                }
+            }else {
+                log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
             }
 
             ScopesIssuer.loadInstance(whitelist);
@@ -173,6 +173,7 @@ public class APIKeyMgtServiceComponent {
             log.debug("API manager configuration service bound to the API handlers");
         }
         APIKeyMgtDataHolder.setAmConfigService(amcService);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
@@ -180,6 +181,7 @@ public class APIKeyMgtServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         APIKeyMgtDataHolder.setAmConfigService(null);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
     /**

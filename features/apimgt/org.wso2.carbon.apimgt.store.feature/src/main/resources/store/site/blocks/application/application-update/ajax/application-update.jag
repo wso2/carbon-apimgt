@@ -44,6 +44,11 @@ include("/jagg/jagg.jag");
         applicationOld = request.getParameter("applicationOld");
         applicationNew = request.getParameter("applicationNew");
         callbackUrlNew = request.getParameter("callbackUrlNew");
+        if(null == request.getParameter("callbackUrlNew")){
+            callbackUrlNew = "";
+        }else{
+            callbackUrlNew = request.getParameter("callbackUrlNew");
+        }        
         descriptionNew = request.getParameter("descriptionNew");
         tier = request.getParameter("tier");
         username = user.username;

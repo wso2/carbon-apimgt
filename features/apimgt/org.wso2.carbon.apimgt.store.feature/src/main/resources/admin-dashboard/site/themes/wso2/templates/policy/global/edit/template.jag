@@ -26,7 +26,7 @@
 <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
     <div class="page-header">
-        <h1><%=pageTitle%></h1>
+        <h2><%=pageTitle%></h2>
     </div>
 
     <div class="content-section shadow-up">
@@ -113,6 +113,8 @@ var isNewPolicy = true;
           $('#description').val("<%=encode.forJavaScript(String(description))%>");
           $('#keyTemplate').val("<%=encode.forJavaScript(String(keyTemplate))%>");
           $('#siddhiQuery').val("<%=encode.forJavaScript(String(siddhiQuery))%>");
+        } else {
+            $('#description').val('');
         }
       
       var parameterArray = ("<%=streamParameters%>").split(',');

@@ -162,10 +162,6 @@
 
 
         <dependency>
-            <groupId>com.nimbusds.wso2</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
         </dependency>
@@ -277,6 +273,7 @@
                             org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
+                            !org.apache.commons.codec.*,
                             !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}"
                         </Export-Package>
@@ -320,7 +317,6 @@
                             org.json.*,
                             org.slf4j,
                             org.w3c.dom,
-                            com.nimbusds.*,
                             com.ibm.wsdl.*,
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",

@@ -72,6 +72,9 @@ a.btn .icon-caret, .btn .icon-caret {
 ul.nav.nav-tabs {
     background-color: #ddd;
 }
+.nav-tabs > li > a{
+    color: #222;
+}
 .white-wrapper>.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover .nav-tabs>li.active>a:visited .nav-tabs>li.active>a:active {
     background-color: #fff;
     border: 1px solid #fff;
@@ -157,8 +160,24 @@ a.remove_rating:hover{
 .login-form-wrapper .form-horizontal{
     max-width:100%;
 }
-
-
+.modal-content{
+    background: #FFF;
+    color:#000;
+ }
+ .modal-header h3{
+    padding: 0px;
+ }
+ .modal-header{
+    background: #f1f1f1;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+ }
+ .modal-header .close{
+    color:#222;
+    margin-top: 6px;
+    font-size: 16px;
+ }
 .extended-form{
     display: none;
 }

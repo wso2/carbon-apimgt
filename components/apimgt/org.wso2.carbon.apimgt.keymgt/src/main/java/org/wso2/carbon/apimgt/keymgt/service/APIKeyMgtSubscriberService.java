@@ -326,12 +326,13 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 String appName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
                 ServiceProvider serviceProvider =
                                         appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
-                if (serviceProvider != null) {
+                if (serviceProvider != null && !appName.equals(applicationName)) {
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
                     appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
+                    log.debug("Service Provider Name Updated to : " + applicationName);
                 }
-                log.debug("Service Provider Name Updated to : " + applicationName);
+
             }
 
             OAuthAdminService oAuthAdminService = new OAuthAdminService();

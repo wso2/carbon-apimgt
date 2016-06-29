@@ -3,7 +3,7 @@
 <div id="topUsers-stat-page"  class="stat-page">
 
 	<div class="page-header">     
-    			<h1><%=i18n.localize("usersTitle")%></h1>   			 
+    			<h2><%=i18n.localize("usersTitle")%></h2>
 	</div>
 	
     <div id="rangeSliderWrapper" >

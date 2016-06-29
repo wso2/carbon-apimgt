@@ -19,7 +19,7 @@
  </script>
 
 <div class="page-header" id="Message">
-    <h1>Add Application</h1>
+    <h2>Add Application</h2>
 </div>
 <p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
           
@@ -78,15 +78,6 @@
           <div class="help-block">This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application. </div>
           <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=tierDescriptions%>"/>  
     </div>
-  </div>
-  <div class="form-group">
-    <label class="col-lg-3 col-md-3 control-label" for="callback-url">OAuth Callback URL
-    <a href="#" title="Callback URL Help" id="callback-help" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#callBackHelpMsg"><i class="fa fa-question-circle"></i></a>
-    </label>    
-    <div class="col-lg-9 col-md-9">
-        <input type="text" class="validInput form-control" title="callback_url" name="callback-url"  id="callback-url"/>
-    </div>
-    <div style="display:none"><div id="callBackHelpMsg"><%= i18n.localize("callBackHelpMsg") %></div></div>
   </div>
   <div class="form-group">
     <label for="description" class="col-lg-3 col-md-3 control-label">Description</label>    

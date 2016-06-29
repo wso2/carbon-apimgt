@@ -147,7 +147,7 @@
 											<div class="form-group">
 												<label class="col-sm-3 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
 												<div class="col-sm-4">
-													<input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
+													<input type="text" class="form-control required validateAPIVersion validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
 												</div>
 											</div>
 											<% }else{ %>

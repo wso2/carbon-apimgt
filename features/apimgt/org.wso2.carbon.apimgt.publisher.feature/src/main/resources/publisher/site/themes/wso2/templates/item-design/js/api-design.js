@@ -926,8 +926,15 @@ $(document).ready(function(){
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
                     $( "body" ).trigger( "api_saved" );
-                    $('#apiSaved').show();
-                    setTimeout("hideMsg()", 3000);
+                    //$('#apiSaved').show();
+                    //setTimeout("hideMsg()", 3000);
+                    var n = noty({
+                        theme: 'wso2',
+                        text: $('#apiSaved').text(),
+                        layout:'top',
+                        type:'success',
+                        timeout : '3000'
+                    });
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {

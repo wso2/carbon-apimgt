@@ -9,7 +9,7 @@
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
     	<div class="page-header">
-            <h1><%=i18n.localize("selectBlockingEntity")%></h1>
+            <h2><%=i18n.localize("selectBlockingEntity")%></h2>
         </div>
 
 

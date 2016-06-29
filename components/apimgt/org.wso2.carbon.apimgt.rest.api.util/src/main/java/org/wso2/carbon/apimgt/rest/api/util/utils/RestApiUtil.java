@@ -89,6 +89,7 @@ public class RestApiUtil {
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
+    private static Set<URITemplate> adminAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
 
@@ -385,11 +386,12 @@ public class RestApiUtil {
     /**
      * Returns a new ConflictException
      * 
+     * @param message summary of the error
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
      */
-    public static ConflictException buildConflictException(String description) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_CONFLCIT_MESSAGE_DEFAULT, 409l, description);
+    public static ConflictException buildConflictException(String message, String description) {
+        ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
         return new ConflictException(errorDTO);
     }
 
@@ -584,7 +586,23 @@ public class RestApiUtil {
      */
     public static void handleResourceAlreadyExistsError(String description, Log log)
             throws ConflictException {
-        ConflictException conflictException = buildConflictException(description);
+        ConflictException conflictException = buildConflictException(
+                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
+        log.error(description);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleConflict(String description, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(RestApiConstants.STATUS_CONFLICT_MESSAGE_DEFAULT,
+                description);
         log.error(description);
         throw conflictException;
     }
@@ -599,7 +617,8 @@ public class RestApiUtil {
      */
     public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
             throws ConflictException {
-        ConflictException conflictException = buildConflictException(description);
+        ConflictException conflictException = buildConflictException(
+                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
         log.error(description, t);
         throw conflictException;
     }
@@ -938,9 +957,9 @@ public class RestApiUtil {
     /**
      * This is static method to return URI Templates map of API Store REST API.
      * This content need to load only one time and keep it in memory as content will not change
-     * during runtime. Also we cannot change
+     * during runtime.
      *
-     * @return URITemplate set associated with API Manager publisher REST API
+     * @return URITemplate set associated with API Manager Store REST API
      */
     public static Set<URITemplate> getStoreAppResourceMapping() {
 
@@ -970,7 +989,7 @@ public class RestApiUtil {
     /**
      * This is static method to return URI Templates map of API Publisher REST API.
      * This content need to load only one time and keep it in memory as content will not change
-     * during runtime. Also we cannot change
+     * during runtime.
      *
      * @return URITemplate set associated with API Manager publisher REST API
      */
@@ -996,6 +1015,36 @@ public class RestApiUtil {
                 log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return publisherResourceMappings;
+        }
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Admin REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager Admin REST API
+     */
+    public static Set<URITemplate> getAdminAPIAppResourceMapping() {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_ADMIN_CONTEXT,
+                RestApiConstants.REST_API_ADMIN_VERSION));
+
+        if (adminAPIResourceMappings != null) {
+            return adminAPIResourceMappings;
+        } else {
+            try {
+                String definition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                //Get URL templates from swagger content we created
+                adminAPIResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+            }
+            return adminAPIResourceMappings;
         }
     }
 

@@ -80,12 +80,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.
                 OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
+        String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
+        if (keyType != null) {
+            applicationName = applicationName + "_" + keyType;
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
 
-//        String callBackURL = oAuthApplicationInfo.getCallBackURL();
+
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
@@ -99,7 +103,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate = new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
             applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
             applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
-            applicationToCreate.setClientName(oAuthApplicationInfo.getClientName());
+            applicationToCreate.setClientName(applicationName);
             applicationToCreate.setAppOwner(userId);
             info = keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
@@ -160,14 +164,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                                                                                                            .split(",");
             }
             String applicationName = oAuthApplicationInfo.getClientName();
+            String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
+
+            if (keyType != null) {
+                applicationName = applicationName + "_" + keyType;
+            }
             log.debug("Updating OAuth Client with ID : " + oAuthApplicationInfo.getClientId());
 
             if (log.isDebugEnabled() && oAuthApplicationInfo.getCallBackURL() != null) {
                 log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
             }
 
-            if (log.isDebugEnabled() && oAuthApplicationInfo.getClientName() != null) {
-                log.debug("Client Name : " + oAuthApplicationInfo.getClientName());
+            if (log.isDebugEnabled() && applicationName != null) {
+                log.debug("Client Name : " + applicationName);
             }
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = keyMgtClient
                     .updateOAuthApplication(userId, applicationName, oAuthApplicationInfo.getCallBackURL(),

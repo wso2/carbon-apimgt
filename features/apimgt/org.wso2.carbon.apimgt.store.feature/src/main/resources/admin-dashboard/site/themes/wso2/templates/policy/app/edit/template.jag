@@ -35,7 +35,7 @@
 
 <div id='tier-add-container'>
     <div class="page-header">
-        <h1 id="tierTopic"><%=pageTitle%></h1>
+        <h2 id="tierTopic"><%=pageTitle%></h2>
         <p class="lead"></p>
     </div>
 
@@ -163,6 +163,8 @@
             $('#defaultBandwidth').val("<%=defaultBandwidth%>");
             $('#defaultBandwidthUnit').val("<%=defaultBandwidthUnit%>");
           }
+        } else {
+            $('#description').val('');
         }
         showHideDefaultQuotaPolicy();
     });

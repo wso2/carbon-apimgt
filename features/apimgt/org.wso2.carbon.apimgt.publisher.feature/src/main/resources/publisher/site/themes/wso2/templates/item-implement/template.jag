@@ -304,7 +304,7 @@
 														    <div class="modal-content">
 														        <div class="modal-header">
 																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
-																	<h3>Advanced Endpoint Configuration</h3>
+																	<h3 class="modal-title">Advanced Endpoint Configuration</h3>
 														        </div>
 														        <div class="modal-body">
 														        	<div id="advance_form"></div>
@@ -391,7 +391,7 @@
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
-  
+
 							                                    <label class="checkbox">
 							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
@@ -400,38 +400,46 @@
 							                                    </label>							                                    
 							                                </div>
 							                            </div>
-							                            <div class="form-group form-inline">
-							                            	<div class="col-sm-3"></div>
-							                            	<div class="col-sm-9">
-							                            		<table class="table table-bordered table-striped" id="seqTable"
+							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-							                                            <thead>
-							                                                <tr>
-							                                                    <th><%=i18n.localize("inFlow")%></th>
-							                                                    <th><%=i18n.localize("outFlow")%></th>
-							                                                    <th><%=i18n.localize("faultFlow")%></th>
-							                                                </tr>
-							                                            </thead>
-							                                            <tr>
-							                                                <td>
-							                                                    <select class="form-control" id="inSequence"  name="inSequence" >
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                                <td>
-							                                                    <select class="form-control" id="outSequence"  name="outSequence">
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                                <td>
-							                                                    <select class="form-control" id="faultSequence"  name="faultSequence">
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                            </tr>
-							                                    </table>							                                    
-							                            	</div>
-							                            </div>
+							                            <div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
+
+																<div id="" class="">
+																	<select class="form-control" id="inSequence"  name="inSequence" >
+							                                        	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+							                                    	</select>
+																</div>
+
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
+
+																<div id="" class="">
+																	<select class="form-control" id="outSequence"  name="outSequence">
+							                                        	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+							                                    	</select>
+																</div>
+
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("faultFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
+
+																<div id="" class="">
+																	<select class="form-control" id="faultSequence"  name="faultSequence">
+							                                	    	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+																	</select>
+																</div>
+
+															</div>
+														</div>
+														</span>
+							                            
 														<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 															<div class="col-sm-3"></div>
 															<div class="col-sm-3">
