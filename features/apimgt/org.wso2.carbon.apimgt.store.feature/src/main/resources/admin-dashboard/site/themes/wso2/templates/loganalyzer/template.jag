@@ -7,34 +7,51 @@ var lenI=0,apps = outputs.applications; if(apps!=null){lenI = apps.length;}
 var uriMatcher = new URIMatcher(request.getRequestURI())
 var page;
 //Provide a pattern to be matched against the URL
-if(uriMatcher.match('/{admindashboard}/{loganalyzer}/{pageNo}')) {
+if(uriMatcher.match('/{admindashboard}/{loganalyzer}/{pageName}')) {
 //If pattern matches, elements can be accessed from their keys
-  page = uriMatcher.elements().pageNo;
+  page = uriMatcher.elements().pageName;
 }
 
 if(page == null) {
-    page = 'page6';
+    page = 'live-log-viewer';
 }
+
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 var tenantDomain = MultitenantUtils.getTenantDomain(username);
+
 var carbon = require('carbon');
-var httpUriMatcher = new URIMatcher(carbon.server.address('http'));
-var httpsUriMatcher = new URIMatcher(carbon.server.address('https'));
+var serverConfigService = carbon.server.osgiService('org.wso2.carbon.base.api.ServerConfigurationService');
+var hostName = serverConfigService.getFirstProperty("HostName");
+var hostURLMatcher = new URIMatcher(request.getRequestURL());
 var httpPort;
 var httpsPort;
-if(httpUriMatcher.match('/{hostname}:{port}')) {
-    httpPort = httpUriMatcher.elements().port;
+
+if(hostName == null | hostName == ""){
+    if(hostURLMatcher.match('https://{hostname}:{port}/admin-dashboard/loganalyzer/{page}') |
+            hostURLMatcher.match('http://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')){
+        hostName = hostURLMatcher.elements().hostname;
+    }else{
+        hostName = "localhost";
+    }
 }
-if(httpsUriMatcher.match('/{hostname}:{port}')) {
-    httpsPort = httpsUriMatcher.elements().port;
+
+if(hostURLMatcher.match('http://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')) {
+    httpPort = hostURLMatcher.elements().port;
+}else{
+    httpPort = 9763;
+}
+if(hostURLMatcher.match('https://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')) {
+    httpsPort = hostURLMatcher.elements().port;
+}else{
+    httpsPort = 9443;
 }
 %>
-
+<div id ="title-section" class="title-section"></div>
+<%
+var analyticsConfig = Packages.org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+var analyticsConfigInstance = analyticsConfig.getInstance();
+if(analyticsConfigInstance.isAnalyticsEnabled()){%>
 <div id="loganalyzer">
-
-    <div id ="title-section" class="page-header">
-    </div>
-
     <!-- page content -->
     <div class="container body-wrapper">
         <div class="page-content">
@@ -82,7 +99,7 @@ if(httpsUriMatcher.match('/{hostname}:{port}')) {
                  data-gs-height="{{height}}" data-banner="{{banner}}" {{#if banner}}
                  data-gs-no-resize="true"
                  {{/if}}>
-            <div class="grid-stack-item-content ues-component-box gadget-wrapper" id="{{id}}">
+            <div class="grid-stack-item-content ues-component-box gadget-wrapper" id="{{id}}" style="overflow-y: hidden">
             </div>
             </div>
             {{/each}}
@@ -174,9 +191,9 @@ if(httpsUriMatcher.match('/{hostname}:{port}')) {
             </div>
         </script>
 
-    <script id="ues-menu-list-hbs" type="text/x-handlebars-template">
-        //{{#traverseMenu menu false isAnonView user isHiddenMenu}}{{/traverseMenu}}
-    </script>
+        <script id="ues-menu-list-hbs" type="text/x-handlebars-template">
+            //{{#traverseMenu menu false isAnonView user isHiddenMenu}}{{/traverseMenu}}
+        </script>
 
         <script src="/shindig/gadgets/js/container:open-views:opensearch:rpc:xmlutil:pubsub-2.js?c=1&debug=1&container=default"></script>
         <script src="/portal/js/ues.js"></script>
@@ -189,7 +206,7 @@ if(httpsUriMatcher.match('/{hostname}:{port}')) {
             ues.global.tenantPrefix = "/t";
             ues.global.type = 'default';
             ues.global.anon = false;
-            ues.global.host = {"hostname": "localhost", "port": "", "protocol": ""};
+            ues.global.host = {"hostname": "<%=hostName%>", "port": "", "protocol": ""};
             ues.global.context = "/portal";
             ues.global.server = {
                 httpPort: "<%=httpPort%>",
@@ -263,9 +280,23 @@ if(httpsUriMatcher.match('/{hostname}:{port}')) {
                     $("#title-section").append('<h2>'+pages[i].title+'</h2>');
                 }
             }
-    //usage : in traverseMenu helper
-    var user = {}, isAnonView = null;
-    </script>
+            //usage : in traverseMenu helper
+            var user = {}, isAnonView = null;
+        </script>
     </div>
 </div>
+<%}else{%>
+
+    <div id="message-section"></div>
+    <script>
+        $("#title-section").empty();
+        var pages = loganalyzerDashboard.pages;
+        for(var i=0; i< pages.length; i++){
+        if(pages[i].id === "<%=page%>") {
+            $("#title-section").append('<h2>'+pages[i].title+'</h2>');
+            $("#message-section").append('<h3>'+pages[i].title+" is disabled."+'</h3>');
+        }
+    }
+    </script>
+<%}%>
 <% }); %>
