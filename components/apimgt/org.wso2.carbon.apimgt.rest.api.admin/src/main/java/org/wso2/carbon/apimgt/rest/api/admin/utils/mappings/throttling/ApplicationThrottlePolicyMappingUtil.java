@@ -51,7 +51,7 @@ public class ApplicationThrottlePolicyMappingUtil {
         }
         listDTO.setCount(appPolicyDTOList.size());
         listDTO.setList(appPolicyDTOList);
-        listDTO.setNext("");
+        listDTO.setNext(""); //todo set next and previous
         listDTO.setPrevious("");
         return listDTO;
     }

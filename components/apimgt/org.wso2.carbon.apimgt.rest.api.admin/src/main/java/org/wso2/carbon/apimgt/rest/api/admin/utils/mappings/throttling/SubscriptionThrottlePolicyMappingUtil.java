@@ -58,7 +58,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
         }
         listDTO.setCount(subscriptionPolicyDTOList.size());
         listDTO.setList(subscriptionPolicyDTOList);
-        listDTO.setNext("");
+        listDTO.setNext(""); //todo set next and previous
         listDTO.setPrevious("");
         return listDTO;
     }

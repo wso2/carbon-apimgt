@@ -51,7 +51,7 @@ public class GlobalThrottlePolicyMappingUtil {
         }
         listDTO.setCount(globalPolicyDTOList.size());
         listDTO.setList(globalPolicyDTOList);
-        listDTO.setNext("");
+        listDTO.setNext(""); //todo set next and previous
         listDTO.setPrevious("");
         return listDTO;
     }

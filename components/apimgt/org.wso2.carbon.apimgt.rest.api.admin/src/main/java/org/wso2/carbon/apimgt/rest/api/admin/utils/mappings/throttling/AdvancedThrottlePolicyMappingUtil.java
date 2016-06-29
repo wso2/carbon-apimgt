@@ -55,8 +55,8 @@ public class AdvancedThrottlePolicyMappingUtil {
         }
         listDTO.setList(advancedPolicyDTOs);
         listDTO.setCount(advancedPolicyDTOs.size());
-        listDTO.setNext("");
-        listDTO.setPrevious("");
+        listDTO.setNext(""); //todo
+        listDTO.setPrevious(""); //todo
         return listDTO;
     }
 

@@ -74,6 +74,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPoliciesGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
+            //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             APIPolicy[] apiPolicies = (APIPolicy[]) apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
@@ -131,6 +132,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName, String ifNoneMatch,
             String ifModifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             APIPolicy apiPolicy = apiProvider.getAPIPolicy(userName, policyName);
@@ -157,6 +159,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPoliciesPolicyNamePut(String policyName, AdvancedThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
@@ -174,6 +177,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    //todo  test this. This failed in 24/06 pack
+
     /**
      * Delete an Advanced level policy specified by name
      *
@@ -186,12 +191,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPoliciesPolicyNameDelete(String policyName, String ifMatch,
             String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_API, policyName);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting Advanced level policy : " + policyName;
+            String errorMessage = "Error while deleting Advanced level policy : " + policyName; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -211,6 +217,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesApplicationGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
+            //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             ApplicationPolicy[] appPolicies = (ApplicationPolicy[]) apiProvider
@@ -299,6 +306,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesApplicationPolicyNamePut(String policyName, ApplicationThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             ApplicationPolicy appPolicy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(
@@ -317,6 +325,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    //todo  test this. This failed in 24/06 pack
+
     /**
      * Delete an Application level policy specified by name
      *
@@ -329,6 +339,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesApplicationPolicyNameDelete(String policyName, String ifMatch,
             String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_APP, policyName);
@@ -354,6 +365,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
+            //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider
@@ -416,6 +428,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPolicyNameGet(String policyName, String ifNoneMatch,
             String ifModifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicy(userName, policyName);
@@ -443,6 +456,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPolicyNamePut(String policyName, SubscriptionThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
@@ -463,6 +477,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    //todo  test this. This failed in 24/06 pack
+
     /**
      * Delete a Subscription level policy specified by name
      *
@@ -475,6 +491,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPolicyNameDelete(String policyName, String ifMatch,
             String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_SUB, policyName);
@@ -500,6 +517,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesGlobalGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
+            //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             GlobalPolicy[] globalPolicies = (GlobalPolicy[]) apiProvider
@@ -558,6 +576,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesGlobalPolicyNameGet(String policyName, String ifNoneMatch,
             String ifModifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
             GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
@@ -584,6 +603,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesGlobalPolicyNamePut(String policyName, GlobalThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(
                     body);
@@ -613,6 +633,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingPoliciesGlobalPolicyNameDelete(String policyName, String ifMatch,
             String ifUnmodifiedSince) {
         try {
+            //todo handle 404
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
             apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_GLOBAL, policyName);
@@ -638,6 +659,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     public Response throttlingBlockingConditionsGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
+            //todo add sorting, limit, offset
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
             BlockingConditionListDTO listDTO = BlockingConditionMappingUtil
@@ -658,11 +680,11 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) {
+    public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) { //todo BIG
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
-
+            //todo implement UUID for retrieving
             //retrieve the new blocking condition and send back as the response
             /*BlockConditionsDTO newBlockingCondition = apiProvider.getBlockCondition();
             GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
@@ -670,10 +692,10 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + "")).entity("").build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding Blocking Condition: " + "";
+            String errorMessage = "Error while adding Blocking Condition: " + ""; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving Blocking Condition resource location : " + "";
+            String errorMessage = "Error while retrieving Blocking Condition resource location : " + ""; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -693,7 +715,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             BlockConditionsDTO blockCondition = apiProvider
-                    .getBlockCondition(Integer.parseInt(conditionId));
+                    .getBlockCondition(Integer.parseInt(conditionId)); //todo use uuid?
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
             return Response.ok().entity(dto).build();
         } catch (APIManagementException e) {
