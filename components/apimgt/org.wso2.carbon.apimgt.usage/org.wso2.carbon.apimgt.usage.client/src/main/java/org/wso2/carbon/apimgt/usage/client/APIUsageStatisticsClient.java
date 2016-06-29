@@ -48,7 +48,6 @@ import static java.util.Collections.sort;
 /**
  * Abstract class and act as a interface for the Statistic usage client for APIM.
  * Known implementations are,
- * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl
  * org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl
  */
 public abstract class APIUsageStatisticsClient {
