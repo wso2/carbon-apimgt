@@ -96,8 +96,6 @@ public class API implements Serializable{
     
     private String responseCache;
     private int cacheTimeout;
-    
-    private String destinationStatsEnabled;
 
     private String implementation = "ENDPOINT";
 
@@ -609,14 +607,6 @@ public class API implements Serializable{
     public void setOldFaultSequence(String oldFaultSequence) {
         this.oldFaultSequence = oldFaultSequence;
     }
-    
-	public String getDestinationStatsEnabled() {
-		return destinationStatsEnabled;
-	}
-
-	public void setDestinationStatsEnabled(String destinationStatsEnabled) {
-		this.destinationStatsEnabled = destinationStatsEnabled;
-	}
 
     public Set<Scope> getScopes() {
         return scopes;

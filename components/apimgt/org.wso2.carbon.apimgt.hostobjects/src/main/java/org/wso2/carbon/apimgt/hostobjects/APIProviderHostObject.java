@@ -616,15 +616,6 @@ public class APIProviderHostObject extends ScriptableObject {
             throw new APIManagementException("Invalid Implementation Type.");
         }
 
-
-        String destinationStats = (String) apiData.get("destinationStats", apiData);
-        if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
-            destinationStats = APIConstants.ENABLED;
-        } else {
-            destinationStats = APIConstants.DISABLED;
-        }
-        api.setDestinationStatsEnabled(destinationStats);
-
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
         	api.setEndpointSecured(true);
@@ -1252,13 +1243,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	responseCache = APIConstants.DISABLED;
         }
 
-        String destinationStats = (String) apiData.get("destinationStats", apiData);
-        if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
-        	destinationStats = APIConstants.ENABLED;
-        } else {
-        	destinationStats = APIConstants.DISABLED;
-        }
-
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
@@ -1422,7 +1406,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
-        api.setDestinationStatsEnabled(destinationStats);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
@@ -1724,13 +1707,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	responseCache = APIConstants.DISABLED;
         }
 
-        String destinationStats = (String) apiData.get("destinationStats", apiData);
-        if (APIConstants.ENABLED.equalsIgnoreCase(destinationStats)) {
-        	destinationStats = APIConstants.ENABLED;
-        } else {
-        	destinationStats = APIConstants.DISABLED;
-        }
-
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
         }
@@ -2005,7 +1981,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
-        api.setDestinationStatsEnabled(destinationStats);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
@@ -2655,12 +2630,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(37, myn, checkValue(tiersDisplayNamesSet.toString()));
 
                 myn.put(38, myn, checkValue(api.getFaultSequence()));
-                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
-
-
-                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
-                myn.put(39, myn, checkValue(api.getDestinationStatsEnabled()));
-
 
                 //todo implement resource load
 

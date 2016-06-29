@@ -140,7 +140,6 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
-        dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
         dto.setThumbnailUrl(model.getThumbnailUrl());
         List<SequenceDTO> sequences = new ArrayList<>();
@@ -281,7 +280,6 @@ public class APIMappingUtil {
         } else {
             model.setCacheTimeout(APIConstants.API_RESPONSE_CACHE_TIMEOUT);
         }
-        model.setDestinationStatsEnabled(dto.getDestinationStatsEnabled());
 
         if (dto.getSequences() != null) {
             List<SequenceDTO> sequences = dto.getSequences();
