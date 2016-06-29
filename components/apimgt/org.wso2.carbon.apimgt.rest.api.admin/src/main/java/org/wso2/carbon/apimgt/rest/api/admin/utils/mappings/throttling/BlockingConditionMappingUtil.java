@@ -66,7 +66,7 @@ public class BlockingConditionMappingUtil {
     public static BlockingConditionDTO fromBlockingConditionToDTO(
             BlockConditionsDTO blockCondition) throws UnsupportedThrottleLimitTypeException {
         BlockingConditionDTO dto = new BlockingConditionDTO();
-        dto.setConditionId(blockCondition.getConditionId() + ""); //todo change to uuid
+        dto.setConditionId(blockCondition.getUUID());
         dto.setConditionType(blockCondition.getConditionType());
 
         String conditionValue = blockCondition.getConditionValue();

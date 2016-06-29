@@ -680,7 +680,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) { //todo BIG
+    public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
@@ -695,7 +695,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             String errorMessage = "Error while adding Blocking Condition: " + ""; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving Blocking Condition resource location : " + ""; //todo
+            String errorMessage = "Error while retrieving Blocking Condition resource location : " + "";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -715,7 +715,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             BlockConditionsDTO blockCondition = apiProvider
-                    .getBlockCondition(Integer.parseInt(conditionId)); //todo use uuid?
+                    .getBlockConditionByUUID(conditionId);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(blockCondition);
             return Response.ok().entity(dto).build();
         } catch (APIManagementException e) {
@@ -740,9 +740,9 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiProvider.updateBlockCondition(Integer.parseInt(conditionId), body.getEnabled().toString());
-
-            BlockConditionsDTO updatedBlockCondition = apiProvider.getBlockCondition(Integer.parseInt(conditionId));
+            apiProvider.updateBlockConditionByUUID(conditionId, body.getEnabled().toString());
+            //retrieves the updated condition and send back as the response
+            BlockConditionsDTO updatedBlockCondition = apiProvider.getBlockConditionByUUID(conditionId);
             return Response.ok().entity(updatedBlockCondition).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating Block Condition. Id : " + conditionId;
@@ -764,7 +764,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiProvider.deleteBlockCondition(Integer.parseInt(conditionId));
+            apiProvider.deleteBlockConditionByUUID(conditionId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting Block Condition. Id : " + conditionId;
