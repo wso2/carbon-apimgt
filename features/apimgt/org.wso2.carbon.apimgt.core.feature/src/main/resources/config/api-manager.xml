@@ -142,14 +142,10 @@
         <!-- Administrator password to login to the remote DAS server. -->
         <DASPassword>admin</DASPassword>
 
-        <!-- For APIM implemented Statistic client for DAS REST API -->
-        <!--StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatsProviderImpl-->
         <!-- For APIM implemented Statistic client for RDBMS -->
         <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatsProviderImpl>
 
-        <!-- DAS REST API configuration
-             Set the values if .'org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl'
-             is used as Statistic Client -->
+        <!-- DAS REST API configuration -->
         <DASRestApiURL>https://localhost:9444</DASRestApiURL>
         <DASRestApiUsername>admin</DASRestApiUsername>
         <DASRestApiPassword>admin</DASRestApiPassword>
