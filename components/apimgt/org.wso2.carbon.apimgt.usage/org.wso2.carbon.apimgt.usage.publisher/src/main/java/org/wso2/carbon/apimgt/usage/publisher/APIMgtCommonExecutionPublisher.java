@@ -59,17 +59,21 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
             executionTimePublisherDTO.setTenantId(APIUtil.getTenantId(provider));
             executionTimePublisherDTO.setSecurityLatency(
                     ((Number)messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY)).longValue());
-            executionTimePublisherDTO.setThrottlingLatency(
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY)).longValue());
-            executionTimePublisherDTO.setRequestMediationLatency(
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY)).longValue());
-            executionTimePublisherDTO.setResponseMediationLatency(
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY)).longValue());
+            Object throttleLatency =  messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY);
+            executionTimePublisherDTO.setThrottlingLatency(throttleLatency == null ? 0 :
+                                                          ((Number) throttleLatency).longValue());
+            Object reqMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY);
+            executionTimePublisherDTO.setRequestMediationLatency(reqMediationLatency == null ? 0 :
+                    ((Number) reqMediationLatency).longValue());
+            Object resMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY);
+            executionTimePublisherDTO.setResponseMediationLatency(resMediationLatency == null ? 0 :
+                    ((Number) resMediationLatency).longValue());
             Object otherLatency = messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY);
             executionTimePublisherDTO.setOtherLatency(otherLatency == null ? 0 :
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY)).longValue());
-            executionTimePublisherDTO.setBackEndLatency(
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY)).longValue());
+                    ((Number) otherLatency).longValue());
+            Object backendLatency = messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY);
+            executionTimePublisherDTO.setBackEndLatency(backendLatency == null ? 0 :
+                    ((Number) backendLatency).longValue());
             executionTimePublisherDTO.setEventTime(System.currentTimeMillis());
             publisher.publishEvent(executionTimePublisherDTO);
 

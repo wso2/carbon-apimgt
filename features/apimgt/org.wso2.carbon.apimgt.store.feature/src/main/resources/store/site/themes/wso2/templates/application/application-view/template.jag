@@ -11,7 +11,7 @@ for(var i=0;i < outputs.tiers.length; i++){
 }
 %>
 <div class="page-header" id="Message">
-    <h1 id="application_name"><%= encode.forHtml(application.name) %></h1>
+    <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
 </div>
   <!-- Nav tabs -->
   <div class="white-wrapper">

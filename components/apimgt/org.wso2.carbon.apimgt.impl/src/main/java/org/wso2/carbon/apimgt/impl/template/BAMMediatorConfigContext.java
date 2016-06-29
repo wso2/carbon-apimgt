@@ -24,11 +24,6 @@ public class BAMMediatorConfigContext extends ConfigContextDecorator {
         } else {
             context.put("statsEnabled", Boolean.FALSE);
         }
-        if (APIConstants.ENABLED.equalsIgnoreCase(api.getDestinationStatsEnabled())) {
-            context.put("destinationBasedStatsEnabled", Boolean.TRUE);
-        } else {
-            context.put("destinationBasedStatsEnabled", Boolean.FALSE);
-        }
 
         return context;
     }

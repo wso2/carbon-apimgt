@@ -4,7 +4,7 @@
 
 	
     <div class="page-header">     
-    			<h1><%=i18n.localize("callTypeTitle")%></h1>   			 
+    			<h2><%=i18n.localize("callTypeTitle")%></h2>
 	</div>
 
 	<div class="row">
