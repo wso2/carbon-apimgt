@@ -17,7 +17,7 @@ var getDomainSpecificConfigurationsInfo = function (domainName) {
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
 
         var client = stub._getServiceClient();
         var options = client.getOptions();
@@ -58,7 +58,7 @@ var getDomainTemplates = function (domainName) {
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
 
         var client = stub._getServiceClient();
         var options = client.getOptions();
@@ -98,7 +98,7 @@ var deleteConfiguration = function (domainName, configurationName) {
         username = conf.*::['Analytics'].*::['DASUsername'].text();
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
 
         var client = stub._getServiceClient();
         var options = client.getOptions();

@@ -91,7 +91,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.execution.manager.stub</artifactId>
+            <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.commons</groupId>
@@ -194,7 +194,7 @@
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
-                                <bundleDef>org.wso2.carbon.analytics-common:org.wso2.carbon.event.execution.manager.stub:${carbon.analytics.common.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.analytics-common:org.wso2.carbon.event.template.manager.stub:${carbon.analytics.common.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:4.4.0</importFeatureDef>

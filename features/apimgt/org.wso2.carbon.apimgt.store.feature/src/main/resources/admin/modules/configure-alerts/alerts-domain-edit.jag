@@ -17,7 +17,7 @@ var getDomain = function (domainName) {
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
@@ -54,7 +54,7 @@ var getDomainConfiguration = function (domainName, configurationName) {
         username = conf.*::['Analytics'].*::['DASUsername'].text();
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
@@ -83,9 +83,9 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         var valueSeparator = "::";
         
        
-        var ScenarioConfigurationDTO = Packages.org.wso2.carbon.event.execution.manager.admin.dto.configuration.xsd.ScenarioConfigurationDTO;
+        var ScenarioConfigurationDTO = Packages.org.wso2.carbon.event.template.manager.admin.dto.configuration.xsd.ScenarioConfigurationDTO;
         
-        var ParameterDTO = Packages.org.wso2.carbon.event.execution.manager.admin.dto.configuration.xsd.ConfigurationParameterDTO;
+        var ParameterDTO = Packages.org.wso2.carbon.event.template.manager.admin.dto.configuration.xsd.ConfigurationParameterDTO;
         
         var scenarioConfigurationDTO = new ScenarioConfigurationDTO();
 
@@ -123,7 +123,7 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
-        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();
         var options = client.getOptions();
         var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();

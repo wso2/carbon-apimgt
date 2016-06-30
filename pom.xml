@@ -197,7 +197,7 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.analytics-common</groupId>
-                <artifactId>org.wso2.carbon.event.execution.manager.stub</artifactId>
+                <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
 
