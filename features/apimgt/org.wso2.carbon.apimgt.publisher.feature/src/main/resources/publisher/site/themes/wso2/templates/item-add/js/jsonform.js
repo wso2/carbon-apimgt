@@ -669,7 +669,7 @@ jsonform.elementTypes = {
         '<div>' +
         '<% _.each(node.options, function(key, idx) { if ((idx > 0) && ((idx % columns) === 0)) { %></div><div><% } %><a class="btn<% if (buttonClass) { %> <%= buttonClass %><% } %>" style="max-width:<%= width %>px;max-height:<%= height %>px"><% if (key instanceof Object) { %><img src="<% if (!key.value.match(/^https?:/)) { %><%= prefix %><% } %><%= key.value %><%= suffix %>" alt="<%= key.title %>" /></a><% } else { %><img src="<% if (!key.match(/^https?:/)) { %><%= prefix %><% } %><%= key %><%= suffix %>" alt="" /><% } %></a> <% }); %>' +
         '</div>' +
-        '<div class="pagination-right"><a class="btn">Reset</a></div>' +
+        '<div class="pagination-right"><a class="btn btn-secondary">Reset</a></div>' +
       '</div>' +
       '</div>' +
       '</div>',

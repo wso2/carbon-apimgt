@@ -59,7 +59,7 @@ var api = outputs.api;%>
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
         onComplete: function(swaggerApi, swaggerUi){
-          console.log("Loaded SwaggerUI");
+          console.log("Loaded SwaggerUI");        
         },
         onFailure: function(data) {
           console.log("Unable to Load SwaggerUI");
@@ -67,7 +67,8 @@ var api = outputs.api;%>
         docExpansion: "list",
         jsonEditor: false,
         defaultModelRendering: 'schema',
-        showRequestHeaders: true
+        showRequestHeaders: true,
+        validatorUrl: null
       });
 
       window.swaggerUi.load();
@@ -138,10 +139,10 @@ var select_environment = function(){
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
-      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     }
     else{
-      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     }
   });
 

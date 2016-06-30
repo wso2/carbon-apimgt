@@ -1087,8 +1087,8 @@
     </div>
     <div class="modal-footer">
     <div id="res" class="hide" style="color:red;float:left"></div>
-    <a class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
+    <a class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     </div>
     </div>
     </div>

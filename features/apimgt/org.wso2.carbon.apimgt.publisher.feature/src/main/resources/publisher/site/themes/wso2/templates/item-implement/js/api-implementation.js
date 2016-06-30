@@ -295,7 +295,7 @@ $(document).ready(function(){
     $('#upload_sequence').click(function () {
     	
     	$('#upload_sequence').buttonLoader('start');
-        	var type = $('.toggleRadios input[type=radio]:checked').val();
+        	var type = $(".modal-body #flow_id").val();
         	uploadSequence(type);
             $('#upload_sequence').buttonLoader('stop');
     });
