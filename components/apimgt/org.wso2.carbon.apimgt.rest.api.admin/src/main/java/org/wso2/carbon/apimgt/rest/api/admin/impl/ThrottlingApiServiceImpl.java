@@ -54,7 +54,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * This is the service implementation class for Admin-Dashboard Throttling related operations
+ * This is the service implementation class for Admin Portal Throttling related operations
  */
 public class ThrottlingApiServiceImpl extends ThrottlingApiService {
 

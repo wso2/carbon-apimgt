@@ -6,7 +6,7 @@ info:
   version: "0.9.0"
   title: "WSO2 API Manager - Admin"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Dashboard.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.
 
     It is written with [swagger 2](http://swagger.io/).
 

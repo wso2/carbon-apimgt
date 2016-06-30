@@ -3,7 +3,7 @@
   "info": {
     "version": "0.9.0",
     "title": "WSO2 API Manager - Admin",
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Dashboard.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
