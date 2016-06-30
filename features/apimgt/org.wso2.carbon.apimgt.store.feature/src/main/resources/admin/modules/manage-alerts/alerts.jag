@@ -1,5 +1,5 @@
 <%
-var agent = "admin";
+var agent = "admin-dashboard";
 var retrieveSavedAlertsTypes = function () {
     var i,api,apis,length, log = new Log();
 

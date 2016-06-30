@@ -22,7 +22,7 @@
                                     <img class="img-responsive brand-spacer" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
                                 </div>
                             </div>
-                            <h2 class="text-center-sm text-center-xs text-center-md text-right">Admin Dashboard</h2>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right">Admin Portal</h2>
                         </div>
 
                     </div>

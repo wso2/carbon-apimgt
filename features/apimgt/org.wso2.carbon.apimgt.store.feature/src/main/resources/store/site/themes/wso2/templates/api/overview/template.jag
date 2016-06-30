@@ -55,12 +55,14 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
-	    	            <div  class="endpoint-copybtn well well-small"><a data-clipboard-text="<%=environmenturls[urltype]%><%=api.context%>" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=api.context%>
+	    	            <div  class="endpoint-copybtn well well-small"><a
+	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
+	    	            class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%>
-	                            <br><%=environmenturls[urltype]%><%=apiContext%>
+	                            <br><%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
 	    	            <%}
@@ -78,7 +80,8 @@
     <% if(api.wadl && api.wadl != ""){ %>
         <h4 class="add-margin-top-5x"><%=i18n.localize("wadl")%>:</h4>
     <p>
-        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=api.wadl%></a>
+        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile
+        ("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=encode.forHtml(api.wadl)%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>

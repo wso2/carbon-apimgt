@@ -30,7 +30,7 @@
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Manager Admin Rest API Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains required bundles for API Manager Rest API for API Admin Dashboard functionality</description>
+    <description>This feature contains required bundles for API Manager Rest API for API Admin Portal functionality</description>
 
 
     <dependencies>

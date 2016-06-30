@@ -59,7 +59,7 @@ public class UsageClient {
     private static APIUsageStatisticsClient usageStatisticsClient;
 
     /**
-     * central point to initialise datasources or related configuration done by the admin-dashboard analytics section
+     * central point to initialise datasources or related configuration done by the Admin Portal analytics section
      *
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -719,7 +719,7 @@ public class UsageClient {
      * @throws SQLException                           throws if any db exceptions occurred
      * @throws APIMgtUsageQueryServiceClientException throws if any other error occurred
      */
-    private static List<String> getApiProviders(String provider)
+    public static List<String> getApiProviders(String provider)
             throws SQLException, APIMgtUsageQueryServiceClientException {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -731,7 +731,11 @@ public class UsageClient {
             String query;
 
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%'";
+                if(!MultitenantUtils.isEmailUserName()) {
+                    query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%'";
+                } else {
+                    query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%@%'";
+                }
             } else {
                 query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER LIKE '%@" + tenantDomain + "'";
             }

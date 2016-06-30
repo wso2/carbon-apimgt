@@ -65,12 +65,15 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             long endTime = System.currentTimeMillis();
             boolean cacheHit = false;
 
-            long startTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtGatewayConstants.REQUEST_START_TIME)));
-            long backendStartTime = Long.parseLong((String) (mc.getProperty(
-                    APIMgtGatewayConstants.BACKEND_REQUEST_START_TIME)));
-            long backendEndTime = ((Number) (mc.getProperty(
-                    APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME))).longValue();
+            Object startTimeProperty = mc.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME);
+            long startTime = (startTimeProperty == null ? 0 :  Long.parseLong((String) startTimeProperty));
+
+            Object beStartTimeProperty = mc.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_START_TIME);
+            long backendStartTime = (beStartTimeProperty == null ? 0 : Long.parseLong((String) beStartTimeProperty));
+
+            Object beEndTimeProperty = mc.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME);
+            long backendEndTime = (beEndTimeProperty == null ? 0 : ((Number) beEndTimeProperty).longValue());
+
             //Check the config property is set to true to build the response message in-order
             //to get the response message size
             boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()
@@ -127,7 +130,9 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
             responsePublisherDTO.setUsername((String) mc.getProperty(APIMgtGatewayConstants.USER_ID));
-            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
+            String tenantDomain = (responsePublisherDTO.getUsername() == null ? null :
+                    MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
+            responsePublisherDTO.setTenantDomain(tenantDomain);
             responsePublisherDTO.setContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
             responsePublisherDTO.setApiVersion((String) mc.getProperty(RESTConstants.SYNAPSE_REST_API));
             responsePublisherDTO.setApi((String) mc.getProperty(APIMgtGatewayConstants.API));

@@ -11,7 +11,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Admin Dashboard- Login",
+            "title":"Admin Portal - Login",
             "header":{
                 "name":"menu/login"
             },
