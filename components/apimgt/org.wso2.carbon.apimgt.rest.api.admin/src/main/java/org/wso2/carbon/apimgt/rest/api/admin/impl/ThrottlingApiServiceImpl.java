@@ -687,10 +687,10 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
 
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
-            BlockingConditionDTO newBlockCondition = BlockingConditionMappingUtil
+            BlockingConditionDTO dto = BlockingConditionMappingUtil
                     .fromBlockingConditionToDTO(newBlockingCondition);
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + uuid))
-                    .entity(newBlockCondition).build();
+                    .entity(dto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding Blocking Condition: " + ""; //todo
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -744,7 +744,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             apiProvider.updateBlockConditionByUUID(conditionId, body.getEnabled().toString());
             //retrieves the updated condition and send back as the response
             BlockConditionsDTO updatedBlockCondition = apiProvider.getBlockConditionByUUID(conditionId);
-            return Response.ok().entity(updatedBlockCondition).build();
+            BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(updatedBlockCondition);
+            return Response.ok().entity(dto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating Block Condition. Id : " + conditionId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
