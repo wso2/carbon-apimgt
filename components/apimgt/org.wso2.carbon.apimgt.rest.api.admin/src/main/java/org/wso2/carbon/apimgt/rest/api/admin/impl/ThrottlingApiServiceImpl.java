@@ -670,7 +670,9 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + uuid))
                     .entity(dto).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding Blocking Condition: " + ""; //todo
+            String errorMessage =
+                    "Error while adding Blocking Condition. Condition type: " + body.getConditionType() + ", value: "
+                            + body.getConditionValue();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Blocking Condition resource location. Condition type: " + body
