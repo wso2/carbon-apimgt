@@ -525,7 +525,7 @@ public class UsageClient {
             int tenantId = APIUtil.getTenantId(provider);
             statement.setInt(1, tenantId);
             if (!"All".equals(apiCreator)) {
-                statement.setString(2, apiCreator);
+                statement.setString(2, MultitenantUtils.getTenantAwareUsername(apiCreator));
             }
 
             //execute

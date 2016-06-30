@@ -907,10 +907,8 @@ function getApiCreators(provider, apiFilter, limit) {
             for(var i = 0; i < userListAvailable.size(); i++) {
                 user = {};
                 user.userId = userListAvailable.get(i);
-                log.info(user.userId);
                 userList[i] = user;
             }
-            log.info(userList);
 
             return {
                 error:false,
