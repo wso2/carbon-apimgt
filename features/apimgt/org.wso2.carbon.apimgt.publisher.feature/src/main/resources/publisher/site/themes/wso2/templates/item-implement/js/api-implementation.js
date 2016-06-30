@@ -470,7 +470,7 @@ function loadInSequences() {
 
                           }
 
-                          for ( var i = 0; i < arr.length; i++) {
+                          for ( var i = 0; i < arrUserDefined.length; i++) {
                               if(arrUserDefined[i] == insequence){
                                   $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
                               }else{
@@ -486,6 +486,7 @@ function loadInSequences() {
                           }
                       }
                       inSequencesLoaded = true;
+                      $("#inSequence").selectpicker('refresh');
                   }else {
                       if (result.message == "timeout") {
                           jagg.showLogin();
@@ -525,7 +526,7 @@ function loadOutSequences() {
                           }
 
                           for ( var i = 0; i < arr.length; i++) {
-                              if(arr[i] == insequence){
+                              if(arr[i] == outsequence){
                                   $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
                                   $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
@@ -539,11 +540,11 @@ function loadOutSequences() {
 
                           }
 
-                          for ( var i = 0; i < arr.length; i++) {
-                              if(arrUserDefined[i] == insequence){
-                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
+                          for ( var i = 0; i < arrUserDefined.length; i++) {
+                              if(arrUserDefined[i] == outsequence){
+                                  $('#outSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
                               }else{
-                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
+                                  $('#outSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
                               }
                               $('<input>').
                               attr('type', 'hidden').
@@ -555,6 +556,7 @@ function loadOutSequences() {
                           }
                       }
                       outSequencesLoaded = true;
+                      $("#outSequence").selectpicker('refresh');
                   }else {
                       if (result.message == "timeout") {
                           jagg.showLogin();
@@ -594,7 +596,7 @@ function loadFaultSequences() {
                           }
 
                           for ( var i = 0; i < arr.length; i++) {
-                              if(arr[i] == insequence){
+                              if(arr[i] == faultsequence){
                                   $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
                                   $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
@@ -608,8 +610,8 @@ function loadFaultSequences() {
 
                           }
 
-                          for ( var i = 0; i < arr.length; i++) {
-                              if(arrUserDefined[i] == insequence){
+                          for ( var i = 0; i < arrUserDefined.length; i++) {
+                              if(arrUserDefined[i] == faultsequence){
                                   $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
                               }else{
                                   $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
@@ -624,6 +626,7 @@ function loadFaultSequences() {
                           }
                       }
                       faultSequencesLoaded = true;
+                      $("#faultSequence").selectpicker('refresh');
                   }else {
                       if (result.message == "timeout") {
                           jagg.showLogin();
