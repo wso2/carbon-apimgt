@@ -134,7 +134,7 @@
     "subsPendingApproval":"Subscription is pending approval",
     "tiers":"Tier",
     "blockedEntities":"Blocked Entities",
-    "blockNew":"Add Block Entity",
+    "blockNew":"Add",
     "conditionIdHead":"Condition Id",
     "conditionTypeHead":"Condition Type",
     "conditionValueHead":"Condition Value",
@@ -143,8 +143,8 @@
     "applicationTiers": "Application Tiers",
     "subscriptionTiers": "Subscription Tiers",
     "customRules": "Custom Rules",
-    "selectBlockingEntity": "Select Entity to Block",
-    "block": "Block",
+    "selectBlockingEntity": "Select Item to Blacklist",
+    "block": "Blacklist",
     "addSubsTier": "Add Subscription Tier",
     "editSubsTier": "Edit Subscription Tier",
     "rateLimitHeader": "Burst Control (Rate Limiting)",
@@ -172,6 +172,6 @@
     "policyFlags":"Policy Flags",
     "noCustomRulesDescription":"Custom Rules are not defined",
     "noCustomRules":"No Custom Rules Found",
-    "noBlockedEntitiesDescription":"Blocked Entities are not defined",
-    "noBlockedEntities":"No Blocked Entities Found"
+    "noBlockedEntitiesDescription":"Blacklisted items are not defined",
+    "noBlockedEntities":"No Blacklisted Items Found"
 }
