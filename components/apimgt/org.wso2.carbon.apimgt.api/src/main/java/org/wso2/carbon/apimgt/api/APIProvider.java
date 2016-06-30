@@ -423,15 +423,34 @@ public interface APIProvider extends APIManager {
      */
     Set getThrottleTierPermissions() throws APIManagementException;
 
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    List<String> getCustomInSequences()  throws APIManagementException;
+
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    List<String> getCustomOutSequences()  throws APIManagementException;
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
     List<String> getCustomInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
     
     
     /**
-     * Get the list of Custom OutSequences.
+     * Get the list of Custom InSequences including API defined in sequences.
      * @return List of available sequences
      * @throws APIManagementException
      */
-    
     List<String> getCustomOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
     /**
@@ -449,6 +468,31 @@ public interface APIProvider extends APIManager {
      */
 
     List<String> getCustomFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+
+    /**
+     * Get the list of Custom in sequences inclusing api identifier.
+     * @return List of in sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+    /**
+     * Get the list of Custom out Sequences including given api
+     * @return List of available out sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+    /**
+     * Get the list of Custom Fault Sequences including per API sequences.
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
 
     /**

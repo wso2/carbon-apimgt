@@ -407,15 +407,11 @@
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
-							                                        	<optgroup label="Existing">
+							                                        	<optgroup label="Existing" id="inSequenceExistingOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                                                            <option>2</option>
-                                                                            <option>3</option>
                                                                         </optgroup>
-                                                                        <optgroup label="Added by you">
-                                                                            <option>11</option>
-                                                                            <option>22</option>
-                                                                            <option>33</option>
+                                                                        <optgroup label="Added by you" id="inSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                                         </optgroup>
 							                                    	</select>
 																    <span class="input-group-btn">
@@ -431,15 +427,11 @@
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="outSequence"  name="outSequence">
-							                                        	<optgroup label="Existing">
+							                                        	<optgroup label="Existing" id="outSequenceExistingOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                                                            <option>2</option>
-                                                                            <option>3</option>
                                                                         </optgroup>
-                                                                        <optgroup label="Added by you">
-                                                                            <option>11</option>
-                                                                            <option>22</option>
-                                                                            <option>33</option>
+                                                                        <optgroup label="Added by you" id="outSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                                         </optgroup>
 							                                    	</select>
 							                                    	<span class="input-group-btn">
@@ -455,15 +447,11 @@
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="faultSequence"  name="faultSequence">
-							                                	    	<optgroup label="Existing">
+							                                	    	<optgroup label="Existing" id="faultSequenceExistingOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                                                            <option>2</option>
-                                                                            <option>3</option>
                                                                         </optgroup>
-                                                                        <optgroup label="Added by you">
-                                                                            <option>11</option>
-                                                                            <option>22</option>
-                                                                            <option>33</option>
+                                                                        <optgroup label="Added by you" id="faultSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                                         </optgroup>
 																	</select>
 																	<span class="input-group-btn" >
