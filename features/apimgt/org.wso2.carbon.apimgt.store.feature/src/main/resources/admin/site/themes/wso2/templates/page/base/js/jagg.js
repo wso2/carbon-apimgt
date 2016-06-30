@@ -25,7 +25,7 @@ var jagg = jagg || {};
     jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
         if (params.title == undefined) {
-            $('#messageModal h3.modal-title').html('Admin Dashboard');
+            $('#messageModal h3.modal-title').html('Admin Portal');
         } else {
             $('#messageModal h3.modal-title').html(params.title);
         }
@@ -102,7 +102,7 @@ var jagg = jagg || {};
                 type = "Error"
             }
         }
-        jagg.messageDisplay({content:params.content,title:"Admin Dashboard - " + type,buttons:[
+        jagg.messageDisplay({content:params.content,title:"Admin Portal - " + type,buttons:[
             {name:"OK",cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
                 if (params.cbk && typeof params.cbk == "function")
