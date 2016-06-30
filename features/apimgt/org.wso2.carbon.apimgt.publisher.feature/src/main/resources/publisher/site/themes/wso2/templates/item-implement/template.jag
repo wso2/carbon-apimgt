@@ -419,7 +419,7 @@
                                                                         </optgroup>
 							                                    	</select>
 																    <span class="input-group-btn">
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
                                                                     </span>
                                                                 </div>
 
@@ -443,7 +443,7 @@
                                                                         </optgroup>
 							                                    	</select>
 							                                    	<span class="input-group-btn">
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="in" data-name="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
                                                                     </span>
                                                                 </div>
 
@@ -467,14 +467,13 @@
                                                                         </optgroup>
 																	</select>
 																	<span class="input-group-btn" >
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="Fault Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Fault Flow</a>
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="fault" data-name="Fault Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Fault Flow</a>
                                                                     </span>
 																</div>
 
 															</div>
 														</div>
 														</span>
-							                            
                                                 </fieldset>
 														<% if(outputs.isCreatePermitted){
 														 %>
@@ -687,6 +686,7 @@
 											<div class="input-group input-wrap file-upload-control">
 												<input type="text" id="sequence_file_value" class="form-control" readonly> 
 												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
+												<input id="flow_id" name="flow_id" type="hidden" value="">
 												<div class="input-group-btn">
 													<button class="btn browse" type="button" title="Browse File">
 														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
@@ -851,9 +851,12 @@
 
     $(document).on("click", ".btn-sequenceUpload", function () {
          var flowId = $(this).data('id');
-         $(".modal-title #flowName").text(flowId);
+         var flowName = $(this).data('name');
+         $(".modal-title #flowName").text(flowName);
+         $(".modal-body #flow_id").val(flowId);
+         $(".modal-body #sequence_file_help").addClass('hide');
+         $(".modal-footer #upload_sequence").attr('disabled', 'disabled');
     });
-
 </script>
 
 
