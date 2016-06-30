@@ -48,7 +48,6 @@ $(document).ready(function(){
     $('#week-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('week'));
         $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
-        $(this).removeClass('active');
         $("body").trigger("update_chart");
     })
 
