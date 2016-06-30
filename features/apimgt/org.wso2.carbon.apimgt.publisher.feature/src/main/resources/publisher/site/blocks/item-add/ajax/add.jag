@@ -334,6 +334,71 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
+        } else if (action === "getCustomCombinedInSequences") {
+
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+
+            mod = jagg.module("api");
+            result = mod.getCustomCombinedInSequences(apiName, apiVersion, apiProvider);
+            var log = new Log();
+            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+            log.info(result);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    sequences:result.sequences
+                }
+            }
+            print(obj);
+        } else if (action === "getCustomCombinedOutSequences") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+            mod = jagg.module("api");
+            result = mod.getCustomCombinedOutSequences(apiName, apiVersion, apiProvider);
+            var log = new Log();
+            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+            log.info(result);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    sequences:result.sequences
+                }
+            }
+            print(obj);
+        } else if (action === "getCustomCombinedFaultSequences") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+            mod = jagg.module("api");
+            result = mod.getCustomCombinedFaultSequences(apiName, apiVersion, apiProvider);
+            var log = new Log();
+            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+            log.info(result);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    sequences:result.sequences
+                }
+            }
+            print(obj);
         } else {
             print({
                       error:true,

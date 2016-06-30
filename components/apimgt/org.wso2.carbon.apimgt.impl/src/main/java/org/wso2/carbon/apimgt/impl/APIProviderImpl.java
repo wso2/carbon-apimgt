@@ -3204,6 +3204,85 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	}
 
     /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomInSequences()  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+
+                }
+            }
+
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomOutSequences()  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+
+                }
+            }
+
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
      * Get stored custom fault sequences from governanceSystem registry
      *
      * @throws APIManagementException
@@ -3229,8 +3308,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
         } catch (Exception e) {
-            handleException("Issue is in getting custom Fault Sequences from the Registry", e);
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
         }
         return sequenceList;
     }
@@ -3294,6 +3382,130 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return sequenceList;
     }
 
+
+    /**
+     * Get the list of Custom in sequences of API.
+     * @return List of in sequences
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomApiInSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
+     * Get the list of Custom out Sequences of API
+     *
+     * @return List of available out sequences
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
+     * Get the list of Custom Fault Sequences of API.
+     *
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
 
     /**
      * This method is used to initiate the web service calls and cluster messages related to stats publishing status

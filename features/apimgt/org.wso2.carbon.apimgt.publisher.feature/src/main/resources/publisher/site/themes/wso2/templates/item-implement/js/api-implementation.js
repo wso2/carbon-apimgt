@@ -432,12 +432,13 @@ function loadInSequences() {
     }
 
         jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomInSequences", provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+                action : "getCustomCombinedInSequences", provider:apiProvider, apiName:apiName, apiVersion:apiVersion
             },
               function(result) {
                   if (!result.error) {
                       var arr = [];
-                      if (result.sequences.length == 0) {
+                      var arrUserDefined = [];
+                      if (result.sequences.defaultSequences.length == 0 && result.sequences.userDefinedSequences.length == 0) {
                           var msg = "No defined sequences";
                           $('<input>').
                                   attr('type', 'hidden').
@@ -446,21 +447,41 @@ function loadInSequences() {
                                   attr('value', msg).
                                   appendTo('#manage_form');
                       } else {
-                          for ( var j = 0; j < result.sequences.length; j++) {
-                              arr.push(result.sequences[j]);
+                          for ( var j = 0; j < result.sequences.defaultSequences.length; j++) {
+                              arr.push(result.sequences.defaultSequences[j]);
                           }
+
+                          for ( var k = 0; k < result.sequences.userDefinedSequences.length; k++) {
+                              arrUserDefined.push(result.sequences.userDefinedSequences[k]);
+                          }
+
                           for ( var i = 0; i < arr.length; i++) {
-                              if(result.sequences[i] == insequence){
-                                  $('#inSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
+                              if(arr[i] == insequence){
+                                  $('#inSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
                               }else{
-                                  $('#inSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+                                  $('#inSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
                               }
                               $('<input>').
                                       attr('type', 'hidden').
                                       attr('name', 'inSeq').
                                       attr('id', 'inSeq').
-                                      attr('value', result.sequences[i]).
+                                      attr('value', arr[i]).
                                       appendTo('#manage_form');
+
+                          }
+
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(arrUserDefined[i] == insequence){
+                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
+                              }else{
+                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
+                              }
+                              $('<input>').
+                              attr('type', 'hidden').
+                              attr('name', 'inSeq').
+                              attr('id', 'inSeq').
+                              attr('value', arrUserDefined[i]).
+                              appendTo('#manage_form');
 
                           }
                       }
@@ -480,12 +501,13 @@ function loadOutSequences() {
     }
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomOutSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+                action : "getCustomCombinedOutSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
             },
               function(result) {
                   if (!result.error) {
                       var arr = [];
-                      if (result.sequences.length == 0) {
+                      var arrUserDefined = [];
+                      if (result.sequences.defaultSequences.length == 0 && result.sequences.userDefinedSequences.length == 0) {
                           var msg = "No defined sequences";
                           $('<input>').
                                   attr('type', 'hidden').
@@ -494,22 +516,41 @@ function loadOutSequences() {
                                   attr('value', msg).
                                   appendTo('#manage_form');
                       }else {
-                          for ( var j = 0; j < result.sequences.length; j++) {
-                              arr.push(result.sequences[j]);
+                          for ( var j = 0; j < result.sequences.defaultSequences.length; j++) {
+                              arr.push(result.sequences.defaultSequences[j]);
                           }
-                          for(var i=0; i<arr.length; i++){
-                              if(result.sequences[i] == outsequence){
-                                  $('#outSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
-                              }
-                              else{
-                                  $('#outSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+
+                          for ( var k = 0; k < result.sequences.userDefinedSequences.length; k++) {
+                              arrUserDefined.push(result.sequences.userDefinedSequences[k]);
+                          }
+
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(arr[i] == insequence){
+                                  $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
+                              }else{
+                                  $('#outSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
                               }
                               $('<input>').
-                                      attr('type', 'hidden').
-                                      attr('name', 'outSeq').
-                                      attr('id', 'outSeq').
-                                      attr('value', result.sequences[i]).
-                                      appendTo('#manage_form');
+                              attr('type', 'hidden').
+                              attr('name', 'inSeq').
+                              attr('id', 'inSeq').
+                              attr('value', arr[i]).
+                              appendTo('#manage_form');
+
+                          }
+
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(arrUserDefined[i] == insequence){
+                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
+                              }else{
+                                  $('#inSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
+                              }
+                              $('<input>').
+                              attr('type', 'hidden').
+                              attr('name', 'inSeq').
+                              attr('id', 'inSeq').
+                              attr('value', arrUserDefined[i]).
+                              appendTo('#manage_form');
 
                           }
                       }
@@ -529,12 +570,13 @@ function loadFaultSequences() {
     }
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomFaultSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+                action : "getCustomCombinedFaultSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
             },
               function(result) {
                   if (!result.error) {
                       var arr = [];
-                      if (result.sequences.length == 0) {
+                      var arrUserDefined = [];
+                      if (result.sequences.defaultSequences.length == 0 && result.sequences.userDefinedSequences.length == 0) {
                           var msg = "No defined sequences";
                           $('<input>').
                                   attr('type', 'hidden').
@@ -543,22 +585,41 @@ function loadFaultSequences() {
                                   attr('value', msg).
                                   appendTo('#manage_form');
                       }else {
-                          for ( var j = 0; j < result.sequences.length; j++) {
-                              arr.push(result.sequences[j]);
+                          for ( var j = 0; j < result.sequences.defaultSequences.length; j++) {
+                              arr.push(result.sequences.defaultSequences[j]);
                           }
-                          for(var i=0; i<arr.length; i++){
-                              if(result.sequences[i] == faultsequence){
-                                  $('#faultSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
-                              }
-                              else{
-                                  $('#faultSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+
+                          for ( var k = 0; k < result.sequences.userDefinedSequences.length; k++) {
+                              arrUserDefined.push(result.sequences.userDefinedSequences[k]);
+                          }
+
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(arr[i] == insequence){
+                                  $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'" selected="selected">'+arr[i]+'</option>');
+                              }else{
+                                  $('#faultSequenceExistingOptGroup').append('<option value="'+arr[i]+'">'+arr[i]+'</option>');
                               }
                               $('<input>').
-                                      attr('type', 'hidden').
-                                      attr('name', 'faultSeq').
-                                      attr('id', 'faultSeq').
-                                      attr('value', result.sequences[i]).
-                                      appendTo('#manage_form');
+                              attr('type', 'hidden').
+                              attr('name', 'inSeq').
+                              attr('id', 'inSeq').
+                              attr('value', arr[i]).
+                              appendTo('#manage_form');
+
+                          }
+
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(arrUserDefined[i] == insequence){
+                                  $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'" selected="selected">'+arrUserDefined[i]+'</option>');
+                              }else{
+                                  $('#faultSequenceUserAddedOptGroup').append('<option value="'+arrUserDefined[i]+'">'+arrUserDefined[i]+'</option>');
+                              }
+                              $('<input>').
+                              attr('type', 'hidden').
+                              attr('name', 'inSeq').
+                              attr('id', 'inSeq').
+                              attr('value', arrUserDefined[i]).
+                              appendTo('#manage_form');
 
                           }
                       }
