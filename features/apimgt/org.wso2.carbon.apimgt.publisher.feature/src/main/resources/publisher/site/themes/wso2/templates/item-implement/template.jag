@@ -391,7 +391,6 @@
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
-
 							                                    <label class="checkbox">
 							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
@@ -404,11 +403,20 @@
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 							                            <div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-6">
+															<div class="headerContainer tagContainer col-sm-4">
 
 																<div id="" class="">
-																	<select class="form-control" id="inSequence"  name="inSequence" >
-							                                        	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
+							                                        	<optgroup label="Existing">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option>2</option>
+                                                                            <option>3</option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you">
+                                                                            <option>11</option>
+                                                                            <option>22</option>
+                                                                            <option>33</option>
+                                                                        </optgroup>
 							                                    	</select>
 																</div>
 
@@ -416,11 +424,20 @@
 														</div>
 														<div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-6">
+															<div class="headerContainer tagContainer col-sm-4">
 
 																<div id="" class="">
-																	<select class="form-control" id="outSequence"  name="outSequence">
-							                                        	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+																	<select class="form-control selectpicker" id="outSequence"  name="outSequence">
+							                                        	<optgroup label="Existing">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option>2</option>
+                                                                            <option>3</option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you">
+                                                                            <option>11</option>
+                                                                            <option>22</option>
+                                                                            <option>33</option>
+                                                                        </optgroup>
 							                                    	</select>
 																</div>
 
@@ -428,11 +445,20 @@
 														</div>
 														<div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("faultFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-6">
+															<div class="headerContainer tagContainer col-sm-4">
 
 																<div id="" class="">
-																	<select class="form-control" id="faultSequence"  name="faultSequence">
-							                                	    	<option value="none" selected="selected"><%=i18n.localize("none")%></option>
+																	<select class="form-control selectpicker" id="faultSequence"  name="faultSequence">
+							                                	    	<optgroup label="Existing">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option>2</option>
+                                                                            <option>3</option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you">
+                                                                            <option>11</option>
+                                                                            <option>22</option>
+                                                                            <option>33</option>
+                                                                        </optgroup>
 																	</select>
 																</div>
 
@@ -446,7 +472,7 @@
 																 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
 															</div>
 														</div>
-
+                                                </fieldset>
 														<% if(outputs.isCreatePermitted){
 														 %>
 														<br/><br/>
@@ -465,7 +491,7 @@
 													</div>
 												<% }; %>
 							                        <%}%>
-							                    </fieldset>
+
 												<hr />
 							                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
 							                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
