@@ -69,3 +69,11 @@ table.table-bordered th:last-child, table.table-bordered td:last-child {
     left: auto;
     right: 20px;
 }
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover{
+    background: #191919;
+    border-color: #004675;
+}
+.secondary-nav > li.active > a, .secondary-nav > li.active > a:focus, .secondary-nav > li.active > a:hover{
+    background: #004675;
+    border-color: #004675;
+}
