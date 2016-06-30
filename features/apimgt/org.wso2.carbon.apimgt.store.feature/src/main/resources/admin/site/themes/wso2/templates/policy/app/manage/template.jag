@@ -1,7 +1,7 @@
 <% jagg.template("policy/app/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="page-header">
-        <h2>Application Level Policy List</h2>
+        <h2>Per Token Quotas</h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">

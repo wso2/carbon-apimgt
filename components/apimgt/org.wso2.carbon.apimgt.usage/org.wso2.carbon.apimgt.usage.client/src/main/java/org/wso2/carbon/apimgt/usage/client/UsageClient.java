@@ -59,7 +59,7 @@ public class UsageClient {
     private static APIUsageStatisticsClient usageStatisticsClient;
 
     /**
-     * central point to initialise datasources or related configuration done by the admin-dashboard analytics section
+     * central point to initialise datasources or related configuration done by the Admin Portal analytics section
      *
      * @throws APIMgtUsageQueryServiceClientException
      */

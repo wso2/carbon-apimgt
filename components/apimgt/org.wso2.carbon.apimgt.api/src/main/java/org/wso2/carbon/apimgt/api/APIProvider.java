@@ -663,7 +663,17 @@ public interface APIProvider extends APIManager {
     BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException;
 
     /**
-     *
+     * Retrieves a block condition by its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Updates a block condition given its id
+     * 
      * @param conditionId id of the condition
      * @param state state of condition
      * @return state change success or not
@@ -671,23 +681,43 @@ public interface APIProvider extends APIManager {
      */
     boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
 
-
     /**
-     *
-     * @param conditionType
-     * @param conditionValue
-     * @return
+     * Updates a block condition given its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
      * @throws APIManagementException
      */
-    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+    boolean updateBlockConditionByUUID(String uuid,String state) throws APIManagementException;
 
     /**
-     *
-     * @param conditionId
-     * @return
+     *  Add a block condition
+     * 
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its Id
+     * 
+     * @param conditionId Id of the condition
+     * @return true if successfully deleted
      * @throws APIManagementException
      */
     boolean deleteBlockCondition(int conditionId) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException;
 
     /**
      *  Get the lifecycle configuration for a tenant

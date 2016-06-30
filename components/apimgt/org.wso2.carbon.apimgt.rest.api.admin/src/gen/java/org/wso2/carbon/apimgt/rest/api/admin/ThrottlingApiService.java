@@ -23,11 +23,11 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class ThrottlingApiService {
-    public abstract Response throttlingBlockingConditionsGet(Integer limit,Integer offset,String accept,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response throttlingBlockingConditionsPost(BlockingConditionDTO body,String contentType);
-    public abstract Response throttlingBlockingConditionsConditionIdGet(String conditionId,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response throttlingBlockingConditionsConditionIdPut(String conditionId,BlockingConditionDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response throttlingBlockingConditionsConditionIdDelete(String conditionId,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response throttlingBlacklistGet(Integer limit,Integer offset,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response throttlingBlacklistPost(BlockingConditionDTO body,String contentType);
+    public abstract Response throttlingBlacklistConditionIdGet(String conditionId,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response throttlingBlacklistConditionIdPut(String conditionId,BlockingConditionDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response throttlingBlacklistConditionIdDelete(String conditionId,String ifMatch,String ifUnmodifiedSince);
     public abstract Response throttlingPoliciesAdvancedPoliciesGet(Integer limit,Integer offset,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response throttlingPoliciesAdvancedPoliciesPost(AdvancedThrottlePolicyDTO body,String contentType);
     public abstract Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName,String ifNoneMatch,String ifModifiedSince);
