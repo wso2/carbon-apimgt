@@ -342,9 +342,6 @@ if(jagg.isCSRFTokenValid())
 
             mod = jagg.module("api");
             result = mod.getCustomCombinedInSequences(apiName, apiVersion, apiProvider);
-            var log = new Log();
-            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-            log.info(result);
             if (result.error) {
                 obj = {
                     error:true,
@@ -363,9 +360,6 @@ if(jagg.isCSRFTokenValid())
             var apiVersion = request.getParameter("apiVersion");
             mod = jagg.module("api");
             result = mod.getCustomCombinedOutSequences(apiName, apiVersion, apiProvider);
-            var log = new Log();
-            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-            log.info(result);
             if (result.error) {
                 obj = {
                     error:true,
@@ -384,9 +378,6 @@ if(jagg.isCSRFTokenValid())
             var apiVersion = request.getParameter("apiVersion");
             mod = jagg.module("api");
             result = mod.getCustomCombinedFaultSequences(apiName, apiVersion, apiProvider);
-            var log = new Log();
-            log.info("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-            log.info(result);
             if (result.error) {
                 obj = {
                     error:true,
