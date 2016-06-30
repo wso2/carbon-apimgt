@@ -5,7 +5,6 @@
 	<p class="lead">Add New API</p>
 </div>
 
-<div class="row">
 	<div class="panel-group accordion" role="tablist" aria-multiselectable="true">
 		<div class="panel panel-default">
 			<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
@@ -123,5 +122,4 @@
 			</div>
 		</div>	
 	</div>
-</div>
 <% }); %>
