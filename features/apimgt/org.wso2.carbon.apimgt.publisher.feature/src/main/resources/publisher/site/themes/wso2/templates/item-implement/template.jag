@@ -854,6 +854,8 @@
          var flowName = $(this).data('name');
          $(".modal-title #flowName").text(flowName);
          $(".modal-body #flow_id").val(flowId);
+         var fileInput = $(".modal-body #sequence_file_value");
+         fileInput.replaceWith(fileInput.val('').clone(true));
          $(".modal-body #sequence_file_help").addClass('hide');
          $(".modal-footer #upload_sequence").attr('disabled', 'disabled');
     });
