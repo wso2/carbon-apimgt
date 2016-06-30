@@ -261,6 +261,23 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
+        } else if (action === "getResourceTiers") {
+            mod = jagg.module("api");
+            result = mod.getResourceTiers();
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    tiers:result.tiers
+                }
+            }
+
+            print(obj);
+
         } else if (action === "getCustomInSequences") {
 
             var apiProvider =request.getParameter("provider");
