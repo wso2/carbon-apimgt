@@ -65,6 +65,11 @@ $(document).ready(function(){
         developerFilter();
     });
 
+    $('body').on('click', '.btn-group button', function (e) {
+        $(this).addClass('active');
+        $(this).siblings().removeClass('active');
+    });
+
     nv.addGraph(function () {
         chart = nv.models.lineChart()
             .margin({right: 40, left: 75})
@@ -94,7 +99,7 @@ $(document).ready(function(){
     });
 
     function developerFilter(){
-        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag",
+        jagg.post("/site/blocks/stats/creator-list/ajax/stats.jag",
             {
                 "apiFilter": apiFilter
             },
@@ -124,7 +129,6 @@ $(document).ready(function(){
         }, "json");
     }
 
-    //update developer list
     developerFilter();
 
     $("body").on("update_chart",function(){

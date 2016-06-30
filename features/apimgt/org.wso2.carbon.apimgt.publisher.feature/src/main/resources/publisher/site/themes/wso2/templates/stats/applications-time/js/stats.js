@@ -2,6 +2,7 @@ var chart;
 var chartData;
 var apiFilter = "allAPIs";
 var selectedDeveloper = "All";
+var selectedCreator = "All";
 var subscribedApi = "All";
 
 function update_chart(data) {

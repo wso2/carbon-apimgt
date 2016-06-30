@@ -65,6 +65,8 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApisByTime.apply(this, arguments);
     },getDeveloperList:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getDeveloperList.apply(this, arguments);
+    },getApiCreators:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApiCreators.apply(this, arguments);
     },getApisList:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getApisList.apply(this, arguments);
     }
