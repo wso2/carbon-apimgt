@@ -51,7 +51,7 @@ public class BlockingConditionMappingUtil {
         }
         listDTO.setCount(blockingConditionDTOList.size());
         listDTO.setList(blockingConditionDTOList);
-        listDTO.setNext(""); //todo set next and previous
+        listDTO.setNext("");
         listDTO.setPrevious("");
         return listDTO;
     }
