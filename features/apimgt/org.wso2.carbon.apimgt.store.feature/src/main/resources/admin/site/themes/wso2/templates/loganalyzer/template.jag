@@ -27,26 +27,26 @@ var httpPort;
 var httpsPort;
 
 if(hostName == null | hostName == ""){
-    if(hostURLMatcher.match('https://{hostname}:{port}/admin-dashboard/loganalyzer/{page}') |
-            hostURLMatcher.match('http://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')){
+    if(hostURLMatcher.match('https://{hostname}:{port}/{admin}/loganalyzer/{page}') |
+            hostURLMatcher.match('http://{hostname}:{port}/{admin}/loganalyzer/{page}')){
         hostName = hostURLMatcher.elements().hostname;
     }else{
         hostName = "localhost";
     }
 }
 
-if(hostURLMatcher.match('http://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')) {
+if(hostURLMatcher.match('http://{hostname}:{port}/{admin}/loganalyzer/{page}')) {
     httpPort = hostURLMatcher.elements().port;
 }else{
     httpPort = 9763;
 }
-if(hostURLMatcher.match('https://{hostname}:{port}/admin-dashboard/loganalyzer/{page}')) {
+if(hostURLMatcher.match('https://{hostname}:{port}/{admin}/loganalyzer/{page}')) {
     httpsPort = hostURLMatcher.elements().port;
 }else{
     httpsPort = 9443;
 }
 %>
-<div id ="title-section" class="title-section"></div>
+<div id ="title-section" class= "page-header"></div>
 <%
 var analyticsConfig = Packages.org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 var analyticsConfigInstance = analyticsConfig.getInstance();
@@ -277,7 +277,7 @@ if(analyticsConfigInstance.isAnalyticsEnabled()){%>
             var pages = ues.global.dashboard.pages;
             for(var i=0; i< pages.length; i++){
                 if(pages[i].id === "<%=page%>") {
-                    $("#title-section").append('<h2>'+pages[i].title+'</h2>');
+                    $("#title-section").append('<h1>'+pages[i].title+'</h1>');
                 }
             }
             //usage : in traverseMenu helper
@@ -293,7 +293,7 @@ if(analyticsConfigInstance.isAnalyticsEnabled()){%>
         var pages = loganalyzerDashboard.pages;
         for(var i=0; i< pages.length; i++){
         if(pages[i].id === "<%=page%>") {
-            $("#title-section").append('<h2>'+pages[i].title+'</h2>');
+            $("#title-section").append('<h1>'+pages[i].title+'</h1>');
             $("#message-section").append('<h3>'+pages[i].title+" is disabled."+'</h3>');
         }
     }
