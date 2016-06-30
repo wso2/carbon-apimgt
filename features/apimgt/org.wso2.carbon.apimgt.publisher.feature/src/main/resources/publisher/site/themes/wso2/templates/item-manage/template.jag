@@ -34,7 +34,9 @@
     ];
     var TIERS =[
         <% for (var i = 0; i < resourceTiers.length; i++) {
-        %>{ "value": "<%= resourceTiers[i].tierName %>", "text": "<%= resourceTiers[i].tierDisplayName %>" }<% if((i+1) != resourceTiers.length){%>,<%}%>
+        %>{ "value": "<%= encode.forJavaScript(String(resourceTiers[i].tierName)) %>", "text": "<%= encode.forJavaScript(String(resourceTiers[i].tierDisplayName)) %>"
+        }<% if(
+        (i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 
@@ -336,7 +338,10 @@
                                                         if(resourceTiers[i].tierName == api.apiLevelPolicy){
                                                             isSelected = true;
                                                         }
-                                                        %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option><%
+                                                        %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
+                                                        <%if
+                                                        (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
+                                                        <%
                                                     }
                                                     %>
                                                     </select>

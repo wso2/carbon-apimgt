@@ -39,6 +39,18 @@
           "roles": "admin",
           "name": "apim:tier_manage",
           "key": "apim:tier_manage"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:bl_view",
+          "key": "apim:bl_view"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:bl_manage",
+          "key": "apim:bl_manage"
         }
       ]
     }
@@ -176,7 +188,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nTier returned\n",
+            "description": "OK.\nPolicy returned\n",
             "schema": {
               "$ref": "#/definitions/ApplicationThrottlePolicy"
             },
@@ -456,7 +468,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nTier returned\n",
+            "description": "OK.\nPolicy returned\n",
             "schema": {
               "$ref": "#/definitions/SubscriptionThrottlePolicy"
             },
@@ -479,7 +491,7 @@
             "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
           },
           "404": {
-            "description": "Not Found.\nRequested Tier does not exist.\n",
+            "description": "Not Found.\nRequested Policy does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -736,7 +748,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nTier returned\n",
+            "description": "OK.\nPolicy returned\n",
             "schema": {
               "$ref": "#/definitions/GlobalThrottlePolicy"
             },
@@ -759,7 +771,7 @@
             "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
           },
           "404": {
-            "description": "Not Found.\nRequested Tier does not exist.\n",
+            "description": "Not Found.\nRequested Policy does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1016,7 +1028,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nTier returned\n",
+            "description": "OK.\nPolicy returned\n",
             "schema": {
               "$ref": "#/definitions/AdvancedThrottlePolicy"
             },
@@ -1039,7 +1051,7 @@
             "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
           },
           "404": {
-            "description": "Not Found.\nRequested Tier does not exist.\n",
+            "description": "Not Found.\nRequested Policy does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1164,9 +1176,9 @@
         }
       }
     },
-    "/throttling/blocking-conditions": {
+    "/throttling/blacklist": {
       "get": {
-        "x-scope": "apim:tier_view",
+        "x-scope": "apim:bl_view",
         "summary": "Get all blocking condtions",
         "description": "Get all blocking condtions\n",
         "parameters": [
@@ -1222,7 +1234,7 @@
         }
       },
       "post": {
-        "x-scope": "apim:tier_manage",
+        "x-scope": "apim:bl_manage",
         "summary": "Add a Blocking condition",
         "description": "Add a Blocking condition\n",
         "parameters": [
@@ -1275,9 +1287,9 @@
         }
       }
     },
-    "/throttling/blocking-conditions/{conditionId}": {
+    "/throttling/blacklist/{conditionId}": {
       "get": {
-        "x-scope": "apim:tier_view",
+        "x-scope": "apim:bl_view",
         "summary": "Retrieve a Blocking Condition",
         "description": "Retrieve a Blocking Condition providing the condition Id\n",
         "parameters": [
@@ -1296,7 +1308,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK.\nTier returned\n",
+            "description": "OK.\nCondition returned\n",
             "schema": {
               "$ref": "#/definitions/BlockingCondition"
             },
@@ -1319,7 +1331,7 @@
             "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
           },
           "404": {
-            "description": "Not Found.\nRequested Tier does not exist.\n",
+            "description": "Not Found.\nRequested Condition does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1333,7 +1345,7 @@
         }
       },
       "delete": {
-        "x-scope": "apim:tier_manage",
+        "x-scope": "apim:bl_manage",
         "summary": "Delete a Blocking condition",
         "description": "Delete a Blocking condition\n",
         "parameters": [
@@ -1369,7 +1381,7 @@
         }
       },
       "put": {
-        "x-scope": "apim:tier_manage",
+        "x-scope": "apim:bl_manage",
         "summary": "Update a Blocking condition",
         "description": "Update a Blocking condition\n",
         "parameters": [
