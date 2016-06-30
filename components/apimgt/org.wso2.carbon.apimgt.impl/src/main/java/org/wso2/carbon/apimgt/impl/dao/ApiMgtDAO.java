@@ -10047,12 +10047,23 @@ public class ApiMgtDAO {
         return isDeployed;
     }
 
-    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+    /**
+     * Add a block condition
+     * 
+     * @param conditionType Type of the block condition
+     * @param conditionValue value related to the type
+     * @param tenantDomain tenant domain the block condition should be effective
+     * @return uuid of the block condition if successfully added
+     * @throws APIManagementException
+     */
+    public String addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
             APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
+        ResultSet rs = null;
+        String uuid = null;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
@@ -10094,11 +10105,13 @@ public class ApiMgtDAO {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 if(!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                    uuid = UUID.randomUUID().toString();
                     insertPreparedStatement = connection.prepareStatement(query);
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
-                    insertPreparedStatement.setString(4, tenantDomain);
                     insertPreparedStatement.setString(3, "TRUE");
+                    insertPreparedStatement.setString(4, tenantDomain);
+                    insertPreparedStatement.setString(5, uuid);
                     status = insertPreparedStatement.execute();
                     connection.commit();
                     status = true;
@@ -10111,17 +10124,28 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
+                    handleException(
+                            "Failed to rollback adding Block condition : " + conditionType + " and " + conditionValue,
+                            ex);
                 }
             }
+            handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
-        return status;
+        if (status) {
+            return uuid;
+        } else {
+            return null;
+        }
     }
 
-    /*
-     * Gets details about a blocking condition.
+    /**
+     * Get details of a block condition by Id
+     *
+     * @param conditionId id of the condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIManagementException
      */
     public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
         Connection connection = null;
@@ -10141,21 +10165,64 @@ public class ApiMgtDAO {
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("VALUE"));
                 blockCondition.setConditionId(conditionId);
+                blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to get Block condition", e);
+                    handleException("Failed to rollback getting Block condition with id " + conditionId, ex);
                 }
             }
+            handleException("Failed to get Block condition with id " + conditionId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockCondition;
     }
 
+    /**
+     * Get details of a block condition by UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIManagementException
+     */
+    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        BlockConditionsDTO blockCondition = null;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITION_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setString(1, uuid);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                blockCondition = new BlockConditionsDTO();
+                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockCondition.setConditionType(resultSet.getString("TYPE"));
+                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockCondition.setUUID(resultSet.getString("UUID"));
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting Block condition by uuid " + uuid, ex);
+                }
+            }
+            handleException("Failed to get Block condition by uuid " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockCondition;
+    }
 
     public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
         Connection connection = null;
@@ -10175,6 +10242,7 @@ public class ApiMgtDAO {
                 blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
                 blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
                 blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
@@ -10182,14 +10250,24 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to get Block condition", e);
+                    handleException("Failed to rollback getting Block conditions ", ex);
                 }
             }
+            handleException("Failed to get Block conditions", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockConditionsDTOList;
     }
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     * 
+     * @param conditionId id of the block condition
+     * @param state blocking state
+     * @return true if the operation was success
+     * @throws APIManagementException
+     */
     public boolean updateBlockConditionState(int conditionId,String state) throws APIManagementException {
         Connection connection = null;
         PreparedStatement updateBlockConditionPreparedStatement = null;
@@ -10209,14 +10287,60 @@ public class ApiMgtDAO {
                 try {
                      connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to update Block condition with condition id "+conditionId, e);
+                    handleException("Failed to rollback updating Block condition with condition id " + conditionId, ex);
                 }
             }
+            handleException("Failed to update Block condition with condition id " + conditionId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
         }
         return status;
     }
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     * 
+     * @param uuid UUID of the block condition
+     * @param state blocking state
+     * @return true if the operation was success
+     * @throws APIManagementException
+     */
+    public boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
+            updateBlockConditionPreparedStatement.setString(1, state.toUpperCase());
+            updateBlockConditionPreparedStatement.setString(2, uuid);
+            updateBlockConditionPreparedStatement.executeUpdate();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback updating Block condition with condition UUID " + uuid, ex);
+                }
+            }
+            handleException("Failed to update Block condition with condition UUID " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    /**
+     * Delete the block condition given the id
+     * 
+     * @param conditionId id of the condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
     public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement deleteBlockConditionPreparedStatement = null;
@@ -10235,9 +10359,45 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to delete Block condition with condition id"+conditionId, e);
+                    handleException("Failed to rollback deleting Block condition with condition id " + conditionId, ex);
                 }
             }
+            handleException("Failed to delete Block condition with condition id " + conditionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    /**
+     * Delete the block condition given the id
+     *
+     * @param uuid UUID of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.DELETE_BLOCK_CONDITION_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
+            deleteBlockConditionPreparedStatement.setString(1, uuid);
+            status = deleteBlockConditionPreparedStatement.execute();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback deleting Block condition with condition UUID " + uuid, ex);
+                }
+            }
+            handleException("Failed to delete Block condition with condition UUID " + uuid, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
         }
@@ -10264,9 +10424,10 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to check Block condition with context "+context, e);
+                    handleException("Failed to rollback checking Block condition with context " + context, ex);
                 }
             }
+            handleException("Failed to check Block condition with context " + context, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -10295,10 +10456,13 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to check Block condition with Application Name " + appName + " with " +
-                            "Application Owner" + appOwner, e);
+                    handleException(
+                            "Failed to rollback checking Block condition with Application Name " + appName + " with "
+                                    + "Application Owner" + appOwner, ex);
                 }
             }
+            handleException("Failed to check Block condition with Application Name " + appName + " with " +
+                    "Application Owner" + appOwner, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -10325,9 +10489,10 @@ public class ApiMgtDAO {
                  try {
                      connection.rollback();
                  } catch (SQLException ex) {
-                     handleException("Failed to get API Details", e);
+                     handleException("Failed to rollback getting API Details", ex);
                  }
              }
+             handleException("Failed to get API Details", e);
          } finally {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }

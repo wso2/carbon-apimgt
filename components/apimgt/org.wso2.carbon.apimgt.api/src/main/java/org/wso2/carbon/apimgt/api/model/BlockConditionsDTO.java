@@ -22,6 +22,7 @@ public class BlockConditionsDTO {
     private boolean enabled;
     private String conditionType,conditionValue;
     private int conditionId;
+    private String uuid;
 
     public int getConditionId() {
         return conditionId;
@@ -53,5 +54,13 @@ public class BlockConditionsDTO {
 
     public void setConditionId(int conditionId) {
         this.conditionId = conditionId;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 }
