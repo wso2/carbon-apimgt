@@ -156,3 +156,6 @@ input.ep-field{
     border:1px solid;
     border-color: #ccc;
 }
+.btn-sequenceUpload{
+    min-width:155px;
+}

@@ -403,9 +403,9 @@
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 							                            <div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-4">
+															<div class="headerContainer tagContainer col-sm-6">
 
-																<div id="" class="">
+																<div class="input-group">
 																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
 							                                        	<optgroup label="Existing">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
@@ -418,15 +418,18 @@
                                                                             <option>33</option>
                                                                         </optgroup>
 							                                    	</select>
-																</div>
+																    <span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
+                                                                    </span>
+                                                                </div>
 
 															</div>
 														</div>
 														<div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-4">
+															<div class="headerContainer tagContainer col-sm-6">
 
-																<div id="" class="">
+																<div class="input-group">
 																	<select class="form-control selectpicker" id="outSequence"  name="outSequence">
 							                                        	<optgroup label="Existing">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
@@ -439,15 +442,18 @@
                                                                             <option>33</option>
                                                                         </optgroup>
 							                                    	</select>
-																</div>
+							                                    	<span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
+                                                                    </span>
+                                                                </div>
 
 															</div>
 														</div>
 														<div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("faultFlow")%></label>
-															<div class="headerContainer tagContainer col-sm-4">
+															<div class="headerContainer tagContainer col-sm-6">
 
-																<div id="" class="">
+																<div class="input-group">
 																	<select class="form-control selectpicker" id="faultSequence"  name="faultSequence">
 							                                	    	<optgroup label="Existing">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
@@ -460,6 +466,9 @@
                                                                             <option>33</option>
                                                                         </optgroup>
 																	</select>
+																	<span class="input-group-btn" >
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="Fault Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Fault Flow</a>
+                                                                    </span>
 																</div>
 
 															</div>
@@ -671,7 +680,7 @@
     <div class="modal-content clearfix">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
-        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy</h3>
+        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy - <span id="flowName"></span></h3>
       </div>
       <div class="">      
                             <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
@@ -679,27 +688,8 @@
 					                 
 					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
 					            </div>
-					            <div class="form-group toggleRadios">
-					            	<label class="col-sm-3 control-label">Mediation Policy Type</label>
-					            <div class="col-sm-7">
-	                                <label class="radio">
-	                                    <input type="radio" class="select-file" name="upload-sequence" id="" value="in" checked> 
-	                                    <span class="helper">In</span>
-	                                </label>
-	                                <label class="radio">
-	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
-	                                    <span class="helper">Out</span>
-	                                </label>
-	                                <label class="radio">
-	                                    <input type="radio" class="select-url" name="upload-sequence" value="fault">
-	                                    <span class="helper">Fault</span>
-	                                </label>
-                                </div>
-					            </div>	
-					            <br class="spacer"/>
                                 	<div class="form-group">
-                                		<label class="col-sm-3"></label>
-										<div class="controls col-sm-8">
+										<div class="controls col-sm-12">
 											<div class="input-group input-wrap file-upload-control">
 												<input type="text" id="sequence_file_value" class="form-control" readonly> 
 												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
@@ -863,7 +853,13 @@
         }catch(e){
             console.log("Invalid endpoint config");
         }
-    })
+    });
+
+    $(document).on("click", ".btn-sequenceUpload", function () {
+         var flowId = $(this).data('id');
+         $(".modal-title #flowName").text(flowId);
+    });
+
 </script>
 
 
