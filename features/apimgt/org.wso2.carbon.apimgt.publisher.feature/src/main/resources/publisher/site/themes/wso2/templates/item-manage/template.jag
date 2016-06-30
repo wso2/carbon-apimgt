@@ -455,12 +455,12 @@
                                                                     <label class="control-label col-sm-3" for="throttle">
                                                                     </label>
                                                                     <div class="col-sm-8">
-                                                                              <p class="help-block">
-                                                                              <span class="icon fw-stack fw-lg" style="font-size:8px">
-                                        									<i class="fw fw-circle fw-stack-2x"></i>
-                                        									<i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
-                                        								</span>
-                                                                              <%=i18n.localize("Refer ","Refer ")%><a style="color:#1a78d8" href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a><%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%></p>
+                                                                          <p class="help-block">
+                                        									  <i class="fw fw-info"></i>
+                                                                              <%=i18n.localize("Refer ","Refer ")%>
+                                                                              <a href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a>
+                                                                              <%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%>
+                                                                          </p>
                                                                     </div>
                                                                 </div>
 
