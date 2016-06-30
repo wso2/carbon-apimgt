@@ -136,7 +136,6 @@ var getSupportedLanguages = function()  {
     var log = new Log();
     try {
         var langs = generator.getSupportedSDKLanguages();
-
         if(langs != null && "null" != langs)   {
             return  {
                 langs:langs,

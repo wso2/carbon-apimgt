@@ -48,6 +48,7 @@ $(document).ready(function(){
     $('#week-btn').on('click',function(){
         $('#date-range').data('daterangepicker').setStartDate(moment().startOf('week'));
         $('#date-range').data('daterangepicker').setEndDate(moment().format('YYYY-MM-DD HH:mm:ss'));
+        $(this).removeClass('active');
         $("body").trigger("update_chart");
     })
 
@@ -63,6 +64,11 @@ $(document).ready(function(){
         $('#developerSelect').append('<option> All </option>');
         apiFilter = this.value;
         developerFilter();
+    });
+
+    $('body').on('click', '.btn-group button', function (e) {
+        $(this).addClass('active');
+        $(this).siblings().removeClass('active');
     });
 
     nv.addGraph(function () {
@@ -94,7 +100,7 @@ $(document).ready(function(){
     });
 
     function developerFilter(){
-        jagg.post("/site/blocks/stats/developers-list/ajax/stats.jag",
+        jagg.post("/site/blocks/stats/creator-list/ajax/stats.jag",
             {
                 "apiFilter": apiFilter
             },
@@ -124,7 +130,6 @@ $(document).ready(function(){
         }, "json");
     }
 
-    //update developer list
     developerFilter();
 
     $("body").on("update_chart",function(){
