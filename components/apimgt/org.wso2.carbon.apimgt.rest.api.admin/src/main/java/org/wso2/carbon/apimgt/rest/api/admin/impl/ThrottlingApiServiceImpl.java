@@ -635,8 +635,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingBlockingConditionsGet(Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response throttlingBlacklistGet(Integer limit, Integer offset, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
@@ -658,7 +658,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlockingConditionsPost(BlockingConditionDTO body, String contentType) {
+    public Response throttlingBlacklistPost(BlockingConditionDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String uuid = apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
@@ -691,7 +691,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Matched block condition for the given Id
      */
     @Override
-    public Response throttlingBlockingConditionsConditionIdGet(String conditionId, String ifNoneMatch,
+    public
+    Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch,
             String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -717,7 +718,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated block condition
      */
     @Override
-    public Response throttlingBlockingConditionsConditionIdPut(String conditionId, BlockingConditionDTO body,
+    public
+    Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -742,7 +744,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return 200 OK response if successfully deleted the block condition
      */
     @Override
-    public Response throttlingBlockingConditionsConditionIdDelete(String conditionId, String ifMatch,
+    public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
