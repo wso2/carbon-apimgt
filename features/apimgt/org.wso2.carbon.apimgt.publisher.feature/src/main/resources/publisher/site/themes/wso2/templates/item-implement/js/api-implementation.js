@@ -4,7 +4,7 @@ $(document).ready(function(){
         cors_config = jQuery.parseJSON($('#corsConfigurationManaged').val());
     }
 
- $(".cors-ui-container").corsUi({
+    $(".cors-ui-container").corsUi({
         config : cors_config
     });
 
@@ -339,23 +339,26 @@ function uploadSequence (type) {
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function(responseText){
+                success: $.proxy(function(responseText){        
                     if (!responseText.error) {
-                    	if (type == "in") {
+                    	if (this.type == "in") {
                     		if ($("#inSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#inSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#inSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
-                    	} else if (type == "out") {
+                            $('#inSequence').selectpicker('render');
+                    	} else if (this.type == "out") {
                     		if ($("#outSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#outSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#outSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
-                    	} else if (type == "fault") {
+                            $('#outSequence').selectpicker('render');
+                    	} else if (this.type == "fault") {
                     		if ($("#faultSequence option[value='" + responseText.fileName + "']").length == 0) {
                     			$('#faultSequence').append($("<option></option>").attr("value",responseText.fileName).text(responseText.fileName));
                     		}                    		
                     		$("#faultSequence option[value='" + responseText.fileName + "']").attr("selected", "selected");
+                            $('#faultSequence').selectpicker('render');
                     	}
                     	$("#sequenceUpload").modal('hide');
                     	$('#sequence_file_value').val('');
@@ -378,7 +381,7 @@ function uploadSequence (type) {
                           $('#sequence_file_help').removeClass('hide');
                      }
                     }
-                },
+                }, { "type": type }),
                 dataType: "json"
             });               
 return true;                         
