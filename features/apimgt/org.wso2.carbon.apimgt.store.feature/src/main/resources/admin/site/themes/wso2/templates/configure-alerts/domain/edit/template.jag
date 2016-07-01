@@ -221,7 +221,17 @@
                                 }
 
                             }
-                        }
+                        } else {
+                                    var parameterDTOs = currentTemplate.getDomainParameterDTOs();
+                                    var indexParam = 0;
+                                    for (var i in parameterDTOs){
+                                        parameterString += "'" + parameterDTOs[i].getName() + "::" + parameterDTOs[i].getDefaultValue() + "'";
+                                        indexParam++;
+                                        if (indexParam < currentTemplate.getDomainParameterDTOs().length) {
+                                            parameterString += "+ ',' +";
+                                        }
+                                    }
+                                }
                     }
                 %>
 

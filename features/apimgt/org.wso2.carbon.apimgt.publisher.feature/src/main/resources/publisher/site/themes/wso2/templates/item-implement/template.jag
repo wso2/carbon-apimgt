@@ -401,8 +401,8 @@
 							                            </div>
 							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-							                            <div class="form-group">
-															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
 
 																<div class="input-group">
@@ -414,15 +414,15 @@
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                                         </optgroup>
 							                                    	</select>
-																    <span class="input-group-btn">
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
+							                                    	<span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="in" data-name="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
                                                                     </span>
                                                                 </div>
 
 															</div>
-														</div>
-														<div class="form-group">
-															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
+														</div>							                                        
+							                            <div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
 
 																<div class="input-group">
@@ -433,9 +433,9 @@
                                                                         <optgroup label="Added by you" id="outSequenceUserAddedOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                                         </optgroup>
-							                                    	</select>
-							                                    	<span class="input-group-btn">
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="in" data-name="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
+							                                    	</select>																
+																    <span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
                                                                     </span>
                                                                 </div>
 

@@ -250,6 +250,7 @@
     "forum.topic.list" : "lista Topic",
     "forum.replies" : "respuestas",
     "forum.by" : "Por",
+    "save" : "salvar",
 
     "forum.topicCreation.title" : "Crear nueva Topic",
     "forum.topicCreation.subject" : "Tema",
