@@ -283,6 +283,9 @@ table.table-bordered th:last-child, table.table-bordered td:last-child {
     display: block;
     height: 0;
 }
+.wr-hidden-operation .panel-heading .panel-title,.wr-hidden-operation .collapse .panel-heading .panel-title{
+    height:auto;
+}
 #pipeline-content .panel-group{
     margin-bottom:0px;
 }
