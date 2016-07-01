@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.gateway.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -41,6 +40,8 @@ import java.util.TimerTask;
 
 public class BlockingConditionRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(BlockingConditionRetriever.class);
+    private static final int blockConditionsDataRetrievalTimeoutInSeconds = 15;
+    private static final int blockConditionsDataRetrievalRetries = 15;
 
     @Override
     public void run() {
@@ -70,13 +71,31 @@ public class BlockingConditionRetriever extends TimerTask {
             int keyMgtPort = keyMgtURL.getPort();
             String keyMgtProtocol = keyMgtURL.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-            HttpResponse httpResponse = httpClient.execute(method);
+            HttpResponse httpResponse = null;
+            int retryCount = 0;
+            boolean retry;
+            do {
+                try {
+                    httpResponse = httpClient.execute(method);
+                    retry = false;
+                } catch (IOException ex) {
+                    retryCount++;
+                    if (retryCount < blockConditionsDataRetrievalRetries) {
+                        retry = true;
+                        log.warn("Failed retrieving Blocking Conditions from remote endpoint: " + ex.getMessage()
+                                 + ". Retrying after " + blockConditionsDataRetrievalTimeoutInSeconds + " seconds...");
+                        Thread.sleep(blockConditionsDataRetrievalTimeoutInSeconds * 1000);
+                    } else {
+                        throw ex;
+                    }
+                }
+            } while(retry);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if (responseString != null && !responseString.isEmpty()) {
                 return new Gson().fromJson(responseString, BlockConditionsDTO.class);
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error("Exception when retrieving Blocking Conditions from remote endpoint ", e);
         }
         return null;

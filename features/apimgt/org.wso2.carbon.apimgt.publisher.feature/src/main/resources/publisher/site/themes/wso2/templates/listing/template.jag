@@ -15,12 +15,7 @@
     if ((outputs.apis != null && outputs.apis.length > 0) || query != null) {
         jagg.includeBlock("search/api-search", null);
     }
-    //Fetch tier information to create sample API
     var mod = jagg.module("api");
-    var tiers = mod.getTiers().tiers;
-    var defaultApiLevelTier = tiers[0].tierName;
-    var resourceTiers = mod.getResourceTiers().tiers;
-    var defaultResourceLevelTier =  resourceTiers[0].tierName;
     var gatewayURL = mod.getGatewayURL().gatewayURL;
     %>
     <%
@@ -109,7 +104,7 @@
         	<div class="col-sm-12">
         		<div class="col-sm-5">
         			 <div class="add-padding-2x app-data ">
-                                    <h4><a href="#" title="<%= encode.forHtml(api.docName)%>"><%= encode.forHtml(api.docName)%></a></h4>
+                                    <h4 class="truncate"><a href="#" title="<%= encode.forHtml(api.docName)%>"><%= encode.forHtml(api.docName)%></a></h4>
                                     <% if(api.docSummary && api.docSummary != ""){ %>
                                     	<h5><a href="#" title="<%=i18n.localize("docSum")%>"><%=i18n.localize("docSum")%>:<%=  encode.forHtml(api.docSummary)%></a></h5>
                                     <%} %>
@@ -149,9 +144,9 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a title="<%=api.version%>"><%=api.version%></a></h5>
-                                    <p><%=api.provider%></p>
+                                    <p class="truncate"><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("apiBrowse")%>" >
 			                                <span id="noOfUsers">
@@ -207,9 +202,9 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><%=api.version%></h5>
-                                    <p><%=api.provider%></p>
+                                    <p class="truncate"><%=api.provider%></p>
                                     <p>
                                     	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("users")%>">
 			                                <span id="noOfUsers">
@@ -259,7 +254,7 @@
                     <p><%=i18n.localize("noAPIsMsg1")%></p>
                 </div>
                 <div style="display: inline"><a title="<%=i18n.localize("addAPI")%>" class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
-        		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultApiLevelTier%>', '<%=defaultResourceLevelTier%>', '<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
+        		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
         <%}else{%>
         		<div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>

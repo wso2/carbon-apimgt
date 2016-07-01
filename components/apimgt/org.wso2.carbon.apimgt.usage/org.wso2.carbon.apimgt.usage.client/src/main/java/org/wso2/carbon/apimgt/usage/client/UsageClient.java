@@ -59,7 +59,7 @@ public class UsageClient {
     private static APIUsageStatisticsClient usageStatisticsClient;
 
     /**
-     * central point to initialise datasources or related configuration done by the admin-dashboard analytics section
+     * central point to initialise datasources or related configuration done by the Admin Portal analytics section
      *
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -243,8 +243,13 @@ public class UsageClient {
             String groupAndOrder = " group by sub.created_time order by sub.created_time asc";
             String time = " and sub.created_time between '" + fromDate + "' and '" + toDate + "' ";
 
-            if ("All".equals(apiName)) {
+            /*if ("All".equals(apiName)) {
                 from = "from AM_SUBSCRIBER sub ";
+                if (!"allAPIs".equals(apiFilter)) {
+                    from += " ,AM_API as api,AM_APPLICATION AS app, AM_SUBSCRIPTION as subc  ";
+                    where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
+                            + "sub.subscriber_id=app.subscriber_id and api.api_provider='" + provider + "'";
+                }
             } else {
                 from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
                 where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
@@ -252,7 +257,9 @@ public class UsageClient {
                 if (!"allAPIs".equals(apiFilter)) {
                     where += " and api.api_provider = '" + provider + "' ";
                 }
-            }
+            }*/
+            
+            from = "from AM_SUBSCRIBER sub "; 
 
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
@@ -494,7 +501,7 @@ public class UsageClient {
      * @return list of api count over time
      * @throws APIMgtUsageQueryServiceClientException throws if any db exception occured
      */
-    public static List<ApisByTimeDTO> getApisByTime(String provider, String developer, String apiFilter,
+    public static List<ApisByTimeDTO> getApisByTime(String provider, String apiCreator, String apiFilter,
             String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -503,63 +510,24 @@ public class UsageClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
 
-           /* String query = "select count(api.api_id) as y, api.created_time as x from AM_API as api, AM_APPLICATION "
-                    + "as app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
-            String group = "group by api.created_time,api.api_id ";
-            String order = " order by api.created_time asc ";
-            String where = "where api.api_id=subc.api_id and app.application_id=subc.application_id and "
-                    + "sub.subscriber_id=app.subscriber_id and api.created_time between '" + fromDate + "' and '" +
-                    toDate + "' ";
-
-            if (!"All".equals(developer)) {
-                where += " and subc.created_by = '" + developer + "' ";
+            String query = "select COUNT(lc.API_ID) as y,lc.EVENT_DATE as x  from AM_API_LC_EVENT lc, \n "
+                    + " (SELECT le.API_ID,max(le.EVENT_DATE) as latest  from AM_API_LC_EVENT le where le.TENANT_ID= ? and \n ";
+            if (!"All".equals(apiCreator)) {
+                query += " le.USER_ID= ? and \n";
             }
-            if (!"allAPIs".equals(apiFilter)) {
-                where += " and api.api_provider = '" + provider + "' ";
-            } else {
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(provider);
-                List<API> apiList = apiProvider.getAllAPIs();
-                StringBuilder apis = new StringBuilder(" and api.context in (");
-                if (apiList.size() > 0) {
-                    apis.append("'").append(apiList.get(0).getContext()).append("'");
-                }
-                for (int i = 1; i < apiList.size(); i++) {
-                    apis.append(", '").append(apiList.get(i).getContext()).append("' ");
-                }
-                apis.append(") ");
-                where += apis.toString();
-            }*/
-            
-			String query = "select COUNT(lc.API_ID) as y,lc.EVENT_DATE as x  from AM_API_LC_EVENT lc, \n "
-					+ " (SELECT le.API_ID,max(le.EVENT_DATE) as latest  from AM_API_LC_EVENT le where \n ";
-			if (!"All".equals(developer)) {
-				query += " le.USER_ID= ? and \n ";
-			}
-
-			query += " le.EVENT_DATE between '"+fromDate+"' and '"+toDate+"' group by le.API_ID order by latest DESC )x \n ";
-
-			if (!"allAPIs".equals(apiFilter)) {
-				query += " ,AM_API ai ";
-			}
-			query += " where lc.NEW_STATE ='PUBLISHED' and  lc.API_ID = x.API_ID and lc.EVENT_DATE = x.latest \n ";
-
-			if (!"allAPIs".equals(apiFilter)) {
-				query += " and ai.API_ID = lc.API_ID and ai.API_PROVIDER = ? \n ";
-			}
-			query += " group by lc.API_ID,lc.EVENT_DATE order by lc.EVENT_DATE ASC \n ";
+            query += " le.EVENT_DATE between '" + fromDate + "' and '" + toDate
+                    + "' group by le.API_ID order by latest DESC )x \n ";
+            query += " where lc.NEW_STATE ='PUBLISHED' and  lc.API_ID = x.API_ID and lc.EVENT_DATE = x.latest \n ";
+            query += " group by lc.API_ID,lc.EVENT_DATE order by lc.EVENT_DATE ASC \n ";
 
             statement = connection.prepareStatement(query);
-            
-            if (!"All".equals(developer)) {
-            	statement.setString(1, developer);
-			}
-            
-            if (!"All".equals(developer) && !"allAPIs".equals(apiFilter)) {
-            	statement.setString(2, provider);
-			}else if(!"allAPIs".equals(apiFilter)){
-				statement.setString(1, provider);
-			}
-            
+
+            int tenantId = APIUtil.getTenantId(provider);
+            statement.setInt(1, tenantId);
+            if (!"All".equals(apiCreator)) {
+                statement.setString(2, MultitenantUtils.getTenantAwareUsername(apiCreator));
+            }
+
             //execute
             rs = statement.executeQuery();
             List<ApisByTimeDTO> list = new ArrayList<ApisByTimeDTO>();
@@ -712,7 +680,7 @@ public class UsageClient {
      * @throws SQLException                           throws if any db exceptions occurred
      * @throws APIMgtUsageQueryServiceClientException throws if any other error occurred
      */
-    private static List<String> getApiProviders(String provider)
+    public static List<String> getApiProviders(String provider)
             throws SQLException, APIMgtUsageQueryServiceClientException {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -724,7 +692,11 @@ public class UsageClient {
             String query;
 
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%'";
+                if(!MultitenantUtils.isEmailUserName()) {
+                    query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%'";
+                } else {
+                    query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER NOT LIKE '%@%@%'";
+                }
             } else {
                 query = "SELECT DISTINCT(API_PROVIDER) FROM AM_API  WHERE API_PROVIDER LIKE '%@" + tenantDomain + "'";
             }

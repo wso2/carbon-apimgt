@@ -25,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -71,8 +73,8 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
+//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -136,34 +138,11 @@ import java.util.regex.Pattern;
 public class ApiMgtDAO {
     private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
 
-    private TokenGenerator tokenGenerator = null;
     private boolean forceCaseInsensitiveComparisons = false;
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized");
-        } else {
-            String enableJWTGeneration = configuration.getFirstProperty(APIConstants.ENABLE_JWT_GENERATION);
-            if (enableJWTGeneration != null && JavaUtils.isTrueExplicitly(enableJWTGeneration)) {
-                String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
-                if (clazz == null) {
-                    tokenGenerator = new JWTGenerator();
-                } else {
-                    try {
-                        tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz).newInstance();
-                    } catch (InstantiationException e) {
-                        log.error("Error while instantiating class " + clazz, e);
-                    } catch (IllegalAccessException e) {
-                        log.error(e);
-                    } catch (ClassNotFoundException e) {
-                        log.error("Cannot find the class " + clazz + e);
-                    }
-                }
-            }
-        }
 
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
@@ -714,11 +693,6 @@ public class ApiMgtDAO {
                         conn.commit();
                     } else {
                         keyValidationInfoDTO.setAuthorized(true);
-
-                        if (tokenGenerator != null) {
-                            String jwtToken = generateJWTToken(keyValidationInfoDTO, context, version, accessToken);
-                            keyValidationInfoDTO.setEndUserToken(jwtToken);
-                        }
                     }
                 } else {
                     keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus
@@ -980,19 +954,6 @@ public class ApiMgtDAO {
 		return isAnyContentAware;
 	}
 
-
-
-    private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version)
-            throws APIManagementException {
-        return tokenGenerator.generateToken(keyValidationInfoDTO, context, version);
-    }
-
-
-    private String generateJWTToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String context, String version,
-                                    String accessToken) throws APIManagementException {
-        return tokenGenerator.generateToken(keyValidationInfoDTO, context, version, accessToken);
-    }
-
     private void updateTokenState(String accessToken, Connection conn, PreparedStatement ps)
             throws SQLException, APIManagementException, CryptoException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
@@ -1136,7 +1097,6 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(checkDuplicateQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
-            ps.setString(3, identifier.getTier());
 
             resultSet = ps.executeQuery();
 
@@ -1147,8 +1107,10 @@ public class ApiMgtDAO {
 
                 String applicationName = getApplicationNameFromId(applicationId);
 
-                if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
-                        .SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+                if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                        APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                        APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                        APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
 
                     //Throw error saying subscription already exists.
                     log.error("Subscription already exists for API " + identifier.getApiName() + " in Application " +
@@ -4508,7 +4470,13 @@ public class ApiMgtDAO {
         }
         try {
             connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
+            if (connection.getMetaData().getDriverName().contains("MS SQL") ||
+                connection.getMetaData().getDriverName().contains("Microsoft")) {
+                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME");
+            }
+            String blockingFilerSql = " select distinct x.*,bl.* from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name))";
+            prepStmt = connection.prepareStatement(blockingFilerSql);
+            
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 prepStmt.setString(1, groupingId);
                 prepStmt.setString(2, subscriber.getName());
@@ -4527,6 +4495,7 @@ public class ApiMgtDAO {
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
+                application.setIsBlackListed(rs.getBoolean("ENABLED"));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -4991,24 +4960,11 @@ public class ApiMgtDAO {
     }
 
     public void recordAPILifeCycleEvent(APIIdentifier identifier, APIStatus oldStatus, APIStatus newStatus,
-                                        String userId) throws APIManagementException {
+            String userId, int tenantId) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, conn);
-        } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
-        }
-    }
-
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId)
-            throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, conn);
+            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, tenantId, conn);
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
         } finally {
@@ -5017,15 +4973,26 @@ public class ApiMgtDAO {
     }
 
     public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
-                                        Connection conn) throws APIManagementException {
+            int tenantId) throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, tenantId, conn);
+        } catch (SQLException e) {
+            handleException("Failed to record API state change", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+    }
+
+    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
+            int tenantId, Connection conn) throws APIManagementException {
         //Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement selectQuerySt = null;
 
-        int tenantId;
         int apiId = -1;
-        tenantId = APIUtil.getTenantId(userId);
 
         if (oldStatus == null && !newStatus.equals(APIStatus.CREATED.toString())) {
             String msg = "Invalid old and new state combination";
@@ -5296,8 +5263,10 @@ public class ApiMgtDAO {
                 addScopes(api.getScopes(), applicationId, tenantId);
             }
             addURLTemplates(applicationId, api, connection);
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), APIUtil.replaceEmailDomainBack
-                    (api.getId().getProviderName()), connection);
+            String tenantUserName = MultitenantUtils
+                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+                    connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
@@ -5889,7 +5858,7 @@ public class ApiMgtDAO {
 			prepStmt.setString(2, version);
 
 			rs = prepStmt.executeQuery();
-			Map<String, Set<String>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<String>>();
+			Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
 			while (rs != null && rs.next()) {
 
 				String httpVerb = rs.getString("HTTP_METHOD");
@@ -5905,7 +5874,13 @@ public class ApiMgtDAO {
                     if (StringUtils.isEmpty(conditionGroupId)) {
                         continue;
 					}
-					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+
+                    // Converting ConditionGroup to a lightweight ConditionGroupDTO.
+                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                    groupDTO.setConditionGroupId(policyConditionGroupId);
+//					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
+                    mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
+
 				} else {
 					String script = null;
 					URITemplate uriTemplate = new URITemplate();
@@ -5920,13 +5895,16 @@ public class ApiMgtDAO {
 					}
 
 					uriTemplate.setMediationScript(script);
-					Set<String> conditionGroupIdSet = new HashSet<String>();
+					Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
 					mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
 					uriTemplates.add(uriTemplate);
 					if (StringUtils.isEmpty(conditionGroupId)) {
 						continue;
 					}
-					conditionGroupIdSet.add(policyConditionGroupId);
+                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                    groupDTO.setConditionGroupId(policyConditionGroupId);
+					conditionGroupIdSet.add(groupDTO);
+
 				}
 
 			}
@@ -5935,14 +5913,22 @@ public class ApiMgtDAO {
 				String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
 				if (mapByHttpVerbURLPatternToId.containsKey(key)) {
 					if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
-						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
-                        uriTemplate.getThrottlingConditions().add("_default");
+                        Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
+                        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                        conditionGroupDTOs.add(defaultGroup);
+//						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
+                      uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                        uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
 					}
 
 				}
 
 				if (uriTemplate.getThrottlingConditions().isEmpty()) {
-					uriTemplate.getThrottlingConditions().add("_default");
+					uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
 				}
 
 			}
@@ -5953,6 +5939,55 @@ public class ApiMgtDAO {
 		}
 		return uriTemplates;
 	}
+
+    /**
+     * Converts an {@code Pipeline} object into a {@code ConditionGroupDTO}.{@code ConditionGroupDTO} class tries to
+     * contain the same information held by  {@code Pipeline}, but in a much lightweight fashion.
+     * @param conditionGroup Id of the condition group ({@code Pipeline}) to be converted
+     * @return An object of {@code ConditionGroupDTO} type.
+     * @throws APIManagementException
+     */
+    private ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+        List<Condition> conditions = getConditions(conditionGroup);
+        ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
+        for(Condition condition:conditions){
+            ConditionDTO conditionDTO = new ConditionDTO();
+            conditionDTO.setConditionType(condition.getType());
+
+            conditionDTO.isInverted(condition.isInvertCondition());
+            if(PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())){
+                IPCondition ipRangeCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(ipRangeCondition.getStartingIP());
+                conditionDTO.setConditionValue(ipRangeCondition.getEndingIP());
+
+            }else if(PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())){
+                IPCondition ipCondition = (IPCondition) condition;
+                conditionDTO.setConditionName(PolicyConstants.IP_SPECIFIC_TYPE);
+                conditionDTO.setConditionValue(ipCondition.getSpecificIP());
+
+            }else if(PolicyConstants.HEADER_TYPE.equals(condition.getType())){
+                HeaderCondition headerCondition = (HeaderCondition) condition;
+                conditionDTO.setConditionName(headerCondition.getHeaderName());
+                conditionDTO.setConditionValue(headerCondition.getValue());
+
+            }else if(PolicyConstants.JWT_CLAIMS_TYPE.equals(condition.getType())){
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) condition;
+                conditionDTO.setConditionName(jwtClaimsCondition.getClaimUrl());
+                conditionDTO.setConditionValue(jwtClaimsCondition.getAttribute());
+
+            }else if(PolicyConstants.QUERY_PARAMETER_TYPE.equals(condition.getType())){
+                QueryParameterCondition parameterCondition = (QueryParameterCondition) condition;
+                conditionDTO.setConditionName(parameterCondition.getParameter());
+                conditionDTO.setConditionValue(parameterCondition.getValue());
+            }
+            conditionDTOs.add(conditionDTO);
+        }
+
+        ConditionGroupDTO conditionGroupDTO = new ConditionGroupDTO();
+        conditionGroupDTO.setConditions(conditionDTOs.toArray(new ConditionDTO[]{}));
+
+        return conditionGroupDTO;
+    }
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
@@ -6267,53 +6302,6 @@ public class ApiMgtDAO {
         throw new APIManagementException(msg, t);
     }
 
-    /**
-     * Generates fresh JWT token for given information of validation information
-     *
-     * @param context              String context for API
-     * @param version              version of API
-     * @param keyValidationInfoDTO APIKeyValidationInfoDTO
-     * @return signed JWT token string
-     * @throws APIManagementException error in generating token
-     */
-    @Deprecated
-    public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO)
-            throws APIManagementException {
-        String calleeToken = null;
-
-        if (tokenGenerator != null) {
-            calleeToken = generateJWTToken(keyValidationInfoDTO, context, version);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("JWT generator not properly initialized. JWT token will not present in validation info");
-            }
-        }
-        return calleeToken;
-    }
-
-    /**
-     * Generates fresh JWT token for given information of validation information
-     *
-     * @param context              String context for API
-     * @param version              version of API
-     * @param keyValidationInfoDTO APIKeyValidationInfoDTO
-     * @return signed JWT token string
-     * @throws APIManagementException error in generating token
-     */
-    @Deprecated
-    public String createJWTTokenString(String context, String version, APIKeyValidationInfoDTO keyValidationInfoDTO,
-                                       String accessToken) throws APIManagementException {
-        String calleeToken = null;
-
-        if (tokenGenerator != null) {
-            calleeToken = generateJWTToken(keyValidationInfoDTO, context, version, accessToken);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("JWT generator not properly initialized. JWT token will not present in validation info");
-            }
-        }
-        return calleeToken;
-    }
 
     public HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
             throws APIManagementException {
@@ -8175,9 +8163,9 @@ public class ApiMgtDAO {
         return tokens;
     }
 
-    public TokenGenerator getTokenGenerator() {
-        return tokenGenerator;
-    }
+//    public TokenGenerator getTokenGenerator() {
+//        return tokenGenerator;
+//    }
 
     private String getAccessTokenStoreTableNameOfUserId(String userId, String accessTokenStoreTable)
             throws APIManagementException {
@@ -9128,7 +9116,7 @@ public class ApiMgtDAO {
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-
+                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
                     siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
@@ -9173,7 +9161,7 @@ public class ApiMgtDAO {
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-
+                globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
                 InputStream siddhiQueryBlob = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                 if (siddhiQueryBlob != null) {
                     siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
@@ -9307,6 +9295,8 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
                 policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (blob != null) {
                     byte[] customAttrib = blob.getBytes(1, (int) blob.length());
@@ -9425,8 +9415,9 @@ public class ApiMgtDAO {
                     conditions.add(ipCondition);
                 } else if (startingIP != null && !"".equals(startingIP)) {
 
-                     /* Assumes availability of starting ip means ip range is enforced.
-                       Therefore availability of ending ip is not checked.
+                     /*
+                     Assumes availability of starting ip means ip range is enforced.
+                     Therefore availability of ending ip is not checked.
                     */
                     IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
                     ipRangeCondition.setStartingIP(startingIP);
@@ -10056,12 +10047,23 @@ public class ApiMgtDAO {
         return isDeployed;
     }
 
-    public boolean addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+    /**
+     * Add a block condition
+     * 
+     * @param conditionType Type of the block condition
+     * @param conditionValue value related to the type
+     * @param tenantDomain tenant domain the block condition should be effective
+     * @return uuid of the block condition if successfully added
+     * @throws APIManagementException
+     */
+    public String addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
             APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
+        ResultSet rs = null;
+        String uuid = null;
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
@@ -10103,11 +10105,13 @@ public class ApiMgtDAO {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 if(!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)){
+                    uuid = UUID.randomUUID().toString();
                     insertPreparedStatement = connection.prepareStatement(query);
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
-                    insertPreparedStatement.setString(4, tenantDomain);
                     insertPreparedStatement.setString(3, "TRUE");
+                    insertPreparedStatement.setString(4, tenantDomain);
+                    insertPreparedStatement.setString(5, uuid);
                     status = insertPreparedStatement.execute();
                     connection.commit();
                     status = true;
@@ -10120,17 +10124,28 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
+                    handleException(
+                            "Failed to rollback adding Block condition : " + conditionType + " and " + conditionValue,
+                            ex);
                 }
             }
+            handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
-        return status;
+        if (status) {
+            return uuid;
+        } else {
+            return null;
+        }
     }
 
-    /*
-     * Gets details about a blocking condition.
+    /**
+     * Get details of a block condition by Id
+     *
+     * @param conditionId id of the condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIManagementException
      */
     public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
         Connection connection = null;
@@ -10150,21 +10165,64 @@ public class ApiMgtDAO {
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("VALUE"));
                 blockCondition.setConditionId(conditionId);
+                blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to get Block condition", e);
+                    handleException("Failed to rollback getting Block condition with id " + conditionId, ex);
                 }
             }
+            handleException("Failed to get Block condition with id " + conditionId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockCondition;
     }
 
+    /**
+     * Get details of a block condition by UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIManagementException
+     */
+    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        BlockConditionsDTO blockCondition = null;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITION_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(true);
+            selectPreparedStatement = connection.prepareStatement(query);
+            selectPreparedStatement.setString(1, uuid);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                blockCondition = new BlockConditionsDTO();
+                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                blockCondition.setConditionType(resultSet.getString("TYPE"));
+                blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockCondition.setUUID(resultSet.getString("UUID"));
+            }
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting Block condition by uuid " + uuid, ex);
+                }
+            }
+            handleException("Failed to get Block condition by uuid " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockCondition;
+    }
 
     public List<BlockConditionsDTO> getBlockConditions(String tenantDomain) throws APIManagementException {
         Connection connection = null;
@@ -10184,6 +10242,7 @@ public class ApiMgtDAO {
                 blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
                 blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
                 blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
@@ -10191,14 +10250,24 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to get Block condition", e);
+                    handleException("Failed to rollback getting Block conditions ", ex);
                 }
             }
+            handleException("Failed to get Block conditions", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockConditionsDTOList;
     }
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     * 
+     * @param conditionId id of the block condition
+     * @param state blocking state
+     * @return true if the operation was success
+     * @throws APIManagementException
+     */
     public boolean updateBlockConditionState(int conditionId,String state) throws APIManagementException {
         Connection connection = null;
         PreparedStatement updateBlockConditionPreparedStatement = null;
@@ -10218,14 +10287,60 @@ public class ApiMgtDAO {
                 try {
                      connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to update Block condition with condition id "+conditionId, e);
+                    handleException("Failed to rollback updating Block condition with condition id " + conditionId, ex);
                 }
             }
+            handleException("Failed to update Block condition with condition id " + conditionId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
         }
         return status;
     }
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     * 
+     * @param uuid UUID of the block condition
+     * @param state blocking state
+     * @return true if the operation was success
+     * @throws APIManagementException
+     */
+    public boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement updateBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.UPDATE_BLOCK_CONDITION_STATE_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
+            updateBlockConditionPreparedStatement.setString(1, state.toUpperCase());
+            updateBlockConditionPreparedStatement.setString(2, uuid);
+            updateBlockConditionPreparedStatement.executeUpdate();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback updating Block condition with condition UUID " + uuid, ex);
+                }
+            }
+            handleException("Failed to update Block condition with condition UUID " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    /**
+     * Delete the block condition given the id
+     * 
+     * @param conditionId id of the condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
     public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement deleteBlockConditionPreparedStatement = null;
@@ -10244,9 +10359,45 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to delete Block condition with condition id"+conditionId, e);
+                    handleException("Failed to rollback deleting Block condition with condition id " + conditionId, ex);
                 }
             }
+            handleException("Failed to delete Block condition with condition id " + conditionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
+        }
+        return status;
+    }
+
+    /**
+     * Delete the block condition given the id
+     *
+     * @param uuid UUID of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement deleteBlockConditionPreparedStatement = null;
+        boolean status = false;
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.DELETE_BLOCK_CONDITION_BY_UUID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
+            deleteBlockConditionPreparedStatement.setString(1, uuid);
+            status = deleteBlockConditionPreparedStatement.execute();
+            connection.commit();
+            status = true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback deleting Block condition with condition UUID " + uuid, ex);
+                }
+            }
+            handleException("Failed to delete Block condition with condition UUID " + uuid, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
         }
@@ -10273,9 +10424,10 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to check Block condition with context "+context, e);
+                    handleException("Failed to rollback checking Block condition with context " + context, ex);
                 }
             }
+            handleException("Failed to check Block condition with context " + context, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -10304,10 +10456,13 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to check Block condition with Application Name " + appName + " with " +
-                            "Application Owner" + appOwner, e);
+                    handleException(
+                            "Failed to rollback checking Block condition with Application Name " + appName + " with "
+                                    + "Application Owner" + appOwner, ex);
                 }
             }
+            handleException("Failed to check Block condition with Application Name " + appName + " with " +
+                    "Application Owner" + appOwner, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
@@ -10334,9 +10489,10 @@ public class ApiMgtDAO {
                  try {
                      connection.rollback();
                  } catch (SQLException ex) {
-                     handleException("Failed to get API Details", e);
+                     handleException("Failed to rollback getting API Details", ex);
                  }
              }
+             handleException("Failed to get API Details", e);
          } finally {
              APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
          }

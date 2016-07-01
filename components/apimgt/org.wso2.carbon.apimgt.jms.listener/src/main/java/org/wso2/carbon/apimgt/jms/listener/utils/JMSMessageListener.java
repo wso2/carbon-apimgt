@@ -35,13 +35,25 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(JMSMessageListener.class);
 
+    // These patterns will be used to determine for which type of keys the throttling condition has occurred.
+    private Pattern apiPattern = Pattern.compile("/.*/(.*):\\1_(condition_(\\d*)|default)");
+    private static final int API_PATTERN_GROUPS = 3;
+    private static final int API_PATTERN_CONDITION_INDEX = 2;
+
+    private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,5}_(condition_(\\d*)|default)");
+    public static final int RESOURCE_PATTERN_GROUPS = 4;
+    public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
+
     public JMSMessageListener(ThrottleDataHolder throttleDataHolder) {
     }
+
 
     public void onMessage(Message message) {
         try {
@@ -99,7 +111,7 @@ public class JMSMessageListener implements MessageListener {
 
         String throttleKey = map.get(APIThrottleConstants.THROTTLE_KEY).toString();
         String throttleState = map.get(APIThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(map.get(APIThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Long timeStamp = Long.parseLong(map.get(APIThrottleConstants.EXPIRY_TIMESTAMP).toString());
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
@@ -109,9 +121,27 @@ public class JMSMessageListener implements MessageListener {
         if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     addThrottleData(throttleKey, timeStamp);
+
+            String extractedKey = extractAPIorResourceKey(throttleKey);
+            if (extractedKey != null) {
+                if(!ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(extractedKey)){
+                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledAPIKey(extractedKey, timeStamp);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding throttling key : " + extractedKey);
+                    }
+                }
+
+            }
         } else {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder().
                     removeThrottleData(throttleKey);
+            String extractedKey = extractAPIorResourceKey(throttleKey);
+            if (extractedKey != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing throttling key : " + extractedKey);
+                }
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledAPIKey(extractedKey);
+            }
         }
     }
 
@@ -153,6 +183,27 @@ public class JMSMessageListener implements MessageListener {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeIpBlockingCondition(conditionValue);
             }
         }
+    }
+
+    private String extractAPIorResourceKey(String throttleKey) {
+        Matcher m = resourcePattern.matcher(throttleKey);
+        if (m.matches()) {
+            if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
+                String condition = m.group(RESOURCE_PATTERN_CONDITION_INDEX);
+                String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                return resourceKey;
+            }
+        } else {
+            m = apiPattern.matcher(throttleKey);
+            if (m.matches()) {
+                if (m.groupCount() == API_PATTERN_GROUPS) {
+                    String condition = m.group(API_PATTERN_CONDITION_INDEX);
+                    String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                    return resourceKey;
+                }
+            }
+        }
+        return null;
     }
 
     private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {

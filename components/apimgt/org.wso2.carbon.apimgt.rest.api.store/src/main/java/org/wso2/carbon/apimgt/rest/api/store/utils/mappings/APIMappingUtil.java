@@ -22,19 +22,20 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
 
 public class APIMappingUtil {
 
@@ -102,6 +103,8 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+
+        dto.setEndpointURLs(extractEnpointURLs(model));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
@@ -182,5 +185,50 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         return apiInfoDTO;
+    }
+
+
+    private static List<APIEndpointURLsDTO> extractEnpointURLs(API api) {
+        List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+
+        Set<String> environmentsPublishedByAPI = new HashSet<String>(api.getEnvironments());
+        environmentsPublishedByAPI.remove("none");
+
+        Set<String> apiTransports = new HashSet<>(Arrays.asList(api.getTransports().split(",")));
+
+        for (String environmentName : environmentsPublishedByAPI) {
+            Environment environment = environments.get(environmentName);
+            if (environment != null) {
+                APIEndpointURLsEnvironmentURLsDTO environmentURLsDTO = new APIEndpointURLsEnvironmentURLsDTO();
+                String[] gwEndpoints = environment.getApiGatewayEndpoint().split(",");
+
+                for (String gwEndpoint : gwEndpoints) {
+                    StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
+                    endpointBuilder.append('/');
+                    endpointBuilder.append(api.getContext());
+
+                    if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
+                        environmentURLsDTO.setHttp(endpointBuilder.toString());
+                    }
+                    else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                        environmentURLsDTO.setHttps(endpointBuilder.toString());
+                    }
+                }
+
+                APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+                apiEndpointURLsDTO.setEnvironmentURLs(environmentURLsDTO);
+
+                apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+                apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+
+                apiEndpointsList.add(apiEndpointURLsDTO);
+            }
+        }
+
+        return apiEndpointsList;
     }
 }

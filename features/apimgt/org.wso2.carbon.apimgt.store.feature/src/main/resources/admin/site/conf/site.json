@@ -1,0 +1,31 @@
+{
+    "theme" : {
+        "base" : "wso2",
+        "subtheme" : "modern"
+    },
+    "context" : "/admin",
+    "request_url":"READ_FROM_REQUEST",
+    "tasksPerPage": 10,
+    "allowedPermission": "/permission/admin/manage/apim_admin",
+    "workflows":{
+     "workFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
+    },
+    "ssoConfiguration" : {
+        "enabled" : "false",
+        "issuer" : "API_WORKFLOW_ADMIN",
+        "identityProviderURL" : "https://localhost:9443/samlsso",
+        "keyStorePassword" : "",
+        "identityAlias" : "",
+        "responseSigningEnabled":"true",
+        "keyStoreName" :""
+    },
+
+
+    "reverseProxy" : {
+        "enabled" : false,    // values true , false , "auto" - will look for  X-Forwarded-* headers
+        "host" : "sample.proxydomain.com", // If reverse proxy do not have a domain name use IP
+        "context":"",
+      //"regContext":"" // Use only if different path is used for registry
+    },
+
+}

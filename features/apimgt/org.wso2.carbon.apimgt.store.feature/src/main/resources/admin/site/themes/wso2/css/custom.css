@@ -1,0 +1,79 @@
+.api-wrapper {
+	background-color: #EFEFEF;
+	position: relative;
+}
+.center-wrapper{
+    margin:0 auto;
+    margin-left:auto;
+    margin-right:auto;
+    align:center;
+    text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+input.ep-field{
+    min-width: 50%;
+}
+._jsonform-array-ul label{
+    width:118px;
+    margin-left: 0px;
+}
+._jsonform-array-ul label .help_popup{
+    display: none;
+}
+#description {
+    resize: vertical;
+}
+.modal-content{
+    background: #FFF;
+    color:#000;
+ }
+ .modal-header h3{
+    padding: 0px;
+ }
+ .modal-header{
+    background: #f1f1f1;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+ }
+ .modal-header .close{
+    color:#222;
+    margin-top: 6px;
+    font-size: 16px;
+ }
+#pipeline-content .panel-group{
+    margin-bottom:0px;
+}
+.navbar-menu-toggle,.navbar-menu-toggle:hover, .navbar-menu-toggle:focus, .navbar-menu-toggle:active{
+    background:#222;
+}
+.navbar-menu-toggle[aria-expanded=true]{
+    background:#242932;
+}
+.form-group label>.requiredAstrix {
+    color: #E74C3C;
+    font-weight: 400;
+    margin-left:2px;
+}
+
+table.table-bordered th:last-child, table.table-bordered td:last-child {
+    border-right-width: 1px;
+}
+
+.toggle-caret{
+    margin: 0px;
+    position: absolute;
+    width: auto;
+    left: auto;
+    right: 20px;
+}
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover{
+    background: #191919;
+    border-color: #004675;
+}
+.secondary-nav > li.active > a, .secondary-nav > li.active > a:focus, .secondary-nav > li.active > a:hover{
+    background: #004675;
+    border-color: #004675;
+}

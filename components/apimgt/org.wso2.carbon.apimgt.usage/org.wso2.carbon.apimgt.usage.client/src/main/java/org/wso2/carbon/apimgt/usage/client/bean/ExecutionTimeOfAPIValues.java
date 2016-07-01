@@ -33,6 +33,20 @@ public class ExecutionTimeOfAPIValues {
     private int seconds;
     private long executionTime;
 
+    private long apiResponseTime;
+
+    private long securityLatency;
+
+    private long throttlingLatency;
+
+    private long requestMediationLatency;
+
+    private long responseMediationLatency;
+
+    private long backendLatency;
+
+    private long otherLatency;
+
     public int getSeconds() {
         return seconds;
     }
@@ -135,5 +149,61 @@ public class ExecutionTimeOfAPIValues {
 
     public void setExecutionTime(long executionTime) {
         this.executionTime = executionTime;
+    }
+
+    public long getApiResponseTime() {
+        return apiResponseTime;
+    }
+
+    public void setApiResponseTime(long apiResponseTime) {
+        this.apiResponseTime = apiResponseTime;
+    }
+
+    public long getSecurityLatency() {
+        return securityLatency;
+    }
+
+    public void setSecurityLatency(long securityLatency) {
+        this.securityLatency = securityLatency;
+    }
+
+    public long getThrottlingLatency() {
+        return throttlingLatency;
+    }
+
+    public void setThrottlingLatency(long throttlingLatency) {
+        this.throttlingLatency = throttlingLatency;
+    }
+
+    public long getRequestMediationLatency() {
+        return requestMediationLatency;
+    }
+
+    public void setRequestMediationLatency(long requestMediationLatency) {
+        this.requestMediationLatency = requestMediationLatency;
+    }
+
+    public long getResponseMediationLatency() {
+        return responseMediationLatency;
+    }
+
+    public void setResponseMediationLatency(long responseMediationLatency) {
+        this.responseMediationLatency = responseMediationLatency;
+    }
+
+    public long getBackendLatency() {
+        return backendLatency;
+    }
+
+    public void setBackendLatency(long backendLatency) {
+        this.backendLatency = backendLatency;
+    }
+
+    public long getOtherLatency() {
+        return otherLatency;
+    }
+
+    public void setOtherLatency(long otherLatency) {
+        this.otherLatency = otherLatency;
     }
 }

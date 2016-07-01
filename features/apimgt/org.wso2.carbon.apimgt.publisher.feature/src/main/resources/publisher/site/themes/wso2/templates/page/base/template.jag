@@ -141,9 +141,6 @@ var user = jagg.getUser();
 
 
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/jquery.cookie.js"))%>"></script>
-    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/jquery.form.js"))%>"></script>
-
-
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/button-loader/jquery.buttonLoader.js"))%>"></script>
 
 

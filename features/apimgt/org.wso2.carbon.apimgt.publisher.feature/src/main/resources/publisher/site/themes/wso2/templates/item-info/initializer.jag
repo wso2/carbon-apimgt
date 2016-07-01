@@ -2,12 +2,12 @@
 jagg.initializer("item-info", {
 
     preInitialize:function () {
-        jagg.addHeaderJS("item-info", "item-info", "templates/item-info/js/load-tabs.js");             
+        jagg.addHeaderJS("item-info", "item-info", "libs/load-tabs.js");
              jagg.addHeaderJS("lodash", "jagg", "templates/item-info/js/lodash.min.js");
-              jagg.addHeaderJS("graphlib", "jagg", "templates/item-info/js/graphlib.core.min.js");               
-             jagg.addHeaderJS("chrome.lifecycle.fix.js", "jagg", "templates/item-info/js/chrome.lifecycle.fix.js");
-                jagg.addHeaderJS("graph", "jagg", "templates/item-info/js/d3.min.js");
-                jagg.addHeaderJS("dagre", "jagg", "templates/item-info/js/dagre-d3.min.js");                
+              jagg.addHeaderJS("graphlib", "jagg", "libs/graphlib.core.min.js");
+             jagg.addHeaderJS("chrome.lifecycle.fix.js", "jagg", "libs/chrome.lifecycle.fix.js");
+                jagg.addHeaderJS("graph", "jagg", "libs/d3.min.js");
+                jagg.addHeaderJS("dagre", "jagg", "libs/dagre-d3.min.js");
                
                 jagg.addHeaderCSS("liecycle", "jagg", "templates/item-info/css/lifecycles.css");             
                

@@ -99,6 +99,14 @@ jagg.module("api", {
     },
     getCustomOutSequences:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomOutSequences.apply(this, arguments);
+    },getCustomCombinedInSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomCombinedInSequences.apply(this, arguments);
+    },
+    getCustomCombinedOutSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomCombinedOutSequences.apply(this, arguments);
+    },
+    getCustomCombinedFaultSequences:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getCustomCombinedFaultSequences.apply(this, arguments);
     },
     isSynapseGateway:function () {
     	return jagg.require(jagg.getModulesDir() + "api/add.jag").isSynapseGateway.apply(this, arguments);

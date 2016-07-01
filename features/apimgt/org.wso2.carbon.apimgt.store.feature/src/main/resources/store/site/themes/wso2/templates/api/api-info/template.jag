@@ -71,7 +71,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h1><%=api.name%> - <%=api.version%></h1>
+    <h2><%=api.name%> - <%=api.version%></h2>
     <%
             var tagDisplayName = "";
             var tag = "";
@@ -291,8 +291,8 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
         <% jagg.includeBlock("ui/tab", outputs.tabs); %>
                
         <div class="api-info">
-            <div class="row-fluid">
-                <div class="span12">                        
+            <div class="row">
+                <div class="col-sm-12">                        
 
                     <%if (api.isAdvertiseOnly && api.redirectURL != null) {
                         	var tenantDomain = 'carbon.super';

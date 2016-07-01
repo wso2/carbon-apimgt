@@ -53,24 +53,26 @@ swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
 
 var api = outputs.api;%>
   <script type="text/javascript">
-    $(function () {
+  $(document).ready(function(){
       window.swaggerUi = new SwaggerUi({
-      url:  "<%=swaggerAPI%>",
-      dom_id: "swagger-ui-container",
-      supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-      onComplete: function(swaggerApi, swaggerUi){
-        console.log("Loaded SwaggerUI");
-      },
-      onFailure: function(data) {
-        console.log("Unable to Load SwaggerUI");
-      },
-      docExpansion: "list",
-      validatorUrl: null
-    });
+        url: "<%=swaggerAPI%>",
+        dom_id: "swagger-ui-container",
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
+        onComplete: function(swaggerApi, swaggerUi){
+          console.log("Loaded SwaggerUI");        
+        },
+        onFailure: function(data) {
+          console.log("Unable to Load SwaggerUI");
+        },
+        docExpansion: "list",
+        jsonEditor: false,
+        defaultModelRendering: 'schema',
+        showRequestHeaders: true,
+        validatorUrl: null
+      });
 
-    window.swaggerUi.load();
+      window.swaggerUi.load();
   });
-
   </script>
 
 <% if(api.status != "PROTOTYPED"){ %>
@@ -137,7 +139,10 @@ var select_environment = function(){
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
-      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+    }
+    else{
+      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     }
   });
 
@@ -223,15 +228,15 @@ function checkOnKeyPress(e) {
 
 -->
 <% }else if(jagg.getUser() != null){ %>
-    <div class="alert alert-info" style="margin-bottom:10px">
-        <i class="fa fa-info"></i> &nbsp;&nbsp; <%=i18n.localize("subscribeToGetAccessToken")%> &nbsp;
-        <%=i18n.localize("provideAccessToken")%>
+    <div class="message message-info">
+        <h4><i class="icon fw fw-info"></i>Notice </h4>
+        <p><%=i18n.localize("subscribeToGetAccessToken")%>&nbsp;<%=i18n.localize("provideAccessToken")%></p>
     </div>
 <% }else{ %>
-    <div class="alert alert-info" style="margin-bottom:10px">
-        <i class="fa fa-info"></i> &nbsp;&nbsp; <%=i18n.localize("requireAccessToken")%> &nbsp;
-        <%=i18n.localize("provideAccessToken")%>
-    </div>     
+    <div class="message message-info">
+        <h4><i class="icon fw fw-info"></i>Notice</h4>
+        <p><%=i18n.localize("requireAccessToken")%> &nbsp; <%=i18n.localize("provideAccessToken")%></p>
+    </div>       
 <% } %>
     <div class="alert hide notoken">
     <button type="button" class="close" data-dismiss="alert">&times;</button>

@@ -9,6 +9,7 @@ jagg.block("application/application-view", {
         var application = null;
         var oauthapp = null;
         var scopes = [];
+        var grant_types = [];
         if (user) {
             username = user.username;
             var applicationName = request.getParameter("name");
@@ -19,14 +20,21 @@ jagg.block("application/application-view", {
             application = result.application;
 
             var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 0, 10);
-            //@todo handle error
-            result2 = result2.result;
-            for(i=0;i < result2.applications.length;i++){
-                if(result2.applications[i].name == applicationName){
-                    oauthapp = result2.applications[i];
-                    scopes = oauthapp.scopes;
+
+            var log = new Log();
+
+            if(Object.keys(result2.result).length>0){
+                //@todo handle error
+                result2 = result2.result;
+                for(i=0;i < result2.applications.length;i++){
+                    if(result2.applications[i].name == applicationName){
+                        oauthapp = result2.applications[i];
+                        scopes = oauthapp.scopes;
+                    }
                 }
             }
+
+            grant_types = mod.getAllowedGrantTypes();
         }
 
         var tiers, result;
@@ -41,7 +49,8 @@ jagg.block("application/application-view", {
             "gatewayurl":gatewayURL[0],
             "application" : application,
             "scopes": scopes,
-            "oauthapp": oauthapp
+            "oauthapp": oauthapp,
+            "grant_types":grant_types
         };
     }
 });

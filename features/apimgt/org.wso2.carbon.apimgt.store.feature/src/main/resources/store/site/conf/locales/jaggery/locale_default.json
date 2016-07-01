@@ -4,6 +4,7 @@
     "version" : "Version",
     "apiThumb": "API Thumbnail",
     "status" : "Status",
+    "workflowStatus" : "Workflow Status",
     "updated" : "Updated",
     "urls" : "URLs",
     "wsdl" : "Download WSDL",
@@ -311,7 +312,30 @@
 
     "healthAvailabilityPerMin_Desc": "This alert type should get triggered if at least one of the three cases below satisfied; Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 AND Response status code < 600",
 
-    "sdk.description": "Download client-side SDK for your Applications."
-  
+    "sdk.description": "Download client-side SDK for your Applications.",
+    "sdk.not.configured": "No SDK configured",
+    "android":  "Android",
+    "java": "Java",
+    "scala":  "Scala",
+    "csharp": "CSharp",
+    "cpp":  "Cpp",
+    "dart" : "Dart",
+    "flash":  "Flash",
+    "go": "Go",
+    "groovy": "Groovy",
+    "javascript": "Javascript",
+    "jmeter": "jmeter",
+    "nodejs": "NodeJS",
+    "perl": "Perl",
+    "php":  "Php",
+    "python": "Python",
+    "ruby": "Ruby",
+    "swift": "swift",
+    "clojure":  "Clojure",
+    "aspNet5":  "AspNet5",
+    "asyncScala": "AsyncScala",
+    "spring": "Spring",
+    "csharpDotNet2": "CsharpDotNet2",
+    "haskell":  "Haskell"
     
 }

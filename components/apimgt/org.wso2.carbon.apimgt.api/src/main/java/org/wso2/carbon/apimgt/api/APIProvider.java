@@ -19,7 +19,10 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -134,6 +137,30 @@ public interface APIProvider extends APIManager {
     void addTier(Tier tier) throws APIManagementException;
 
     void addPolicy(Policy policy) throws APIManagementException;
+
+
+    /**
+     * Get application throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get subscription throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get global throttling policy by name
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
 
     /**
      * Updates throttle policy in global CEP, gateway and database.
@@ -396,15 +423,34 @@ public interface APIProvider extends APIManager {
      */
     Set getThrottleTierPermissions() throws APIManagementException;
 
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    List<String> getCustomInSequences()  throws APIManagementException;
+
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    List<String> getCustomOutSequences()  throws APIManagementException;
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
     List<String> getCustomInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
     
     
     /**
-     * Get the list of Custom OutSequences.
+     * Get the list of Custom InSequences including API defined in sequences.
      * @return List of available sequences
      * @throws APIManagementException
      */
-    
     List<String> getCustomOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
     /**
@@ -422,6 +468,31 @@ public interface APIProvider extends APIManager {
      */
 
     List<String> getCustomFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+
+    /**
+     * Get the list of Custom in sequences inclusing api identifier.
+     * @return List of in sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+    /**
+     * Get the list of Custom out Sequences including given api
+     * @return List of available out sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
+
+    /**
+     * Get the list of Custom Fault Sequences including per API sequences.
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+
+    List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
 
     /**
@@ -628,9 +699,25 @@ public interface APIProvider extends APIManager {
      */
     List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
 
-
     /**
      *
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException;
+
+    /**
+     * Retrieves a block condition by its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Updates a block condition given its id
+     * 
      * @param conditionId id of the condition
      * @param state state of condition
      * @return state change success or not
@@ -638,23 +725,43 @@ public interface APIProvider extends APIManager {
      */
     boolean updateBlockCondition(int conditionId,String state) throws APIManagementException;
 
-
     /**
-     *
-     * @param conditionType
-     * @param conditionValue
-     * @return
+     * Updates a block condition given its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
      * @throws APIManagementException
      */
-    boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+    boolean updateBlockConditionByUUID(String uuid,String state) throws APIManagementException;
 
     /**
-     *
-     * @param conditionId
-     * @return
+     *  Add a block condition
+     * 
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its Id
+     * 
+     * @param conditionId Id of the condition
+     * @return true if successfully deleted
      * @throws APIManagementException
      */
     boolean deleteBlockCondition(int conditionId) throws APIManagementException;
+
+    /**
+     * Deletes a block condition given its UUID
+     * 
+     * @param uuid uuid of the block condition
+     * @return true if successfully deleted
+     * @throws APIManagementException
+     */
+    boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException;
 
     /**
      *  Get the lifecycle configuration for a tenant

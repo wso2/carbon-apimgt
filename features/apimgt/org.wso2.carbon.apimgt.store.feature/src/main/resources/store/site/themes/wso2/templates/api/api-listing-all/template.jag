@@ -63,7 +63,7 @@ var reqUrl = request.getRequestURI();
              	if( tag.split(site.tagGroupKey).length == 2 ){
                  	tagDisplayName = tag.split(site.tagGroupKey)[0];
       %>
-             		<h1>APIs - <%= encode.forHtml(tagDisplayName)%></h1>
+             		<h2>APIs - <%= encode.forHtml(tagDisplayName)%></h2>
 		             <ul class="breadcrumb">
 		                 <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag")%><%=urlPrefix%>" title="<%=i18n.localize("listAPIs")%>">APIs groups</a> <span class="divider">/</span></li>
 		                 <li class="active"><%= encode.forHtml(tagDisplayName)%></li>
@@ -71,12 +71,12 @@ var reqUrl = request.getRequestURI();
        <%
             	}else{
 	               %>
-	               <h1>APIs - ( <%= encode.forHtml(tag) %> )</h1>
+	               <h2>APIs - ( <%= encode.forHtml(tag) %> )</h2>
 	               <%
             	}
              } else{
          %>
-    			<h1>APIs</h1>
+    			<h2>APIs</h2>
    			 <% } %>
    			 </div>
 
@@ -164,15 +164,15 @@ var reqUrl = request.getRequestURI();
 					                                    </div>
 					                                   </a>
 				                                </div>
-				                                <div class="add-padding-2x app-data ">
-				                                    <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+				                                <div class="add-padding-2x app-data">
+				                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
 				                                    <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
 				                                    <%if(api.isAdvertiseOnly) {%>
-				                                    	<p><%=api.apiOwner%></p>
+				                                    	<p class="truncate"><%=api.apiOwner%></p>
 				                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-				                                    	<p><%=api.apiBusinessOwner%></p>
+				                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
 				                                    <%} else { %>
-				                                    	<p><%=api.provider%></p>
+				                                    	<p class="truncate"><%=api.provider%></p>
 				                                    <% } %>
 				                                    <% if(isRatingActivated){ %>
 								                                  <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
@@ -185,7 +185,7 @@ var reqUrl = request.getRequestURI();
 
                 <%} else {%>
                 
-                	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 version-provider-wrapper">
+                	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="white-wrapper add-margin-bottom-4x">
                             	<%if(outputs.isMonetizationEnabled) {%>
 				                    <div class="ribbon-wrapper">
@@ -221,14 +221,14 @@ var reqUrl = request.getRequestURI();
 	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
-                                    	<p><%=api.apiOwner%></p>
+                                    	<p class="truncate"><%=api.apiOwner%></p>
                                     <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-                                    	<p><%=api.apiBusinessOwner%></p>
+                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
                                     <%} else { %>
-                                    	<p><%=api.provider%></p>
+                                    	<p class="truncate"><%=api.provider%></p>
                                     <% } %>
                                     <% if(isRatingActivated){ %>
                                         <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
@@ -245,7 +245,7 @@ var reqUrl = request.getRequestURI();
             
             <%  if(numberOfPages > 1) { %>
                 <div class="col-sm-12">
-                <ul class="pagination " id="apiListingPagination">
+                <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"
                                 <% if(page != 1) { %>

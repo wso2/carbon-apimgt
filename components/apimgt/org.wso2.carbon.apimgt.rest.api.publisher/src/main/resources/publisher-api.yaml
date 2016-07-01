@@ -1094,7 +1094,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application
+        - Applications
       responses:
         200:
           description: |
@@ -2348,6 +2348,9 @@ definitions:
         type: integer
         format: int64
         example: 60000
+      timeUnit:
+        type: string
+        example: "min"
       tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
@@ -2567,6 +2570,3 @@ definitions:
         type: string
         description: HTTPS environment URL
         example: "https://localhost:8244"
-#-----------------------------------------------------
-# END-OF-FILE
-#-----------------------------------------------------

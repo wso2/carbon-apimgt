@@ -35,6 +35,7 @@ public class Tier implements Serializable, Comparable<Tier>{
     private long requestsPerMin = 0;
     private long requestCount = 0;
     private long unitTime = 0;
+    private String timeUnit = "ms";
     private String tierPlan;
     // The default value would be "true" since the default behavior is to stop when the quota is reached
     private boolean stopOnQuotaReached = true;
@@ -100,6 +101,14 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setUnitTime(long unitTime) {
         this.unitTime = unitTime;
+    }
+
+    public String getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(String timeUnit) {
+        this.timeUnit = timeUnit;
     }
 
     public String getTierPlan() {

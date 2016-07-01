@@ -1970,7 +1970,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("oracle")) {
                 query = "SELECT " + APIUsageStatisticsClientConstants.TIME + ','
                         + APIUsageStatisticsClientConstants.YEAR + ',' + APIUsageStatisticsClientConstants.MONTH + ','
-                        + APIUsageStatisticsClientConstants.DAY + "FROM (SELECT "
+                        + APIUsageStatisticsClientConstants.DAY + " FROM (SELECT "
                         + APIUsageStatisticsClientConstants.TIME + ',' + APIUsageStatisticsClientConstants.YEAR + ','
                         + APIUsageStatisticsClientConstants.MONTH + ',' + APIUsageStatisticsClientConstants.DAY
                         + " FROM " + columnFamily + " order by " + APIUsageStatisticsClientConstants.TIME
@@ -2451,10 +2451,20 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     executionTimeOfAPIValues.setHour(hour);
                     executionTimeOfAPIValues.setMinutes(minute);
                     executionTimeOfAPIValues.setSeconds(seconds);
-                    executionTimeOfAPIValues.setMediationName(rs.getString(APIUsageStatisticsClientConstants
-                            .MEDIATION));
-                    executionTimeOfAPIValues.setExecutionTime(rs.getInt(APIUsageStatisticsClientConstants
-                            .EXECUTION_TIME));
+                    executionTimeOfAPIValues.setApiResponseTime(rs.getLong(APIUsageStatisticsClientConstants
+                            .API_RESPONSE_TIME));
+                    executionTimeOfAPIValues.setSecurityLatency(rs.getLong(APIUsageStatisticsClientConstants
+                            .SECURITY_LATENCY));
+                    executionTimeOfAPIValues.setThrottlingLatency(rs.getLong(APIUsageStatisticsClientConstants.
+                            THROTTLING_LATENCY));
+                    executionTimeOfAPIValues.setRequestMediationLatency(rs.getLong(APIUsageStatisticsClientConstants.
+                            REQ_MEDIATION_LATENCY));
+                    executionTimeOfAPIValues.setResponseMediationLatency(rs.getLong(APIUsageStatisticsClientConstants.
+                            RES_MEDIATION_LATENCY));
+                    executionTimeOfAPIValues.setBackendLatency(rs.getLong(APIUsageStatisticsClientConstants.
+                            BACKEND_LATENCY));
+                    executionTimeOfAPIValues.setOtherLatency(rs.getLong(APIUsageStatisticsClientConstants.
+                            OTHER_LATENCY));
                     result1.setValues(executionTimeOfAPIValues);
                     result1.setTableName(tableName);
                     result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
@@ -2469,6 +2479,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 insertZeroElementsAndSort(result, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
             }
         } catch (SQLException e) {
+            log.error("SQLException occurred when accessing the database", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } catch (ParseException e) {
             handleException("Couldn't parse the date", e);

@@ -158,6 +158,8 @@ public final class APIUtil {
 
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
+    private static final Log audit = CarbonConstants.AUDIT_LOG;
+
     private static boolean isContextCacheInitialized = false;
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
@@ -256,8 +258,6 @@ public final class APIUtil {
 
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
-            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -446,8 +446,6 @@ public final class APIUtil {
 
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
-
-            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -652,7 +650,6 @@ public final class APIUtil {
             api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
 
-            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
@@ -775,8 +772,6 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, api.getSubscriptionAvailability());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, api.getSubscriptionAvailableTenants());
-
-            artifact.setAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED, api.getDestinationStatsEnabled());
 
             artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
 
@@ -2289,8 +2284,6 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
 
-            api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
-
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
@@ -2960,38 +2953,6 @@ public final class APIUtil {
         }
     }
 
-    /**
-     * Add BAM Server Profile Configuration which is used for southbound statistics
-     * publishing
-     *
-     * @throws APIManagementException
-     */
-    public static void addBamServerProfile(String bamServerURL, String bamServerUser,
-                                           String bamServerPassword, int tenantId) throws APIManagementException {
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        try {
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            log.debug("Adding Bam Server Profile to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/bam/profile/bam-profile.xml");
-            String bamProfile = IOUtils.toString(inputStream);
-
-            String bamProfileConfig = bamProfile.replaceAll("\\[1\\]", bamServerURL).
-                    replaceAll("\\[2\\]", bamServerUser).
-                    replaceAll("\\[3\\]", encryptPassword(bamServerPassword));
-
-            Resource resource = registry.newResource();
-            resource.setContent(bamProfileConfig);
-            registry.put(APIConstants.BAM_SERVER_PROFILE_LOCATION, resource);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while adding BAM Server Profile configuration " +
-                    "information to the registry", e);
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading BAM Server Profile configuration " +
-                    "configuration file content", e);
-        }
-    }
-
     public static boolean isAnalyticsEnabled() {
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
@@ -3613,20 +3574,29 @@ public final class APIUtil {
     /**
      * Helper method to get tenantId from userName
      *
-     * @param userName
+     * @param userName user name
      * @return tenantId
-     * @throws APIManagementException
      */
     public static int getTenantId(String userName) {
         //get tenant domain from user name
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        return getTenantIdFromTenantDomain(tenantDomain);
+    }
+
+    /**
+     * Helper method to get tenantId from tenantDomain
+     *
+     * @param tenantDomain tenant Domain
+     * @return tenantId
+     */
+    public static int getTenantIdFromTenantDomain(String tenantDomain) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
 
         if (realmService == null) {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
 
-        try {           
+        try {
             return realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
             log.error(e.getMessage(), e);
@@ -4987,9 +4957,12 @@ public final class APIUtil {
      */
     public static HttpClient getHttpClient(int port, String protocol) {
         SchemeRegistry registry = new SchemeRegistry();
-        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        socketFactory.setHostnameVerifier(hostnameVerifier);
+        String ignoreHostnameVerification = System.getProperty("org.wso2.ignoreHostnameVerification");
+        if (ignoreHostnameVerification != null && "true".equalsIgnoreCase(ignoreHostnameVerification)) {
+            X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+            socketFactory.setHostnameVerifier(hostnameVerifier);
+        }
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
                 registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
@@ -5683,7 +5656,7 @@ public final class APIUtil {
             if (needDeployment) {
                 String policyString;
                 try {
-                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                    policyString = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                     String policyFile = apiPolicy.getTenantDomain() + "_" +PolicyConstants.POLICY_LEVEL_API +
                                         "_" + apiPolicy.getPolicyName() + "_default";
                     if(!APIConstants.DEFAULT_API_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
@@ -5757,12 +5730,16 @@ public final class APIUtil {
                 tier.setDescription(policy.getDescription());
                 tier.setDisplayName(policy.getDisplayName());
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                tier.setTimeUnit(limit.getTimeUnit());
+                tier.setUnitTime(limit.getUnitTime());
                 if(limit instanceof RequestCountLimit) {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
+                    tier.setRequestCount(countLimit.getRequestCount());
                 } else {
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
+                    tier.setRequestCount(bandwidthLimit.getDataAmount());
                 }
                 tierMap.put(policy.getPolicyName(), tier);
             } else {
@@ -5771,6 +5748,7 @@ public final class APIUtil {
                     tier.setDescription(policy.getDescription());
                     tier.setDisplayName(policy.getDisplayName());
                     tier.setRequestsPerMin(Integer.MAX_VALUE);
+                    tier.setRequestCount(Integer.MAX_VALUE);
                     tierMap.put(policy.getPolicyName(), tier);
                 }
             }
@@ -5927,5 +5905,49 @@ public final class APIUtil {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+    /**
+     * Logs an audit message on actions performed on entities (APIs, Applications, etc). The log is printed in the
+     * following JSON format
+     *  {
+         "typ": "API",
+         "action": "update",
+         "performedBy": "admin@carbon.super",
+         "info": {
+         "name": "Twitter",
+         "context": "/twitter",
+         "version": "1.0.0",
+         "provider": "nuwan"
+         }
+         }
+     * @param entityType - The entity type. Ex: API, Application
+     * @param entityInfo - The details of the entity. Ex: API Name, Context
+     * @param action - The type of action performed. Ex: Create, Update
+     * @param performedBy - The user who performs the action.
+     */
+    public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("typ", entityType);
+        jsonObject.put("action", action);
+        jsonObject.put("performedBy", performedBy);
+        jsonObject.put("info", entityInfo);
+        audit.info(jsonObject.toString());
+    }
+
+    public static int getPortOffset() {
+        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
+        String portOffset = System.getProperty(APIConstants.PORT_OFFSET_SYSTEM_VAR,
+                                               carbonConfig.getFirstProperty(APIConstants.PORT_OFFSET_CONFIG));
+        try {
+            if ((portOffset != null)) {
+                return Integer.parseInt(portOffset.trim());
+            } else {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            log.error("Invalid Port Offset: " + portOffset + ". Default value 0 will be used.", e);
+            return 0;
+        }
     }
 }

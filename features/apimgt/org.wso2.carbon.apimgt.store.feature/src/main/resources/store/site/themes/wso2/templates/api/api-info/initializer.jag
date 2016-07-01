@@ -7,7 +7,7 @@ jagg.initializer("api/api-info", {
     },
 
     postInitialize:function(inputs, outputs) {
-        jagg.addFooterJSCode("api/api-info", "api", "jagg.api = " + stringify(inputs.api) + ";");
+        jagg.addFooterJSCode("api/api-info", "api", "jagg.api = jQuery.parseJSON(\"" + encode.forJavaScript(stringify(inputs.api)) + "\");");
     }
 });
 %>

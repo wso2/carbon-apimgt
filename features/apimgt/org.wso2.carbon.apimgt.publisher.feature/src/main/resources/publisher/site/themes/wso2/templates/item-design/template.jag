@@ -99,7 +99,7 @@
 					<form class="form-horizontal apim-form" method="POST"
 					  id="design_form"
 					  enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
-					<div id="accordion1" class="panel-group">
+					<div class="panel-group accordion">
                     	<div class="panel panel-default">
 							<div class="panel-heading">
 								<h4 class="panel-title">
@@ -147,7 +147,7 @@
 											<div class="form-group">
 												<label class="col-sm-3 control-label" for="version"><%=i18n.localize("version")%>:<span class="requiredAstrix">*</span></label>
 												<div class="col-sm-4">
-													<input type="text" class="form-control required validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
+													<input type="text" class="form-control required validateAPIVersion validInput noSpace" placeholder="E.g.: v1.0.0" id="version" name="version" onchange="getContextValue()" value="" onkeyup="updateContextPattern()"/>
 												</div>
 											</div>
 											<% }else{ %>
@@ -401,8 +401,8 @@
 </script>
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">
-    <button class="btn btn-primary" id="update_swagger">Save</button>                    
-    <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Close</button>            
+    <button class="btn btn-primary" id="update_swagger">Apply Changes</button>                    
+    <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor">Discard Changes</button>            
     </div>              
 </div>   
 

@@ -1,13 +1,13 @@
 <% jagg.template("item-add", function(inputs, outputs, jagg) { %>
 
 <div class="page-header">
-	<p class="lead">Let's get started!</p>
+	<h2>Let's get started!</h2>
+	<p class="lead">Add New API</p>
 </div>
 
-<div class="row">
-	<div id="accordion1" class="panel-group" role="tablist" aria-multiselectable="true">
+	<div class="panel-group accordion" role="tablist" aria-multiselectable="true">
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+			<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 				<h4 class="panel-title">
 					<label class="radio">
 						<input class="create-api" type="radio" name="create-api" />
@@ -63,7 +63,7 @@
 			</div>
 		</div>
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+			<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 				<h4 class="panel-title">
 					<label class="radio">
                                     <input class="create-api" type="radio" name="create-api" />
@@ -97,7 +97,7 @@
 			</div>
 		</div>
 		<div class="panel panel-default">
-			<div class="panel-heading" role="tab" id="headingThree" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse3" aria-expanded="true" aria-controls="accordion1-collapse3">
+			<div class="panel-heading" role="tab" id="headingThree" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse3" aria-expanded="true" aria-controls="accordion1-collapse3">
 				<h4 class="panel-title">
 					<label class="radio">
                                     <input class="create-api" type="radio" name="create-api" />
@@ -122,5 +122,4 @@
 			</div>
 		</div>	
 	</div>
-</div>
 <% }); %>

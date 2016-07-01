@@ -365,7 +365,7 @@ APIDesigner.prototype.init_controllers = function(){
         var pn = $(this).attr('data-path-name');
         var op = $(this).attr('data-operation');        
         jagg.message({
-        	content:'Do you want to remove "'+op+' : '+pn+'" resource from list.',
+        	content:'Do you want to remove "'+op+' : '+ Handlebars.Utils.escapeExpression(pn) +'" resource from list.',
         	type:'confirm',
         	title:"Remove Resource",
         	okCallback:function(){
@@ -728,13 +728,35 @@ APIDesigner.prototype.edit_swagger = function(){
     $(".wizard").hide();
     $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
+
+    //Added temparory navebar on top of the swagger editor
+    var tempNav = $('.navbar').clone();
+    tempNav.find('.navbar-header').remove();
+    tempNav.find('#navbar').removeClass('collapse').find('.navbar-nav li').remove();
+    $('.swagger_editer_header').prepend($('.swagger_editer_header .btn-secondary'));
+    $('.swagger_editer_header .btn-secondary .fw-stack').remove();
+    $('.swagger_editer_header .btn-secondary').prepend('<span class="icon fw-stack"><i class="fw fw-left fw-stack-1x" ' +
+                '+ title="Go to Overview"></i><i class="fw fw-circle-outline fw-stack-2x" title="Go Back"></i></span>');
+    tempNav.find('.navbar-nav').append($('.swagger_editer_header'));
+    tempNav.hide().addClass('tempNav').css({
+        'position':'fixed',
+        'top':'0px',
+        'left': '0px',
+        'width':'100%',
+        'z-index':'10000'
+    });
+
+    tempNav.appendTo('body');
     $("#swaggerEditer").fadeIn("fast");
+    tempNav.show('fast');
 };
 
 APIDesigner.prototype.close_swagger_editor = function(){
     $("body").removeClass("modal-open");
     $(".wizard").show();
     $("#se-iframe").remove();
+    $('#swaggerEditer').append($('.swagger_editer_header'));
+    $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");
 };
 
@@ -742,6 +764,8 @@ APIDesigner.prototype.update_swagger = function(){
     $("body").removeClass("modal-open");
     $("#se-iframe").remove();
     $(".wizard").show();
+    $('#swaggerEditer').append($('.swagger_editer_header'));
+    $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
     var json = jsyaml.safeLoad(designer.yaml);
@@ -902,8 +926,15 @@ $(document).ready(function(){
                     designer.saved_api.version = responseText.data.version;
                     designer.saved_api.provider = responseText.data.provider;
                     $( "body" ).trigger( "api_saved" );
-                    $('#apiSaved').show();
-                    setTimeout("hideMsg()", 3000);
+                    //$('#apiSaved').show();
+                    //setTimeout("hideMsg()", 3000);
+                    var n = noty({
+                        theme: 'wso2',
+                        text: $('#apiSaved').text(),
+                        layout:'top',
+                        type:'success',
+                        timeout : '3000'
+                    });
                 } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {

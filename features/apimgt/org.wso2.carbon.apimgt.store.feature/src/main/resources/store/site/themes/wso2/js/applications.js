@@ -18,6 +18,38 @@
     };
 }( jQuery ));
 
+
+var GrantTypes = function (available) {
+    //order will be preserved in the response map
+    this.config = {
+        "authorization_code":"Code",
+        "implicit":"Implicit",
+        "refresh_token":"Refresh Token", 
+        "password":"Password", 
+        "iwa:ntlm":"IWA-NTLM", 
+        "client_credentials":"Client Credential", 
+        "urn:ietf:params:oauth:grant-type:saml2-bearer":"SAML2",
+    }
+
+    this.available = {};
+    for(var i=0;i < available.length;i++){
+        this.available[available[i]] = this.config[available[i]];
+    }
+};
+
+GrantTypes.prototype.getMap = function(selected){
+    var grants = [];
+    if(selected !=undefined)
+        grants = selected.split(" ");
+    var map = [];
+    for(var grant in this.available){
+        var selected = grants.indexOf(grant) > -1;
+        map.push({ key: grant , name:this.available[grant], "selected" : selected});
+    }
+
+    return map;
+};
+
 ;(function ( $, window, document, undefined ) {
 
     var pluginName = "codeHighlight";
@@ -76,6 +108,13 @@
             password: "Password"           
         };
 
+    Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+        if(v1 === v2) {
+            return options.fn(this);
+        }
+        return options.inverse(this);
+    });
+
     // The actual plugin constructor
     function Plugin( element, options ) {
         this.element = $(element);
@@ -83,6 +122,8 @@
         this.app = options.app;
         this.type = options.type;
         this.app.show_keys = ( $.cookie('OAuth_key_visibility') === 'true');
+        this.grants = new GrantTypes(options.grant_types);
+        this.app.grants = this.grants.getMap(this.app.grants);
 
         this.options = $.extend( {}, defaults, options) ;
 
@@ -95,6 +136,8 @@
     Plugin.prototype = {
 
         init: function() {
+            this.selectDefaultGrants();
+
             this.render();
 
             //register actions
@@ -104,6 +147,41 @@
             this.element.on( "click", ".provide_keys_save", $.proxy(this.provideKeysSave, this));
             this.element.on( "click", ".provide_keys_cancel", $.proxy(this.provideKeysCancel, this));
             this.element.on( "click", ".show_keys", $.proxy(this.toggleKeyVisibility, this));
+            this.element.on( "click", ".generateAgainBtn", $.proxy(this.generateAgainBtn, this));
+            this.element.on( "click", ".update_grants", $.proxy(this.updateGrants, this));
+            this.element.on( "change", ".callback_url", $.proxy(this.change_callback_url, this));
+        },
+
+        change_callback_url: function(e){
+            this.app.callbackUrl = $(e.currentTarget).val();
+            this.selectDefaultGrants();
+            this.render();
+        },
+
+        selectDefaultGrants: function(){
+            /* If keys are not generated select grants by default */
+            if(this.app.ConsumerKey == undefined || this.app.ConsumerKey == ""){                
+                for(var i =0 ;i < this.app.grants.length;i++){
+                    if((this.app.callbackUrl == undefined || this.app.callbackUrl =="" ) &&
+                        (this.app.grants[i].key == "authorization_code" || this.app.grants[i].key == "implicit") ){
+                        this.app.grants[i].selected = false;
+                        this.app.grants[i].disabled = true;
+                    }else{
+                        this.app.grants[i].selected = true;
+                        delete this.app.grants[i].disabled
+                    }                    
+                }
+            }else{
+                for(var i =0 ;i < this.app.grants.length;i++){
+                    if((this.app.callbackUrl == undefined || this.app.callbackUrl =="" ) &&
+                        (this.app.grants[i].key == "authorization_code" || this.app.grants[i].key == "implicit") ){
+                        this.app.grants[i].selected = false;
+                        this.app.grants[i].disabled = true;
+                    }else{
+                        delete this.app.grants[i].disabled
+                    }                 
+                }                
+            } 
         },
 
         toggleKeyVisibility: function(el, options) {
@@ -153,10 +231,32 @@
                 }
             },this), "json");
             return false;
-        },                
+        },
+
+        generateAgainBtn: function(){
+
+            var elem = this.element.find(".generateAgainBtn");
+            var keyType = elem.attr("data-keyType");
+            var applicationName = elem.attr("data-applicationName");
+
+            jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+                action:"cleanUpApplicationRegistration",
+                applicationName:applicationName,
+                keyType:keyType
+            }, function (result) {
+                if (!result.error) {
+                    location.reload();
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }, "json");
+        },
 
         generateKeys: function(){
             var validity_time = this.element.find(".validity_time").val();
+            var selected = this.element.find(".grants:checked")
+                           .map(function(){ return $( this ).val();}).get().join(",");
+
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action: "generateApplicationKey",
                 application: this.app.name,
@@ -164,13 +264,16 @@
                 callbackUrl: this.app.callbackUrl,
                 validityTime: validity_time,
                 tokenScope:"",
+                jsonParams:'{"grant_types":"'+selected+'"}',
             }, $.proxy(function (result) {
                 if (!result.error) {
+                    
                     this.app.ConsumerKey = result.data.key.consumerKey,
                     this.app.ConsumerSecret = result.data.key.consumerSecret,
                     this.app.Key = result.data.key.accessToken,
                     this.app.KeyScope = result.data.key.tokenScope,
-                    this.app.ValidityTime = result.data.key.validityTime
+                    this.app.ValidityTime = result.data.key.validityTime,
+                    this.app.keyState = result.data.key.keyState,
                     this.render();
                 } else {
                     jagg.message({content: result.message, type: "error"});
@@ -199,7 +302,8 @@
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
                     this.app.KeyScope = result.data.key.tokenScope.join();                    
-                    this.render();                    
+                    this.render();
+                    this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);                    
                 } else {
                     jagg.message({content:result.message,type:"error"});
                 }
@@ -208,11 +312,32 @@
             return false;
         },
 
+        updateGrants: function(){
+            var selected = this.element.find(".grants:checked")
+                           .map(function(){ return $( this ).val();}).get().join(",");
+
+            jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
+                action:"updateClientApplication",
+                application:this.app.name,
+                keytype:this.type,
+                jsonParams:'{"grant_types":"'+selected+'"}',
+                callbackUrl:this.app.callbackUrl
+            }, $.proxy(function (result) {
+                if (!result.error) {
+                    console.log(result);                    
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }, this), "json");                       
+            return false;
+        },
+
         render: function(){                   
             this.app.basickey = Base64.encode(this.app.ConsumerKey+":"+this.app.ConsumerSecret);
             this.app.username = this.options.username;
             this.app.password = this.options.password;
             this.app.provide_keys = this.options.provide_keys;
+
             this.element.html(template(this.app));
             this.element.find(".copy-button").zclip();
             this.element.find(".selectpicker").selectpicker({dropupAuto:false}); 
@@ -332,7 +457,12 @@ $("#application-actions").each(function(){
                     context.shared = true;
                 else
                     context.shared = false;
-                return application_name(context);             
+                var value = application_name(context);
+                if(rec.isBlacklisted == 'true' || rec.isBlacklisted == true){
+                    value = value.replace((">"+rec.name+"<"),("><font color='red'>"+rec.name+" (Blacklisted) <"));
+
+                }
+                return  value;            
               }
             },
             { "data": "tier" },

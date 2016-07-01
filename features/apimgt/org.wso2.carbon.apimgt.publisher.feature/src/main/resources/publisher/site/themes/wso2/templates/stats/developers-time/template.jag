@@ -8,10 +8,11 @@
 
 <div class="row">
 	<div class="form-group col-sm-2">
-        <select class="select form-control" id="apiFilter" name="apiFilter">
+        <label class="control-label"><%=i18n.localize("allAPIs")%></label>
+        <!--select class="select form-control" id="apiFilter" name="apiFilter">
             <option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
             <option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
-        </select>
+        </select-->
 	</div>
 	<div class="col-sm-4"></div>
     <div class="col-sm-6">
@@ -23,7 +24,7 @@
                    </button>
                    <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
                    <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
-                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
+                   <button id="date-range" type="button" class="btn btn-default date-range last-child" >
                      <i class="fw fw-calendar" title="date-range"></i>
                      <span></span> <b class="caret"></b>
                    </button>
@@ -33,14 +34,14 @@
     </div>
 </div>
 
-<form class="form-inline">
+<!--form class="form-inline">
   <div class="form-group">
     <label class="control-label">Subscribed to&nbsp;&nbsp;</label>
     <select class="selectpicker" id="apiSelect" data-live-search="true">
        <option>All</option>
     </select>
   </div>
-</form>
+</form-->
 
         <div id="chartContainer"  class="col-sm-12" style="height:600px;">
                 <svg></svg>

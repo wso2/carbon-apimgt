@@ -1,7 +1,7 @@
-function APISamples (defaultResourceLevelTier) {
+function APISamples () {
     this.sample_swagger = "{\"paths\":{\"/order\":{\"post\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Create a new Order\",\"parameters\"" +
-    ":[{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":" +
+    "\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}"  + "\",\"description\":\"Create a new Order\"," +
+    "\"parameters\":[{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":" +
     "\"Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
     "\"responses\":{\"201\":{\"headers\":{\"Location\":{\"description\":\"The URL of the newly created resource.\",\"type\":" +
     "\"string\"},\"Content-Type\":{\"description\":\"The content type of the body.\",\"type\":" +
@@ -12,7 +12,8 @@ function APISamples (defaultResourceLevelTier) {
     ",\"415\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}}}}," +
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultResourceLevelTier + "\",\"description\":\"Return a list of available menu items\",\"parameters\":" +
+    "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Return a list of available menu items\"," +
+    "\"parameters\":" +
     "[],\"responses\":{\"200\":{\"headers\"" + ":{},\"schema\":{\"title\":\"Menu\"," + "\"properties\":{" +
     "\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"},\"type\":\"array\"}},\"type\":" +
     "\"object\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
@@ -20,7 +21,8 @@ function APISamples (defaultResourceLevelTier) {
     "resource.\"},\"406\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Not Acceptable. The requested media type is not supported\"}}}},\"/order/{orderId}\"" +
     ":{\"put\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
-    "\"" + defaultResourceLevelTier + "\",\"description\":\"Update an existing Order\",\"parameters\":[{\"description\"" +
+    "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Update an existing Order\"," +
+    "\"parameters\":[{\"description\"" +
     ":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\",\"type\":\"number\",\"required\"" +
     ":true,\"in\":\"path\"},{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"" +
     "Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
@@ -33,7 +35,8 @@ function APISamples (defaultResourceLevelTier) {
     ",\"description\":\"Not Found. The resource to be updated does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
     "not been performed because one of the preconditions is not met.\"}}},\"get\":{\"x-auth-type\"" +
-    ":\"Application & Application User\",\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"" +
+    ":\"Application & Application User\",\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\"," +
+    "\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
     "\"format\":\"integer\",\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
     "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{}," +
@@ -43,7 +46,7 @@ function APISamples (defaultResourceLevelTier) {
     ":\"Not Found. Requested API does not exist.\"},\"406\":{\"schema\":{\"$ref\":" +
     "\"#/definitions/Error\"},\"description\":\"Not Acceptable. The requested media type is" +
     " not supported\"}}},\"delete\":{\"x-auth-type\":\"Application & Application User\"," +
-    "\"x-throttling-tier\":\"" + defaultResourceLevelTier + "\",\"description\":\"Delete an existing Order\"," +
+    "\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Delete an existing Order\"," +
     "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\"," +
     "\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
     ":\"OK. Resource successfully deleted.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
@@ -75,7 +78,41 @@ function APISamples (defaultResourceLevelTier) {
     "\"http://PizzaShack.lk\"},\"version\":\"1.0.0\"}}";
     }
 
-APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
+APISamples.prototype.deploySampleApi = function (gatewayURL) {
+    var _this = this;
+    var addAPIUrl = "/site/blocks/item-add/ajax/add.jag";
+    jagg.post(addAPIUrl, {action: "getTiers"},
+        function (apiLevelTierResult) {
+            if (!apiLevelTierResult.error) {
+                defaultApiLevelTier = apiLevelTierResult.tiers[0].tierName;
+                jagg.post(addAPIUrl, {action: "getResourceTiers"},
+                    function (resourceTierResult) {
+                        if (!resourceTierResult.error) {
+                            defaultResourceLevelTier = resourceTierResult.tiers[0].tierName;
+                            _this.sample_swagger = _this.sample_swagger.split("$.{defaultResourceLevelTier}")
+                                .join(defaultResourceLevelTier);
+                            _this.deploySampleApiToBackend(gatewayURL, defaultApiLevelTier);
+                        } else {
+                            $(".modal-body").removeClass("loadingButton");
+                            jagg.message({
+                                content: "Error occurred while loading resource level tiers",
+                                type: "error",
+                                title: "Error"
+                            });
+                        }
+                    }, "json");
+            } else {
+                $(".modal-body").removeClass("loadingButton");
+                jagg.message({
+                    content: "Error occurred while loading API level tiers",
+                    type: "error",
+                    title: "Error"
+                });
+            }
+        }, "json");
+};
+
+APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApiLevelTier) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
     var addAPIData = {action: 'sampleDesign', name: 'PizzaShackAPI', provider: username,
         version: '1.0.0', description: 'This is a simple API for Pizza Shack online pizza delivery store.', tags: 'pizza',
@@ -146,15 +183,15 @@ APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
                                         requireResubscription: true},
                                         function (result) {
                                             if (!result.error) {
-                                                window.location.assign(siteContext + "/site/pages/index.jag");
                                                 $(".modal-body").removeClass("loadingButton");
                                                 jagg.message({
                                                     content: "Sample PizzaShackAPI is Deployed Successfully",
                                                     type: "info",
-                                                    title: "Success"
+                                                    title: "Success",
+                                                    cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                                 });
                                                 //Add document for the published sample
-                                                addSampleAPIDoc();
+                                                _this.addSampleAPIDoc();
                                             }
                                         }, 'json');
                                 } else {
@@ -184,7 +221,7 @@ APISamples.prototype.deploySample = function (defaultApiLevelTier, gatewayURL) {
         }, 'json');
 };
 
-addSampleAPIDoc = function () {
+APISamples.prototype.addSampleAPIDoc = function () {
     var addDocUrl = "/site/blocks/documentation/ajax/docs.jag";
     var addDocData = {action: 'addSampleDocumentation', provider: username,
         apiName: 'PizzaShackAPI',version: '1.0.0',
@@ -206,7 +243,7 @@ addSampleAPIDoc = function () {
         }, 'json');
 };
 
-var deploySampleApi = function (defaultApiLevelTier, defaultResourceLevelTier, gatewayURL) {
-    var deployer = new APISamples(defaultResourceLevelTier);
-    deployer.deploySample(defaultApiLevelTier, gatewayURL);
+var deploySampleApi = function (gatewayURL) {
+    var deployer = new APISamples();
+    deployer.deploySampleApi(gatewayURL);
 };

@@ -38,6 +38,7 @@ public class Application {
     private String description;
     private String status;
     private String groupId;
+    private Boolean isBlackListed;
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
@@ -181,4 +182,14 @@ public class Application {
     public String getUUID() {
         return uuid;
     }
+
+	public Boolean getIsBlackListed() {
+		return isBlackListed;
+	}
+
+	public void setIsBlackListed(Boolean isBlackListed) {
+		this.isBlackListed = isBlackListed;
+	}
+    
+    
 }

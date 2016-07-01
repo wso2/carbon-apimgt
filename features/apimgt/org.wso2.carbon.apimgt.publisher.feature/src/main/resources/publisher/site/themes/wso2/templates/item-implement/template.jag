@@ -87,9 +87,9 @@
                         <div class="wiz-content">
 							    <div class="row">
 							        <div class="col-sm-12">
-									<div id="accordion1" class="panel-group" role="tablist">
+									<div class="panel-group accordion" role="tablist">
 									<div class="panel panel-default">
-							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
+							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
 						                    <div>
 				                                <div class="heading">Managed API</div>
@@ -149,7 +149,10 @@
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
 																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
+																{{/if}}																
 																{{/if}}
+																{{#if template_not_supported }}
+																<label class="error" for="name">Address endpoint do not support URI Templates.</label>
 																{{/if}}
 															</div>
 							                            </div>
@@ -224,7 +227,7 @@
 								                        	{{#if ../load_balance}}
 								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Message Mediation Policies"}}
+								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
 								                        	{{else}}
 								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
 								                        	{{/if}}								                        
@@ -301,7 +304,7 @@
 														    <div class="modal-content">
 														        <div class="modal-header">
 																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
-																	<h3>Advanced Endpoint Configuration</h3>
+																	<h3 class="modal-title">Advanced Endpoint Configuration</h3>
 														        </div>
 														        <div class="modal-body">
 														        	<div id="advance_form"></div>
@@ -379,28 +382,7 @@
 							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>">
 							                            </div>
 							                        </div>
-							
-							                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
-							                        <!--Southboud statistics -->
-							                        <div class="form-group">
-							                            <label class="control-label col-sm-3" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
-							                              <div class="col-sm-4">
-							                               <select class="select required form-control" id="destinationStats" name="destinationStats">
-							                                    <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
-							                                    <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
-							                                </select>
-							                                <a class="help_popup" help_data="stats_help" data-trigger="hover" title="stats_help">
-							                                	<span class="icon fw-stack fw-lg" style="font-size:6px">
-												                   <i class="fw fw-circle fw-stack-2x"></i>
-												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-												                </span>
-							                                </a>
-							                                <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
-							                             </div>
-							                        </div>
-							                        <!--Southboud statistics End -->
-							                        <% }%>
-							
+
 							                        </div><!-- more option endpoint -->
 												<br/><br/>
 							                    <fieldset>
@@ -409,7 +391,6 @@
 							                            <div class="form-group">
 							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
 							                                <div class="controls col-sm-8">
-  
 							                                    <label class="checkbox">
 							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
@@ -418,45 +399,70 @@
 							                                    </label>							                                    
 							                                </div>
 							                            </div>
-							                            <div class="form-group form-inline">
-							                            	<div class="col-sm-3"></div>
-							                            	<div class="col-sm-9">
-							                            		<table class="table table-bordered table-striped" id="seqTable"
+							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-							                                            <thead>
-							                                                <tr>
-							                                                    <th><%=i18n.localize("inFlow")%></th>
-							                                                    <th><%=i18n.localize("outFlow")%></th>
-							                                                    <th><%=i18n.localize("faultFlow")%></th>
-							                                                </tr>
-							                                            </thead>
-							                                            <tr>
-							                                                <td>
-							                                                    <select class="form-control" id="inSequence"  name="inSequence" >
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                                <td>
-							                                                    <select class="form-control" id="outSequence"  name="outSequence">
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                                <td>
-							                                                    <select class="form-control" id="faultSequence"  name="faultSequence">
-							                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-							                                                    </select>
-							                                                </td>
-							                                            </tr>
-							                                    </table>							                                    
-							                            	</div>
-							                            </div>
-														<div id="uploadSeqDiv" class="form-group" <%if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-															<div class="col-sm-3"></div>
-															<div class="col-sm-3">
-																 <a  href="#sequenceUpload" role="button" class="btn btn-secondary" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Mediation Policy</a>
+							                            <div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
+
+																<div class="input-group">
+																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
+							                                        	<optgroup label="Existing" id="inSequenceExistingOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you" id="inSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+							                                    	</select>
+																    <span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
+                                                                    </span>
+                                                                </div>
+
 															</div>
 														</div>
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
 
+																<div class="input-group">
+																	<select class="form-control selectpicker" id="outSequence"  name="outSequence">
+							                                        	<optgroup label="Existing" id="outSequenceExistingOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you" id="outSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+							                                    	</select>
+							                                    	<span class="input-group-btn">
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="in" data-name="In Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload In Flow</a>
+                                                                    </span>
+                                                                </div>
+
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("faultFlow")%></label>
+															<div class="headerContainer tagContainer col-sm-6">
+
+																<div class="input-group">
+																	<select class="form-control selectpicker" id="faultSequence"  name="faultSequence">
+							                                	    	<optgroup label="Existing" id="faultSequenceExistingOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+                                                                        <optgroup label="Added by you" id="faultSequenceUserAddedOptGroup">
+                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                        </optgroup>
+																	</select>
+																	<span class="input-group-btn" >
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="fault" data-name="Fault Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Fault Flow</a>
+                                                                    </span>
+																</div>
+
+															</div>
+														</div>
+														</span>
+                                                </fieldset>
 														<% if(outputs.isCreatePermitted){
 														 %>
 														<br/><br/>
@@ -475,7 +481,7 @@
 													</div>
 												<% }; %>
 							                        <%}%>
-							                    </fieldset>
+
 												<hr />
 							                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
 							                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
@@ -494,7 +500,7 @@
 							            </div>
 							            </div>							
 							            <div class="panel panel-default">
-							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
+							            	 <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-expanded="true" aria-controls="accordion1-collapse2">
 												<h4 class="panel-title">
 								                    <div>
 						                                <div class="heading">Prototyped API</div>
@@ -655,7 +661,7 @@
     <div class="modal-content clearfix">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
-        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy</h3>
+        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy - <span id="flowName"></span></h3>
       </div>
       <div class="">      
                             <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
@@ -663,30 +669,12 @@
 					                 
 					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
 					            </div>
-					            <div class="form-group toggleRadios">
-					            	<label class="col-sm-3 control-label">Mediation Policy Type</label>
-					            <div class="col-sm-7">
-	                                <label class="radio">
-	                                    <input type="radio" class="select-file" name="upload-sequence" id="" value="in" checked> 
-	                                    <span class="helper">In</span>
-	                                </label>
-	                                <label class="radio">
-	                                    <input type="radio" class="select-url" name="upload-sequence" value="out">
-	                                    <span class="helper">Out</span>
-	                                </label>
-	                                <label class="radio">
-	                                    <input type="radio" class="select-url" name="upload-sequence" value="fault">
-	                                    <span class="helper">Fault</span>
-	                                </label>
-                                </div>
-					            </div>	
-					            <br class="spacer"/>
                                 	<div class="form-group">
-                                		<label class="col-sm-3"></label>
-										<div class="controls col-sm-8">
+										<div class="controls col-sm-12">
 											<div class="input-group input-wrap file-upload-control">
 												<input type="text" id="sequence_file_value" class="form-control" readonly> 
 												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
+												<input id="flow_id" name="flow_id" type="hidden" value="">
 												<div class="input-group-btn">
 													<button class="btn browse" type="button" title="Browse File">
 														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
@@ -847,7 +835,18 @@
         }catch(e){
             console.log("Invalid endpoint config");
         }
-    })
+    });
+
+    $(document).on("click", ".btn-sequenceUpload", function () {
+         var flowId = $(this).data('id');
+         var flowName = $(this).data('name');
+         $(".modal-title #flowName").text(flowName);
+         $(".modal-body #flow_id").val(flowId);
+         var fileInput = $(".modal-body #sequence_file_value");
+         fileInput.replaceWith(fileInput.val('').clone(true));
+         $(".modal-body #sequence_file_help").addClass('hide');
+         $(".modal-footer #upload_sequence").attr('disabled', 'disabled');
+    });
 </script>
 
 

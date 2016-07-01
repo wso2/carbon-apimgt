@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteri
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -141,7 +140,7 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-	
+
 	private final String userNameWithoutChange;
 
     public APIProviderImpl(String username) throws APIManagementException {
@@ -617,6 +616,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             apiMgtDAO.addAPI(api,tenantId);
 
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
+
             if (log.isDebugEnabled()) {
                 log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
                         .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
@@ -736,17 +744,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
-    
+
     public boolean isAPIUpdateValid(API api) throws APIManagementException{
     	String apiSourcePath = APIUtil.getAPIPath(api.getId());
     	boolean isValid = false;
-    	
+
     	try{
     		Resource apiSourceArtifact = registry.get(apiSourcePath);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
             String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            
+
             if (!APIConstants.CREATED.equals(status) && !APIConstants.PROTOTYPED.equals(status)) {
             	//api at least is in published status
             	if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
@@ -760,12 +768,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		isValid = true;
             	}
             }
-            
+
     	}catch(RegistryException ex){
     		 handleException("Error while validate user for API publishing", ex);
-    	}    	
+    	}
     	return isValid;
-    	
+
     }
 
 
@@ -779,12 +787,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-    	
+
     	boolean isValid = isAPIUpdateValid(api);
     	if(!isValid){
     		throw new APIManagementException(" User doesn't have permission for update");
     	}
-    	
+
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
@@ -843,6 +851,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully updated the API: " + api.getId() + " in the database");
                 }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
 
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -1219,7 +1236,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 updateApiArtifact(api, false,false);
-                apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId);
+                apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId, this.tenantId);
 
                 if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){ //published default version need to be changed
                     apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, status);
@@ -1833,9 +1850,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             		artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
             //Here we have to set permission specifically to image icon we added
             String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-            if (iconPath != null) {
-            	iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
-                APIUtil.copyResourcePermissions(api.getId().getProviderName(),thumbUrl,iconPath);
+            if (iconPath != null && iconPath.lastIndexOf("/apimgt") != -1) {
+                iconPath = iconPath.substring(iconPath.lastIndexOf("/apimgt"));
+                APIUtil.copyResourcePermissions(api.getId().getProviderName(), thumbUrl, iconPath);
             }
             // Retain the tags
             org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
@@ -2201,7 +2218,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
-            
+
             GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);
             clearResourcePermissions(docPath, apiId);
@@ -2510,7 +2527,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
             artifactManager.removeGenericArtifact(apiArtifact);
             artifactManager.removeGenericArtifact(artifactId);
-            
+
 
             String thumbPath = APIUtil.getIconPath(identifier);
             if (registry.resourceExists(thumbPath)) {
@@ -2574,6 +2591,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug(logMessage);
             }
 
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
@@ -2591,7 +2616,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                    identifier.getProviderName();
-            
+
             if(registry.resourceExists(apiProviderPath)){
             	Resource providerCollection=registry.get(apiProviderPath);
             	CollectionImpl collection=(CollectionImpl)providerCollection;
@@ -3179,6 +3204,85 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	}
 
     /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomInSequences()  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+
+                }
+            }
+
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+
+    /**
+     * Get the list of Custom InSequences including API defined in sequences.
+     * @return List of available sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomOutSequences()  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                if (faultSeqCollection !=null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource outSequence = registry.get(faultSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+
+                }
+            }
+
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
      * Get stored custom fault sequences from governanceSystem registry
      *
      * @throws APIManagementException
@@ -3202,14 +3306,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                 }
-            }           
+            }
 
+        }  catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
         } catch (Exception e) {
-            handleException("Issue is in getting custom Fault Sequences from the Registry", e);
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
         }
         return sequenceList;
     }
-    
+
     /**
      * Get stored custom fault sequences from governanceSystem registry
      *
@@ -3236,8 +3349,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 }
             }
-            
-            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, 
+
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
                                                                       APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
             if(registry.resourceExists(customOutSeqFileLocation))    {
@@ -3258,7 +3371,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT 
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT
                                                             + " sequences of " + apiIdentifier + " in the registry";
             log.error(msg);
             throw new APIManagementException(msg, e);
@@ -3269,6 +3382,130 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return sequenceList;
     }
 
+
+    /**
+     * Get the list of Custom in sequences of API.
+     * @return List of in sequences
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomApiInSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
+     * Get the list of Custom out Sequences of API
+     *
+     * @return List of available out sequences
+     * @throws APIManagementException
+     */
+
+    public List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
+
+    /**
+     * Get the list of Custom Fault Sequences of API.
+     *
+     * @return List of available fault sequences
+     * @throws APIManagementException
+     */
+    public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
+        List<String> sequenceList = new ArrayList<String>();
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving registry for tenant " + tenantId;
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT
+                    + " sequences of " + apiIdentifier + " in the registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new APIManagementException(e.getMessage(), e);
+        }
+        return sequenceList;
+    }
 
     /**
      * This method is used to initiate the web service calls and cluster messages related to stats publishing status
@@ -3403,8 +3640,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();
                     if(!currentStatus.equals(targetStatus)){
-                        apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(),
-                                this.username);
+                        apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
+                                targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
                 }
                 if (log.isDebugEnabled()) {
@@ -3781,7 +4018,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName();
                 String defaultPolicyName = policyFile + "_default";
                 executionFlows.put(defaultPolicyName, defaultPolicy);
@@ -3888,7 +4125,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIPolicy existingPolicy = apiMgtDAO.getAPIPolicy(policy.getPolicyName(), policy.getTenantId());
                 apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
-                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefualt(apiPolicy);
+                String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
                 //TODO rename level to  resource or appropriate name
                 String policyFile = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
                 String defaultPolicyName = policyFile + "_default";
@@ -4007,7 +4244,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
             policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
             //add default policy file name
-            policyFileNames.add(policyFile + "_default");           
+            policyFileNames.add(policyFile + "_default");
             for (Pipeline pipeline : policy.getPipelines()) {
                 policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
             }
@@ -4040,7 +4277,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg, e);
             throw new APIManagementException(msg);
         }
-        
+
         GlobalPolicy globalPolicy = null;
         if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
             globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -4053,7 +4290,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
     }
-    
+
     public boolean hasAttachments(String username, String policyName, String policyType)throws APIManagementException{
     	int tenantID = APIUtil.getTenantId(username);
     	String tenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -4061,7 +4298,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(APIUtil.getSuperTenantId() != tenantID){
         	tenantDomainWithAt = "@"+tenantDomain;
         }
-       
+
         boolean hasSubscription = apiMgtDAO.hasSubscription(policyName, tenantDomainWithAt, policyType);
         return hasSubscription;
     }
@@ -4072,39 +4309,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public BlockConditionsDTO getBlockCondition(int conditionId) throws APIManagementException {
+        return apiMgtDAO.getBlockCondition(conditionId);
+    }
+
+    @Override
+    public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getBlockConditionByUUID(uuid);
+    }
+
+    @Override
     public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
-
         boolean updateState = apiMgtDAO.updateBlockConditionState(conditionId,state);
-
+        BlockConditionsDTO blockConditionsDTO = apiMgtDAO.getBlockCondition(conditionId);
         if(updateState){
-            BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
-
-            if(blockCondition != null) {
-
-                String blockingConditionType = blockCondition.getConditionType();
-                String blockingConditionValue = blockCondition.getConditionValue();
-                if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                    blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
-                    blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
-                }
-
-                publishBlockingEvent(blockingConditionType, blockingConditionValue,  Boolean.toString(blockCondition
-                        .isEnabled()));
-            }
+            publishBlockingEventUpdate(blockConditionsDTO);
         }
-
         return updateState;
     }
 
     @Override
-    public boolean addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
+    public boolean updateBlockConditionByUUID(String uuid, String state) throws APIManagementException {
+
+        boolean updateState = apiMgtDAO.updateBlockConditionStateByUUID(uuid, state);
+        BlockConditionsDTO blockConditionsDTO = apiMgtDAO.getBlockConditionByUUID(uuid);
+        if (updateState && blockConditionsDTO != null) {
+            publishBlockingEventUpdate(blockConditionsDTO);
+        }
+        return updateState;
+    }
+
+    @Override
+    public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
             conditionValue = tenantDomain + ":" + conditionValue.trim();
         }
-        boolean state = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
+        String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
 
-        if (state) {
+        if (uuid != null) {
             if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
                 conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
                 conditionValue = conditionValue + "@" + tenantDomain;
@@ -4112,7 +4355,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publishBlockingEvent(conditionType, conditionValue, "true");
         }
 
-        return state;
+        return uuid;
     }
 
     @Override
@@ -4120,22 +4363,78 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         BlockConditionsDTO blockCondition = apiMgtDAO.getBlockCondition(conditionId);
         boolean deleteState = apiMgtDAO.deleteBlockCondition(conditionId);
-        if(deleteState && blockCondition != null){
-            String blockingConditionType = blockCondition.getConditionType();
-            String blockingConditionValue = blockCondition.getConditionValue();
-            if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
-                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
-                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
-            }
-            publishBlockingEvent(blockingConditionType, blockingConditionValue ,"delete");
+        if (deleteState && blockCondition != null) {
+            unpublishBlockCondition(blockCondition);
         }
         return deleteState;
     }
 
+    @Override
+    public boolean deleteBlockConditionByUUID(String uuid) throws APIManagementException {
+        boolean deleteState = false;
+        BlockConditionsDTO blockCondition = apiMgtDAO.getBlockConditionByUUID(uuid);
+        if (blockCondition != null) {
+            deleteState = apiMgtDAO.deleteBlockCondition(blockCondition.getConditionId());
+            if (deleteState) {
+                unpublishBlockCondition(blockCondition);
+            }
+        }
+        return deleteState;
+    }
 
+    /**
+     * Unpublish a blocking condition.
+     *
+     * @param blockCondition Block Condition object
+     */
+    private void unpublishBlockCondition (BlockConditionsDTO blockCondition) {
+        String blockingConditionType = blockCondition.getConditionType();
+        String blockingConditionValue = blockCondition.getConditionValue();
+        if(APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+            blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+            blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+        }
+        publishBlockingEvent(blockingConditionType, blockingConditionValue, "delete");
+    }
+
+    @Override
     public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-        return policy;
+        return apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
+        return apiMgtDAO.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
+        return apiMgtDAO.getGlobalPolicy(policyName);
+    }
+
+    /**
+     * Publishes the changes on blocking conditions.
+     *
+     * @param blockCondition Block Condition object
+     * @throws APIManagementException
+     */
+    private void publishBlockingEventUpdate(BlockConditionsDTO blockCondition) throws APIManagementException {
+        if (blockCondition != null) {
+            String blockingConditionType = blockCondition.getConditionType();
+            String blockingConditionValue = blockCondition.getConditionValue();
+            if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
+                blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
+                blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+            }
+
+            publishBlockingEvent(blockingConditionType, blockingConditionValue, Boolean.toString(blockCondition
+                    .isEnabled()));
+        }
     }
 
     /**

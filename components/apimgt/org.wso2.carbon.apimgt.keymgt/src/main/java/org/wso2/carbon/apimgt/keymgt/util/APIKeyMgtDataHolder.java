@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
+import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -83,6 +83,8 @@ public class APIKeyMgtDataHolder {
     public static void setThriftServerEnabled(Boolean thriftServerEnabled) {
         isThriftServerEnabled = thriftServerEnabled;
     }
+
+
 
     public static void initData() {
         try {

@@ -112,6 +112,7 @@ public class TierMappingUtil {
         dto.setUnitTime(tier.getUnitTime());
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(tierLevel));
+        dto.setTimeUnit(tier.getTimeUnit());
         if (tier.getTierPlan() != null) {
             dto.setTierPlan(TierDTO.TierPlanEnum.valueOf(tier.getTierPlan()));
         }

@@ -34,7 +34,9 @@
     ];
     var TIERS =[
         <% for (var i = 0; i < resourceTiers.length; i++) {
-        %>{ "value": "<%= resourceTiers[i].tierName %>", "text": "<%= resourceTiers[i].tierDisplayName %>" }<% if((i+1) != resourceTiers.length){%>,<%}%>
+        %>{ "value": "<%= encode.forJavaScript(String(resourceTiers[i].tierName)) %>", "text": "<%= encode.forJavaScript(String(resourceTiers[i].tierDisplayName)) %>"
+        }<% if(
+        (i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 
@@ -127,571 +129,590 @@
             <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
-              
-              	<div class="form-heading">
-					<h4 class="panel-title">
-						<div>
-                   			<div class="heading">Configurations</div>
-						</div>
-                    	<div class="clearfix"></div>										        
-					</h4>
-				</div>
 
-	            <div class="form-group">
-	                        <label class = "col-sm-3 control-label">Make this the Default Version:
-	                        <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
-	                        	<span class="icon fw-stack fw-lg" style="font-size:6px">
-									<i class="fw fw-circle fw-stack-2x"></i>
-									<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-								</span>
-	                        </a>
-	                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
-	                         </label>
-	                     	<div class="controls col-sm-8">
-	                     	  <label class="checkbox">
-	                            <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
-	                            <span class="helper"></span>
-	                    	</label>                         
-	
-	                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
-	                             <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
-	                         <%}else{%>
-	                             <p class="help-block">No default version defined for the current API</p>
-	                         <%}}%>
-	
-	                     </div>
-	                     <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
-	            </div>
-	            <div class="form-group transport-styles">
-                <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
-                	<a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
-                		<span class="icon fw-stack fw-lg" style="font-size:6px">
-								<i class="fw fw-circle fw-stack-2x"></i>
-								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-						</span>
-                	</a>	
-                	<p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
-                </label>
-                <div class="controls col-sm-8">
-                	<label class="checkbox">
-                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpsTransport")%></span>
-                    </label>
-                    <label class="checkbox">
-                            <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
-                            <span class="helper"><%=i18n.localize("httpTransport")%></span>
-                    </label>                    
-                </div>
-             </div>
-             
-             <!--Response Caching -->
-                <div class="form-group">
-                    <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
-                    	<a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
-                    		<span class="icon fw-stack fw-lg" style="font-size:6px">
-								<i class="fw fw-circle fw-stack-2x"></i>
-								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-							</span>
-                    	</a>	
-                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
-                    </label>
-                      <div class="col-sm-4 responseCacheSelect">
-                       <select class="select required form-control" id="responseCache" name="responseCache">
-                            <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
-                            <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
-                        </select>                        
-                     </div>
-                </div>
-                <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
-                    <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
-                    <div class="col-sm-4">
-                        <input type="text" style="text-align:right;" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+
+                <div class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <div>
+                                    <div class="heading no-description">Configurations</div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse">
+                            <div class="panel-body">
+                                        <div class="form-group">
+                                            <label class = "col-sm-3 control-label">Make this the Default Version:
+                                                <a class="help_popup" help_data="default_api_help" title="default_api_help" data-trigger="hover" data-placement="bottom">
+                                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                        <i class="fw fw-circle fw-stack-2x"></i>
+                                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                    </span>
+                                                </a>
+                                                <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+                                            </label>
+                                            <div class="controls col-sm-8">
+                                                  <label class="checkbox">
+                                                    <input type="checkbox" id="default_version" class="default_version_check" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>>
+                                                    <span class="helper"></span>
+                                                </label>
+
+                                                 <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                                                     <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                                                 <%}else{%>
+                                                     <p class="help-block">No default version defined for the current API</p>
+                                                 <%}}%>
+                                            </div>
+                                             <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+                                            </div>
+                                        <div class="form-group transport-styles">
+                                        <label class="control-label col-sm-3" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span>
+                                                <a class="help_popup" help_data="http_help" data-trigger="hover" title="http_help" data-placement="bottom">
+                                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                    </span>
+                                                </a>
+                                                <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                                        </label>
+                                        <div class="controls col-sm-8">
+                                                <label class="checkbox">
+                                                        <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
+                                                        <span class="helper"><%=i18n.localize("httpsTransport")%></span>
+                                                </label>
+                                                <label class="checkbox">
+                                                        <input type="checkbox" id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+                                                        <span class="helper"><%=i18n.localize("httpTransport")%></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                         <!--Response Caching -->
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="responseCache"><%=i18n.localize("responseCache")%>:
+                                                    <a class="help_popup" help_data="cache_help" title="cache_help" data-trigger="hover" data-placement="bottom">
+                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                        </span>
+                                                    </a>
+                                                    <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>
+                                                </label>
+                                                  <div class="col-sm-4 responseCacheSelect">
+                                                   <select class="select required form-control" id="responseCache" name="responseCache">
+                                                        <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
+                                                        <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+                                                    </select>
+                                                 </div>
+                                            </div>
+                                            <div class="form-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                                                <label class="control-label col-sm-3" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                                                </div>
+                                            </div>
+                                        <!--Response Caching End -->
+                            </div>
+                        </div>
                     </div>
-                </div>
-            <!--Response Caching End -->
 
-		
-			<div class="form-heading">
-					<h4 class="panel-title">
-						<div>
-                   			<div class="heading"><%=i18n.localize("Throttling Settings","Throttling Settings")%></div>
-						</div>
-                    	<div class="clearfix"></div>										        
-					</h4>
-				</div>
-            <% if (isSynapseGateway) { %>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="throttle">Maximum Backend Throughput :
-                 <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
-                    <span class="icon fw-stack fw-lg" style="font-size:6px">
-                        <i class="fw fw-circle fw-stack-2x"></i>
-                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                    </span>
-                </a>
-                <p id="hard_throttle_help" class="hide">Limits the total number of calls the API Manager is allowed to make to the backend.</p>
-                
-                </label>
-                <div class="col-sm-8">
-                    <label class="radio">
-                        <input type="radio" class="backend_tps" id ="backend_tps_unlimited" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
-                        checked="checked"<%}%> value="unlimited">
-                        <span class="helper">Unlimited</span>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" class="backend_tps" id ="backend_tps_specify" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
-                        checked="checked"<%}%> value="specify">
-                        <span class="helper">Specify</span>
-                    </label>                    
-                </div>
-            </div>
-            <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
-                <label class="control-label col-sm-3" for="throttle">Production TPS
-                </label>
-                <div class="col-sm-2">
-                    <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
-                </div>
-            </div>
-            <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
-                <label class="control-label col-sm-3" for="throttle">Sandbox TPS
-                </label>
-                <div class="col-sm-2">
-                    <input type="text" class="form-control validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
-                </div>
-            </div>            
-            <%}%>				
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <div>
+                                    <div class="heading no-description"><%=i18n.localize("Throttling Settings","Throttling Settings")%></div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse">
+                            <div class="panel-body">
 
+                                        <% if (isSynapseGateway) { %>
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="throttle">Maximum Backend Throughput :
+                                                         <a class="help_popup" help_data="hard_throttle_help" title="hard_throttle_help" data-trigger="hover" data-placement="bottom">
+                                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                            </span>
+                                                        </a>
+                                                        <p id="hard_throttle_help" class="hide">Limits the total number of calls the API Manager is allowed to make to the backend.</p>
 
-                
-    <hr />
-    <div class="form-group">
-	    <label class="control-label col-sm-3" for="tiertier">
-            <%=i18n.localize("subTier")%>:
-            <span class="requiredAstrix">*</span>
-            <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
-    		    <span class="icon fw-stack fw-lg" style="font-size:6px">
-				    <i class="fw fw-circle fw-stack-2x"></i>
-					<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-			    </span>
-    	    </a>
-    	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-        </label>
-        <div class="controls col-sm-4 tierSelect">
-			<%                         
-                for (var i = 0; i < tiers.length; i++) {
-                    var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
-                %>
-                <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
-                        <input type="checkbox" class="tier_check" name="tier" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
-                        <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> : <%= tiers[i].tierDescription %></span>                                    
-                </label>
-                <%
-                }
-            %>
-           <label id="tier_error" class="error hide" style="display: block;">Please select at least one Subscription Tier.</label>
-        </div>
-	</div>
+                                                        </label>
+                                                        <div class="col-sm-8">
+                                                            <label class="radio">
+                                                                <input type="radio" class="backend_tps" id ="backend_tps_unlimited" name="backend_tps" <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>
+                                                                checked="checked"<%}%> value="unlimited">
+                                                                <span class="helper">Unlimited</span>
+                                                            </label>
+                                                            <label class="radio">
+                                                                <input type="radio" class="backend_tps" id ="backend_tps_specify" name="backend_tps" <%if(api.productionTps != "" || api.sandboxTps != ""){ %>
+                                                                checked="checked"<%}%> value="specify">
+                                                                <span class="helper">Specify</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
+                                                        <label class="control-label col-sm-3" for="throttle">Production TPS
+                                                        </label>
+                                                        <div class="col-sm-4">
+                                                            <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
+                                                        <label class="control-label col-sm-3" for="throttle">Sandbox TPS
+                                                        </label>
+                                                        <div class="col-sm-4">
+                                                            <input type="text" class="form-control validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                                                        </div>
+                                                    </div>
+                                                    <%}%>
 
 
-<%  if(mod.isGlobalCEPThrottlingEnabled()){%>      
-    <hr />
-    <div class="form-group">
-        <label class="control-label col-sm-3" for="apiPolicy">Advanced Throttling Policies:
-            <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
-            	<span class="icon fw-stack fw-lg" style="font-size:6px">
-    				<i class="fw fw-circle fw-stack-2x"></i>
-    				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-    			</span>
-            </a>
-            <p id="api_policy_help" class="hide"><%=i18n.localize("enableApiLevelPolicyHelpMsg")%></p>
-        </label>
-        <div class="controls col-sm-8">       
-            <label class="radio">
-                    <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
-                    <span class="helper">Apply to API</span>
-            </label>
-            <label class="radio">
-                    <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="resource_level" <%if(api.apiLevelPolicy == null || api.apiLevelPolicy == ""){%>checked<%}%>>
-                    <span class="helper">Apply per Resource</span>
-            </label>            
-        </div>
-    </div>
-    <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
-  	<div class="form-group">
-  		<div class="control-label col-sm-3"></div>
-      	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
-            <select id="apiTier" name="apiTier"  class="form-control selected required">
-            <%
-            for (var i = 0; i < resourceTiers.length; i++) {
-                var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
-                var isSelected = false;                
-                if(resourceTiers[i].tierName == api.apiLevelPolicy){
-                    isSelected = true;
-                }               
-                %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option><%
-            }
-            %>
-            </select>
-        </div>
-        <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
-            <script id="resource-policy-ui-template" language="text/x-handlebars-template">
-                <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
-                <div id="resource_policy_modal" class="modal fade">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h3>Select Policy per Resource</h3>
-                            </div>
-                            <div class="modal-body">
-                                <table class="table">
-                                    <tr>
-                                        <td colspan="2">Resource</td>                                        
-                                        <td>Policy</th>
-                                    </tr>
-                                    {{#each doc.paths}}
-                                        {{#each this}}
-                                        <tr class="resource_container" data-path="">
-                                            <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
-                                                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
-                                            </td>
-                                            <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
-                                            <td>
-                                                <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
-                                                    {{#each ../../tiers}}
-                                                        <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
-                                                    {{/each}}
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        {{/each}}
-                                    {{/each}}                                    
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                            <div id="res" style="color:red;float:left"></div>
-                            <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-                            <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
+
+                                            <hr />
+                                            <div class="form-group">
+                                        	    <label class="control-label col-sm-3" for="tiertier">
+                                                    <%=i18n.localize("subTier")%>:
+                                                    <span class="requiredAstrix">*</span>
+                                                    <a class="help_popup" help_data="tier_help" data-trigger="hover" data-placement="bottom">
+                                            		    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        				    <i class="fw fw-circle fw-stack-2x"></i>
+                                        					<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                        			    </span>
+                                            	    </a>
+                                            	    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                                                </label>
+                                                <div class="controls col-sm-4 tierSelect">
+                                        			<%
+                                                        for (var i = 0; i < tiers.length; i++) {
+                                                            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                                                        %>
+                                                        <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
+                                                                <input type="checkbox" class="tier_check" name="tier" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
+                                                                <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> : <%= tiers[i].tierDescription %></span>
+                                                        </label>
+                                                        <%
+                                                        }
+                                                    %>
+                                                   <label id="tier_error" class="error hide" style="display: block;">Please select at least one Subscription Tier.</label>
+                                                </div>
+                                        	</div>
+
+
+                                        <%  if(mod.isGlobalCEPThrottlingEnabled()){%>
+                                            <hr />
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-3" for="apiPolicy">Advanced Throttling Policies:
+                                                    <a class="help_popup" help_data="api_policy_help" title="api_policy_help" data-trigger="hover" data-placement="bottom">
+                                                    	<span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            				<i class="fw fw-circle fw-stack-2x"></i>
+                                            				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            			</span>
+                                                    </a>
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("enableApiLevelPolicyHelpMsg")%></p>
+                                                </label>
+                                                <div class="controls col-sm-8">
+                                                    <label class="radio">
+                                                            <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="api_level_policy" <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>checked<%}%>>
+                                                            <span class="helper">Apply to API</span>
+                                                    </label>
+                                                    <label class="radio">
+                                                            <input type="radio" id="api_level_policy" class="api_level_policy" name="api_level_policy" value="resource_level" <%if(api.apiLevelPolicy == null || api.apiLevelPolicy == ""){%>checked<%}%>>
+                                                            <span class="helper">Apply per Resource</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="enableApiLevelPolicy" name="enableApiLevelPolicy" value=<%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>"true"<%} else {%>"false"<%}%>/>
+                                          	<div class="form-group">
+                                          		<div class="control-label col-sm-3"></div>
+                                              	 <div class="col-sm-4" id="api-level-policy-section" <%if(api.apiLevelPolicy!=null && api.apiLevelPolicy!=""){%>style="display:block"<%} else {%>style="display:none"<%}%>>
+                                                    <select id="apiTier" name="apiTier"  class="form-control selected required">
+                                                    <%
+                                                    for (var i = 0; i < resourceTiers.length; i++) {
+                                                        var isSelectedAPITier = api.availableTiers.indexOf(resourceTiers[i].tierName) > -1;
+                                                        var isSelected = false;
+                                                        if(resourceTiers[i].tierName == api.apiLevelPolicy){
+                                                            isSelected = true;
+                                                        }
+                                                        %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
+                                                        <%if
+                                                        (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
+                                                        <%
+                                                    }
+                                                    %>
+                                                    </select>
+                                                </div>
+                                                <div id="resource-policy-select" class="col-sm-4 <%if(api.apiLevelPolicy != null && api.apiLevelPolicy != ""){%>hide<%}%>"  >
+                                                    <script id="resource-policy-ui-template" language="text/x-handlebars-template">
+                                                        <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
+                                                        <div id="resource_policy_modal" class="modal fade">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                                    <h3>Select Policy per Resource</h3>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <table class="table">
+                                                                            <tr>
+                                                                                <td colspan="2">Resource</td>
+                                                                                <td>Policy</th>
+                                                                            </tr>
+                                                                            {{#each doc.paths}}
+                                                                                {{#each this}}
+                                                                                <tr class="resource_container" data-path="">
+                                                                                    <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
+                                                                                        <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                                                                                    </td>
+                                                                                    <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
+                                                                                    <td>
+                                                                                        <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
+                                                                                            {{#each ../../tiers}}
+                                                                                                <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
+                                                                                            {{/each}}
+                                                                                        </select>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                {{/each}}
+                                                                            {{/each}}
+                                                                        </table>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                    <div id="res" style="color:red;float:left"></div>
+                                                                    <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+                                                                    <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </script>
+                                                    <a class=" help_popup" help_data="tier_help"></a>
+                                                    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                                                </div>
+                                        	</div>
+                                        <%  } else { %>
+                                        <hr />
+                                        <div class="form-group">
+                                                <label class="control-label col-sm-3" for="resourceTiers">Resource Level Tiers:
+                                                    <a class="help_popup" help_data="resource_policy_help" title="resource_policy_help" data-trigger="hover" data-placement="bottom">
+                                                    	<span class="icon fw-stack fw-lg" style="font-size:6px">
+                                            				<i class="fw fw-circle fw-stack-2x"></i>
+                                            				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                            			</span>
+                                                    </a>
+                                                    <p id="api_policy_help" class="hide"><%=i18n.localize("enableResourceLevelPolicyHelpMsg")%></p>
+                                                </label>
+
+                                            <div id="resource-policy-select" class="controls col-sm-4">
+                                                    <script id="resource-policy-ui-template" language="text/x-handlebars-template">
+                                                        <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
+                                                        <div id="resource_policy_modal" class="modal fade">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                                    <h3>Select Policy per Resource</h3>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <table class="table">
+                                                                            <tr>
+                                                                                <td colspan="2">Resource</td>
+                                                                                <td>Policy</th>
+                                                                            </tr>
+                                                                            {{#each doc.paths}}
+                                                                                {{#each this}}
+                                                                                <tr class="resource_container" data-path="">
+                                                                                    <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
+                                                                                        <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                                                                                    </td>
+                                                                                    <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
+                                                                                    <td>
+                                                                                        <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
+                                                                                            {{#each ../../tiers}}
+                                                                                                <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
+                                                                                            {{/each}}
+                                                                                        </select>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                {{/each}}
+                                                                            {{/each}}
+                                                                        </table>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                    <div id="res" style="color:red;float:left"></div>
+                                                                    <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+                                                                    <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </script>
+                                                    <a class=" help_popup" help_data="tier_help"></a>
+                                                    <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                                                </div>
+                                        </div>
+                                        <% } %>
+                                                      <div class="form-group">
+                                                                    <label class="control-label col-sm-3" for="throttle">
+                                                                    </label>
+                                                                    <div class="col-sm-8">
+                                                                          <p class="help-block">
+                                        									  <i class="fw fw-info"></i>
+                                                                              <%=i18n.localize("Refer ","Refer ")%>
+                                                                              <a href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a>
+                                                                              <%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%>
+                                                                          </p>
+                                                                    </div>
+                                                                </div>
+
+
+                                                        <% mod = jagg.module("api");
+                                                    		result = mod.isMultipleTenantsAvailable();
+                                                        	var isMultipleTenantsAvailable = result.status;
+                                                    		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                                                    			<div class="form-group">
+                                        	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:
+                                        	                        	<a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
+                                        	                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        										<i class="fw fw-circle fw-stack-2x"></i>
+                                        										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                        									</span>
+                                        	                        	</a>
+                                        	                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
+                                        	                        </label>
+                                        	                        <div class="col-sm-4">
+                                        	                            <% if(api.visibility!="public") {%>
+                                        	                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                        	                                <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
+                                        	                            </select>
+                                        	                            <%} else {%>
+                                        	                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                        	                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+                                        	                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
+                                        	                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                        	                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+                                        	                                    <% } %>
+                                        	                                </select>
+                                        	                            <%}%>
+                                        	                       </div>
+                                                                   </div>
+                                                                       <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                                                                           <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
+                                                                               <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+                                                                           </label>
+                                                                           <div class="col-sm-4">
+                                                                               <input type="text" class="input form-control"
+                                                                               id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                                                               <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+                                                                           </div>
+
+                                                                       </div>
+                                                                <% } %>
+
+                                        <!-- End of configuration panel -->
+
+
                             </div>
                         </div>
                     </div>
                 </div>
-            </script>
-            <a class=" help_popup" help_data="tier_help"></a>
-            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-        </div>
-	</div>
-<%  } else { %>
-<hr />
-<div class="form-group">
-        <label class="control-label col-sm-3" for="resourceTiers">Resource Level Tiers:
-            <a class="help_popup" help_data="resource_policy_help" title="resource_policy_help" data-trigger="hover" data-placement="bottom">
-            	<span class="icon fw-stack fw-lg" style="font-size:6px">
-    				<i class="fw fw-circle fw-stack-2x"></i>
-    				<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-    			</span>
-            </a>
-            <p id="api_policy_help" class="hide"><%=i18n.localize("enableResourceLevelPolicyHelpMsg")%></p>
-        </label>
 
-    <div id="resource-policy-select" class="controls col-sm-4">
-            <script id="resource-policy-ui-template" language="text/x-handlebars-template">
-                <a class="select_adv_policy_for_resource btn btn-secondary">Select Policy per Resource</a>
-                <div id="resource_policy_modal" class="modal fade">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h3>Select Policy per Resource</h3>
+
+        <div class="panel-group accordion add-margin-bottom-2x" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
+                        <h4 class="panel-title">
+                            <div>
+                                <div class="heading no-description">Gateway Environments</div>
+                                <div class="status">
+                                    <i class="fw fw-down"></i>
+                                </div>
                             </div>
-                            <div class="modal-body">
-                                <table class="table">
-                                    <tr>
-                                        <td colspan="2">Resource</td>
-                                        <td>Policy</th>
-                                    </tr>
-                                    {{#each doc.paths}}
-                                        {{#each this}}
-                                        <tr class="resource_container" data-path="">
-                                            <td class="resource-method-td resource_expand" data-path="$.paths.{{ @../key}}.{{ @key }}">
-                                                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
-                                            </td>
-                                            <td><a class="resource-path" title="resource_path">{{ @../key}}</a></td>
-                                            <td>
-                                                <select class="form-control selected input-sm select_resource_policy" data-path="{{ @../key }}" data-method="{{@key}}" data-attr="x-throttling-tier">
-                                                    {{#each ../../tiers}}
-                                                        <option value="{{ this.value }}" {{#ifCond this.value '==' ../x-throttling-tier }}selected="selected"{{/ifCond}}>{{ this.text }}</option>
-                                                    {{/each}}
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        {{/each}}
-                                    {{/each}}
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                            <div id="res" style="color:red;float:left"></div>
-                            <a href="#" class="btn btn-primary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
-                            <!-- a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("saveChanges")%></a -->
-                            </div>
-                        </div>
-                    </div>
+                            <div class="clearfix"></div>
+                        </h4>
+
                 </div>
-            </script>
-            <a class=" help_popup" help_data="tier_help"></a>
-            <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
-        </div>
-</div>
-<% } %>
-              <div class="form-group">
-                            <label class="control-label col-sm-3" for="throttle">                            
-                            </label>
-                            <div class="col-sm-8">
-                                      <p class="help-block">
-                                      <span class="icon fw-stack fw-lg" style="font-size:8px">
-									<i class="fw fw-circle fw-stack-2x"></i>
-									<i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
-								</span>
-                                      <%=i18n.localize("Refer ","Refer ")%><a style="color:#1a78d8" href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a><%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%></p>              
-                            </div>
-                        </div>
+                <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <table class="table table-striped table-hover display data-table">
+                         <thead>
+                             <tr>
+                                <th width="5%"><div class="environments_checkbox"></div></th>
+                                <th><div class="environments_data">Environment Name</div></th>
+                                <th><div class="environments_data">Type</div></th>
+                                <th><div class="environments_data">Description</div></th>
+                             </tr>
+                         </thead>
+                         <tbody>
 
-                
-                <% mod = jagg.module("api");
-            		result = mod.isMultipleTenantsAvailable();
-                	var isMultipleTenantsAvailable = result.status;
-            		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-            			<div class="form-group">
-	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:
-	                        	<a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
-	                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
-										<i class="fw fw-circle fw-stack-2x"></i>
-										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-									</span>
-	                        	</a>	
-	                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
-	                        </label>
-	                        <div class="col-sm-4">
-	                            <% if(api.visibility!="public") {%>
-	                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
-	                                <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
-	                            </select>
-	                            <%} else {%>
-	                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
-	                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
-	                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-	                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
-	                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
-	                                    <% } %>
-	                                </select>
-	                            <%}%>                            	
-	                       </div>
-                           </div>
-                               <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                                   <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
-                                       <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
-                                   </label>
-                                   <div class="col-sm-4">
-                                       <input type="text" class="input form-control"
-                                       id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-                                       <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
-                                   </div>
-
-                               </div>
-                        <% } %>
-
-<!-- End of configuration panel -->
-<div id="accordion1" class="panel-group" role="tablist" aria-multiselectable="true">
-	<div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
-			<h4 class="panel-title">
-				<label class="radio">
-				</label>
-				<div>
-					<div class="heading">Gateway Environments</div>
-					<div class="description truncate" title=""></div>
-					<div class="status">
-						<i class="fw fw-down"></i>
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</h4>
-
-    </div>
-    <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-        <table class="table table-striped table-hover table-bordered display data-table">
-             <thead>
-             <tr>
-                <th width="5%"><div class="environments_checkbox"></div></th>
-                <th><div class="environments_data">Environment Name</div></th>
-                <th><div class="environments_data">Type</div></th>
-                <th><div class="environments_data">Description</div></th>
-             </tr>
-             </thead>
-             <tbody>
-
-             <%
-             var environmentsJson=api.environments;
-             if(environmentsJson=="none"){
-                    for(i=0 ;i<environmentsList.length;i++){
-             %>
-                <tr data-type="selectable">
-                    <td>
-                    	<div class="environments_checkbox">
-                    		<label class="checkbox">
-	                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
-	                            <span class="helper"></span>
-                    		</label>
-                    	</div>
-                   	</td>
-                    <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
-                    <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                    <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
-                </tr>
-             <%}}
-             else{
-                 for(i=0 ;i<environmentsList.length;i++){
-                        if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+                         <%
+                         var environmentsJson=api.environments;
+                         if(environmentsJson=="none"){
+                                for(i=0 ;i<environmentsList.length;i++){
+                         %>
                             <tr data-type="selectable">
-                                 <td>
-                                 	<div class="environments_checkbox">
-                                 		<label class="checkbox">
-				                            <input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env">
-				                            <span class="helper"></span>
-			                    		</label>
-                                 	</div>
-                                 </td>
-                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
-                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                 <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                <td>
+                                    <div class="environments_checkbox">
+                                        <label class="checkbox">
+                                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
+                                            <span class="helper"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
                             </tr>
-                      <%}else{%>
-                            <tr data-type="selectable">
-                                 <td>
-                                 	<div class="environments_checkbox">
-                                 		<label class="checkbox">
-				                            <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
-				                            <span class="helper"></span>
-			                    		</label>
-                                 	</div>
-                                 </td>
-                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
-                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                 <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
-                            </tr>
+                         <%}}
+                         else{
+                             for(i=0 ;i<environmentsList.length;i++){
+                                    if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+                                        <tr data-type="selectable">
+                                             <td>
+                                                <div class="environments_checkbox">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env">
+                                                        <span class="helper"></span>
+                                                    </label>
+                                                </div>
+                                             </td>
+                                             <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                             <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                             <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                        </tr>
+                                  <%}else{%>
+                                        <tr data-type="selectable">
+                                             <td>
+                                                <div class="environments_checkbox">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" value="<%=environmentsList[i].name%>" class="env">
+                                                        <span class="helper"></span>
+                                                    </label>
+                                                </div>
+                                             </td>
+                                             <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                             <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                             <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                        </tr>
 
-                       <%}}}%>
-                       </tbody>
+                                   <%}}}%>
+                            </tbody>
                        </table>
-                    <script>
-                    $('input').on('change', function() {
-                        var values = $('input:checked.env').map(function() {
-                            return this.value;
-                        }).get();
-                    if(values==""){
-                    values="none";
-                    }
-                        $('#environments').val(values.toString());
-                    });
-                    </script>                       
-    </div>
-  </div><!-- Gateway environments -->
-
-  <div class="panel panel-default">
-  	<div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent="#accordion1" href="#accordion1-collapse2" aria-controls="accordion1-collapse2">
-			<h4 class="panel-title">
-				<label class="radio">
-				</label>
-				<div>
-					<div class="heading"><%=i18n.localize("businessInformationTitle")%></div>
-					<div class="description truncate" title=""></div>
-					<div class="status">
-						<i class="fw fw-down"></i>
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</h4>
-
-    </div>	
-    <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-      <div class="panel-body">
-                    <div class="form-group">
-                        <label class="control-label col-sm-3" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
-                        <div class="controls col-sm-8">
-                             <input type="text" class=" validInput form-control businessInfo" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
-                        </div>
+                        <script>
+                        $('input').on('change', function() {
+                            var values = $('input:checked.env').map(function() {
+                                return this.value;
+                            }).get();
+                        if(values==""){
+                        values="none";
+                        }
+                            $('#environments').val(values.toString());
+                        });
+                        </script>
                     </div>
-                     <div class="form-group">
-                        <label class="control-label col-sm-3" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
-                        <div class="controls col-sm-8">
-                             <input type="text" class=" email form-control businessInfo" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
-                        </div>
-                    </div>
-                     <div class="form-group">
-                        <label class="control-label col-sm-3" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
-                        <div class="controls col-sm-8">
-                             <input type="text" class=" validInput form-control businessInfo" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
-                        </div>
-                    </div>
-                     <div class="form-group">
-                        <label class="control-label col-sm-3" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
-                        <div class="controls col-sm-8">
-                             <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
-                        </div>
-                    </div>
-      </div>
-    </div>
-  </div><!-- Business Information -->
-  </div>
-<!-- Resources Information -->  
-	<div class="form-heading">
-		<h4 class="panel-title">
-			<div>
-				<div class="heading">Resources</div>
-				</div>
-                <div class="clearfix"></div>										        
-		</h4>
-	</div>
-										    
-	<div id="api_designer">
-                    <div id ="apidoc_details"></div>
-                    <div id="scopes_view"></div>
-                    <div id ="resource_details"></div>
-    </div>
-<!-- Resources Information -->  
-
-
-
-
-
-
-                          
-                <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
-                <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
-                <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
-                <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
-                <input type="hidden" name="action" value="manage" />
-                <input type="hidden" id="swagger" name="swagger" value="" />
-				<div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
                 </div>
-                <div class="form-actions" id="saveButtons">
+          </div><!-- Gateway environments -->
 
-                    <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("save")%></button>
-                    <% if(outputs.isPermitted) {
-                       var status=outputs.lcStatus;
-                    %>
-                         <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
-                         <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("saveNpublish")%>"><%=i18n.localize("saveNpublish")%></a>
-                         <%} else{%>
-                         <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("saveNpublish")%>"><%=i18n.localize("saveNpublish")%></a>
-                         <%}%>
-                    <%}%>
+          <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse2" aria-controls="accordion1-collapse2">
+                        <h4 class="panel-title">
+                            <div>
+                                <div class="heading no-description"><%=i18n.localize("businessInformationTitle")%></div>
+                                <div class="status">
+                                    <i class="fw fw-down"></i>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </h4>
 
-                    <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
-            </form>
-
+                <div id="accordion1-collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                  <div class="panel-body">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                                    <div class="controls col-sm-8">
+                                         <input type="text" class=" validInput form-control businessInfo" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                    <label class="control-label col-sm-3" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                                    <div class="controls col-sm-8">
+                                         <input type="text" class=" email form-control businessInfo" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                    <label class="control-label col-sm-3" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                                    <div class="controls col-sm-8">
+                                         <input type="text" class=" validInput form-control businessInfo" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                    <label class="control-label col-sm-3" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                                    <div class="controls col-sm-8">
+                                         <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                                    </div>
+                                </div>
+                  </div>
+                </div>
+          </div><!-- Business Information -->
         </div>
+
+
+        <div class="panel-group accordion">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <div>
+                            <div class="heading no-description">Resources</div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </h4>
+                </div>
+                <div class="panel-collapse">
+                    <div class="panel-body">
+                    <!-- Resources Information -->
+                        <div id="api_designer">
+                            <div id ="apidoc_details"></div>
+                            <div id="scopes_view"></div>
+                            <div id ="resource_details"></div>
+                        </div>
+                        <!-- Resources Information -->
+                        <hr/>
+                            <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
+                            <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+                            <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+                            <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+                            <input type="hidden" name="action" value="manage" />
+                            <input type="hidden" id="swagger" name="swagger" value="" />
+                            <div class="form-actions" style="display:none" id="saveMessage">
+                                <div class="btn loadingButton">Saving API. Please wait..</div>
+                            </div>
+                            <div class="form-actions" id="saveButtons">
+
+                                <button class="btn btn-secondary has-spinner" id="save_api"><%=i18n.localize("save")%></button>
+                                <% if(outputs.isPermitted) {
+                                   var status=outputs.lcStatus;
+                                %>
+                                     <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" ){ %>
+                                     <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("saveNpublish")%>"><%=i18n.localize("saveNpublish")%></a>
+                                     <%} else{%>
+                                     <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("saveNpublish")%>"><%=i18n.localize("saveNpublish")%></a>
+                                     <%}%>
+                                <%}%>
+
+                                <input type="reset" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
 
         <div id="publish-success" class="modal fade">
           <div class="modal-dialog">
@@ -783,28 +804,40 @@
 
 <script id="scopes-template" type="text/x-handlebars-template">
     <div class="scope_container">
-    {{#if api_doc.x-wso2-security.apim.x-wso2-scopes }}
-        <h4>Scopes</h4>
-        <ul>
-            {{#each api_doc.x-wso2-security.apim.x-wso2-scopes }}
-            <li>
-                <h6><a data-index='{{ @index }}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>">
-						<span class="fw-stack" style="font-size:10px">
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="scopes"><%=i18n.localize("scopes","Scopes")%>:</label>
+            <div class="controls col-sm-9">
+                {{#if api_doc.x-wso2-security.apim.x-wso2-scopes }}
+                 <ul class="scopes-list">
+                     {{#each api_doc.x-wso2-security.apim.x-wso2-scopes }}
+                     <li>
+                         <div>
+                         <a data-index='{{ @index }}' class='delete_scope pull-right' title="<%=i18n.localize("deleteScope")%>">
+                            <span class="fw-stack" style="font-size:10px">
                                 <i class="fw fw-delete fw-stack-1x"></i>
-                                <i class="fw fw-circle-outline fw-stack-2x"></i>
-                		</span>
-					</a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
-                <strong>Roles</strong> : {{ roles }}    
-                <p>{{ description }}</p>
-            </li>
-            {{/each}}
-        </ul>
-    {{/if}}
-        <a id="define_scopes" class="pointer btn" title="define_scopes">
-				<span class="icon fw-stack">
-	            	<i class="fw fw-add fw-stack-1x"></i>
-	                <i class="fw fw-circle-outline fw-stack-2x"></i>
-	            </span> Add Scopes</a>
+                                 <i class="fw fw-circle-outline fw-stack-2x"></i>
+                            </span>
+                         </a>
+                         <span><strong>{{ key }}</strong></span>
+                         {{#if name }}
+                            <span class="text-muted">: {{ name }}</span>
+                         {{/if}}
+                         </div>
+                         <span>Roles</span> : {{ roles }}
+                         <p class="text-muted">{{ description }}</p>
+                     </li>
+                     {{/each}}
+                 </ul>
+                {{/if}}
+                <button id="define_scopes" class="pointer btn btn-secondary" title="define_scopes" type="button">
+                    <span class="icon fw-stack" style="font-size:10px;">
+                        <i class="fw fw-add fw-stack-1x"></i>
+                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                    </span>
+                    Add Scopes
+                </button>
+            </div>
+        </div>
     </div>
 </script>
 
@@ -821,6 +854,7 @@
             designer.set_default_management_values();
             designer.render_resources();
             $("#swaggerUpload").modal('hide');
+            showHideResourceLevelTierSelection();
         });
 
         var publish_api = function(e){
@@ -1053,8 +1087,8 @@
     </div>
     <div class="modal-footer">
     <div id="res" class="hide" style="color:red;float:left"></div>
-    <a class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
+    <a class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     </div>
     </div>
     </div>

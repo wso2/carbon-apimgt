@@ -179,8 +179,6 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE =  "signup-config";
 
-    public static final String BAM_SERVER_PROFILE_LOCATION = "bamServerProfiles/bam-profile";
-    
     public static final String DOCUMENTATION_SEARCH_PATH_FIELD = "path";
     
     public static final String DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD = "mediaType";
@@ -427,6 +425,8 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
             + "ApplicationTokenDefaultValidityPeriod";
+    public static final int DEFAULT_THRIFT_PORT = 10397;
+    public static final int DEFAULT_THRIFT_CLIENT_CONNECTION_TIMEOUT = 10000;
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
@@ -442,6 +442,9 @@ public final class APIConstants {
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
+
+    public static final String PORT_OFFSET_SYSTEM_VAR = "portOffset";
+    public static final String PORT_OFFSET_CONFIG = "Ports.Offset";
 
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
@@ -480,7 +483,6 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
-    public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
@@ -489,9 +491,6 @@ public final class APIConstants {
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
     public static final String API_PUBLISHER_URL =  API_PUBLISHER + "URL";
-    public static final String API_PUBLISHER_SERVER_URL = API_PUBLISHER + "ServerURL";
-    public static final String API_PUBLISHER_USERNAME = API_PUBLISHER + "Username";
-    public static final String API_PUBLISHER_PASSWORD = API_PUBLISHER + "Password";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
@@ -509,8 +508,6 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORE_USERNAME = "Username";
     public static final String EXTERNAL_API_STORE_PASSWORD ="Password";
 
-
- 
     public static final String AUTH_MANAGER = "AuthManager.";
     public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
@@ -521,7 +518,6 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
     
     //elements in the configuration file in the registry related to self signup
-    public static final String SELF_SIGN_UP_REG_ROOT = "SelfSignUp";
     public static final String SELF_SIGN_UP_REG_DOMAIN_ELEM = "SignUpDomain";
     public static final String SELF_SIGN_UP_REG_ROLES_ELEM = "SignUpRoles";
     public static final String SELF_SIGN_UP_REG_ROLE_ELEM = "SignUpRole";
@@ -561,7 +557,6 @@ public final class APIConstants {
     public static final QName ASSERTION_ELEMENT = new QName(THROTTLE_NAMESPACE, "MediatorThrottleAssertion");
     public static final QName THROTTLE_ID_ELEMENT = new QName(THROTTLE_NAMESPACE,"ID");
     public static final QName THROTTLE_ID_DISPLAY_NAME_ELEMENT = new QName(THROTTLE_NAMESPACE, "displayName");
-    public static final String TIER_DESCRIPTION_PREFIX = "tier.desc.";
 
     public static final String THROTTLE_TIER_DESCRIPTION_ATTRIBUTE = "Description";
 
@@ -704,12 +699,9 @@ public final class APIConstants {
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
-    public static final String JWT_CACHE_NAME = "jwtCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
-    public static final String APP_USER_SCOPE_CACHE = "appUserScopeCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
-    public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
@@ -795,17 +787,12 @@ public final class APIConstants {
     public static final String ENABLED = "Enabled";
     public static final String DISABLED = "Disabled";
     public static final int API_RESPONSE_CACHE_TIMEOUT = 300;
-    
-    
+
     public static class ApplicationStatus {
        public static final String APPLICATION_CREATED = "CREATED";
        public static final String APPLICATION_APPROVED = "APPROVED"; 
        public static final String APPLICATION_REJECTED = "REJECTED"; 
        public static final String APPLICATION_ONHOLD = "ON_HOLD"; 
-       
-       private ApplicationStatus(){           
-       }
-          
     }
 
     public static class AppRegistrationStatus {
@@ -813,24 +800,6 @@ public final class APIConstants {
         public static final String REGISTRATION_APPROVED = "APPROVED";
         public static final String REGISTRATION_REJECTED = "REJECTED";
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
-        private AppRegistrationStatus(){
-            
-        }
-
-    }
-
-    public interface KeyValidationRequestConstants {
-        String RESOURCE_CONTEXT = "context";
-        String RESOURCE_VERSION = "apiVersion";
-        String RESOURCE_AUTH_LEVEL = "authLevel";
-        String RESOURCE_PATH = "resource";
-        String RESOURCE_VERB = "httpVerb";
-        String KEY_DOMAIN = "clientDomain";
-        String CACHE_KEY = "cacheKey";
-
-        String RESOURCE_PARAMS = "keymgt_resource_params";
-        String VALIDATED_DTO = "validatedDTO";
-        String KM_CACHE_HIT = "km_cacheHit";
     }
 
     public static class FrontEndParameterNames {
@@ -839,21 +808,12 @@ public final class APIConstants {
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
-        
-        private FrontEndParameterNames(){            
-        }
     }
 
     public static class AccessTokenConstants {
         public static final String ACCESS_TOKEN = "accessToken";
-        public static final String REFRESH_TOKEN = "refreshToken";
         public static final String VALIDITY_TIME = "validityTime";
-        public static final String TOKEN_DETAILS = "tokenDetails";
-        public static final String TOKEN_STATE = "tokenState";
         public static final String TOKEN_SCOPES = "tokenScope";
-        
-        private AccessTokenConstants(){            
-        }
     }
     
     //key  of the endpoint securevault
@@ -864,10 +824,6 @@ public final class APIConstants {
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
     
-    public static final String  API_MANAGER_DESTINATION_STATS_BAM_PROFILE_NAME = "bam-profile";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_NAME = "org_wso2_apimgt_statistics_destination";
-    public static final String  API_MANAGER_DESTINATION_REQUESTS_STREAM_VERSION = "1.0.0";
-
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
@@ -1091,6 +1047,7 @@ public final class APIConstants {
     public static final String CLIENT_CODEGEN_ARTIFACTID = "SwaggerCodegen.ClientGeneration.ArtifactId";
     public static final String CLIENT_CODEGEN_MODAL_PACKAGE = "SwaggerCodegen.ClientGeneration.ModelPackage";
     public static final String CLIENT_CODEGEN_API_PACKAGE = "SwaggerCodegen.ClientGeneration.ApiPackage";
+    public static final String CLIENT_CODEGEN_SUPPORTED_LANGUAGES = "SwaggerCodegen.ClientGeneration.SupportedLanguages";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";
@@ -1107,6 +1064,8 @@ public final class APIConstants {
 
     public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
     public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
+
+    public static final String THROTTLE_POLICY_DEFAULT = "_default";
 
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
@@ -1221,4 +1180,26 @@ public final class APIConstants {
 
     public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
     public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
+
+    public static class AuditLogConstants {
+        public static final String CREATED = "created";
+        public static final String UPDATED = "updated";
+        public static final String DELETED = "deleted";
+
+        public static final String API = "API";
+        public static final String APPLICATION = "Application";
+        public static final String SUBSCRIPTION = "Subscription";
+
+        public static final String NAME = "name";
+        public static final String VERSION = "version";
+        public static final String CONTEXT = "context";
+        public static final String PROVIDER = "provider";
+        public static final String TIER = "tier";
+        public static final String CALLBACK = "callbackURL";
+        public static final String STATUS = "status";
+        public static final String API_NAME = "api_name";
+        public static final String APPLICATION_NAME = "application_name";
+        public static final String APPLICATION_ID = "application_id";
+    }
+
 }

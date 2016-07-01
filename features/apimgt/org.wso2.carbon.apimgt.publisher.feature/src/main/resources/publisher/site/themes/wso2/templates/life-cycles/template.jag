@@ -115,11 +115,13 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 </script>
 
 <div class="alert alert-error" id="statusAPIError" style="display:none">
-<span id="statusErrorSpan"></span>
+    <span id="statusErrorSpan"></span>
 </div>
-<div class="row-fluid">
-
- <form class="form-horizontal well">
+<div class="alert alert-success add-margin-bottom-2x" id="statusUpdateMsg" style="display:none;">
+     <%=i18n.localize("lifecycleSuccessMsg")%>
+</div>
+ <form class="form-horizontal lifecycle-state">
+    <div class="well remove-padding-top remove-padding-bottom">
      <input type="hidden" name="action" id="action" value="updateStatus"/>
      <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
      <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
@@ -127,14 +129,13 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
      	  <span class="badge badge-warning">!</span> <%=i18n.localize("removeAPIFromExternalStoresWarning")%>
      </div>
-     <div class="row">
 		<div class="form-group">
-		        <label class="control-label col-sm-3" name="state"><%=i18n.localize("state")%>:</label>
-		        <div class="controls col-sm-8">
-					<label class="control-label col-sm-3" name="stateValue"><% print(lcStatus); %></label>
-		         </div>
+            <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4><%=i18n.localize("state")%>:</h4></label>
+            <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
+                <h4><p class="form-control-static" name="stateValue"><strong><% print(lcStatus); %></strong></p></h4>
+             </div>
 		</div>
-		<br/>
+    </div>
 
                  <%for (var j=0;j<lcData.items.length;j++){
                  var item=lcData.items[j];
@@ -166,80 +167,92 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                             	</div>
                         <%}
                  <%}}}%>
-</div>
 
     <div class="form-actions">
+        <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+
        <% for (var i=0;i<lcData.nextStates.length;i++) {
            var next = lcData.nextStates[i].toLowerCase();
 
             if(lcStatus=="CREATED"){
                if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
-               <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-secondary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
-               <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%} else {%>
-               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%}
             } else if(lcStatus=="PROTOTYPED") {%>
                <% if (lcData.nextStates[i].toLowerCase().indexOf("prototype") == -1) {%>
                <%if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
-               <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
-               <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%} else {%>
-               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%}}
             } else if(lcStatus=="PUBLISHED") {%>
                <% if (lcData.nextStates[i].toLowerCase().indexOf("publish") == -1) {%>
-               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
                <%}%>
             <%} else {%>
-               <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
             <%}
 
         }%>
 
-       </div><br/>&nbsp;
-       <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
-        <%=i18n.localize("lifecycleSuccessMsg")%>
-      </div>
-
-      </form>
- <div id="lifecycle-rendering-area" class="lifecycle-rendering-area">
-       <svg width=900 height=600 ><g/></svg>
        </div>
 
-<div class="page-header">
-		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>
-	</div>
-<%if(lcs!=null){
-        var length = lcs.length;
-        if (length == 0) {
-        %>
-        <span class="label label-info"><%=i18n.localize("noLifecycleMsg")%></span>
- <%}%>
+</form>
+        <div id="lifecycle-rendering-area" class="lifecycle-rendering-area add-margin-top-4x add-margin-bottom-4x">
+            <svg width=900 height=600 ><g/></svg>
+        </div>
+        <div class="page-header">
+            <h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>
+        </div>
+        <%if(lcs!=null){
+                var length = lcs.length;
+                if (length == 0) {
+                %>
+                <span class="label label-info"><%=i18n.localize("noLifecycleMsg")%></span>
+         <%}%>
 
         <table class="lifeCycleTable" id="lifeCycleTable">
-  <thead>
-         </thead>
-       <tbody>
-        <%for(var j=0;j<length;j++){
-        var lc=lcs[j];
-        var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
-        %>
-        <tr>
-        <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
-        <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
-        <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
+            <thead>
+            </thead>
+            <tbody>
+            <%for(var j=0;j<length;j++){
+            var lc=lcs[j];
+            var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
+            %>
+            <tr>
+            <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
+            <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
+            <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
+            <%}%>
+            </td>
+            </tr>
+            <%}%>
+            </tbody>
+        </table>
         <%}%>
-        </td>
-        </tr>
-        <%}%>
-        </tbody></table>
-        <%}%>
-
 </div>
-
 <script type="text/javascript">
 function hideMsg() {
     $('#statusUpdateMsg').hide("fast");

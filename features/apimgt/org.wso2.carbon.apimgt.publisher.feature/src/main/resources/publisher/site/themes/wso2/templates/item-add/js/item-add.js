@@ -139,5 +139,6 @@ $( document ).ready(function() {
         $('#' + $(this).val()).parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
+    $('.toggleRadios input[type=radio]').first().click();
 
 });

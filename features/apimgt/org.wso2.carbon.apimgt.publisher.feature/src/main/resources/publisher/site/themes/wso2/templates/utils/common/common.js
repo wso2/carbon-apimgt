@@ -105,7 +105,7 @@ $.fn.generateBgcolor = function(options){
  *  accordion config
  ***********************************************************/
 
-$('#accordion1').on('shown.bs.collapse', function (e,f) {
+$('.accordion').on('shown.bs.collapse', function (e,f) {
     var elem = $(this).children().children('.in');
     var icon = $(elem).prev().find('.status').children();
 
@@ -116,7 +116,7 @@ $('#accordion1').on('shown.bs.collapse', function (e,f) {
     icon.addClass('fw-up');
 });
 
-$('#accordion1').on('hidden.bs.collapse', function (e,f) {
+$('.accordion').on('hidden.bs.collapse', function (e,f) {
     var elem = $(this).children().children();
     var icon = $(elem).prev().find('.status').children();
 

@@ -22,7 +22,7 @@
                 // The reason is that the context will have the version now
                 for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-small api_urls"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-small"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
                         <br><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
@@ -55,12 +55,14 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
-	    	            <div  class="endpoint-copybtn well well-small api_urls"><a data-clipboard-text="<%=environmenturls[urltype]%><%=api.context%>" class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=api.context%>
+	    	            <div  class="endpoint-copybtn well well-small"><a
+	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
+	    	            class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%>
-	                            <br><%=environmenturls[urltype]%><%=apiContext%>
+	                            <br><%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
 	    	            <%}
@@ -78,7 +80,8 @@
     <% if(api.wadl && api.wadl != ""){ %>
         <h4 class="add-margin-top-5x"><%=i18n.localize("wadl")%>:</h4>
     <p>
-        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=api.wadl%></a>
+        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile
+        ("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=encode.forHtml(api.wadl)%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
@@ -91,17 +94,17 @@
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
 	 		<h4 class="add-margin-top-5x">Business Information</h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
-		    		<p class="no-margin"><strong><%=i18n.localize("busiOwner")%>: </strong><%=api.bizOwner%>
+		    		<p class="no-margin"><%=i18n.localize("busiOwner")%>: <%=encode.forHtml(api.bizOwner)%>
 		    			<% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
-			           			[<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+			           			[<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
 			        	<%}%>
 		    		</p>
 
 		    <% } %>
 		    <% if(api.techOwner && api.techOwner != ""){ %>
-		    	<p class="no-margin"><strong><%=i18n.localize("techOwner")%>: </strong><%=api.techOwner%>
+		    	<p class="no-margin"><%=i18n.localize("techOwner")%>: <%=encode.forHtml(api.techOwner)%>
 		    			<% if(api.techOwnerMail && api.techOwnerMail!=""){%>
-		           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+		           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.techOwnerMail)%>"><%=encode.forHtml(api.techOwnerMail)%></a>]
 		        <%}%>
 		    		</p>
 		    <% } %>
@@ -109,15 +112,15 @@
     
     <h4 class="add-margin-top-5x"><%=i18n.localize("share")%>:</h4>
     <div class="btn-group" role="group" aria-label="...">
-      <button type="button" class="btn btn-default share_links" ref="social"><%=i18n.localize("SocialSites")%></button>
+      <button type="button" class="btn btn-default share_links disabled" ref="social"><%=i18n.localize("SocialSites")%></button>
       <button type="button" class="btn btn-default share_links" ref="embed"><%=i18n.localize("embed")%></button>
-      <a title="<%=i18n.localize("email")%>" href="" id="api_mailto" class="btn btn-default"><i class="fa fa-envelope-o"></i> <%=i18n.localize("email")%></a>
+      <a title="<%=i18n.localize("email")%>" href="" id="api_mailto" class="btn btn-default">Email</a>
     </div>
     <div id="share_div_embed" class="share_dives highlight" style="display:none">
 		<pre><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></pre>
 	</div>
 
-    <div id="share_div_social" class="share_dives">
+    <div id="share_div_social" class="share_dives add-margin-top-2x">
         <!-- Facebook -->
         <a class="social_links" id="facebook" href="#" target="_blank" title="facebook"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/facebook.png"))%>" alt="Facebook" /></a>
         <!-- Twitter -->

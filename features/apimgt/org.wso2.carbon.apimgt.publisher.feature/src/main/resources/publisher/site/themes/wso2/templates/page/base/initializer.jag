@@ -10,7 +10,7 @@ jagg.initializer("page/base", {
         jagg.addHeaderCSS("page/base", "wso2-theme", "libs/theme-wso2_1.0/css/theme-wso2.css");
 		jagg.addHeaderCSS("page/base", "wso2-fonts", "libs/font-wso2_1.0.2/css/font-wso2.min.css");
         jagg.addHeaderCSS("page/base", "bootstrap-select-css", "libs/bootstrap-select/css/bootstrap-select.min.css");
-        jagg.addHeaderCSS("page/base", "localstyles", "css/custom.css");
+        jagg.addHeaderCSS("page/base", "custom", "css/custom.css");
         jagg.addHeaderCSS("page/base", "bootstrap-rating.css", "libs/bootstrap-rating/bootstrap-rating.css");
         jagg.addHeaderCSS("page/base", "bootstrap-jasny.css", "libs/jasny-bootstrap/dist/css/jasny-bootstrap.min.css");
         jagg.addHeaderCSS("page/base", "bootstrap-datatables", "libs/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css");
@@ -34,7 +34,7 @@ jagg.initializer("page/base", {
 
         jagg.addFooterJS("page/base", "handlebars", "libs/main.js");
         jagg.addFooterJS("page/base", "bootstrap3js", "libs/bootstrap_3.3.5/js/bootstrap.min.js");
-		jagg.addFooterJS("page/base", "wso2js", "libs/theme-wso2_1.0/js/theme-wso2.js");
+		jagg.addFooterJS("page/base", "wso2js", "libs/theme-wso2_1.0/js/theme-wso2.js");        
         jagg.addFooterJS("page/base", "bootstrap-selectjs", "libs/bootstrap-select/js/bootstrap-select.min.js");
         jagg.addFooterJS("page/base", "jquery-form", "libs/jquery.form.js");
         jagg.addFooterJS("page/base", "cookie", "libs/jquery.cookie.js");
@@ -46,8 +46,8 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "datatables-js", "libs/data-tables_1.10.7/extensions/Responsive/js/dataTables.responsive.js");
         jagg.addFooterJS("page/base", "common-js", "templates/utils/common/common.js");
         jagg.addFooterJS("page/base", "noty", "libs/noty-2.3.8/js/noty/packaged/jquery.noty.packaged.js");
-        jagg.addFooterJS("page/base", "bootstrapTheme", "libs/noty-2.3.8/js/noty/themes/bootstrap.js");
-        jagg.addFooterJS("page/base", "topCenter", "libs/noty-2.3.8/js/noty/layouts/topCenter.js");
+        jagg.addFooterJS("page/base", "wso2js_noty", "libs/theme-wso2_1.0/js/noty-theme-wso2.js");
+        jagg.addFooterJS("page/base", "topRight", "libs/noty-2.3.8/js/noty/layouts/topRight.js");
     }
 });
 %>
