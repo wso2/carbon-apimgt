@@ -4960,24 +4960,11 @@ public class ApiMgtDAO {
     }
 
     public void recordAPILifeCycleEvent(APIIdentifier identifier, APIStatus oldStatus, APIStatus newStatus,
-                                        String userId) throws APIManagementException {
+            String userId, int tenantId) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, conn);
-        } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
-        }
-    }
-
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId)
-            throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, conn);
+            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, tenantId, conn);
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
         } finally {
@@ -4986,15 +4973,26 @@ public class ApiMgtDAO {
     }
 
     public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
-                                        Connection conn) throws APIManagementException {
+            int tenantId) throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, tenantId, conn);
+        } catch (SQLException e) {
+            handleException("Failed to record API state change", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+    }
+
+    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
+            int tenantId, Connection conn) throws APIManagementException {
         //Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement selectQuerySt = null;
 
-        int tenantId;
         int apiId = -1;
-        tenantId = APIUtil.getTenantId(userId);
 
         if (oldStatus == null && !newStatus.equals(APIStatus.CREATED.toString())) {
             String msg = "Invalid old and new state combination";
@@ -5265,8 +5263,10 @@ public class ApiMgtDAO {
                 addScopes(api.getScopes(), applicationId, tenantId);
             }
             addURLTemplates(applicationId, api, connection);
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), APIUtil.replaceEmailDomainBack
-                    (api.getId().getProviderName()), connection);
+            String tenantUserName = MultitenantUtils
+                    .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+                    connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
