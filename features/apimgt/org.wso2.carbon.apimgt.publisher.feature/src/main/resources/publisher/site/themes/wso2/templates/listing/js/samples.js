@@ -195,12 +195,12 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                             }
                                         }, 'json');
                                 } else {
-                                    window.location.assign(siteContext + "/site/pages/index.jag");
                                     $(".modal-body").removeClass("loadingButton");
                                     jagg.message({
-                                        content: "Sample PizzaShackAPI is Deployed Successfully",
+                                        content: "Sample PizzaShackAPI is Created Successfully",
                                         type: "info",
-                                        title: "Success"
+                                        title: "Success",
+                                        cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                     });
                                 }
                             }, 'json');
