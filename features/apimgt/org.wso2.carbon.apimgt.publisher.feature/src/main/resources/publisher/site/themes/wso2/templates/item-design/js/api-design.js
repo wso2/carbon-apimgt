@@ -197,12 +197,20 @@ function APIDesigner(){
                             "required": false,
                             "in": "body",
                             "schema": {
-                                "type" : "object"
+                                "type" : "object",
+                                "properties" : {
+                                    "payload" : {
+                                        "type": "string"
+                                    }
+                                } 
                             }
                         });
                     }
                     resource[method] = { 
-                        responses : { '200':{}}
+                        responses : { '200': {
+                            "description" : ""
+                            }
+                        }
                     };
                     if(tempPara.length > 0){
                        resource[method].parameters = tempPara;
