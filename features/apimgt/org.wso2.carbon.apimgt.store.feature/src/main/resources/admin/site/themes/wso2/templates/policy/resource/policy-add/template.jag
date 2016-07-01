@@ -228,7 +228,7 @@
 </div>
 
 <script id="designer-policy-template" type="text/x-handlebars-template">
-<div id="accordion2" class="panel-group form-group" role="tablist" aria-multiselectable="true">
+<div class="panel-group form-group accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="collapse-{{executionFlow.id}}" data-toggle="collapse" href="#pipeline-{{executionFlow.id}}" aria-expanded="false" aria-controls="pipeline-{{executionFlow.id}}">
             <h4 class="panel-title">
