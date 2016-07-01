@@ -202,6 +202,8 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                         title: "Success",
                                         cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                     });
+                                    //Add document for the created sample
+                                    _this.addSampleAPIDoc();
                                 }
                             }, 'json');
                     }, 'json');
