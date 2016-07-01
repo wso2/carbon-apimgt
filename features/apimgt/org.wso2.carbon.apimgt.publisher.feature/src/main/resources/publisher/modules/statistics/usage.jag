@@ -889,6 +889,42 @@ function getDeveloperList(provider, apiFilter, limit) {
     }
 }
 
+function getApiCreators(provider, apiFilter, limit) {
+    var userListAvailable;
+    try {
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
+        userListAvailable = usageClient.getApiProviders(provider);
+        if (log.isDebugEnabled()) {
+            log.debug("getExecutionTimeByMediation for : " + provider);
+        }
+        if (userListAvailable == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            var userList = [];
+            for(var i = 0; i < userListAvailable.size(); i++) {
+                user = {};
+                user.userId = userListAvailable.get(i);
+                userList[i] = user;
+            }
+
+            return {
+                error:false,
+                usage:userList
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
 function getApisByTime(provider, developer, apiFilter, fromDate, toDate, limit) {
     var usage;
     try {

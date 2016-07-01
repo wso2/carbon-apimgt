@@ -57,8 +57,9 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
             executionTimePublisherDTO.setApiResponseTime(totalTime);
             executionTimePublisherDTO.setProvider(provider);
             executionTimePublisherDTO.setTenantId(APIUtil.getTenantId(provider));
-            executionTimePublisherDTO.setSecurityLatency(
-                    ((Number)messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY)).longValue());
+            Object securityLatency = messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY);
+            executionTimePublisherDTO.setSecurityLatency(securityLatency == null ? 0 :
+                                                          ((Number) securityLatency).longValue());
             Object throttleLatency =  messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY);
             executionTimePublisherDTO.setThrottlingLatency(throttleLatency == null ? 0 :
                                                           ((Number) throttleLatency).longValue());

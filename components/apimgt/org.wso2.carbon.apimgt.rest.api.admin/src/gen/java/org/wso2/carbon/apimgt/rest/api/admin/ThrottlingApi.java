@@ -36,7 +36,7 @@ public class ThrottlingApi  {
    private final ThrottlingApiService delegate = ThrottlingApiServiceFactory.getThrottlingApi();
 
     @GET
-    @Path("/blocking-conditions")
+    @Path("/blacklist")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all blocking condtions", notes = "Get all blocking condtions\n", response = BlockingConditionListDTO.class)
@@ -47,16 +47,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingBlockingConditionsGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
+    public Response throttlingBlacklistGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingBlockingConditionsGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingBlacklistGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
-    @Path("/blocking-conditions")
+    @Path("/blacklist")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add a Blocking condition", notes = "Add a Blocking condition\n", response = BlockingConditionDTO.class)
@@ -67,33 +67,33 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response throttlingBlockingConditionsPost(@ApiParam(value = "Blocking condition object that should to be added\n" ,required=true ) BlockingConditionDTO body,
+    public Response throttlingBlacklistPost(@ApiParam(value = "Blocking condition object that should to be added\n" ,required=true ) BlockingConditionDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
-    return delegate.throttlingBlockingConditionsPost(body,contentType);
+    return delegate.throttlingBlacklistPost(body,contentType);
     }
     @GET
-    @Path("/blocking-conditions/{conditionId}")
+    @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Blocking Condition", notes = "Retrieve a Blocking Condition providing the condition Id\n", response = BlockingConditionDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nCondition returned\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Condition does not exist.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingBlockingConditionsConditionIdGet(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
+    public Response throttlingBlacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingBlockingConditionsConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingBlacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/blocking-conditions/{conditionId}")
+    @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update a Blocking condition", notes = "Update a Blocking condition\n", response = BlockingConditionDTO.class)
@@ -106,16 +106,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingBlockingConditionsConditionIdPut(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
+    public Response throttlingBlacklistConditionIdPut(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
     @ApiParam(value = "Blocking condition object that needs to be modified\n" ,required=true ) BlockingConditionDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingBlockingConditionsConditionIdPut(conditionId,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingBlacklistConditionIdPut(conditionId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/blocking-conditions/{conditionId}")
+    @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a Blocking condition", notes = "Delete a Blocking condition\n", response = void.class)
@@ -126,11 +126,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingBlockingConditionsConditionIdDelete(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
+    public Response throttlingBlacklistConditionIdDelete(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingBlockingConditionsConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingBlacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/policies/advanced-policies")
@@ -175,11 +175,11 @@ public class ThrottlingApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Advanced Policy", notes = "Retrieve a Advanced Policy providing the policy name.\n", response = AdvancedThrottlePolicyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy returned\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Policy does not exist.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
@@ -272,7 +272,7 @@ public class ThrottlingApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Application Policy", notes = "Retrieve an Application Policy providing the policy name.\n", response = ApplicationThrottlePolicyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy returned\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
         
@@ -369,11 +369,11 @@ public class ThrottlingApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Global Policy", notes = "Retrieve a Global Policy providing the policy name.\n", response = GlobalThrottlePolicyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy returned\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Policy does not exist.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
@@ -466,11 +466,11 @@ public class ThrottlingApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Subscription Policy", notes = "Retrieve a Subscription Policy providing the policy name.\n", response = SubscriptionThrottlePolicyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy returned\n"),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Policy does not exist.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 

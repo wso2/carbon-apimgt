@@ -105,6 +105,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             } else {
                 errorMsg = "Logged in user '" + authUserName + "' and application owner '" + owner
                         + "' should be same.";
+                log.error(errorMsg);
                 errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, errorMsg);
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }

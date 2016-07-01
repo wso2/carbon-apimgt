@@ -150,4 +150,12 @@ input.ep-field{
 .scopes-list li p{
     margin:0px;
 }
-
+.btn-group.bootstrap-select .btn-default,.btn-group.bootstrap-select a.btn-default{
+    color: #333;
+    background-color: #fff;
+    border:1px solid;
+    border-color: #ccc;
+}
+.btn-sequenceUpload{
+    min-width:155px;
+}

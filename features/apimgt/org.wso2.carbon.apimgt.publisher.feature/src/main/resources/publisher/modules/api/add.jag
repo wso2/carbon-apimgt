@@ -1,5 +1,6 @@
 <%
 user = jagg.getUser();
+var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
 
 var manageAPI = function (api) {
     var success, log = new Log(),
@@ -429,6 +430,114 @@ var getCustomFaultSequences = function (apiName, apiVersion, apiProvider) {
     	sequences = provider.getCustomFaultSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
             log.debug("getCustomFaultSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomCombinedInSequences = function (apiName, apiVersion, apiProviderName) {
+    var sequences = {},sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var username = user.username;
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var defaultSequences = apiProvider.getCustomInSequences();
+        sequences.defaultSequences = [];
+        for(var i = 0 ; i < defaultSequences.size(); i++) {
+            sequences.defaultSequences.push(defaultSequences.get(i));
+        }
+
+        var userDefinedSequences = apiProvider.getCustomApiInSequences(apiIdentifierObj);
+        sequences.userDefinedSequences = [];
+        for(var i = 0; i < userDefinedSequences.size(); i++) {
+            sequences.userDefinedSequences.push(userDefinedSequences.get(i));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomCombinedInSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomCombinedOutSequences = function (apiName, apiVersion, apiProviderName) {
+    var sequences = {},sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var username = user.username;
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var defaultSequences = apiProvider.getCustomOutSequences();
+        sequences.defaultSequences = [];
+        for(var i = 0 ; i < defaultSequences.size(); i++) {
+            sequences.defaultSequences.push(defaultSequences.get(i));
+        }
+
+        var userDefinedSequences = apiProvider.getCustomApiOutSequences(apiIdentifierObj);
+        sequences.userDefinedSequences = [];
+        for(var i = 0; i < userDefinedSequences.size(); i++) {
+            sequences.userDefinedSequences.push(userDefinedSequences.get(i));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomCombinedOutSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomCombinedFaultSequences = function (apiName, apiVersion, apiProviderName) {
+    var sequences = {},sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var username = user.username;
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var defaultSequences = apiProvider.getCustomFaultSequences();
+        sequences.defaultSequences = [];
+        for(var i = 0 ; i < defaultSequences.size(); i++) {
+            sequences.defaultSequences.push(defaultSequences.get(i));
+        }
+
+        var userDefinedSequences = apiProvider.getCustomApiFaultSequences(apiIdentifierObj);
+        sequences.userDefinedSequences = [];
+        for(var i = 0; i < userDefinedSequences.size(); i++) {
+            sequences.userDefinedSequences.push(userDefinedSequences.get(i));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomCombinedFaultSequences " +  " : " + stringify(sequences));
         }
 
         return {

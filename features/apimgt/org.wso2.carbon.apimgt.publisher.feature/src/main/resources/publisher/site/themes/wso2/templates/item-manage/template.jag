@@ -34,7 +34,9 @@
     ];
     var TIERS =[
         <% for (var i = 0; i < resourceTiers.length; i++) {
-        %>{ "value": "<%= resourceTiers[i].tierName %>", "text": "<%= resourceTiers[i].tierDisplayName %>" }<% if((i+1) != resourceTiers.length){%>,<%}%>
+        %>{ "value": "<%= encode.forJavaScript(String(resourceTiers[i].tierName)) %>", "text": "<%= encode.forJavaScript(String(resourceTiers[i].tierDisplayName)) %>"
+        }<% if(
+        (i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 
@@ -336,7 +338,10 @@
                                                         if(resourceTiers[i].tierName == api.apiLevelPolicy){
                                                             isSelected = true;
                                                         }
-                                                        %><option value="<%= resourceTiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= resourceTiers[i].tierDisplayName %></option><%
+                                                        %><option value="<%= encode.forHtmlAttribute(String(resourceTiers[i].tierName))%>"
+                                                        <%if
+                                                        (isSelected){%>selected="selected"<%}%>><%= encode.forHtml(String(resourceTiers[i].tierDisplayName)) %></option>
+                                                        <%
                                                     }
                                                     %>
                                                     </select>
@@ -455,12 +460,12 @@
                                                                     <label class="control-label col-sm-3" for="throttle">
                                                                     </label>
                                                                     <div class="col-sm-8">
-                                                                              <p class="help-block">
-                                                                              <span class="icon fw-stack fw-lg" style="font-size:8px">
-                                        									<i class="fw fw-circle fw-stack-2x"></i>
-                                        									<i class="fw fw-info fw-stack-1x fw-inverse" style="font-size:15px"></i>
-                                        								</span>
-                                                                              <%=i18n.localize("Refer ","Refer ")%><a style="color:#1a78d8" href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a><%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%></p>
+                                                                          <p class="help-block">
+                                        									  <i class="fw fw-info"></i>
+                                                                              <%=i18n.localize("Refer ","Refer ")%>
+                                                                              <a href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ","documentation ")%></a>
+                                                                              <%=i18n.localize("to find out details about each throttling setting.","to find out details about each throttling setting.")%>
+                                                                          </p>
                                                                     </div>
                                                                 </div>
 
@@ -1082,8 +1087,8 @@
     </div>
     <div class="modal-footer">
     <div id="res" class="hide" style="color:red;float:left"></div>
-    <a class="btn" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
+    <a class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
     </div>
     </div>
     </div>

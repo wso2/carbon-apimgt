@@ -29,6 +29,14 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:bl_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:bl_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:subscription_view",
         "Roles": "admin"
       },
