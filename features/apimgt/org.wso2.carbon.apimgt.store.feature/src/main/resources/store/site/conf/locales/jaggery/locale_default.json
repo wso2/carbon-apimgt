@@ -255,6 +255,7 @@
     "forum.topic.list" : "Topic List",
     "forum.replies" : "Replies",
     "forum.by" : "By",
+    "save" : "save",
 
     "forum.topicCreation.title" : "Create New Topic",
     "forum.topicCreation.subject" : "Subject",
