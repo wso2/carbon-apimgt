@@ -2,9 +2,11 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
+
+
 
 
 
