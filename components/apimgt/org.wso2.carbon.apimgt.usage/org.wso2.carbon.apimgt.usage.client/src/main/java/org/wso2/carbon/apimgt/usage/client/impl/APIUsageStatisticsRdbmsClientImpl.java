@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.DataHandler;
@@ -1671,11 +1672,23 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         try {
             connection = dataSource.getConnection();
             String query;
             String oracleQuery;
             String msSqlQuery;
+            String filter;
+            if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    filter = APIUsageStatisticsClientConstants.CONTEXT + " not like '%/t/%'";
+                } else {
+                    filter = APIUsageStatisticsClientConstants.CONTEXT + " like '%" + tenantDomain + "%'";
+                }
+            } else {
+                filter = APIUsageStatisticsClientConstants.API_PUBLISHER + " = '" + providerName + "'";
+            }
+
             if (fromDate != null && toDate != null) {
                 query = "SELECT " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
@@ -1686,7 +1699,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        " ? AND ? " +
+                        " ? AND ? AND " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.USER_ID + ',' + APIUsageStatisticsClientConstants.VERSION
@@ -1702,7 +1715,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "? AND ? " +
+                        "? AND ? AND " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.VERSION + ',' + APIUsageStatisticsClientConstants.USER_ID
@@ -1718,7 +1731,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "? AND ? " +
+                        "? AND ? AND " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.USER_ID + ',' + APIUsageStatisticsClientConstants.VERSION
@@ -1734,6 +1747,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS TOTAL_REQUEST_COUNT, "
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
+                        " WHERE " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
@@ -1747,6 +1761,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS TOTAL_REQUEST_COUNT, "
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
+                        " WHERE " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.VERSION + ','
@@ -1761,6 +1776,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS TOTAL_REQUEST_COUNT, "
                         + APIUsageStatisticsClientConstants.CONTEXT +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
+                        " WHERE " + filter +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
                         + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.API_PUBLISHER + ','
