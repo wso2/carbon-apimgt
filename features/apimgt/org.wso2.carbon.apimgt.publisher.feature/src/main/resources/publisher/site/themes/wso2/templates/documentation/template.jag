@@ -24,7 +24,7 @@
                 <input type="hidden" id="docAPIName" value="<%=api.name%>"/>
                 <%if(createPermitted){%>
                 <div id="addDoc">
-                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+                <a onclick="newDocFormToggle()" href="#" title="<%=i18n.localize("addNewDoc")%>" class="btn btn-primary  btn-sm padding-reduce-on-grid-view">
                     <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("addNewDoc")%>"></i> <%=i18n.localize("addNewDoc")%>
                 </a>
                 </div>
