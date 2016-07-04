@@ -228,10 +228,10 @@ function getAPIUsageByUser(providerName,from,to) {
     }
 }
 
-function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
+function getProviderAPIVersionUserLastAccess(providerName, from, to, limit) {
     var usage = [];
     try {
-        usage = usageClient.getProviderAPIVersionUserLastAccess(providerName,from,to, 10);
+        usage = usageClient.getProviderAPIVersionUserLastAccess(providerName,from,to, limit);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUserLastAccess for : " + server);
         }

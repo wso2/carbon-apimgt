@@ -21,7 +21,8 @@ include("/jagg/jagg.jag");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
             var apiFilter = request.getParameter("apiFilter");
-            
+            var limit = request.getParameter("length");
+
             var provider;
 
             if (mode != null && mode == "browse") {
@@ -34,7 +35,7 @@ include("/jagg/jagg.jag");
                 provider = allProviders + '@' + org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
             }
 
-            result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
+            result = mod.getProviderAPIVersionUserLastAccess(provider, from, to, limit);
 
             if (result.error == "true") {
                 obj = {
@@ -44,7 +45,10 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    draw: new Date(),
+                    recordsTotal: result.usage.length,
+                    recordsFiltered: result.usage.length,
+                    data: result.usage
                 }
             }
             print(obj);
