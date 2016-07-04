@@ -30,6 +30,7 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -72,12 +73,12 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
         Timer.Context context = timer.start();
-        long executionStartTime = System.currentTimeMillis();
+        long executionStartTime = System.nanoTime();
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
         }
     }
@@ -86,12 +87,12 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
         Timer.Context context = timer.start();
-        long executionStartTime = System.currentTimeMillis();
+        long executionStartTime = System.nanoTime();
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.close();
         }
     }

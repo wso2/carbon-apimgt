@@ -48,6 +48,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -101,7 +102,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
-        long executionStartTime = System.currentTimeMillis();
         long startTime = System.nanoTime();
         long endTime;
         long difference;
@@ -148,7 +148,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             handleAuthFailure(messageContext, e);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             context.stop();
 
         }
