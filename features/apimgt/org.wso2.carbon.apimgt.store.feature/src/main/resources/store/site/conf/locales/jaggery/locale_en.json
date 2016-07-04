@@ -148,6 +148,7 @@
     "accessToken" : "Access Token",
     "consumerKey" : "Consumer Key",
     "consumerSecret" : "Consumer Secret",
+    "noKeysMsg" : "No keys are generated for this type in this application.",
 
     "sandbox" : "Sandbox",
     "production" : "Production",

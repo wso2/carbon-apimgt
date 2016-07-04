@@ -152,7 +152,7 @@
   {{else}}
     <div class="message message-info">
     	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
-        <p><%=i18n.localize("sandboxKeyMsg")%></p>
+        <p><%=i18n.localize("noKeysMsg")%></p>
     </div>
   	<form class="">
   	  {{#unless provide_keys_form }}
