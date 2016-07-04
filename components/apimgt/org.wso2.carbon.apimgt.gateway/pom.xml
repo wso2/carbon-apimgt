@@ -117,7 +117,6 @@
         <dependency>
             <groupId>org.wso2.carbon.metrics</groupId>
             <artifactId>org.wso2.carbon.metrics.manager</artifactId>
-            <version>${carbon.metrics.version}</version>
         </dependency>
     </dependencies>
 
