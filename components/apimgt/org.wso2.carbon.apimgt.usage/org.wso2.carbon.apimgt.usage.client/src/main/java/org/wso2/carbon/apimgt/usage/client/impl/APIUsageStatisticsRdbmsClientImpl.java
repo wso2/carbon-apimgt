@@ -1716,7 +1716,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.USER_ID + ", SUM("
                         + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS TOTAL_REQUEST_COUNT, "
                         + APIUsageStatisticsClientConstants.CONTEXT +
-                        "FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
+                        " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                         "? AND ? " +
                         " GROUP BY " + APIUsageStatisticsClientConstants.API + ','
