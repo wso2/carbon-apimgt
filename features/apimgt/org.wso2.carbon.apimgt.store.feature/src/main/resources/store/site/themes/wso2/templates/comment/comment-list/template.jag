@@ -9,7 +9,9 @@
     <div class="comment">
         <hr />
         <div><%=i18n.localize("postComment")%> <strong><%=comment.username%></strong> <%=i18n.localize("onText")%> <span class="dateFull"><%=comment.createdTime%></span></div>
-        <div class="comment-text"><%=comment.comment%></div>
+        <div class="truncate-children">
+            <span class="comment-text" title="<%=comment.comment%>"><%=comment.comment%></span>
+        </div>
     </div>
     <% }
     } else {

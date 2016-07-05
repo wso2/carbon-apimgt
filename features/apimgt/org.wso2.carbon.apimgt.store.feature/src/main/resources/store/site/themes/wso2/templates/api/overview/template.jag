@@ -9,7 +9,7 @@
  }
  var urlPrefix = jagg.getTenantURLPrefix();%>
 <div class="row">
-		  <div class="col-md-12 col-lg-6">
+		  <div class="col-md-12 col-lg-9">
 	<%if (!api.isAdvertiseOnly) {%>
 
 	    <% 
@@ -22,7 +22,7 @@
                 // The reason is that the context will have the version now
                 for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-small"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-sm add-margin-bottom-1x"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
                         <br><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
@@ -37,17 +37,20 @@
     	        var environmentsPerType = environments[environmentType];
                 if(environmentType == "production"){
                     %>
+                    <br/>
                     <h4>Production Endpoints</h4>
                     <%} else if(environmentType == "sandbox"){
                         %>
+                    <br/>
                     <h4>Sandbox Endpoints</h4>
                 <%} else {%>
+                    <br/>
                 	<h4>Production and Sandbox Endpoints</h4>
                 <%}
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
                 %>
-    	            <h5 class="add-margin-top-5x"><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
+    	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
@@ -55,7 +58,7 @@
     	        for (var urltype in environmenturls ) {
                     if(urltype != "showInConsole"){
 	                    if(environmenturls[urltype] != ""){ %>
-	    	            <div  class="endpoint-copybtn well well-small"><a
+	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
 	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
 	    	            class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
@@ -65,6 +68,7 @@
 	                            <br><%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
+
 	    	            <%}
     	            }
                     }
@@ -85,16 +89,18 @@
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
-        <h4 class="add-margin-top-5x"><%=i18n.localize("desc")%>:</h4>
+        <br/>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("desc")%></h4>
     <p>
         <%=api.description%>
     </p>
         <% } %>
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
+	 		<br/>
 	 		<h4 class="add-margin-top-5x">Business Information</h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
-		    		<p class="no-margin"><%=i18n.localize("busiOwner")%>: <%=encode.forHtml(api.bizOwner)%>
+		    		<p class="no-margin"><strong><%=i18n.localize("busiOwner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
 		    			<% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
 			           			[<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
 			        	<%}%>
@@ -102,22 +108,22 @@
 
 		    <% } %>
 		    <% if(api.techOwner && api.techOwner != ""){ %>
-		    	<p class="no-margin"><%=i18n.localize("techOwner")%>: <%=encode.forHtml(api.techOwner)%>
+		    	<p class="no-margin"><strong><%=i18n.localize("techOwner")%> : </strong><%=encode.forHtml(api.techOwner)%>
 		    			<% if(api.techOwnerMail && api.techOwnerMail!=""){%>
 		           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.techOwnerMail)%>"><%=encode.forHtml(api.techOwnerMail)%></a>]
 		        <%}%>
 		    		</p>
 		    <% } %>
 	   <%} %>
-    
-    <h4 class="add-margin-top-5x"><%=i18n.localize("share")%>:</h4>
-    <div class="btn-group" role="group" aria-label="...">
-      <button type="button" class="btn btn-default share_links disabled" ref="social"><%=i18n.localize("SocialSites")%></button>
-      <button type="button" class="btn btn-default share_links" ref="embed"><%=i18n.localize("embed")%></button>
-      <a title="<%=i18n.localize("email")%>" href="" id="api_mailto" class="btn btn-default">Email</a>
+    <br/>
+    <h4 class="add-margin-top-5x"><%=i18n.localize("share")%></h4>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-secondary share_links disabled" ref="social"><%=i18n.localize("SocialSites")%></button>
+      <button type="button" class="btn btn-secondary share_links" ref="embed"><%=i18n.localize("embed")%></button>
+      <button type="button" class="btn btn-secondary" id="api_mailto" ><%=i18n.localize("email")%></button>
     </div>
-    <div id="share_div_embed" class="share_dives highlight" style="display:none">
-		<pre><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></pre>
+    <div id="share_div_embed" class="share_dives highlight add-margin-top-2x" style="display:none">
+		<div class="well well-sm"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
 	</div>
 
     <div id="share_div_social" class="share_dives add-margin-top-2x">
@@ -131,18 +137,23 @@
         <a class="social_links" id="digg" href="#" target="_blank" title="digg"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/diggit.png"))%>" alt="Digg" /></a>
         <div class="clearfix">
     </div>
-
+    <br/><br/>
     </div>
-
-    <h4 class="add-margin-top-5x"><%=i18n.localize("comments")%>:</h4>
-    <% if(user) jagg.includeBlock("comment/comment-add", null); %>
-    <% jagg.includeBlock("comment/comment-list", {api:api}); %>
 </div>
+</div>
+<div class="row">
+      <div class="col-md-12 col-lg-9">
+            <h4 class="add-margin-top-5x"><%=i18n.localize("comments")%></h4>
+            <% if(user) jagg.includeBlock("comment/comment-add", null); %>
+            <% jagg.includeBlock("comment/comment-list", {api:api}); %>
+      </div>
 </div>
 <script language="javascript">
     $(document).ready(function(){
         var link = window.location+'';
-        $('#api_mailto').attr('href',"mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location));
+        $('#api_mailto').on("click",function(){
+            location.href = "mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location);
+        });
         $('#embed_iframe').text('<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
         $('#embed-copy').attr('data-clipboard-text', '<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
         
@@ -150,7 +161,7 @@
             $('.share_links').removeClass('disabled');
             $(this).addClass('disabled');
             $('.share_dives').hide();
-            $('#share_div_' + $(this).attr('ref')).show('fast');
+            $('#share_div_' + $(this).attr('ref')).show();
             return false;
         });
 
@@ -161,6 +172,8 @@
         $("#twitter").attr("href","http://twitter.com/share?url="+api_url+"&text="+encodeURIComponent(description));
         $("#googleplus").attr("href","https://plus.google.com/share?url="+api_url);
         $("#digg").attr("href","http://www.digg.com/submit?url="+api_url);
+
+
 
     });
     
