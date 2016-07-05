@@ -203,7 +203,7 @@ public class APIMappingUtil {
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
-                APIEndpointURLsEnvironmentURLsDTO environmentURLsDTO = new APIEndpointURLsEnvironmentURLsDTO();
+                APIEnvironmentURLsDTO environmentURLsDTO = new APIEnvironmentURLsDTO();
                 String[] gwEndpoints = environment.getApiGatewayEndpoint().split(",");
 
                 for (String gwEndpoint : gwEndpoints) {

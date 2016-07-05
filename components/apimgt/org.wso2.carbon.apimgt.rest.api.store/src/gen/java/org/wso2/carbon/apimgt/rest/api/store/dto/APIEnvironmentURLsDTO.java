@@ -2,14 +2,16 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
 
 
 
+
+
 @ApiModel(description = "")
-public class APIEndpointURLsEnvironmentURLsDTO  {
+public class APIEnvironmentURLsDTO  {
   
   
   
@@ -49,7 +51,7 @@ public class APIEndpointURLsEnvironmentURLsDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIEndpointURLsEnvironmentURLsDTO {\n");
+    sb.append("class APIEnvironmentURLsDTO {\n");
     
     sb.append("  https: ").append(https).append("\n");
     sb.append("  http: ").append(http).append("\n");

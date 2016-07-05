@@ -1,12 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
-import java.util.*;
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
+
+
 
 
 
@@ -33,7 +36,7 @@ public class ApplicationDTO  {
   private String description = null;
   
   
-  private String status = null;
+  private String status = "";
   
   
   private String groupId = null;
@@ -67,9 +70,9 @@ public class ApplicationDTO  {
 
   
   /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber.
+   * If subscriber is not given user invoking the API will be taken as the subscriber.\n
    **/
-  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
+  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.\n")
   @JsonProperty("subscriber")
   public String getSubscriber() {
     return subscriber;

@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsEnvironmentURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIEnvironmentURLsDTO;
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
+
+
 
 
 
@@ -14,7 +16,7 @@ public class APIEndpointURLsDTO  {
   
   
   
-  private APIEndpointURLsEnvironmentURLsDTO environmentURLs = null;
+  private APIEnvironmentURLsDTO environmentURLs = null;
   
   
   private String environmentName = null;
@@ -27,10 +29,10 @@ public class APIEndpointURLsDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("environmentURLs")
-  public APIEndpointURLsEnvironmentURLsDTO getEnvironmentURLs() {
+  public APIEnvironmentURLsDTO getEnvironmentURLs() {
     return environmentURLs;
   }
-  public void setEnvironmentURLs(APIEndpointURLsEnvironmentURLsDTO environmentURLs) {
+  public void setEnvironmentURLs(APIEnvironmentURLsDTO environmentURLs) {
     this.environmentURLs = environmentURLs;
   }
 

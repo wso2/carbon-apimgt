@@ -381,6 +381,10 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+################################################################
+# The swagger resource of "Individual API" resource APIs
+################################################################
+
   /apis/{apiId}/swagger:
 #-----------------------------------------------------
 # Retrieve the API swagger definition
@@ -493,6 +497,134 @@ paths:
           description: |
             Forbidden.
             The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+################################################################
+# The thumbnail resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/thumbnail:
+#-------------------------------------------------------------------------------------------------
+# Downloads a thumbnail image of an API
+#-------------------------------------------------------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail > image.jpg"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]"
+      summary: Get the thumbnail image
+      description: |
+        Downloads a thumbnail image of an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - APIs
+      responses:
+        200:
+          description: |
+            OK.
+            Thumbnail image returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Document does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#----------------------------------------------------------------------------
+# Upload a thumbnail image to a certain API
+#----------------------------------------------------------------------------
+    post:
+      consumes:
+        - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}"
+      summary: Upload a thumbnail image
+      description: |
+        Upload a thumbnail image to an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: formData
+          name: file
+          description: Image to upload
+          type: file
+          required: true
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - APIs
+      responses:
+        200:
+          description: |
+            OK.
+            Image updated
+          schema:
+            $ref : '#/definitions/FileInfo'
+          headers:
+            Location:
+              description: |
+                The URL of the uploaded thumbnail image of the API.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -2570,3 +2702,18 @@ definitions:
         type: string
         description: HTTPS environment URL
         example: "https://localhost:8244"
+
+#-----------------------------------------------------
+# The File Information resource
+#-----------------------------------------------------
+  FileInfo :
+    title: File Information including meta data
+    properties:
+      relativePath:
+        type: string
+        description: relative location of the file (excluding the base context and host of the Publisher API)
+        example: "apis/01234567-0123-0123-0123-012345678901/thumbnail"
+      mediaType:
+        type: string
+        description: media-type of the file
+        example: "image/jpeg"

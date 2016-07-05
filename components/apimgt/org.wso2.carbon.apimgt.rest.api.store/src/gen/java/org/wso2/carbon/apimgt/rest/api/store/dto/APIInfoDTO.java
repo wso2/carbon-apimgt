@@ -2,9 +2,11 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
+
+
 
 
 
@@ -95,9 +97,9 @@ public class APIInfoDTO  {
 
   
   /**
-   * If the provider value is not given, the user invoking the API will be used as the provider.
+   * If the provider value is not given, the user invoking the API will be used as the provider.\n
    **/
-  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.")
+  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.\n")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;

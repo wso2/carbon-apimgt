@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -401,6 +403,45 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the thumbnail image of an API specified by API identifier
+     *
+     * @param apiId API Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
+    @Override
+    public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            ResourceFile thumbnailResource = apiConsumer.getIcon(apiIdentifier);
+
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }
