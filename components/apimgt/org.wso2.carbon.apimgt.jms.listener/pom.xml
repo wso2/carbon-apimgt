@@ -26,11 +26,11 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>andes</artifactId>-->
-            <!--<version>3.1.5</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.broker.lifecycle</artifactId>
+            <version>6.0.0-SNAPSHOT</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>org.wso2.carbon.analytics-common</groupId>-->
             <!--<artifactId>org.wso2.carbon.databridge.agent</artifactId>-->
@@ -70,6 +70,7 @@
                             org.apache.axis2.*,
                             org.apache.commons.*,
                             org.wso2.carbon.apimgt.impl.dto.*,
+                            org.wso2.carbon.apimgt.broker.lifecycle.service.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>

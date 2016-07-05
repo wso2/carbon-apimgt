@@ -30,6 +30,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.broker.lifecycle.service.ShutdownNotifierService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -50,11 +51,15 @@ import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="api.manager.broker.lifecycle"
+ * interface="org.wso2.carbon.apimgt.broker.lifecycle.service.ShutdownNotifierService" cardinality="0..1"
+ * policy="dynamic" bind="setShutdownNotifierService" unbind="unsetShutdownNotifierService"
  */
 
 public class JMSListenerComponent implements ServiceListener {
 
     private static final Log log = LogFactory.getLog(JMSListenerComponent.class);
+    private JMSThrottleDataRetriever jmsThrottleDataRetriever;
 
     protected void activate(ComponentContext context) {
         log.debug("Activating component...");
@@ -106,7 +111,7 @@ public class JMSListenerComponent implements ServiceListener {
     }
 
     private void startJMSListener() {
-        JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
+        jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
         jmsThrottleDataRetriever.subscribeForJmsEvents();
     }
 
@@ -136,6 +141,14 @@ public class JMSListenerComponent implements ServiceListener {
             log.debug("Deactivating component");
         }
 
+    }
+
+    protected void setShutdownNotifierService(ShutdownNotifierService notifierService){
+        ServiceReferenceHolder.getInstance().setShutdownNotifierService(notifierService);
+    }
+
+    protected void unsetShutdownNotifierService(ShutdownNotifierService notifierService){
+        ServiceReferenceHolder.getInstance().setShutdownNotifierService(null);
     }
 
     @Override
