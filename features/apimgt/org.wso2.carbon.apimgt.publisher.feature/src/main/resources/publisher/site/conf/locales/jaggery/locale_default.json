@@ -203,6 +203,7 @@
 
     "apiTime" : "Published APIs Over Time",
     "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
+    "APISubscriptionsTimeTitle" : "API Subscription Over Time",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",
