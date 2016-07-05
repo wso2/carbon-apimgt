@@ -54,6 +54,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -874,12 +875,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String fileName = fileDetail.getDataHandler().getName();
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+            if (StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
             //this will fail if user does not have access to the API or the API does not exist
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            ResourceFile apiImage = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+            ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
             String thumbPath = APIUtil.getIconPath(api.getId());
             String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
-
             api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
             APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             apiProvider.updateAPI(api);
