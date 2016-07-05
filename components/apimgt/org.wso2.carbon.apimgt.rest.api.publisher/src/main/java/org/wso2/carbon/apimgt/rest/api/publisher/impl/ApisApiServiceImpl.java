@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,22 +31,25 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
@@ -778,6 +782,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving document content location : " + documentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
         return null;
     }
@@ -805,9 +811,103 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the thumbnail image of an API specified by API identifier
+     * 
+     * @param apiId API Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
+    @Override
+    public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getIcon(apiIdentifier);
+            
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Uploads a thumbnail image into an API
+     * 
+     * @param apiId API Id
+     * @param fileInputStream input stream of thumbnail image
+     * @param fileDetail file details as Attachment
+     * @param contentType content type of the payload
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return metadata of the uploaded thumbnail image
+     */
+    @Override
+    public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            ResourceFile apiImage = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+            String thumbPath = APIUtil.getIconPath(api.getId());
+            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+
+            api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+            apiProvider.updateAPI(api);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
+                    .replace(RestApiConstants.APIID_PARAM, apiId);
+            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(apiImage.getContentType());
+            return Response.created(uri).entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (FaultGatewaysException e) {
+            //This is logged and process is continued because icon is optional for an API
+            log.error("Failed to update API after adding icon. ", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
         }
         return null;
     }

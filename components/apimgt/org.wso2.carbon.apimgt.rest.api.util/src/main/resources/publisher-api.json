@@ -525,6 +525,144 @@
                 }
             }
         },
+        "/apis/{apiId}/thumbnail": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "x-wso2-curl": "curl -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail > image.jpg",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]",
+                "summary": "Get the thumbnail image",
+                "description": "Downloads a thumbnail image of an API\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Modified-Since"
+                    }
+                ],
+                "tags": [
+                    "APIs"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThumbnail image returned\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Document does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-scope": "apim:api_create",
+                "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" http://127.0.0.1:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg",
+                "x-wso2-response": "HTTP/1.1 201 Created\r\nLocation: http://localhost:9763/api/am/publisher/v0.9/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}",
+                "summary": "Upload a thumbnail image",
+                "description": "Upload a thumbnail image to an API.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "file",
+                        "description": "Image to upload",
+                        "type": "file",
+                        "required": true
+                    },
+                    {
+                        "$ref": "#/parameters/Content-Type"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "APIs"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nImage updated\n",
+                        "schema": {
+                            "$ref": "#/definitions/FileInfo"
+                        },
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the uploaded thumbnail image of the API.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional request.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nThe resource to be updated does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/apis/copy-api": {
             "post": {
                 "x-scope": "apim:api_create",
@@ -2682,6 +2820,21 @@
                     "type": "string",
                     "description": "HTTPS environment URL",
                     "example": "https://localhost:8244"
+                }
+            }
+        },
+        "FileInfo": {
+            "title": "File Information including meta data",
+            "properties": {
+                "relativePath": {
+                    "type": "string",
+                    "description": "relative location of the file (excluding the base context and host of the Publisher API)",
+                    "example": "apis/01234567-0123-0123-0123-012345678901/thumbnail"
+                },
+                "mediaType": {
+                    "type": "string",
+                    "description": "media-type of the file",
+                    "example": "image/jpeg"
                 }
             }
         }
