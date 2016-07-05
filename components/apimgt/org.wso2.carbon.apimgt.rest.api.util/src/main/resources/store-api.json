@@ -434,6 +434,8 @@
         },
         "/apis/{apiId}/thumbnail": {
             "get": {
+                "x-wso2-curl": "curl  http://127.0.0.1:9763/api/am/store/v0.9/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg",
+                "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]",
                 "summary": "Get the thumbnail image",
                 "description": "Downloads a thumbnail image of an API\n",
                 "parameters": [
