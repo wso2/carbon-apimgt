@@ -31,6 +31,7 @@ import java.util.*;
 public class JMSThrottleDataRetriever {
     private static final Log log = LogFactory.getLog(JMSThrottleDataRetriever.class);
     private ThrottleProperties.JMSConnectionProperties jmsConnectionProperties;
+    private JMSListener jmsListener;
 
     public JMSThrottleDataRetriever() {
         if (ServiceReferenceHolder.getInstance().getAPIMConfiguration() != null) {
@@ -77,13 +78,19 @@ public class JMSThrottleDataRetriever {
             jmsTaskManager.setJmsMessageListener(new JMSMessageListener(ServiceReferenceHolder.getInstance()
                                                                                 .getThrottleDataHolder()));
 
-            JMSListener jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
+            jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
                                                       jmsTaskManager);
             jmsListener.startListener();
             log.info("Starting jms topic consumer thread...");
 
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
+        }
+    }
+
+    public void unSubscribeFromEvents(){
+        if(jmsListener != null){
+            jmsListener.stopListener();
         }
     }
 
