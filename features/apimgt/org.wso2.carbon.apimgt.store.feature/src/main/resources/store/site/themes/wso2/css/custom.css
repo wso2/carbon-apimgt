@@ -233,7 +233,22 @@ a.remove_rating:hover{
 .remove_rating i{
     margin-top: -3px;
 }
+.resize-vertical-only{
+    resize:vertical;
+}
 
+.truncate-children {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.truncate-children > * {
+    display: table-cell;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 /* =============================================================================
  * Same height columns support
