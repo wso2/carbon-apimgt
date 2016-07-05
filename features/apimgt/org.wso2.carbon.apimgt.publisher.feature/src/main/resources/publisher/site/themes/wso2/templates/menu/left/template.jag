@@ -50,7 +50,7 @@
 
 
 
-					<li><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("statistics")%>"
+					<li <%if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ %>class="active"<%} %>><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("statistics")%>"
                                aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("statistics")%>" style="font-size:22px;"></i> <%=i18n.localize("statistics")%>
                                <i class="fw  fw-2x" title="<%=i18n.localize("statistics")%>"></i>
                                </a>
@@ -72,7 +72,7 @@
 							<%if(isPermitted){%>
 								<li <%if(reqUrl.equals(manageAlertTypesMappedUrl) || reqUrl.equals(manageAlertTypesUrl)){ %>class="active"<%} %>><a class="js_toggler"
 									href="<%=manageAlertTypesMappedUrl%><%=urlPrefix%>"
-									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" style="font-size:22px;"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
+									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-notification fw-2x" style="font-size:22px;"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
 							<%}%>
                     	<%
 						}
