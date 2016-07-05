@@ -5,6 +5,8 @@
         <strong><%=i18n.localize("commentMsg")%></strong>
       </div>
     <textarea id="comment-text" class="form-control comment-box resize-vertical-only"></textarea>
-    <button id="comment-add-button" class="btn btn-default"><i class=" icon-plus-sign"></i><%=i18n.localize("add")%></button>
+    <div class="add-margin-top-2x">
+        <button id="comment-add-button" class="btn btn-secondary btn-mobile"><i class=" icon-plus-sign"></i><%=i18n.localize("add")%></button>
+    </div>
 </div>
 <% }); %>

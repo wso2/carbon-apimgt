@@ -41,9 +41,10 @@
                     <h4>Production Endpoints</h4>
                     <%} else if(environmentType == "sandbox"){
                         %>
-                        <br/>
+                    <br/>
                     <h4>Sandbox Endpoints</h4>
                 <%} else {%>
+                    <br/>
                 	<h4>Production and Sandbox Endpoints</h4>
                 <%}
                     for( var environmentName in environmentsPerType){
@@ -67,6 +68,7 @@
 	                            <br><%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
+
 	    	            <%}
     	            }
                     }
@@ -98,7 +100,7 @@
 	 		<br/>
 	 		<h4 class="add-margin-top-5x">Business Information</h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
-		    		<p class="no-margin"><%=i18n.localize("busiOwner")%>: <%=encode.forHtml(api.bizOwner)%>
+		    		<p class="no-margin"><strong><%=i18n.localize("busiOwner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
 		    			<% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
 			           			[<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
 			        	<%}%>
@@ -106,7 +108,7 @@
 
 		    <% } %>
 		    <% if(api.techOwner && api.techOwner != ""){ %>
-		    	<p class="no-margin"><%=i18n.localize("techOwner")%>: <%=encode.forHtml(api.techOwner)%>
+		    	<p class="no-margin"><strong><%=i18n.localize("techOwner")%> : </strong><%=encode.forHtml(api.techOwner)%>
 		    			<% if(api.techOwnerMail && api.techOwnerMail!=""){%>
 		           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.techOwnerMail)%>"><%=encode.forHtml(api.techOwnerMail)%></a>]
 		        <%}%>
