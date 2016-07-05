@@ -146,6 +146,7 @@
     "accessToken" :  "Access Token",
     "consumerKey" : "Consumer Key",
     "consumerSecret" : "Consumer Secret",
+    "noKeysMsg" : "No hay claves se generan de este tipo en esta aplicación.",
 
     "sandbox" : "Sandbox",
     "production" : "Producción",

@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This API handler is responsible for evaluating authenticated user requests against their
@@ -156,12 +157,12 @@ public class APIThrottleHandler extends AbstractHandler {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
-        long executionStartTime = System.currentTimeMillis();
+        long executionStartTime = System.nanoTime();
         try {
             return doThrottle(messageContext);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.THROTTLING_LATENCY,
-                    System.currentTimeMillis() - executionStartTime);
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             context.stop();
         }
     }

@@ -13,5 +13,7 @@ features/apimgt/org.wso2.carbon.apimgt.rest.api.dcr.feature/src/main/resources/c
 features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api#am#publisher#v0.9.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api#am#store#v0.9.war
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/throttle#data#v1.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/
-features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/
+features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/main.js
+features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/package.json
+features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/main.js
+features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/package.json
