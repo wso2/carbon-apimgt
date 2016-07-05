@@ -432,6 +432,63 @@
                 }
             }
         },
+        "/apis/{apiId}/thumbnail": {
+            "get": {
+                "summary": "Get the thumbnail image",
+                "description": "Downloads a thumbnail image of an API\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Modified-Since"
+                    }
+                ],
+                "tags": [
+                    "API (individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nThumbnail image returned\n",
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested Document does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/applications": {
             "get": {
                 "x-scope": "apim:subscribe",
@@ -1497,6 +1554,35 @@
                 "thumbnailUrl": {
                     "type": "string",
                     "example": ""
+                },
+                "endpointURLs": {
+                    "type": "array",
+                    "items": {
+                        "properties": {
+                            "environmentName": {
+                                "type": "string",
+                                "example": "Production and Sandbox"
+                            },
+                            "environmentType": {
+                                "type": "string",
+                                "example": "hybrid"
+                            },
+                            "environmentURLs": {
+                                "properties": {
+                                    "http": {
+                                        "type": "string",
+                                        "description": "HTTP environment URL",
+                                        "example": "http://192.168.56.1:8280/phoneverify/1.0.0"
+                                    },
+                                    "https": {
+                                        "type": "string",
+                                        "description": "HTTPS environment URL",
+                                        "example": "https://192.168.56.1:8243/phoneverify/1.0.0"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
                 "businessInformation": {
                     "properties": {

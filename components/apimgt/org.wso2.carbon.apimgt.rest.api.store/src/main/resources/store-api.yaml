@@ -440,6 +440,63 @@ paths:
             schema:
               $ref: '#/definitions/Error'
 
+################################################################
+# The thumbnail resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/thumbnail:
+#-------------------------------------------------------------------------------------------------
+# Downloads a thumbnail image of an API
+#-------------------------------------------------------------------------------------------------
+    get:
+      #x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"http://127.0.0.1:9763/api/am/publisher/v0.9/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
+      #x-wso2-response: "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF"
+      summary: Get the thumbnail image
+      description: |
+        Downloads a thumbnail image of an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Thumbnail image returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Document does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Application Collection" resource APIs
@@ -1502,7 +1559,6 @@ definitions:
       endpointURLs:
         type: array
         items:
-          $ref: '#/definitions/APIEndpointURLs'
           properties:
             environmentName:
               type: string
