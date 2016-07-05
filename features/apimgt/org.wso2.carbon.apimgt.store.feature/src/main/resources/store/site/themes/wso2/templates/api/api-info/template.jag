@@ -98,7 +98,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 <div class="page-content">       
         <div class="row">
             <div class="row-height">
-                <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2 col-md-height col-sm-middle col-md-top">
+                <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2 col-md-height col-sm-middle col-lg-top">
                      <div class="white-wrapper details-wrapper">
                         <div class="thumbnail icon">
                             <% if(thumbURL == null) { %>

@@ -235,49 +235,9 @@ a.remove_rating:hover{
 }
 
 
-
 /* =============================================================================
- * Same height columns supportx`
+ * Same height columns support
  * ============================================================================= */
-
-/* USAGE
-<div class="row">
-  <div class="row-height">
-    <div class="col-xs-2 col-xs-height col-xs-middle">
-      <div class="inside"></div>
-    </div>
-    <div class="col-xs-4 col-lg-5 col-xs-height col-xs-middle">
-      <div class="inside"></div>
-    </div>
-  </div>
-</div>
-*/
-
-/* content styles */
-
-.inside {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  background: #ededed;
-  background: -webkit-gradient(linear, left top, left bottom,color-stop(0%, #f4f4f4), color-stop(100%, #ededed));
-  background: -moz-linear-gradient(top, #f4f4f4 0%, #ededed 100%);
-  background: -ms-linear-gradient(top, #f4f4f4 0%, #ededed 100%);
-}
-.inside-full-height {
-  /*
-  // if you want to give content full height give him height: 100%;
-  // with content full height you can't apply margins to the content
-  // content full height does not work in ie http://stackoverflow.com/questions/27384433/ie-display-table-cell-child-ignores-height-100
-  */
-  height: 100%;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.content {
-  padding: 12px 3px;
-}
-
-/* columns of same height styles */
 
 .row-height {
   display: table;
