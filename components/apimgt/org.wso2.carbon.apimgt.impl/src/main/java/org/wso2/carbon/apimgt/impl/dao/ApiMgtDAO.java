@@ -8480,7 +8480,7 @@ public class ApiMgtDAO {
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
             if(hasCustomAttrib){
-            	policyStatement.setBlob(10, new ByteArrayInputStream(policy.getCustomAttributes()));
+            	policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
             }
             policyStatement.executeUpdate();
 
@@ -8524,12 +8524,12 @@ public class ApiMgtDAO {
             }
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
-            policyStatement.setInt(11, policy.getRateLimitCount());
-            policyStatement.setString(12, policy.getRateLimitTimeUnit());
-            policyStatement.setBoolean(13, policy.isStopOnQuotaReach());
-            policyStatement.setString(14, policy.getBillingPlan());
+            policyStatement.setInt(12, policy.getRateLimitCount());
+            policyStatement.setString(13, policy.getRateLimitTimeUnit());
+            policyStatement.setBoolean(14, policy.isStopOnQuotaReach());
+            policyStatement.setString(15, policy.getBillingPlan());
             if(hasCustomAttrib){
-            	policyStatement.setBytes(15, policy.getCustomAttributes());
+            	policyStatement.setBytes(16, policy.getCustomAttributes());
             }
             policyStatement.executeUpdate();
 
@@ -8835,6 +8835,7 @@ public class ApiMgtDAO {
             siddhiQueryInputStream = new ByteArrayInputStream(byteArray);
             policyStatement.setBinaryStream(5, siddhiQueryInputStream,lengthOfBytes);
             policyStatement.setBoolean(6, false);
+            policyStatement.setString(7, UUID.randomUUID().toString());
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
