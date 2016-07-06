@@ -227,7 +227,7 @@ GrantTypes.prototype.getMap = function(selected){
                     this.app.Key = result.data.key.accessToken;
                     this.render();
                 } else {
-                    jagg.message({content: result.message, type: "error"});
+                    jagg.message({content: "Error occurred while saving OAuth application. Please check if you have provided valid Consumer Key & Secret.", type: "error"});
                 }
             },this), "json");
             return false;
