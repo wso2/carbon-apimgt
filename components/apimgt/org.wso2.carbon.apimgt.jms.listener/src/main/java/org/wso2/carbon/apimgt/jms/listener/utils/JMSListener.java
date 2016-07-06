@@ -61,12 +61,7 @@ public class JMSListener implements Runnable {
      * Listen for JMS messages on behalf of the given service
      */
     private void start() {
-        try {
-            //initial startup delay of 5 seconds to avoid starting jms listener before server startup
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         JMSTaskManager stm = jmsTaskManager;
         boolean connected = false;
 
@@ -146,6 +141,17 @@ public class JMSListener implements Runnable {
                     stm.isJmsSpec11(), stm.isQueue(), stm.isSubscriptionDurable(), stm.getDurableSubscriberClientId());
         } catch (JMSException ignore) {
         }   // we silently ignore this as a JMSException can be expected when connection is not available
+        finally {
+            // Closing the connection, because if left open, when shutting down broker errors will be thrown
+            // complaining about active subscriptions.
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    log.warn("Error while closing test connection.", e);
+                }
+            }
+        }
 
         return (connection != null);
     }
