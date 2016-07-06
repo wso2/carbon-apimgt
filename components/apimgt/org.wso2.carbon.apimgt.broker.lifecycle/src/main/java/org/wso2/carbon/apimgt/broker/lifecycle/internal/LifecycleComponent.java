@@ -22,12 +22,10 @@ package org.wso2.carbon.apimgt.broker.lifecycle.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.andes.listeners.BrokerLifecycleListener;
 import org.wso2.carbon.andes.service.QpidService;
-import org.wso2.carbon.apimgt.broker.lifecycle.impl.JMSClientShutdownListener;
-import org.wso2.carbon.apimgt.broker.lifecycle.service.ShutdownNotifierService;
+import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
 
 
 /**
@@ -37,29 +35,20 @@ import org.wso2.carbon.apimgt.broker.lifecycle.service.ShutdownNotifierService;
 
 /**
  * @scr.component name="org.wso2.apimgt.broker.lifecycle" immediate="true"
+ * @scr.reference name="shutdown.listener"
+ * interface="org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService" cardinality="1..1"
+ * policy="dynamic" bind="setShutDownService" unbind="unsetShutDownService"
  * @scr.reference name="QpidService"
- * interface="org.wso2.carbon.andes.service.QpidService" cardinality="0..1"
+ * interface="org.wso2.carbon.andes.service.QpidService" cardinality="1..1"
  * policy="dynamic" bind="setQpidService" unbind="unsetQpidService"
  */
 
 public class LifecycleComponent {
 
     private static final Log log = LogFactory.getLog(LifecycleComponent.class);
-    private ServiceRegistration registration;
 
     protected void activate(ComponentContext context) {
         log.debug("Activating component...");
-
-        BundleContext bundleContext = context.getBundleContext();
-
-        registration = bundleContext.registerService(
-                ShutdownNotifierService.class.getName(),
-                new ShutdownNotifierService() {
-                    @Override
-                    public void completeShutDown() {
-                        ServiceReferenceHolder.getInstance().setShutDownStatus(true);
-                    }
-                }, null);
 
         return;
     }
@@ -68,13 +57,39 @@ public class LifecycleComponent {
         log.debug("Setting QpidService...");
         ServiceReferenceHolder.getInstance().setQpidService(qpidService);
         if(qpidService != null){
-            qpidService.registerBrokerLifecycleListener(new JMSClientShutdownListener());
+            qpidService.registerBrokerLifecycleListener(new BrokerLifecycleListener() {
+                @Override
+                public void onShuttingdown() {
+                    if(ServiceReferenceHolder.getInstance().getListenerShutdownService() == null){
+                        return;
+                    }
+
+                    log.debug("Triggering a Shutdown of the Listener...");
+                    ServiceReferenceHolder.getInstance().getListenerShutdownService().shutDownListener();
+
+                }
+
+                @Override
+                public void onShutdown() {
+
+                }
+            });
         }
     }
 
     public void unsetQpidService(QpidService qpidService){
         log.debug("Un Setting QpidService...");
         ServiceReferenceHolder.getInstance().setQpidService(null);
+    }
+
+    public void setShutDownService(JMSListenerShutDownService shutDownService){
+        log.debug("Setting JMS Listener Shutdown Service");
+        ServiceReferenceHolder.getInstance().setListenerShutdownService(shutDownService);
+    }
+
+    public void unsetShutDownService(JMSListenerShutDownService shutDownService){
+        log.debug("Setting JMS Listener Shutdown Service");
+        ServiceReferenceHolder.getInstance().setListenerShutdownService(null);
     }
 
 }

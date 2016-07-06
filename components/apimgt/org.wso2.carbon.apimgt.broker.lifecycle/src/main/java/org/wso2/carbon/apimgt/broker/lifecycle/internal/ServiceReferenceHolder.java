@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.broker.lifecycle.internal;
 
 
 import org.wso2.carbon.andes.service.QpidService;
+import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
 
 public class ServiceReferenceHolder {
 
@@ -29,6 +30,7 @@ public class ServiceReferenceHolder {
     private boolean shutDownStatus = false;
 
     private QpidService qpidService;
+    private JMSListenerShutDownService listenerShutdownService;
 
     private ServiceReferenceHolder(){
 
@@ -54,4 +56,11 @@ public class ServiceReferenceHolder {
         this.qpidService = qpidService;
     }
 
+    public JMSListenerShutDownService getListenerShutdownService() {
+        return listenerShutdownService;
+    }
+
+    public void setListenerShutdownService(JMSListenerShutDownService listenerShutdownService) {
+        this.listenerShutdownService = listenerShutdownService;
+    }
 }

@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -18,12 +18,14 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.broker.lifecycle.service;
+package org.wso2.carbon.apimgt.jms.listener;
 
 /**
- * This interface can be used to notify completion of JMS client shutdown.
+ * JMS Listener will start shutting down when this service is called. This service can be used by an external
+ * component to shutdown the JMS Listener. (This is useful for closing all the subscriptions made with a broker,
+ * before stopping the Broker)
  */
-public interface ShutdownNotifierService {
+public interface JMSListenerShutDownService {
 
-    public void completeShutDown();
+    void shutDownListener();
 }

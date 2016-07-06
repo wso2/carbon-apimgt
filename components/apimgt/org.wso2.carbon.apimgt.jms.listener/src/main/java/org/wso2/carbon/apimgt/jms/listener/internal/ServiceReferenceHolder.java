@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.jms.listener.internal;
 
-import org.wso2.carbon.apimgt.broker.lifecycle.service.ShutdownNotifierService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -36,7 +35,6 @@ public class ServiceReferenceHolder {
     private APIThrottleDataService throttleDataService;
     private ThrottleDataHolder throttleDataHolder;
     private APIManagerConfiguration apimConfiguration;
-    private ShutdownNotifierService shutdownNotifierService;
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -74,13 +72,5 @@ public class ServiceReferenceHolder {
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
-    }
-
-    public void setShutdownNotifierService(ShutdownNotifierService notifierService) {
-        shutdownNotifierService = notifierService;
-    }
-
-    public ShutdownNotifierService getShutdownNotifierService() {
-        return shutdownNotifierService;
     }
 }

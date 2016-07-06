@@ -1197,7 +1197,7 @@
         <velocity.version>1.7</velocity.version>
         <fasterxml.jackson.version>2.7.2</fasterxml.jackson.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.5.0-SNAPSHOT</carbon.broker.version>
+        <carbon.broker.version>3.1.6</carbon.broker.version>
     </properties>
 </project>
 
