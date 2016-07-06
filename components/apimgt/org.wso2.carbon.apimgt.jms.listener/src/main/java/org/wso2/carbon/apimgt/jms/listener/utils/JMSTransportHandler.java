@@ -99,6 +99,7 @@ public class JMSTransportHandler {
             // we are checking if a shutdown triggered by a previous thread is in progress.
             synchronized (jmsListener) {
                 if (!stopIssued) {
+                    stopIssued = true;
                     log.debug("Stopping JMS Listener");
                     jmsListener.stopListener();
                     log.debug("JMS Listener Stopped");
