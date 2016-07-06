@@ -19,10 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -140,12 +137,35 @@ public interface APIProvider extends APIManager {
 
 
     /**
+     * Get api throttling policy by name
+     * @param username name of the user
+     * @param policyName name of the policy
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get api throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException;
+
+
+    /**
      * Get application throttling policy by name
      * @param username name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
      */
     ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException;
+
+    /**
+     * Get application throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException;
 
     /**
      * Get subscription throttling policy by name
@@ -156,11 +176,25 @@ public interface APIProvider extends APIManager {
     SubscriptionPolicy getSubscriptionPolicy(String username, String policyName) throws APIManagementException;
 
     /**
+     * Get subscription throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
+
+    /**
      * Get global throttling policy by name
      * @param policyName name of the policy
      * @throws APIManagementException
      */
     GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException;
+
+    /**
+     * Get global throttling policy by uuid
+     * @param uuid UUID of the policy
+     * @throws APIManagementException
+     */
+    GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
     /**
      * Updates throttle policy in global CEP, gateway and database.
