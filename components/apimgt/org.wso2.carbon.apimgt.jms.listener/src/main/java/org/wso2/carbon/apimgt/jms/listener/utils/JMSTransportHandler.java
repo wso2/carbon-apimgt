@@ -28,11 +28,14 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import java.io.IOException;
 import java.util.*;
 
-public class JMSThrottleDataRetriever {
-    private static final Log log = LogFactory.getLog(JMSThrottleDataRetriever.class);
+public class JMSTransportHandler {
+    private static final Log log = LogFactory.getLog(JMSTransportHandler.class);
     private ThrottleProperties.JMSConnectionProperties jmsConnectionProperties;
+    private JMSConnectionFactory jmsConnectionFactory;
+    private JMSListener jmsListener;
+    private boolean stopIssued = false;
 
-    public JMSThrottleDataRetriever() {
+    public JMSTransportHandler() {
         if (ServiceReferenceHolder.getInstance().getAPIMConfiguration() != null) {
             jmsConnectionProperties =
                     ServiceReferenceHolder.getInstance().getAPIMConfiguration().getThrottleProperties()
@@ -59,9 +62,9 @@ public class JMSThrottleDataRetriever {
                 parameters.put(name, properties.getProperty(name));
             }
             String destination = jmsConnectionProperties.getDestination();
-            JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters,
-                                                                                 ListenerConstants
-                                                                                         .CONNECTION_FACTORY_NAME);
+            jmsConnectionFactory = new JMSConnectionFactory(parameters,
+                                                            ListenerConstants
+                                                                    .CONNECTION_FACTORY_NAME);
             Map<String, String> messageConfig = new HashMap<String, String>();
             messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
             int minThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMinThreadPoolSize();
@@ -70,20 +73,39 @@ public class JMSThrottleDataRetriever {
                     .getKeepAliveTimeInMillis();
             int jobQueueSize = jmsConnectionProperties.getJmsTaskManagerProperties().getJobQueueSize();
             JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory,
-                                      ListenerConstants.CONNECTION_FACTORY_NAME,
-                                      new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
-                                                           keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
-                                                           "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+                                                                                              ListenerConstants.CONNECTION_FACTORY_NAME,
+                                                                                              new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                                                                                                                   keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                                                                                                                   "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
             jmsTaskManager.setJmsMessageListener(new JMSMessageListener(ServiceReferenceHolder.getInstance()
                                                                                 .getThrottleDataHolder()));
 
-            JMSListener jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
-                                                      jmsTaskManager);
+            jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
+                                          jmsTaskManager);
             jmsListener.startListener();
             log.info("Starting jms topic consumer thread...");
 
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
+        }
+    }
+
+    public void unSubscribeFromEvents() {
+
+        log.info("Starting to Shutdown the Listener...");
+
+        if (jmsListener != null && !stopIssued && jmsConnectionFactory != null) {
+            // To prevent multiple components executing stop at the same time,
+            // we are checking if a shutdown triggered by a previous thread is in progress.
+            synchronized (jmsListener) {
+                if (!stopIssued) {
+                    log.debug("Stopping JMS Listener");
+                    jmsListener.stopListener();
+                    log.debug("JMS Listener Stopped");
+                    jmsConnectionFactory.stop();
+                    log.debug("JMS Connection Factory Stopped");
+                }
+            }
         }
     }
 
