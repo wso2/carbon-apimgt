@@ -49,18 +49,33 @@ include("/jagg/jagg.jag");
         }        
         description = request.getParameter("description");       
         mod = jagg.module("application");
-        result = mod.addApplication(username, application, tier, callbackUrl, description);
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(user.username);
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var applicationTierType = org.wso2.carbon.apimgt.impl.APIConstants.TIER_APPLICATION_TYPE;
+        var applicationTierList = APIUtil.getTiers(applicationTierType, tenantDomain);
 
-        if (result.error) {
-            obj = {
-                error:true,
-                message:result.error
-            };
-        } else {
-            obj = {
-                error:false,
-                status:result.status
+        if (!applicationTierList.isEmpty() && applicationTierList.containsKey(tier)) {
+            result = mod.addApplication(username, application, tier, callbackUrl, description);
+            if (result.error) {
+                obj = {
+                    error: true,
+                    message: result.error
+                };
+            } else {
+                obj = {
+                    error: false,
+                    status: result.status
+                }
             }
+        } else {
+            var log = new Log();
+            var errorMessage = "Specified application tier " + tier + " does not exist.";
+            log.error(errorMessage);
+            obj = {
+                error: true,
+                message: errorMessage
+            };
         }
         print(obj);
     } else {

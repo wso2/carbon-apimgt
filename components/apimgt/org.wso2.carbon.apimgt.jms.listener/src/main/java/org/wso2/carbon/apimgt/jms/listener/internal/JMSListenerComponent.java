@@ -29,16 +29,18 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.jms.listener.utils.JMSThrottleDataRetriever;
+import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
+import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
 
 
 /**
- * This components start the JMS listeners
+ * This component start the JMS listeners
  */
 
 /**
@@ -55,6 +57,9 @@ import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
 public class JMSListenerComponent implements ServiceListener {
 
     private static final Log log = LogFactory.getLog(JMSListenerComponent.class);
+    private JMSTransportHandler jmsTransportHandler;
+    private BundleContext bundleContext;
+    private ServiceRegistration registration;
 
     protected void activate(ComponentContext context) {
         log.debug("Activating component...");
@@ -70,6 +75,7 @@ public class JMSListenerComponent implements ServiceListener {
         }
 
         BundleContext bundleContext = context.getBundleContext();
+        this.bundleContext = bundleContext;
         boolean andesBundlePresent = false;
 
         for (Bundle bundle : bundleContext.getBundles()) {
@@ -106,8 +112,21 @@ public class JMSListenerComponent implements ServiceListener {
     }
 
     private void startJMSListener() {
-        JMSThrottleDataRetriever jmsThrottleDataRetriever = new JMSThrottleDataRetriever();
-        jmsThrottleDataRetriever.subscribeForJmsEvents();
+        jmsTransportHandler = new JMSTransportHandler();
+        jmsTransportHandler.subscribeForJmsEvents();
+        if(bundleContext != null) {
+            registration = bundleContext.registerService(
+                    JMSListenerShutDownService.class.getName(),
+                    new JMSListenerShutDownService() {
+
+                        @Override
+                        public void shutDownListener() {
+                            // Shutting down the listener
+                            log.debug("Shutdown service called... Starting to shutdown listener.");
+                            jmsTransportHandler.unSubscribeFromEvents();
+                        }
+                    }, null);
+        }
     }
 
 
@@ -135,7 +154,14 @@ public class JMSListenerComponent implements ServiceListener {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating component");
         }
-
+        if(this.registration != null){
+            this.registration.unregister();
+        }
+        if(jmsTransportHandler != null){
+            // This method will make shutdown the Listener.
+            log.debug("Unsubscribing from JMS Events...");
+            jmsTransportHandler.unSubscribeFromEvents();
+        }
     }
 
     @Override

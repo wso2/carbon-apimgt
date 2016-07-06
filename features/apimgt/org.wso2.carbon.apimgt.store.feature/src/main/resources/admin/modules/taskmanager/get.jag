@@ -13,9 +13,13 @@ var options = new Array();
 options.useSOAP = 1.2;
 options.action = "http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803/simpleQuery";
 var cookie=session.get("workflowCookie");
+
+var encodedCredentials = getAuthorizationHeader();
+var basicHeader = "Basic " + encodedCredentials;
+
 if(cookie != null){
     options["HTTPHeaders"] = [
-                                  { name : "Cookie", value :cookie },
+                                  { name : "Cookie", value :cookie },{ name : "Authorization", value :basicHeader.toString() }
                             ];
 
     var searchBy='';
@@ -100,8 +104,12 @@ if (cookie==null) {
             });
             return;
 }else{
+
+var encodedCredentials = getAuthorizationHeader();
+var basicHeader = "Basic " + encodedCredentials;
+
 options["HTTPHeaders"] = [
-                              { name : "Cookie", value :cookie },
+                              { name : "Cookie", value :cookie },{ name : "Authorization", value :basicHeader.toString() }
                         ];
 
 var payload = '<ns:loadTask xmlns:ns="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803" xmlns:ns1="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/types/200803">'+
@@ -136,7 +144,18 @@ return false;
 }
 };
 
+var getAuthorizationHeader=function(){
+var Base64Utils = Packages.org.apache.axiom.util.base64.Base64Utils;
+var inputString = adminUserName + ":" + adminPassword;
+var byteArray = [];
 
+for (var i = 0; i < inputString.length; ++i) {
+    byteArray.push(inputString.charCodeAt(i));
+}
+var encodedString = Base64Utils.encode(byteArray);
+
+return encodedString;
+};
 
 
 

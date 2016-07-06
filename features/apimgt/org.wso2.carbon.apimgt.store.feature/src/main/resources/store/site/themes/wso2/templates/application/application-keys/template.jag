@@ -190,6 +190,8 @@
 		  </div>
 		</div>
 	  	{{else}}
+	  	  <h4>Map Existing OAuth Keys</h4>
+	  	  <p>If you already has an OAuth application registered with the IdP you can use those keys without generating one.</p>
 		  <div class="form-group">	    
 		    <button  class="btn btn-secondory provide_keys">Provide Keys</button>	        
 		  </div>

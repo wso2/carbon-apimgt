@@ -423,11 +423,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 //ignoring sql injection for keyString since it construct locally and no public access
                 query = "SELECT " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + ',' + APIUsageStatisticsClientConstants.API
-                        + ",SUM(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
+                        + ',' + APIUsageStatisticsClientConstants.API_PUBLISHER + ',' + "SUM("
+                        + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString
-                        + ") AND time BETWEEN ? AND ? GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                        + "," + APIUsageStatisticsClientConstants.API;
+                        + ") AND time BETWEEN ? AND ? GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
+                        + APIUsageStatisticsClientConstants.API_PUBLISHER + "," + APIUsageStatisticsClientConstants.API;
 
                 statement = connection.prepareStatement(query);
                 int index = 1;
@@ -437,6 +438,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 FaultCountDTO faultCountDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
+                    apiName = apiName + " (" + publisher + ")";
                     long faultCount = resultSet.getLong("total_faults");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
                     String appName = subscriberAppsMap.get(consumerKey);
@@ -543,14 +546,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.TIME;
                 } else {
                     query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
+                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.METHOD + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
                             + APIUsageStatisticsClientConstants.RESOURCE + " FROM " + tableName + " WHERE "
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                             " AND " + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
-                            + APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD
-                            + "," + APIUsageStatisticsClientConstants.RESOURCE;
+                            + APIUsageStatisticsClientConstants.API + ","
+                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
+                            + APIUsageStatisticsClientConstants.METHOD + ","
+                            + APIUsageStatisticsClientConstants.RESOURCE;
                 }
 
                 statement = connection.prepareStatement(query);
@@ -561,6 +567,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 AppCallTypeDTO appCallTypeDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
+                    apiName = apiName + " (" + publisher + ")";
                     String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
                     String resource = resultSet.getString(APIUsageStatisticsClientConstants.RESOURCE);
@@ -675,12 +683,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME;
                 } else {
                     query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
+                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + "," + " SUM("
                             + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " + " FROM "
                             + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE "
                             + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")  AND "
                             + APIUsageStatisticsClientConstants.TIME + " BETWEEN ? AND ?  GROUP BY "
                             + APIUsageStatisticsClientConstants.API + ","
+                            + APIUsageStatisticsClientConstants.API_PUBLISHER + ","
                             + APIUsageStatisticsClientConstants.CONSUMERKEY;
                 }
 
@@ -693,6 +703,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 PerAppApiCountDTO apiUsageDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
+                    apiName = apiName + " (" + publisher + ")";
                     long requestCount = resultSet.getLong("total_calls");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
                     String appName = subscriberAppsMap.get(consumerKey);
