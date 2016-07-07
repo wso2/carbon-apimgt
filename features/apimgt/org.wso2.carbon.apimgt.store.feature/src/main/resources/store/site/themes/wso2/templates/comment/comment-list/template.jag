@@ -6,11 +6,15 @@
         for(i = 0; i < length; i++) {
             comment = comments[i];
     %>
-    <div class="comment">
-        <hr />
-        <div><%=i18n.localize("postComment")%> <strong><%=comment.username%></strong> <%=i18n.localize("onText")%> <span class="dateFull"><%=comment.createdTime%></span></div>
-        <div class="truncate-children">
-            <span class="comment-text" title="<%=comment.comment%>"><%=comment.comment%></span>
+    <div class="comment-container">
+        <div class="comment-box">
+            <div class="comment-body">
+                <span class="tip tip-down"></span>
+                <div class="comment-message">
+                    <span class="comment-text word-break"><%=comment.comment%></span>
+                </div>
+            </div>
+            <div class="comment-extra"><%=i18n.localize("postComment")%> <strong><%=comment.username%></strong> <%=i18n.localize("onText")%> <span class="dateFull"><%=comment.createdTime%></span></div>
         </div>
     </div>
     <% }
