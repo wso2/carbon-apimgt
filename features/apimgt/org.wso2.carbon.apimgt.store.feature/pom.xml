@@ -197,18 +197,18 @@
                                 <bundleDef>org.wso2.carbon.analytics-common:org.wso2.carbon.event.execution.manager.stub:${carbon.analytics.common.version}</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:4.4.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:4.5.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.user.registration.server:5.1.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.user.registration.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>commons-io.wso2:commons-io:2.4.0.wso2v1</importBundleDef>
+                                <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:3.4.0.wso2v1</importBundleDef>
+                                <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:${commons-lang3.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>
-                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v2</importBundleDef>
+                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:${waffle-jna.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                         </configuration>

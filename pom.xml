@@ -983,7 +983,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.4.0.wso2v1</version>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -1103,6 +1103,7 @@
         <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
 
         <!--lib thrift version range-->
+        <libthrift.version>0.8.0.wso2v1</libthrift.version>
         <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
 
         <!-- P2 Plugin Version -->
@@ -1152,7 +1153,7 @@
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
         <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
-        <commons-io.version>2.0.0.wso2v1</commons-io.version>
+        <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <google.code.gson.version>2.2.4</google.code.gson.version>
         <httpcomponents.version>4.2.5</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
@@ -1200,6 +1201,7 @@
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.1.6</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v2</waffle-jna.version>
+        <commons-lang3.version>3.4.0.wso2v1</commons-lang3.version>
     </properties>
 </project>
 
