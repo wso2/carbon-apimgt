@@ -167,14 +167,14 @@
         }
       }
     },
-    "/throttling/policies/application/{policyName}": {
+    "/throttling/policies/application/{policyId}": {
       "get": {
         "x-scope": "apim:tier_view",
         "summary": "Retrieve an Application Policy",
         "description": "Retrieve an Application Policy providing the policy name.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -230,7 +230,7 @@
         "description": "Delete an Application level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -266,7 +266,7 @@
         "description": "Update an Application level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "in": "body",
@@ -447,14 +447,14 @@
         }
       }
     },
-    "/throttling/policies/subscription/{policyName}": {
+    "/throttling/policies/subscription/{policyId}": {
       "get": {
         "x-scope": "apim:tier_view",
         "summary": "Retrieve a Subscription Policy",
         "description": "Retrieve a Subscription Policy providing the policy name.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -510,7 +510,7 @@
         "description": "Delete a Subscription level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -546,7 +546,7 @@
         "description": "Update a Subscription level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "in": "body",
@@ -616,11 +616,11 @@
         }
       }
     },
-    "/throttling/policies/global": {
+    "/throttling/policies/custom": {
       "get": {
         "x-scope": "apim:tier_view",
-        "summary": "Get all Global level throttle policies",
-        "description": "Get all Global level throttle policies\n",
+        "summary": "Get all Custom Rules",
+        "description": "Get all Custom Rules\n",
         "parameters": [
           {
             "$ref": "#/parameters/limit"
@@ -645,7 +645,7 @@
           "200": {
             "description": "OK.\nPolicies returned\n",
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicyList"
+              "$ref": "#/definitions/CustomRuleList"
             },
             "headers": {
               "Content-Type": {
@@ -675,16 +675,16 @@
       },
       "post": {
         "x-scope": "apim:tier_manage",
-        "summary": "Add a Global level throttle policy",
-        "description": "Add a Global level throttle policy\n",
+        "summary": "Add a Custom Rule",
+        "description": "Add a Custom Rule\n",
         "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "Global level policy object that should to be added\n",
+            "description": "Custom Rule object that should to be added\n",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicy"
+              "$ref": "#/definitions/CustomRule"
             }
           },
           {
@@ -698,7 +698,7 @@
           "201": {
             "description": "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n",
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicy"
+              "$ref": "#/definitions/CustomRule"
             },
             "headers": {
               "Location": {
@@ -727,14 +727,14 @@
         }
       }
     },
-    "/throttling/policies/global/{policyName}": {
+    "/throttling/policies/custom/{ruleId}": {
       "get": {
         "x-scope": "apim:tier_view",
-        "summary": "Retrieve a Global Policy",
-        "description": "Retrieve a Global Policy providing the policy name.\n",
+        "summary": "Retrieve a Custom Rule",
+        "description": "Retrieve a Custom Rule providing the policy name.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/ruleId"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -750,7 +750,7 @@
           "200": {
             "description": "OK.\nPolicy returned\n",
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicy"
+              "$ref": "#/definitions/CustomRule"
             },
             "headers": {
               "Content-Type": {
@@ -786,11 +786,11 @@
       },
       "delete": {
         "x-scope": "apim:tier_manage",
-        "summary": "Delete a Global level throttle policy",
-        "description": "Delete a Global level throttle policy\n",
+        "summary": "Delete a Custom Rule",
+        "description": "Delete a Custom Rule\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/ruleId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -822,11 +822,11 @@
       },
       "put": {
         "x-scope": "apim:tier_manage",
-        "summary": "Update a Global level throttle policy",
-        "description": "Update a Global level throttle policy\n",
+        "summary": "Update a Custom Rule",
+        "description": "Update a Custom Rule\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/ruleId"
           },
           {
             "in": "body",
@@ -834,7 +834,7 @@
             "description": "Policy object that needs to be modified\n",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicy"
+              "$ref": "#/definitions/CustomRule"
             }
           },
           {
@@ -854,7 +854,7 @@
           "200": {
             "description": "OK.\nPolicy updated.\n",
             "schema": {
-              "$ref": "#/definitions/GlobalThrottlePolicy"
+              "$ref": "#/definitions/CustomRule"
             },
             "headers": {
               "Location": {
@@ -1007,14 +1007,14 @@
         }
       }
     },
-    "/throttling/policies/advanced-policies/{policyName}": {
+    "/throttling/policies/advanced-policies/{policyId}": {
       "get": {
         "x-scope": "apim:tier_view",
         "summary": "Retrieve an Advanced Policy",
         "description": "Retrieve a Advanced Policy providing the policy name.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1070,7 +1070,7 @@
         "description": "Delete an Advanced level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -1106,7 +1106,7 @@
         "description": "Update an Advanced level throttle policy\n",
         "parameters": [
           {
-            "$ref": "#/parameters/policyName"
+            "$ref": "#/parameters/policyId"
           },
           {
             "in": "body",
@@ -1458,10 +1458,17 @@
     }
   },
   "parameters": {
-    "policyName": {
-      "name": "policyName",
+    "policyId": {
+      "name": "policyId",
       "in": "path",
-      "description": "Thorttle policy name\n",
+      "description": "Thorttle policy UUID\n",
+      "type": "string",
+      "required": true
+    },
+    "ruleId": {
+      "name": "ruleId",
+      "in": "path",
+      "description": "Custom rule UUID\n",
       "type": "string",
       "required": true
     },
@@ -1739,8 +1746,8 @@
         }
       }
     },
-    "GlobalThrottlePolicy": {
-      "title": "Global Throttle Policy",
+    "CustomRule": {
+      "title": "Custom Rule",
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
@@ -1757,26 +1764,26 @@
         }
       ]
     },
-    "GlobalThrottlePolicyList": {
-      "title": "Global Level Throttle Policy List",
+    "CustomRuleList": {
+      "title": "Custom Rule List",
       "properties": {
         "count": {
           "type": "integer",
-          "description": "Number of Global throttle policies returned.\n",
+          "description": "Number of Custom Rules returned.\n",
           "example": 1
         },
         "next": {
           "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/global?limit=1&offset=2&query=\"\n"
+          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/custom?limit=1&offset=2&query=\"\n"
         },
         "previous": {
           "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/global?limit=1&offset=0&query=\"\n"
+          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/custom?limit=1&offset=0&query=\"\n"
         },
         "list": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/GlobalThrottlePolicy"
+            "$ref": "#/definitions/CustomRule"
           }
         }
       }
