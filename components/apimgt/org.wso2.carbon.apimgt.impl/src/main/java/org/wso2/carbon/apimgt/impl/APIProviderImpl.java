@@ -4403,8 +4403,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIPolicyByUUID(uuid);
+    }
+
+    @Override
     public ApplicationPolicy getApplicationPolicy(String username, String policyName) throws APIManagementException {
         return apiMgtDAO.getApplicationPolicy(policyName, APIUtil.getTenantId(username));
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getApplicationPolicyByUUID(uuid);
     }
 
     @Override
@@ -4413,8 +4423,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionPolicyByUUID(uuid);
+    }
+
+    @Override
     public GlobalPolicy getGlobalPolicy(String policyName) throws APIManagementException {
         return apiMgtDAO.getGlobalPolicy(policyName);
+    }
+
+    @Override
+    public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getGlobalPolicyByUUID(uuid);
     }
 
     /**

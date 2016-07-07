@@ -24,6 +24,7 @@ import java.util.List;
 
 public class Policy implements Serializable {
     private int policyId;
+    private String uuid;
     private String policyName;
     private String displayName;
     private String description;
@@ -61,6 +62,14 @@ public class Policy implements Serializable {
 
     public void setPolicyName(String policyName) {
         this.policyName = policyName;
+    }
+
+    public String getUUID() {
+        return uuid;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
     }
 
     public void setDefaultQuotaPolicy(QuotaPolicy defaultQuotaPolicy) {

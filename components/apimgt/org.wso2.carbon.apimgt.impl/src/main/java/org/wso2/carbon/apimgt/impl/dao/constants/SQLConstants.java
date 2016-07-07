@@ -2162,30 +2162,31 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN) \n" +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, RATE_LIMIT_COUNT, \n" +
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
-            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, IS_DEPLOYED) \n" +
-            "VALUES (?,?,?,?,?,?)";
+            "INSERT INTO AM_POLICY_GLOBAL (NAME ,TENANT_ID, KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY, " 
+                    + "IS_DEPLOYED, UUID) \n" +
+            "VALUES (?,?,?,?,?,?,?)";
 
     public static final String GET_APP_POLICY_NAMES =
             " SELECT " +
@@ -2260,6 +2261,13 @@ public class SQLConstants {
             " WHERE" +
             "   NAME =?";
 
+    public static final String GET_GLOBAL_POLICY_BY_UUID =
+            "SELECT " +
+            "   * " +
+            "FROM " +
+            "   AM_POLICY_GLOBAL " +
+            "WHERE" +
+            "   UUID =?";
 
     public static final String GET_APPLICATION_POLICY_SQL =
             "SELECT "+
@@ -2270,6 +2278,14 @@ public class SQLConstants {
                     "NAME = ? AND " +
                     "TENANT_ID =?";
 
+    public static final String GET_APPLICATION_POLICY_BY_UUID_SQL =
+            "SELECT " +
+                "* " + 
+            "FROM " +
+                "AM_POLICY_APPLICATION " +
+            "WHERE " +
+                "UUID = ?";
+
     public static final String GET_SUBSCRIPTION_POLICY_SQL =
             "SELECT "+
                     "* " +
@@ -2279,7 +2295,13 @@ public class SQLConstants {
                     "NAME = ? AND " +
                     "TENANT_ID =?";
 
-
+    public static final String GET_SUBSCRIPTION_POLICY_BY_UUID_SQL =
+            "SELECT "+
+                    "* " +
+            "FROM " +
+                    "AM_POLICY_SUBSCRIPTION " +
+            "WHERE " +
+                    "UUID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_SQL =
             "UPDATE AM_POLICY_APPLICATION " +
@@ -2305,6 +2327,31 @@ public class SQLConstants {
                     "TIME_UNIT = ?, " +
                     " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_BY_UUID_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+                    "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ? " +
+                    "WHERE UUID = ?";
+
+    public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
+            "UPDATE AM_POLICY_APPLICATION " +
+                    "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "CUSTOM_ATTRIBUTES = ? "+
+                    "WHERE UUID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_SQL =
             "UPDATE AM_POLICY_SUBSCRIPTION " +
@@ -2339,6 +2386,39 @@ public class SQLConstants {
                     " CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
+    public static final String UPDATE_SUBSCRIPTION_POLICY_BY_UUID_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+                    "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ? "+
+                    "WHERE UUID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
+            "UPDATE AM_POLICY_SUBSCRIPTION " +
+                    "SET " +
+                    "DISPLAY_NAME = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "QUOTA_TYPE = ?, " +
+                    "QUOTA = ?, " +
+                    "QUOTA_UNIT = ?, " +
+                    "UNIT_TIME = ?, " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "STOP_ON_QUOTA_REACH = ?, " +
+                    "BILLING_PLAN = ?, "+
+                    "CUSTOM_ATTRIBUTES = ? "+
+                    "WHERE UUID = ?";
+
     public static final String UPDATE_GLOBAL_POLICY_SQL =
             "UPDATE AM_POLICY_GLOBAL " +
             "SET " +
@@ -2346,6 +2426,14 @@ public class SQLConstants {
                     "SIDDHI_QUERY = ?, " +
                     "KEY_TEMPLATE = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_GLOBAL_POLICY_BY_UUID_SQL =
+            "UPDATE AM_POLICY_GLOBAL " +
+                    "SET " +
+                    "DESCRIPTION = ?, " +
+                    "SIDDHI_QUERY = ?, " +
+                    "KEY_TEMPLATE = ? " +
+                    "WHERE UUID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
             "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
@@ -2381,12 +2469,12 @@ public class SQLConstants {
 		public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
 
 		public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
-				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, APPLICABLE_LEVEL) \n"
-				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, UUID, APPLICABLE_LEVEL) \n"
+				+ " VALUES (?,?,?,?,? ,?,?,?,?,? ,?,?)";
 
 		public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
 				+ " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
-				+ " IS_DEPLOYED, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
 
 		public static final String UPDATE_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET " + "NAME = ?," + "DISPLAY_NAME = ?,"
 				+ " TYPE = ?," + "TENANT_ID = ?," + "APPLICABLE_LEVEL = ? ," + "DESCRIPTION = ? ,"
@@ -2398,11 +2486,17 @@ public class SQLConstants {
 		public static final String GET_API_POLICIES = " SELECT " + "   * " + "FROM " + "   AM_API_THROTTLE_POLICY "
 				+ " WHERE" + "   TENANT_ID =?";
 
-		public static final String GET_API_POLICY_ID_SQL = "SELECT " + "POLICY_ID " + "FROM "
+		public static final String GET_API_POLICY_ID_SQL = "SELECT " + "POLICY_ID, UUID " + "FROM "
 				+ " AM_API_THROTTLE_POLICY " + "WHERE " + "NAME = ? AND " + "TENANT_ID = ?";
+
+        public static final String GET_API_POLICY_ID_BY_UUID_SQL = "SELECT " + "POLICY_ID, UUID " + "FROM "
+                + " AM_API_THROTTLE_POLICY " + "WHERE " + "UUID = ?";
 
 		public static final String GET_API_POLICY_SQL = "SELECT " + "* " + "FROM " + "AM_API_THROTTLE_POLICY "
 				+ " WHERE " + "NAME = ? AND " + "TENANT_ID =?";
+
+        public static final String GET_API_POLICY_BY_UUID_SQL = "SELECT " + "* " + "FROM " + "AM_API_THROTTLE_POLICY "
+                + " WHERE " + "UUID = ?";
 
 		public static final String UPDATE_API_POLICY_STATUS_SQL = "UPDATE AM_API_THROTTLE_POLICY SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
 
