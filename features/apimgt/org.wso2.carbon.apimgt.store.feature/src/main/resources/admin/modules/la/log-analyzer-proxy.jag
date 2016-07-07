@@ -18,8 +18,7 @@
  */
 
     include("/jagg/jagg.jag");
-    include("/site/pages/header.jag");
-    
+    include("/site/pages/header.jag");  
     (function () {
         var user = jagg.getUser();
         if (!user){
