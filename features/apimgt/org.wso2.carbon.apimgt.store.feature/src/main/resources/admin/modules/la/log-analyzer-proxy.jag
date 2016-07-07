@@ -68,7 +68,7 @@
         var tableName = request.getParameter("tablename");
 
         if(tables.indexOf(tableName) > -1){
-          if(tenantId == "-1234"){
+          if(tenantId.equals("-1234")){
             payload.query = payload.query.concat(" AND tenantID:\"*\"");
           }else{
             payload.query = payload.query.concat(" AND tenantID:\"" + tenantId + "\"");
