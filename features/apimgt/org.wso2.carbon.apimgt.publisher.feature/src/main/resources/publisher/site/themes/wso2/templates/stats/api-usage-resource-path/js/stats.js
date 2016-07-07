@@ -135,7 +135,6 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
             if (!json.error) {
                 $('#resourcePathUsageTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-
                 if (length == 0) {
                     $('#resourcePathUsageTable').hide();
                     $('div#resourcePathUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
@@ -154,7 +153,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                 $dataTable.append($('<thead class="tableHead"><tr>'+
                                         '<th id="api">api</th>'+
                                         '<th id="version">version</th>'+
-                                        '<th id="context">context</th>'+
+                                        '<th id="context">resourcePath</th>'+
                                         '<th id="method">method</th>'+
                                         '<th style="text-align:right">Hits</th>'+
                                     '</tr></thead>'));
@@ -180,7 +179,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                                      var t;
 
                                      for(t=0;t<apis[y][1][z][1].length;t++){
-                                         if(apis[y][1][z][1][t][0] == json.usage[x].context){
+                                         if(apis[y][1][z][1][t][0] == json.usage[x].resourcePath){
                                              webresourceIndex = t;
                                               var b;
 
@@ -207,7 +206,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                          var method =[];
                          requestCount.push([json.usage[x].count,json.usage[x].time]);
                          method.push([json.usage[x].method,requestCount]);
-                         resourse.push([json.usage[x].context,method]);
+                         resourse.push([json.usage[x].resourcePath,method]);
                          version.push([json.usage[x].version,resourse]);
                          apis.push([json.usage[x].apiName,version]);
                      }else{
@@ -217,7 +216,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                               var method =[];
                              requestCount.push([json.usage[x].count,json.usage[x].time]);
                              method.push([json.usage[x].method,requestCount]);
-                             resourse.push([json.usage[x].context,method]);
+                             resourse.push([json.usage[x].resourcePath,method]);
                              apis[apiIndex][1].push([json.usage[x].version,resourse]);
                          }else{
                              if(webresourceIndex == -1){
@@ -225,7 +224,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                                  var method =[];
                                  requestCount.push([json.usage[x].count,json.usage[x].time]);
                                  method.push([json.usage[x].method,requestCount]);
-                                 apis[apiIndex][1][apiVersionIndex][1].push([json.usage[x].context,method]);
+                                 apis[apiIndex][1][apiVersionIndex][1].push([json.usage[x].resourcePath,method]);
                              }else{
                                 if(methodIndex == -1){
                                      var requestCount = [];

@@ -80,7 +80,7 @@ public class APIKeyValidator {
             this.dataStore = new ThriftAPIDataStore();
         }
 
-        this.gatewayKeyCacheEnabled = isAPIKeyValidationEnabled();
+        this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
 
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
 
@@ -223,11 +223,11 @@ public class APIKeyValidator {
         dataStore.cleanup();
     }
 
-    public boolean isAPIKeyValidationEnabled() {
+    public boolean isGatewayTokenCacheEnabled() {
         try {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            return Boolean.parseBoolean(serviceURL);
+            String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
         }
