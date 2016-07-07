@@ -141,13 +141,14 @@
         <repository>
             <id>wso2-staging</id>
             <name>WSO2 staging Repository</name>
-            <url>https://maven.wso2.org/nexus/content/repositories/orgwso2siddhi-1005/</url>
+            <url>http://maven.wso2.org/nexus/content/repositories/orgwso2carbondeployment-1003/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
+
     </repositories>
 
     <pluginRepositories>
@@ -982,7 +983,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.4.0.wso2v1</version>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -1061,11 +1062,11 @@
         <analytics.common.version>1.0.0-alpha1</analytics.common.version>
         <carbon.analytics.common.version>5.1.0-beta</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.6</carbon.kernel.version>
+        <carbon.kernel.version>4.4.7</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.5.3</carbon.commons.version>
-        <carbon.registry.version>4.5.4</carbon.registry.version>
+        <carbon.commons.version>4.5.4</carbon.commons.version>
+        <carbon.registry.version>4.5.5</carbon.registry.version>
         <carbon.mediation.version>4.6.1-BETA2</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
@@ -1078,7 +1079,7 @@
         <carbon.identity-outbound-auth-samlsso.version>5.1.1-SNAPSHOT</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.6.3</carbon.governance.version>
-        <carbon.deployment.version>4.6.2-SNAPSHOT</carbon.deployment.version>
+        <carbon.deployment.version>4.7.0</carbon.deployment.version>
         <carbon.multitenancy.version>4.5.2</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
@@ -1102,6 +1103,7 @@
         <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
 
         <!--lib thrift version range-->
+        <libthrift.version>0.8.0.wso2v1</libthrift.version>
         <libthrift.import.version.range>[0.8.0.wso2v1,0.9.0)</libthrift.import.version.range>
 
         <!-- P2 Plugin Version -->
@@ -1151,7 +1153,7 @@
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
         <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
-        <commons-io.version>2.0.0.wso2v1</commons-io.version>
+        <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <google.code.gson.version>2.2.4</google.code.gson.version>
         <httpcomponents.version>4.2.5</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
@@ -1198,6 +1200,8 @@
         <fasterxml.jackson.version>2.7.2</fasterxml.jackson.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.1.6</carbon.broker.version>
+        <waffle-jna.version>1.6.wso2v2</waffle-jna.version>
+        <commons-lang3.version>3.4.0.wso2v1</commons-lang3.version>
     </properties>
 </project>
 

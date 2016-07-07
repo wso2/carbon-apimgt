@@ -197,12 +197,12 @@
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
-                                <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
+                                <importBundleDef>libthrift.wso2:libthrift:${libthrift.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:4.4.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:5.1.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:5.1.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
