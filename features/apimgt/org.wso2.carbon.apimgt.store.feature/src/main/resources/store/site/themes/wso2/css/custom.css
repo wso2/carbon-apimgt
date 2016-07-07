@@ -183,6 +183,7 @@ a.remove_rating:hover{
 }
 /* Customize swagger UI */
 #swagger-ui-container {max-width: 100%;}
+.swagger-section .swagger-ui-wrap{ min-width:initial!important;}
 #swagger-ui-container .container{ width: 100% !important;padding: 0 !important; }
 #swagger-ui-container #api_info { display: none;}
 #resources_container ul { padding-left: 0px;}
