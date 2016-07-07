@@ -983,7 +983,14 @@ var loganalyzerDashboard = {
                                     "title": "Live Log viewer",
                                     "borders": true
                                 },
-                                "options": {},
+                                "options": {
+                                                  "type": {
+                                                    "type": "STRING",
+                                                    "title": "Gadget Type",
+                                                    "value": "APIM",
+                                                    "options": [],
+                                                    "required": true
+                                                  }},
                                 "locale_titles": {}
                             }
                         }
