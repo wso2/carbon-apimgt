@@ -18,13 +18,30 @@
  */
 
     include("/jagg/jagg.jag");
-    include("/site/pages/header.jag");
+    include("/site/pages/header.jag");  
     (function () {
         var user = jagg.getUser();
         if (!user){
             response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
             return;
         }
+
+	    var tables = ["LOGANALYZER",
+		  "LOGANALYZER_APIM_ARTIFACT_DELETED_DAILY",
+                  "LOGANALYZER_APIM_ARTIFACT_DELETED_WEEKLY",
+                  "LOGANALYZER_APIM_ARTIFACT_DELETED_MONTHLY",
+                  "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_DAILY",
+                  "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_MONTHLY",
+                  "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_WEEKLY",
+                  "MESSAGE_LEVEL_ERROR_DAILY",
+                  "MESSAGE_LEVEL_ERROR_MONTHLY",
+                  "MESSAGE_LEVEL_ERROR_WEEKLY",
+                  "CLASS_LEVEL_ERROR_DAILY",
+                  "CLASS_LEVEL_ERROR_MONTHLY",
+                  "CLASS_LEVEL_ERROR_WEEKLY",
+                  "LOGANALYZER_ERROR_CODE_DISTRIBUTION_DAILY",
+                  "LOGANALYZER_ERROR_CODE_DISTRIBUTION_WEEKLY",
+                  "LOGANALYZER_ERROR_CODE_DISTRIBUTION_MONTHLY"];
 
         var uri = request.getRequestURI();
         var uriMatcher = new URIMatcher(String(uri));
@@ -48,12 +65,15 @@
         var method = request.getMethod();
         var targetURL = analyticsConfigInstance.getDasServerUrl() + "/portal/controllers/apis/analytics.jag";
         var payload = request.getContent();
+        var tableName = request.getParameter("tablename");
 
-        if(tenantId == "-1234" && isTenantAllowAllUsers){
-            payload.query = payload.query.replace(/#tenantID#/i, "\"*\"");
-        }else{
-            payload.query = payload.query.replace(/#tenantID#/i, "\"" + tenantId + "\"");
-        }
+        if(tables.indexOf(tableName) > -1){
+          if(tenantId.equals("-1234")){
+            payload.query = payload.query.concat(" AND tenantID:\"*\"");
+          }else{
+            payload.query = payload.query.concat(" AND tenantID:\"" + tenantId + "\"");
+          }
+     }
 
         if(method == undefined){
             log.error("Method Undefined. Target URL: " + targetURL);
