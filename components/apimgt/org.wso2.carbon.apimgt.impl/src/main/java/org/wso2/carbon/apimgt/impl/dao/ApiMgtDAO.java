@@ -101,14 +101,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8422,7 +8415,7 @@ public class ApiMgtDAO {
 
                 String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
 
-                ps = connection.prepareStatement(emailListSaveQuery);
+                ps = connection.prepareStatement(emailListSaveQuery, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, userName);
                 ps.setString(2, stakeHolder);
                 ps.execute();
