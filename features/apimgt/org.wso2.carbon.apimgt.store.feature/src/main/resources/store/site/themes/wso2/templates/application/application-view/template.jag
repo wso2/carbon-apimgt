@@ -32,13 +32,13 @@ for(var i=0;i < outputs.tiers.length; i++){
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Status")%></label>
     <div class="col-sm-9">
-      <p class="form-control-static"><strong><% if(application.status != "APPROVED" && application.status != "REJECTED" ){%> INACTIVE <%} else { %><%=encode.forHtml(application.status) %><%}%></strong></p>
+      <p class="form-control-static"><strong><% if(application.status != "APPROVED" && application.status != "REJECTED" ){%> <%=i18n.localize("INACTIVE") %> <%} else { %><%= i18n.localize(encode.forHtml(application.status)) %><%}%></strong></p>
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Per Token Quota")%></label>
     <div class="col-sm-9">
-      <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;&nbsp;<%=app_tier.tierDescription %></p>
+      <p class="form-control-static"><strong><%= i18n.localize(encode.forHtml(application.tier)) %></strong>&nbsp;&nbsp;&nbsp;<%=i18n.localize(app_tier.tierDescription) %></p>
       <p><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%></p>
     </div>
   </div>

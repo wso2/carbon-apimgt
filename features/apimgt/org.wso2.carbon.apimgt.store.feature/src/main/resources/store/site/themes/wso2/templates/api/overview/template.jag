@@ -46,8 +46,9 @@
                 <%}
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
-                %>
-    	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
+                        // @todo: param_string
+                %> 
+    	            <h5 class="add-margin-top-2x"><%=i18n.localize(environmentName)%> <%=i18n.localize("URLs")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
@@ -93,7 +94,7 @@
         <% } %>
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
-	 		<h4 class="add-margin-top-5x">Business Information</h4>
+	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
 		    		<p class="no-margin"><strong><%=i18n.localize("Business Owner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
 		    			<% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
@@ -118,7 +119,7 @@
     </ul>
     <div class="share-container add-margin-top-2x">
         <div id="share_div_embed" class="share_dives highlight" style="display:none">
-            <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
+            <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
         </div>
 
         <div id="share_div_social" class="share_dives">
