@@ -59,7 +59,7 @@
 					<button type="button" class="navbar-toggle collapsed"
 						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
 						aria-controls="navbar">
-						<span class="sr-only">Toggle navigation</span> <span
+						<span class="sr-only"><%=i18n.localize("Toggle navigation")%></span> <span
 							class="icon-bar"></span> <span class="icon-bar"></span> <span
 							class="icon-bar"></span>
 					</button>
@@ -85,24 +85,24 @@
                     	<% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){ %>
 	                        <%if(isCreatePermitted) {%>
 	                        <li>
-	                            <a title="<%=i18n.localize("addAPI")%>" href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                            <a title="<%=i18n.localize("Add New API")%>" href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("addAPI")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("addAPI")%>"></i>
+	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add New API")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Add New API")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("addAPI")%>
+	                                <%=i18n.localize("Add New API")%>
 	                            </a>
 	                        </li>
 	                        <%} %>
                         <%} %>
                         <% if(reqUrl.indexOf(addUrl)>=0 ||reqUrl.indexOf(addMappedUrl)>=0){ %>
 	                        <li>
-	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("goBack")%>">
+	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("Go Back")%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goBack")%>
+	                                <%=i18n.localize("Go Back")%>
 	                            </a>
 	                        </li>
                         <%} %>
@@ -112,40 +112,40 @@
 	                        	if(isCreatePermitted) {	                            
 	                        %>
 	                        <li>
-	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("goBack")%>">
+	                            <a href="<%=listMappedUrl%><%=urlPrefix%>" title="<%=i18n.localize("Go Back")%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goBack")%>
+	                                <%=i18n.localize("Go Back")%>
 	                            </a>
 	                        </li>
 	                        <li>
-	                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("editAPI")%>">
+	                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Edit API")%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("editAPI")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("editAPI")%>"></i>
+	                                    <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("Edit API")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Edit API")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("editAPI")%>
+	                                <%=i18n.localize("Edit API")%>
 	                            </a>
 	                        </li>
 	                        <li>
-	                            <a href="<%=jagg.url("/version")%>?<%=apiUrlId%>" title="<%=i18n.localize("CreateNewVersion")%>">
+	                            <a href="<%=jagg.url("/version")%>?<%=apiUrlId%>" title="<%=i18n.localize("Create New Version")%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("CreateNewVersion")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("CreateNewVersion")%>"></i>
+	                                    <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Create New Version")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Create New Version")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("CreateNewVersion")%>
+	                                <%=i18n.localize("Create New Version")%>
 	                            </a>
 	                        </li>
 	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        
 	                        <li>
-	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>" title="<%=i18n.localize("manageAPI")%>">
+	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>" title="<%=i18n.localize("Manage API")%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-settings fw-stack-1x" title="<%=i18n.localize("manageAPI")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("manageAPI")%>"></i>
+	                                    <i class="fw fw-settings fw-stack-1x" title="<%=i18n.localize("Manage API")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Manage API")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("manageAPI")%>
+	                                <%=i18n.localize("Manage API")%>
 	                            </a>
 	                        </li>
 	                        <%} %>	                        
@@ -154,12 +154,12 @@
                         <% if(reqUrl.indexOf(allStaticUrl)>=0 ||reqUrl.indexOf(allStaticMappedUrl)>=0){ %>
 
 	                      <li>
-	                            <a title="<%=i18n.localize("goBack")%>" href="<%=goBackStatsURL%>">
+	                            <a title="<%=i18n.localize("Go Back")%>" href="<%=goBackStatsURL%>">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goBack")%>
+	                                <%=i18n.localize("Go Back")%>
 	                            </a>
 	                        </li>
                         <%} %>
@@ -168,10 +168,10 @@
 	                      <li>
 	                            <a title="<%=i18n.localize("goBack")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goBack")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goBack")%>
+	                                <%=i18n.localize("Go Back")%>
 	                            </a>
 	                        </li>
                         <%} %>
@@ -180,33 +180,33 @@
 	                      	<li>
 	                            <a title="" href="<%=jagg.url("/site/pages/add.jag")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go to Overview")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goBack")%>
+	                                <%=i18n.localize("Go Back")%>
 	                            </a>
 	                        </li>	                        
                         <%} %>                        
                         <% if(request.getParameter("name") != null && (reqUrl.indexOf(addDesignUrl) >= 0 || reqUrl.indexOf(addImplementUrl) >= 0 || reqUrl.indexOf(addManageUrl) >= 0)){ %>
                         	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
 	                      	<li>
-	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                            <a title="<%=i18n.localize("Go to Overview")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
-	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("goBack")%>"></i>
+	                                    <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go to Overview")%>"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goToOverView")%>
+	                                <%=i18n.localize("Go to Overview")%>
 	                            </a>
 	                        </li>	                        
                         <%} %>
                         <% if(reqUrl.indexOf(docViewerMappedUrl) >= 0 || reqUrl.indexOf(docViewerUrl) >= 0){ %>
                         	<%var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix; %>
 	                      <li>
-	                            <a title="<%=i18n.localize("goToOverView")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                            <a title="<%=i18n.localize("Go to Overview")%>" href="<%=jagg.url("/info")%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.url("/info")%>?<%=apiUrlId%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
 	                                <span class="icon fw-stack">
-	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("goToOverView")%>"></i>
+	                                    <i class="fw fw-list fw-stack-1x" title="<%=i18n.localize("Go to Overview")%>"></i>
 	                                </span>
-	                                <%=i18n.localize("goToOverView")%>
+	                                <%=i18n.localize("Go to Overview")%>
 	                            </a>
 	                        </li>
                         <%} %>
