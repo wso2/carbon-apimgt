@@ -39,7 +39,7 @@
 
         <div class="row">
             <div class="container col-md-12">
-                <div class="title-section"><h2><%=i18n.localize("editConfigurations")%>
+                <div class="title-section"><h2><%=i18n.localize("Edit Configurations")%>
                 </h2></div>
             </div>
 
@@ -68,7 +68,7 @@
 
                 <div class="form-group">
                     <label class="col-md-3 control-label"
-                           for="name"><%=i18n.localize("templateName")%>:</label>
+                           for="name"><%=i18n.localize("Template Name")%>:</label>
 
                     <div class="col-md-9">
                         <select disabled id="cBoxTemplates" class="form-control"
@@ -104,7 +104,7 @@
                 %>
 
                 <div class="form-group">
-                    <label class="control-label col-md-3"><%=i18n.localize("configName")%>:</label>
+                    <label class="control-label col-md-3"><%=i18n.localize("Configuration Name")%></label>
 
                     <div class="col-md-9">
                         <input type="text" id="txtName" class="form-control"
@@ -124,7 +124,7 @@
                 %>
 
                 <div class="form-group">
-                    <label class="control-label col-md-3"><%=i18n.localize("description")%>
+                    <label class="control-label col-md-3"><%=i18n.localize("Description")%>
                     </label>
 
                     <div class="col-md-9">
@@ -244,7 +244,7 @@
                                     document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].text,
                                     document.getElementById('txtName').value, document.getElementById('txtDescription').value,
                                     <%=parameterString%>)">
-                        <%=i18n.localize("saveConfiguration")%>
+                        <%=i18n.localize("Save Configuration")%>
                     </button>
                 </div>
             </div>

@@ -14,14 +14,14 @@
         </script>
 
 <div class="page-header" id="Message">
-    <h2><%=i18n.localize("My Account","My Account")%></h2>
+    <h2><%=i18n.localize("My Account")%></h2>
 </div>
 
-<h3><%=i18n.localize("changePassword")%></h3>
+<h3><%=i18n.localize("Change Password")%></h3>
 <form class="form-horizontal">
 
 		<div class="form-group">
-			<label class="control-label col-sm-2" for="currentPassword"><%=i18n.localize("currentPassword")%>:<span class="requiredAstrix">*</span></label>
+			<label class="control-label col-sm-2" for="currentPassword"><%=i18n.localize("Current Password")%>:<span class="requiredAstrix">*</span></label>
 			<div class="col-sm-4"><input type="password" title="currentPassword" class="password form-control" id="currentPassword" /></div>
 		</div>
 
@@ -31,17 +31,17 @@
     <input id="hiddenUsername" type="hidden" value="<%=username%>">
     <input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>">
     <div class="form-group">
-        <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("newPassword")%>:<span class="requiredAstrix">*</span></label>
+        <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("New Password")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
-            <input type="password" title="<%=i18n.localize("securePassword")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
+            <input type="password" title="<%=i18n.localize("Enter more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
 
             <div class="help-block" id="password-help" style="display:none">
-              <%=i18n.localize("pwHelpMsgLine1")%>
+              <%=i18n.localize("For a more secure password:")%>
                 <ul>
-                    <li><%=i18n.localize("pwHelpMsgLine2")%></li>
-                    <li><%=i18n.localize("pwHelpMsgLine3")%></li>
-                    <li><%=i18n.localize("pwHelpMsgLine4")%></li>
-                    <li><%=i18n.localize("pwHelpMsgLine5")%></li>
+                    <li><%=i18n.localize("Use 6 to 30 characters")%></li>
+                    <li><%=i18n.localize("Use both letters and numbers")%></li>
+                    <li><%=i18n.localize("Add special characters (such as @, ?, #)")%></li>
+                    <li><%=i18n.localize("Mix capital and lowercase letters")%></li>
                 </ul>
             </div>
 
@@ -57,14 +57,14 @@
     </div>
 
     <div class="form-group">
-            <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("retypePassword")%>:<span class="requiredAstrix">*</span></label>
-            <div class="col-sm-4"><input type="password" title="<%=i18n.localize("passwordNotMatch")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
+            <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("Re-type Password")%>:<span class="requiredAstrix">*</span></label>
+            <div class="col-sm-4"><input type="password" title="<%=i18n.localize("Password did not match")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
     </div>
 	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/> 
     <div class="row">
         <div class= "col-md-2"></div>
         <div class= "col-md-4">
-            <input class="submit btn btn-primary" type="submit" value="<%=i18n.localize("submit")%>"/>
+            <input class="submit btn btn-primary" type="submit" value="<%=i18n.localize("Submit")%>"/>
         </div>
     </div>
 
