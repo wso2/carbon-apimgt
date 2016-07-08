@@ -16,16 +16,20 @@
         <table class="table table-bordered">
             <tbody>
             <tr>
-                <td class="col-sm-3"><%=i18n.localize("visibility")%></td>
-                <td id="inUrl"><%if(api.visibility == "restricted"){%> <%="Restricted by roles, only visible to " + api.roles +"."%><%}else{%><%=i18n.localize(api.visibility)%><%}%></td>
+                <td class="col-sm-3"><%=i18n.localize("Visibility")%></td>
+                <td id="inUrl">
+                    <%if(api.visibility == "restricted"){%>
+                        <%=i18n.localize("Restricted by roles, only visible to ") + api.roles +"."%><%}
+                    else{%><%=i18n.localize(api.visibility)%><%}%>
+                </td>
             </tr>
             <tr>
-                <td class="col-sm-3"><%=i18n.localize("context")%></td>
+                <td class="col-sm-3"><%=i18n.localize("Context")%></td>
                 <td id="inUrl"><%=api.context%></td>
             </tr>
             <% if(endpoint_config && (endpoint_config.production_endpoints != undefined)){ %>
             <tr>
-                <td class="col-sm-3"><%=i18n.localize("endpoint")%></td>
+                <td class="col-sm-3"><%=i18n.localize("Production URL")%></td>
                 <td id="inUrl">
                 <%
                     if(endpoint_config.production_endpoints instanceof Array){
@@ -46,7 +50,7 @@
             <% } %>
             <% if(endpoint_config && (endpoint_config.production_failovers != undefined)){ %>
             <tr>
-                <td><%=i18n.localize("productionFailoverEp")%></td>
+                <td><%=i18n.localize("Production Fail-over Endpoint(s)")%></td>
                 <td>
                 <%
                         print('<ul class="endpoint_list">');
@@ -63,7 +67,7 @@
             <% } %>
             <%if(endpoint_config && (endpoint_config.sandbox_endpoints != undefined)){%>
             <tr>
-                <td><%=i18n.localize("sandbox")%></td>
+                <td><%=i18n.localize("Sandbox URL")%></td>
                 <td id="sandbox">
                 <%
                     if(endpoint_config.sandbox_endpoints instanceof Array){
@@ -83,7 +87,7 @@
             </tr>
             <% if(endpoint_config && (endpoint_config.sandbox_failovers != undefined)){ %>
             <tr>
-                <td><%=i18n.localize("sandboxFailoverEp")%></td>
+                <td><%=i18n.localize("Sandbox Fail-over Endpoint(s)")%></td>
                 <td>
                 <%
                         print('<ul class="endpoint_list">');
@@ -101,26 +105,32 @@
             <%}%>
             <%if(api.wsdl!=''){%>
             <tr>
-                <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a title="<%=i18n.localize("wsdl")%>" href="site/themes/wso2/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
+                <td><%=i18n.localize("WSDL")%></td>
+                <td id="wsdl"><a title="<%=i18n.localize("WSDL")%>"
+                    href="site/themes/wso2/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=
+                    <%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank">
+                    <%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a>
+                </td>
             </tr>
             <%}
             if(api.wadl!=''){%>
             <tr>
-                <td><%=i18n.localize("wadl")%></td>
-                <td id="wadl"><a title="<%=i18n.localize("wadl")%>" href="<%= encode.forHtmlAttribute(api.wadl)%>" target="_blank"><%= encode.forHtml(api.wadl)%></a></td>
+                <td><%=i18n.localize("WADL")%></td>
+                <td id="wadl"><a title="<%=i18n.localize("WADL")%>" href="<%= encode.forHtmlAttribute(api.wadl)%>"
+                    target="_blank"><%= encode.forHtml(api.wadl)%></a>
+                </td>
             </tr>
             <%}%>
             <tr>
-                <td><%=i18n.localize("lastUpdated")%></td>
+                <td><%=i18n.localize("Date Last Updated")%></td>
                 <td id="inUpdated" class="dateFull"><%=api.lastUpdated%></td>
             </tr>
             <tr>
-                <td><%=i18n.localize("tier")%></td>
+                <td><%=i18n.localize("Tier Availability")%></td>
                 <td id="tierAvb"><%=api.availableTiersDisplayNames%></td>
             </tr>
             <tr>
-                <td><%=i18n.localize("defaultAPIVersion")%></td>
+                <td><%=i18n.localize("Default API Version")%></td>
                 <td id="defaultAPIVersion">
                     <%if(api.hasDefaultVersion){
                         print(api.currentDefaultVersion);
@@ -132,13 +142,13 @@
             </tr>
             <% if(api.tags!=''){%>
             <tr>
-                <td><%=i18n.localize("tags")%></td>
+                <td><%=i18n.localize("Tags")%></td>
                 <td id="tags"><%=api.tags%></td>
             </tr>
              <%
             }if(api.bizOwner!=''){%>
              <tr>
-                <td><%=i18n.localize("busiOwner")%></td>
+                <td><%=i18n.localize("Business Owner")%></td>
                 <td id="bizOwnerData"><%=encode.forHtml(api.bizOwner)%> <% if(api.bizOwnerMail!=''){%>
                 [<a title="mailto" href="mailto:<%=api.bizOwnerMail%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
                 <%}%>
@@ -147,7 +157,7 @@
              <%
              }if(api.techOwner!=''){%>
              <tr>
-                <td><%=i18n.localize("techOwner")%></td>
+                <td><%=i18n.localize("Technical Owner")%></td>
                 <td id="techOwnerData"><%=encode.forHtml(api.techOwner)%><% if(api.techOwnerMail!=''){%>
                 [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=encode.forHtml(api.techOwnerMail)%></a>]
                 <%}%>
