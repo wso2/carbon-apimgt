@@ -190,6 +190,10 @@
     "applicationsOverTime" : "Applications Created Over Time",
     "userSubscriptionsOverTime" : "Subscriptions Created Over Time",
     "developersOverTime" : "Developer Signups Over Time",
+    "apiTime" : "Created APIs Over Time",
+    "apiCreatedBy" : "API Created By",
+    "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
+    "APISubscriptionsTimeTitle" : "API Subscription Over Time",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "apiLatencyTimeTitle" : "API Latency BreakDown",

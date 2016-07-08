@@ -510,22 +510,21 @@ public class UsageClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
 
-            String query = "select COUNT(lc.API_ID) as y,lc.EVENT_DATE as x  from AM_API_LC_EVENT lc, \n "
-                    + " (SELECT le.API_ID,max(le.EVENT_DATE) as latest  from AM_API_LC_EVENT le where le.TENANT_ID= ? and \n ";
-            if (!"All".equals(apiCreator)) {
-                query += " le.USER_ID= ? and \n";
+            String query = "select COUNT(API_ID) as y,CREATED_TIME as x from AM_API";
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                query += " where CONTEXT not like '/t/%' and ";
+            } else {
+                query += " where CONTEXT like '/t/%' and ";
             }
-            query += " le.EVENT_DATE between '" + fromDate + "' and '" + toDate
-                    + "' group by le.API_ID order by latest DESC )x \n ";
-            query += " where lc.NEW_STATE ='PUBLISHED' and  lc.API_ID = x.API_ID and lc.EVENT_DATE = x.latest \n ";
-            query += " group by lc.API_ID,lc.EVENT_DATE order by lc.EVENT_DATE ASC \n ";
-
-            statement = connection.prepareStatement(query);
-
-            int tenantId = APIUtil.getTenantId(provider);
-            statement.setInt(1, tenantId);
             if (!"All".equals(apiCreator)) {
-                statement.setString(2, MultitenantUtils.getTenantAwareUsername(apiCreator));
+                query += " CREATED_BY= ? and ";
+            }
+            query += " CREATED_TIME between '" + fromDate + "' and '" + toDate
+                    + "' group by CREATED_TIME order by CREATED_TIME ASC ";
+            statement = connection.prepareStatement(query);
+            if (!"All".equals(apiCreator)) {
+                statement.setString(1, apiCreator);
             }
 
             //execute
