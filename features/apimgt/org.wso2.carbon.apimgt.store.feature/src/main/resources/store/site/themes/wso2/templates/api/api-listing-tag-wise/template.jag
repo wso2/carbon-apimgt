@@ -16,7 +16,7 @@
 
     %>
 <div class="page-header">
-     <h2>APIs groups</h2>
+     <h2><%=i18n.localize("APIs groups")%></h2>
 </div>
 <div class="page-content">
     <div class="row">     
@@ -37,15 +37,15 @@
 						                	<div class="square-element setbgcolor">
 												<div class="api-name-icon"></div>
 													<div style="display: none">
-														<a href="" class="api-name" title="<%=i18n.localize("apiName")%>"><%=tagName%></a>
+														<a href="" class="api-name" title="<%=i18n.localize("API Name")%>"><%=tagName%></a>
 													</div>
 											</div> 
 						                <% } else { %>
 						                    <div class="square-element">
-						                    	<img class="" src="<%=getThumbnailUrl(tag)%>" alt="<%=i18n.localize("apiThumb")%>">
+						                    	<img class="" src="<%=getThumbnailUrl(tag)%>" alt="<%=i18n.localize("API Thumbnail")%>">
 						                    </div>
 						              	<% } %>
-						                  <a href="<%=path%>" title="<%=i18n.localize("browse.title")%>">
+						                  <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">
 							              	<div class="after">                                       
 							                	<span class="fw-stack fw-lg">
 							                    	<i class="fw fw-circle-outline fw-stack-2x"></i>

@@ -3,7 +3,7 @@ var usage=outputs.usage;var length;if (usage!=null){length=outputs.usage.length;
 
 %>
 <div class="title-section">
-            <h2>Usage Summary</h2>
+            <h2><%=i18n.localize("Usage Summary")%></h2>
 </div>
 <div class="content-section shadow-up">
     <div class="content-data">
@@ -19,59 +19,59 @@ var usage=outputs.usage;var length;if (usage!=null){length=outputs.usage.length;
 
 
             <select id="month" size="1" name="month" >
-      <option value="1" >January</option>
+      <option value="1" ><%=i18n.localize("January")%></option>
 
-      <option value="2">February</option>
+      <option value="2"><%=i18n.localize("February")%></option>
 
-      <option value="3">March</option>
+      <option value="3"><%=i18n.localize("March")%></option>
 
-      <option value="4">April</option>
+      <option value="4"><%=i18n.localize("April")%></option>
 
-      <option value="5">May</option>
+      <option value="5"><%=i18n.localize("May")%></option>
 
-      <option value="6">June</option>
+      <option value="6"><%=i18n.localize("June")%></option>
 
-      <option value="7">July</option>
+      <option value="7"><%=i18n.localize("July")%></option>
 
-      <option value="8">August</option>
+      <option value="8"><%=i18n.localize("August")%></option>
 
-      <option value="9">September</option>
+      <option value="9"><%=i18n.localize("September")%></option>
 
-      <option value="10">October</option>
+      <option value="10"><%=i18n.localize("October")%></option>
 
-      <option value="11">November</option>
+      <option value="11"><%=i18n.localize("November")%></option>
 
-      <option value="12">December</option>
+      <option value="12"><%=i18n.localize("December")%></option>
     </select>
-     <button class="btn btn-primary" id="generate">Generate</button>
+     <button class="btn btn-primary" id="generate"><%=i18n.localize("Generate")%></button>
        </div>
-        <div  id="showMsg" style="display:none;"><label><b>No usage details available for the user: &nbsp;<%=jagg.getUser().username%>  (for provided month).</b></label></div>
+        <div  id="showMsg" style="display:none;"><label><b><%=i18n.localize("No usage details available for the user: ")%> &nbsp;<%=jagg.getUser().username%>  <%=i18n.localize("(for provided month).")%></b></label></div>
         <div id="usageDiv" class="row-fluid" style="display:none;">
         <div class="span12">
         <table id="usageSummary" class="table table-bordered" style="width:411px;">
         <thead>
         <tr>
 
-        <th style="width:120px;">API</th>
-        <th style="width:120px;">Version</th>
-        <th><span class="pull-right">Invocations</span></th>
+        <th style="width:120px;"><%=i18n.localize("API")%></th>
+        <th style="width:120px;"><%=i18n.localize("Version")%></th>
+        <th><span class="pull-right"><%=i18n.localize("Invocations")%></span></th>
         </tr>
         </thead>
         <tbody id="usageSummaryBody">
         </tbody>
         </table>
-                <h3>Billing Summary</h3>
+                <h3><%=i18n.localize("Billing Summary")%></h3>
   <div class="control-group">
-<label class="control-label"><div class="help-block"><strong>Billing Scheme</strong>: No. of API Invocations</div></label>
+<label class="control-label"><div class="help-block"><strong><%=i18n.localize("Billing Scheme")%></strong>: <%=i18n.localize("No. of API Invocations")%></div></label>
 </div>
  <table class="table table-bordered" style="width:550px;">
         <thead>
         <tr>
 
-        <th style="width:120px;">API</th>
-        <th style="width:120px;"><span class="pull-right">Total Invocations</span></th>
-        <th style="width:120px;">Rate</th>
-        <th><span class="pull-right">Charge[$]</span></th>
+        <th style="width:120px;"><%=i18n.localize("API")%></th>
+        <th style="width:120px;"><span class="pull-right"><%=i18n.localize("Total Invocations")%></span></th>
+        <th style="width:120px;"><%=i18n.localize("Rate")%></th>
+        <th><span class="pull-right"><%=i18n.localize("Charge[$]")%></span></th>
         </tr>
         </thead>
         <tbody id="billingBody">

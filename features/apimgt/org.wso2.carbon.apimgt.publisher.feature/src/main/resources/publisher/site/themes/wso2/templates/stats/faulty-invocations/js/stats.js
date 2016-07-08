@@ -87,8 +87,8 @@ currentLocation=window.location.pathname;
 
                 else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span><a href="https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics" target="_blank" title="WSO2 wiki documentation on APIM statistics" class="warningLink">'
+                        +i18n.t('Refer our wiki to configure DAS correctly')+'</a></span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             }
             else {
@@ -119,10 +119,10 @@ var drawAPIResponseFaultCountTable = function(from,to){
                 var $dataTable =$('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiFaultyTable"></table>');
 
                 $dataTable.append($('<thead class="tableHead"><tr>'+
-                                        '<th>api</th>'+
-                                        '<th>version</th>'+
-                                        '<th>count</th>'+
-                                        '<th width="20%" >percentage</th>'+
+                                        '<th>i18n.t("API")</th>'+
+                                        '<th>i18n.t("Version")</th>'+
+                                        '<th>i18n.t("Count")</th>'+
+                                        '<th width="20%" >i18n.t("Percentage")</th>'+
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
