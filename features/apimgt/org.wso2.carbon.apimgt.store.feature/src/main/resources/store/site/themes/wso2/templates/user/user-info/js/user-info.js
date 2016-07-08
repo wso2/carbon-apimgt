@@ -27,7 +27,7 @@ $(document).ready(function() {
         }, function (result) {
             if (result.error == false) {
             	$('#logoutForm').submit();
-                    jagg.message({content:"User password changed successfully. You can now sign into the API store using the new password.",type:"info",
+                    jagg.message({content:i18n.t("User password changed successfully. You can now sign into the API store using the new password."),type:"info",
                         cbk:function() {
                             $('#signUpRedirectForm').submit();
                         }
