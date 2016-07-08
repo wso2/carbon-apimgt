@@ -24,6 +24,6 @@ package org.wso2.carbon.apimgt.impl.factory;
  */
 public class DaoHolder {
 
-    public static
+
 
 }
