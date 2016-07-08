@@ -15,6 +15,7 @@ else if(error=="500"){errorMsg=msg.error.internalServerErrorAction();}
 </head>
 
 <body>
+<!-- @todo: param_string-->
 <h2><%=errorMsg.h1%> : <%=errorMsg.title%></h2>
 
 <br/>
