@@ -258,14 +258,14 @@
                                                         <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("Production TPS")%>
                                                         </label>
                                                         <div class="col-sm-4">
-                                                            <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                                                            <input type="text" class="form-control validInput" id="productionTps" name="productionTps" placeholder="<%=i18n.localize("Max TPS")%>" value="<%=api.productionTps%>">
                                                         </div>
                                                     </div>
                                                     <div class="form-group sub-form-group tps_boxes <%if( api.productionTps == "" && api.sandboxTps == "" ){ %>hide<%}%>">
                                                         <label class="control-label col-sm-3" for="throttle"><%=i18n.localize("Sandbox TPS")%>
                                                         </label>
                                                         <div class="col-sm-4">
-                                                            <input type="text" class="form-control validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                                                            <input type="text" class="form-control validInput" id="sandboxTps" name="sandboxTps" placeholder="<%=i18n.localize("Max TPS")%>" value="<%=api.sandboxTps%>">
                                                         </div>
                                                     </div>
                                                     <%}%>
