@@ -62,7 +62,7 @@
 				<input type="hidden" name="SAMLRequest"
 					  value="<%= encodedRequest %>"/>
 				<input type="hidden" name="RelayState" value="<%= relayState %>"/>
-				<button type="submit">POST</button>
+				<button type="submit"><%=i18n.localize("POST")%></button>
 			</p>
 			</form>
 		</div>
