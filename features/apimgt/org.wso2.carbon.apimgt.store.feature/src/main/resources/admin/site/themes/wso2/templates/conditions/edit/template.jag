@@ -9,64 +9,63 @@
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
 
     	<div class="page-header">
-            <h2><%=i18n.localize("selectBlockingEntity")%></h2>
+            <h2><%=i18n.localize("Select Item to Blacklist")%></h2>
         </div>
 
 
-        <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
-            value='<%=i18n.localize("errorMsgRequired")%>'/>
-            <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
-            value='<%=i18n.localize("errorMessageInvalid")%>'/>
-            <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
-            value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+        <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("Required")%>'/>
+        <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("Invalid")%>'/>
+        <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+        value='<%=i18n.localize("Name contains one or more illegal characters")%> ( [ ~ ! & @ # ; % ^ * + = { } | <>
+        \"  , ] ).'/>
         <div class="row-fluid">
             <form class="apim-form form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                 action="/admin/site/blocks/conditions/edit/ajax/conditions-edit.jag">
                     <div class="form-group" id="selected-type">
                         <label class="col-sm-3 control-label">
-                        Select Condition Type<span class="requiredAstrix">*</span></label>
+                        <%=i18n.localize("Select Condition Type")%><span class="requiredAstrix">*</span></label>
                        <div class="col-sm-9">
                         <label class="radio">
                             <input type="radio" name="select-option" value="API" checked onclick="changeToolTip('api')">
-                            <span class="helper">API Context</span>
+                            <span class="helper"><%=i18n.localize("API Context")%></span>
                         </label>
                         <label class="radio">
                             <input type="radio" name="select-option" value="APPLICATION" onclick="changeToolTip('app')">
-                            <span class="helper">Application</span>
+                            <span class="helper"><%=i18n.localize("Application")%></span>
                         </label>
                         <label class="radio">
                             <input type="radio" name="select-option" value="IP" onclick="changeToolTip('ip')">
-                            <span class="helper">IP Address</span>
+                            <span class="helper"><%=i18n.localize("IP Address")%></span>
                         </label>
                             <label class="radio">
                             <input type="radio" name="select-option" value="USER" onclick="changeToolTip('user')">
-                            <span class="helper">User</span>
+                            <span class="helper"><%=i18n.localize("User")%></span>
                         </label>
                     </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Value :
+                        <label class="col-sm-3 control-label"><%=i18n.localize("Value")%> :
                         <span class="requiredAstrix">*</span></label>
                         <div class="col-sm-4">
-                            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
+                            <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("Required")%>'/>
                             <input class="form-control  required validInput noSpace" type="text" id="value"/>
                                 <div id="errorMsgDiv" style="display:none">
-                                       <span><p id="invalidInput" style="color:red;">Invalid Input</p></span>
+                                       <span><p id="invalidInput" style="color:red;"><%=i18n.localize("Invalid Input")%></p></span>
                                 </div>
                                 <% if(tenantDomain == "carbon.super") { %>
-                                    <span><p id="formatTip" style="color:green;">Format : ${context}</p></span>
-                                    <span><p id="sampleformatTip" style="color:green;">Eg : test/1.0.0</p></span>
+                                    <span><p id="formatTip" style="color:green;"><%=i18n.localize("Format : ")%> ${context}</p></span>
+                                    <span><p id="sampleformatTip" style="color:green;"><%=i18n.localize("Eg : ")%> test/1.0.0</p></span>
                                 <%} else  { %>
-                                    <span><p id="formatTip" style="color:green;">Format : /t/${tenantDomain}/${context}</p></span>
-                                    <span><p id="sampleformatTip" style="color:green;">Eg : /t/<%=tenantDomain%>/test/1.0.0</p></span>
+                                    <span><p id="formatTip" style="color:green;"><%=i18n.localize("Format : ")%> /t/${tenantDomain}/${context}</p></span>
+                                    <span><p id="sampleformatTip" style="color:green;"><%=i18n.localize("Eg : ")%> /t/<%=tenantDomain%>/test/1.0.0</p></span>
                                 <% } %>
                         </div>
                     </div>
                     <br class="spacer">
                 <div class="form-actions">
                     <input id="add-condition-btn" onclick="addCondition()" name="save-tier-btn" type="button"
-                        class="btn btn-primary" value='<%=i18n.localize("block")%>'/>
-                    <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("cancelTier")%>'>
+                        class="btn btn-primary" value='<%=i18n.localize("Blacklist")%>'/>
+                    <input id="cancel-condition-btn" type="reset" class="btn"  value='<%=i18n.localize("Cancel")%>'>
                 </div>
             </form>
         </div>
@@ -79,27 +78,27 @@
         if("app" == type) {
             $('#formatTip').text("Format : ${userName}:${applicationName}");
             <% if(tenantDomain == "carbon.super") { %>
-                $('#sampleformatTip').text("Eg : admin:DefaultApplication");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + ": admin:DefaultApplication");
             <%} else  { %>
-                $('#sampleformatTip').text("Eg : admin@<%=tenantDomain%>:DefaultApplication");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin@<%=tenantDomain%>:DefaultApplication");
              <% } %>
         } else if("api" == type) {
             <% if(tenantDomain == "carbon.super") { %>
                 $('#formatTip').text("Format : ${context}");
-                $('#sampleformatTip').text("Eg : test/1.0.0");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + ": test/1.0.0");
             <%} else  { %>
                 $('#formatTip').text("Format : /t/${tenantDomain}/${context}");
-                $('#sampleformatTip').text("Eg : /t/<%=tenantDomain%>/test/1.0.0");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : /t/<%=tenantDomain%>/test/1.0.0");
              <% } %>
         } else if("ip" == type) {
             $('#formatTip').text("Format : ${ip}");
-            $('#sampleformatTip').text("Eg : 127.0.0.1");
+            $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : 127.0.0.1");
         }  else if("user" == type) {
             $('#formatTip').text("Format : ${userName}");
             <% if(tenantDomain == "carbon.super") { %>
-                $('#sampleformatTip').text("Eg : admin");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin");
             <%} else  { %>
-                $('#sampleformatTip').text("Eg : admin@<%=tenantDomain%>");
+                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin@<%=tenantDomain%>");
              <% } %>
         }
     }
