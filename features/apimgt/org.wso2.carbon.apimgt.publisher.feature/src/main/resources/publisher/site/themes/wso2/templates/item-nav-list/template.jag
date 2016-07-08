@@ -26,12 +26,12 @@
 		  <%}%>
   </div>
   </li>
-  <li><a href="#" onclick="showTab('usersLink')" title="<%=i18n.localize("user")%>"><i class="icon-user" title="<%=i18n.localize("user")%>"></i>
-      <span class="userCount"><i class="fw fw-user" title="<%=i18n.localize("user")%>"></i>
+  <li><a href="#" onclick="showTab('usersLink')" title="<%=i18n.localize("User")%>"><i class="icon-user" title="<%=i18n.localize("User")%>"></i>
+      <span class="userCount"><i class="fw fw-user" title="<%=i18n.localize("User")%>"></i>
           <% if (api.subs == "1"){%>
-          <%=api.subs%> <%=i18n.localize("user")%>
+          <%=api.subs%> <%=i18n.localize("User")%>
           <%}else{%>
-          <%=api.subs%> <%=i18n.localize("users")%>
+          <%=api.subs%> <%=i18n.localize("Users")%>
           <%}%>
           </span></a></li>
 
@@ -39,9 +39,9 @@
 
   <!--li><span><i class="icon-heart"></i> Up time: 90%</span></li-->
   <li><a href="#" onclick="showTab('lifecyclesLink')" title="<%=api.status%>"><span id="status"><i class="glyphicon glyphicon-pencil" title="<%=api.status%>"></i>&nbsp;<%=api.status%></span></a></li>
-  <li><a href="#"  onclick="showTab('docsLink')" title="<%=i18n.localize("docs")%>"><i class="glyphicon glyphicon-file" title="<%=i18n.localize("docs")%>"></i> <%=i18n.localize("docs")%></a></li>
-  <li><a href="#" onclick="location.href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>'" id="goToStore" title="<%=i18n.localize("viewInStore")%>">
-  			<i class="fw fw-deploy"></i>&nbsp;<%=i18n.localize("viewInStore")%></a></li>
+  <li><a href="#"  onclick="showTab('docsLink')" title="<%=i18n.localize("Docs")%>"><i class="glyphicon glyphicon-file" title="<%=i18n.localize("Docs")%>"></i> <%=i18n.localize("Docs")%></a></li>
+  <li><a href="#" onclick="location.href='<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>'" id="goToStore" title="<%=i18n.localize("View in Store")%>">
+  			<i class="fw fw-deploy"></i>&nbsp;<%=i18n.localize("View in Store")%></a></li>
 </ul>
 <script>
 $(window).load(function(){
