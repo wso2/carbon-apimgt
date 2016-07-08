@@ -1,14 +1,14 @@
 <% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
 
 <div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style="display:none">
-  <div class="tag-title"> Tags</div>
+  <div class="tag-title"><%=i18n.localize("Tags")%></div>
   <div class="tag-content" id="tag-content" style="width:100%;">
   </div>
 </div>
 
 <script type="text/javascript">
     $(function(){
-        jagg.post( "/site/blocks/tag/tag-cloud/ajax/list.jag", { 
+        jagg.post( "/site/blocks/tag/tag-cloud/ajax/list.jag", {
           <% if(jagg.getTenantDomain()){ %>
             tenant: "<%= jagg.getTenantDomain()%>",
           <% } %> 
@@ -18,7 +18,7 @@
               var path = "<%=jagg.urlTenanted("/site/pages/list-apis.jag",{ "page" : 1 })%>";
               var words = [];
               if(result.tags.length == 0){
-                $("#tag-content").append('<span class="text-muted">No tags to display.</span>');                
+                $("#tag-content").append('<span class="text-muted">i18n.localize("No tags to display.")</span>');
               } else {
             	  $('#tagcloud').show();
               }
