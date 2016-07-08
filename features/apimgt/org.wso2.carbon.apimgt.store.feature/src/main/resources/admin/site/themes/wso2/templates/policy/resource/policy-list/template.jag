@@ -71,7 +71,7 @@
         <div class="form-actions" id="saveButtons">
             <button type="submit" id="addNewAPIButton" name="addNewAPIButton"
                 onclick="window.location='<%= jagg.url( "/api-policy-edit")%>'" class="btn btn-primary has-spinner">
-                <%=i18n.localize("addTier")%>
+                <%=i18n.localize("Add Tier")%>
             </button>
         </div>
     </div>
