@@ -1,11 +1,11 @@
 $(document).ready(function() {
     $.validator.addMethod("matchPasswords", function(value) {
 		return value == $("#newPassword").val();
-	}, "The passwords you entered do not match.");
+	}, i18n.t("The passwords you entered do not match."));
 
     $.validator.addMethod('noSpace', function(value, element) {
             return !/\s/g.test(value);
-    }, 'The Name contains white spaces.');
+    }, i18n.t('The Name contains white spaces.'));
 
 
     $("#sign-up").validate({
@@ -37,13 +37,13 @@ $(document).ready(function() {
         }, function (result) {
             if (result.error == false) {
                 if(result.showWorkflowTip){
-                    jagg.message({content:"User account awaiting Administrator approval.",type:"info",
+                    jagg.message({content: i18n.t("User account awaiting Administrator approval.") ,type:"info",
                         cbk:function() {
                             $('#signUpRedirectForm').submit();
                         }
                     });
                 }else {
-                    jagg.message({content:"User added successfully. You can now sign into the API store using the new user account.",type:"info",
+                    jagg.message({content: i18n.t("User added successfully. You can now sign into the API store using the new user account."), type:"info",
                         cbk:function() {
                             $('#signUpRedirectForm').submit();
                         }

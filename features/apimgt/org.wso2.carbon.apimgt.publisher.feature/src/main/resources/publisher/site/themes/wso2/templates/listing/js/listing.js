@@ -2,18 +2,18 @@ var removeAPI = function(name, version, provider, buttonElement) {
     $(".modal-footer").html("");
     var apiThumbnail = $(buttonElement).closest(".thumbnail");
     jagg.message({
-        content:"Are you sure you want to delete the API - " + name + " - " + version ,
+        content: i18n.t("Are you sure you want to delete the API") + " - " + name + " - " + version ,
         type:"confirm",
-        title:"Confirm Delete",
+        title: i18n.t("Confirm Delete"),
         anotherDialog:true,
         okCallback:function(){
             $('#messageModal').modal({backdrop: 'static', keyboard: false });
             $(".modal-header .close").hide();
             $(".modal-footer").html("");
-            $(".modal-title").html("Please wait");
+            $(".modal-title").html(i18n.t("Please wait"));
             $(".modal-body").addClass("loadingButton");
             $(".modal-body").css({"margin-left":25});
-            $(".modal-body").html("Deleting API : "+ name + " - " + version );
+            $(".modal-body").html(i18n.t("Deleting API") +" : "+ name + " - " + version );
 
             buttonElement.hidden = true;
             apiThumbnail.hide();

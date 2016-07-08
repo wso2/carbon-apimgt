@@ -10,7 +10,7 @@ $(document).ready(function(){
                 	btn.parent().next().show();
                     $('#js_completeBtn'+iteration).show();
                     btn.parent().remove();
-                    $('#status'+iteration).text("IN_PROGRESS");
+                    $('#status'+iteration).text(i18n.t("IN_PROGRESS"));
                 } else {
                     jagg.showLogin();
                 }
@@ -50,7 +50,7 @@ $(document).ready(function(){
                     btn.next().show();
                     $('#js_startBtn'+iteration).show();
                     btn.remove();
-                    $('#status'+iteration).text("RESERVED");
+                    $('#status'+iteration).text(i18n.t("RESERVED"));
                 } else {
                     jagg.showLogin();
                 }

@@ -84,13 +84,13 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="'+ i18n.t('Thumbnail image when stats enabled')+'"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="'+ i18n.t('Thumbnail image when stats not configured')+'"></div>'));
                 }
             }
             else {
@@ -214,7 +214,7 @@ var drawAPIUsage = function (from,to,apiFilter) {
                         		$('div#apiSelectTable_wrapper.dataTables_wrapper.no-footer').remove();
                         		$('#apiUsageByUserTable').hide();
                                 $('#noData').html('');
-                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available.') + '</h4></div></div>'));
 
                         }
                     }
@@ -246,7 +246,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available.') + '</h4></div></div>'));
 
                 } else {
                     $('#apiUsage_note').removeClass('hide');
@@ -402,7 +402,7 @@ var drawChart = function (from, to) {
                     $dataTable.append($('<thead class="tableHead"><tr>'+
                                             '<th width="10%"></th>'+
                                             '<th>API</th>'+
-                                            '<th style="text-align:right" width="20%" >Subscriber Count</th>'+
+                                            '<th style="text-align:right" width="20%" >'+ i18n.t('Subscriber Count') + '</th>'+
                                             '<th class="details-control sorting_disabled"></th>'+
                                         '</tr></thead>'));
 
@@ -419,7 +419,7 @@ var drawChart = function (from, to) {
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
                                                 +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td>'
-                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
+                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">'+ i18n.t('Show more details') + '<div style="display :inline"class="showDetail"></div></td></tr>'));
                             state_array.push(true);
                             defaultFilterValues.push(sortData[n].API_name);
                             chartData.push(sortData[n].API_name);
@@ -429,7 +429,7 @@ var drawChart = function (from, to) {
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
                                                 +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td>'
-                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
+                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">'+ i18n.t('Show more details') + '<div style="display :inline"class="showDetail"></div></td></tr>'));
                             state_array.push(false);
                             chartData.push(sortData[n].API_name);
                         }
@@ -491,7 +491,7 @@ var drawChart = function (from, to) {
                           count++;
                             //limiting to show 20 entries at a time
                             if(count>20){
-                                $('#displayMsg').html('<h5 style="color:#555" >Please Note that the graph will be showing only 20 entries</h5>');
+                                $('#displayMsg').html('<h5 style="color:#555" >'+ i18n.t('Please Note that the graph will be showing only 20 entries') + '</h5>');
                                 state_array[id] = false;
                                 $(this).prop("checked", "");
                                 count--;
@@ -545,7 +545,7 @@ var drawChart = function (from, to) {
                                 div.style("top", d3.event.pageY-25+"px");
                                 div.style("display", "inline-block");
 
-                                div.html('<div style="color:#555; text-align:left">API : '+app +'</div><div style="color:#666;margin-top:5px;text-align:left">Subscription Count : '+data[i].SubscriberCount+'</div><table class="table" id="tooltipTable"><thead><tr><th>Version</th><th>Hits</th></tr></thead><tbody></tbody></table>');
+                                div.html('<div style="color:#555; text-align:left">'+ i18n.t('API') + ' : ' +app +'</div><div style="color:#666;margin-top:5px;text-align:left">'+ i18n.t('Subscription Count') + ' : '+data[i].SubscriberCount+'</div><table class="table" id="tooltipTable"><thead><tr><th>'+ i18n.t('Version') + '</th><th>'+ i18n.t('Hits') + '</th></tr></thead><tbody></tbody></table>');
                                     for (var l=0;l<versionCount.length;l++){
                                         var versionName=versionCount[l].version;
                                         var version_Count=versionCount[l].count;
@@ -577,7 +577,7 @@ var drawChart = function (from, to) {
 
 function format ( d ) {
     var subTable=$('<div class="slider pull-right " ><table style="padding-left:50px;"></table></div>');
-    subTable.append($('<thead><tr><th>Version</th><th>Subscriber Count</th><th>Hit Count</th></tr></thead>'));
+    subTable.append($('<thead><tr><th>'+ i18n.t('Version') + '</th><th>'+ i18n.t('Subscriber Count') + '</th><th>'+ i18n.t('Hit Count') + '</th></tr></thead>'));
 
     var versions=[];
     var isChecked=false;

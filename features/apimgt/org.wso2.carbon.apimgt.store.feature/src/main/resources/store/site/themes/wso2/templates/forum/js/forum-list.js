@@ -228,7 +228,7 @@ $(document).ready(function () {
         // Validate inputs.
         if ($('#subject').val().trim() == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.topicSubjectCannotBeEmpty'),
+                content: i18n.t('Topic subject cannot be empty.'),
                 type: "error"
             });
             return;
@@ -236,7 +236,7 @@ $(document).ready(function () {
 
         if ($('<div>').append($('#topicDescriptioEditor').code()).text().trim() == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.topicDescriptionCannotBeEmpty'),
+                content: i18n.t('Topic description cannot be empty.'),
                 type: "error"
             });
             return;
@@ -268,10 +268,10 @@ $(document).ready(function () {
         // Show confirmation dialog box.
 
         $('#messageModal').html($('#confirmation-data').html());
-        $('#messageModal div.modal-body').text('\n\n' + i18n.t('confirm.deleteMsgForForumTopic') + '"' + $(deleteButton).attr('data-subject') + '" ?');
-        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal div.modal-body').text('\n\n' + i18n.t('Do you want to remove the topic ') + '"' + $(deleteButton).attr('data-subject') + '" ?');
+        $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
+        $('#messageModal a.btn-primary').html(i18n.t('Yes'));
+        $('#messageModal a.btn-other').html(i18n.t('No'));
         $('#messageModal a.btn-primary').click(function () {
             $.ajax({
                 type: 'DELETE',
@@ -357,7 +357,7 @@ $(document).ready(function () {
         var newSubject = $('#forum_topic_subject_edit_input').val().trim();
         if (newSubject == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.topicSubjectCannotBeEmpty'),
+                content: i18n.t('Topic subject cannot be empty.'),
                 type: "error"
             });
             return;
@@ -366,7 +366,7 @@ $(document).ready(function () {
         var newDescription = $('#forum_topic_description_edit_editor').code();
         if ($('<div>').append(newDescription).text().trim() == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.topicDescriptionCannotBeEmpty'),
+                content: i18n.t('Topic description cannot be empty.'),
                 type: "error"
             });
             return;
@@ -389,7 +389,7 @@ $(document).ready(function () {
                 if (response.error == false) {
                     forum_load_replies(1);
                 } else {
-                    var errorMessage = i18n.t('errorMsgs.cannotEditForumTopic');
+                    var errorMessage = i18n.t('Cannot edit the topic. ');
                     errorMessage = errorMessage + response.message.split(':')[1];
                     jagg.message({
                         content: errorMessage,
@@ -430,7 +430,7 @@ $(document).ready(function () {
         var replyContent = $('#forum_reply_editor').code();
         if ($('<div>').append(replyContent).text().trim() == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.replyCannotBeEmpty'),
+                content: i18n.t('Reply cannot be empty.'),
                 type: "error"
             });
             return;
@@ -439,7 +439,7 @@ $(document).ready(function () {
         var date = new Date();
         var time = date.getTime();
 
-        var replyInfo = getDate(date) + " <br/>" + getTime(time) + " <br/> " + i18n.t('info.replyAdded');
+        var replyInfo = getDate(date) + " <br/>" + getTime(time) + " <br/> " + i18n.t('Reply Successfully Added');
         $('#forum_replies_list').show();
         $('#forum_reply_content_temp').html(replyContent);
         $('#forum_reply_added_block').show();
@@ -515,7 +515,7 @@ $(document).ready(function () {
         // Validate inputs.
         if ($('<div>').append(content).text().trim() == "") {
             jagg.message({
-                content: i18n.t('errorMsgs.replyCannotBeEmpty'),
+                content: i18n.t('Reply cannot be empty.'),
                 type: "error"
             });
             return;
@@ -538,7 +538,7 @@ $(document).ready(function () {
                 if (response.error == false) {
                     forum_load_replies(1);
                 } else {
-                    var errorMessage = i18n.t('errorMsgs.cannotEditForumReply');
+                    var errorMessage = i18n.t('Cannot edit the reply. ');
                     errorMessage = errorMessage + response.message.split(':')[1];
                     jagg.message({
                         content: errorMessage,
@@ -569,10 +569,10 @@ $(document).ready(function () {
         var deleteButton = this;
 
         $('#messageModal').html($('#confirmation-data').html());
-        $('#messageModal div.modal-body').html(i18n.t('confirm.deleteMsgForForumReply'));
-        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal div.modal-body').html(i18n.t('Do you want to remove this reply ?'));
+        $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
+        $('#messageModal a.btn-primary').html(i18n.t('Yes'));
+        $('#messageModal a.btn-other').html(i18n.t('Yes'));
         $('#messageModal a.btn-primary').click(function () {
             $.ajax({
                 type: 'DELETE',
@@ -585,7 +585,7 @@ $(document).ready(function () {
                         $('#messageModal').modal('hide');
                         forum_load_replies(1);
                     } else {
-                        var errorMessage = i18n.t('errorMsgs.cannotDeleteForumReply');
+                        var errorMessage = i18n.t('Cannot delete the reply. ');
                         errorMessage = errorMessage + response.message.split(':')[1];
                         jagg.message({
                             content: errorMessage,
