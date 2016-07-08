@@ -426,7 +426,8 @@ public class UsageClient {
                     + "created_time,api.api_name, api.api_version ";
             String from = "from AM_API as api,  AM_SUBSCRIPTION as subc ";
             String where = "where api.api_id=subc.api_id ";
-            String groupAndOrder = "group by subc.created_time order by subc.created_time asc ";
+            String groupAndOrder =
+                    "group by api.api_name, api.api_version, subc.created_time" + " order by subc.created_time asc ";
             String time = " and subc.created_time between '" + fromDate + "' and '" + toDate + "' ";
             if (!"allAPIs".equals(apiFilter)) {
                 where += " and api.api_provider = '" + provider + "' ";
