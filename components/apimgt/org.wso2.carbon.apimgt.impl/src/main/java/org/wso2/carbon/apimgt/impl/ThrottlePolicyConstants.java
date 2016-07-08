@@ -24,6 +24,8 @@ package org.wso2.carbon.apimgt.impl;
 public class ThrottlePolicyConstants {
     public static final String COLUMN_POLICY_ID = "POLICY_ID";
 
+    public static final String COLUMN_UUID = "UUID";
+
     public static final String COLUMN_NAME = "NAME";
 
     public static final String COLUMN_DESCRIPTION = "DESCRIPTION";

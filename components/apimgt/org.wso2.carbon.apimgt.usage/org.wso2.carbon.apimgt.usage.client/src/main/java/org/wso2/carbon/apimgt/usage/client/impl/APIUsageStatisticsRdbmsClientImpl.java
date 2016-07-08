@@ -2628,10 +2628,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (!"ALL".equals(drillDown)) {
                 query.append(" AND os ='").append(drillDown).append("'");
             }
-            query.append(" GROUP BY os ");
-            if (!"ALL".equals(drillDown)) {
-                query.append(",browser");
-            }
+            query.append(" GROUP BY os, browser ");
+
             if (isTableExist(tableName, connection)) { //Tables exist
                 preparedStatement = connection.prepareStatement(query.toString());
                 rs = preparedStatement.executeQuery();

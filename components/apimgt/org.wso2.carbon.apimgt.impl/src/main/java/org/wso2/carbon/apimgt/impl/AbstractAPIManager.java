@@ -1292,11 +1292,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return policies;
     }
-
-    public APIPolicy getAPIPolicy(String username, String policyName) throws APIManagementException {
-        APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-        return policy;
-    }
     
     @Override
     public Map<String,Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain,
