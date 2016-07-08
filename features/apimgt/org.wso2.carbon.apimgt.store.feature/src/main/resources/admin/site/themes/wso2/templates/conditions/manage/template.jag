@@ -1,7 +1,7 @@
 <% jagg.template("conditions/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     	<div class="page-header">
-            <h2>Blacklisted Items</h2>
+            <h2><%= i18n.localize("Blacklisted Items")%></h2>
         </div>  
    
     <%
@@ -25,11 +25,11 @@
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class=""><%=i18n.localize("conditionIdHead")%></th>
-                <th class=""><%=i18n.localize("conditionTypeHead")%></th>
-                <th class=""><%=i18n.localize("conditionValueHead")%></th>
-                <th class=""><%=i18n.localize("conditionStatus")%></th>
-                <th class=""><%=i18n.localize("conditionActions")%></th>
+                <th class=""><%=i18n.localize("Condition Id")%></th>
+                <th class=""><%=i18n.localize("Condition Type")%></th>
+                <th class=""><%=i18n.localize("Condition Value")%></th>
+                <th class=""><%=i18n.localize("Condition Status")%></th>
+                <th class=""><%=i18n.localize("Actions")%></th>
             </tr>
         </thead>
 
@@ -74,12 +74,12 @@
     </table>
     <%} else {%>
     		<div class="message message-info">
-				<h4><i class="icon fw fw-info"></i><%=i18n.localize("noBlockedEntities")%></h4>
-				<p><%=i18n.localize("noBlockedEntitiesDescription")%></p>
+				<h4><i class="icon fw fw-info"></i><%=i18n.localize("Blacklisted items are not defined")%></h4>
+				<p><%=i18n.localize("Blacklisted items are not defined")%></p>
 			</div>
     <%} %>
     <div class="form-actions">
-        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("blockNew")%>">
+        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("Add")%>">
     </div>
 </div>
 
@@ -98,9 +98,9 @@
         }, function (result) {
             if (result.error == false) {
                 if (result.response) {
-                jagg.message({content:"Condition update successfully",type:"info"});                    
+                jagg.message({content:i18n.t("Condition update successfully"),type:"info"});                    
                 }else{
-                jagg.message({content:"Condition not updated successfully",type:"warn"});                    
+                jagg.message({content:i18n.t('Condition not updated successfully'),type:"warn"});                    
                 }
             } else {
                 jagg.message({content:result.message,type:"error"});
@@ -110,8 +110,8 @@
     }
     function deleteCondition(conditionId){
     jagg.message({
-        content:'Are you sure you want to delete this current Block Condition',
-        title:'Confirm Deletion',
+        content:i18n.t('Are you sure you want to delete this current Block Condition'),
+        title:i18n.t('Confirm Deletion'),
         type:'confirm',
         anotherDialog:true,
         okCallback:function(){
