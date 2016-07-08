@@ -1,7 +1,7 @@
 <% jagg.template("stats/apis-time", function(inputs, outputs, jagg) { %>
 
 <div id="apisTime-stat-page" class="stat-page">
-    <div class="title-section"> <h2>Published APIs</h2> </div>
+    <div class="title-section"> <h2><%=i18n.localize("apiTime")%></h2> </div>
     <div class="col-md-12">
     <br />
 
@@ -28,7 +28,7 @@
 
 <form class="form-inline">
   <div class="form-group">
-    <label class="control-label">API Published by&nbsp;&nbsp;</label>
+    <label class="control-label"><%=i18n.localize("apiCreatedBy")%></label>
     <select id="developerSelect" class="selectpicker" data-live-search="true">
        <option>All</option>
     </select>

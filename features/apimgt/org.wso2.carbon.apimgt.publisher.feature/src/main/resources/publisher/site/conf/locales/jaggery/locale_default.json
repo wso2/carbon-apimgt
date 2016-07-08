@@ -201,7 +201,8 @@
     "applicationThrottledCounts" : "App Throttled Out Requests",
     "applicationThrottledRequests" : "App Throttled Requests",
 
-    "apiTime" : "Published APIs Over Time",
+    "apiTime" : "Created APIs Over Time",
+    "apiCreatedBy" : "API Created By",
     "apiTimeTitle" : "PUBLISHED APIS OVER TIME",
     "APISubscriptionsTimeTitle" : "API Subscription Over Time",
 
