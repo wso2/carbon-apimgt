@@ -1,17 +1,17 @@
 <% jagg.template("policy/app/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="page-header">
-        <h2>Per Token Quotas</h2>
+        <h2><%=i18n.localize("Per Token Quotas")%></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
     <table class="table table-responsive table-striped" id="app-policy">
         <thead>
             <tr>
-                <th class=""><%="Name"%></th>
-                <th class=""><%="Quota Policy"%></th>
-                <th class=""><%="Quota"%></th>
-                <th class=""><%="Unit Time"%></th>
+                <th class=""><%=i18n.localize("Name")%></th>
+                <th class=""><%=i18n.localize("Quota Policy")%></th>
+                <th class=""><%=i18n.localize("Quota")%></th>
+                <th class=""><%=i18n.localize("Unit Time")%></th>
                 <th class=""></th>
             </tr>
         </thead>
@@ -48,14 +48,14 @@
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     <i class="fw fw-edit fw-stack-1x"></i>
                                 </span>
-                                <span class="hidden-xs">Edit</span>
+                                <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
                         </a>
                         <a id="deleteButton<%=count%>" onclick="deleteAppPolicy('<%=encode.forJavaScript(String(policyName))%>')" class="btn padding-reduce-on-grid-view">
                             <span class="fw-stack">
                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     <i class="fw fw-delete fw-stack-1x"></i>
                                 </span>
-                                <span class="hidden-xs">Delete</span>
+                                <span class="hidden-xs"><%=i18n.localize("Delete")%></span>
                         </a>
                     </td>
 
@@ -69,7 +69,7 @@
 
 </div>
 <div class='form-actions'>
-<input id="add-policy-btn" type='button' class='btn btn-primary' value='Add New Policy' />
+<input id="add-policy-btn" type='button' class='btn btn-primary' value='<%=i18n.localize("Add New Policy")%>' />
 </div>
 </div>
 

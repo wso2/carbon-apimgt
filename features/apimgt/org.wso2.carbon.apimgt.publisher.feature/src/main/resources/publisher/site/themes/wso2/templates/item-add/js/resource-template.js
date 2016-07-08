@@ -212,11 +212,11 @@ var validateResourceTable = function(){
                 foundMyVal++;
             }
         });
-        if(foundMyVal > 1){
-            errors += "URL Pattern has to be unique. <strong>" + myVal + "</strong> has duplicated entries.<br/>";
+        if(foundMyVal > 1){ //todo param_string
+            errors += i18n.t("URL Pattern has to be unique.") + "<strong>" + myVal + "</strong>" + i18n.t("has duplicated entries.") + "<br/>";
         }
         if(myVal == ""){
-            errors += "URL Pattern can't be empty.<br />";
+            errors += i18n.t("URL Pattern can't be empty.") + "<br />";
         }
     });
 
@@ -237,7 +237,7 @@ var validateResourceTable = function(){
 
 
     if(!allRowsHas_at_least_one_check){
-        errors += "At least one HTTP Verb has to be checked for a resource.<br />";
+        errors += i18n.t("At least one HTTP Verb has to be checked for a resource.") + "<br />";
     }
     console.info(errors);
     if(errors != ""){
