@@ -113,7 +113,8 @@ public class APIClientGenerationManager {
         }
         File spec = null;
         boolean isFirstApi = true;
-        String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator + userName + ".json";
+        String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator +
+                                                                    UUID.randomUUID().toString() + ".json";
         String clientOutPutDir;
         String sourceToZip;
         String zipName;
