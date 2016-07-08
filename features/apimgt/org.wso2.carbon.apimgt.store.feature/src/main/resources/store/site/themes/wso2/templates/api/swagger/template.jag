@@ -59,7 +59,7 @@ var api = outputs.api;%>
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
         onComplete: function(swaggerApi, swaggerUi){
-          console.log("Loaded SwaggerUI");        
+          console.log("Loaded SwaggerUI");
         },
         onFailure: function(data) {
           console.log("Unable to Load SwaggerUI");
@@ -91,7 +91,7 @@ $(document).ready(function(){
       $("#access_token").val("");
     }else{
       $("#access_token").val(key);
-    }     
+    }
     $("#access_token").trigger("change");
   };
 
@@ -126,9 +126,9 @@ var select_environment = function(){
     var name =selectedEnvironment.val();
     if (window.swaggerUi.api.url.indexOf("?")!=-1) {
       if (window.swaggerUi.api.url.indexOf("envName")!=-1) {
-            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("envName")[0] + "envName="+name});    
+            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("envName")[0] + "envName="+name});
       }else{
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});            
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});
       }
     }else{
     window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
@@ -158,111 +158,114 @@ function checkOnKeyPress(e) {
     }
 }
 </script>
-<div id="authorizations" class="col-sm-12">
-    <form class="form-horizontal">
+<div class="row">
+<div id="authorizations" class="col-md-12 col-lg-12">
+
 <% if(subscriptions != null && subscriptions.length > 0) { %>
+<form class="form-horizontal">
+  <div class="form-group">
       <div class="form-group">
-        <div class="col-sm-12">
-		        <div class="input-group input-wrap res-wrap">
-		        		<div class="input-group-btn">	
-				         	 <label class="control-label">Try</label>
-				         </div>
-		        		<select id="sub_app_list" class="form-control subapp">
-				          <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-				            <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
-				                 <%= encode.forHtml(subscriptions[i].application)%>
-				            </option>
-				          <% } %>
-				         </select>
-				         <div class="input-group-btn">	
-				         	 <label class="control-label">Using</label>
-				         </div>
-
-				        <select id="key_type" class="form-control keytype">
-					            <option value="production">Production</option>
-					            <option value="sandbox">Sandbox</option>
-					    </select>
-
-				         <div class="input-group-btn">	
-				         	 <label class="control-label">Key</label>
-				         </div>
-				         <div class="input-group-btn">	
-				         	 <label class="control-label OnEnvironment">On Environment</label>
-				         </div>
-                         <select id="environment_name" class="env_name">
-                              <%
-                              var envir = JSON.parse(api.serverURL);
-                              for(var types in envir){
-                                var endpointType=envir[types];
-                                for(var endpoint in endpointType){
-                                    if(endpointType[endpoint]["showInConsole"]){
-                                    %>
-                                       <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
-                                    <% }
-                                }
-                              }
-                              %>
-                        </select>
-		        </div>
-
+          <label for="" class="col-sm-2 control-label">Try</label>
+          <div class="col-sm-10">
+            <select id="sub_app_list" class="form-control subapp">
+              <% for(var i = 0 ;subscriptions.length > i;i++){ %>
+                <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
+                     <%= encode.forHtml(subscriptions[i].application)%>
+                </option>
+              <% } %>
+            </select>
+          </div>
+      </div>
+      <div class="form-group">
+        <label for="" class="col-sm-2 control-label">Using</label>
+            <div class="col-sm-10">
+            <div class="input-group">
+              <select id="key_type" class="form-control keytype">
+                      <option value="production">Production</option>
+                      <option value="sandbox">Sandbox</option>
+              </select>
+              <div class="input-group-addon">Key</div>
+              </div>
+            </div>
+      </div>
+      <div class="form-group">
+        <label for="" class="col-sm-2 control-label OnEnvironment">On Environment</label>
+        <div class="col-sm-10">
+          <select id="environment_name" class="env_name">
+                <%
+                var envir = JSON.parse(api.serverURL);
+                for(var types in envir){
+                  var endpointType=envir[types];
+                  for(var endpoint in endpointType){
+                      if(endpointType[endpoint]["showInConsole"]){
+                      %>
+                         <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+                      <% }
+                  }
+                }
+                %>
+          </select>
         </div>
       </div>
-<!--
-
-<div class="form-group">
-  <label class="col-sm-2 control-label"><label for="">Try</label></label>
-  <div class="col-sm-10">      
-    <select id="sub_app_list" class="inline">
-    <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-      <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>"><%= encode.forHtml(subscriptions[i].application)%></option>
-    <% } %>
-    </select>
-    <label> On </label>
-    <select id="key_type">
-      <option value="production">Production</option>
-      <option value="sandbox">Sandbox</option>        
-    </select> 
-    <label> Environment. </label>    
   </div>
-</div>
-
--->
-<% }else if(jagg.getUser() != null){ %>
-    <div class="message message-info">
-        <h4><i class="icon fw fw-info"></i>Notice </h4>
-        <p><%=i18n.localize("subscribeToGetAccessToken")%>&nbsp;<%=i18n.localize("provideAccessToken")%></p>
-    </div>
-<% }else{ %>
-    <div class="message message-info">
-        <h4><i class="icon fw fw-info"></i>Notice</h4>
-        <p><%=i18n.localize("requireAccessToken")%> &nbsp; <%=i18n.localize("provideAccessToken")%></p>
-    </div>       
-<% } %>
-    <div class="alert hide notoken">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong>Warning!</strong> Selected application do not have an access token for selected environment. Please go to subscription page and generate an access token first.
-    </div>
-
-
-
-
-      <div class="form-group">
-        <label class="col-sm-3 control-label">Set Request Header</label>
-        <div class=" col-sm-9">
-        <div class="input-group">
-          <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
-          <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
-        </div>
-        </div>
+</form>
+    <!--
+    <div class="form-group">
+      <label class="col-sm-2 control-label"><label for="">Try</label></label>
+      <div class="col-sm-10">
+        <select id="sub_app_list" class="inline">
+        <% for(var i = 0 ;subscriptions.length > i;i++){ %>
+          <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>"><%= encode.forHtml(subscriptions[i].application)%></option>
+        <% } %>
+        </select>
+        <label> On </label>
+        <select id="key_type">
+          <option value="production">Production</option>
+          <option value="sandbox">Sandbox</option>
+        </select>
+        <label> Environment. </label>
       </div>
-    </form>
+    </div>
+
+    -->
+    <% }else if(jagg.getUser() != null){ %>
+        <div class="message message-info remove-margin-top">
+            <h4><i class="icon fw fw-info"></i>Notice </h4>
+            <p><%=i18n.localize("subscribeToGetAccessToken")%>&nbsp;<%=i18n.localize("provideAccessToken")%></p>
+        </div>
+    <% }else{ %>
+        <div class="message message-info remove-margin-top">
+            <h4><i class="icon fw fw-info"></i>Notice</h4>
+            <p><%=i18n.localize("requireAccessToken")%> &nbsp; <%=i18n.localize("provideAccessToken")%></p>
+        </div>
+    <% } %>
+        <div class="alert alert-warning hide notoken">
+        <button type="button" class="close" data-dismiss="alert"><i class="fw fw-cancel"></i></button>
+        <strong>Warning!</strong> Selected application do not have an access token for selected environment. Please go to subscription page and generate an access token first.
+        </div>
+
+
+
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Set Request Header</label>
+            <div class=" col-sm-9">
+            <div class="input-group">
+              <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
+              <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
+            </div>
+            </div>
+          </div>
+        </form>
+    </div>
+
+    <% } %>
+<div class="col-md-12 col-lg-12">
+    <div class="swagger-section">
+    <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+    <div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
+    <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
-
-<% } %>
-
-<div class="swagger-section">
-<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-<div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
-<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+</div>
 </div>
 <%  }); %>

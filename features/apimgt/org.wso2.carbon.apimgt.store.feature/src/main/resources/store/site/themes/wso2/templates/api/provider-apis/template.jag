@@ -6,7 +6,9 @@
 
 %>
 <%if(outputs.apiOwner!=null && outputs.apis && outputs.apis.length > 0){%>
-  <h3><%=i18n.localize("moreAPI")%>  '<%= owner %>'</h3>
+<div class="page-header add-margin-top-4x">
+  <h2 class="truncate-children"><span><%=i18n.localize("moreAPI")%>  '<%= owner %>'</span></h2>
+</div>
   <div class="page-content">
   	<div class="row">
     <%
