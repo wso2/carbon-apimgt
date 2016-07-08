@@ -13,7 +13,7 @@
         	<p class="doc-content"><%=doc.provider.docName%></p>
 			
 		    <%if(!doc.provider.content && doc.provider.content==""){%>
-		    	<p>No document content have been added yet.</p>
+		    	<p><%=i18n.localize("No document content have been added yet.")%></p>
 		    <%}else{%>
 		    	<p><%=doc.provider.content%></p>
 		    <%}%>
