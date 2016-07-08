@@ -155,7 +155,7 @@ var drawAPIsTable = function(from,to){
     	 var $dataTables = $('<table class="display defaultTable"  style="background-color:transparent"	width="100%" cellspacing="0" id="apiSelectTable"></table>');
                         $dataTables.append($('<thead class="tableHead" style="background-color:#C1DAD7" ><tr>' +
                             '<th width="10%"></th>' +
-                    	        '<th>API</th>' +
+                    	        '<th>i18n.t("API")</th>' +
                             '<th width="10%" style="text-transform:none;text-align:left">Selected</th>'+
                             '</tr></thead>'));
 
