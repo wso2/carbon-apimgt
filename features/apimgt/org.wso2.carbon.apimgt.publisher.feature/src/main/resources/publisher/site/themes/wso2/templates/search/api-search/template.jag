@@ -8,7 +8,7 @@ var query=request.getParameter("query");
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <div class="input-group input-wrap has-form-control-btn">
                         <input type="text" name="query" title="Search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
-                        placeholder="<%=i18n.localize("search")%>"<%}%> />
+                        placeholder="<%=i18n.localize("Search")%>"<%}%> />
                         <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
                             <input type="hidden" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
                         <%}%>
@@ -26,16 +26,16 @@ var query=request.getParameter("query");
                 </div>
             </div>
             <div id="searchAPIHelp" class="hide">
-                <div><strong><%=i18n.localize("searchAPIHelpMsg1")%></strong></div>
+                <div><strong><%=i18n.localize("Search Options")%></strong></div>
                 <ol>
-                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg9")%></li>
+                <li><%=i18n.localize("By API Name [Default]  or")%></li>
+                <li><%=i18n.localize("By API Provider [Syntax - provider:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By API Version  [Syntax - version:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By Context [Syntax - context:xxxx ] or ")%></li>
+                <li><%=i18n.localize("By Status [Syntax - status:xxxx ] or ")%></li>
+                <li><%=i18n.localize("By Description [Syntax - description:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Subcontext [Syntax - subcontext:xxxx ] ")%></li>
+                <li><%=i18n.localize("By Documentation Content [Syntax - doc:xxxx ] ")%></li>
                 </ol>
             </div>
         </form>

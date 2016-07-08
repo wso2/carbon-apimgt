@@ -47,7 +47,9 @@
    </script>
 
        <div class="alert alert-info" id="apiInfo" style="display:none;">
-           <div style="padding-bottom:10px"><b><%=i18n.localize("aboutAPIs")%></b></div>
+           <div style="padding-bottom:10px">
+           <b><%=i18n.localize("The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ")%></b>
+           </div>
        </div>
 
         <span class="loading"></span>
@@ -106,15 +108,16 @@
         			 <div class="add-padding-2x app-data ">
                                     <h4 class="truncate"><a href="#" title="<%= encode.forHtml(api.docName)%>"><%= encode.forHtml(api.docName)%></a></h4>
                                     <% if(api.docSummary && api.docSummary != ""){ %>
-                                    	<h5><a href="#" title="<%=i18n.localize("docSum")%>"><%=i18n.localize("docSum")%>:<%=  encode.forHtml(api.docSummary)%></a></h5>
+                                    	<h5><a href="#" title="<%=i18n.localize("Summary")%>"><%=i18n.localize("Summary")%>:<%=  encode.forHtml(api.docSummary)%></a></h5>
                                     <%} %>
                                     <%if (api.docSourceURL&& api.docSourceURL!="") { %>
-                                    	<p><a href="<%=api.docSourceURL%>" title="i18n.localize("viewDoc")%>" target="_blank"><%=i18n.localize("viewDoc")%></a></p>
+                                    	<p><a href="<%=api.docSourceURL%>" title="i18n.localize("View Content")%>" target="_blank"><%=i18n.localize("View Content")%></a></p>
                                     <%} else if(api.docFilePath && api.docFilePath!="") { %>
-                                    	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("download")%>"><%=i18n.localize("download")%></a></p>
+                                    	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("Download")%>"><%=i18n.localize("Download")%></a></p>
                                     <% } else { %>
-                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + "&provider=" + encode.forUriComponent(api.provider) + urlPostfix; %>
-                                    	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("viewDoc")%>"><%=i18n.localize("viewDoc")%></a></p>
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) 
+                                    	+ "&provider=" + encode.forUriComponent(api.provider) + urlPostfix; %>
+                                    	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("View Content")%>"><%=i18n.localize("View Content")%></a></p>
                                     <% } %>
                                 </div>
         		</div>
@@ -144,28 +147,29 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate">
+                                    <a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a title="<%=api.version%>"><%=api.version%></a></h5>
                                     <p class="truncate"><%=api.provider%></p>
                                     <p>
-                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("apiBrowse")%>" >
+                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("Browse API")%>" >
 			                                <span id="noOfUsers">
-			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("users")%><% } %>
+			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("Users")%><% } %>
 			                                </span>
 			                            </a>
                                     </p>
                                     <h5><a><%=api.status%></a></h5>
 		                            <%if(outputs.isCreatePermitted){ %>
-			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("design")%>">
+			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Design")%>">
 				                            <span class="fw-stack">
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("design")%>"></i>
+				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Design")%>"></i>
 				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("design")%>"></i>
 				                            </span>
 			                            </a>
-			                            <a href='#' onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("delete")%>">
+			                            <a href='#' onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("DELETE")%>">
 				                            <span class="fw-stack" title="test">
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("delete")%>"></i>
-				                                <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("delete")%>"></i>
+				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("DELETE")%>"></i>
+				                                <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("DELETE")%>"></i>
 				                            </span>
 			                            </a>
 			                       <%} %>
@@ -192,38 +196,38 @@
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
-                                    <a href="<%=path%>" title="<%=i18n.localize("apiBrowse")%>"> 
+                                    <a href="<%=path%>" title="<%=i18n.localize("Browse API")%>"> 
 	                                    <div class="after">                                        
-	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("apiBrowse")%>">
-	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("apiBrowse")%>"></i>
-	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("apiBrowse")%>"></i>
+	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("Browse API")%>">
+	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Browse API")%>"></i>
+	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("Browse API")%>"></i>
 	                                            </span>                                        
 	                                    </div>
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("apiName")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
                                     <h5><%=api.version%></h5>
                                     <p class="truncate"><%=api.provider%></p>
                                     <p>
-                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("users")%>">
+                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("Users")%>">
 			                                <span id="noOfUsers">
-			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("user")%> <% } else { %><%=api.subs%> <%=i18n.localize("users")%><% } %>
+			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("User")%> <% } else { %><%=api.subs%> <%=i18n.localize("Users")%><% } %>
 			                                </span>
 			                            </a>
                                     </p>
                                     <h5><%=api.status%></h5>
 		                            <%if(outputs.isCreatePermitted){ %>
-			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("edit")%>">
+			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Edit")%>">
 				                         <span class="fw-stack" style="font-size:10px" >
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("edit")%>"></i>
-				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("edit")%>"></i>
+				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Edit")%>"></i>
+				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("Edit")%>"></i>
 				                            </span>
 			                            </a>
-			                            <a onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("delete")%>">
+			                            <a onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("DELETE")%>">
 				                           <span class="fw-stack" style="font-size:10px">
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("delete")%>" ></i>
-				                                <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("delete")%>"></i>
+				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("DELETE")%>" ></i>
+				                                <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("DELETE")%>"></i>
 				                            </span>
 			                            </a>
 			                       <%} %>
@@ -244,21 +248,21 @@
     if(mode=="search"){
     %>
     	<div class="alert alert-info" role="alert">
-                    <i class="icon fw fw-warning"></i><strong>Info!</strong>
-                    <%=i18n.localize("searchMsg")%>
+                    <i class="icon fw fw-warning"></i><strong><%= i18n.localize("Info!")%></strong>
+                    <%=i18n.localize("No matching APIs found.")%>
                 </div>
     <%}else{%>
     	<%if(outputs.isCreatePermitted){ %>
     	        <div class="message message-info">
-                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>
-                    <p><%=i18n.localize("noAPIsMsg1")%></p>
+                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("No APIs created yet.")%></h4>
+                    <p><%=i18n.localize("Click one of the buttons below to get started.")%></p>
                 </div>
-                <div style="display: inline"><a title="<%=i18n.localize("addAPI")%>" class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
-        		<div style="display: inline"><a title="<%=i18n.localize("SampleAPI")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
+                <div style="display: inline"><a title="<%=i18n.localize("Add New API")%>" class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("New API...")%></a></div>
+        		<div style="display: inline"><a title="<%=i18n.localize("Deploy Sample API")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=gatewayURL%>')" ><%=i18n.localize("Deploy Sample API")%></a></div>
         <%}else{%>
         		<div class="message message-info">
-                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("noAPIsMsg")%></h4>
-                    <p><%=i18n.localize("noAPIsMsg1")%></p>
+                    <h4><i class="icon fw fw-info"></i><%=i18n.localize("No APIs created yet.")%></h4>
+                    <p><%=i18n.localize("Click one of the buttons below to get started.")%></p>
                 </div>
         <%}%>
     <%

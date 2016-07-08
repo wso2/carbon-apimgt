@@ -41,7 +41,7 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
-                            <th><%=i18n.localize("version")%></th>
+                            <th><%=i18n.localize("Version")%></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -57,9 +57,9 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                 <% if(mode=="edit"){%>
                 <div class="col-md-12">
                     <div style="padding:10px 0;">
-                        <button type="button" title="Save the changes to the document and stay in this tab" class="btn btn-primary" id="inline-apply-button" onclick="saveContent(provider,apiName,apiVersion,docName,'apply')">Save</button>
-                        <button type="button" title="Save the document and close this tab" class="btn btn-primary" id="inline-save-button" onclick="saveContent(provider,apiName,apiVersion,docName,'save')">Save and Close</button>
-                        <button type="button" title="Cancel all the unsaved changes and close this tab"  class="btn btn-default" id="inline-cancel-button" onclick="window.close()">Cancel</button>
+                        <button type="button" title="<%=i18n.localize("Save the changes to the document and stay in this tab")%>" class="btn btn-primary" id="inline-apply-button" onclick="saveContent(provider,apiName,apiVersion,docName,'apply')"><%=i18n.localize("Save")%></button>
+                        <button type="button" title="<%=i18n.localize("Save the document and close this tab")%>" class="btn btn-primary" id="inline-save-button" onclick="saveContent(provider,apiName,apiVersion,docName,'save')"><%=i18n.localize("Save and Close")%></button>
+                        <button type="button" title="<%=i18n.localize("Cancel all the unsaved changes and close this tab")%>"  class="btn btn-default" id="inline-cancel-button" onclick="window.close()"><%=i18n.localize("Cancel")%></button>
 
                     </div>
                 </div>
