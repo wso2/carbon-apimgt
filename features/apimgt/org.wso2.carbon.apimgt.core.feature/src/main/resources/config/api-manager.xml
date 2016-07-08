@@ -507,14 +507,7 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
-        <JMSEventPublisherParameters>
-                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
-                <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
-                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
-                <transport.jms.Destination>throttleData</transport.jms.Destination>
-                <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
-                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
-        </JMSEventPublisherParameters>
+        <JMSEventPublisherName>jmsEventPublisher</JMSEventPublisherName>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
                 <Gold>5000</Gold>

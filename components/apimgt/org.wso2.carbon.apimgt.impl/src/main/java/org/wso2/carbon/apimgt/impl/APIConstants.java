@@ -642,8 +642,7 @@ public final class APIConstants {
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
-    public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
-
+    
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
     public static final int AM_PUBLISHER_APIMGT_EXECUTION_ID = 202;
@@ -1150,7 +1149,7 @@ public final class APIConstants {
         public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
-        public static final String JMS_PUBLISHER_PARAMETERS = "JMSEventPublisherParameters";
+        public static final String JMS_EVENT_PUBLISHER = "JMSEventPublisherName";
         public static final String DEFAULT_THROTTLE_LIMITS = "DefaultLimits";
         public static final String SUBSCRIPTION_THROTTLE_LIMITS = "SubscriptionTierLimits";
         public static final String APPLICATION_THROTTLE_LIMITS = "ApplicationTierLimits";
