@@ -1,15 +1,15 @@
 <% jagg.template("stats/subscriptions-time", function(inputs, outputs, jagg) { %>
 
 <div id="apiSubscriptionTime-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("APISubscriptionsTimeTitle")%></h2> </div>
+    <div class="title-section"> <h2><%=i18n.localize("API Subscription Over Time")%></h2> </div>
     <div class="col-md-12">
 <br/>
 
 <div class="row">
 	<div class="form-group col-sm-2">
         <select class="select form-control" id="apiFilter" name="apiFilter">
-            <option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
-            <option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+            <option value="allAPIs"><%=i18n.localize("All APIs")%></option>
+            <option value="myAPIs"><%=i18n.localize("My APIs")%></option>
         </select>
 	</div>
 	<div class="col-sm-4"></div>
@@ -17,11 +17,11 @@
         <div id="rangeSliderWrapper" >
            <div id="dateRangePickerContainer" style="text-align:right">
                <div class="btn-group" role="group">
-                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                   <button id="hour-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Hour")%></button>
+                   <button id="today-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Day")%>
                    </button>
-                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+                   <button id="week-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Week")%></button>
+                   <button id="month-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Month")%></button>
                    <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
                      <i class="fw fw-calendar" title="date-range"></i>
                      <span></span> <b class="caret"></b>
@@ -34,8 +34,8 @@
 
 <div class="col-md-5 filters" style="display:none">
     <label class="control-label">API&nbsp;&nbsp;</label>
-    <select id="apiSelect" name="selValue" class="selectpicker" data-live-search="true" title="Select API">
-       <option>None</option>
+    <select id="apiSelect" name="selValue" class="selectpicker" data-live-search="true" title="<%=i18n.localize("Select API")%>">
+       <option><%=i18n.localize("None")%></option>
     </select>
 </div>
 
