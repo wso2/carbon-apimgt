@@ -1,7 +1,7 @@
 var deleteTier = function (tierObject) {
     jagg.message({
-        content:'Tier deletion might affect current subscriptions. Are you sure you want to delete this tier? ',
-        title:'Confirm Deletion',
+        content: i18n.t('Tier deletion might affect current subscriptions. Are you sure you want to delete this tier? '),
+        title: i18n.t('Confirm Deletion'),
         type:'confirm',
         anotherDialog:true,
         okCallback:function(){
