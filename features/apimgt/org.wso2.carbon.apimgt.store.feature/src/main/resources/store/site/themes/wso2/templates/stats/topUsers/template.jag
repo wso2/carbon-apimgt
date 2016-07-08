@@ -3,17 +3,17 @@
 <div id="topUsers-stat-page"  class="stat-page">
 
 	<div class="page-header">     
-    			<h2><%=i18n.localize("usersTitle")%></h2>
+    			<h2><%=i18n.localize("Top Users For Applications")%></h2>
 	</div>
 	
     <div id="rangeSliderWrapper" >
        <div id="dateRangePickerContainer" style="text-align:right">
            <div class="btn-group" role="group">
-               <button id="hour-btn" type="button" class="btn btn-default ">Hour</button>
-               <button id="today-btn" type="button" class="btn btn-default ">Day
+               <button id="hour-btn" type="button" class="btn btn-default "><%=i18n.localize("Hour")%></button>
+               <button id="today-btn" type="button" class="btn btn-default "><%=i18n.localize("Day")%>
                </button>
-               <button id="week-btn" type="button" class="btn btn-default">Week</button>
-               <button id="month-btn" type="button" class="btn btn-default  active">Month</button>
+               <button id="week-btn" type="button" class="btn btn-default"><%=i18n.localize("Week")%></button>
+               <button id="month-btn" type="button" class="btn btn-default  active"><%=i18n.localize("Month")%></button>
                <button id="date-range" type="button" class="btn btn-default" >
                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                  <span></span> <b class="caret"></b>
@@ -23,7 +23,7 @@
     </div>
     
 	    <div class="page-header">     
-	    			<h2><%=i18n.localize("registeredUseres")%></h2>   			 
+	    			<h2><%=i18n.localize("Registered Users For Applications")%></h2>   			 
 		</div>
 
 
@@ -38,7 +38,7 @@
         <hr/>
         
         <div class="page-header">     
-    			<h2><%=i18n.localize("topUsersTitle")%></h2>   			 
+    			<h2><%=i18n.localize("Top Users For Applications")%></h2>   			 
 		</div>
 
 
