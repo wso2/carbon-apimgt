@@ -132,12 +132,12 @@ function APIDesigner(){
     $( "#api_designer" ).delegate( "#add_resource", "click", this, function( event ) {
         var designer = APIDesigner();
         if($("#resource_url_pattern").val() == ""){
-            jagg.message({content:"URL pattern cannot be empty.",type:"error"});
+            jagg.message({content: i18n.t("URL pattern cannot be empty."), type: "error"});
             return;
         }
         // checking for white spaces in URL template
         if (/\s/.test( $("#resource_url_pattern").val() )) {
-            jagg.message({content:"URL pattern cannot contain whitespace",type:"error"});
+            jagg.message({content: i18n.t("URL pattern cannot contain whitespace"), type: "error"});
             return;
         }
 
@@ -150,6 +150,7 @@ function APIDesigner(){
             if($(this).is(':checked')){
                 if(designer.check_if_resource_exist( path , $(this).val() ) ){
                 	resource_exist = true;
+                    // @todo: param_string
                     var err_message = "Resource already exist for URL Pattern "+path+" and Verb "+$(this).val();
                     jagg.message({content:err_message,type:"error"});
                     return;
@@ -221,7 +222,7 @@ function APIDesigner(){
             }
         });
         if(vc==0){
-            jagg.message({content:"You should select at least one HTTP verb." ,type:"error"});            
+            jagg.message({content: i18n.t("You should select at least one HTTP verb."), type: "error"});
             return;
         }
         event.data.add_resource(resource, path);
@@ -373,6 +374,7 @@ APIDesigner.prototype.init_controllers = function(){
         var pn = $(this).attr('data-path-name');
         var op = $(this).attr('data-operation');        
         jagg.message({
+            // @todo: param_string
         	content:'Do you want to remove "'+op+' : '+ Handlebars.Utils.escapeExpression(pn) +'" resource from list.',
         	type:'confirm',
         	title:"Remove Resource",
@@ -435,8 +437,9 @@ APIDesigner.prototype.init_controllers = function(){
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
 
+        // @todo: param_string
         jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
-            type: 'confirm', title: "Delete Parameter",
+            type: 'confirm', title: i18n.t("Delete Parameter"),
             okCallback: function () {
                 API_DESIGNER = APIDesigner();
                 API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
@@ -448,7 +451,7 @@ APIDesigner.prototype.init_controllers = function(){
     	$("#messageModal div.modal-footer").html("");
         var i = $(this).attr("data-index");
         jagg.message({content: i18n.t('confirm.deleteScope'),
-            type: 'confirm', title: "Delete Scope",
+            type: 'confirm', title: i18n.t("Delete Scope"),
             okCallback: function () {
                 API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
                 API_DESIGNER.render_scopes();
@@ -906,9 +909,9 @@ $(document).ready(function(){
         if(designer.has_resources() == false){
         	$("#messageModal div.modal-footer").html("");
             jagg.message({
-                content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)?" ,
+                content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),
                 type:"confirm",
-                title:"Resource not specified",
+                title: i18n.t("Resource not specified"),
                 anotherDialog:true,
                 okCallback:function(){
                     var designer = APIDesigner();
@@ -963,7 +966,7 @@ $(document).ready(function(){
             },
             error: function() {
                 $('#'+thisID).buttonLoader('stop');
-                jagg.message({content:"Error occurred while updating API",type:"error"});
+                jagg.message({content: i18n.t("Error occurred while updating API"), type: "error"});
             },
             dataType: 'json'
         });
@@ -981,14 +984,15 @@ $(document).ready(function(){
                 		$('.tags-error').show();
                 		$('.add-tags-error').hide();
                         $('.add-tags-error').html('');
+                        // @todo: param_string
                         $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .');
                         return '';
                 }));
             }
 
             if(tagName.length > 30){
-                $tag.val(tagName.substring(0, 30));               
-                $('.tags-error').html('The tag can have only 30 characters maximum.');
+                $tag.val(tagName.substring(0, 30));
+                $('.tags-error').html(i18n.t('The tag can have only 30 characters maximum.'));
             }
 
         });
@@ -1007,7 +1011,7 @@ $(document).ready(function(){
         if($(this).val().length > 0){
         	$('.tags-error').hide();
     		$('.add-tags-error').show();
-            $('.add-tags-error').html('Please press Enter to add the tag.')
+            $('.add-tags-error').html(i18n.t('Please press Enter to add the tag.'))
             $('.tags-error').html('');
         }
         else if($(this).val().length == 0){
@@ -1114,7 +1118,7 @@ var isAPIUpdateValid = function(){
                     }
                 }else{
                     jagg.message({
-                        content : "API Update validation error ",
+                        content: i18n.t("API Update validation error "),
                         type : "error"
                     });
                     disableForm();
