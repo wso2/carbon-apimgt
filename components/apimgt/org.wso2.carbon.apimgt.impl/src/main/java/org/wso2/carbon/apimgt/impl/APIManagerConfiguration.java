@@ -890,14 +890,10 @@ public class APIManagerConfiguration {
                 }
                 throttleProperties.setBlockCondition(blockConditionRetrieverConfiguration);
 
-                OMElement jmsPublisherParams = throttleConfigurationElement.getFirstChildWithName(new QName
-                     (APIConstants.AdvancedThrottleConstants.JMS_PUBLISHER_PARAMETERS));
-                if(jmsPublisherParams != null){
-                    Iterator<OMElement> paramIterator = jmsPublisherParams.getChildElements();
-                    while (paramIterator.hasNext()){
-                        OMElement parameter = paramIterator.next();
-                        throttleProperties.addJMSPublisherParameter(parameter.getLocalName(),parameter.getText());
-                    }
+                OMElement jmsEventPublisherConfiguration = throttleConfigurationElement.getFirstChildWithName(new
+                    QName(APIConstants.AdvancedThrottleConstants.JMS_EVENT_PUBLISHER));
+                if (jmsEventPublisherConfiguration != null) {
+                    throttleProperties.setJMSEventPublisher(jmsEventPublisherConfiguration.getText());
                 }
 
             }

@@ -518,30 +518,6 @@ public class APIManagerComponent {
 
     }
 
-
-    private void configureJMSPublisher() {
-        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-
-        adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
-        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
-        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        if (configuration.getThrottleProperties().getJmsPublisherParameters() != null) {
-            adapterConfiguration.setStaticProperties(configuration.getThrottleProperties().getJmsPublisherParameters());
-
-            try {
-                ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-            } catch (OutputEventAdapterException e) {
-                log.warn("Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly", e);
-            }
-        } else {
-            log.info("JMS Publisher not enabled.");
-        }
-
-    }
-
     private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
         APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
    }
@@ -574,7 +550,6 @@ public class APIManagerComponent {
      */
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
-        configureJMSPublisher();
     }
 
     /**

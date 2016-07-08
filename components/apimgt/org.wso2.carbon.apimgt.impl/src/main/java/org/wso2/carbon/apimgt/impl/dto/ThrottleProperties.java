@@ -30,12 +30,12 @@ public class ThrottleProperties {
     private JMSConnectionProperties jmsConnectionProperties;
     private boolean enableUnlimitedTier;
     private String throttleDataSourceName;
+    private String jmsEventPublisherName;
     private PolicyDeployer policyDeployer;
     private BlockCondition blockCondition;
     private boolean enableHeaderConditions;
     private boolean enableJwtConditions;
     private boolean enableQueryParamConditions;
-    private Map<String, String> jmsPublisherParameters = new HashMap<String, String>();
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
 
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
@@ -52,6 +52,14 @@ public class ThrottleProperties {
 
     public void setDataPublisherThreadPool(DataPublisherThreadPool dataPublisherThreadPool) {
         this.dataPublisherThreadPool = dataPublisherThreadPool;
+    }
+
+    public void setJMSEventPublisher(String eventPublisherName){
+        this.jmsEventPublisherName = eventPublisherName;
+    }
+
+    public String getJmsEventPublisherName() {
+        return jmsEventPublisherName;
     }
 
     public BlockCondition getBlockCondition() {
@@ -84,14 +92,6 @@ public class ThrottleProperties {
 
     public void setThrottleDataSourceName(String throttleDataSourceName) {
         this.throttleDataSourceName = throttleDataSourceName;
-    }
-
-    public Map<String, String> getJmsPublisherParameters() {
-        return jmsPublisherParameters;
-    }
-
-    public void addJMSPublisherParameter(String paramName, String paramValue) {
-        jmsPublisherParameters.put(paramName, paramValue);
     }
 
     public boolean isEnabled() {
@@ -129,7 +129,6 @@ public class ThrottleProperties {
     public JMSConnectionProperties getJmsConnectionProperties() {
         return jmsConnectionProperties;
     }
-
 
     public void setJmsConnectionProperties(JMSConnectionProperties jmsConnectionProperties) {
         this.jmsConnectionProperties = jmsConnectionProperties;
@@ -451,7 +450,6 @@ public class ThrottleProperties {
             this.password = password;
         }
     }
-
     public static class BlockCondition {
         private boolean enabled;
         private String dataSource;
