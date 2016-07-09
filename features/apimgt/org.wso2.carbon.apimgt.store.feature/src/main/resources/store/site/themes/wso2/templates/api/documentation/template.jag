@@ -11,7 +11,7 @@ if(tenantDomain === null){
 }
 var urlPrefix = jagg.getTenantURLPrefix("&");
 %>
-<div class="api-documentation panel-group accordion" role="tablist" aria-multiselectable="true">
+<div class="api-documentation panel-group accordion" role="tablist">
     <%
     var i, type, length, doc, docs, empty = true, documentations = outputs.documentations,index,count = 0, icon;
     var urlPrefix = jagg.getTenantURLPrefix();
@@ -26,13 +26,14 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
             } else if (type.toUpperCase() == "PUBLIC FORUM" || type.toUpperCase() == "SUPPORT FORUM") {
                 icon = "fw-forum";
             } else if (type.toUpperCase() == "SAMPLES") {
-                icon = "fw-endpoint";
+                icon = "fw-api";
             } else {
                 icon = "fw-text";
             }
     %>
+
     <div class="panel panel-default">
-    	<div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse<%=index%>" aria-expanded="true" aria-controls="accordion1-collapse1">
+    	<div class="panel-heading" role="tab" id="heading<%=index%>" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse<%=index%>" aria-expanded="true" aria-controls="accordion1-collapse<%=index%>">
 				<h4 class="panel-title">
 					<label class="radio">
 						<span class="fw-stack">
@@ -40,7 +41,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 					    </span>
                     </label>
                     <div>
-                   		<div class="heading"><%=type%></div>
+                   		<div class="heading no-description"><%=type%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
                         </div>
@@ -48,16 +49,17 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                     <div class="clearfix"></div>
 				</h4>
 		</div>
-        <div id="accordion1-collapse<%=index%>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-				<div class="panel-body">
-				<table class="docs-table table table-striped table-hover display data-table" cellspacing="0">
+        <div id="accordion1-collapse<%=index%>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<%=index%>">
+            <div class="panel-body">
+				<table class="table table-striped">
 			        <thead>
 			          <tr>
-			              <th><%=i18n.localize("name")%></th>            
-			              <th><%=i18n.localize("docSum")%></th>      
-			              <th></th>
+			              <th class="col-md-2"><%=i18n.localize("name")%></th>
+			              <th class="col-md-8"><%=i18n.localize("docSum")%></th>
+			              <th class="col-md-2"></th>
 			          </tr>
-			      
+			        </thead>
+			        <tbody>
                 <%
                 length = docs.length;
                 for(i = 0; i < length; i++) {
@@ -93,7 +95,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                 
                 
                 <% } %>
-                </thead>    
+                  </tbody>
 			    </table>
             </div>
         </div>
@@ -102,11 +104,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <% 
     	count ++;
     } %>
-    <% if(empty) { %>
-    <div class="message message-info">
+</div>
+
+<% if(empty) { %>
+    <div class="message message-info remove-margin">
         <h4><i class="icon fw fw-info"></i>No Documents Found</h4>
         <p>No documents have been associated with this API so far.</p>
-    </div>    
-    <% } %>
-</div>
+    </div>
+<% } %>
+
 <% }); %>
