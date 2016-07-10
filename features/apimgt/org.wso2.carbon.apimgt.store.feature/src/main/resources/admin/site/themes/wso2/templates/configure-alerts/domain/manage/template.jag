@@ -21,9 +21,9 @@
             <table class="table table-bordered" id="tblConfigs">
                 <thead>
                     <tr>
-                        <th><%=i18n.localize("domainTableColumnName")%></th>
-                        <th><%=i18n.localize("domainTableColumnDescription")%></th>
-                        <th><%=i18n.localize("templateStatus")%></th>
+                        <th><%=i18n.localize("Scenario Type")%></th>
+                        <th><%=i18n.localize("Description")%></th>
+                        <th><%=i18n.localize("Status")%></th>
                         <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
                     </tr>
                 </thead>
@@ -82,7 +82,7 @@
                                 <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
                                     <tbody>
                                     <tr>
-                                        <td class="leftCol-med" colspan="2">No Configurations to be listed
+                                        <td class="leftCol-med" colspan="2"><%=i18n.localize("No Configurations to be listed")%>
                                         </td>
                                     </tr>
                                     </tbody>
@@ -173,7 +173,7 @@
                                 <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
                                     <tbody>
                                     <tr>
-                                        <td class="leftCol-med" colspan="2">No Configurations to be listed
+                                        <td class="leftCol-med" colspan="2"><%=i18n.localize("No Configurations to be listed")%>
                                         </td>
                                     </tr>
                                     </tbody>

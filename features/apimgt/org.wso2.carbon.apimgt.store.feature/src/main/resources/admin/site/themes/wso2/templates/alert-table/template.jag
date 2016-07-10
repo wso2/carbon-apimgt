@@ -21,16 +21,16 @@
         <div id="alertTableLabel">
         <label>Alert Type 
         <select  id="alertSelected" class="select form-control" data-live-search="true">
-            <option value="1">All Alerts</option>
-            <option value="2">Unseen Source IP Address</option>
-            <option value="3">Abnormal Request Count</option>
-            <option value="4">Abnormal Response Time</option>
-            <option value="5">Abnormal API Usage</option>
-            <option value="6">Abnormal Renewal of Access Tokens</option>
-            <option value="7">Tier Crossing</option>
-            <option value="8">Abnormal Backend Time</option>
-            <option value="9">Availability of APIs</option>
-            <option value="10">Abnormal Resource Access Pattern</option>
+            <option value="1"><%=i18n.localize("All Alerts")%></option>
+            <option value="2"><%=i18n.localize("Unseen Source IP Address")%></option>
+            <option value="3"><%=i18n.localize("Abnormal Request Count")%></option>
+            <option value="4"><%=i18n.localize("Abnormal Response Time")%></option>
+            <option value="5"><%=i18n.localize("Abnormal API Usage")%></option>
+            <option value="6"><%=i18n.localize("Abnormal Renewal of Access Tokens")%></option>
+            <option value="7"><%=i18n.localize("Tier Crossing")%></option>
+            <option value="8"><%=i18n.localize("Abnormal Backend Time")%></option>
+            <option value="9"><%=i18n.localize("Availability of APIs")%></option>
+            <option value="10"><%=i18n.localize("Abnormal Resource Access Pattern")%></option>
         </select>
         </label>
         </div>

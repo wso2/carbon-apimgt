@@ -134,7 +134,7 @@ $(document).ready(function () {
             }
         }, "json");
 
-        $(this).html(i18n.t('info.wait'));
+        $(this).html(i18n.t('Please wait..'));
     });
 
  $('.app-create-key-button').click(function () {
@@ -172,7 +172,7 @@ $(document).ready(function () {
             }
         }, "json");
 
-        $(this).html(i18n.t('info.wait'));
+        $(this).html(i18n.t('Please wait..'));
     });
 
 
@@ -207,7 +207,7 @@ $(document).ready(function () {
     $('.help_popup_prod').click(function(){
 	        $('#prodtoken_help').toggle('fast', function()
 	        {
-	            $('#prodtoken_help').html(i18n.t('info.tokenHelpMsg'));
+	            $('#prodtoken_help').html(i18n.t('The period after which the token will expire after generation. A negative value ensures that the token never expires.'));
 	        });
 	        return false;
 	    })
@@ -215,21 +215,21 @@ $(document).ready(function () {
    $('.help_popup_sand').click(function(){
 	 $('#sandtoken_help').toggle('fast', function()
 	 {
-	  $('#sandtoken_help').html(i18n.t('info.tokenHelpMsg'));
+	  $('#sandtoken_help').html(i18n.t('The period after which the token will expire after generation. A negative value ensures that the token never expires.'));
 	   });
 	    return false;
 	 });
 
     $('.update_domain_popup_prod').click(function () {
         $('#update_help_prod').toggle('fast', function () {
-            $('#update_help_prod').html(i18n.t('info.domainUpdateHelp'));
+            $('#update_help_prod').html(i18n.t('Specify list of domains that are permitted to send requests to the gateway through this application.'));
         });
         return false;
     });
 
     $('.update_domain_popup_sand').click(function () {
         $('#update_help_sand').toggle('fast', function () {
-            $('#update_help_sand').html(i18n.t('info.domainUpdateHelp'));
+            $('#update_help_sand').html(i18n.t('Specify list of domains that are permitted to send requests to the gateway through this application.'));
         });
         return false;
     });
@@ -315,7 +315,7 @@ var mapExistingOauthClient=function(oBtnElement){
         }
     }, "json");
 
-    $(this).html(i18n.t('info.wait'));
+    $(this).html(i18n.t('Please wait...'));
 
 }
 
@@ -430,7 +430,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
 
     }, "json");
 
-    $(this).html(i18n.t('info.wait'));
+    $(this).html(i18n.t('Please wait...'));
 
 }
 
@@ -482,13 +482,13 @@ function toggleKey(toggleButton){
         if(!$('.allowDomainDiv',keyTable).attr('.data-value') == "havetohide"){
             $('.allowDomainDiv',keyTable).show();
         }
-        $(toggleButton).html('<i class="icon-arrow-down icon-white"></i>'+ i18n.t('titles.showKeys')+'');
+        $(toggleButton).html('<i class="icon-arrow-down icon-white"></i>'+ i18n.t(' Show Keys ')+'');
     }else{
         $('table',keyTable).show();
         $('.info-msg',keyTable).hide();
         $('.oauth-title',keyTable).show();
         $('.allowDomainDiv',keyTable).hide();
-        $(toggleButton).html('<i class="icon-arrow-up icon-white"></i>'+ i18n.t('titles.hideKeys')+'');
+        $(toggleButton).html('<i class="icon-arrow-up icon-white"></i>'+ i18n.t(' Show Keys ')+'');
     }
 }
 function collapseKeys(index,type,link){
@@ -536,10 +536,10 @@ function toggleTokenTimeSection(link){
 function removeSubscription(apiName, version, provider,  applicationId, delLink) {
     jagg.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'});
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-    $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.unsubscribeMsg') +'<b>"' + apiName+'-'+version + '</b>"?');
-    $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-    $('#messageModal a.btn-other').html(i18n.t('info.no'));
+    $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
+    $('#messageModal div.modal-body').html('\n\n'+i18n.t('Are you sure you want to unsubscribe from ') +'<b>"' + apiName+'-'+version + '</b>"?');
+    $('#messageModal a.btn-primary').html(i18n.t('Yes'));
+    $('#messageModal a.btn-other').html(i18n.t('No'));
     $('#messageModal a.btn-primary').click(function() {
     jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
         action:"removeSubscription",
