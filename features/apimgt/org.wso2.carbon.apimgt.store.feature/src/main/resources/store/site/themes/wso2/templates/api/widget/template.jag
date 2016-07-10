@@ -43,8 +43,8 @@
 </head>
 
     <body>
-    <a href="<%= link %>" target="_blank" class="nostyle" title="<%=i18n.localize("apiThumb")%>">
-    <img width="100" src="<%= thumbURL %>" style="float:left; margin-right:20px;" alt="<%=i18n.localize("apiThumb")%>">
+    <a href="<%= link %>" target="_blank" class="nostyle" title="<%=i18n.localize("API Thumbnail")%>">
+    <img width="100" src="<%= thumbURL %>" style="float:left; margin-right:20px;" alt="<%=i18n.localize("API Thumbnail")%>">
     </a>
     <a title="API" href="<%= link %>" target="_blank"  class="nostyle">
     <h2><%=api.name%> - <%=api.version%></h2>
@@ -69,7 +69,7 @@
 
     %>
     </p>
-    <div class="star-ratings">starrating</div>
+    <div class="star-ratings"/>
     </body>
     </html>
 <% }); %>

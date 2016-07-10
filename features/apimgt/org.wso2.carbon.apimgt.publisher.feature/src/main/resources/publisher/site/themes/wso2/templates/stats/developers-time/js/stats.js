@@ -60,7 +60,7 @@ $(document).ready(function(){
 
     $("#apiFilter").change(function (e) {
         $('#apiSelect').empty();
-        $('#apiSelect').append('<option> All </option>');
+        $('#apiSelect').append('<option> '+i18n.t('All')+' </option>');
         apiFilter = this.value;
         apiFilterList();
     });
@@ -74,11 +74,11 @@ $(document).ready(function(){
             .showYAxis(true)        //Show the y-axis
             .showXAxis(true) ;       //Show the x-axis
 
-        chart.xAxis.axisLabel('Time')
+        chart.xAxis.axisLabel(i18n.t('Time'))
         .tickFormat(function (d) {
              return d3.time.format('%m/%d %H:%M:%S')(new Date(d)) });
 
-        chart.yAxis.axisLabel('Developer Signups')
+        chart.yAxis.axisLabel(i18n.t('Developer Signups'))
             .tickFormat(d3.format('d'));
 
         chart.tooltipContent(function(key, x, y, e, graph) {

@@ -15,8 +15,8 @@
        <!-- <li>
             <a class="tooltip-right medium orange pill" data-content="#tooltipcontentID<%=i%>"></a>
             <div class="tooltip-content" id="tooltipcontentID<%=i%>">
-                <h5><a href="<%=path%>" title="<%=i18n.localize("name")%>"><%=api.name%></a></h5>
-                <img src="<%=api.thumbURL%>" alt="<%=i18n.localize("apiThumb")%>"/>
+                <h5><a href="<%=path%>" title="<%=i18n.localize("Name")%>"><%=api.name%></a></h5>
+                <img src="<%=api.thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>"/>
                 <p><%=api.description%></p>
             </div>
         </li>-->

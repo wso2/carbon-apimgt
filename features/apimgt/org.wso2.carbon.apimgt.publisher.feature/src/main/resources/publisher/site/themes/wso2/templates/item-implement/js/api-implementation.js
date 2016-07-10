@@ -512,7 +512,7 @@ function loadOutSequences() {
                       var arr = [];
                       var arrUserDefined = [];
                       if (result.sequences.defaultSequences.length == 0 && result.sequences.userDefinedSequences.length == 0) {
-                          var msg = "No defined sequences";
+                          var msg = i18n.t("No defined sequences");
                           $('<input>').
                                   attr('type', 'hidden').
                                   attr('name', 'outSeq').
@@ -582,7 +582,7 @@ function loadFaultSequences() {
                       var arr = [];
                       var arrUserDefined = [];
                       if (result.sequences.defaultSequences.length == 0 && result.sequences.userDefinedSequences.length == 0) {
-                          var msg = "No defined sequences";
+                          var msg = i18n.t("No defined sequences");
                           $('<input>').
                                   attr('type', 'hidden').
                                   attr('name', 'faultSeq').

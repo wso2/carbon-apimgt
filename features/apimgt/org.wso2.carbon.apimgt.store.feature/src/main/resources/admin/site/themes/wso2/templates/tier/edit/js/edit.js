@@ -136,8 +136,8 @@ function addCustomAttribute(element, count){
     element.parent().append(
         '<tr id="attribute'+count+'">'+
             '<td><div class="clear"></div></td>'+
-            '<td><input type="text" class="form-control" id="attributeName'+count+'" name="attributeName'+count+'" placeholder="Attribute Name"/></td>'+
-            '<td><input type="text" class="form-control" id="attributeValue'+count+'" name="attributeValue'+count+'" placeholder="Value"/></td>'+
+            '<td><input type="text" class="form-control" id="attributeName'+count+'" name="attributeName'+count+'" placeholder="'+i18n.t('Attribute Name')+'"/></td>'+
+            '<td><input type="text" class="form-control" id="attributeValue'+count+'" name="attributeValue'+count+'" placeholder="'+i18n.t('Value')+'"/></td>'+
             '<td class="delete_resource_td "><a  id="attributeDelete'+count+'" href="javascript:removeCustomAttribute('+count+');">' + 
             '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td>'+
         '</tr>'

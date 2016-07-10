@@ -86,8 +86,8 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                 %>
 
     <ul class="breadcrumb">
-        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>" title="<%=i18n.localize("listAPIs")%>">APIs groups</a> <span class="divider">/</span></li>
-        <li><a title="<%=i18n.localize("tags")%>" href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
+        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>" title="<%=i18n.localize("List APIs")%>"><%=i18n.localize("APIs groups")%></a> <span class="divider">/</span></li>
+        <li><a title="<%=i18n.localize("Tags")%>" href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
         <li class="active"><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%></li>
     </ul>
     <%
@@ -123,32 +123,32 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                 <div class="add-padding-4x">
                                     <div class="form-horizontal">
                                         <div class="form-group">
-                                            <label class="col-xs-4 col-sm-4 control-label"><strong>Version:</strong></label>
+                                            <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Version:")%></strong></label>
                                             <div class="col-xs-8 col-sm-8">
                                               <p class="form-control-static"><%=api.version%></p>
                                             </div>
                                         </div>
                                     <div class="form-group">
-                                        <label class="col-xs-4 col-sm-4 control-label"><strong>By:</strong></label>
+                                        <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("By:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
                                             <p class="form-control-static"><%=displayOwner %></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="col-xs-4 col-sm-4 control-label"><strong>Updated:</strong></label>
+                                        <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Updated:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
                                             <p class="form-control-static"><%=api.updatedDate%></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="col-xs-4 col-sm-4 control-label"><strong>Status:</strong></label>
+                                        <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Status:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
                                             <p class="form-control-static"><span class="text-info"><i class="fw fw-publish fw-2x"></i> <%=api.status%></span></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <% if(isRatingActivated && user){%>
-                                            <label class="col-xs-4 col-sm-4 control-label"><strong>Rating:</strong></label>
+                                            <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Rating:")%></strong></label>
                                             <div class="col-xs-5 col-sm-5">
                                                 <p class="form-control-static">
                                                     <input type="hidden" class="rating-tooltip-manual rate_save" value="<%= api.userRate %>"/>
@@ -191,13 +191,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                         }
                                 %>
                                         <div class="form-group">
-                                            <label for="application-list"><%=i18n.localize("applications")%></label>
+                                            <label for="application-list"><%=i18n.localize("Applications")%></label>
                                             <select id="application-list" class="form-control">
                                                 <%if(!subscribedToDefault){%>
-                                                    <option value="-"><%=i18n.localize("selectApp")%></option>
+                                                    <option value="-"><%=i18n.localize("Select Application...")%></option>
                                                 <%}%>
-                                                <option value="createNewApp"><%=i18n.localize("newApp")%></option>
-                                                <optgroup label="<%=i18n.localize("myApps")%>">
+                                                <option value="createNewApp"><%=i18n.localize("New Application...")%></option>
+                                                <optgroup label="<%=i18n.localize("My Applications")%>">
                                                    <%
                                                    for(i = 0; i < length; i++) {
                                                    app = apps[i];
@@ -217,7 +217,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                   <!-- Load Tiers -->
                                 <%if(user && api) { %>
                                     <div class="form-group">
-                                        <label for="tier-select1" class="hidden-xs"><%=i18n.localize("tiers")%></label>
+                                        <label for="tier-select1" class="hidden-xs"><%=i18n.localize("Tiers")%></label>
                                         <select id="tiers-list" name="tiers-list" class="form-control">
                                             <%
                                                 var tiersList = api.tiers, denied = false, tiersAvailable = false;
@@ -259,9 +259,9 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                         <i class="fw fw-subscribe fw-stack-1x"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     </span>
-                                            <%=i18n.localize("subscribe")%>
+                                            <%=i18n.localize("Subscribe")%>
                                       <%if(!tiersAvailable){%>
-                                            <span id="subsBtnDesc" class="help-block"><%=i18n.localize("noTiers")%></span>
+                                            <span id="subsBtnDesc" class="help-block"><%=i18n.localize("You may not be entitled to any of the available tiers")%></span>
                                     <%}%>
                                 </button>
                             </form>
@@ -282,7 +282,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                         <i class="fw fw-subscribe fw-stack-1x"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     </span>
-                                            <%=i18n.localize("goToSubscribe")%>
+                                            <%=i18n.localize("Visit Publisher Store")%>
 
                                 </a>
                              <%}%>
@@ -307,7 +307,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 						}
                     	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
                     %>
-                    	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" title="<%=i18n.localize("goToSubscribe")%>" href="<%=path%>" target="_"><%=i18n.localize("goToSubscribe")%></a></div>
+                    	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" title="<%=i18n.localize("Visit Publisher Store")%>" href="<%=path%>" target="_"><%=i18n.localize("Visit Publisher Store")%></a></div>
                     <%}%>
                 </div>
             </div>
@@ -319,7 +319,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 			        <%
 			        var apiName=request.getParameter("name");
 			        %>
-            		<strong><%=i18n.localize("noAPIMsg1")%><%= encode.forHtml(apiName)%> <%=i18n.localize("noAPIMsg2")%></strong>
+            		<strong><%=i18n.localize("No API available with the name -")%><%= encode.forHtml(apiName)%> <%=i18n.localize("or the user is not authorized to view the API.")%></strong>
             	</div>
         	</div>  
         <% } %>

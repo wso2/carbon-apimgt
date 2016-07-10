@@ -68,13 +68,13 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="'+i18n.t("Stats Enabled")+'"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Stats Disabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span><a href="https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics" target="_blank" title="WSO2 wiki documentation on APIM statistics" class="warningLink">'
+                    +i18n.t('Refer our wiki to configure DAS correctly')+'</a></span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             }
             else {
@@ -110,7 +110,7 @@ var drawTopUsersGraph = function(from,to){
                 $('#topUsersView').empty();
                 if (length > 0) {
                 for(var k=0 ; k<length ;k++){
-                     $('#topUsersView').append($(' <h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>User</th><th>Number of API Calls</th></tr></thead> </table> </div> </div>'));
+                     $('#topUsersView').append($(' <h4>'+i18n.t("Application Name: ")+ json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("User")+'</th><th>'+i18n.t("Number of API Calls")+'</th></tr></thead> </table> </div> </div>'));
                 }
 
                 for(var k=0 ; k<length ;k++){
@@ -137,7 +137,7 @@ var drawTopUsersGraph = function(from,to){
                     $('#userTable'+(k+1)).show();
                 }
             }else{
-                $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
+                $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>'+i18n.t("No Data Available.")+'</h4></div>'));
             }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -206,7 +206,7 @@ var drawTopAppUsers = function(from,to){
                 if (length == 0) {
                     $('#topAppUsersTable').hide();
                     $('#tempLoadingSpace').html('');
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('No Data Found ... ')+'</span>'));
 
                 }
             } else {
@@ -535,7 +535,7 @@ var drawAppUsers = function(from,to){
                 if (length == 0) {
                     $('#appUsersTable').hide();
                     $('#tempLoadingSpace').html('');
-                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
+                    $('#tempLoadingSpace').append($('<span class="label label-info">'+i18n.t('No Data Found ... ')+'</span>'));
                 }else{
                     $('#tempLoadingSpace').hide();
                 }

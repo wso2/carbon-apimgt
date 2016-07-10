@@ -73,8 +73,7 @@ var user = jagg.getUser();
 			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>" title="<%=i18n.localize("apiPublisherHomePage")%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
-				alt="<%=i18n.localize("apiPublisherHomePage")%>" class="logo">
-				<h1><%=i18n.localize("apiPublisher")%></h1>
+				alt="<%=i18n.localize("WSO2 API Publisher Home")%>" class="logo"><h1><%=i18n.localize("API Publisher")%></h1>
 			</a>
 		</div>
 		<%if(user) { %>
@@ -83,14 +82,14 @@ var user = jagg.getUser();
 				<li class="visible-inline-block">
 					
 	                     <!--Links to Access APIStore-->
-	                     	<a href="<%=storeUrl%>"  target="_blank" title="<%=i18n.localize("goToStore")%>">
+	                     	<a href="<%=storeUrl%>"  target="_blank" title="<%=i18n.localize("Go to APIStore")%>">
 	                     		<span class="icon fw-stack fw-lg">
 	                   <i class="fw fw-circle fw-stack-2x" title="user"></i>
 	                   <i class="fw fw-deploy fw-stack-1x fw-inverse" title="user"></i>
 	                </span>
 	                     		
 								<span class="hidden-xs">
-								Go to <%=i18n.localize("apistore")%>
+								Go to <%=i18n.localize("Go to APIStore")%>
 								</span>
 	                     	</a>
 	                
@@ -113,8 +112,8 @@ var user = jagg.getUser();
 						<%}%> <span class="caret"></span>
 					</li>
 					<li class="divider visible-xs"></li>
-					<li><a title="<%=i18n.localize("logout")%>"
-						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
+					<li><a title="<%=i18n.localize("Logout")%>"
+						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("Logout")%></a></li>
 				 </ul>
 			</li>
 			</ul>

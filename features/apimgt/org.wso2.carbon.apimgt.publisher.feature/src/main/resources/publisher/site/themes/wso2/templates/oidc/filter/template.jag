@@ -57,15 +57,13 @@
 %>
 <div>
 
-	        <p>You are now redirected to Identity. If the
-
-	        redirection fails, please click the post button.</p>
+	        <p><%= i18n.localize("You are now redirected to Identity. If the redirection fails, please click the post button.")%></p>
 
 	        <form method="post" action="<%=authRequest%>">
 
 	            <p>
 
-	                <button type="submit">POST</button>
+	                <button type="submit"><%= i18n.localize("POST")%></button>
 
 	            </p>
 

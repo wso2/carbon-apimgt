@@ -14,17 +14,17 @@
 		<div id="col-sm-12">
         <div id="userKey">
 			<div class="page-header">
-				<h2><%=i18n.localize("manageSubscriptions")%></h2>
+				<h2><%=i18n.localize("Manage Subscriptions")%></h2>
 			</div>
 
                     <table id="manage-subscriptions" class="table table-responsive table-striped">
                         <thead>
                             <tr>
-                                <th class="userSpecialCell"><%=i18n.localize("user")%></th>
-                                <th class="appSpecialCell"><%=i18n.localize("application")%></th>
+                                <th class="userSpecialCell"><%=i18n.localize("User")%></th>
+                                <th class="appSpecialCell"><%=i18n.localize("Application")%></th>
 
-                                <th class="apiSpecialCell"><%=i18n.localize("api")%></th>
-                                <th class="userSpecialCell">Still Subscribed?</th>
+                                <th class="apiSpecialCell"><%=i18n.localize("API")%></th>
+                                <th class="userSpecialCell"><%=i18n.localize("Still Subscribed?")%></th>
                                 <th class="actionSpecialCell"></th>								
                             </tr>
                         </thead>
@@ -121,9 +121,9 @@
 		                            </td>
 		                            <td>
 					                    <% if (subscriptionStatus =='SUBSCRIBE') {%>
-					                        <label>Yes</label>
+					                        <label><%=i18n.localize("Yes")%></label>
 					                    <%} else {%>
-					                        <label>No</label>
+					                        <label><%=i18n.localize("No")%></label>
 					                    <%} %>
 	                    			</td>
 						                <%
@@ -149,8 +149,8 @@
 										                <option value="blockProduction" <%if(existingStatus=='PROD_ONLY_BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("blockProduction")%></option>
 										                <option value="blockAll" <%if(existingStatus=='BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("blockAll")%></option>				              							                
 										            <%} else {%>
-										            	<option value="blockAll"><%=i18n.localize("blockAll")%></option>
-										                <option value="blockProduction"><%=i18n.localize("blockProduction")%></option>													
+										            	<option value="blockAll"><%=i18n.localize("Production & Sandbox")%></option>
+										                <option value="blockProduction"><%=i18n.localize("Production Only")%></option>
 										            <%}%>
 										        </select>
 									        </div>
@@ -158,7 +158,7 @@
 									        <div class="col-sm-6 text-right">
 									        
 									        <%if(existingStatus == 'ON_HOLD'){
-	                            				var tip = i18n.localize("subsPendingApproval");
+	                            				var tip = i18n.localize("Subscription is pending approval");
 	                       					%>
 	                       						<a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%> title="updateSubscription"
 			                                    onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'

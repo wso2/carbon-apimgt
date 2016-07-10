@@ -1,7 +1,7 @@
 var deleteGlobalPolicy = function (policyObject) {
     jagg.message({
-        content:'Policy deletion might affect current subscriptions. Are you sure you want to delete this policy? ',
-        title:'Confirm Deletion',
+        content: i18n.t('Policy deletion might affect current subscriptions. Are you sure you want to delete this policy?'),
+        title: i18n.t('Confirm Deletion'),
         type:'confirm',
         anotherDialog:true,
         okCallback:function(){

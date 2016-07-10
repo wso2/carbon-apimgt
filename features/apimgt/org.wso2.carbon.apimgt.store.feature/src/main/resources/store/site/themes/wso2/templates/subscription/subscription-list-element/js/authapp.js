@@ -29,14 +29,14 @@ $(document).ready(function () {
         addNewCallBackURLelementSandbox :function addNewCallBackURLelementSandbox(){
             $(".cDivPlusIconSandBox").click(function(e){ //on add input button click
 
-                $(".input_fields_wrap_sandbox").append('<div class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" name="callbackURLsSandBox[]" title="callbackURLsSandBox"/><div class="cDivRemoveIconSandBox remove_field_sandbox">Remove</div></div>');
+                $(".input_fields_wrap_sandbox").append('<div class="cDivCallBackUrlElementSandBox"><input type="text" class="input-large icallbackURLsSandBox" name="callbackURLsSandBox[]" title="callbackURLsSandBox"/><div class="cDivRemoveIconSandBox remove_field_sandbox">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
         addNewContactElementSandbox :function addNewContactElementSandbox(){
             $(".cDivPlusIconSandBoxContact").click(function(e){ //on add input button click
                 e.preventDefault();
-                $(".input_fields_wrap_sandbox_contacts").append('<div class="cDivContactSandBoxElement"><input type="text" class="input-large iContactsSandBox" name="iSandboxAuthAppContact[]" title="SandboxAuthAppContact"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">Remove</div></div>');
+                $(".input_fields_wrap_sandbox_contacts").append('<div class="cDivContactSandBoxElement"><input type="text" class="input-large iContactsSandBox" name="iSandboxAuthAppContact[]" title="SandboxAuthAppContact"/><div class="cDivRemoveIconSandBox remove_field_sandbox_contact">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
@@ -45,7 +45,7 @@ $(document).ready(function () {
 
                 //alert($(".input_fields_wrap_scope").html());
 
-                $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" name="iProductionAppScopeSandBox[]" title="ProductionAppScopeSandBox"/><div class="cDivRemoveIcon remove_field_scope_sandbox">Remove</div></div>');
+                $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" name="iProductionAppScopeSandBox[]" title="ProductionAppScopeSandBox"/><div class="cDivRemoveIcon remove_field_scope_sandbox">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
@@ -161,7 +161,7 @@ $(document).ready(function () {
 
                     }, "json");
                 }else{
-                    alert("Callback URLs can not be empty");
+                    alert(i18n.t("Callback URLs can not be empty"));
                 }
 
             });
@@ -176,7 +176,7 @@ $(document).ready(function () {
         deleteActionClickSandBox : function deleteActionClickSandBox(){
             $("#iDivDeleteActionSandbox").click(function(){
 
-                var r = confirm("Do you want to delete this sandbox auth app from OIDC");
+                var r = confirm(i18n.t("Do you want to delete this sandbox auth app from OIDC"));
                 if (r == true) {
                     sandboxApplication.deleteAuthApplicationSandBox();
                 }
@@ -213,7 +213,7 @@ $(document).ready(function () {
                 var scopeArraySandBox = ["phone", "openid", "offline_access", "address", "email", "profile"];
                 var arrayLength = scopeArraySandBox.length;
                 for (var i = 0; i < arrayLength; i++) {
-                    $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" value="'+scopeArraySandBox[i]+'" name="iProductionAppScopeSandBox[]"/><div class="cDivRemoveIcon remove_field_scope_sandbox">Remove</div></div>');
+                    $(".input_fields_wrap_scope_sandbox").append('<div class="cDivScopeElementSandBox"><input type="text" class="input-large iScopeSandBox" value="'+scopeArraySandBox[i]+'" name="iProductionAppScopeSandBox[]"/><div class="cDivRemoveIcon remove_field_scope_sandbox">' + i18n.t("Remove") + '</div></div>');
                 }
 
             }
@@ -302,14 +302,14 @@ $(document).ready(function () {
         addNewCallBackURLelementProduction :function addNewCallBackURLelementProduction(){
             $(".cDivPlusIcon").click(function(e){ //on add input button click
 
-                $(wrapper).append('<div class="cDivCallBackUrlElement"><input type="text" class="input-large iCallBackUrls" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">Remove</div></div>');
+                $(wrapper).append('<div class="cDivCallBackUrlElement"><input type="text" class="input-large iCallBackUrls" name="callbackURLs[]"/><div class="cDivRemoveIcon remove_field">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
         addNewContactElement :function addNewContactElement(){
             $(".cDivPlusIconContact").click(function(e){ //on add input button click
                 e.preventDefault();
-                $(wrapperContacts).append('<div class="cDivContactElement"><input type="text" class="input-large iContacts" name="iProductionAuthAppContact[]"/><div class="cDivRemoveIcon remove_field_contact">Remove</div></div>');
+                $(wrapperContacts).append('<div class="cDivContactElement"><input type="text" class="input-large iContacts" name="iProductionAuthAppContact[]"/><div class="cDivRemoveIcon remove_field_contact">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
@@ -318,7 +318,7 @@ $(document).ready(function () {
 
                 //alert($(".input_fields_wrap_scope").html());
 
-                $(".input_fields_wrap_scope").append('<div class="cDivScopeElement"><input type="text" class="input-large iScope" name="iProductionAppScope[]"/><div class="cDivRemoveIcon remove_field_scope">Remove</div></div>');
+                $(".input_fields_wrap_scope").append('<div class="cDivScopeElement"><input type="text" class="input-large iScope" name="iProductionAppScope[]"/><div class="cDivRemoveIcon remove_field_scope">' + i18n.t("Remove") + '</div></div>');
 
             });
         },
@@ -428,7 +428,7 @@ $(document).ready(function () {
 
                     }, "json");
                 }else{
-                    alert("Callback URLs can not be empty");
+                    alert(i18n.t("Callback URLs can not be empty"));
                 }
 
             });
@@ -445,7 +445,7 @@ $(document).ready(function () {
         deleteActionClick : function deleteActionClick(){
             $("#iDivDeleteAction").click(function(){
 
-                var r = confirm("Do you want to delete this auth app from OIDC");
+                var r = confirm(i18n.t("Do you want to delete this sandbox auth app from OIDC"));
                 if (r == true) {
                     productionApplication.deleteAuthApplication();
                 }
@@ -483,7 +483,7 @@ $(document).ready(function () {
                 var scopeArray = ["phone", "openid", "offline_access", "address", "email", "profile"];
                 var arrayLength = scopeArray.length;
                 for (var i = 0; i < arrayLength; i++) {
-                    $(".input_fields_wrap_scope").append('<div class="cDivScopeElement"><input type="text" class="input-large iScope" value="'+scopeArray[i]+'" name="iProductionAppScope[]"/><div class="cDivRemoveIcon remove_field_scope">Remove</div></div>');
+                    $(".input_fields_wrap_scope").append('<div class="cDivScopeElement"><input type="text" class="input-large iScope" value="'+scopeArray[i]+'" name="iProductionAppScope[]"/><div class="cDivRemoveIcon remove_field_scope">' + i18n.t("Remove") + '</div></div>');
                 }
 
             }
