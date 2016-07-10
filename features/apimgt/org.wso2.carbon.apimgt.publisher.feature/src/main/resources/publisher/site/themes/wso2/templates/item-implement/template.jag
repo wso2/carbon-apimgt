@@ -18,10 +18,10 @@
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
     var AUTH_TYPES = [
-      { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
-      { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
-      { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
-      { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
+      { "value": "<%=i18n.localize("None")%>", "text":"<%=i18n.localize("None")%>"} ,
+      { "value": "<%=i18n.localize("Application")%>", "text":"<%=i18n.localize("Application")%>"},
+      { "value": "<%=i18n.localize("Application User")%>", "text":"<%=i18n.localize("Application User")%>"},
+      { "value": "<%=i18n.localize("Application & Application User")%>", "text":"<%=i18n.localize("Application & Application User")%>"}
     ];
     var insequence = "<%=api.inSequence%>";
     var outsequence = "<%=api.outSequence%>";
@@ -67,8 +67,8 @@
   <%  }%>
   
   			  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
-   		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!", "Success!")%></strong>
-                    <%=i18n.localize("You have successfully saved the API.", "You have successfully saved the API.")%>
+   		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!")%></strong>
+                    <%=i18n.localize("You have successfully saved the API.")%>
                     <button type="button" class="close" aria-label="close" data-dismiss="alert">
                         <span aria-hidden="true">
                             <i class="fw fw-cancel"></i>
@@ -79,9 +79,9 @@
 	<div class="">
                         <div class="wizard-inner">
                             <ol class="wiz-nav-inner no-controls" >
-                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("design")%>"><span class="wiz-step-count">1</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("design")%></span></a></li>
-                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("implement")%>"><span class="wiz-step-count">2</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("implement")%></span></a></li>
-                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("manage")%>"><span class="wiz-step-count">3</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("manage")%></span></a></li>
+                                <li class="wiz-step completed"><a href="<%= design_w_link %>" title="<%=i18n.localize("Design")%>"><span class="wiz-step-count">1</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("Design")%></span></a></li>
+                                <li class="wiz-step current"><a href="<%= implement_w_link %>" title="<%=i18n.localize("Implement")%>"><span class="wiz-step-count">2</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("Implement")%></span></a></li>
+                                <li class="wiz-step <%= manage_wlabel%>"><a href="<%= manage_w_link %>" title="<%=i18n.localize("Manage")%>"><span class="wiz-step-count">3</span><span class="hidden-xs wiz-step-title"><%=i18n.localize("Manage")%></span></a></li>
                             </ol>
                         </div>
                         <div class="wiz-content">
@@ -92,8 +92,8 @@
 							          <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#accordion1-collapse1" aria-expanded="true" aria-controls="accordion1-collapse1">
 										<h4 class="panel-title">
 						                    <div>
-				                                <div class="heading">Managed API</div>
-				                                <div class="description truncate">Provide the production and sandbox endpoints of the API to be managed.</div>
+				                                <div class="heading"><%=i18n.localize("Managed API")%></div>
+				                                <div class="description truncate"> <%=i18n.localize("Provide the production and sandbox endpoints of the API to be managed.")%> </div>
 				                                <div class="status">
 				                                    <i class="fw fw-down"></i>
 				                                </div>
@@ -142,17 +142,17 @@
 																  {{/if}}
 																  <input type="text" class="form-control endpoint_input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">																  
 																  <span class="input-group-btn">
-																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title="Advanced Options"><i class="fw fw-settings"></i></button>
+																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title='<%=i18n.localize("Advanced Options")%>'><i class="fw fw-settings"></i></button>
 																    <button class="btn btn-secondary check_url_valid" type="button" >Test</button>
 																  </span>
 																</div>
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
-																<label class="error" for="name">Please specify a production or sandbox endpoint.</label>
+																<label class="error" for="name"><%=i18n.localize("Please specify a production or sandbox endpoint.")%></label>
 																{{/if}}																
 																{{/if}}
 																{{#if template_not_supported }}
-																<label class="error" for="name">Address endpoint do not support URI Templates.</label>
+																<label class="error" for="name"><%=i18n.localize("Address endpoint do not support URI Templates.")%></label>
 																{{/if}}
 															</div>
 							                            </div>
@@ -180,7 +180,7 @@
 							                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															<div class="message message-info remove-margin">
 											                    <h4><i class="icon fw fw-info"></i>Notice</h4>
-											                    <p>You have selected "Dynamic Endpoint" which will send the message to the address specified in the "To" header. Please upload a mediation sequence file to Message Mediation Policies which sets the "To" header.</p>
+											                    <p> <%=i18n.localize('You have selected \"Dynamic Endpoint\" which will send the message to the address specified in the \"To\" header. Please upload a mediation sequence file to Message Mediation Policies which sets the \"To\" header. ')%></p>
 															</div>
 															</div>
 														</div>
@@ -195,7 +195,7 @@
 																</label>							                                							                                    
 							                                    <label class="checkbox">
 																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
-																  <span class="helper">Failover</span>
+																  <span class="helper"><%=i18n.localize("Failover")%></span>
 																</label>																
 							                                </div>
 								                        </div>
@@ -249,7 +249,8 @@
 
 							                            {{#if load_balance}}
 															<div class="form-group">
-															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="algoCombo">Algorithm
+															    <label class="control-label col-xs-12 col-sm-3
+															    col-md-3 col-lg-3" for="algoCombo"> <%= i18n.localize("Algorithm")%>
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
 															            <span class="icon fw-stack fw-lg" style="font-size:6px">
 															              <i class="fw fw-circle fw-stack-2x"></i>
@@ -260,13 +261,13 @@
 															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
 															        <select class="form-control valid load_balance_property" name="algoCombo" id="algoCombo" aria-invalid="false">
 															            <option {{#ifCond algoCombo "==" "org.apache.synapse.endpoints.algorithms.RoundRobin" }}selected="selected"{{/ifCond}} value="org.apache.synapse.endpoints.algorithms.RoundRobin">Round-robin</option>
-															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other">Other</option>
+															            <option {{#ifCond algoCombo "==" "other" }}selected="selected"{{/ifCond}} value="other"><%= i18n.localize("Other")%></option>
 															        </select>
 															    </div>
 															</div>
 															{{#ifCond algoCombo "==" "other"}}
 															<div class="form-group">
-															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Class Name for Algorithm
+															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for=""> <%= i18n.localize("Class Name for Algorithm")%>
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
@@ -304,15 +305,15 @@
 														    <div class="modal-content">
 														        <div class="modal-header">
 																	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fw fw-cancel"></i></button>
-																	<h3 class="modal-title">Advanced Endpoint Configuration</h3>
+																	<h3 class="modal-title"><%=i18n.localize("Advanced Endpoint Configuration")%></h3>
 														        </div>
 														        <div class="modal-body">
 														        	<div id="advance_form"></div>
 														        </div>
 														        <div class="modal-footer">
 															        <div id="res" style="color:red;float:left"></div>
-																	<a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>" ><%=i18n.localize("save")%></a>
-																	<a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>" ><%=i18n.localize("close")%></a>
+																	<a href="#" class="btn btn-primary" id="advance_ep_submit" title='<%=i18n.localize("Save")%>"'><%=i18n.localize("Save")%></a>
+																	<a href="#" class="btn btn-secondary" data-dismiss="modal" title='<%=i18n.localize("Close")%>"'><%=i18n.localize("Close")%></a>
 														        </div>
 														    </div>
 														    </div>
@@ -322,59 +323,59 @@
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 							
 							                        <div id="endpoint_help" class="hide">
-								                         <strong>HTTP/REST Endpoint </strong><p>A REST API endpoint based on a URI template</p>
-								                         <strong>HTTP/SOAP Endpoint</strong><p>The direct URL of the service</p>
-								                         <!-- strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
-								                         <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p-->
-								                         <Strong>Dynamic Endpoint</strong><p>The dynamic endpoint will send the message to the address specified in the 'To' header.</p>
+								                         <strong>HTTP/REST Endpoint </strong><p><%= i18n.localize("A REST API endpoint based on a URI template")%></p>
+								                         <strong>HTTP/SOAP Endpoint</strong><p><%= i18n.localize("The direct URL of the service")%></p>
+								                         <!-- strong>Failover Group </strong><p><%= i18n.localize("The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.")%></p>
+								                         <strong>Load Balance</strong><p><%= i18n.localize("The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.")%></p-->
+								                         <Strong>Dynamic Endpoint</strong><p><%= i18n.localize("The dynamic endpoint will send the message to the address specified in the 'To' header.")%></p>
 							                        </div>							
 							
 							                         <div class="form-group">
 							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
-							                                <a href="#" class="more-options but" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>" ><%=i18n.localize("moreOptions")%></a>
+							                                <a href="#" class="more-options but" ref="more-options-endpoints" title="<%=i18n.localize("Show More Options")%>" ><%=i18n.localize("Show More Options")%></a>
 							                             </div>
 							                         </div>
 							                        <div id="more-options-endpoints"  style="display:none">
 							
 							
 							                        <div class="form-group">
-							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span>
+							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("Endpoint Security Scheme")%>:<span class="requiredAstrix">*</span>
 							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom" title="endpointSec_help">
 							                      				<span class="icon fw-stack fw-lg" style="font-size:6px">
 												                   <i class="fw fw-circle fw-stack-2x"></i>
 												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 												                </span>							                      				
 							                      			</a>
-							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
+							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("To connect to secured endpoints, you need to pass the credentials of the backend service.")%></p>
 							                            </label>
 							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointType" name="endpointType" >
-							                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
-							                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
+							                                <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("Non Secured")%></option>
+							                                <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("Secured")%></option>
 							                            </select>
 							                            </div>
 							                        </div>
 							
 							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("endpointAuthType")%>" data-placement="bottom">
+							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("Endpoint Auth Type")%>:<span class="requiredAstrix">*</span>
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("Endpoint Auth Typ")%>" data-placement="bottom">
 							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 												                   <i class="fw fw-circle fw-stack-2x"></i>
 												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 												                </span>
 							                            	</a>
-							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+							                            	<p id="endpointAuth_help" class="hide"><%=i18n.localize("Select the authentication scheme you require.")%></p>
 							                            </label>
 							                            <div class="col-sm-4">
 							                            <select class="select required form-control" id="endpointAuthType" name="endpointAuthType" >
-							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
-							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
+							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("Basic Auth")%></option>
+							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("Digest Auth")%></option>
 							                            </select>							                            
 							                            </div>
 							                        </div>
 							
 							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
+							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("Credentials")%>:<span class="requiredAstrix">*</span></label>
 							                            <div class="col-sm-2">
 							                                <input type="text" class="form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
 														</div>
@@ -387,31 +388,31 @@
 												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
-							                        <legend ><%=i18n.localize("sequence")%></legend>
+							                        <legend ><%=i18n.localize("Message Mediation Policies")%></legend>
 							                            <div class="form-group">
-							                                <label class="control-label col-sm-3"><%=i18n.localize("enable.sequence")%></label>
+							                                <label class="control-label col-sm-3"><%=i18n.localize("Enable Message Mediation")%></label>
 							                                <div class="controls col-sm-8">
 							                                    <label class="checkbox">
 							                                        <input type="checkbox" id="toggleSequence" name="sequence_check"
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
 							                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>>
-							                                            <span class="helper"><%=i18n.localize("sequenceMsg")%></span>
+							                                            <span class="helper"><%=i18n.localize("Check to select a message mediation policy to be executed in the message flow")%></span>
 							                                    </label>							                                    
 							                                </div>
 							                            </div>
 							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 														<div class="form-group">
-															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("inFlow")%></label>
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("In Flow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
 							                                        	<optgroup label="Existing" id="inSequenceExistingOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
                                                                         <optgroup label="Added by you" id="inSequenceUserAddedOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 							                                    	</select>
 							                                    	<span class="input-group-btn">
@@ -422,16 +423,16 @@
 															</div>
 														</div>							                                        
 							                            <div class="form-group">
-															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("outFlow")%></label>
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("Out Flow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="outSequence"  name="outSequence">
 							                                        	<optgroup label="Existing" id="outSequenceExistingOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
                                                                         <optgroup label="Added by you" id="outSequenceUserAddedOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 							                                    	</select>																
 																    <span class="input-group-btn">
@@ -442,20 +443,20 @@
 															</div>
 														</div>
 														<div class="form-group">
-															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("faultFlow")%></label>
+															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("Fault Flow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="faultSequence"  name="faultSequence">
 							                                	    	<optgroup label="Existing" id="faultSequenceExistingOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
                                                                         <optgroup label="Added by you" id="faultSequenceUserAddedOptGroup">
-                                                                            <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                                            <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 																	</select>
 																	<span class="input-group-btn" >
-                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="fault" data-name="Fault Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Fault Flow</a>
+                                                                        <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="fault" data-name="Fault Flow" data-toggle="modal" title="<%=i18n.localize("Mediation Policy Upload")%>" ><i class="fw fw-upload"></i> <%=i18n.localize("Upload Fault Flow")%></a>
                                                                     </span>
 																</div>
 
@@ -467,7 +468,7 @@
 														 %>
 														<br/><br/>
 														<div id="corsConfigsManaged">
-															<legend>CORS configuration</legend>
+															<legend><%=i18n.localize("CORS configuration")%> </legend>
                                                             <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationManaged"/>
 															<div class="cors-ui-container"></div>
 
@@ -504,7 +505,7 @@
 												<h4 class="panel-title">
 								                    <div>
 						                                <div class="heading">Prototyped API</div>
-						                                <div class="description truncate" title="Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs">Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</div>
+						                                <div class="description truncate" title="<%=i18n.localize("Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs")%>"><%=i18n.localize("Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs")%></div>
 						                                <div class="status">
 						                                    <i class="fw fw-down"></i>
 						                                </div>
@@ -519,7 +520,7 @@
 								                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
 								                <fieldset>
 								                <div class="form-group">
-								                    <label class="control-label col-sm-3" for="context">Implementation Method</label>
+								                    <label class="control-label col-sm-3" for="context"><%=i18n.localize("Implementation Method")%></label>
 								                    <div class="col-sm-8">
 								                        <%if(api.implementation && api.implementation == "INLINE"){
 								                                var inline_impl = "checked='checked'";
@@ -554,7 +555,7 @@
 								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
 								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 								                    <div class="form-group">
-								                        <label class="control-label col-sm-3">Prototype Endpoint:
+								                        <label class="control-label col-sm-3"><%=i18n.localize("Prototype Endpoint:")%>
 								                        <a class="help_popup" help_data="endpoint_test_help" data-trigger="hover" title="endpoint_test_help">
 															<span class="icon fw-stack fw-lg" style="font-size:6px">
 																   <i class="fw fw-circle fw-stack-2x"></i>
@@ -562,7 +563,7 @@
 															</span>
 														</a>
 														<div id="endpoint_test_help" class="hide">
-															<p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+															<p> <%=i18n.localize("WSO2 API Manager uses HTTP Head to check the validity of the endpoint.")%> </p>
 														</div>
 								                        </label>
 								                        <div class="col-sm-8">
@@ -585,7 +586,7 @@
 
 														<div id="corsConfigsPrototyped">
 															<br/><br/>
-															<legend>CORS configuration</legend>
+															<legend><%=i18n.localize("CORS configuration")%></legend>
 
 															<input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfigurationPrototyped"/>
 
@@ -637,9 +638,9 @@
 							                </table>
 							                </div>
 							                <div class="modal-footer">
-							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true " title="<%=i18n.localize("keepEditingAPI")%>"><%=i18n.localize("keepEditingAPI")%></button>
-							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("goToStore")%>" ><%=i18n.localize("goToStore")%></a>
-							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary" title="<%=i18n.localize("goToOverview")%>" ><%=i18n.localize("goToOverview")%></a>
+							                <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true " title="<%=i18n.localize("Keep Editing API")%>"><%=i18n.localize("Keep Editing API")%></button>
+							                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-secondary" title="<%=i18n.localize("Go to APIStore")%>" ><%=i18n.localize("Go to APIStore")%></a>
+							                <a href='<%= jagg.url("/info?"+ apiUrlId ) %>' class="btn btn-primary" title="<%=i18n.localize("Go to Overview")%>" ><%=i18n.localize("Go to Overview")%></a>
 							                </div>
 							                </div>
 							            </div>
@@ -661,7 +662,7 @@
     <div class="modal-content clearfix">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
-        <h3 class="modal-title" id="sequenceUploadLabel">Upload Mediation Policy - <span id="flowName"></span></h3>
+        <h3 class="modal-title" id="sequenceUploadLabel"><%=i18n.localize("Upload Mediation Policy - ")%><span id="flowName"></span></h3>
       </div>
       <div class="">      
                             <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
@@ -678,7 +679,7 @@
 												<div class="input-group-btn">
 													<button class="btn browse" type="button" title="Browse File">
 														<i class="fw fw-file-browse" aria-hidden="true"></i> <span
-															class="hidden-xs">Browse</span>
+															class="hidden-xs"><%=i18n.localize("Browse")%></span>
 													</button>
 												</div>
 											</div>
@@ -689,7 +690,7 @@
                         <div class="pull-right">
                             <div class="modal-footer">
                                 <button type="button" id="upload_sequence" class="btn btn-primary has-spinner"><%=i18n.localize("Upload")%></button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal"><%=i18n.localize("close")%></button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal"><%=i18n.localize("Close")%></button>
                             </div>
                         </div>
         
@@ -706,7 +707,7 @@
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding add-margin-bottom-2x">
 	<div class="add-margin-bottom-4x">
-    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a>
+    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a>
 	</div>
 	<div class="add-margin-bottom-4x">
     	<strong>Response Content Type : </strong><a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
@@ -718,16 +719,16 @@
 		{{#if parameters}}
 		<table class="table table-condensed table-bordered">
 			<tr>
-				<th width="15%">Parameter Name</th>
-				<th width="40%">Description</th>
-				<th width="15%">Parameter Type</th>
-				<th width="15%">Data Type</th>
-				<th width="15%">Required</th>
+				<th width="15%"><%=i18n.localize("Parameter Name")%></th>
+				<th width="40%"><%=i18n.localize("Description")%></th>
+				<th width="15%"><%=i18n.localize("Parameter Type")%></th>
+				<th width="15%"><%=i18n.localize("Data Type")%></th>
+				<th width="15%"><%=i18n.localize("Required")%></th>
 			</tr>
 		{{#each parameters}}
 			<tr>
 			<td>{{ name }}</td>
-			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("description")%>">{{ description }}</a></td>
+			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a></td>
 			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
 			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
 			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
@@ -752,16 +753,16 @@
 <div  id="environmentsRetry-modal" class="modal hide fade">
         <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Gateway Failures</h3>
+        <h3><%=i18n.localize("Gateway Failures")%></h3>
         </div>
         <div class="modal-body">
         <div id="modal-published-header">
-        Failed to Publish Environments
+        <%=i18n.localize("Failed to Publish Environments")%>
         </div>
         <div id="modal-published-content">
         </div>
         <div id="modal-unpublished-header">
-                Failed to UnPublish Environments
+        <%=i18n.localize("Failed to UnPublish Environments")%>
                 </div>
                 <div id="modal-unpublished-content">
                 </div>
@@ -769,7 +770,7 @@
         </div>
         <div class="modal-footer">
         <div id="res" class="hide" style="color:red;float:left"></div>
-        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="do gateway action">OK</a>
+        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()" title="<%=i18n.localize("do gateway action")%>"><%=i18n.localize("OK")%></a>
                                    <script type="text/javascript">
                             function doGatewayAction() {
                                $("#environmentsRetry-modal").modal('hide');
@@ -779,7 +780,7 @@
 </div>
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <fieldset class="<%= hide_impl %> implementation_method_inline implementation_method">
-<legend>Resources</legend>
+<legend><%=i18n.localize("Resources")%></legend>
 <table style="width:100%">                       
 {{#each doc.paths}}
     {{# each this}}
@@ -854,7 +855,7 @@
 <script id="advance-endpoint-ui-template" type="text/x-handlebars-template">
 		{{#if address }}
         <fieldset>
-            <legend>Message Content</legend>
+            <legend><%=i18n.localize("Message Content")%></legend>
             <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
 				<div class="form-group">
 					<label class="control-label col-sm-3" for="format">Format</label>
@@ -863,29 +864,29 @@
 							<option value="soap11">SOAP 1.1</option>
 							<option value="soap12">SOAP 1.2</option>
 							<option value="POX">Plain Old XML (POX)</option>
-							<option value="REST">REpresentational State Transer (REST)</option>
+							<option value="REST">Representational State Transer (REST)</option>
 							<option value="GET">GET</option>
-							<option selected value="leave-as-is">Leave As-Is</option>
+							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
 						</select>
-						<p class="help-block hide">Message format for the endpoint.</p>
+						<p class="help-block hide"><%=i18n.localize("Message format for the endpoint.")%></p>
 					</div>
 				</div>
 				<div class="form-group ">
-					<label class="control-label col-sm-3" for="optimize">Optimize</label>
+					<label class="control-label col-sm-3" for="optimize"><%=i18n.localize("Optimize")%></label>
 					<div class="col-sm-4">
 						<select class="form-control selectpicker" id="optimize" name="optimize">
 							<option value="SWA">SWA</option>
 							<option value="MTOM">MTOM</option>
-							<option selected value="leave-as-is">Leave As-Is</option>
+							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
 						</select>
-						<p class="help-block hide">Method to optimize the attachments.</p>
+						<p class="help-block hide"><%=i18n.localize("Method to optimize the attachments.")%></p>
 					</div>
 				</div>
 			</div>
         </fieldset>
         {{/if}}
         <fieldset>
-            <legend>Endpoint Suspend State</legend>
+            <legend><%=i18n.localize("Endpoint Suspend State")%></legend>
 				<div class="form-group ">
 					<label class="control-label col-sm-3" for="suspendErrorCode">Error Codes
 						<a class="help_popup" help_data="suspendErrorCode_help" data-trigger="hover" data-placement="bottom" title="suspendErrorCode_help">
@@ -894,28 +895,25 @@
 							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 							</span>
 						</a>
-						<p id="suspendErrorCode_help" class="hide">A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.</p>
+						<p id="suspendErrorCode_help" class="hide"><%=i18n.localize("A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
 					</label>
 					<div class="col-sm-6">
 						<select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
-							<option value="101000">101000 : Receiver IO error sending</option>
-							<option value="101001">101001 : Receiver IO error receiving</option>
-							<option value="101500">101500 : Sender IO error sending</option>
-							<option value="101501">101501 : Sender IO error receiving</option>
-							<option value="101503">101503 : Connection failed</option>
-							<option value="101504">101504 : Connection timed out</option>
-							<option value="101505">101505 : Connection closed</option>
-							<option value="101506">101506 : HTTP protocol violation</option>
-							<option value="101507">101507 : Connect cancel</option>
-							<option value="101508">101508 : Connect timeout</option>
-							<option value="101509">101509 : Send abort</option>
-							<option value="101510">101510 : Response processing failure</option>
+							<option value="101000">101000 : <%=i18n.localize("Receiver IO error sending")%></option>
+							<option value="101001">101001 : <%=i18n.localize("Receiver IO error receiving")%></option>
+							<option value="101500">101500 : <%=i18n.localize("Sender IO error sending")%></option>
+							<option value="101501">101501 : <%=i18n.localize("Sender IO error receiving")%></option>
+							<option value="101503">101503 : <%=i18n.localize("Connection failed")%></option>
+							<option value="101504">101504 : <%=i18n.localize("Connection timed out")%></option>
+							<option value="101505">101505 : <%=i18n.localize("Connection closed")%></option>
+							<option value="101506">101506 : <%=i18n.localize("TTP protocol violation<")%>/option>
+							<option value="101507">101507 : <%=i18n.localize("Connect cancel")%></option>
+							<option value="101508">101508 : <%=i18n.localize("Connect timeout")%></option>
+							<option value="101509">101509 : <%=i18n.localize("Send abort")%></option>
+							<option value="101510">101510 : <%=i18n.localize("Response processing failure")%></option>
 						</select>
-						<p class="help-block">A list of error codes.If these
-						error codes are received from the endpoint, the
-						endpoint will be suspended.</p><span class=
-						"help-block jsonform-errortext" style=
-						"display:none;"></span>
+						<p class="help-block"><%=i18n.localize("A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
+						<span class="help-block jsonform-errortext" style="display:none;"></span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -926,93 +924,85 @@
 							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 							</span>
 						</a>
-						<p id="suspendDuration_help" class="hide">The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.</p>
+						<p id="suspendDuration_help" class="hide"><%=i18n.localize("The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.")%></p>
 					</label>
 					<div class="col-sm-2">
 						<input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
-						<p class="help-block hide">The duration that the endpoint is
-						suspended for the first time after the receiving the
-						suspend error codes.</p>
+						<p class="help-block hide"><%=i18n.localize("The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.")%></p>
 					</div>
 
 					<label class="control-label col-sm-2" for="suspendMaxDuration">Max Duration (ms)</label>
 					<div class="col-sm-2">
 						<input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
-						<p class="help-block hide">The maximum duration that the
-						endpoint is suspended after the receiving the suspend
-						error codes.</p>
+						<p class="help-block hide"><%=i18n.localize("The maximum duration that the endpoint is suspended after the receiving the suspend error codes .")%>.</p>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="control-label col-sm-3" for="factor">Factor</label>
 					<div class="col-sm-2">
 						<input class="form-control" id="factor" name="factor" type="text" value="">
-						<p class="help-block hide">The duration to suspend can vary
-						from the first time suspension to the subsequent time.
-						The factor value decides the suspense duration variance
-						between subsequent suspensions.</p>
+						<p class="help-block hide">
+						    <%=i18n.localize("The duration to suspend can vary from the first time suspension to the subsequent time. The factor value decides the suspense duration variance between subsequent suspensions.")%>
+						</p>
 					</div>
 				</div>
         </fieldset>
         <fieldset class="control-group add-margin-top-5x">
-            <legend>Endpoint Timeout State</legend>
+            <legend><%=i18n.localize("Endpoint Timeout State")%></legend>
             <div class="form-group ">
-                <label class="control-label col-sm-3" for="">Error Codes</label>
+                <label class="control-label col-sm-3" for=""><%=i18n.localize("Error Codes")%></label>
                 <div class=" col-sm-6">
                     <select class="form-control selectpicker" id="" multiple="multiple" name="retryErroCode">
-                        <option value="101000">101000 : Receiver IO error sending</option>
-                        <option value="101001">101001 : Receiver IO error receiving</option>
-                        <option value="101500">101500 : Sender IO error sending</option>
-                        <option value="101501">101501 : Sender IO error receiving</option>
-                        <option value="101503">101503 : Connection failed</option>
-                        <option value="101504">101504 : Connection timed out</option>
-                        <option value="101505">101505 : Connection closed</option>
-                        <option value="101506">101506 : HTTP protocol violation</option>
-                        <option value="101507">101507 : Connect cancel</option>
-                        <option value="101508">101508 : Connect timeout</option>
-                        <option value="101509">101509 : Send abort</option>
-                        <option value="101510">101510 : Response processing failure</option>
+                        <option value="101000">101000 : <%=i18n.localize("Receiver IO error sending")%></option>
+                        <option value="101001">101001 : <%=i18n.localize("Receiver IO error receiving")%></option>
+                        <option value="101500">101500 : <%=i18n.localize("Sender IO error sending")%></option>
+                        <option value="101501">101501 : <%=i18n.localize("Sender IO error receiving")%></option>
+                        <option value="101503">101503 : <%=i18n.localize("Connection failed")%></option>
+                        <option value="101504">101504 : <%=i18n.localize("Connection timed out")%> </option>
+                        <option value="101505">101505 : <%=i18n.localize("Connection closed")%></option>
+                        <option value="101506">101506 : <%=i18n.localize("HTTP protocol violation")%></option>
+                        <option value="101507">101507 : <%=i18n.localize("Connect cancel")%></option>
+                        <option value="101508">101508 : <%=i18n.localize("Connect timeout")%></option>
+                        <option value="101509">101509 : <%=i18n.localize("Send abort")%></option>
+                        <option value="101510">101510 : <%=i18n.localize("Response processing failure")%></option>
                     </select>
-                    <p class="help-block hide">A list of error codes. If these
-                    error codes are received from the endpoint, the request
-                    will be subjected to a timeout.</p>
+                    <p class="help-block hide"><%=i18n.localize("A list of error codes. If these error codes are received from the endpoint, the request will be subjected to a timeout.")%></p>
                 </div>
             </div>
             <div class="form-group ">
-                <label class="control-label col-sm-3" for="retryTimeOut">Retries Before Suspension</label>
+                <label class="control-label col-sm-3" for="retryTimeOut"><%=i18n.localize("Retries Before Suspension")%></label>
                 <div class="col-sm-2">
                     <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
-                    <p class="help-block hide">The number of re-tries in case of
-                    a timeout, caused by the above listed error
-                    codes.</p>                
+                    <p class="help-block hide"><%=i18n.localize("The number of re-tries in case of a timeout, caused by the above listed erro codes.")%>r
+                    </p>
                 </div>
                 <label class="control-label col-sm-2" for="retryDelay">Retry Delay(ms)</label>
                 <div class="col-sm-2">
                     <input class="form-control" id="retryDelay" name="retryDelay"
                     type="text" value="">                                    
-                <p class="help-block hide">The delay between retries, in milliseconds.</p>
+                <p class="help-block hide"><%=i18n.localize("The delay between retries, in milliseconds.")%></p>
                 </div>
             </div>
         </fieldset>
         <fieldset class="control-group add-margin-top-5x">
-            <legend>Connection Timeout</legend>
+            <legend><%=i18n.localize("Connection Timeout")%></legend>
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
-                        <option value="neverTimeout">Never timeout</option>
-                        <option value="discard">Discard message</option>
-                        <option selected value="fault">Execute fault sequence</option>
+                        <option value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
+                        <option value="discard"><%=i18n.localize("Discard message")%></option>
+                        <option selected value="fault"><%=i18n.localize("Execute fault sequence")%></option>
                     </select>
-                    <p class="help-block hide">The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence</p>
+                    <p class="help-block hide"><%=i18n.localize("The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>
             <div class="form-group ">
-                <label class="control-label col-sm-3" for="actionDuration">Duration (ms)</label>
+                <label class="control-label col-sm-3" for="actionDuration"><%=i18n.localize("Duration (ms)")%></label>
                 <div class="col-sm-2">
                     <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
-                    <p class="help-block hide">The duration in milliseconds before considering a request as timeout.</p>
+                    <p class="help-block hide"><%=i18n.localize("The duration in milliseconds before considering a request as timeout.")%></p>
                 </div>
             </div>
         </fieldset>
@@ -1022,7 +1012,7 @@
 <script id="cors-ui-template" type="text/x-handlebars-template">
 
     <div class="form-group">
-			<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("corsConfiguration")%></label>
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("Enable API based CORS Configuration")%></label>
 			<div class="controls col-sm-8">
 			<label class="checkbox">
                 <input type="checkbox" class="toggleCorsManaged" name="cors_check" {{#if corsConfigurationEnabled }} checked="checked"  {{/if}} />
@@ -1033,22 +1023,22 @@
 	{{#if corsConfigurationEnabled }}
 	<div id="corsFormElements">
 		<div class="form-group">
-			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("Access Control Allow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
 			<div class="headerContainer tagContainer col-sm-6">
 				<label class="checkbox">
 					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
-					<span class="helper"><%=i18n.localize("allOrigins")%></span>
+					<span class="helper"><%=i18n.localize("All Allow Origins")%></span>
 				</label>
 				{{#unless allowAll }}
 				<div id="accesseAllowOriginDiv" class="add-margin-top-2x">
-					<input type="text"  class="tagsinput  form-control" placeholder="Access Control Allow Origins" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
+					<input type="text"  class="tagsinput  form-control" placeholder="<%=i18n.localize("Access Control Allow Origins")%>" id="accessControlAllowOrigins" name="accessControlAllowOrigins" value="{{accessControlAllowOrigins}}" data-role="tagsinput"/>
 				</div>
 				{{/unless}}
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged">
-				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Headers")%></strong></p>
+				<p><%=i18n.localize("Access Control Allow ")%><strong><%=i18n.localize("Headers")%></strong></p>
 			</label>
 			<div class="headerContainer tagContainer col-sm-6">
 				<input type="text" class="tagsinput form-control"  id="allowHeadersManaged" name="accessControlAllowHeaders" value="{{ accessControlAllowHeaders }}" data-role="tagsinput"/>
@@ -1056,7 +1046,7 @@
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged">
-				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Methods")%></strong></p>
+				<p><%=i18n.localize("Access Control Allow ")%><strong><%=i18n.localize("Methods")%></strong></p>
 			</label>
 			<div class="headerContainer tagContainer col-sm-6">
 				<input type="text"  class="tagsinput form-control"  id="allowMethodsManaged" name="accessControlAllowMethods" value="{{ accessControlAllowMethods }}" data-role="tagsinput"/>
@@ -1065,7 +1055,7 @@
 
 		<div class="form-group">
 			<label class="control-label col-sm-3" for="corsConfigurationManaged">
-				<p><%=i18n.localize("accessControlAllow")%><strong><%=i18n.localize("Credentials")%></strong></p>
+				<p><%=i18n.localize("Access Control Allow ")%><strong><%=i18n.localize("Credentials")%></strong></p>
 			</label>
 			<div class="headerContainer tagContainer col-sm-6">
 				<label class="checkbox">
