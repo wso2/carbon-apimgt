@@ -67,7 +67,7 @@ public class APIKeyValidator {
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
 
-    private  boolean isGatewayKeyCacheInitialized = false;
+    private  static boolean isGatewayKeyCacheInitialized = false;
 
     protected Log log = LogFactory.getLog(getClass());
 
