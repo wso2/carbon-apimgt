@@ -1588,11 +1588,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             userNameWithoutDomain = nameParts[0];
         }
 
+        int loggedInUserTenantDomain = -1;
+        if(!StringUtils.isEmpty(loggedUsername)) {
+            loggedInUserTenantDomain = APIUtil.getTenantId(loggedUsername);
+        }
+
         if (loggedUsername.isEmpty()) {
             // Anonymous user is viewing.
             checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+        } else if (tenantId != loggedInUserTenantDomain) {
+            //Cross tenant scenario
+            providerId = APIUtil.replaceEmailDomainBack(providerId);
+            String[] nameParts = providerId.split("@");
+            String provideNameWithoutDomain = nameParts[0];
+            checkAuthorized = manager.isUserAuthorized(provideNameWithoutDomain, path, ActionConstants.GET);
         } else {
-            // Some user is logged in.
+            // Some user is logged in also user and api provider tenant domain are same.
             checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
         }
 
