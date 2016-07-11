@@ -45,7 +45,7 @@
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value="'<%=i18n.localize('Name contains one or more illegal characters')%>'+'( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).'"/>
 
     <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data" action="/admin/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
-        <h3><%=i18n.localize("generalDetails")%></h3>
+        <h3><%=i18n.localize("General Details")%></h3>
         <div class="form-group">
             <label class="control-label col-sm-3"><%="Name"%>  <span class="requiredAstrix">*</span></label>
             <div class="col-md-9">

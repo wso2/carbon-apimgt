@@ -10,7 +10,7 @@
    <!-- alert types configurations -->
     <div class="row">
         <div class="container col-md-12">
-            <h2><%=i18n.localize("alertConfigurations")%></h2>
+            <h2><%=i18n.localize("Alert Configurations")%></h2>
         </div>
     </div>
     <div class="row">
@@ -24,7 +24,7 @@
                         <th><%=i18n.localize("Scenario Type")%></th>
                         <th><%=i18n.localize("Description")%></th>
                         <th><%=i18n.localize("Status")%></th>
-                        <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("Actions")%></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,11 +47,11 @@
 
                                 if (existingConfig) {
                                 %>
-                                <td><%=i18n.localize("templateStatusActive")%></td>
+                                <td><%=i18n.localize("Active")%></td>
                                 <td class="tcenter">
                                     <a onclick="deleteConfiguration('<%=existingConfig.getDomain()%>','<%=existingConfig.getName()%>')">
                                         <i class="glyphicon glyphicon-remove"></i>
-                                        <%=i18n.localize("deactivate")%>
+                                        <%=i18n.localize("Deactivate")%>
                                     </a>
                                     &nbsp; &nbsp;
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
@@ -62,11 +62,11 @@
 
                                 <% } else { %>
                                 <!--  need to show configuration and activate -->
-                               <td><%=i18n.localize("templateStatusInactive")%></td>
+                               <td><%=i18n.localize("Inactive")%></td>
                                <td class="tcenter">
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getType() +"&templateType="+templates[i].getType()+"&mode=edit")%>">
                                         <i class="fw fw-activate"></i>
-                                        <%=i18n.localize("activate")%></a></td>
+                                        <%=i18n.localize("Activate")%></a></td>
 
                                 <% } %>
                             </tr>
@@ -99,7 +99,7 @@
     </div>
     <div class="row">
         <div class="container col-md-12">
-            <h2><%=i18n.localize("geoLocationConfigurations")%></h2>
+            <h2><%=i18n.localize("GEO Location configurations")%></h2>
         </div>
     </div>
     <div class="row">
@@ -110,10 +110,10 @@
             <table class="table table-bordered" id="tblConfigs">
                 <thead>
                     <tr>
-                        <th><%=i18n.localize("domainTableColumnName")%></th>
-                        <th><%=i18n.localize("domainTableColumnDescription")%></th>
-                        <th><%=i18n.localize("templateStatus")%></th>
-                        <th colspan="2" class="tcenter"><%=i18n.localize("actions")%></th>
+                        <th><%=i18n.localize("Scenario Type")%></th>
+                        <th><%=i18n.localize("Description")%></th>
+                        <th><%=i18n.localize("Status")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("Actions")%></th>
 
                     </tr>
                 </thead>
@@ -137,11 +137,11 @@
 
                                 if (existingConfig) {
                                     %>
-                                <td><%=i18n.localize("templateStatusActive")%></td>
+                                <td><%=i18n.localize("Active")%></td>
                                 <td class="tcenter">
                                     <a onclick="deleteConfiguration('<%=existingConfig.getDomain()%>','<%=existingConfig.getName()%>')">
                                         <i class="glyphicon glyphicon-remove"></i>
-                                        <%=i18n.localize("deactivate")%>
+                                        <%=i18n.localize("Deactivate")%>
                                     </a>
                                     &nbsp; &nbsp;
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
@@ -152,11 +152,11 @@
 
                                 <% } else { %>
                                 <!--  need to show configuration and activate -->
-                               <td><%=i18n.localize("templateStatusInactive")%></td>
+                               <td><%=i18n.localize("Inactive")%></td>
                                <td class="tcenter">
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getType() +"&templateType="+templates[i].getType()+"&mode=edit")%>">
                                         <i class="fw fw-activate"></i>
-                                        <%=i18n.localize("activate")%></a></td>
+                                        <%=i18n.localize("Activate")%></a></td>
 
                                 <% } %>
                             </tr>
