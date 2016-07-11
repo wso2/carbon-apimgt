@@ -91,7 +91,7 @@ public class APIClientGenerationManager {
      * @return Name of the generated SDK
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
+    public Map<String, String> sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
             throws APIClientGenerationException {
         Subscriber currentSubscriber = null;
         String swagger = null;
@@ -262,7 +262,13 @@ public class APIClientGenerationManager {
         }
 
         spec.delete();
-        return appName + "_" + sdkLanguage;
+
+        File zipFile = new File(zipName);
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("path", zipFile.getAbsolutePath());
+        result.put("fileName", appName + "_" + sdkLanguage + ".zip");
+
+        return result;
     }
 
     public String getSupportedSDKLanguages()    {
