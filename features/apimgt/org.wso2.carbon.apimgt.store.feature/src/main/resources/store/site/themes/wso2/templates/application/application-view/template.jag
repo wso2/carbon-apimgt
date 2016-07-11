@@ -38,7 +38,7 @@ for(var i=0;i < outputs.tiers.length; i++){
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Per Token Quota")%></label>
     <div class="col-sm-9">
-      <p class="form-control-static"><strong><%= i18n.localize(encode.forHtml(application.tier)) %></strong>&nbsp;&nbsp;&nbsp;<%=i18n.localize(app_tier.tierDescription) %></p>
+      <p class="form-control-static"><strong><%= encode.forHtml(application.tier) %></strong>&nbsp;&nbsp;&nbsp;<%= encode.forHtml(app_tier.tierDescription+"") %></p>
       <p><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%></p>
     </div>
   </div>
@@ -119,7 +119,7 @@ for(var i=0;i < outputs.tiers.length; i++){
         <%  var langsArray = supportedLangs.langs.split(",");
                 for(var i = 0 ; i < langsArray.length ; i++ ) { %>
                     <button class="btn btn-primary " onclick="generateAndroidSdk('<%=application.name%>','<%=langsArray[i]%>')" type="button">
-                        <%=i18n.localize(langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
+                        <%= langsArray[i] %>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
                     </button>
 
         <%
