@@ -82,6 +82,8 @@ include("/jagg/jagg.jag");
             response.contentType = "application/force-download";
             response.addHeader("Content-Disposition","attachment; filename = \"" + result.fileName + "\"");
             print(file.getStream());
+            file.close();
+            file.del();
         }
         print(obj);
     }else if (action == "getAllSubscriptions") {

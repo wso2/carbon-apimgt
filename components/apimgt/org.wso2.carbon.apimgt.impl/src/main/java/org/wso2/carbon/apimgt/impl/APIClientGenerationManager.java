@@ -123,12 +123,18 @@ public class APIClientGenerationManager {
         if (!tempFolder.exists()) {
             tempFolder.mkdir();
         } else {
+            // On Windows OS, deleting the folder fails stating that a file within it is still open, attempting to close
+            // the open file from the jaggery side has not been successful. For the time being we will avoid deleting
+            // the directory. This is not an issue since existing zip files will be overwritten on the server side.
+            // This issue is not encountered on Linux however.
+            /*
             try {
                 FileUtils.deleteDirectory(tempFolder);
             } catch (IOException e) {
                 log.error("Problem deleting the temporary swaggerCodegen folder", e);
                 throw new APIClientGenerationException("Problem deleting the temporary swaggerCodegen folder", e);
             }
+            */
             tempFolder.mkdir();
         }
 
