@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -422,12 +423,11 @@ public class UsageClient {
             //get the connection
             connection = APIMgtDBUtil.getConnection();
 
-            String select = "select count(subc.subscription_id) as subscription_count, subc.created_time as "
-                    + "created_time,api.api_name, api.api_version ";
+            String select =
+                    "select count(subc.subscription_id) as subscription_count, subc.created_time as " + "created_time ";
             String from = "from AM_API as api,  AM_SUBSCRIPTION as subc ";
             String where = "where api.api_id=subc.api_id ";
-            String groupAndOrder =
-                    "group by api.api_name, api.api_version, subc.created_time" + " order by subc.created_time asc ";
+            String groupAndOrder = "group by subc.created_time" + " order by subc.created_time asc ";
             String time = " and subc.created_time between '" + fromDate + "' and '" + toDate + "' ";
             if (!"allAPIs".equals(apiFilter)) {
                 where += " and api.api_provider = '" + provider + "' ";
@@ -444,7 +444,7 @@ public class UsageClient {
                 where += providers.toString();
             }
 
-            if (apiName != null) {
+            if (apiName != null && !StringUtils.isBlank(apiName) && !"All".equalsIgnoreCase(apiName)) {
                 where += "and api.api_name='" + apiName + "' ";
             }
             String query = select + from + where + time + groupAndOrder;
@@ -452,15 +452,12 @@ public class UsageClient {
             //execute
             rs = statement.executeQuery();
             List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
-            long x;
-            int subscription_count = 0;
+            long x, y = 0;
             //iterate over the results
             while (rs.next()) {
-                subscription_count = rs.getInt("subscription_count");
-                long created_time = rs.getTimestamp("created_time").getTime();
-                String api_name = rs.getString("api_name");
-                String api_version = rs.getString("api_version");
-                list.add(new SubscriptionOverTimeDTO(subscription_count, created_time, api_name, api_version));
+                x = rs.getTimestamp("created_time").getTime();
+                y += rs.getLong("subscription_count");
+                list.add(new SubscriptionOverTimeDTO(x, y));
             }
             return list;
         } catch (Exception e) {
