@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class GlobalThrottlePolicyDTO extends ThrottlePolicyDTO {
+public class CustomRuleDTO extends ThrottlePolicyDTO {
   
   
   
@@ -51,7 +51,7 @@ public class GlobalThrottlePolicyDTO extends ThrottlePolicyDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GlobalThrottlePolicyDTO {\n");
+    sb.append("class CustomRuleDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  siddhiQuery: ").append(siddhiQuery).append("\n");
     sb.append("  keyTemplate: ").append(keyTemplate).append("\n");

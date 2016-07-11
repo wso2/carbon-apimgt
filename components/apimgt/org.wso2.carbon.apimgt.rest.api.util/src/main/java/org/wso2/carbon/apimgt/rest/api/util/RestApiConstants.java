@@ -38,6 +38,12 @@ public final class RestApiConstants {
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
+    public static final String RESOURCE_POLICY = "policy";
+    public static final String RESOURCE_APP_POLICY = "application policy";
+    public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
+    public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
+    public static final String RESOURCE_CUSTOM_RULE = "custom rule";
+    public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";

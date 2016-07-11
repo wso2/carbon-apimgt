@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class GlobalThrottlePolicyListDTO  {
+public class CustomRuleListDTO  {
   
   
   
@@ -27,13 +27,13 @@ public class GlobalThrottlePolicyListDTO  {
   private String previous = null;
   
   
-  private List<GlobalThrottlePolicyDTO> list = new ArrayList<GlobalThrottlePolicyDTO>();
+  private List<CustomRuleDTO> list = new ArrayList<CustomRuleDTO>();
 
   
   /**
-   * Number of Global throttle policies returned.\n
+   * Number of Custom Rules returned.\n
    **/
-  @ApiModelProperty(value = "Number of Global throttle policies returned.\n")
+  @ApiModelProperty(value = "Number of Custom Rules returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -44,9 +44,9 @@ public class GlobalThrottlePolicyListDTO  {
 
   
   /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/global?limit=1&offset=2&query=\"\n
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/custom?limit=1&offset=2&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/global?limit=1&offset=2&query=\"\n")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/custom?limit=1&offset=2&query=\"\n")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -57,9 +57,9 @@ public class GlobalThrottlePolicyListDTO  {
 
   
   /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/global?limit=1&offset=0&query=\"\n
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/custom?limit=1&offset=0&query=\"\n
    **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/global?limit=1&offset=0&query=\"\n")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/custom?limit=1&offset=0&query=\"\n")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;
@@ -73,10 +73,10 @@ public class GlobalThrottlePolicyListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<GlobalThrottlePolicyDTO> getList() {
+  public List<CustomRuleDTO> getList() {
     return list;
   }
-  public void setList(List<GlobalThrottlePolicyDTO> list) {
+  public void setList(List<CustomRuleDTO> list) {
     this.list = list;
   }
 
@@ -85,7 +85,7 @@ public class GlobalThrottlePolicyListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GlobalThrottlePolicyListDTO {\n");
+    sb.append("class CustomRuleListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

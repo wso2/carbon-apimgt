@@ -13,8 +13,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 
@@ -170,7 +170,7 @@ public class ThrottlingApi  {
     return delegate.throttlingPoliciesAdvancedPoliciesPost(body,contentType);
     }
     @GET
-    @Path("/policies/advanced-policies/{policyName}")
+    @Path("/policies/advanced-policies/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Advanced Policy", notes = "Retrieve a Advanced Policy providing the policy name.\n", response = AdvancedThrottlePolicyDTO.class)
@@ -183,14 +183,14 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdGet(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/policies/advanced-policies/{policyName}")
+    @Path("/policies/advanced-policies/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an Advanced level throttle policy", notes = "Update an Advanced level throttle policy\n", response = AdvancedThrottlePolicyDTO.class)
@@ -203,16 +203,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNamePut(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdPut(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) AdvancedThrottlePolicyDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNamePut(policyName,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/policies/advanced-policies/{policyName}")
+    @Path("/policies/advanced-policies/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an Advanced level throttle policy", notes = "Delete an Advanced level throttle policy\n", response = void.class)
@@ -223,11 +223,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNameDelete(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyNameDelete(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/policies/application")
@@ -267,7 +267,7 @@ public class ThrottlingApi  {
     return delegate.throttlingPoliciesApplicationPost(body,contentType);
     }
     @GET
-    @Path("/policies/application/{policyName}")
+    @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Application Policy", notes = "Retrieve an Application Policy providing the policy name.\n", response = ApplicationThrottlePolicyDTO.class)
@@ -280,14 +280,14 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesApplicationPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesApplicationPolicyIdGet(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesApplicationPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesApplicationPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/policies/application/{policyName}")
+    @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an Application level throttle policy", notes = "Update an Application level throttle policy\n", response = ApplicationThrottlePolicyDTO.class)
@@ -300,16 +300,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesApplicationPolicyNamePut(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesApplicationPolicyIdPut(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) ApplicationThrottlePolicyDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesApplicationPolicyNamePut(policyName,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesApplicationPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/policies/application/{policyName}")
+    @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an Application level throttle policy", notes = "Delete an Application level throttle policy\n", response = void.class)
@@ -320,17 +320,17 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesApplicationPolicyNameDelete(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesApplicationPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesApplicationPolicyNameDelete(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesApplicationPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince);
     }
     @GET
-    @Path("/policies/global")
+    @Path("/policies/custom")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all Global level throttle policies", notes = "Get all Global level throttle policies\n", response = GlobalThrottlePolicyListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get all Custom Rules", notes = "Get all Custom Rules\n", response = CustomRuleListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicies returned\n"),
         
@@ -338,19 +338,19 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesGlobalGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
+    public Response throttlingPoliciesCustomGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesGlobalGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesCustomGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
-    @Path("/policies/global")
+    @Path("/policies/custom")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add a Global level throttle policy", notes = "Add a Global level throttle policy\n", response = GlobalThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Add a Custom Rule", notes = "Add a Custom Rule\n", response = CustomRuleDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
         
@@ -358,16 +358,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response throttlingPoliciesGlobalPost(@ApiParam(value = "Global level policy object that should to be added\n" ,required=true ) GlobalThrottlePolicyDTO body,
+    public Response throttlingPoliciesCustomPost(@ApiParam(value = "Custom Rule object that should to be added\n" ,required=true ) CustomRuleDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
-    return delegate.throttlingPoliciesGlobalPost(body,contentType);
+    return delegate.throttlingPoliciesCustomPost(body,contentType);
     }
     @GET
-    @Path("/policies/global/{policyName}")
+    @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve a Global Policy", notes = "Retrieve a Global Policy providing the policy name.\n", response = GlobalThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a Custom Rule", notes = "Retrieve a Custom Rule providing the policy name.\n", response = CustomRuleDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy returned\n"),
         
@@ -377,17 +377,17 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesGlobalPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesCustomRuleIdGet(@ApiParam(value = "Custom rule UUID\n",required=true ) @PathParam("ruleId") String ruleId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesGlobalPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesCustomRuleIdGet(ruleId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/policies/global/{policyName}")
+    @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Global level throttle policy", notes = "Update a Global level throttle policy\n", response = GlobalThrottlePolicyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Update a Custom Rule", notes = "Update a Custom Rule\n", response = CustomRuleDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy updated.\n"),
         
@@ -397,19 +397,19 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesGlobalPolicyNamePut(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
-    @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) GlobalThrottlePolicyDTO body,
+    public Response throttlingPoliciesCustomRuleIdPut(@ApiParam(value = "Custom rule UUID\n",required=true ) @PathParam("ruleId") String ruleId,
+    @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) CustomRuleDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesGlobalPolicyNamePut(policyName,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesCustomRuleIdPut(ruleId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/policies/global/{policyName}")
+    @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a Global level throttle policy", notes = "Delete a Global level throttle policy\n", response = void.class)
+    @io.swagger.annotations.ApiOperation(value = "Delete a Custom Rule", notes = "Delete a Custom Rule\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nResource successfully deleted.\n"),
         
@@ -417,11 +417,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesGlobalPolicyNameDelete(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesCustomRuleIdDelete(@ApiParam(value = "Custom rule UUID\n",required=true ) @PathParam("ruleId") String ruleId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesGlobalPolicyNameDelete(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesCustomRuleIdDelete(ruleId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/policies/subscription")
@@ -461,7 +461,7 @@ public class ThrottlingApi  {
     return delegate.throttlingPoliciesSubscriptionPost(body,contentType);
     }
     @GET
-    @Path("/policies/subscription/{policyName}")
+    @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Subscription Policy", notes = "Retrieve a Subscription Policy providing the policy name.\n", response = SubscriptionThrottlePolicyDTO.class)
@@ -474,14 +474,14 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesSubscriptionPolicyNameGet(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesSubscriptionPolicyIdGet(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesSubscriptionPolicyNameGet(policyName,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesSubscriptionPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/policies/subscription/{policyName}")
+    @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update a Subscription level throttle policy", notes = "Update a Subscription level throttle policy\n", response = SubscriptionThrottlePolicyDTO.class)
@@ -494,16 +494,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesSubscriptionPolicyNamePut(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesSubscriptionPolicyIdPut(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) SubscriptionThrottlePolicyDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesSubscriptionPolicyNamePut(policyName,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesSubscriptionPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/policies/subscription/{policyName}")
+    @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a Subscription level throttle policy", notes = "Delete a Subscription level throttle policy\n", response = void.class)
@@ -514,11 +514,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesSubscriptionPolicyNameDelete(@ApiParam(value = "Thorttle policy name\n",required=true ) @PathParam("policyName") String policyName,
+    public Response throttlingPoliciesSubscriptionPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesSubscriptionPolicyNameDelete(policyName,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesSubscriptionPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince);
     }
 }
 

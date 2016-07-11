@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -416,7 +417,7 @@ public class RestApiUtil {
     public static boolean isDueToResourceNotFound(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
         return rootCause instanceof APIMgtResourceNotFoundException
-                || rootCause instanceof ResourceNotFoundException;
+                || rootCause instanceof ResourceNotFoundException || rootCause instanceof PolicyNotFoundException;
     }
 
     /**
