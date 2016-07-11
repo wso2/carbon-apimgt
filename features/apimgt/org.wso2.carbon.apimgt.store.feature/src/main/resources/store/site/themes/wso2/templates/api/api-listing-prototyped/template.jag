@@ -46,7 +46,7 @@
         var query=    encode.forUriComponent(request.getParameter('query'));
         if(query == 'null')query = null;
         if(numberOfPages > 1) { %>
-        <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("apis")%></div>
+        <div class="api-count-display"><span><%=String(from).split('.')[0]%> - <%=String(to).split('.')[0]%></span> of <span><%=String(outputs.totalLength).split('.')[0]%></span> <%=i18n.localize("APIs")%></div>
         <% } %>
                 <%
 

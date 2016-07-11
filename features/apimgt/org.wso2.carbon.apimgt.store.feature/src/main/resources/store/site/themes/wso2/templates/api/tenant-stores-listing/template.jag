@@ -24,7 +24,7 @@ var tenantDomains=outputs.tenantDomains;
                             <a href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
                             <li class="thumbnail span3 tenent-thumb">
                             <center>
-                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="<%=i18n.localize("tenantStore")%>">
+                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="<%=i18n.localize("Tenant Store")%>">
                             <h3><%=tenantDomains[i]%></h3>
                             <span><%=i18n.localize("Visit Store")%></span>
                             </center>

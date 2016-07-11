@@ -222,7 +222,7 @@ var reqUrl = request.getRequestURI();
                                 </div>
                                 <div class="add-padding-2x app-data ">
                                     <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
-                                    <h5><a href="<%=path%>" title="<%=i18n.localize("version")%>"><%=api.version%></a></h5>
+                                    <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p class="truncate"><%=api.apiOwner%></p>
                                     <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>

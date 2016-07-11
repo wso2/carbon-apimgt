@@ -10,25 +10,25 @@ var urlSuffix = jagg.getTenantURLPrefix();
 <div id="forum_add_new_topic_page">
     
     <div class="title-section">
-        <h2><%=i18n.localize('forum.topicCreation.title')%></h2>
+        <h2><%=i18n.localize("Create New Topic")%></h2>
     </div>
 
     <form class="form-horizontal forum_form">
         <table width="100%">
             <tr>
                 <td width="100%">
-                    <input type="text" id="subject" title="<%=i18n.localize('forum.topicCreation.subject')%>" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level form-control input-lg">
+                    <input type="text" id="subject" title="<%=i18n.localize("Subject")%>" placeholder="<%=i18n.localize("Subject")%>" class="input-block-level form-control input-lg">
                 </td>
             </tr>
         </table>
         <div id="topicDescriptioEditor"></div>
         <input type="hidden" id="parentId" name="parentId" value="<%= encode.forHtml(inputs.parentId)%>">
         <div id="topic-add-actions">
-            <a title="<%=i18n.localize( 'forum.topicCreation.create')%>" class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
-                <%=i18n.localize( 'forum.topicCreation.create')%>
+            <a title="<%=i18n.localize( 'Create')%>" class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
+                <%=i18n.localize( 'Create')%>
             </a>
-            <a title="<%=i18n.localize( 'cancel')%>" class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
-                <%=i18n.localize( 'cancel')%>
+            <a title="<%=i18n.localize( 'Cancel')%>" class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
+                <%=i18n.localize( 'Cancel')%>
             </a>
         </div>
     </form>
