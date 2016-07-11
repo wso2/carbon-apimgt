@@ -39,16 +39,12 @@
     </select>
 </div>
 
-<div id="spinner" class="center-wrapper">
-    <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
-</div>
-
 <div id="noData">
 </div>
         <br/ >
 
         <div id="chartContainer"  class="col-sm-12" style="margin-bottom :20px;height: 100%">
-            <svg></svg>
+            <svg style="height:600px;"></svg>
         </div>
     </div>
 </div>
