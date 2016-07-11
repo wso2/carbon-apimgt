@@ -50,13 +50,13 @@ include("header.jag");
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"API Forum",
+            "title":i18n.localize("API Forum"),
             "pagePath":"/site/pages/forum.jag",
             "body":[
                 {
                     "name":"layout/base",
                     "inputs":{
-                        "title":"My Subscriptions",
+                        "title":i18n.localize("API Forum"),
                         "top":[                            
                             {
                                 "name":"search/api-search",

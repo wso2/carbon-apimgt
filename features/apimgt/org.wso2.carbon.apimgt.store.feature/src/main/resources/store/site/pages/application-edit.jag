@@ -17,13 +17,13 @@ var tenantDomain = jagg.getTenantDomain();
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Application Edit",
+            "title":i18n.localize("Application Edit"),
             "pagePath":"/site/pages/applications-edit.jag",
             "body":[
                 {
                     "name":"layout/base",
                     "inputs":{
-                        "title":"Applications",
+                        "title":i18n.localize("Applications"),
                         "top":[                            
                             {
                                 "name":"search/api-search",

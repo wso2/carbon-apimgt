@@ -20,7 +20,7 @@ i18n.init(request,localeResourcesBasePath);
                 {
                     "name":"layout/base",
                     "inputs":{
-                        "title":"Document Viewer",
+                        "title":i18n.localize("Document Viewer"),
                         "top":null,
                         "left":null,
                         "middle":{
