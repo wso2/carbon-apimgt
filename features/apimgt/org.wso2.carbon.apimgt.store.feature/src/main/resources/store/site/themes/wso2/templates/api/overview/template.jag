@@ -24,7 +24,7 @@
                 %>
                 <div  class="well well-sm add-margin-bottom-1x"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
-                        <br><%= transports[t] %><%= contextWithoutTenant %>
+                        <br/><%= transports[t] %><%= contextWithoutTenant %>
                     <%}%>
                 </div>
                 <%
@@ -37,14 +37,11 @@
     	        var environmentsPerType = environments[environmentType];
                 if(environmentType == "production"){
                     %>
-                    <br/>
                     <h4>Production Endpoints</h4>
                     <%} else if(environmentType == "sandbox"){
                         %>
-                    <br/>
                     <h4>Sandbox Endpoints</h4>
                 <%} else {%>
-                    <br/>
                 	<h4>Production and Sandbox Endpoints</h4>
                 <%}
                     for( var environmentName in environmentsPerType){
@@ -65,7 +62,7 @@
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%>
-	                            <br><%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
+	                            <%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
 
@@ -89,7 +86,6 @@
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
-        <br/>
         <h4 class="add-margin-top-5x"><%=i18n.localize("desc")%></h4>
     <p>
         <%=api.description%>
@@ -97,7 +93,6 @@
         <% } %>
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
-	 		<br/>
 	 		<h4 class="add-margin-top-5x">Business Information</h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
 		    		<p class="no-margin"><strong><%=i18n.localize("busiOwner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
@@ -115,29 +110,29 @@
 		    		</p>
 		    <% } %>
 	   <%} %>
-    <br/>
     <h4 class="add-margin-top-5x"><%=i18n.localize("share")%></h4>
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-secondary share_links disabled" ref="social"><%=i18n.localize("SocialSites")%></button>
-      <button type="button" class="btn btn-secondary share_links" ref="embed"><%=i18n.localize("embed")%></button>
-      <button type="button" class="btn btn-secondary" id="api_mailto" ><%=i18n.localize("email")%></button>
-    </div>
-    <div id="share_div_embed" class="share_dives highlight add-margin-top-2x" style="display:none">
-		<div class="well well-sm"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
-	</div>
+    <ul class="nav nav-pills">
+      <li role="presentation" class="active"><a href="#" ref="social" class="share_links"><%=i18n.localize("SocialSites")%></a></li>
+      <li role="presentation"><a href="#" ref="embed" class="share_links"><%=i18n.localize("embed")%></a></li>
+      <li role="presentation"><a href="#" id="api_mailto"><%=i18n.localize("email")%></a></li>
+    </ul>
+    <div class="share-container add-margin-top-2x">
+        <div id="share_div_embed" class="share_dives highlight" style="display:none">
+            <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
+        </div>
 
-    <div id="share_div_social" class="share_dives add-margin-top-2x">
-        <!-- Facebook -->
-        <a class="social_links" id="facebook" href="#" target="_blank" title="facebook"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/facebook.png"))%>" alt="Facebook" /></a>
-        <!-- Twitter -->
-        <a class="social_links" id="twitter" href="#" target="_blank" title="twitter"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/twitter.png"))%>" alt="Twitter" /></a>
-        <!-- Google+ -->
-        <a class="social_links" id="googleplus" href="#" target="_blank" title="googleplus"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/google.png"))%>" alt="Google" /></a>
-        <!-- Digg -->
-        <a class="social_links" id="digg" href="#" target="_blank" title="digg"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/diggit.png"))%>" alt="Digg" /></a>
-        <div class="clearfix">
+        <div id="share_div_social" class="share_dives">
+            <!-- Facebook -->
+            <a class="social_links" id="facebook" href="#" target="_blank" title="facebook"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/facebook.png"))%>" alt="Facebook" /></a>
+            <!-- Twitter -->
+            <a class="social_links" id="twitter" href="#" target="_blank" title="twitter"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/twitter.png"))%>" alt="Twitter" /></a>
+            <!-- Google+ -->
+            <a class="social_links" id="googleplus" href="#" target="_blank" title="googleplus"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/google.png"))%>" alt="Google" /></a>
+            <!-- Digg -->
+            <a class="social_links" id="digg" href="#" target="_blank" title="digg"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/diggit.png"))%>" alt="Digg" /></a>
+            <div class="clearfix">
+        </div>
     </div>
-    <br/><br/>
     </div>
 </div>
 </div>
@@ -157,9 +152,9 @@
         $('#embed_iframe').text('<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
         $('#embed-copy').attr('data-clipboard-text', '<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
         
-        $('.share_links').click(function(){
-            $('.share_links').removeClass('disabled');
-            $(this).addClass('disabled');
+        $('.share_links,#api_mailto').click(function(){
+            $('.share_links,#api_mailto').parent().removeClass('active');
+            $(this).parent().addClass('active');
             $('.share_dives').hide();
             $('#share_div_' + $(this).attr('ref')).show();
             return false;

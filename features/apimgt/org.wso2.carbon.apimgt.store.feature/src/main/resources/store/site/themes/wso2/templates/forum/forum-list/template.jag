@@ -23,40 +23,35 @@ var reqUrl = request.getRequestURI();
 %>
 
 <div id="forum_topics_list_page">
-    <div class="title-section">
-        <h2><%=i18n.localize('forum')%></h2>
-    </div>
 
-    <div class="row">
-        <div class="form-inline form-search col-lg-7 col-md-12 col-sm-12">
-        <%if(reqUrl.indexOf("forum") <= 0) { %>
-	          <div class="form-group">
-	            <a title="<%=i18n.localize( 'forum.createNewTopic')%>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> ">
-	                <%=i18n.localize( 'forum.createNewTopic')%>
-	            </a>&nbsp;
-	          </div>
-	     <%} %>
+        <div class="form-horizontal form-search">
+
           <div class="form-group">
+          <div class="col-md-12 col-lg-12">
             <div class="input-group">
               <input type="text" class="form-control clearable search-input" title="<%=i18n.localize('forum.searchForum')%>" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">
               <span class="input-group-btn">
-                <button class="btn btn-default search-button" id="forum_topic_search" ><i class="fa fa-search"></i> Search</button>
+                <button class="btn btn-secondary search-button" id="forum_topic_search" ><i class="fa fa-search"></i> Search</button>
               </span>
-            </div>  
+              <span class="input-group-btn">
+                <%if(reqUrl.indexOf("forum") <= 0) { %>
+                    <a title="<%=i18n.localize( 'forum.createNewTopic')%>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary <%= needLoginStyleClass %> ">
+                        <%=i18n.localize( 'forum.createNewTopic')%>
+                    </a>
+                 <%} %>
+              </span>
+            </div>
           </div>
-        </div>      
-        <div class="col-lg-5 col-md-12 col-sm-12">
-            <ul id="forum_topics_list_paginator" class="pull-right" style="margin:0px;float:right;"></ul>
+          </div>
         </div>
-    </div>
-
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-12 col-lg-12">
         <div id="forum_topics_list" style="display:none"></div>
         <div id="forum_no_topics" style="display:none" class="message message-info">
 			<h4><i class="icon fw fw-info"></i><%=i18n.localize('forum.noTopicsFound')%></h4>
 			<p><%=i18n.localize('forum.noTopicsFound.description')%></p>
 		</div>
+		<ul id="forum_topics_list_paginator" class="pull-right"></ul>
       </div>
     </div>
 </div>
@@ -66,27 +61,36 @@ var reqUrl = request.getRequestURI();
 
 <script id="forum_template_topics_list" type="text/x-handlebars-template">
     
-    <table class = "table table-striped table-bordered">
+    <table class="table table-striped">
         <thead>
             <tr>
-                <th> <%= i18n.localize('forum.topic') %> </th>
-                <th class="span1"><%=i18n.localize('forum.replies')%></th >
+                <th class="col-md-8"><%= i18n.localize('forum.topic') %></th>
+                <th class="col-md-2"><%= i18n.localize('forum.by') %></th>
+                <th class="col-md-1"><%=i18n.localize('forum.replies')%></th >
+                <th class="col-md-1"></th>
             </tr>
-        </thead >
+        </thead>
         <tbody> 
         
             {{#each topics}} 
             <tr>
                 <td>
-                    <a title="forum topic" href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <strong> {{subject}} </strong></a >
+                    <a title="forum topic" href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <span class="word-break"> {{subject}} </span></a >
+                </td>
+                <td>{{ topicOwner }}</td>
+                <td>{{ replyCount }}</td>
+                <td>
                     <%if (jagg.getUser()) { %>
                         {{#if_creator topicOwner user}}
-                            <span class = "glyphicon glyphicon-trash pull-right forum_delete_topic_icon" data-id = "{{ topicId }}" data-subject = "{{ subject }}" ></span>
+                             <a class="forum_delete_topic_icon" data-id ="{{ topicId }}" data-subject = "{{ subject }}" title="Delete Comment">
+                                <span class="fw-stack" style="font-size:10px">
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>
+                             </a>
                         {{/if_creator}}
                     <%}%>
-                    <br/> <%= i18n.localize('forum.by') %> : {{ topicOwner }} 
                 </td>
-                <td>{{ replyCount }}</td >
             </tr>
             {{/each}} 
 

@@ -9822,15 +9822,15 @@ header .nav .dropdown-menu > li:not(.divider) {
 .accordion .panel-heading .radio > i,
 .collapse .panel-heading .radio > i {
   position: relative;
-  top: 20px;
-  left: 20px;
+  top: 22px;
+  left: 22px;
 }
 
 .accordion .panel-heading .radio > span,
 .collapse .panel-heading .radio > span {
   position: relative;
-  top: 10px;
-  left: 10px;
+  top: 14px;
+  left: 14px;
 }
 
 .accordion .panel-heading div .status,

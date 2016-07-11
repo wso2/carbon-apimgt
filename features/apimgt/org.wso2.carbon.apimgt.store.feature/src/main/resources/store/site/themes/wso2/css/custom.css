@@ -183,6 +183,7 @@ a.remove_rating:hover{
 }
 /* Customize swagger UI */
 #swagger-ui-container {max-width: 100%;}
+.swagger-section .swagger-ui-wrap{ min-width:initial!important;}
 #swagger-ui-container .container{ width: 100% !important;padding: 0 !important; }
 #swagger-ui-container #api_info { display: none;}
 #resources_container ul { padding-left: 0px;}
@@ -236,20 +237,27 @@ a.remove_rating:hover{
 .resize-vertical-only{
     resize:vertical;
 }
-
 .truncate-children {
     display: table;
     table-layout: fixed;
     width: 100%;
     white-space: nowrap;
 }
-
 .truncate-children > * {
     display: table-cell;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
+.word-break{
+  word-break: break-all;
+}
+.share-container{
+    min-height:60px;
+}
+#forum_topics_list_paginator{
+    float:right;
+    margin:0px;
+}
 
 /* =============================================================================
  * Same height columns support
@@ -366,4 +374,69 @@ a.remove_rating:hover{
   .col-lg-bottom {
     vertical-align: bottom;
   }
+}
+
+/* =============================================================================
+ * Forum comment styles
+ * ============================================================================= */
+
+.tip {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  background: transparent;
+  border: 10px solid #f5f5f5;
+}
+
+.tip-up {
+  top: -25px; /* Same as body margin top + border */
+  left: 10px;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+
+.tip-down {
+  bottom: -20px;
+  left: 10px;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.tip-left {
+  top: 10px;
+  left: -25px;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.tip-right {
+  top: 10px;
+  right: -25px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.comment-body {
+  position: relative;
+  height: auto;
+  margin: 20px 0px 10px 0px;
+  padding: 10px;
+  border: 1px solid #f5f5f5;
+  background: #f5f5f5;
+}
+
+.comment-message {
+  color: #333;
+}
+.comment-extra{
+    font-size:12px;
+    text-indent:15px;
+    color:#666;
+}
+.comment-extra strong{
+    font-weight:500;
 }
