@@ -1620,7 +1620,9 @@ definitions:
 #-----------------------------------------------------
   ThrottlePolicy :
     title: Generic Throttle Policy
-    properties:         
+    properties:
+      policyId:
+        type: string
       policyName:
         type: string
       displayName:

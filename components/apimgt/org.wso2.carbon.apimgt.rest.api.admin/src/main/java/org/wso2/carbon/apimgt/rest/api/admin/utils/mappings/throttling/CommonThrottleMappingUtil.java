@@ -658,6 +658,7 @@ public class CommonThrottleMappingUtil {
         if (policy.getTenantDomain() == null) {
             dto.setTenantDomain(RestApiUtil.getLoggedInUserTenantDomain());
         }
+        dto.setPolicyId(policy.getUUID());
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());

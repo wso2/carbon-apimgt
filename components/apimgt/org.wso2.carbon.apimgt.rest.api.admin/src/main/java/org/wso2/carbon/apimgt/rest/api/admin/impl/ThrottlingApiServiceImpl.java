@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.BlockingC
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -110,7 +111,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromAdvancedPolicyToDTO(newApiPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Advanced level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -160,6 +161,10 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+
+            //overridden parameters
+            body.setPolicyId(policyId);
+
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             apiProvider.updatePolicy(apiPolicy);
 
@@ -250,7 +255,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromApplicationThrottlePolicyToDTO(newAppPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Application level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -302,10 +307,12 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+            
+            //overridden properties
+            body.setPolicyId(policyId);
+
             ApplicationPolicy appPolicy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(
                     body);
-
-            appPolicy.setUUID(policyId);
             apiProvider.updatePolicy(appPolicy);
 
             //retrieve the new policy and send back as the response
@@ -400,7 +407,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             String errorMessage = "Error while adding a Subscription level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -452,6 +459,10 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+
+            //overridden properties
+            body.setPolicyId(policyId);
+
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(
                             body);
@@ -512,12 +523,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             String userName = RestApiUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
-                        new APIManagementException("Tenant " + tenantDomain
-                                + " is not allowed to access custom rules. Only super tenant is allowed"), log);
-            }
+            checkTenantDomainForCustomRules();
 
             GlobalPolicy[] globalPolicies = (GlobalPolicy[]) apiProvider
                     .getPolicies(userName, PolicyConstants.POLICY_LEVEL_GLOBAL);
@@ -544,12 +550,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
-                        new APIManagementException("Tenant " + tenantDomain
-                                + " is not allowed to access custom rules. Only super tenant is allowed"), log);
-            }
+            checkTenantDomainForCustomRules();
 
             GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(
                     body);
@@ -560,8 +561,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil
                     .fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
             return Response.created(
-                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId()))
+                    .entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -587,12 +588,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
-                        new APIManagementException("Tenant " + tenantDomain
-                                + " is not allowed to access custom rules. Only super tenant is allowed"), log);
-            }
+            checkTenantDomainForCustomRules();
 
             GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil
@@ -622,12 +618,10 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
-                        new APIManagementException("Tenant " + tenantDomain
-                                + " is not allowed to access custom rules. Only super tenant is allowed"), log);
-            }
+            checkTenantDomainForCustomRules();
+
+            //overridden properties
+            body.setPolicyId(ruleId);
 
             GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(
                     body);
@@ -660,12 +654,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
-                        new APIManagementException("Tenant " + tenantDomain
-                                + " is not allowed to access custom rules. Only super tenant is allowed"), log);
-            }
+            checkTenantDomainForCustomRules();
 
             String userName = RestApiUtil.getLoggedInUsername();
             GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
@@ -772,8 +761,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated block condition
      */
     @Override
-    public
-    Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
+    public Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -811,4 +799,17 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    /**
+     * Checks if the logged in user belongs to super tenant and throws 403 error if not
+     *
+     * @throws ForbiddenException
+     */
+    private void checkTenantDomainForCustomRules() throws ForbiddenException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain
+                            + " is not allowed to access custom rules. Only super tenant is allowed"), log);
+        }
+    }
 }
