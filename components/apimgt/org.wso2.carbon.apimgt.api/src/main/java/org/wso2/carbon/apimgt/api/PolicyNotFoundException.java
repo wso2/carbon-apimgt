@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 /**
- * This is the custom exception class for API management.
+ * Thrown when required policy cannot be found
  */
 public class PolicyNotFoundException extends APIManagementException {
 
