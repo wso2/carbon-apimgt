@@ -21,7 +21,7 @@ jagg.block("api/api-listing-all", {
         }
 
         var log = new Log();
-
+        log.info("================================================================");
         if(tag == null) { tag = inputs.tag;}
         tenantDomain = jagg.getTenantDomain();
 
@@ -33,13 +33,17 @@ jagg.block("api/api-listing-all", {
         }
         var start = (page - 1)*12;
         var end = 12;
-
+        log.info("================================================================");
+        log.info("==============WOW==============" + tag);
+        log.info("==============WOW==============" + query);
         if (tag) {
             mod = jagg.module("api");
             response = mod.getPaginatedAPIsByTag(tag,start,end);
             apis = response.result.apis;
+            log.info("==============WOW1==============" + tag);
         } else if (query) {
             mod = jagg.module("search");
+            log.info("==============WOW2==============");
             response = mod.searchPaginatedAPIs(query,tenantDomain,start,end, "true");
             if(response.error){
                 error = true;
@@ -50,16 +54,19 @@ jagg.block("api/api-listing-all", {
                 };
             }
             else{
+            log.info("==============WOW3==============" + tag);
                 apis = response.result.apis;
                 error = response.result.error;
                 message = response.result.message;
             }
 
         } else if (apiStatus == "PROTOTYPED" || apiStatus == "prototyped") {
+        log.info("==============WOW4==============" + tag);
         	mod = jagg.module("api");
             response = mod.getAllPaginatedPrototypedAPIs(tenantDomain,start,end);
             apis = response.result.apis;
         } else {
+        log.info("==============WOW5==============" + tag);
             mod = jagg.module("api");
 	    var returnAPITags = "false";
             response = mod.getAllPaginatedAPIs(tenantDomain, start, end, returnAPITags);
