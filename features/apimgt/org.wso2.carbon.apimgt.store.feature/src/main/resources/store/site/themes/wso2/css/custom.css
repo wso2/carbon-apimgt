@@ -254,7 +254,8 @@ a.remove_rating:hover{
 .share-container{
     min-height:60px;
 }
-#forum_topics_list_paginator{
+#forum_topics_list_paginator,
+#forum_replies_paginator{
     float:right;
     margin:0px;
 }
