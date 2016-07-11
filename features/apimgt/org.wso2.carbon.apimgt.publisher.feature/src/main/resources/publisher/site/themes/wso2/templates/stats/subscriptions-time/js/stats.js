@@ -78,8 +78,9 @@ $(document).ready(function(){
             .showXAxis(true) ;       //Show the x-axis
 
         chart.xAxis.axisLabel('Time')
+        .rotateLabels(-20)
         .tickFormat(function (d) {
-             return d3.time.format('%m/%d %H:%M:%S')(new Date(d)) });
+             return d3.time.format('%m/%d %H:%M')(new Date(d)) });
 
         chart.yAxis.axisLabel('API Subscription')
             .tickFormat(d3.format('d'));

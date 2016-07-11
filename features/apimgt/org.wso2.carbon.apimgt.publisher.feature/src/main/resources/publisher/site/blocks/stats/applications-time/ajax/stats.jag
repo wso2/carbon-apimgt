@@ -33,7 +33,7 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    data: [{ "key": "Developers", "values": result.usage }]
+                    data: [{ "key": "Applications", "values": result.usage }]
                 }
             }
             print(obj);
