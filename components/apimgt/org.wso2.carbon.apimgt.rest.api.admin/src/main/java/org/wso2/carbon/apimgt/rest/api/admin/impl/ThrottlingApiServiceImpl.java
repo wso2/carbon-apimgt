@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.ThrottlingApiService;
@@ -36,8 +37,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.GlobalThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
@@ -46,7 +47,9 @@ import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.BlockingC
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -108,7 +111,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromAdvancedPolicyToDTO(newApiPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Advanced level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -122,31 +125,30 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Get a specific Advanced Level Policy
      *
-     * @param policyName      name of the policy
+     * @param policyId      uuid of the policy
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Required policy specified by name
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNameGet(String policyName, String ifNoneMatch,
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
-            APIPolicy apiPolicy = apiProvider.getAPIPolicy(userName, policyName);
+            APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
             AdvancedThrottlePolicyDTO policyDTO = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(apiPolicy);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Advanced level policy : " + policyName;
+            String errorMessage = "Error while retrieving Advanced level policy : " + policyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * Updates a given Advanced level policy specified by name
+     * Updates a given Advanced level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
      * @param ifMatch           If-Match header value
@@ -154,11 +156,15 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNamePut(String policyName, AdvancedThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdPut(String policyId,
+            AdvancedThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+
+            //overridden parameters
+            body.setPolicyId(policyId);
+
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             apiProvider.updatePolicy(apiPolicy);
 
@@ -175,23 +181,24 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Delete an Advanced level policy specified by name
+     * Delete an Advanced level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        uuid of the policy
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyNameDelete(String policyName, String ifMatch,
+    public Response throttlingPoliciesAdvancedPoliciesPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
-            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_API, policyName);
+            APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
+            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_API, apiPolicy.getPolicyName());
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting Advanced level policy : " + policyName;
+            String errorMessage = "Error while deleting Advanced level policy : " + policyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -248,7 +255,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromApplicationThrottlePolicyToDTO(newAppPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Application level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -261,34 +268,33 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Get a specific Application Policy by its name
+     * Get a specific Application Policy by its uuid
      *
-     * @param policyName      name of the policy
+     * @param policyId      uuid of the policy
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Application Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyNameGet(String policyName, String ifNoneMatch,
+    public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
-            ApplicationPolicy appPolicy = apiProvider.getApplicationPolicy(userName, policyName);
+            ApplicationPolicy appPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
             ApplicationThrottlePolicyDTO policyDTO = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyToDTO(appPolicy);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Application level policy: " + policyName;
+            String errorMessage = "Error while retrieving Application level policy: " + policyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * Updates a given Application level policy specified by name
+     * Updates a given Application level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
      * @param ifMatch           If-Match header value
@@ -296,11 +302,15 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyNamePut(String policyName, ApplicationThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response throttlingPoliciesApplicationPolicyIdPut(String policyId,
+            ApplicationThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+            
+            //overridden properties
+            body.setPolicyId(policyId);
+
             ApplicationPolicy appPolicy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(
                     body);
             apiProvider.updatePolicy(appPolicy);
@@ -318,24 +328,29 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Delete an Application level policy specified by name
+     * Delete an Application level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        uuid of the policy
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyNameDelete(String policyName, String ifMatch,
+    public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
-            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_APP, policyName);
+            Policy policy = apiProvider.getApplicationPolicyByUUID(policyId);
+            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_APP, policy.getPolicyName());
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting Application level policy : " + policyName;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_POLICY, policyId, e, log);
+            } else {
+                String errorMessage = "Error while deleting Application level policy : " + policyId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }
@@ -345,7 +360,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      *
      * @param limit           maximum number of policies to return
      * @param offset          starting index
-     * @param accept          Accept header value
+     * @param accept           Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Subscription Throttle policies to the given request
@@ -392,7 +407,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                     .fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
             return Response.created(
                     new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                            .getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             String errorMessage = "Error while adding a Subscription level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -405,34 +420,33 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Get a specific Subscription Policy by its name
+     * Get a specific Subscription Policy by its uuid
      *
-     * @param policyName      name of the policy
+     * @param policyId      uuid of the policy
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Subscription Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyNameGet(String policyName, String ifNoneMatch,
+    public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
-            SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicy(userName, policyName);
+            SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
             SubscriptionThrottlePolicyDTO policyDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
-            String errorMessage = "Error while retrieving Subscription level policy: " + policyName;
+            String errorMessage = "Error while retrieving Subscription level policy: " + policyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * Updates a given Subscription level policy specified by name
+     * Updates a given Subscription level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        u
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
      * @param ifMatch           If-Match header value
@@ -440,11 +454,15 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyNamePut(String policyName, SubscriptionThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId,
+            SubscriptionThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+
+            //overridden properties
+            body.setPolicyId(policyId);
+
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(
                             body);
@@ -464,23 +482,24 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Delete a Subscription level policy specified by name
+     * Delete a Subscription level policy specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param policyId        uuid of the policyu
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyNameDelete(String policyName, String ifMatch,
+    public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
-            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_SUB, policyName);
+            SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
+            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_SUB, subscriptionPolicy.getPolicyName());
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting Subscription level policy : " + policyName;
+            String errorMessage = "Error while deleting Subscription level policy : " + policyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -497,14 +516,18 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return All matched Global Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesGlobalGet(Integer limit, Integer offset, String accept,
+    public Response throttlingPoliciesCustomGet(Integer limit, Integer offset, String accept,
             String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
+
+            //only super tenant is allowed to access global policies/custom rules
+            checkTenantDomainForCustomRules();
+
             GlobalPolicy[] globalPolicies = (GlobalPolicy[]) apiProvider
                     .getPolicies(userName, PolicyConstants.POLICY_LEVEL_GLOBAL);
-            GlobalThrottlePolicyListDTO listDTO = GlobalThrottlePolicyMappingUtil
+            CustomRuleListDTO listDTO = GlobalThrottlePolicyMappingUtil
                     .fromGlobalPolicyArrayToListDTO(globalPolicies);
             return Response.ok().entity(listDTO).build();
         } catch (APIManagementException e) {
@@ -522,22 +545,26 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesGlobalPost(GlobalThrottlePolicyDTO body, String contentType) {
+    public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+            //only super tenant is allowed to access global policies/custom rules
+            checkTenantDomainForCustomRules();
+
             GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(
                     body);
             apiProvider.addPolicy(globalPolicy);
 
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
-            GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
+            CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil
                     .fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
             return Response.created(
-                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO
-                            .getPolicyName())).entity(policyDTO).build();
+                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId()))
+                    .entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding a Global level policy: " + body.getPolicyName();
+            String errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Global Throttle policy location : " + body.getPolicyName();
@@ -547,33 +574,37 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     }
 
     /**
-     * Get a specific Global Policy by its name
+     * Get a specific custom rule by its name
      *
-     * @param policyName      name of the policy
+     * @param ruleId      uuid of the policy
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Global Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesGlobalPolicyNameGet(String policyName, String ifNoneMatch,
+    public Response throttlingPoliciesCustomRuleIdGet(String ruleId, String ifNoneMatch,
             String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GlobalPolicy globalPolicy = apiProvider.getGlobalPolicy(policyName);
-            GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
+
+            //only super tenant is allowed to access global policies/custom rules
+            checkTenantDomainForCustomRules();
+
+            GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil
                     .fromGlobalThrottlePolicyToDTO(globalPolicy);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Global level policy: " + policyName;
+            String errorMessage = "Error while retrieving Custom Rule: " + ruleId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * Updates a given Global level policy specified by name
+     * Updates a given Global level policy/custom rule specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param ruleId        uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
      * @param ifMatch           If-Match header value
@@ -581,44 +612,56 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesGlobalPolicyNamePut(String policyName, GlobalThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
+            String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+            //only super tenant is allowed to access global policies/custom rules
+            checkTenantDomainForCustomRules();
+
+            //overridden properties
+            body.setPolicyId(ruleId);
+
             GlobalPolicy globalPolicy = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyDTOToModel(
                     body);
             apiProvider.updatePolicy(globalPolicy);
 
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
-            GlobalThrottlePolicyDTO policyDTO = GlobalThrottlePolicyMappingUtil
+            CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil
                     .fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
             return Response.ok().entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while updating Global level policy: " + body.getPolicyName();
+            String errorMessage = "Error while updating custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * Delete a Global level policy specified by name
+     * Delete a Global level policy/custom rule specified by uuid
      *
-     * @param policyName        name of the policy
+     * @param ruleId        uuid of the policy
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesGlobalPolicyNameDelete(String policyName, String ifMatch,
+    public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+            //only super tenant is allowed to access global policies/custom rules
+            checkTenantDomainForCustomRules();
+
             String userName = RestApiUtil.getLoggedInUsername();
-            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_GLOBAL, policyName);
+            GlobalPolicy globalPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
+            apiProvider.deletePolicy(userName, PolicyConstants.POLICY_LEVEL_GLOBAL, globalPolicy.getUUID());
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting Global level policy : " + policyName;
+            String errorMessage = "Error while deleting custom rule : " + ruleId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -718,8 +761,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated block condition
      */
     @Override
-    public
-    Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
+    public Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -757,4 +799,17 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
         return null;
     }
 
+    /**
+     * Checks if the logged in user belongs to super tenant and throws 403 error if not
+     *
+     * @throws ForbiddenException
+     */
+    private void checkTenantDomainForCustomRules() throws ForbiddenException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain
+                            + " is not allowed to access custom rules. Only super tenant is allowed"), log);
+        }
+    }
 }
