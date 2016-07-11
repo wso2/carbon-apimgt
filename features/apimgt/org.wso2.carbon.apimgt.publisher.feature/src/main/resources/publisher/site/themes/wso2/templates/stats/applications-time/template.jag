@@ -49,7 +49,7 @@
 </form>
 
         <div id="chartContainer"  class="col-sm-12" style="height:600px;">
-                <svg></svg>
+                <svg style="height:600px;"></svg>
         </div>
     </div>
 </div>

@@ -81,7 +81,7 @@ $(document).ready(function(){
         .tickFormat(function (d) {
              return d3.time.format('%m/%d %H:%M:%S')(new Date(d)) });
 
-        chart.yAxis.axisLabel('Developer Signups')
+        chart.yAxis.axisLabel('API Subscription')
             .tickFormat(d3.format('d'));
 
         chart.tooltipContent(function(key, x, y, e, graph) {
