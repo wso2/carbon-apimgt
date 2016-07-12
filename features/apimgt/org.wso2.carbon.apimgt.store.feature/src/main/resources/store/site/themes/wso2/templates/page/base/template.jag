@@ -1,5 +1,4 @@
 <% jagg.template("page/base", function(inputs, outputs, jagg) {
-  response.addHeader('X-Frame-Options', 'SAMEORIGIN');
   var i18n = require("i18n");
   var localeResourcesBasePath="/site/conf/locales/jaggery/";
   i18n.init(request,localeResourcesBasePath); 
