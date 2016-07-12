@@ -55,9 +55,6 @@ a.btn .icon-caret, .btn .icon-caret {
         margin-left:-15px;
         margin-right:-15px;
     }
-    .navbar-right li{
-        width:100%;
-    }
 }
 
 @media (min-width: 768px){
