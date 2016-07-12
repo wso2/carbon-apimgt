@@ -398,7 +398,7 @@ var validInputUrl = function(docUrlDiv) {
             docUrlD = docUrlDiv.val();
         }
         var erCondition = validUrl(docUrlD);
-        return validInput(docUrlDiv, i18n.t('errorMsgs.invalidDocUrl'), erCondition);
+        return validInput(docUrlDiv, i18n.t('Invalid Document Url Format.'), erCondition);
     }
 };
 
