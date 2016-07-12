@@ -336,7 +336,7 @@ var deleteResource = function (deleteButton) {
     //Check whether only one defined resource remains before delete operation
     if(count==3){
         $('#resourceTableError').show('fast');
-        $('#resourceTableError').html( i18n.t('errorMsgs.apiResource')+'<br />');
+        $('#resourceTableError').html( i18n.t("Sorry. This row can not be deleted. At least one resource entry has to be available.")+'<br />');
         return;
     }
     $('#resourceTableError').hide('fast');
@@ -358,10 +358,10 @@ var validateResourceTable = function(){
             }
         });
         if(foundMyVal > 1){
-            errors +=  i18n.t('errorMsgs.uniqueUrlPattern')+"<strong>" + myVal + "</strong>"+ i18n.t('errorMsgs.duplicateUrlPattern') +"<br/>";
+            errors +=  i18n.t("URL Pattern has to be unique. ")+"<strong>" + myVal + "</strong>"+ i18n.t("has duplicated entries. ") +"<br/>";
         }
         if(myVal == ""){
-            errors += i18n.t('errorMsgs.emptyUrlPattern')+"<br />";
+            errors += i18n.t("URL Pattern can't be empty. ")+"<br />";
         }
     });
 
@@ -383,7 +383,7 @@ var validateResourceTable = function(){
 
 
     if(!allRowsHas_at_least_one_check){
-        errors += i18n.t('errorMsgs.emptyVerb')+"<br />";
+        errors += i18n.t("At least one HTTP Verb has to be checked for a resource. ")+"<br />";
     }
     if(errors != ""){
         $('#resourceTableError').show('fast');
@@ -487,7 +487,7 @@ function loadInSequences() {
 		if (!result.error) {
 			var arr = [];
 			if (result.sequences.length == 0) {
-				var msg = "No defined sequences";
+				var msg = i18n.t("No defined sequences");
 				$('<input>').
 				attr('type', 'hidden').
 				attr('name', 'inSeq').
@@ -535,7 +535,7 @@ function loadOutSequences() {
 				if (!result.error) {
 					var arr = [];
 					if (result.sequences.length == 0) {
-						var msg = "No defined sequences";
+						var msg = i18n.t("No defined sequences");
 						$('<input>').
 						attr('type', 'hidden').
 						attr('name', 'outSeq').
@@ -584,7 +584,7 @@ function loadFaultSequences() {
 				if (!result.error) {
 					var arr = [];
 					if (result.sequences.length == 0) {
-						var msg = "No defined sequences";
+						var msg = i18n.t("No defined sequences");
 						$('<input>').
 						attr('type', 'hidden').
 						attr('name', 'faultSeq').

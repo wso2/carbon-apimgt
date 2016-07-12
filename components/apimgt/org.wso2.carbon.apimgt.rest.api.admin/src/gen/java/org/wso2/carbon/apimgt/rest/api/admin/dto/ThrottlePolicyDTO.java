@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -18,7 +17,7 @@ public class ThrottlePolicyDTO  {
   
   private String policyId = null;
   
-  
+  @NotNull
   private String policyName = null;
   
   
@@ -26,12 +25,6 @@ public class ThrottlePolicyDTO  {
   
   
   private String description = null;
-  
-  
-  private ThrottleLimitDTO defaultLimit = null;
-  
-  
-  private String tenantDomain = null;
   
   
   private Boolean isDeployed = null;
@@ -51,7 +44,7 @@ public class ThrottlePolicyDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("policyName")
   public String getPolicyName() {
     return policyName;
@@ -88,30 +81,6 @@ public class ThrottlePolicyDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("defaultLimit")
-  public ThrottleLimitDTO getDefaultLimit() {
-    return defaultLimit;
-  }
-  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
-    this.defaultLimit = defaultLimit;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("tenantDomain")
-  public String getTenantDomain() {
-    return tenantDomain;
-  }
-  public void setTenantDomain(String tenantDomain) {
-    this.tenantDomain = tenantDomain;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("isDeployed")
   public Boolean getIsDeployed() {
     return isDeployed;
@@ -131,8 +100,6 @@ public class ThrottlePolicyDTO  {
     sb.append("  policyName: ").append(policyName).append("\n");
     sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  defaultLimit: ").append(defaultLimit).append("\n");
-    sb.append("  tenantDomain: ").append(tenantDomain).append("\n");
     sb.append("  isDeployed: ").append(isDeployed).append("\n");
     sb.append("}\n");
     return sb.toString();

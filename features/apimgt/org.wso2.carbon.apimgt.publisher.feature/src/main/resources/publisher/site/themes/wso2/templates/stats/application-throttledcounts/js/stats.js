@@ -77,11 +77,11 @@ $( document ).ready(function() {
                     });
                 } else if (json.usage && json.usage.length == 0 && statsEnabled) {
                         $('.stat-page').html("");
-                        $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                        $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="' + i18n.t('Thumbnail image when stats enabled') + '"></div>'));
                 } else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="' + i18n.t('Thumbnail image when stats not configured') + '"></div>'));
                 }
                 
             } else {
@@ -101,7 +101,7 @@ var populateAppList = function() {
                 var  apps = '';
 
                 if (json.usage.length == 0) {
-                    apps = '<option data-hidden="true">No Apps Available</option>';
+                    apps = '<option data-hidden="true">' + i18n.t('No Apps Available')+ '</option>';
                 }
                 for ( var i=0; i < json.usage.length ; i++){
                     if ( i == 0){
@@ -118,7 +118,7 @@ var populateAppList = function() {
                     .trigger('change');
             } else {
                 $('#chartContainer').html('');
-                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="' + i18n.t('No Stats')+ '"></i>' + i18n.t('No Data Available')+ '.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -196,11 +196,11 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
 
                     }else if(length == 0) {
                         $('#chartContainer').html('');
-                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No-Stats"></i>No Data Available.</h4></div></div>'));
+                        $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+i18n.t('No-Stats')+'"></i>'+i18n.t('No Data Available')+'.</h4></div></div>'));
                     }
             } else {
                 $('#chartContainer').html('');
-                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No-Stats"></i>No Data Available.</h4></div></div>'));
+                $('#chartContainer').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+i18n.t('No-Stats')+'"></i>'+i18n.t('No Data Available')+'.</h4></div></div>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {

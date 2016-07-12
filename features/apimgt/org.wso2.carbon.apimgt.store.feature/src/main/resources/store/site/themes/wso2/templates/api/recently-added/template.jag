@@ -8,7 +8,7 @@
 %>
 
 <div class="page-header">
-    <h2><%=i18n.localize("recentlyAdded")%></h2>
+    <h2><%=i18n.localize("Recently Added APIs")%></h2>
 </div>
 
 <div  class="page-content">
@@ -21,17 +21,17 @@
                                 <div class="thumbnail icon">
 									{{#if thumbnailurl}}
 										<div class="square-element">
-                                    		<img class="" src="{{ thumbnailurl }}" alt="<%=i18n.localize("apiThumb")%>">
+                                    		<img class="" src="{{ thumbnailurl }}" alt="<%=i18n.localize("API Thumbnail")%>">
                                     	</div>										                               		
 									{{else}}     
                                     	<div class="square-element setbgcolor">
 											<div class="api-name-icon"></div>
 											<div style="display: none">
-												<a title="<%=i18n.localize("name")%>" href="" class="api-name">{{ name }}</a>
+												<a title="<%=i18n.localize("Name")%>" href="" class="api-name">{{ name }}</a>
 											</div>
 										</div> 
 									{{/if}}
-									<a href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>" title="<%=i18n.localize("browse.title")%>">
+									<a href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>" title="<%=i18n.localize("Browse APIs")%>">
                                     	<div class="after">                                        
                                     		<span class="fw-stack fw-lg">
                                     			<i class="fw fw-circle-outline fw-stack-2x"></i>

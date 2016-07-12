@@ -12,7 +12,7 @@ var saveAlertTypes = function (alertTypesIDs, emailList, checkedValues) {
         //console.log(result);
         if (!result.error) {
 
-            jagg.message({content: i18n.t("info.successfullySaved"), type: "info"});
+            jagg.message({content: i18n.t("Successfully saved"), type: "info"});
             $("#unsubscribeBtn").show();
 
         }else {
@@ -36,7 +36,7 @@ var unSubscribeAlerts = function() {
         //console.log(result);
         if (!result.error) {
 
-            jagg.message({content: i18n.t("info.successfullySaved"), type: "info"});
+            jagg.message({content: i18n.t("Successfully saved"), type: "info"});
 
 
             $(":checkbox").each(function () {
@@ -103,7 +103,7 @@ $(document).ready(function () {
     $("#saveBtn").click(function () {
 
         if ($(".token").hasClass("invalid")) {
-            jagg.message({content: i18n.t("errorMsgs.invalidEmailEntered") , type: "error"});
+            jagg.message({content: i18n.t("Could not save. You have entered an invalid email address.") , type: "error"});
         } else {
 
             var notChecked = [], checked = [], checkedValues = [];
@@ -122,10 +122,10 @@ $(document).ready(function () {
                 if(emailList) {
                     saveAlertTypes(checked, emailList, checkedValues);
                 }else{
-                    jagg.message({content: i18n.t("errorMsgs.atleastOneEmailNeeded") , type: "error"});
+                    jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
                 }
             } else {
-                jagg.message({content: i18n.t("errorMsgs.atLeastOneAlertTypeNeeded") , type: "error"});
+                jagg.message({content: i18n.t("Please select at least one alert type") , type: "error"});
             }
         }
     });

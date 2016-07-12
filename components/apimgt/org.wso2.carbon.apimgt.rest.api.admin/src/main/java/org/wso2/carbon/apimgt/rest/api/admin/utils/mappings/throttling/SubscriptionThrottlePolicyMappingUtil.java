@@ -58,8 +58,6 @@ public class SubscriptionThrottlePolicyMappingUtil {
         }
         listDTO.setCount(subscriptionPolicyDTOList.size());
         listDTO.setList(subscriptionPolicyDTOList);
-        listDTO.setNext("");
-        listDTO.setPrevious("");
         return listDTO;
     }
 
@@ -93,6 +91,10 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 customAttributeDTOs.add(customAttributeDTO);
             }
             policyDTO.setCustomAttributes(customAttributeDTOs);
+        }
+        if (subscriptionPolicy.getDefaultQuotaPolicy() != null) {
+            policyDTO.setDefaultLimit(
+                    CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }
@@ -128,6 +130,10 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 customAttrJsonArray.add(attrJsonObj);
             }
             subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes());
+        }
+        if (dto.getDefaultLimit() != null) {
+            subscriptionPolicy
+                    .setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
         return subscriptionPolicy;
     }

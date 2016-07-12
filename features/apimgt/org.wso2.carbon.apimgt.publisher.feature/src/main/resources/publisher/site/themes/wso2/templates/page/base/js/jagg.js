@@ -45,7 +45,7 @@ var jagg = jagg || {};
                 $('#messageModal div.modal-footer').append($('<a class="btn ' + params.buttons[i].cssClass + '">' + params.buttons[i].name + '</a>').click(params.buttons[i].cbk));
             }
         } else {
-            $('#messageModal a.btn-primary').html('OK').click(function() {
+            $('#messageModal a.btn-primary').html(i18n.t('OK')).click(function() {
                 $('#messageModal').modal('hide');
             });
         }
@@ -73,10 +73,10 @@ var jagg = jagg || {};
         }
         if (params.type == "confirm") {
             if (params.title == undefined) {
-                params.title = "API Publisher"
+                params.title = i18n.t("API Publisher")
             }
             jagg.messageDisplay({content:params.content,title:params.title ,buttons:[
-                {name:"Yes",cssClass:"btn btn-primary",cbk:function() {
+                {name:i18n.t("Yes"),cssClass:"btn btn-primary",cbk:function() {
                     if(!params.anotherDialog){
                         console.info('hiding');
                         $('#messageModal').modal('hide');
@@ -87,7 +87,7 @@ var jagg = jagg || {};
 
 
                 }},
-                {name:"No",cssClass:"btn",cbk:function() {
+                {name:i18n.t("No"),cssClass:"btn",cbk:function() {
                     $('#messageModal').modal('hide');
                     if (typeof params.cancelCallback == "function") {
                         params.cancelCallback()
@@ -99,21 +99,21 @@ var jagg = jagg || {};
             });
             return;
         }
-        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" alt="Error Message Thumbnail" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
+        params.content = '<table><tr><td style="vertical-align:top"><img src="' + siteRoot + '/images/' + params.type + '.png" align="center" hspace="10" alt="'+i18n.t('Error Message Thumbnail')+'" /></td><td><span class="messageText">' + params.content + '</span></td></tr></table>';
         var type = "";
         if (params.title == undefined) {
             if (params.type == "info") {
-                type = "Notification"
+                type = i18n.t("Notification")
             }
             if (params.type == "warning") {
-                type = "Warning"
+                type = i18n.t("Warning")
             }
             if (params.type == "error") {
-                type = "Error"
+                type = i18n.t("Error")
             }
         }
         jagg.messageDisplay({content:params.content,title:"API Publisher - " + type,buttons:[
-            {name:"OK",cssClass:"btn btn-primary",cbk:function() {
+            {name:i18n.t("OK"),cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
                 if (params.cbk && typeof params.cbk == "function")
                     params.cbk();
@@ -145,7 +145,7 @@ var jagg = jagg || {};
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
             $('#loginErrorBox').show();
-            $('#loginErrorMsg').html('Username, Password fields are empty.');
+            $('#loginErrorMsg').html(i18n.t('Username, Password fields are empty.'));
             $('#username').focus();
             return;
         }
@@ -239,10 +239,10 @@ $(document).ready(function(){
         var id = $(this).attr('ref');
         var div = $('#'+id);
         if(div.is(":visible")){
-            $(this).text("Show More Options");
+            $(this).text(i18n.t("Show More Options"));
         }
         else{
-            $(this).text("Show Fewer Options");
+            $(this).text(i18n.t("Show Fewer Options"));
         }
         div.toggle('fast');
         return false; 

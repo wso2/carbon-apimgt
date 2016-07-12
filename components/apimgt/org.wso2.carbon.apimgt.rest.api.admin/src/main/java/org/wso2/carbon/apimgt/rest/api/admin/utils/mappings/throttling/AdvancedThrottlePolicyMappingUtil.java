@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 
@@ -47,16 +47,14 @@ public class AdvancedThrottlePolicyMappingUtil {
     public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(APIPolicy[] apiPolicies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
-        List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
+        List<AdvancedThrottlePolicyInfoDTO> advancedPolicyDTOs = new ArrayList<>();
         if (apiPolicies != null) {
             for (APIPolicy apiPolicy : apiPolicies) {
-                advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(apiPolicy));
+                advancedPolicyDTOs.add(fromAdvancedPolicyToInfoDTO(apiPolicy));
             }
         }
         listDTO.setList(advancedPolicyDTOs);
         listDTO.setCount(advancedPolicyDTOs.size());
-        listDTO.setNext("");
-        listDTO.setPrevious("");
         return listDTO;
     }
 
@@ -76,11 +74,14 @@ public class AdvancedThrottlePolicyMappingUtil {
 
         APIPolicy apiPolicy = new APIPolicy(dto.getPolicyName());
         apiPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, apiPolicy);
-        apiPolicy.setUserLevel(mapAdvancedPolicyUserLevelFromDTOToModel(dto.getUserLevel()));
 
         List<Pipeline> pipelines = CommonThrottleMappingUtil.fromConditionalGroupDTOListToPipelineList(
                 dto.getConditionalGroups());
         apiPolicy.setPipelines(pipelines);
+
+        if (dto.getDefaultLimit() != null) {
+            apiPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
+        }
         return apiPolicy;
     }
 
@@ -96,45 +97,32 @@ public class AdvancedThrottlePolicyMappingUtil {
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
-        policyDTO.setUserLevel(mapAdvancedPolicyUserLevelFromModelToDTO(apiPolicy.getUserLevel()));
         List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList(
                 apiPolicy.getPipelines());
         policyDTO.setConditionalGroups(groupDTOs);
+
+        if (apiPolicy.getDefaultQuotaPolicy() != null) {
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
+        }
         return policyDTO;
     }
 
     /**
-     * Maps User Level in Advanced policy from REST API DTO to Model
+     * Converts a single Advanced Policy model into REST API DTO
      *
-     * @param userLevelEnum User Level as Enum
-     * @return Converted user level into values used in model
+     * @param apiPolicy Advanced Policy model object
+     * @return Converted Advanced policy REST API DTO object
+     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleConditionTypeException
      */
-    private static String mapAdvancedPolicyUserLevelFromDTOToModel(
-            AdvancedThrottlePolicyDTO.UserLevelEnum userLevelEnum) {
-        switch (userLevelEnum) {
-        case apiLevel:
-            return PolicyConstants.ACROSS_ALL;
-        case userLevel:
-            return PolicyConstants.PER_USER;
-        default:
-            return null;
+    public static AdvancedThrottlePolicyInfoDTO fromAdvancedPolicyToInfoDTO(APIPolicy apiPolicy)
+            throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+        AdvancedThrottlePolicyInfoDTO policyDTO = new AdvancedThrottlePolicyInfoDTO();
+        policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
+        if (apiPolicy.getDefaultQuotaPolicy() != null) {
+            policyDTO.setDefaultLimit(
+                    CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
         }
-    }
-
-    /**
-     * Maps User Level in Advanced Policy model into DTO
-     *
-     * @param userLevel User Level values used in Advanced policy model object
-     * @return Converted user level into particular Enum used in Advanced Policy DTO
-     */
-    private static AdvancedThrottlePolicyDTO.UserLevelEnum mapAdvancedPolicyUserLevelFromModelToDTO(String userLevel) {
-        switch (userLevel) {
-        case PolicyConstants.ACROSS_ALL:
-            return AdvancedThrottlePolicyDTO.UserLevelEnum.apiLevel;
-        case PolicyConstants.PER_USER:
-            return AdvancedThrottlePolicyDTO.UserLevelEnum.userLevel;
-        default:
-            return null;
-        }
+        return policyDTO;
     }
 }

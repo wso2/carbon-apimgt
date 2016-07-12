@@ -12,7 +12,7 @@ $( document ).ready(function() {
         drawTable();
     } else {
         $('.content-data').empty();
-        $('.content-data').append('<h2> Stats are disabled.</h2>');
+        $('.content-data').append('<h2>' + i18n.t("Stats are disabled.") + '</h2>');
     }
 
     $("#alertSelected").change( function() {
@@ -22,7 +22,7 @@ $( document ).ready(function() {
             table.ajax.reload(null, true);
         } else{
             $('.content-data').empty();
-            $('.content-data').append('<h2> Stats are disabled.</h2>');
+            $('.content-data').append('<h2>' + i18n.t("Stats are disabled.") + '</h2>');
         }
     });
 
@@ -111,9 +111,9 @@ $( document ).ready(function() {
             //"processing": true,
             "serverSide": true,
             "columns" : [
-                { title: "Alert Timestamp" },
-                { title: "Type", "orderable": false },
-                { title: "Message" , "orderable": false ,"render":function(data){
+                { title: i18n.t("Alert Timestamp") },
+                { title: i18n.t("Type"), "orderable": false },
+                { title: i18n.t("Message") , "orderable": false ,"render":function(data){
                     var userId = data['userId'];
                     var applicationName = data['applicationName'];
                     var applicationOwner = data['applicationOwner'];
@@ -133,65 +133,65 @@ $( document ).ready(function() {
                     var fullMessage = "";;
 
                     if (userId != null) {
-                        fullMessage = '<span class="label label-primary add-margin-right-1x">User ID</span>'+userId+'<br/>';
+                        fullMessage = '<span class="label label-primary add-margin-right-1x">' + i18n.t("User ID") + '</span>'+userId+'<br/>';
                     }
                     if (applicationName != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Application Name</span>'+applicationName+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application Name") + '</span>'+applicationName+'<br/>';
                     }
                     if (applicationOwner != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Application Owner</span>'+applicationOwner+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application Owner") + '</span>'+applicationOwner+'<br/>';
                     }
                     if (applicationId != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Application Id</span>'+applicationId+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application Id") + '</span>'+applicationId+'<br/>';
                     }
                     if (api_version != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">API Version</span>'+api_version+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API Version") + '</span>'+api_version+'<br/>';
                     }
                     if (ip != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">IP</span>'+ip+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("IP") + '</span>'+ip+'<br/>';
                     }
                     if (api != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">API</span>'+api+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API") + '</span>'+api+'<br/>';
                     }
                     if (apiPublisher != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">API Publisher</span>'+apiPublisher+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API Publisher") + '</span>'+apiPublisher+'<br/>';
                     }
                     if (resourceTemplate != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Resource Template</span>'+resourceTemplate+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Resource Template") + '</span>'+resourceTemplate+'<br/>';
                     }
                     if (method != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Method</span>'+method+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Method") + '</span>'+method+'<br/>';
                     }
                     if (backendTime != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Backend Time</span>'+backendTime+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Backend Time") + '</span>'+backendTime+'<br/>';
                     }
                     if (requestPerMin != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Requests Per-Min</span>'+requestPerMin+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Requests Per-Min") + '</span>'+requestPerMin+'<br/>';
                     }
                     if (reason != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Reason</span>'+reason+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Reason") + '</span>'+reason+'<br/>';
                     }
                     if (scope != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Scope</span>'+scope+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Scope") + '</span>'+scope+'<br/>';
                     }
                     if (consumerKey != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">Consumer Key</span>'+consumerKey+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Consumer Key") + '</span>'+consumerKey+'<br/>';
                     }
 
                     fullMessage = fullMessage + data['msg'];
                     return fullMessage;
                 }
                 },
-                {title: "Severity", "render": function(data){
+                {title: i18n.t("Severity"), "render": function(data){
                     var severityLabel;
                     if(data == 1) {
-                        severityLabel = '<span class="label label-danger">severe</span>';
+                        severityLabel = '<span class="label label-danger">' + i18n.t("severe") + '</span>';
                     } else if (data == 2) {
-                        severityLabel = '<span class="label label-warning">moderate</span>';
+                        severityLabel = '<span class="label label-warning">' + i18n.t("moderate") + '</span>';
                     } else if (data == 3){
-                        severityLabel = '<span class="label label-default">mild</span>';
+                        severityLabel = '<span class="label label-default">' + i18n.t("mild") + '</span>';
                     } else {
-                        severityLabel = '<span class="label label-default">mild</span>';
+                        severityLabel = '<span class="label label-default">' + i18n.t("mild") + '</span>';
                     }
                     return severityLabel;
                 }

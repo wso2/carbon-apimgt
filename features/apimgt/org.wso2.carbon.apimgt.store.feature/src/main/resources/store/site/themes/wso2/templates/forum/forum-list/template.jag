@@ -23,20 +23,18 @@ var reqUrl = request.getRequestURI();
 %>
 
 <div id="forum_topics_list_page">
-
         <div class="form-horizontal form-search">
-
           <div class="form-group">
           <div class="col-md-12 col-lg-12">
             <div class="input-group">
-              <input type="text" class="form-control clearable search-input" title="<%=i18n.localize('forum.searchForum')%>" placeholder="<%=i18n.localize('forum.searchForum')%>" id="forum_topic_search_value">
+              <input type="text" class="form-control clearable search-input" title="<%=i18n.localize('Search Forum')%>" placeholder="<%=i18n.localize('Search Forum')%>" id="forum_topic_search_value">
               <span class="input-group-btn">
-                <button class="btn btn-secondary search-button" id="forum_topic_search" ><i class="fa fa-search"></i> Search</button>
+                <button class="btn btn-secondary search-button" id="forum_topic_search" ><i class="fa fa-search"></i> <%=i18n.localize('Search')%></button>
               </span>
               <span class="input-group-btn">
                 <%if(reqUrl.indexOf("forum") <= 0) { %>
-                    <a title="<%=i18n.localize( 'forum.createNewTopic')%>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary <%= needLoginStyleClass %> ">
-                        <%=i18n.localize( 'forum.createNewTopic')%>
+                    <a title="<%=i18n.localize( 'Create New Topic')%>" href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary <%= needLoginStyleClass %> ">
+                        <%=i18n.localize( 'Create New Topic')%>
                     </a>
                  <%} %>
               </span>
@@ -48,8 +46,8 @@ var reqUrl = request.getRequestURI();
       <div class="col-md-12 col-lg-12">
         <div id="forum_topics_list" style="display:none"></div>
         <div id="forum_no_topics" style="display:none" class="message message-info">
-			<h4><i class="icon fw fw-info"></i><%=i18n.localize('forum.noTopicsFound')%></h4>
-			<p><%=i18n.localize('forum.noTopicsFound.description')%></p>
+			<h4><i class="icon fw fw-info"></i><%=i18n.localize('No topics found.')%></h4>
+			<p><%=i18n.localize('There are no forum topic available.')%></p>
 		</div>
 		<ul id="forum_topics_list_paginator" class="pull-right"></ul>
       </div>
@@ -64,9 +62,9 @@ var reqUrl = request.getRequestURI();
     <table class="table table-striped">
         <thead>
             <tr>
-                <th class="col-md-8"><%= i18n.localize('forum.topic') %></th>
-                <th class="col-md-2"><%= i18n.localize('forum.by') %></th>
-                <th class="col-md-1"><%=i18n.localize('forum.replies')%></th >
+                <th class="col-md-8"><%= i18n.localize('Topic') %></th>
+                <th class="col-md-2"><%= i18n.localize('By') %></th>
+                <th class="col-md-1"><%= i18n.localize('Replies')%></th >
                 <th class="col-md-1"></th>
             </tr>
         </thead>
@@ -82,7 +80,7 @@ var reqUrl = request.getRequestURI();
                 <td>
                     <%if (jagg.getUser()) { %>
                         {{#if_creator topicOwner user}}
-                             <a class="forum_delete_topic_icon" data-id ="{{ topicId }}" data-subject = "{{ subject }}" title="Delete Comment">
+                             <a class="forum_delete_topic_icon" data-id ="{{ topicId }}" data-subject = "{{ subject }}" title="<%= i18n.localize('Delete Comment')%>">
                                 <span class="fw-stack" style="font-size:10px">
                                     <i class="fw fw-delete fw-stack-1x"></i>
                                      <i class="fw fw-circle-outline fw-stack-2x"></i>

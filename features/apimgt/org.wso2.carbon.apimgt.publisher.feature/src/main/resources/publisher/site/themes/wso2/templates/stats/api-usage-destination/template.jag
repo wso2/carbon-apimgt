@@ -1,14 +1,14 @@
 <% jagg.template("stats/api-usage-destination", function(inputs, outputs, jagg) { %>
 
 <div id="apiUsageDestination-stat-page" class="stat-page">
-<div class="page-header"> <h2><%=i18n.localize("apiUsageFromDestinationTitle")%></h2></div>
+<div class="page-header"> <h2><%=i18n.localize("API Usage by Destination")%></h2></div>
 
         
         <div class="row">
         	<div class="form-group col-sm-2">
 		        <select class="select form-control" id="apiFilter" name="apiFilter">
-		        	<option value="allAPIs"><%=i18n.localize("allAPIs")%></option>
-		        	<option value="myAPIs"><%=i18n.localize("myAPIs")%></option>
+		        	<option value="allAPIs"><%=i18n.localize("All APIs")%></option>
+		        	<option value="myAPIs"><%=i18n.localize("My APIs")%></option>
 		        </select>
 			</div>
 			<div class="col-sm-4"></div>

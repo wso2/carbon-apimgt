@@ -51,8 +51,6 @@ public class ApplicationThrottlePolicyMappingUtil {
         }
         listDTO.setCount(appPolicyDTOList.size());
         listDTO.setList(appPolicyDTOList);
-        listDTO.setNext("");
-        listDTO.setPrevious("");
         return listDTO;
     }
 
@@ -67,6 +65,9 @@ public class ApplicationThrottlePolicyMappingUtil {
             throws UnsupportedThrottleLimitTypeException {
         ApplicationThrottlePolicyDTO policyDTO = new ApplicationThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(appPolicy, policyDTO);
+        if (appPolicy.getDefaultQuotaPolicy() != null) {
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
+        }
         return policyDTO;
     }
 
@@ -84,6 +85,9 @@ public class ApplicationThrottlePolicyMappingUtil {
 
         ApplicationPolicy appPolicy = new ApplicationPolicy(dto.getPolicyName());
         appPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, appPolicy);
+        if (dto.getDefaultLimit() != null) {
+            appPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
+        }
         return appPolicy;
     }
 }

@@ -81,13 +81,13 @@ currentLocation = window.location.pathname;
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="' + i18n.t("Thumbnail image when stats enabled") + '"></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="' + i18n.t("Thumbnail image when stats not configured") + '"></div>'));
                 }
 
 
@@ -246,7 +246,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                                 count++;
                                 //limiting to show 15 entries at a time
                                 if(count>15){
-                                    $('#displayMsg').html('<h5 style="color:#555">Please Note that the graph will be showing only 15 entries</h5>');
+                                    $('#displayMsg').html('<h5 style="color:#555">' + i18n.t('Please Note that the graph will be showing only 15 entries') + '</h5>');
                                     state_array[id] = false;
                                     $(this).prop("checked", "");
                                     count--;
@@ -316,7 +316,7 @@ var drawProviderAPIServiceTime = function (from, to) {
                         $('#chartContainer').hide();
                         $('#tableContainer').hide();
                         $('#noData').html('');
-                        $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                        $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="' + i18n.t("No Stats")+ '"></i>'+ i18n.t("No Data Available")+'.</h4></div></div>'));
                     }
             } else {
                 if (json.message == "AuthenticateError") {

@@ -4,7 +4,7 @@
 
 	
     <div class="page-header">     
-    			<h2><%=i18n.localize("callTypeTitle")%></h2>
+    			<h2><%=i18n.localize("API Usage from Resource Path")%></h2>
 	</div>
 
 	<div class="row">
@@ -32,9 +32,9 @@
                  <table class="table table-striped table-bordered hide" id="AppApiCallTypeTable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th><%=i18n.localize("appName")%></th>
-                            <th><%=i18n.localize("apiName")%></th>
-                            <th><%=i18n.localize("callType")%></th>
+                            <th><%=i18n.localize("Application Name")%></th>
+                            <th><%=i18n.localize("API Name")%></th>
+                            <th><%=i18n.localize("Resource Usage")%></th>
                         </tr>
                     </thead>
                  </table>

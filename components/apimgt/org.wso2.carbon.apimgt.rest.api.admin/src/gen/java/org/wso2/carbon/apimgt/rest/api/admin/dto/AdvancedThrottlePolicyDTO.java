@@ -19,26 +19,22 @@ import javax.validation.constraints.NotNull;
 public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO {
   
   
-  public enum UserLevelEnum {
-     apiLevel,  userLevel, 
-  };
   
-  private UserLevelEnum userLevel = null;
+  private ThrottleLimitDTO defaultLimit = null;
   
   
   private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<ConditionalGroupDTO>();
 
   
   /**
-   * Applicable throttling level
    **/
-  @ApiModelProperty(value = "Applicable throttling level")
-  @JsonProperty("userLevel")
-  public UserLevelEnum getUserLevel() {
-    return userLevel;
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
   }
-  public void setUserLevel(UserLevelEnum userLevel) {
-    this.userLevel = userLevel;
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
   
@@ -60,7 +56,7 @@ public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO {
     StringBuilder sb = new StringBuilder();
     sb.append("class AdvancedThrottlePolicyDTO {\n");
     sb.append("  " + super.toString()).append("\n");
-    sb.append("  userLevel: ").append(userLevel).append("\n");
+    sb.append("  defaultLimit: ").append(defaultLimit).append("\n");
     sb.append("  conditionalGroups: ").append(conditionalGroups).append("\n");
     sb.append("}\n");
     return sb.toString();

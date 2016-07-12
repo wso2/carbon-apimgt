@@ -20,6 +20,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   
   
   
+  private ThrottleLimitDTO defaultLimit = null;
+  
+  
   private Integer rateLimitCount = null;
   
   
@@ -33,6 +36,18 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   
   
   private String billingPlan = null;
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
 
   
   /**
@@ -102,6 +117,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionThrottlePolicyDTO {\n");
     sb.append("  " + super.toString()).append("\n");
+    sb.append("  defaultLimit: ").append(defaultLimit).append("\n");
     sb.append("  rateLimitCount: ").append(rateLimitCount).append("\n");
     sb.append("  rateLimitTimeUnit: ").append(rateLimitTimeUnit).append("\n");
     sb.append("  customAttributes: ").append(customAttributes).append("\n");

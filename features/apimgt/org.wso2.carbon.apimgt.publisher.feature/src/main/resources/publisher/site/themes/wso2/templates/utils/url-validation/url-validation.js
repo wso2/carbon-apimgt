@@ -28,13 +28,13 @@ $(document).ready(function(){
 
         $(btn).parent().parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
-        $(btn).val(i18n.t('validationMsgs.validating'));
+        $(btn).val(i18n.t('Validating..'));
 
         if (url == '') {
-        	$(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-warning icon-white" title="missing Url"></i> '+ i18n.t('validationMsgs.missingUrl')+'</span>');
+        	$(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-warning icon-white" title="missing Url"></i> '+ i18n.t('Please provide a url to test.')+'</span>');
             var toFade = $(btn).parent().parent().parent().find('.url_validate_label');
             $(btn).removeClass("loadingButton-small");
-            $(btn).val(i18n.t('validationMsgs.testUri'));
+            $(btn).val(i18n.t('Test URI'));
             var foo = setTimeout(function(){$(toFade).hide()},3000);
             return;
         }
@@ -45,23 +45,23 @@ $(document).ready(function(){
                   function (result) {
                       if (!result.error) {
                           if (result.response.response == "success") {
-                              $(btn).parent().parent().after(' <span class="label label-success url_validate_label"><i class="fw fw-check icon-white" title="valid url"></i> ' + i18n.t('validationMsgs.valid') + '</span>');
+                              $(btn).parent().parent().after(' <span class="label label-success url_validate_label"><i class="fw fw-check icon-white" title="valid url"></i> ' + i18n.t('Valid') + '</span>');
 
                           } else {
                               if (result.response.isConnectionError) {
                                 if (result.response.response == null) {
-                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="error-in-correction"></i> ' + i18n.t('validationMsgs.invalid') + i18n.t('validationMsgs.errorInConnection') + '</span>');
+                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="error-in-correction"></i> ' + i18n.t('Invalid') + i18n.t(' - Error connecting to backend') + '</span>');
                                 } else { //When an exception is thrown from jsFunction_isURLValid
-                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid url"></i> ' + i18n.t('validationMsgs.invalid') + '</span>');
+                                    $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid url"></i> ' + i18n.t('Invalid') + '</span>');
                                 }
                               } else {
                                     if (result.response.statusCode == null) { //When an exception is thrown from sendHttpHEADRequest method
-                                        $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid url"></i> ' + i18n.t('validationMsgs.invalid') + '. ' +  result.response.response + '</span>');
+                                        $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid url"></i> ' + i18n.t('Invalid') + '. ' +  result.response.response + '</span>');
                                     } else {
                                         if (result.response.isContainUriTemplatesOnly) {
-                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="missing-complete-url>"></i> ' + i18n.t('validationMsgs.provideCompleteUrl') + '</span>');
+                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="missing-complete-url>"></i> ' + i18n.t('Cannot test the endpoint provided. Please specify the full url for testing.') + '</span>');
                                         } else {
-                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid"></i> ' + i18n.t('validationMsgs.invalid') + '. ' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-cancel icon-white" title="invalid"></i> ' + i18n.t('Invalid') + '. ' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
                                         }
                                     }
                               }
@@ -78,7 +78,7 @@ $(document).ready(function(){
                       }
 
                       $(btn).removeClass("loadingButton-small");
-                      $(btn).val(i18n.t('validationMsgs.testUri'));
+                      $(btn).val(i18n.t('Test URI'));
                   }, "json");
 
     });

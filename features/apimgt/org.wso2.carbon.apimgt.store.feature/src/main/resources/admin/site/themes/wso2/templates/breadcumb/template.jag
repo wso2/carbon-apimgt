@@ -27,7 +27,7 @@
 		        	<a href="#"><%=i18n.localize("settings")%> </a>
 		        </li>
 		        <li class="active">
-		        	<a href="<%=themeMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=themeMappedUrl%>',e:event})"><%=i18n.localize("themeupload")%></a>
+		        	<a href="<%=themeMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=themeMappedUrl%>',e:event})"><%=i18n.localize("Upload Tenant Theme")%></a>
 		        </li>
 		    <% } %>
 		    <% if (reqUrl.indexOf(listUrl) >= 0 || reqUrl.indexOf(listMappedUrl) >= 0) {%>
@@ -36,58 +36,58 @@
 	                    	<a href="#"><%=i18n.localize("tasks")%> </a>
 	                    </li>
 	                    <li class="active">
-	                        <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("userCreation")%></a>
+	                        <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("User Creation")%></a>
 	                    </li>
 	            <% } else if(task == "subscription"){%>
 	                <li>
 	                    <a href="#"><%=i18n.localize("tasks")%> </a>
 	                </li>
 	                <li class="active">
-	                    <a href="<%=listMappedUrl%>?tasks=subscription" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("subscriptionCreation")%></a>
+	                    <a href="<%=listMappedUrl%>?tasks=subscription" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("Subscriptions Creation")%></a>
 	                </li>
 	            <%} else if(task == "application"){%>
 	                <li>
 	                	<a href="#"><%=i18n.localize("tasks")%> </a>
 	                </li>
 	                <li class="active">
-	                	<a href="<%=listMappedUrl%>?tasks=application" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("appCreation")%></a>
+	                	<a href="<%=listMappedUrl%>?tasks=application" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("Application Creation")%></a>
 	                </li>
 	            <% } else if(task == "appRegistration") {%>
 				        <li>
 				        	<a href="#"><%=i18n.localize("tasks")%> </a>
 				        </li>
 				        <li class="active">
-				        	<a href="<%=listMappedUrl%>?tasks=appRegistration" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("appRegistration")%></a>
+				        	<a href="<%=listMappedUrl%>?tasks=appRegistration" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("Application Registration")%></a>
 				        </li>
 	                <% }%>
 	          <% } %>
 	          <% if (reqUrl.indexOf(tierManageUrl) >= 0 || reqUrl.indexOf(tierManageMappedUrl) >= 0) { %>
 			 	<li>
-		        	<a href="#"><%=i18n.localize("settings")%> </a>
+		        	<a href="#"><%=i18n.localize("Settings")%> </a>
 		        </li>
 		        <li class="active">
-		        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("manageTier")%></a>
+		        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("Manage Tiers")%></a>
 		        </li>
 		      <% } %>
 		      <% if (reqUrl.indexOf(tierEditUrl) >= 0 || reqUrl.indexOf(tierEditMappedUrl) >= 0) { %>
 			 	<li>
-		        	<a href="#"><%=i18n.localize("settings")%> </a>
+		        	<a href="#"><%=i18n.localize("Settings")%> </a>
 		        </li>
 		        <% 
-		        var tierName = request.getParameter("tierName");
+		        var tierName = request.getParameter("Tier Name");
 		        	if(tierName) { %>
 				        <li>
-				        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("manageTier")%></a>
+				        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("Manage Tiers")%></a>
 				        </li>
 				        <li class="active">
-				        	<a href="<%=tierEditMappedUrl%>?tierName=<%=tierName%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierEditMappedUrl%>?tierName=<%=tierName%>',e:event})"><%=tierName%></a>
+				        	<a href="<%=tierEditMappedUrl%>?tierName=<%=tierName%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierEditMappedUrl%>?tierName=<%=tierName%>',e:event})"><%=encode.forHtml(tierName)%></a>
 				        </li>
 			    <% } else { %>
 			    	<li>
-				        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("manageTier")%></a>
+				        	<a href="<%=tierManageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierManageMappedUrl%>',e:event})"><%=i18n.localize("Manage Tiers")%></a>
 				    </li>
 				    <li class="active">
-				        	<a href="<%=tierEditMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierEditMappedUrl%>',e:event})"><%=i18n.localize("addTier")%></a>
+				        	<a href="<%=tierEditMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=tierEditMappedUrl%>',e:event})"><%=i18n.localize("Add New Tier")%></a>
 				    </li>
 			    <% } %>
 		      <% } %>

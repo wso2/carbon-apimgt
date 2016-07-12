@@ -229,17 +229,18 @@ function checkOnKeyPress(e) {
     <% }else if(jagg.getUser() != null){ %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice </h4>
-            <p><%=i18n.localize("subscribeToGetAccessToken")%>&nbsp;<%=i18n.localize("provideAccessToken")%></p>
+            <p><%=i18n.localize("Please subscribe to the API to generate an access token.")%>&nbsp;<%=i18n.localize("If you already have an access token please provide it below.")%></p>
         </div>
     <% }else{ %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice</h4>
-            <p><%=i18n.localize("requireAccessToken")%> &nbsp; <%=i18n.localize("provideAccessToken")%></p>
+            <p><%=i18n.localize("You require an access token to try the API. Please login and subscribe to API to generate an access token.")%> &nbsp; <%=i18n.localize("If you already have an access token please provide it below.")%></p>
         </div>
     <% } %>
         <div class="alert alert-warning hide notoken">
         <button type="button" class="close" data-dismiss="alert"><i class="fw fw-cancel"></i></button>
-        <strong>Warning!</strong> Selected application do not have an access token for selected environment. Please go to subscription page and generate an access token first.
+        <strong><%=i18n.localize("Warning!")%> </strong>
+            <%=i18n.localize("Selected application do not have an access token for selected environment. Please go to subscription page and generate an access token first.")%>
         </div>
 
 

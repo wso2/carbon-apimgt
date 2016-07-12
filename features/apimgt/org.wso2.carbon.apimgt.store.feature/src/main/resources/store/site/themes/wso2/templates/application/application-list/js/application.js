@@ -23,13 +23,13 @@ function changeAppNameMode(linkObj){
         var error = "";
         var illegalChars = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;
         if($(this).val() == ""){
-            error = i18n.t('validationMsgs.fieldRequired');
+            error = i18n.t("This field is required.");
         }else if($(this).val().length>70){
-            error = i18n.t('validationMsgs.exceedChars');
+            error = i18n.t("Name exceeds character limit (70)");
         }else if(/(["\'])/g.test($(this).val())){
-            error = i18n.t('validationMsgs.illegalChars')+'( " \' )';
+            error = i18n.t("Name contains one or more illegal characters ")+'( " \' )';
         } else if ($(this).val().search(illegalChars) != -1) {
-            error = i18n.t('validationMsgs.illegalChars');
+            error = i18n.t("Name contains one or more illegal characters ");
         }
         if(error != ""){
             $(this).addClass('error');
@@ -48,13 +48,14 @@ function changeAppNameMode(linkObj){
         var error = "";
         var illegalChars = /([<>\"\'])/;
         if(/(["\'])/g.test($(this).val())){
-            error = i18n.t('validationMsgs.illegalChars')+'( " \' )';
+            error = i18n.t("Name contains one or more illegal characters ")+'( " \' )';
         } else if ($(this).val().search(illegalChars) != -1) {
-            error = i18n.t('validationMsgs.illegalChars');
+            error = i18n.t("Name contains one or more illegal characters ");
         }
         if(error != ""){
             $(this).addClass('error');
             if(!$(this).next().hasClass('error')){
+                //@todo: param_string
                 $(this).parent().append('<label class="error">'+error+'</label>');
             }else{
                 $(this).next().show().html(error);
@@ -97,13 +98,13 @@ function updateApplication(linkObj){
     var error = "";
     var illegalChars = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;
     if (applicationNew == "") {
-        error =  i18n.t("validationMsgs.fieldRequired");
+        error =  i18n.t("This field is required.");
     } else if (applicationNew.length > 70) {
-        error = i18n.t('validationMsgs.exceedChars');
+        error = i18n.t("Name exceeds character limit (70)");
     } else if (/(["\'])/g.test(applicationNew)) {
-        error = i18n.t('validationMsgs.illegalChars')+'( " \' )';
+        error = i18n.t("Name contains one or more illegal characters ")+'( " \' )';
     }else if (applicationNew.search(illegalChars)!=-1) {
-        error = i18n.t('validationMsgs.illegalChars');
+        error = i18n.t("Name contains one or more illegal characters ");
     }
     if(error != ""){
         return;
@@ -131,15 +132,15 @@ function deleteApp(linkObj) {
     var apiCount = $(theTr).attr('api-count');
     $('#messageModal').html($('#confirmation-data').html());
     if(apiCount > 0){
-        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-        $('#messageModal div.modal-body').text('\n\n' +i18n.t('confirm.deleteSubsMsg1')
-            + apiCount + i18n.t('confirm.deleteSubsMsg2') +i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+        $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
+        $('#messageModal div.modal-body').text('\n\n' +i18n.t("This application is subscribed to ")
+            + apiCount + i18n.t(" APIs. ") +i18n.t("Confirm Delete")+'"' + appName + '"'+i18n.t("? This will cancel all the existing subscriptions and keys associated with the application. "));
     } else {
-        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-        $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '" ?');
+        $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
+        $('#messageModal div.modal-body').text('\n\n'+i18n.t("Are you sure you want to remove the application ")+'"' + appName + '" ?');
     }
-    $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-    $('#messageModal a.btn-other').html(i18n.t('info.no'));
+    $('#messageModal a.btn-primary').html(i18n.t("Yes"));
+    $('#messageModal a.btn-other').html(i18n.t("No"));
     $('#messageModal a.btn-primary').click(function() {
         jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
             action:"removeApplication",

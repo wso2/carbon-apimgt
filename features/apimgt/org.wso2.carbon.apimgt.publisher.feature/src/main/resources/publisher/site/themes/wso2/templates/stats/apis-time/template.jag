@@ -1,7 +1,7 @@
 <% jagg.template("stats/apis-time", function(inputs, outputs, jagg) { %>
 
 <div id="apisTime-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("apiTime")%></h2> </div>
+    <div class="title-section"> <h2><%=i18n.localize("Created APIs Over Time")%></h2> </div>
     <div class="col-md-12">
     <br />
 
@@ -11,11 +11,11 @@
         <div id="rangeSliderWrapper" >
             <div id="dateRangePickerContainer" style="text-align:right">
                <div class="btn-group" role="group">
-                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                   <button id="hour-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Hour")%></button>
+                   <button id="today-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Day")%>
                    </button>
-                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+                   <button id="week-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Week")%></button>
+                   <button id="month-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Month")%></button>
                    <button id="date-range" type="button" class="btn btn-default date-range last-child" >
                      <i class="fw fw-calendar" title="date-range"></i>
                      <span></span> <b class="caret"></b>
@@ -28,9 +28,9 @@
 
 <form class="form-inline">
   <div class="form-group">
-    <label class="control-label"><%=i18n.localize("apiCreatedBy")%></label>
+    <label class="control-label"><%=i18n.localize("API Created By")%></label>
     <select id="developerSelect" class="selectpicker" data-live-search="true">
-       <option>All</option>
+       <option><%=i18n.localize("All")%></option>
     </select>
   </div>
 </form>

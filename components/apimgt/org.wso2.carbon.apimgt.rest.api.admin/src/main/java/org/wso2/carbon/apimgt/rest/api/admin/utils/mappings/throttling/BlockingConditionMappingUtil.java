@@ -51,8 +51,6 @@ public class BlockingConditionMappingUtil {
         }
         listDTO.setCount(blockingConditionDTOList.size());
         listDTO.setList(blockingConditionDTOList);
-        listDTO.setNext("");
-        listDTO.setPrevious("");
         return listDTO;
     }
 
@@ -78,7 +76,6 @@ public class BlockingConditionMappingUtil {
             }
         }
         dto.setConditionValue(conditionValue);
-        dto.setEnabled(blockCondition.isEnabled());
         return dto;
     }
 

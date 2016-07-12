@@ -23,6 +23,7 @@ $(document).ready(function() {
         //check for illegal characters in doc name
         var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
         var illegalCharsCondition = illegalChars.test(docId.val());
+        // @todo: param_string
         validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
 
         if(!illegalCharsCondition) {
@@ -80,10 +81,10 @@ var newDocFormToggle = function(){
 
 var removeDocumentation = function (provider, apiName, version, docName, docType) {
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-    $('#messageModal div.modal-body').html('\n\n'+ i18n.t('confirm.deleteMsg')+'<b>"' + docName + '</b>"?');
-    $('#messageModal a.btn-primary').html('Yes');
-    $('#messageModal a.btn-other').html('No');
+    $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
+    $('#messageModal div.modal-body').html('\n\n' + i18n.t('Are you sure you want to delete the file') + '<b>"' + docName + '</b>"?');
+    $('#messageModal a.btn-primary').html(i18n.t('Yes'));
+    $('#messageModal a.btn-other').html(i18n.t('No'));
     $('#messageModal a.btn-primary').click(function() {
         jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"removeDocumentation",provider:provider,
                 apiName:apiName, version:version,docName:docName,docType:docType},
@@ -93,7 +94,7 @@ var removeDocumentation = function (provider, apiName, version, docName, docType
                     $('#' + apiName + '-' + docName.replace(/ /g,'__')).remove();
                     window.location.reload();
                     if ($('#docTable tr').length == 1) {
-                        $('#docTable').append($('<tr><td colspan="6">'+i18n.t('resultMsgs.noDocs')+'</td></tr>'));
+                        $('#docTable').append($('<tr><td colspan="6">' + i18n.t('No documentation associated with the API') + '</td></tr>'));
                     }
                 } else {
                     if (result.message == "AuthenticateError") {
@@ -229,23 +230,24 @@ var saveDoc=function(){
     var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
     var illegalCharsCondition = illegalChars.test(docId.val());
 
+    // @todo: param_string
     if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
         return;
     }
     if($('#saveDocBtn').val() != "Update"){
         errorCondition = isAvailableDoc(apiName + "-" + docId.val());
     }
-    if (apiName && !validInput(docId, 'Duplicate Document Name.', errorCondition)) {
+    if (apiName && !validInput(docId, i18n.t('Duplicate Document Name.'), errorCondition)) {
         return;
-    } else if (!validInput(summaryDiv, 'This field is required.', isSummaryEmpty)) {
+    } else if (!validInput(summaryDiv, i18n.t('This field is required.'), isSummaryEmpty)) {
         return;
-    } else if (sourceType == 'url' && !validInput(docUrlDiv, 'This field is required.', errCondition)) {
+    } else if (sourceType == 'url' && !validInput(docUrlDiv, i18n.t('This field is required.'), errCondition)) {
         return;
     } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
         return;
-    }else if(sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty) && $('#saveDocBtn').val() != "Update") {
+    }else if(sourceType == 'file' && !validInput(fileDiv, i18n.t('This field is required.'), isFilePathEmpty) && $('#saveDocBtn').val() != "Update") {
         return;
-    }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'),'This field is required.', isOtherTypeNameEmpty) && docName!="Swagger API Definition"){
+    }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'), i18n.t('This field is required.'), isOtherTypeNameEmpty) && docName!="Swagger API Definition"){
         return;
     }
 
@@ -309,10 +311,11 @@ var saveDoc=function(){
             var fileNameToBeUpload = $("#docName").val();
             if(getFileName($("#docLocation").val()) == $("#fileNameDiv").html()){
                 jagg.message({
+                    // @todo: param_string
                     content:"There is a file named "+fileNameToBeUpload+" with the same name. You are going to" +
                     " overwrite existing file. Are you sure you want to overwrite existing file" ,
                     type:"confirm",
-                    title:"File already exists..!",
+                    title: i18n.t("File already exists..!"),
                     anotherDialog:true,
                     okCallback:function(){
                         submitDoc();
@@ -395,7 +398,7 @@ var validInputUrl = function(docUrlDiv) {
             docUrlD = docUrlDiv.val();
         }
         var erCondition = validUrl(docUrlD);
-        return validInput(docUrlDiv, i18n.t('errorMsgs.invalidDocUrl'), erCondition);
+        return validInput(docUrlDiv, i18n.t('Invalid Document Url Format.'), erCondition);
     }
 };
 

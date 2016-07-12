@@ -45,23 +45,23 @@
 			<div class="nano-content">
 				<ul class="nav nav-pills  nav-stacked pages">
 					<li <%if(reqUrl.equals(jagg.url(""))||reqUrl.equals(jagg.url("/"))||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0){%>class="active"<% } %>><a
-						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>" title="<%=i18n.localize("apis")%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("apis")%>" style="font-size:22px;"></i> <%=i18n.localize("apis")%></a></li>
+						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>" title="<%=i18n.localize("APIs")%>"
+						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("APIs")%>" style="font-size:22px;"></i> <%=i18n.localize("APIs")%></a></li>
 
 
 
-					<li <%if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ %>class="active"<%} %>><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("statistics")%>"
-                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("statistics")%>" style="font-size:22px;"></i> <%=i18n.localize("statistics")%>
-                               <i class="fw  fw-2x" title="<%=i18n.localize("statistics")%>"></i>
+					<li <%if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ %>class="active"<%} %>><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("Statistics")%>"
+                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Statistics")%>" style="font-size:22px;"></i> <%=i18n.localize("Statistics")%>
+                               <i class="fw  fw-2x" title="<%=i18n.localize("Statistics")%>"></i>
                                </a>
 
 
 					</li>
 
 					<%if(isPermitted){%>
-					<li <%if(reqUrl.equals(subsMappedUrl) || reqUrl.equals(subsUrl)){ %>class="active"<%} %>><a class="js_toggler" title="<%=i18n.localize("manageSubscriptions")%>"
+					<li <%if(reqUrl.equals(subsMappedUrl) || reqUrl.equals(subsUrl)){ %>class="active"<%} %>><a class="js_toggler" title="<%=i18n.localize("Manage Subscriptions")%>"
 						href="<%=subsMappedUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("manageSubscriptions")%>" style="font-size:22px;"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
+						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings fw-2x" title="<%=i18n.localize("Manage Subscriptions")%>" style="font-size:22px;"></i> <%=i18n.localize("Manage Subscriptions")%></a></li>
 					
 					<%}%>
 					<%
@@ -72,7 +72,7 @@
 							<%if(isPermitted){%>
 								<li <%if(reqUrl.equals(manageAlertTypesMappedUrl) || reqUrl.equals(manageAlertTypesUrl)){ %>class="active"<%} %>><a class="js_toggler"
 									href="<%=manageAlertTypesMappedUrl%><%=urlPrefix%>"
-									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-notification fw-2x" style="font-size:22px;"></i> <%=i18n.localize("manageAlertTypes")%></a></li>
+									onclick="jagg.sessionAwareJS({redirect:'<%=manageAlertTypesMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-notification fw-2x" style="font-size:22px;"></i> <%=i18n.localize("Manage alert types")%></a></li>
 							<%}%>
                     	<%
 						}

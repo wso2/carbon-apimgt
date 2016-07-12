@@ -24,9 +24,6 @@ import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
-import org.wso2.carbon.apimgt.api.model.policy.DateCondition;
-import org.wso2.carbon.apimgt.api.model.policy.DateRangeCondition;
-import org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
@@ -102,7 +99,7 @@ public class CommonThrottleMappingUtil {
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         Pipeline pipeline = new Pipeline();
         pipeline.setDescription(dto.getDescription());
-        pipeline.setEnabled(dto.getEnabled());
+        pipeline.setEnabled(true);
         pipeline.setQuotaPolicy(fromDTOToQuotaPolicy(dto.getLimit()));
 
         List<Condition> conditions = fromDTOListToConditionList(dto.getConditions());
@@ -121,9 +118,7 @@ public class CommonThrottleMappingUtil {
     public static ConditionalGroupDTO fromPipelineToConditionalGroupDTO(Pipeline pipeline)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         ConditionalGroupDTO groupDTO = new ConditionalGroupDTO();
-        groupDTO.setId(pipeline.getId());
         groupDTO.setDescription(pipeline.getDescription());
-        groupDTO.setEnabled(pipeline.isEnabled());
         groupDTO.setLimit(fromQuotaPolicyToDTO(pipeline.getQuotaPolicy()));
 
         List<ThrottleConditionDTO> conditionDTOList = fromConditionListToDTOList(pipeline.getConditions());
@@ -178,14 +173,8 @@ public class CommonThrottleMappingUtil {
             throws UnsupportedThrottleConditionTypeException {
         if (dto instanceof IPConditionDTO) {
             return fromDTOToIPCondition((IPConditionDTO) dto);
-        } else if (dto instanceof DateConditionDTO) {
-            return fromDTOToDateCondition((DateConditionDTO) dto);
-        } else if (dto instanceof DateRangeConditionDTO) {
-            return fromDTOToDateRangeCondition((DateRangeConditionDTO) dto);
         } else if (dto instanceof HeaderConditionDTO) {
             return fromDTOToHeaderCondition((HeaderConditionDTO) dto);
-        } else if (dto instanceof HTTPVerbConditionDTO) {
-            return fromDTOToHTTPVerbCondition((HTTPVerbConditionDTO) dto);
         } else if (dto instanceof QueryParameterConditionDTO) {
             return fromDTOToQueryParameterCondition((QueryParameterConditionDTO) dto);
         } else if (dto instanceof JWTClaimsConditionDTO) {
@@ -208,14 +197,8 @@ public class CommonThrottleMappingUtil {
             throws UnsupportedThrottleConditionTypeException {
         if (condition instanceof IPCondition) {
             return fromIPConditionToDTO((IPCondition) condition);
-        } else if (condition instanceof DateCondition) {
-            return fromDateConditionToDTO((DateCondition) condition);
-        } else if (condition instanceof DateRangeCondition) {
-            return fromDateRangeConditionToDTO((DateRangeCondition) condition);
         } else if (condition instanceof HeaderCondition) {
             return fromHeaderConditionToDTO((HeaderCondition) condition);
-        } else if (condition instanceof HTTPVerbCondition) {
-            return fromHTTPVerbConditionToDTO((HTTPVerbCondition) condition);
         } else if (condition instanceof QueryParameterCondition) {
             return fromQueryParameterConditionToDTO((QueryParameterCondition) condition);
         } else if (condition instanceof JWTClaimsCondition) {
@@ -373,62 +356,6 @@ public class CommonThrottleMappingUtil {
     }
 
     /**
-     * Converts a Date Condition DTO object into a model object
-     *
-     * @param dto Date Condition DTO object
-     * @return derived Date Condition model object from DTO
-     */
-    public static DateCondition fromDTOToDateCondition(DateConditionDTO dto) {
-        DateCondition dateCondition = new DateCondition();
-        dateCondition = updateFieldsFromDTOToCondition(dto, dateCondition);
-        dateCondition.setSpecificDate(dto.getSpecificDate());
-        return dateCondition;
-    }
-
-    /**
-     * Converts a Date Condition model object into a DTO
-     *
-     * @param dateCondition Date Condition model object
-     * @return DTO object that was derived from Date Condition model object
-     */
-    public static DateConditionDTO fromDateConditionToDTO(DateCondition dateCondition) {
-        DateConditionDTO dto = new DateConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.DateCondition);
-        dto = updateFieldsFromConditionToDTO(dateCondition, dto);
-        dto.setSpecificDate(dateCondition.getSpecificDate());
-        return dto;
-    }
-
-    /**
-     * Converts a Date Range Condition DTO object into a model object
-     *
-     * @param dto Date Range Condition DTO object
-     * @return Date Range Condition model object derived from Date Range Condition DTO
-     */
-    public static DateRangeCondition fromDTOToDateRangeCondition(DateRangeConditionDTO dto) {
-        DateRangeCondition dateCondition = new DateRangeCondition();
-        dateCondition = updateFieldsFromDTOToCondition(dto, dateCondition);
-        dateCondition.setStartingDate(dto.getStartingDate());
-        dateCondition.setEndingDate(dto.getEndingDate());
-        return dateCondition;
-    }
-
-    /**
-     * Converts a Date Range Condition model object into a DTO
-     *
-     * @param dateRangeCondition Date Range Condition model object
-     * @return DTO object that was derived from Date Range Condition model object
-     */
-    public static DateRangeConditionDTO fromDateRangeConditionToDTO(DateRangeCondition dateRangeCondition) {
-        DateRangeConditionDTO dto = new DateRangeConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.DateRangeCondition);
-        dto = updateFieldsFromConditionToDTO(dateRangeCondition, dto);
-        dto.setStartingDate(dateRangeCondition.getStartingDate());
-        dto.setEndingDate(dateRangeCondition.getEndingDate());
-        return dto;
-    }
-
-    /**
      * Converts a Header Condition DTO object into a model object
      *
      * @param dto Header Condition DTO object
@@ -454,33 +381,6 @@ public class CommonThrottleMappingUtil {
         dto = updateFieldsFromConditionToDTO(headerCondition, dto);
         dto.setHeaderName(headerCondition.getHeaderName());
         dto.setHeaderValue(headerCondition.getValue());
-        return dto;
-    }
-
-    /**
-     * Converts a HTTP Verb Condition DTO object into a model object
-     *
-     * @param dto HTTP Verb Condition DTO object
-     * @return HTTP Verb Condition model object derived from HTTP Verb Condition DTO
-     */
-    public static HTTPVerbCondition fromDTOToHTTPVerbCondition(HTTPVerbConditionDTO dto) {
-        HTTPVerbCondition httpVerbCondition = new HTTPVerbCondition();
-        httpVerbCondition = updateFieldsFromDTOToCondition(dto, httpVerbCondition);
-        httpVerbCondition.setHttpVerb(dto.getHttpVerb());
-        return httpVerbCondition;
-    }
-
-    /**
-     * Converts a HTTP Verb Condition model object into a DTO
-     *
-     * @param httpVerbCondition HTTP Verb Condition model object
-     * @return DTO object that was derived from HTTP Verb Condition model object
-     */
-    public static HTTPVerbConditionDTO fromHTTPVerbConditionToDTO(HTTPVerbCondition httpVerbCondition) {
-        HTTPVerbConditionDTO dto = new HTTPVerbConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.HTTPVerbCondition);
-        dto = updateFieldsFromConditionToDTO(httpVerbCondition, dto);
-        dto.setHttpVerb(httpVerbCondition.getHttpVerb());
         return dto;
     }
 
@@ -552,7 +452,7 @@ public class CommonThrottleMappingUtil {
      * @return Condition object with common fields updated
      */
     public static <T extends Condition> T updateFieldsFromDTOToCondition(ThrottleConditionDTO dto, T condition) {
-        condition.setConditionEnabled(dto.getEnabled().toString());
+        condition.setConditionEnabled(Boolean.TRUE.toString());
         condition.setInvertCondition(dto.getInvertCondition());
         return condition;
     }
@@ -567,7 +467,6 @@ public class CommonThrottleMappingUtil {
      * @return Condition DTO object with common fields updated
      */
     public static <T extends ThrottleConditionDTO> T updateFieldsFromConditionToDTO(Condition condition, T dto) {
-        dto.setEnabled(Boolean.parseBoolean(condition.getConditionEnabled()));
         dto.setInvertCondition(condition.isInvertCondition());
         return dto;
     }
@@ -614,8 +513,7 @@ public class CommonThrottleMappingUtil {
      */
     public static <T extends ThrottlePolicyDTO> T updateDefaultMandatoryFieldsOfThrottleDTO(T dto)
             throws UnsupportedThrottleLimitTypeException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        dto.setTenantDomain(tenantDomain);
+        //nothing to do
         return dto;
     }
 
@@ -630,16 +528,14 @@ public class CommonThrottleMappingUtil {
      */
     public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy)
             throws UnsupportedThrottleLimitTypeException {
-        String tenantDomain = dto.getTenantDomain();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         policy.setTenantDomain(tenantDomain);
+
         policy.setTenantId(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
         policy.setDisplayName(dto.getDisplayName());
         policy.setDeployed(dto.getIsDeployed());
         policy.setDescription(dto.getDescription());
         policy.setPolicyName(dto.getPolicyName());
-        if (dto.getDefaultLimit() != null) {
-            policy.setDefaultQuotaPolicy(fromDTOToQuotaPolicy(dto.getDefaultLimit()));
-        }
         return policy;
     }
 
@@ -655,19 +551,11 @@ public class CommonThrottleMappingUtil {
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        if (policy.getTenantDomain() == null) {
-            dto.setTenantDomain(RestApiUtil.getLoggedInUserTenantDomain());
-        }
         dto.setPolicyId(policy.getUUID());
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());
         dto.setPolicyName(policy.getPolicyName());
-
-        //DefaultQuotaPolicy is null in Global Policy
-        if (policy.getDefaultQuotaPolicy() != null) {
-            dto.setDefaultLimit(fromQuotaPolicyToDTO(policy.getDefaultQuotaPolicy()));
-        }
         return dto;
     }
 
