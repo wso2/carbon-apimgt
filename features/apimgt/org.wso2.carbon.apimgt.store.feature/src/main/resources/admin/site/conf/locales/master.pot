@@ -19,7 +19,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 12:07+0530\n"
+"POT-Creation-Date: 2016-07-12 18:54+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 12:07+0530\n"
+"POT-Creation-Date: 2016-07-12 18:54+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -113,7 +113,7 @@ msgstr ""
 #: site/themes/wso2/templates/policy/global/edit/template.jag:52
 #: site/themes/wso2/templates/policy/app/edit/template.jag:56
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:25
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:114
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:116
 #: site/themes/wso2/templates/configure-alerts/domain/edit/template.jag:127
 #: site/themes/wso2/templates/signup-task/template.jag:48
 #: site/themes/wso2/templates/tier/edit/template.jag:106
@@ -123,7 +123,7 @@ msgstr ""
 #: site/themes/wso2/templates/application-task/template.jag:53
 #: site/themes/wso2/templates/app-registration-task/template.jag:47
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:26
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:115
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:117
 #: site/themes/wso2/templates/signup-task/template.jag:49
 msgid "Status"
 msgstr ""
@@ -1018,7 +1018,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/conditions/manage/template.jag:32
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:27
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:116
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:118
 msgid "Actions"
 msgstr ""
 
@@ -1102,41 +1102,41 @@ msgid "Alert Configurations"
 msgstr ""
 
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:24
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:113
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:115
 msgid "Scenario Type"
 msgstr ""
 
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:50
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:140
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:142
 msgid "Active"
 msgstr ""
 
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:54
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:144
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:146
 msgid "Deactivate"
 msgstr ""
 
 #: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:59
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:149
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:151
 msgid "common.button.edit"
 msgstr ""
 
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:65
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:155
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:67
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:157
 msgid "Inactive"
 msgstr ""
 
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:69
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:159
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:71
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:161
 msgid "Activate"
 msgstr ""
 
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:85
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:176
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:87
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:178
 msgid "No Configurations to be listed"
 msgstr ""
 
-#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:102
+#: site/themes/wso2/templates/configure-alerts/domain/manage/template.jag:104
 msgid "GEO Location configurations"
 msgstr ""
 

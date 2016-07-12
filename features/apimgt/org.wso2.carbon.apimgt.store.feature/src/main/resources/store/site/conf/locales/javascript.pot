@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 14:50+0530\n"
+"POT-Creation-Date: 2016-07-12 18:53+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,8 +120,8 @@ msgid " Show Keys "
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:539
-#: site/themes/wso2/templates/forum/js/forum-list.js:272
-#: site/themes/wso2/templates/forum/js/forum-list.js:573
+#: site/themes/wso2/templates/forum/js/forum-list.js:276
+#: site/themes/wso2/templates/forum/js/forum-list.js:579
 #: site/themes/wso2/templates/application/application-list/js/application.js:135
 #: site/themes/wso2/templates/application/application-list/js/application.js:137
 #: site/themes/wso2/templates/application/application-list/js/application.js:139
@@ -133,15 +133,15 @@ msgid "Are you sure you want to unsubscribe from "
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:541
-#: site/themes/wso2/templates/forum/js/forum-list.js:273
-#: site/themes/wso2/templates/forum/js/forum-list.js:574
-#: site/themes/wso2/templates/forum/js/forum-list.js:575
+#: site/themes/wso2/templates/forum/js/forum-list.js:277
+#: site/themes/wso2/templates/forum/js/forum-list.js:580
+#: site/themes/wso2/templates/forum/js/forum-list.js:581
 #: site/themes/wso2/templates/application/application-list/js/application.js:142
 msgid "Yes"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:542
-#: site/themes/wso2/templates/forum/js/forum-list.js:274
+#: site/themes/wso2/templates/forum/js/forum-list.js:278
 #: site/themes/wso2/templates/application/application-list/js/application.js:143
 msgid "No"
 msgstr ""
@@ -233,42 +233,38 @@ msgstr ""
 msgid "info.Stay on this page"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:231
-#: site/themes/wso2/templates/forum/js/forum-list.js:360
+#: site/themes/wso2/templates/forum/js/forum-list.js:235
+#: site/themes/wso2/templates/forum/js/forum-list.js:365
 msgid "Topic subject cannot be empty."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:239
-#: site/themes/wso2/templates/forum/js/forum-list.js:369
+#: site/themes/wso2/templates/forum/js/forum-list.js:243
+#: site/themes/wso2/templates/forum/js/forum-list.js:374
 msgid "Topic description cannot be empty."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:271
+#: site/themes/wso2/templates/forum/js/forum-list.js:275
 msgid "Do you want to remove the topic "
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:392
+#: site/themes/wso2/templates/forum/js/forum-list.js:397
 msgid "Cannot edit the topic. "
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:433
-#: site/themes/wso2/templates/forum/js/forum-list.js:518
+#: site/themes/wso2/templates/forum/js/forum-list.js:438
+#: site/themes/wso2/templates/forum/js/forum-list.js:524
 msgid "Reply cannot be empty."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:442
-msgid "Reply Successfully Added"
-msgstr ""
-
-#: site/themes/wso2/templates/forum/js/forum-list.js:541
+#: site/themes/wso2/templates/forum/js/forum-list.js:547
 msgid "Cannot edit the reply. "
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:572
+#: site/themes/wso2/templates/forum/js/forum-list.js:578
 msgid "Do you want to remove this reply ?"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/js/forum-list.js:588
+#: site/themes/wso2/templates/forum/js/forum-list.js:594
 msgid "Cannot delete the reply. "
 msgstr ""
 

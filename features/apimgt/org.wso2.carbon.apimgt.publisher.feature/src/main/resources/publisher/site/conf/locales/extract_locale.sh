@@ -41,6 +41,26 @@ json_text = json.dumps(data ,sort_keys=True , indent=4, separators=(',', ': '))
 #Write to file
 with open(filename, "w") as f:
     f.write(json_text)
+
+filename = 'site/conf/locales/js/i18nResources.json'
+
+print('Generating default json for javascript')
+
+f = open(filename , 'r+')
+text = f.read()
+f.close();
+
+data = json.loads(text)
+for key in data:
+    if data[key] == "":
+        data[key] = key
+
+#JSON encode with pretty print
+json_text = json.dumps(data ,sort_keys=True , indent=4, separators=(',', ': '))
+
+#Write to file
+with open(filename, "w") as f:
+    f.write(json_text)
 END
 cp site/conf/locales/jaggery/locale_en.json site/conf/locales/jaggery/locale_default.json
 rm jag_files.list
