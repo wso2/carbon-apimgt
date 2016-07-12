@@ -118,9 +118,10 @@ for(var i=0;i < outputs.tiers.length; i++){
 
         <%  var langsArray = supportedLangs.langs.split(",");
                 for(var i = 0 ; i < langsArray.length ; i++ ) { %>
-                    <button class="btn btn-primary " onclick="generateAndroidSdk('<%=application.name%>','<%=langsArray[i]%>')" type="button">
+                    <a href="/store/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSdk&selectedApp=<%=application.name%>&language=<%=langsArray[i]%>"
+                          class="btn btn-primary " type="button">
                         <%=i18n.localize(langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
-                    </button>
+                    </a>
 
         <%
                 }

@@ -99,10 +99,14 @@ var generateClientSdk = function (appName,language,userName,groupId){
     var log = new Log();
 
     try {
-        var appName = generator.sdkGeneration(appName,language,userName,groupId);
-        if(appName!=null){
+        var result = Packages.java.utils.Map;
+        result = generator.sdkGeneration(appName,language,userName,groupId);
+        if(result!=null){
+            var fileName = result.get("fileName");
+            var path =  result.get("path");
             return {
-                appName:appName,
+                fileName:fileName,
+                path:path,
                 error:false
             };
         }

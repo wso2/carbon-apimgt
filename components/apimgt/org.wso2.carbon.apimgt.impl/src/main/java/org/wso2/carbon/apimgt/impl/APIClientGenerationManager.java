@@ -91,7 +91,7 @@ public class APIClientGenerationManager {
      * @return Name of the generated SDK
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public String sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
+    public Map<String, String> sdkGeneration(String appName, String sdkLanguage, String userName, String groupId)
             throws APIClientGenerationException {
         Subscriber currentSubscriber = null;
         String swagger = null;
@@ -113,7 +113,8 @@ public class APIClientGenerationManager {
         }
         File spec = null;
         boolean isFirstApi = true;
-        String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator + userName + ".json";
+        String specLocation = "tmp" + File.separator + "swaggerCodegen" + File.separator +
+                                                                    UUID.randomUUID().toString() + ".json";
         String clientOutPutDir;
         String sourceToZip;
         String zipName;
@@ -122,12 +123,18 @@ public class APIClientGenerationManager {
         if (!tempFolder.exists()) {
             tempFolder.mkdir();
         } else {
+            // On Windows OS, deleting the folder fails stating that a file within it is still open, attempting to close
+            // the open file from the jaggery side has not been successful. For the time being we will avoid deleting
+            // the directory. This is not an issue since existing zip files will be overwritten on the server side.
+            // This issue is not encountered on Linux however.
+            /*
             try {
                 FileUtils.deleteDirectory(tempFolder);
             } catch (IOException e) {
                 log.error("Problem deleting the temporary swaggerCodegen folder", e);
                 throw new APIClientGenerationException("Problem deleting the temporary swaggerCodegen folder", e);
             }
+            */
             tempFolder.mkdir();
         }
 
@@ -261,7 +268,13 @@ public class APIClientGenerationManager {
         }
 
         spec.delete();
-        return appName + "_" + sdkLanguage;
+
+        File zipFile = new File(zipName);
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("path", zipFile.getAbsolutePath());
+        result.put("fileName", appName + "_" + sdkLanguage + ".zip");
+
+        return result;
     }
 
     public String getSupportedSDKLanguages()    {
