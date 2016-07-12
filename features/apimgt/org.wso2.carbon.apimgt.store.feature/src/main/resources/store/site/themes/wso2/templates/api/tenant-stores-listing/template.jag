@@ -16,16 +16,16 @@ var tenantDomains=outputs.tenantDomains;
                             <h2 class="text-center-sm text-center-xs text-center-md text-right"><%=i18n.localize("API Stores available on this server")%></h2>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
                         <div class="data-container">
                             <div class="row">
-                                <div class="list-group">
+                                <div class="list-group add-margin-top-5x">
                                 <%for(var i=0;i< tenantDomains.length;i++){
                                     var site = require("/site/conf/site.json");
                                 %>
-                                    <a class="list-group-item col-xs-12" href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
-                                    <h3 class="list-group-item-heading"><%=tenantDomains[i]%></h3>
-                                    <p class="list-group-item-text"><%=i18n.localize("Visit Store")%></p>
+                                    <a class="list-group-item col-sm-12" href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
+                                        <h3 class="list-group-item-heading"><%=tenantDomains[i]%></h3>
+                                        <p class="list-group-item-text"><%=i18n.localize("Visit Store")%></p>
                                     </a>
                                 <%}%>
                                 </div>
