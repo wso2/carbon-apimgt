@@ -134,7 +134,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 		<div class="form-group">
             <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4><%=i18n.localize("Current State")%>:</h4></label>
             <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
-                <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus)%></strong></p></h4>
+                <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
              </div>
 		</div>
     </div>
@@ -153,7 +153,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                       	 <label class="control-label col-sm-3"></label>
 	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
 	                        	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                        		<span class="helper"><%=i18n.localize(itemName)%></span>
+	                        		<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
 	                     </label>
                      </div>
                     <%}else{%>
@@ -164,7 +164,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                         			 <label class="control-label col-sm-3"></label>
 	                                 <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
 	                                	<input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
-	                                	<span class="helper"><%=i18n.localize(itemName)%></span>
+	                                	<span class="helper"><%=i18n.localize(itemName, itemName)%></span>
 	                            	</label>
                             	</div>
                         <%}
@@ -179,11 +179,11 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
             if(lcStatus=="CREATED"){
                if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-secondary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-secondary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
                 </div>
                <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
                 </div>
                <%} else {%>
                <div class="btn-group" role="group">
@@ -194,26 +194,26 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                <% if (lcData.nextStates[i].toLowerCase().indexOf("prototype") == -1) {%>
                <%if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
                 </div>
                <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
                 </div>
                <%} else {%>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
                 </div>
                <%}}
             } else if(lcStatus=="PUBLISHED") {%>
                <% if (lcData.nextStates[i].toLowerCase().indexOf("publish") == -1) {%>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
                 </div>
                <%}%>
             <%} else {%>
                 <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
                 </div>
             <%}
 
@@ -246,7 +246,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
             <tr>
             <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
             <%if(lc.oldStatus==""){%><%=i18n.localize("created the API.")%> <%}else{ /*todo param_string*/%>
-            <%=i18n.localize("changed the API status from")%>  '<%=i18n.localize(lc.oldStatus)%>' to '<%=i18n.localize(lc.newStatus)%>'.
+            <%=i18n.localize("changed the API status from")%>  '<%=i18n.localize(lc.oldStatus,lc.oldStatus)%>' to '<%=i18n.localize(lc.newStatus,lc.newStatus)%>'.
             <%}%>
             </td>
             </tr>

@@ -41,7 +41,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 					    </span>
                     </label>
                     <div>
-                   		<div class="heading no-description"><%=i18n.localize(type)%></div>
+                   		<div class="heading no-description"><%=i18n.localize(type,type)%></div>
                         <div class="status">
                         	<i class="fw fw-down"></i>
                         </div>

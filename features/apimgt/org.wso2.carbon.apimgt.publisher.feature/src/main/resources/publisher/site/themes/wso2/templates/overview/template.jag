@@ -20,7 +20,7 @@
                 <td id="inUrl">
                     <%if(api.visibility == "restricted"){%>
                         <%=i18n.localize("Restricted by roles, only visible to ") + api.roles +"."%><%}
-                    else{%><%=i18n.localize(api.visibility)%><%}%>
+                    else{%><%=i18n.localize(api.visibility,api.visibility)%><%}%>
                 </td>
             </tr>
             <tr>
