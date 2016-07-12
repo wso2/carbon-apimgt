@@ -34,19 +34,19 @@
                                 <td>
                                     <%=templates[i].getType()%>
                                 </td>
-                                <td><%=templates[i].getDescription()%></td>
                                 <%
                                     var existingConfig = null;
                                     for (var j in configurations) {
 
-            if (configurations[j].getType().trim() == templates[i].getType().trim()) {
-                existingConfig = configurations[j];
-                break;
-            }
-        }
+                                        if (configurations[j].getType().trim() == templates[i].getType().trim()) {
+                                            existingConfig = configurations[j];
+                                            break;
+                                        }
+                                    }
 
                                 if (existingConfig) {
                                 %>
+                                <td><%=existingConfig.getDescription()%></td>
                                 <td><%=i18n.localize("templateStatusActive")%></td>
                                 <td class="tcenter">
                                     <a onclick="deleteConfiguration('<%=existingConfig.getDomain()%>','<%=existingConfig.getName()%>')">
@@ -62,6 +62,7 @@
 
                                 <% } else { %>
                                 <!--  need to show configuration and activate -->
+                                <td><%=templates[i].getDescription()%></td>
                                <td><%=i18n.localize("templateStatusInactive")%></td>
                                <td class="tcenter">
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getType() +"&templateType="+templates[i].getType()+"&mode=edit")%>">

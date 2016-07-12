@@ -10,14 +10,14 @@ var getAllDomainsInfo = function () {
         var username = "admin";
         var password = "admin";
 
-var carbon = require('carbon'),
+        var carbon = require('carbon'),
         conf = carbon.server.loadConfig('api-manager.xml'),
         dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
         username = conf.*::['Analytics'].*::['DASUsername'].text();
         password = conf.*::['Analytics'].*::['DASPassword'].text();
 
 
-          var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
+        var stub = new org.wso2.carbon.event.execution.manager.stub.ExecutionManagerAdminServiceStub(dasUrl + "/services/ExecutionManagerAdminService");
 
         var client = stub._getServiceClient();
         var options = client.getOptions();
