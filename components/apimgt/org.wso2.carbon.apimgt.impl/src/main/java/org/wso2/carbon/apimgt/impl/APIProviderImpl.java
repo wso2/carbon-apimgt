@@ -4016,6 +4016,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
                 String defaultPolicy = policyBuilder.getThrottlePolicyForAPILevelDefault(apiPolicy);
@@ -4098,6 +4099,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
                 //TODO this has done due to update policy method not deleting the second level entries when delete on cascade
                 //TODO Need to fix appropriately
                 List<Pipeline> pipelineList = apiPolicy.getPipelines();
