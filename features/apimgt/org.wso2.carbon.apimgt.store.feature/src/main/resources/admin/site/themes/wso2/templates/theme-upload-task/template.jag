@@ -9,7 +9,7 @@
         <% if(outputs.error != false){ %>
         	 <div class="message message-danger">
                     <h4><i class="icon fw fw-error"></i><%=i18n.localize("Error!")%></h4>
-                    <p><%=i18n.localize(outputs.error)%></p>
+                    <p><%=i18n.localize(outputs.error,outputs.error)%></p>
              </div>
         <% } %>
         <% if(outputs.success != false){ %>
