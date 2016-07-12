@@ -25,8 +25,9 @@
       </h2>
   </div>
 
-  <div>
-    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control" style="display: none" value="{{ replies.topic.0.subject}}"></input>
+  <div style="display: none">
+    <div class="page-header"><h2 class="word-break"><%=i18n.localize('Forum Topic')%></h2></div>
+    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control" value="{{ replies.topic.0.subject}}"></input>
   </div>
 
 </script>
@@ -35,7 +36,7 @@
 <script id="forum_topic_details_template" type="text/x-handlebars-template">
 
   <div id="forum_topic_view_block">
-  <h4>Description</h4>
+  <h4><%=i18n.localize('Description')%></h4>
     <div id="forum_topic_description" class="forum-description word-break">
       {{# html_sanitize replies.topic.0.description }}{{/html_sanitize}}
     </div>
@@ -93,7 +94,7 @@
               <div class="comment-body">
                   <span class="tip tip-down"></span>
                   <div class="comment-message">
-                      <span class="successfully-added"><%=i18n.localize('Reply Successfully Added')%></span>
+                      <span class="successfully-added"><strong><%=i18n.localize('Reply Successfully Added')%></strong></span>
                       <span id="forum_reply_content_temp" class="comment-text word-break"></span>
                   </div>
               </div>
@@ -101,9 +102,14 @@
             </div>
         </div>
 
+        <div id="no_topic_msg" class="message message-info" style="display:none;">
+            <h4><i class="icon fw fw-info"></i>No replies found.</h4>
+            <p>You can start adding replies below</p>
+        </div>
+
         {{#each replies.replies}}
 
-        <div class="comment-container" id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
+        <div class="comment-container comment-container-dyn" id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
 
         <%if(jagg.getUser()){%>
           {{#if_creator createdBy user}}

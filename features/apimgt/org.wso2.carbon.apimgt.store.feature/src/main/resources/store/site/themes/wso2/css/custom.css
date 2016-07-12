@@ -444,7 +444,6 @@ a.remove_rating:hover{
 }
 .comment-message .successfully-added{
   float:right;
-  font-weight:500;
   color: #5cb85c;
 }
 .comment-extra{

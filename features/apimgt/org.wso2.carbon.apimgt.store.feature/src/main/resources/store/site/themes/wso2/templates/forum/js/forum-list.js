@@ -161,7 +161,11 @@ function forum_load_replies(page) {
                 'replies': result.data
             });
             $('#forum_replies_block').html(template);
-
+            if($(template).find("div").hasClass("comment-container-dyn")){
+                $("#no_topic_msg").hide();
+            }else{
+                $("#no_topic_msg").show();
+            }
             $('#forum_replies_list').show();
 
             // If there are more than one pages show the paginator.
@@ -323,18 +327,17 @@ $(document).ready(function () {
 
         var description = $('#forum_topic_description').html().trim();
         var topicDescriptionEditor = $("#forum_topic_description_edit_editor");
-        $(topicDescriptionEditor)
         $(topicDescriptionEditor).summernote({
-            height: 300,
+            height: 100,
             width:"99.9%"
         });
 
         $(topicDescriptionEditor).code(description);
 
-        $('#forum_topic_view_block').hide();
+        $('#forum_topic_description').hide();
         $('#forum_topic_edit_block').show();
         $('#forum_topic_subject_lable').parent().hide();
-        $('#forum_topic_subject_edit_input').show();
+        $('#forum_topic_subject_edit_input').parent().show();
         $('#forum_edit_topic_icon').hide();
         $('#forum_topic_subject_edit_input').focus();
     });
@@ -343,10 +346,10 @@ $(document).ready(function () {
     $(document).on("click", '#forum_cancel_topic_edit_button', function (event) {
 
         $('#forum_topic_edit_block').hide();
-        $('#forum_topic_view_block').show();
+        $('#forum_topic_description').show();
         $('#forum_edit_topic_icon').show();
         $('#forum_topic_subject_lable').parent().show();
-        $('#forum_topic_subject_edit_input').hide();
+        $('#forum_topic_subject_edit_input').parent().hide();
     });
 
     // Saves updated topic.
@@ -445,6 +448,7 @@ $(document).ready(function () {
         $('#forum_replies_list').show();
         $('#forum_reply_content_temp').html(replyContent);
         $('#forum_reply_added_block').show();
+        $("#no_topic_msg").hide();
         $('#forum_reply_info_temp').html(replyInfo);
 
         $('#forum_reply_editor').code("");
