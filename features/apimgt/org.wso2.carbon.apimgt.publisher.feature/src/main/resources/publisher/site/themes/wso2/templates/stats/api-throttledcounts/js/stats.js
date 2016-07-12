@@ -94,7 +94,10 @@ $( document ).ready(function() {
                 } else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                        + '<a href=https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics'
+                        +  'target=\'_blank\' title='+i18n.t("WSO2 wiki documentation on APIM statistics")'
+                        +  'class=\'warningLink\'>'+ i18n.t("Refer our wiki to configure DAS correctly")</a>
+                        +'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {

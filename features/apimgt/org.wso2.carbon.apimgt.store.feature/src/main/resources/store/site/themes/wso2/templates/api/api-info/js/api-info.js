@@ -9,12 +9,12 @@ function triggerSubscribe() {
     var applicationId = $("#application-list").val();
     var applicationName = $("#application-list option:selected").text();
     if (applicationId == "-" || applicationId == "createNewApp") {
-        jagg.message({content:i18n.t('info.appSelect'),type:"info"});
+        jagg.message({content:i18n.t('Please select an application before subscribing'),type:"info"});
         return;
     }
     var api = jagg.api;
     var tier = $("#tiers-list").val();
-    $(this).html(i18n.t('info.wait')).attr('disabled', 'disabled');
+    $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
 
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
         action:"addSubscription",
@@ -30,9 +30,9 @@ function triggerSubscribe() {
         if (result.error == false) {
             if(result.status.subscriptionStatus == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
-                $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
-                $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
+                $('#messageModal h3.modal-title').html(i18n.t('Subscription Rejected'));
+                $('#messageModal div.modal-body').html('\n\n' + i18n.t('Your subscription is rejected, since it does not matched with authetication requirments. Please contact the api publisher for more information'));
+                $('#messageModal a.btn-primary').html(i18n.t('OK'));
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
@@ -62,8 +62,8 @@ function triggerSubscribe() {
                       $('#messageModal').html($('#confirmation-data').html());
                       $('#messageModal h3.modal-title').html("Redirection");
                       $('#messageModal div.modal-body').html(jsonObj.redirectConfirmationMsg);
-                      $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
-                      $('#messageModal a.btn-other').html(i18n.t('info.cancelSubs'));
+                      $('#messageModal a.btn-primary').html(i18n.t('OK'));
+                      $('#messageModal a.btn-other').html(i18n.t('Cancel Subscription'));
                       $('#messageModal a.btn-primary').click(function () {
                          if(additionalParameters != null && Object.keys(additionalParameters).length > 0) {
                              var params = "";
@@ -99,17 +99,17 @@ function triggerSubscribe() {
                   }
                }else {
                  $('#messageModal').html($('#confirmation-data').html());
-                 $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                 $('#messageModal h3.modal-title').html(i18n.t('Subscription Successful'));
                  if (result.status.subscriptionStatus == 'ON_HOLD') {
                     $('#application-list :selected').remove();
-                    $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionPendingTitle'));
-                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
+                    $('#messageModal h3.modal-title').html(i18n.t('Subscription Awaiting Approval'));
+                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('Your subscription request has been submitted and is now awaiting approval.'));
                  } else {
                     $('#application-list :selected').remove();
-                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
+                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('You have successfully subscribed to the API.'));
                 }
-                $('#messageModal a.btn-primary').html(i18n.t('info.viewSubsPage'));
-                $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
+                $('#messageModal a.btn-primary').html(i18n.t('View Subscriptions'));
+                $('#messageModal a.btn-other').html(i18n.t('info.Stay on this page'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
                 });

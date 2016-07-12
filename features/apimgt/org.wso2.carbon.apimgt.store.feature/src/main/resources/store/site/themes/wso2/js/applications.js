@@ -227,7 +227,7 @@ GrantTypes.prototype.getMap = function(selected){
                     this.app.Key = result.data.key.accessToken;
                     this.render();
                 } else {
-                    jagg.message({content: "Error occurred while saving OAuth application. Please check if you have provided valid Consumer Key & Secret.", type: "error"});
+                    jagg.message({content: i18n.t("Error occurred while saving OAuth application. Please check if you have provided valid Consumer Key & Secret."), type: "error"});
                 }
             },this), "json");
             return false;
@@ -326,6 +326,7 @@ GrantTypes.prototype.getMap = function(selected){
                 if (!result.error) {
                     console.log(result);                    
                 } else {
+                    //@todo: param_string
                     jagg.message({content:result.message,type:"error"});
                 }
             }, this), "json");                       
@@ -402,10 +403,10 @@ $("#subscription-actions").each(function(){
         var row = sub_list.row( $(this).parents('tr') );
         var record = row.data();
         $('#messageModal').html($('#confirmation-data').html());
-        $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-        $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.unsubscribeMsg') +'<b>"' + record.apiName + '-' + record.apiVersion + '</b>"?');
-        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
+        $('#messageModal div.modal-body').html('\n\n'+i18n.t("Are you sure you want to unsubscribe from ") +'<b>"' + record.apiName + '-' + record.apiVersion + '</b>"?');
+        $('#messageModal a.btn-primary').html(i18n.t("Yes"));
+        $('#messageModal a.btn-other').html(i18n.t("No"));
         $('#messageModal a.btn-primary').click(function() {
 	        jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
 	            action:"removeSubscription",
@@ -459,7 +460,7 @@ $("#application-actions").each(function(){
                     context.shared = false;
                 var value = application_name(context);
                 if(rec.isBlacklisted == 'true' || rec.isBlacklisted == true){
-                    value = value.replace((">"+rec.name+"<"),("><font color='red'>"+rec.name+" (Blacklisted) <"));
+                    value = value.replace((">"+rec.name+"<"),("><font color='red'>"+rec.name+ i18n.t(" (Blacklisted)") + "<"));
 
                 }
                 return  value;            
@@ -497,15 +498,15 @@ $("#application-actions").each(function(){
     	var apiCount = $(this).attr("data-count");
     	$('#messageModal').html($('#confirmation-data').html());
         if(apiCount > 0){
-            $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-            $('#messageModal div.modal-body').text('\n\n' +i18n.t('confirm.deleteSubsMsg1')
-                + apiCount + i18n.t('confirm.deleteSubsMsg2') +i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+            $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
+            $('#messageModal div.modal-body').text('\n\n' +i18n.t("This application is subscribed to ")
+                + apiCount + i18n.t(" APIs. ") +i18n.t("Are you sure you want to remove the application ")+'"' + appName + '"'+i18n.t("? This will cancel all the existing subscriptions and keys associated with the application. "));
         } else {
-            $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
-            $('#messageModal div.modal-body').text('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '" ?');
+            $('#messageModal h3.modal-title').html(i18n.t("Confirm Delete"));
+            $('#messageModal div.modal-body').text('\n\n'+i18n.t("Are you sure you want to remove the application ")+'"' + appName + '" ?');
         }
-        $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
-        $('#messageModal a.btn-other').html(i18n.t('info.no'));
+        $('#messageModal a.btn-primary').html(i18n.t("Yes"));
+        $('#messageModal a.btn-other').html(i18n.t("No"));
         $('#messageModal a.btn-primary').click(function() {
             jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
                 action:"removeApplication",

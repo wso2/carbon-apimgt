@@ -2,7 +2,7 @@
 <%
     var policyName = request.getParameter("policyName");
     var policyAction = request.getParameter("action");
-    var pageTitle = "Add Application Level Policy";
+    var pageTitle = i18n.localize("Add Application Level Policy");
     var nameFieldDisableStatus = "";
 
     if(policyName != null){
@@ -40,12 +40,12 @@
     </div>
 
     <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtml(String(policyAction))%>" />
-    <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("errorMsgRequired")%>'/>
-    <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("errorMessageInvalid")%>'/>
-    <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value='<%=i18n.localize("errorMessageIllegalChar")%>'/>
+    <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("Required")%>'/>
+    <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("Invalid")%>'/>
+    <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value="'<%=i18n.localize('Name contains one or more illegal characters')%>'+'( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).'"/>
 
     <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data" action="/admin/site/blocks/policy/app/edit/ajax/app-policy-edit.jag">
-        <h3><%=i18n.localize("generalDetails")%></h3>
+        <h3><%=i18n.localize("General Details")%></h3>
         <div class="form-group">
             <label class="control-label col-sm-3"><%="Name"%>  <span class="requiredAstrix">*</span></label>
             <div class="col-md-9">
@@ -53,14 +53,14 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-sm-3"><%=i18n.localize("description")%></label>
+            <label class="control-label col-sm-3"><%=i18n.localize("Description")%></label>
             <div class="col-md-9">
                 <textarea class="form-control" id="description" class="text" cols="40" rows ="2" name="description"></textarea>
             </div>
         </div>
         <div class="page-header">
             <h2><br></h2>
-            <p class="lead"><%=i18n.localize("quotalimits")%></p>
+            <p class="lead"><%=i18n.localize("Quota Limits")%></p>
         </div>
         <div id="quotaTypeRadioDev">
             <div class="form-group">
@@ -68,18 +68,18 @@
                 <div class="col-sm-9">
                 <label class="radio">
                     <input type="radio"  name="select-quota-type" value="requestCount" id="requestCountType" checked onchange="showHideDefaultQuotaPolicy()"/>
-                    <span class="helper">Request Count</span>
+                    <span class="helper"><%=i18n.localize("Request Count")%></span>
                 </label>
                 <label class="radio">
                     <input type="radio" name="select-quota-type" value="bandwidthVolume" id="bandwidthType" onchange="showHideDefaultQuotaPolicy()"/>
-                    <span class="helper">Request Bandwidth</span>
+                    <span class="helper"><%=i18n.localize("Request Bandwidth")%></span>
                 </label>
                 </div>
             </div>
         </div>
         <div id="defaultRequestCountBasedDiv">
             <div class="form-group">
-                <label class="control-label col-sm-3">Request Count  <span class="requiredAstrix">*</span></label>
+                <label class="control-label col-sm-3"><%=i18n.localize("Request Count")%><span class="requiredAstrix">*</span></label>
                 <div class="col-sm-9">
                     <input class="form-control" type="text" id="defaultRequestCount" name="defaultRequestCount" />
                 </div>
@@ -87,31 +87,31 @@
         </div>
         <div id="defaultBandwidthBasedDiv">
             <div class="form-group">
-                <label class="control-label col-sm-3">Data Bandwidth  <span class="requiredAstrix">*</span></label>
+                <label class="control-label col-sm-3"><%=i18n.localize("Data Bandwidth")%>  <span class="requiredAstrix">*</span></label>
                 <div class="col-sm-6">
                    <input class="form-control" type="text" id="defaultBandwidth" name="defaultBandwidth" />
                 </div>
                 <div class="col-sm-3">
                     <select class="form-control select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit">
-                        <option value="KB" selected="true" >KB</option>
-				        <option value="MB">MB</option>
+                        <option value="KB" selected="true" ><%=i18n.localize("KB")%></option>
+				        <option value="MB"><%=i18n.localize("MB")%></option>
                     </select>
                 </div>
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-sm-3">Unit Time  <span class="requiredAstrix">*</span></label>
+            <label class="control-label col-sm-3"><%=i18n.localize("Unit Time")%>  <span class="requiredAstrix">*</span></label>
             <div class="col-sm-6">
                 <input class="form-control" type="text" id="defaultUnitTime" name="defaultUnitTime" />
             </div>
             <div class="col-sm-3">
                 <select class="form-control select required" id="defaultTimeUnit" name="defaultTimeUnit">
-                    <option value="min" selected="true">Minute(s)</option>
-                    <option value="hour">Hour(s)</option>
-                    <option value="day">Day(s)</option>
-                    <option value="week">Week(s)</option>
-                    <option value="month">Month(s)</option>
-                    <option value="year">Year(s)</option>
+                    <option value="min" selected="true"><%=i18n.localize("Minute(s)")%></option>
+                    <option value="hour"><%=i18n.localize("Hour(s)")%></option>
+                    <option value="day"><%=i18n.localize("Day(s)")%></option>
+                    <option value="week"><%=i18n.localize("Week(s)")%></option>
+                    <option value="month"><%=i18n.localize("Month(s)")%></option>
+                    <option value="year"><%=i18n.localize("Year(s)")%></option>
                 </select>
             </div>
         </div>
@@ -125,14 +125,14 @@
                 <i class="fw fw-save fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
             </span>
-            <%=i18n.localize("saveTier")%>
+            <%=i18n.localize("Save")%>
         </button>
         <button type="button" id="cancel-tier-btn" class="btn btn-secondary">
             <span class="icon fw-stack">
                 <i class="fw fw-cancel fw-stack-1x"></i>
                 <i class="fw fw-circle-outline fw-stack-2x"></i>
             </span>
-            <%=i18n.localize("cancelTier")%>
+            <%=i18n.localize("Cancel")%>
         </button>
     </div>
 </div>

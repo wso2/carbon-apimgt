@@ -23,7 +23,7 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
                       tinyMCE.activeEditor.setContent(docContent);
                   } else {
                       $('#inlineError').show('fast');
-                      $('#inlineSpan').html('<strong>'+ i18n.t('errorMsgs.inlineContent')+'</strong><br />'+result.message);
+                      $('#inlineSpan').html('<strong>'+ i18n.t('Sorry. The content of this document cannot be loaded.')+'</strong><br />'+result.message);
                   }
               }, "json");
 

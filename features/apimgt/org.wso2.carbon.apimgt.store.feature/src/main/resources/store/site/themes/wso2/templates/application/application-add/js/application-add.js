@@ -13,7 +13,7 @@ $(document).ready(function () {
 
      $.validator.addMethod('validateSpecialChars', function(value, element) {
         return !/(["\'])/g.test(value);
-     }, 'The Name contains one or more illegal characters' + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
+     }, i18n.t('The Name contains one or more illegal characters') + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
 
     $("#appAddForm").validate({
         submitHandler: function(form) {
@@ -43,7 +43,7 @@ $(document).ready(function () {
                 $.cookie('lastAppName',application,{ expires: date});
                 $.cookie('lastAppStatus',status,{ expires: date});
                 if(goBack == "yes"){
-                    jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
+                    jagg.message({content:i18n.t('Return back to API detail page?'),type:'confirm',okCallback:function(){
                     window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
                         window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
@@ -62,7 +62,7 @@ $(document).ready(function () {
     $("#application-name").charCount({
 			allowed: 70,
 			warning: 50,
-			counterText: 'Characters left: '
+			counterText: i18n.t('Characters left: ')
 		});
     $("#application-name").val('');
 

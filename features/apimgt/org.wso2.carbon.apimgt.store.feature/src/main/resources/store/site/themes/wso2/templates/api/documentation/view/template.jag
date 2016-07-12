@@ -7,7 +7,7 @@
 <div>
     <div class="span11">
     <%if(!doc.content && doc.content==""){%>
-    No document content have been added yet.
+    <%=i18n.localize("No document content have been added yet.")%>
     <%}else{%>
     <%=doc.content%>
     <%}%>

@@ -35,9 +35,9 @@
                                 <h3>Create your Account</h3>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                        <label class="control-label"><%=i18n.localize("username")%> *</label>
+                                        <label class="control-label"><%=i18n.localize("Username")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newUsername" name="newUsername" title="<%=i18n.localize("characterLimit")%>" minlength="5" maxlength="30" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
+                                            <input id="newUsername" name="newUsername" title="<%=i18n.localize("Please enter at lease 5 characters")%>" minlength="5" maxlength="30" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
                                         </div>
 
             							<input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
@@ -48,26 +48,26 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                        <label class="control-label"><%=i18n.localize("password")%> *</label>
+                                        <label class="control-label"><%=i18n.localize("Password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPassword" name="newPassword" title="<%=i18n.localize("securePassword")%>" type="password" class="form-control password validPassword" placeholder="Password">
+                                            <input id="newPassword" name="newPassword" title="<%=i18n.localize("Enter more secure password")%>" type="password" class="form-control password validPassword" placeholder="Password">
                                         </div>
                                         <div class="help-block" id="password-help" style="display:none">
-							              <%=i18n.localize("pwHelpMsgLine1")%>
+							              <%=i18n.localize("For a more secure password:")%>
 							                <ul>
-							                    <li><%=i18n.localize("pwHelpMsgLine2")%></li>
-							                    <li><%=i18n.localize("pwHelpMsgLine3")%></li>
-							                    <li><%=i18n.localize("pwHelpMsgLine4")%></li>
-							                    <li><%=i18n.localize("pwHelpMsgLine5")%></li>
+							                    <li><%=i18n.localize("Use 6 to 30 characters")%></li>
+							                    <li><%=i18n.localize("Use both letters and numbers")%></li>
+							                    <li><%=i18n.localize("Add special characters (such as @, ?, #)")%></li>
+							                    <li><%=i18n.localize("Mix capital and lowercase letters")%></li>
 							                </ul>
 							            </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                        <label class="control-label"><%=i18n.localize("retypePassword")%> *</label>
+                                        <label class="control-label"><%=i18n.localize("Re-type Password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPasswordConfirm" title="<%=i18n.localize("confirmPassword")%>" type="password" class="form-control matchPasswords" placeholder="Password">
+                                            <input id="newPasswordConfirm" title="<%=i18n.localize("Confirm Password")%>" type="password" class="form-control matchPasswords" placeholder="Password">
                                         </div>
                                     </div>
                                 </div>
@@ -94,7 +94,7 @@
                                             <label class="control-label"><%=i18n.localize(field.name, field.name)%> *</label>
                                             <div class="input-group input-wrap">
 						                        <% if(field.name == "Email") {%>
-                                                    <input type="text" id="<%=i%>cliamUri" name="<%=i18n.localize("validEmail")%>" class="<%=inputClass%> form-control">
+                                                    <input type="text" id="<%=i%>cliamUri" name="<%=i18n.localize("Please enter a valid email.")%>" class="<%=inputClass%> form-control">
                                                 <%} else {%>
                                                     <input type="text" id="<%=i%>cliamUri" name="<%=i%>cliamUri" class="<%=inputClass%> form-control">
                                                 <%}%>
@@ -103,7 +103,7 @@
                                     </div>
 								 <%} %>
 							    <% } %>
-                                <a class="add-margin-bottom-4x sign-up-additional">View Additional Details</a>
+                                <a class="add-margin-bottom-4x sign-up-additional"><%= i18n.localize("View Additional Details")%></a>
                                 
                                 <div class="extended-form"> 
                                 
@@ -143,8 +143,8 @@
 								<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                        <button type="submit" class="btn btn-default btn-primary add-margin-right-2x">Sign Up</button>
-                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary add-margin-right-2x">Cancel</button>
+                                        <button type="submit" class="btn btn-default btn-primary add-margin-right-2x"><%=i18n.localize("Sign Up")%></button>
+                                        <button type="button" id="goBackBtn" class="btn btn-default btn-secondary add-margin-right-2x"><%=i18n.localize("Cancel")%></button>
                                     </div>
                                 </div>
                             </form>

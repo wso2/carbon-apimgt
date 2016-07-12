@@ -25,7 +25,7 @@ var jagg = jagg || {};
     jagg.messageDisplay = function (params) {
         $('#messageModal').html($('#confirmation-data').html());
         if (params.title == undefined) {
-            $('#messageModal h3.modal-title').html('Admin Portal');
+            $('#messageModal h3.modal-title').html(i18n.t('Admin Portal'));
         } else {
             $('#messageModal h3.modal-title').html(params.title);
         }
@@ -36,7 +36,7 @@ var jagg = jagg || {};
                 $('#messageModal div.modal-footer').append($('<a class="btn ' + params.buttons[i].cssClass + '">' + params.buttons[i].name + '</a>').click(params.buttons[i].cbk));
             }
         } else {
-            $('#messageModal a.btn-primary').html('OK').click(function() {
+            $('#messageModal a.btn-primary').html(i18n.t('OK')).click(function() {
                 $('#messageModal').modal('hide');
             });
         }
@@ -102,7 +102,7 @@ var jagg = jagg || {};
                 type = "Error"
             }
         }
-        jagg.messageDisplay({content:params.content,title:"Admin Portal - " + type,buttons:[
+        jagg.messageDisplay({content:params.content,title:i18n.t("Admin Portal - ") + type,buttons:[
             {name:"OK",cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
                 if (params.cbk && typeof params.cbk == "function")
@@ -151,7 +151,8 @@ var jagg = jagg || {};
          );
         $('#username').focus();
         $('#loginErrorBox').show();
-        $('#loginErrorMsg').html('<strong>Session Timed Out </strong>- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ');
+        $('#loginErrorMsg').html('<strong>i18n.t("Session Timed Out") </strong>'
+        + i18n.t('- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. '));
     };
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
@@ -233,10 +234,10 @@ $(document).ready(function(){
         var id = $(this).attr('ref');
         var div = $('#'+id);
         if(div.is(":visible")){
-            $(this).text("Show More Options");
+            $(this).text(i18n.t("Show More Options"));
         }
         else{
-            $(this).text("Show Less Options");
+            $(this).text(i18n.t("Show Less Options"));
         }
         div.toggle('fast');
         return false;
@@ -245,7 +246,7 @@ $(document).ready(function(){
     $('.less-options').click(function(){
         var id = $(this).attr('ref');
         var div = $('#'+id);
-        $('.more-options').text("Show More Options");
+        $('.more-options').text(i18n.t("Show More Options"));
         div.toggle('fast');
         return false;
     });

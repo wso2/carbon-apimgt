@@ -45,10 +45,10 @@
       <div id="forum_topic_description_edit_editor" data-id="{{ replies.topic.0.topicId}}"></div>
       <div class="edit-topic-form-actions">
         <a id="forum_save_updated_topic_button" class="btn btn-primary">
-          <%=i18n.localize( 'save')%>
+          <%=i18n.localize("Save")%>
         </a>
         <a id="forum_cancel_topic_edit_button" class="btn">
-          <%=i18n.localize( 'cancel')%>
+          <%=i18n.localize("Cancel")%>
         </a>
       </div>
     </div>
@@ -71,10 +71,10 @@
 
   <div class="forum_form add-reply add-padding-top-5x">
     <div>
-      <label><strong><h4><%=i18n.localize('forum.addReply.title')%></h4></strong></label>
+      <label><strong><h4><%=i18n.localize('Add Reply')%></h4></strong></label>
     </div>
     <div id="forum_reply_editor"></div>
-    <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('forum.addReply.replyToThread')%></a>
+    <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('Reply to Thread')%></a>
   </div>
 
   <%}%>
@@ -83,7 +83,7 @@
 <script id="forum_replies_list_template" type="text/x-handlebars-template">
         
   <div id="forum_replies_list" style="display: none;">
-    <div class="replies-list-title"><h4><%=i18n.localize('forum.replies')%></h4></div>
+    <div class="replies-list-title"><h4><%=i18n.localize('Replies')%></h4></div>
     <div class="clearfix">
     <table class="table table-striped forum-replies">
       <tbody id="reply_list_tbody">
@@ -103,7 +103,7 @@
             {{ date }}
             <br/>{{ timeStamp }}
             <br/>
-            <%=i18n.localize( 'forum.by')%> {{ createdBy }}
+            <%=i18n.localize("By")%> {{ createdBy }}
             <br/>
 
 
@@ -122,10 +122,10 @@
             <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
             <div class="forum-reply-actions">
               <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}">
-                <%=i18n.localize( 'save')%>
+                <%=i18n.localize("Save")%>
               </a>
               <a class="btn forum_cancel_reply_edit_button" data-id="{{ replyId }}">
-                <%=i18n.localize( 'cancel')%>
+                <%=i18n.localize("Cancel")%>
               </a>
             </div>
           </td>
@@ -137,7 +137,6 @@
     <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
     <div><!-- clearfix -->
   </div>
-
 
 
 </script>

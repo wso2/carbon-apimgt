@@ -1,16 +1,15 @@
 <% jagg.template("stats/perAppAPICount", function(inputs, outputs, jagg) { %>
 <div class="page-header">
-    <h2><%=i18n.localize("apiUsageTitle")%></h2>
+    <h2><%=i18n.localize("API Usage per Application")%></h2>
 </div>
 <div id="apiUsage-stat-page" class="stat-page">
     <div id="rangeSliderWrapper" >
        <div id="dateRangePickerContainer" style="text-align:right">
            <div class="btn-group" role="group">
-               <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
-               <button id="today-btn" type="button" class="btn btn-default date-range">Day
-               </button>
-               <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
-               <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+               <button id="hour-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Hour")%></button>
+               <button id="today-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Day")%></button>
+               <button id="week-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Week")%></button>
+               <button id="month-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Month")%></button>
                <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                  <span></span> <b class="caret"></b>

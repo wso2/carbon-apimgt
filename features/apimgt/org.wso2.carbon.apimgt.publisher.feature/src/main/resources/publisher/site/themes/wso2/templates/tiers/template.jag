@@ -49,22 +49,22 @@
 		        					<% if (denied) {%>
 		        						<label class="radio-inline">
 			        						<input type="radio"  name="<%=radioInputName%>" value="allow" id="y"/>
-			       							<%=i18n.localize("allow")%>
+			       							<%=i18n.localize("Allow")%>
 			       						</label>
 			       						<label class="radio-inline">
 			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z" checked/>
-			        						<%=i18n.localize("deny")%>
+			        						<%=i18n.localize("Deny")%>
 			        					</label>
 		        					 <%} else {
 		        					 	
 		        					 %>
 		        					 	<label class="radio-inline">
 		        					 		<input type="radio"  name="<%=radioInputName%>" value="allow" id="y" checked/>
-			       							<%=i18n.localize("allow")%>
+			       							<%=i18n.localize("Allow")%>
 			       						</label>
 			       						<label class="radio-inline">
 			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z"/>
-			        						<%=i18n.localize("deny")%>
+			        						<%=i18n.localize("Deny")%>
 			        					</label>
 		        					 <%}%>
 		        					 </div>
@@ -73,7 +73,7 @@
                                         <input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>" data-role="tagsinput"/>
 		        					 	<label class="errorTier errorMsg" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
                                         <label class="errorTier errorMsg" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
-		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesTagHelpMsg")%></p>
+		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("Type a role and Enter")%></p>
 		        					 </div>
 	        					</div>
 		                	
@@ -83,12 +83,12 @@
 		            			
 		            			<div class="form-actions" id="saveButtons">
                     				<div class="form-group">
-                                        <button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
+                                        <button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("Update Permissions")%></button>
                                     </div>
                 				</div>
                 				
                 				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
-        							<%=i18n.localize("tierPermissionSuccessMsg")%>
+        							<%=i18n.localize("Successfully updated Tier Permissions.")%>
      							</div>
         					</td>
         					</tr>

@@ -40,7 +40,7 @@ var faultSequencesLoaded = false;
             <%if(api.apiStores!=null){%>
             <input type="hidden" id="externalAPIStores" name="externalAPIStores" value="<%for(var j=0;j<api.apiStores.length;j++){ if(api.apiStores[j].published){%><%=api.apiStores[j].name%>::<%}}%>" />
             <div class="form-group">
-                <label class="col-sm-4 control-label"><%=i18n.localize("publishToExternalAPIStores")%>:</label>
+                <label class="col-sm-4 control-label"><%=i18n.localize("Display In External Stores")%>:</label>
 				<div class="col-sm-4">
 					<ul class="nav">
 						<%for(var i=0;i<api.apiStores.length;i++){%>
@@ -60,12 +60,12 @@ var faultSequencesLoaded = false;
 
 			<br class="spacer">
             <div class="form-actions" style="display:none" id="saveMessageExt">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                    <div class="btn loadingButton"><%=i18n.localize("Saving API. Please wait..")%></div>
             </div>
             <br class="spacer"/>
             <div class="form-actions" id="saveButtons">
-                <input type="button" id="updateButtonExt" class="btn btn-primary" onclick='publishToExternalStores()' value="<%=i18n.localize("save")%>"/>
-                <input type="reset" id="cancelEditExt" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>">
+                <input type="button" id="updateButtonExt" class="btn btn-primary" onclick='publishToExternalStores()' value="<%=i18n.localize("Save")%>"/>
+                <input type="reset" id="cancelEditExt" class="btn btn-secondary" value="<%=i18n.localize("Cancel")%>">
             </div>
 
         </form>

@@ -78,7 +78,8 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
                        to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
-                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>" + i18n.t("to") + "</b> " + toStr[0] + " <i>" +
+                       toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
                        drawAPIUsageByResourcePath(from,to,apiFilter);
                         $('.apply-btn').on('click',function(){
@@ -105,13 +106,12 @@ jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action:
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt=' + i18n.t("Thumbnail image when stats enabled") + '></div>'));
                 }
 
                 else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span><a href="https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics" target="_blank" title=' + i18n.t("WSO2 wiki documentation on APIM statistics") + 'class="warningLink">' + i18n.t("Refer our wiki to configure DAS correctly") + '</a></span><br/><img src="../themes/wso2/images/statsThumb.png" alt=' + i18n.t("Thumbnail image when stats enabled") + '></div>'));
                 }
 
             }
@@ -139,7 +139,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                     $('#resourcePathUsageTable').hide();
                     $('div#resourcePathUsageTable_wrapper.dataTables_wrapper.no-footer').remove();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>' + i18n.t("No Data Available.") + '</h4></div></div>'));
 
                 } else {
 
