@@ -2,7 +2,7 @@
 var log = new Log();
 
 var getDomainSpecificConfigurationsInfo = function (domainName) {
-        try {
+    try {
         var carbon = require('carbon');
         var process = require('process');
         var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
