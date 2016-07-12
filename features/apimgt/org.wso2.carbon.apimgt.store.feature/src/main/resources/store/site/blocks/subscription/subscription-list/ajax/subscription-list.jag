@@ -26,6 +26,16 @@ include("/jagg/jagg.jag");
             message: msg.error.invalidInputs(validation_errors)
         });
     } else if (action == "generateSdk"){
+        if (!user) {
+            if(!ssoEnabled){
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+
         if(request.getParameter('selectedApp')!=null){
             selectedApp = request.getParameter('selectedApp');
         }
@@ -67,11 +77,13 @@ include("/jagg/jagg.jag");
                 };
             }
         } else {
-
-            obj = {
-                error:false,
-                appName:result.appName
-            }
+            var file = new File("file:///" + result.path);
+            file.open("r");
+            response.contentType = "application/force-download";
+            response.addHeader("Content-Disposition","attachment; filename = \"" + result.fileName + "\"");
+            print(file.getStream());
+            file.close();
+            file.del();
         }
         print(obj);
     }else if (action == "getAllSubscriptions") {

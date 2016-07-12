@@ -190,7 +190,7 @@ paths:
 ######################################################
 # The "Individual Application Throttle Policy" resource API
 ######################################################
-  '/throttling/policies/application/{policyName}': 
+  '/throttling/policies/application/{policyId}': 
   
 #-----------------------------------------------------
 # Retrieve a certain Application Policy
@@ -203,7 +203,7 @@ paths:
       description: |
         Retrieve an Application Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -258,7 +258,7 @@ paths:
       description: |
         Delete an Application level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -293,7 +293,7 @@ paths:
       description: |
         Update an Application level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - in: body
           name: body
           description: |
@@ -466,7 +466,7 @@ paths:
 ######################################################
 # The "Individual Subscription Throttle Policy" resource API
 ######################################################
-  '/throttling/policies/subscription/{policyName}': 
+  '/throttling/policies/subscription/{policyId}': 
   
 #-----------------------------------------------------
 # Retrieve a certain Subscription Policy
@@ -479,7 +479,7 @@ paths:
       description: |
         Retrieve a Subscription Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -534,7 +534,7 @@ paths:
       description: |
         Delete a Subscription level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -569,7 +569,7 @@ paths:
       description: |
         Update a Subscription level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - in: body
           name: body
           description: |
@@ -628,20 +628,20 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Global Throttle Policy Collection" resource API
+# The "Custom Rule Collection" resource API
 ######################################################
-  '/throttling/policies/global':
+  '/throttling/policies/custom':
 
 #-----------------------------------------------------
-# Retrieve all Global level policies
+# Retrieve all Custom Rules
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
 #      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
 #      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
-      summary: Get all Global level throttle policies
+      summary: Get all Custom Rules
       description: |
-        Get all Global level throttle policies
+        Get all Custom Rules
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -656,7 +656,7 @@ paths:
             OK.
             Policies returned
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicyList'
+            $ref: '#/definitions/CustomRuleList'
           headers:
             Content-Type:
               description: |
@@ -684,23 +684,23 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a Global level throttle policy
+# Add a Custom Rule
 #-----------------------------------------------------  
     post:
       x-scope: apim:tier_manage
 #      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
 #      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
-      summary: Add a Global level throttle policy
+      summary: Add a Custom Rule
       description: |
-        Add a Global level throttle policy
+        Add a Custom Rule
       parameters:
         - in: body
           name: body
           description: |
-            Global level policy object that should to be added
+            Custom Rule object that should to be added
           required: true
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicy'
+            $ref: '#/definitions/CustomRule'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Throttling
@@ -711,7 +711,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicy'
+            $ref: '#/definitions/CustomRule'
           headers:
             Location:
               description: |
@@ -738,22 +738,22 @@ paths:
             The entity of the request was in a not supported format.
 
 ######################################################
-# The "Individual Global Throttle Policy" resource API
+# The "Individual Custom Rule" resource API
 ######################################################
-  '/throttling/policies/global/{policyName}': 
+  '/throttling/policies/custom/{ruleId}': 
   
 #-----------------------------------------------------
-# Retrieve a certain Global Throttling Policy
+# Retrieve a certain Custom Rule
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
 #        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
 #        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
-      summary: Retrieve a Global Policy
+      summary: Retrieve a Custom Rule
       description: |
-        Retrieve a Global Policy providing the policy name.
+        Retrieve a Custom Rule providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/ruleId'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -764,7 +764,7 @@ paths:
             OK.
             Policy returned
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicy'
+            $ref: '#/definitions/CustomRule'
           headers:
             Content-Type:
               description: |
@@ -798,17 +798,17 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Delete a Global level throttle policy
+# Delete a Custom Rule
 #-----------------------------------------------------  
     delete:
       x-scope: apim:tier_manage
 #      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
 #      x-wso2-response: "HTTP/1.1 200 OK"
-      summary: Delete a Global level throttle policy
+      summary: Delete a Custom Rule
       description: |
-        Delete a Global level throttle policy
+        Delete a Custom Rule
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/ruleId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -832,25 +832,25 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Update a Global throttle policy
+# Update a Custom Rule
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
 #      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
 #      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
 #      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
-      summary: Update a Global level throttle policy
+      summary: Update a Custom Rule
       description: |
-        Update a Global level throttle policy
+        Update a Custom Rule
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/ruleId'
         - in: body
           name: body
           description: |
             Policy object that needs to be modified
           required: true
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicy'
+            $ref: '#/definitions/CustomRule'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -862,7 +862,7 @@ paths:
             OK.
             Policy updated.
           schema:
-            $ref: '#/definitions/GlobalThrottlePolicy'
+            $ref: '#/definitions/CustomRule'
           headers:
             Location:
               description: |
@@ -1015,7 +1015,7 @@ paths:
 ######################################################
 # The "Individual Advanced Throttle Policy" resource API
 ######################################################
-  '/throttling/policies/advanced-policies/{policyName}': 
+  '/throttling/policies/advanced-policies/{policyId}': 
   
 #-----------------------------------------------------
 # Retrieve a certain Advanced Throttling Policy
@@ -1028,7 +1028,7 @@ paths:
       description: |
         Retrieve a Advanced Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1083,7 +1083,7 @@ paths:
       description: |
         Delete an Advanced level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1118,7 +1118,7 @@ paths:
       description: |
         Update an Advanced level throttle policy
       parameters:
-        - $ref: '#/parameters/policyName'
+        - $ref: '#/parameters/policyId'
         - in: body
           name: body
           description: |
@@ -1233,7 +1233,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a Global level throttle policy
+# Add a Custom Rule
 #-----------------------------------------------------  
     post:
       x-scope: apim:bl_manage
@@ -1457,11 +1457,21 @@ parameters:
 
 # Throttle Policy Id
 # Specified as part of the path expression
-  policyName:
-    name: policyName
+  policyId:
+    name: policyId
     in: path
     description: |
-      Thorttle policy name
+      Thorttle policy UUID
+    type: string
+    required: true
+
+# Custom rule Id
+# Specified as part of the path expression
+  ruleId:
+    name: ruleId
+    in: path
+    description: |
+      Custom rule UUID
     type: string
     required: true
 
@@ -1610,7 +1620,9 @@ definitions:
 #-----------------------------------------------------
   ThrottlePolicy :
     title: Generic Throttle Policy
-    properties:         
+    properties:
+      policyId:
+        type: string
       policyName:
         type: string
       displayName:
@@ -1763,10 +1775,10 @@ definitions:
           $ref: '#/definitions/SubscriptionThrottlePolicy'
 
 #-----------------------------------------------------
-# The Global Throttle Policy resource
+# The Custom Rule resource
 #-----------------------------------------------------
-  GlobalThrottlePolicy:
-    title: Global Throttle Policy
+  CustomRule:
+    title: Custom Rule
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
@@ -1776,32 +1788,32 @@ definitions:
             type: string
 
 #-----------------------------------------------------
-# The Global Throttle Policy List resource
+# The Custom Rule List resource
 #-----------------------------------------------------
-  GlobalThrottlePolicyList:
-    title: Global Level Throttle Policy List
+  CustomRuleList:
+    title: Custom Rule List
     properties:
       count:
         type: integer
         description: |
-          Number of Global throttle policies returned.
+          Number of Custom Rules returned.
         example: 1
       next:
         type: string
         description: |
           Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
-          example: "/throttling/policies/global?limit=1&offset=2&query="
+          example: "/throttling/policies/custom?limit=1&offset=2&query="
       previous:
         type: string
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
-          example: "/throttling/policies/global?limit=1&offset=0&query="
+          example: "/throttling/policies/custom?limit=1&offset=0&query="
       list:
         type: array
         items:
-          $ref: '#/definitions/GlobalThrottlePolicy'
+          $ref: '#/definitions/CustomRule'
 
 #-----------------------------------------------------
 # The Conditional Group resource
