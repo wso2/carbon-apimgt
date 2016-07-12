@@ -431,7 +431,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
-    public static final String API_KEY_VALIDATOR_REVOKE_URL  = API_KEY_VALIDATOR + "RevokeAPIURL";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";

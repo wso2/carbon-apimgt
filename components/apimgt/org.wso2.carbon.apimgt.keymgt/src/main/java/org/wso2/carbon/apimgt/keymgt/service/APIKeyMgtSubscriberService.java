@@ -727,7 +727,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 if(apiGatewayURL.length()> 1) {
                     //get https url
                     String apiHTTPSURL = apiGatewayURLs[1];
-                    String revokeURL = apiHTTPSURL + "/" + getRevokeURLPath();
+                    String revokeURL = apiHTTPSURL + getRevokeURLPath();
                     APIRevokeURLs.add(revokeURL);
                 }
             }
@@ -772,7 +772,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private String getRevokeURLPath() {
         APIManagerConfiguration apiConfig = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        String revokeURL = apiConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_REVOKE_URL);
+        String revokeURL = apiConfig.getFirstProperty(APIConstants.REVOKE_API_URL);
         URL revokeEndpointURL = new URL(revokeURL);
         return revokeEndpointURL.getFileName();
     }
