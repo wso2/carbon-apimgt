@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 14:50+0530\n"
+"POT-Creation-Date: 2016-07-12 18:53+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,18 +47,18 @@ msgstr ""
 
 #: site/themes/wso2/templates/manage-alerts/template.jag:58
 #: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:53
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:48
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:125
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:50
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:146
 #: site/themes/wso2/templates/application/application-keys/template.jag:186
 msgid "Save"
 msgstr ""
 
 #: site/themes/wso2/templates/manage-alerts/template.jag:59
 #: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:56
-#: site/themes/wso2/templates/forum/forum-new/template.jag:30
-#: site/themes/wso2/templates/forum/forum-new/template.jag:31
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:51
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:128
+#: site/themes/wso2/templates/forum/forum-new/template.jag:28
+#: site/themes/wso2/templates/forum/forum-new/template.jag:29
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:53
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:147
 #: site/themes/wso2/templates/user/sign-up/template.jag:147
 #: site/themes/wso2/templates/application/application-keys/template.jag:187
 #: site/themes/wso2/templates/application/application-add/template.jag:92
@@ -635,6 +635,8 @@ msgid "WADL"
 msgstr ""
 
 #: site/themes/wso2/templates/api/overview/template.jag:90
+#: site/themes/wso2/templates/forum/forum-new/template.jag:21
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:39
 #: site/themes/wso2/templates/application/application-view/template.jag:46
 msgid "Description"
 msgstr ""
@@ -838,11 +840,7 @@ msgstr ""
 msgid "API Stores available on this server"
 msgstr ""
 
-#: site/themes/wso2/templates/api/tenant-stores-listing/template.jag:27
-msgid "Tenant Store"
-msgstr ""
-
-#: site/themes/wso2/templates/api/tenant-stores-listing/template.jag:29
+#: site/themes/wso2/templates/api/tenant-stores-listing/template.jag:28
 msgid "Visit Store"
 msgstr ""
 
@@ -931,7 +929,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/menu/actions/template.jag:86
 #: site/themes/wso2/templates/menu/actions/template.jag:91
-#: site/themes/wso2/templates/forum/forum-new/template.jag:13
+#: site/themes/wso2/templates/forum/forum-new/template.jag:11
 #: site/themes/wso2/templates/forum/forum-list/template.jag:36
 #: site/themes/wso2/templates/forum/forum-list/template.jag:37
 msgid "Create New Topic"
@@ -1008,29 +1006,38 @@ msgstr ""
 msgid "API Last Access Times"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-new/template.jag:20
+#: site/themes/wso2/templates/forum/forum-new/template.jag:18
+#: site/themes/wso2/templates/forum/forum-new/template.jag:19
 msgid "Subject"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-new/template.jag:27
-#: site/themes/wso2/templates/forum/forum-new/template.jag:28
+#: site/themes/wso2/templates/forum/forum-new/template.jag:25
+#: site/themes/wso2/templates/forum/forum-new/template.jag:26
 msgid "Create"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:74
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:29
+msgid "Forum Topic"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:76
 msgid "Add Reply"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:77
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:80
 msgid "Reply to Thread"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:86
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:90
 #: site/themes/wso2/templates/forum/forum-list/template.jag:67
 msgid "Replies"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-topic/template.jag:106
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:97
+msgid "Reply Successfully Added"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:140
 #: site/themes/wso2/templates/forum/forum-list/template.jag:66
 msgid "By"
 msgstr ""
