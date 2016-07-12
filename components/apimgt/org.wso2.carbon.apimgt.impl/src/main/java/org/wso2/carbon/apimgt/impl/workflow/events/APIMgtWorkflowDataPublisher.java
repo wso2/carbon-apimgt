@@ -82,6 +82,7 @@ public class APIMgtWorkflowDataPublisher {
         //Get DataPublisher which has been registered for the tenant.
         DataPublisher dataPublisher = getDataPublisher(tenantDomain);
         String bamServerURL = analyticsConfig.getDasReceiverUrlGroups();
+        String bamServerAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
         String bamServerUser = analyticsConfig.getDasReceiverServerUser();
         String bamServerPassword = analyticsConfig.getDasReceiverServerPassword();
 
@@ -89,7 +90,8 @@ public class APIMgtWorkflowDataPublisher {
         if (dataPublisher == null) {
 
             try {
-                dataPublisher = new DataPublisher(null,bamServerURL,null,bamServerUser,bamServerPassword);
+                dataPublisher = new DataPublisher(null, bamServerURL, bamServerAuthURL, bamServerUser,
+                        bamServerPassword);
 
                 //Add created DataPublisher.
                 addDataPublisher(tenantDomain, dataPublisher);
