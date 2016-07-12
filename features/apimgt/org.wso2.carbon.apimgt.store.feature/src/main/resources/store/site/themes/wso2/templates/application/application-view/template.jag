@@ -32,7 +32,7 @@ for(var i=0;i < outputs.tiers.length; i++){
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Status")%></label>
     <div class="col-sm-9">
-      <p class="form-control-static"><strong><% if(application.status != "APPROVED" && application.status != "REJECTED" ){%> <%=i18n.localize("INACTIVE") %> <%} else { %><%= i18n.localize(encode.forHtml(application.status)) %><%}%></strong></p>
+      <p class="form-control-static"><strong><% if(application.status != "APPROVED" && application.status != "REJECTED" ){%> <%=i18n.localize("INACTIVE") %> <%} else { %><%= i18n.localize(encode.forHtml(application.status),encode.forHtml(application.status)) %><%}%></strong></p>
     </div>
   </div>
   <div class="form-group">
