@@ -1,8 +1,6 @@
 <%
 // This is a generic header file that can be included in all the pages.
 
-response.addHeader("X-Frame-Options", "SAMEORIGIN");
-
 var site = require("/site/conf/site.json");
 jagg.setCSRFToken();
 
