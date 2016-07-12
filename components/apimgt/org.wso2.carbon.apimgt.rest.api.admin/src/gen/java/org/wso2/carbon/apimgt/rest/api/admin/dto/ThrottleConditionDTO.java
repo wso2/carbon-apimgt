@@ -15,9 +15,6 @@ import javax.validation.constraints.NotNull;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.DateConditionDTO.class, name = "DateCondition"),
-    @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.DateRangeConditionDTO.class, name = "DateRangeCondition"),
-    @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.HTTPVerbConditionDTO.class, name = "HTTPVerbCondition"),
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.HeaderConditionDTO.class, name = "HeaderCondition"),
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO.class, name = "IPCondition"),
     @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.JWTClaimsConditionDTO.class, name = "JWTClaimsCondition"),
@@ -28,16 +25,13 @@ public class ThrottleConditionDTO  {
   
   
   public enum TypeEnum {
-     DateCondition,  DateRangeCondition,  HTTPVerbCondition,  HeaderCondition,  IPCondition,  JWTClaimsCondition,  QueryParameterCondition, 
+     HeaderCondition,  IPCondition,  JWTClaimsCondition,  QueryParameterCondition, 
   };
   @NotNull
   private TypeEnum type = null;
   
   
   private Boolean invertCondition = null;
-  
-  
-  private Boolean enabled = null;
 
   
   /**
@@ -64,18 +58,6 @@ public class ThrottleConditionDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("enabled")
-  public Boolean getEnabled() {
-    return enabled;
-  }
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  
 
   @Override
   public String toString()  {
@@ -84,7 +66,6 @@ public class ThrottleConditionDTO  {
     
     sb.append("  type: ").append(type).append("\n");
     sb.append("  invertCondition: ").append(invertCondition).append("\n");
-    sb.append("  enabled: ").append(enabled).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

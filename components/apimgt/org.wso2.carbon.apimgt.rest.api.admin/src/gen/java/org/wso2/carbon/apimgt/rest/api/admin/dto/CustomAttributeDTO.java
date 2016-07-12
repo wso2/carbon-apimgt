@@ -14,16 +14,16 @@ import javax.validation.constraints.NotNull;
 public class CustomAttributeDTO  {
   
   
-  
+  @NotNull
   private String name = null;
   
-  
+  @NotNull
   private String value = null;
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -35,7 +35,7 @@ public class CustomAttributeDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("value")
   public String getValue() {
     return value;

@@ -24,10 +24,10 @@ public class ThrottleLimitDTO  {
   @NotNull
   private TypeEnum type = null;
   
-  
+  @NotNull
   private String timeUnit = null;
   
-  
+  @NotNull
   private Integer unitTime = null;
 
   
@@ -45,7 +45,7 @@ public class ThrottleLimitDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("timeUnit")
   public String getTimeUnit() {
     return timeUnit;
@@ -57,7 +57,7 @@ public class ThrottleLimitDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("unitTime")
   public Integer getUnitTime() {
     return unitTime;
