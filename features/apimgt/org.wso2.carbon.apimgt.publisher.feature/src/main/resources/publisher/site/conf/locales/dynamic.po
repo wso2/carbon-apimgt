@@ -120,3 +120,27 @@ msgstr ""
 "of that particular API or Request Count of an API per minute > Request "
 "count per minute lower percentile or Response status code >= 500 (By "
 "Default) AND Response status code < 600 (By Default)"
+
+msgid "publish" 
+msgstr "Publish"
+
+msgid "deploy as a prototype" 
+msgstr "Deploy as a Prototype"
+
+msgid "demote to created" 
+msgstr "Demote to Created"
+
+msgid "block" 
+msgstr "Block"
+
+msgid "demote to prototyped" 
+msgstr "Demote to Prototyped"
+
+msgid "deprecate" 
+msgstr "Deprecate"
+
+msgid "re-publish" 
+msgstr "Re-Publish"
+
+msgid "retire" 
+msgstr "Retire"

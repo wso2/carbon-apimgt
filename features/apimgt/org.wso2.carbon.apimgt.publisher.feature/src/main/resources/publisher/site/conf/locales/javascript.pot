@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 12:08+0530\n"
+"POT-Creation-Date: 2016-07-12 14:48+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -162,7 +162,7 @@ msgstr ""
 msgid "WSO2 wiki documentation on APIM statistics"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/apis-time/js/stats.js:86
+#: site/themes/wso2/templates/stats/apis-time/js/stats.js:87
 msgid "Published API Count"
 msgstr ""
 
@@ -185,16 +185,16 @@ msgstr ""
 msgid "All"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:85
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:86
 #: site/themes/wso2/templates/stats/developers-time/js/stats.js:77
 msgid "Time"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:89
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:91
 msgid "Application Count"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/developers-time/js/stats.js:81
+#: site/themes/wso2/templates/stats/developers-time/js/stats.js:82
 msgid "Developer Signups"
 msgstr ""
 
@@ -902,3 +902,27 @@ msgstr ""
 "that particular API or Request Count of an API per minute > Request count "
 "per minute lower percentile or Response status code >= 500 (By Default) AND "
 "Response status code < 600 (By Default)"
+
+msgid "publish"
+msgstr "Publish"
+
+msgid "deploy as a prototype"
+msgstr "Deploy as a Prototype"
+
+msgid "demote to created"
+msgstr "Demote to Created"
+
+msgid "block"
+msgstr "Block"
+
+msgid "demote to prototyped"
+msgstr "Demote to Prototyped"
+
+msgid "deprecate"
+msgstr "Deprecate"
+
+msgid "re-publish"
+msgstr "Re-Publish"
+
+msgid "retire"
+msgstr "Retire"

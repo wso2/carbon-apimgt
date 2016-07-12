@@ -19,7 +19,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 12:08+0530\n"
+"POT-Creation-Date: 2016-07-12 14:48+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 12:08+0530\n"
+"POT-Creation-Date: 2016-07-12 14:48+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -244,6 +244,7 @@ msgstr ""
 #: site/themes/wso2/templates/stats/api-user-agent-usage/template.jag:9
 #: site/themes/wso2/templates/stats/api-latencytime/template.jag:9
 #: site/themes/wso2/templates/stats/api-throttledcounts/template.jag:10
+#: site/themes/wso2/templates/stats/subscriptions-time/template.jag:36
 #: site/themes/wso2/templates/users-keys/template.jag:26
 #: site/themes/wso2/templates/user-apis/template.jag:17
 #: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:548
@@ -308,6 +309,7 @@ msgstr ""
 #: site/themes/wso2/templates/stats/applications-time/template.jag:39
 #: site/themes/wso2/templates/stats/applications-time/template.jag:45
 #: site/themes/wso2/templates/stats/developers-time/template.jag:41
+#: site/themes/wso2/templates/stats/subscriptions-time/template.jag:38
 #: site/themes/wso2/templates/stats/applications-time/js/stats.js:66
 #: site/themes/wso2/templates/stats/applications-time/js/stats.js:68
 #: site/themes/wso2/templates/stats/developers-time/js/stats.js:63
@@ -375,7 +377,7 @@ msgid "Subscribed to"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/developers-time/template.jag:4
-#: site/themes/wso2/templates/stats/developers-time/js/stats.js:81
+#: site/themes/wso2/templates/stats/developers-time/js/stats.js:82
 msgid "Developer Signups"
 msgstr ""
 
@@ -392,7 +394,6 @@ msgstr ""
 msgid "Select API"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/subscriptions-time/template.jag:38
 #: site/themes/wso2/templates/item-design/template.jag:20
 #: site/themes/wso2/templates/item-manage/template.jag:30
 #: site/themes/wso2/templates/item-edit/template.jag:14
@@ -809,6 +810,10 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:596
 msgid "Add"
+msgstr ""
+
+#: site/themes/wso2/templates/overview/template.jag:13
+msgid "description"
 msgstr ""
 
 #: site/themes/wso2/templates/overview/template.jag:22
@@ -2822,6 +2827,30 @@ msgstr ""
 "per minute lower percentile or Response status code >= 500 (By Default) AND "
 "Response status code < 600 (By Default)"
 
+msgid "publish"
+msgstr "Publish"
+
+msgid "deploy as a prototype"
+msgstr "Deploy as a Prototype"
+
+msgid "demote to created"
+msgstr "Demote to Created"
+
+msgid "block"
+msgstr "Block"
+
+msgid "demote to prototyped"
+msgstr "Demote to Prototyped"
+
+msgid "deprecate"
+msgstr "Deprecate"
+
+msgid "re-publish"
+msgstr "Re-Publish"
+
+msgid "retire"
+msgstr "Retire"
+
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:15
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:39
 msgid "Successfully saved"
@@ -2919,7 +2948,7 @@ msgstr ""
 msgid "Hit Count"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/apis-time/js/stats.js:86
+#: site/themes/wso2/templates/stats/apis-time/js/stats.js:87
 msgid "Published API Count"
 msgstr ""
 
@@ -2936,12 +2965,12 @@ msgstr ""
 msgid "No-Stats"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:85
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:86
 #: site/themes/wso2/templates/stats/developers-time/js/stats.js:77
 msgid "Time"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:89
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:91
 msgid "Application Count"
 msgstr ""
 
