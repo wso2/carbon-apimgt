@@ -74,8 +74,8 @@ function APISamples () {
     ":[\"application/json\"],\"info\":{\"title\":\"PizzaShackAPI\",\"description\":\"This document" +
     " describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\",\"license\":{\"name\"" +
     ":\"Apache 2.0\",\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"},\"contact\":" +
-    "{\"email\":\"architecture@PizzaShack.com\",\"name\":\"PizzaShack\",\"url\":" +
-    "\"http://PizzaShack.lk\"},\"version\":\"1.0.0\"}}";
+    "{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\",\"url\":" +
+    "\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}";
     }
 
 APISamples.prototype.deploySampleApi = function (gatewayURL) {
@@ -169,10 +169,10 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                             provider: username, version: "1.0.0", default_version_checked: " ",
                             tier: defaultApiLevelTier, tiersCollection: defaultApiLevelTier,
                             transport_http: "http", transport_https: "https",
-                            bizOwner: "PizzaShack Business Owner",
-                            bizOwnerMail: "marketing@PizzaShack.com",
-                            techOwner: "PizzaShack Technical Owner",
-                            techOwnerMail: "architecture@PizzaShack.com",
+                            bizOwner: "Jane Roe",
+                            bizOwnerMail: "marketing@pizzashack.com",
+                            techOwner: "John Doe",
+                            techOwnerMail: "architecture@pizzashack.com",
                             swagger: _this.sample_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
