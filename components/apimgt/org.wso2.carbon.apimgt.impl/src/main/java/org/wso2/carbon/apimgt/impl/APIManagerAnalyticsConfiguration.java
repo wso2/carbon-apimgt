@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 public class APIManagerAnalyticsConfiguration {
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String dasReceiverUrlGroups;
+    private String dasReceiverAuthUrlGroups;
     private String dasReceiverServerUser;
     private String dasReceiverServerPassword;
     private String dasServerUrl;
@@ -99,6 +100,7 @@ public class APIManagerAnalyticsConfiguration {
             }
 
             dasReceiverUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+            dasReceiverAuthUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_AUTH_URL_GROUPS);
             dasReceiverServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
             dasReceiverServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
 
@@ -224,5 +226,13 @@ public class APIManagerAnalyticsConfiguration {
 
     public String getExecutionTimeStreamName() {
         return executionTimeStreamName;
+    }
+
+    public String getDasReceiverAuthUrlGroups() {
+        return dasReceiverAuthUrlGroups;
+    }
+
+    public void setDasReceiverAuthUrlGroups(String dasReceiverAuthUrlGroups) {
+        this.dasReceiverAuthUrlGroups = dasReceiverAuthUrlGroups;
     }
 }
