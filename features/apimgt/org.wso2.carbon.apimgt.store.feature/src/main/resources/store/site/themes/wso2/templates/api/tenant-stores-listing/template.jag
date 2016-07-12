@@ -1,54 +1,40 @@
 <% jagg.template("api/tenant-stores-listing", function(inputs, outputs, jagg) {
 var tenantDomains=outputs.tenantDomains;
  %>
-
-<div class="container-fluid" id="layout-base">
-    <div class="row">
-        <div class="span12" id="middle">
-            <div class="container" id="tenent_list">
+<div class="page-content-wrapper">
+    <div class="container-fluid ">
+        <div class="container">
+            <div class="login-form-wrapper">
                 <div class="row">
-                    <div class="span12">
-                        <div class="left-side-col">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                        <div class="brand-container add-margin-bottom-5x">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
+                                    <img class="img-responsive brand-spacer" alt="store_logo" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                </div>
+                            </div>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right"><%=i18n.localize("API Stores available on this server")%></h2>
                         </div>
                     </div>
-                    <div class="span12" style="margin-left:14px">
-                        <div class="title-section">
-                            <h2><%=i18n.localize("API Stores available on this server")%></h2>
-                        </div>
-                        <div class="clear"></div>
-                        <center><div class="pagination" id="tenant_pages"><ul id="holder"></ul></div></center>
-                        <ul id="tenant_container">
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                        <div class="data-container">
+                        <div class="row">
+                        <div class="list-group">
                         <%for(var i=0;i< tenantDomains.length;i++){
                             var site = require("/site/conf/site.json");
-                        %>
-                            <a href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
-                            <li class="thumbnail span3 tenent-thumb">
-                            <center>
-                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/tenant-store.png"))%>" alt="<%=i18n.localize("Tenant Store")%>">
-                            <h3><%=tenantDomains[i]%></h3>
-                            <span><%=i18n.localize("Visit Store")%></span>
-                            </center>
+                        %>                            
+                            <a class="list-group-item col-xs-12" href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
+                            <h3 class="list-group-item-heading"><%=tenantDomains[i]%></h3>
+                            <p class="list-group-item-text"><%=i18n.localize("Visit Store")%></p>
                             </a>
-                            </li>
-                        <%}%>
-                        </ul>
-                        <div class="clearfix" ></div>
+                        <%}%>                        
+                        </div>                            
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script language="javascript">
-$(document).ready(function(){
-    $("#holder").jPages({
-      containerID : "tenant_container",
-      previous : "←",
-      next : "→",
-      perPage : 12,
-      delay : 20
-    });
-});
-</script>
-
 <% }); %>
