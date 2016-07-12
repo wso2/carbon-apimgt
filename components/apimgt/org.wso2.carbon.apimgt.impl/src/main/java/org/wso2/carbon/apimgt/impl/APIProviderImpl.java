@@ -4241,39 +4241,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int tenantID = APIUtil.getTenantId(username);
         List<String> policyFileNames = new ArrayList<String>();
         String policyFile = null;
+
         if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
             //need to load whole policy object to get the pipelines
             APIPolicy policy = apiMgtDAO.getAPIPolicy(policyName, APIUtil.getTenantId(username));
-            policyFile = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
+
             //add default policy file name
-            policyFileNames.add(policyFile + "_default");
-            for (Pipeline pipeline : policy.getPipelines()) {
-                policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
+            if (policy.isDeployed()) {
+                policyFile = policy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policyName;
+                policyFileNames.add(policyFile + "_default");
+                for (Pipeline pipeline : policy.getPipelines()) {
+                    policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
+                }
             }
+
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-            policyFile = PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
-            policyFileNames.add(policyFile);
+            ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
+            if (appPolicy.isDeployed()) {
+                policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
+                policyFileNames.add(policyFile);
+            }
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
-            policyFile = PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
-            policyFileNames.add(policyFile);
+            SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
+            if (subscriptionPolicy.isDeployed()) {
+                policyFile = subscriptionPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
+                             policyName;
+                policyFileNames.add(policyFile);
+            }
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
-            policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
-            policyFileNames.add(policyFile);
+            GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
+            if (globalPolicy.isDeployed()) {
+                policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + policyName;
+                policyFileNames.add(policyFile);
+            }
         }
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
         try {
-            //Application and subscription policies can remove straight way as they have single
-            //execution flow.
-            if(PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)){
-                manager.undeployPolicyFromGlobalCEP("app_"+policyName);
-            } else if(PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)){
-                manager.undeployPolicyFromGlobalCEP("sub_"+policyName);
-            } else if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
-                manager.undeployPolicyFromGlobalCEP("global_"+policyName);
-            } else {
-                manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
-            }
+            manager.undeployPolicyFromGatewayManager(policyFileNames.toArray(new String[policyFileNames.size()]));
+
         } catch (Exception e) {
             String msg = "Error while undeploying policy: ";
             log.error(msg, e);
@@ -4281,16 +4287,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         GlobalPolicy globalPolicy = null;
-        if(PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)){
+        if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
         }
         //remove from database
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
 
-        if(globalPolicy != null){
-            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(),"remove");
+        if (globalPolicy != null) {
+            publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "remove");
         }
-
     }
 
     public boolean hasAttachments(String username, String policyName, String policyType)throws APIManagementException{
