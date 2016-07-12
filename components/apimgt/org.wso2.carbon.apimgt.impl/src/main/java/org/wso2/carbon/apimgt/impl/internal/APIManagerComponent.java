@@ -197,6 +197,8 @@ public class APIManagerComponent {
 
             setupImagePermissions();
             APIMgtDBUtil.initialize();
+
+            configureJMSPublisher();
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
@@ -284,7 +286,7 @@ public class APIManagerComponent {
 
     private void addRxtConfigs() throws APIManagementException {
         String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "resources" + File.separator + "rxts";
+                        "resources" + File.separator + "rxts";
         File file = new File(rxtDir);
         //create a FilenameFilter
         FilenameFilter filenameFilter = new FilenameFilter() {
@@ -310,7 +312,7 @@ public class APIManagerComponent {
 
         for (String rxtPath : rxtFilePaths) {
             String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
-                    RegistryConstants.PATH_SEPARATOR + rxtPath;
+                                  RegistryConstants.PATH_SEPARATOR + rxtPath;
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     continue;
@@ -354,13 +356,13 @@ public class APIManagerComponent {
 
         String apiTierFilePath =
                 CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
         String appTierFilePath =
                 CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
         String resTierFilePath =
                 CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
 
         addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
         addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
@@ -433,7 +435,7 @@ public class APIManagerComponent {
         if (role == null) {
             // Required parameter missing - Throw an exception and interrupt startup
             throw new APIManagementException("Required subscriber role parameter missing " +
-                    "in the self sign up configuration");
+                                             "in the self sign up configuration");
         }
 
         try {
@@ -445,17 +447,17 @@ public class APIManagerComponent {
                     log.debug("Creating subscriber role: " + role);
                 }
                 Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                                                                      new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
                 String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
                 String[] userList = new String[]{superTenantName};
                 manager.addRole(role, userList, subscriberPermissions);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
-                    "Self registration might not function properly.", e);
+                                             "Self registration might not function properly.", e);
         }
     }
-    
+
     /**
      * Add the External API Stores Configuration to registry
      * @throws APIManagementException
@@ -491,7 +493,7 @@ public class APIManagerComponent {
                 RegistryType.USER_GOVERNANCE);
 
         String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
-                APPLICATION_ROOT_PERMISSION;
+                                        APPLICATION_ROOT_PERMISSION;
         try {
 
             if (!tenantGovReg.resourceExists(permissionResourcePath)) {
@@ -526,27 +528,36 @@ public class APIManagerComponent {
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
 
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        if (configuration.getThrottleProperties().getJmsPublisherParameters() != null) {
-            adapterConfiguration.setStaticProperties(configuration.getThrottleProperties().getJmsPublisherParameters());
 
-            try {
-                ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
-            } catch (OutputEventAdapterException e) {
-                log.warn("Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly", e);
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            if (configuration.getThrottleProperties().getJmsPublisherParameters() != null) {
+                adapterConfiguration
+                        .setStaticProperties(configuration.getThrottleProperties().getJmsPublisherParameters());
+
+                try {
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+                } catch (OutputEventAdapterException e) {
+                    log.warn(
+                            "Exception occurred while creating JMS Event Adapter. Request Blocking may not work properly",
+                            e);
+                }
+            } else {
+                log.info("JMS Publisher not enabled.");
             }
         } else {
-            log.info("JMS Publisher not enabled.");
+            log.info("api-manager.xml not loaded. JMS Publisher will not be enabled.");
         }
 
     }
 
     private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
         APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
-   }
+    }
 
-   protected void setConfigurationContextService(ConfigurationContextService contextService) {
+    protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
     }
 
@@ -574,7 +585,6 @@ public class APIManagerComponent {
      */
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
-        configureJMSPublisher();
     }
 
     /**
