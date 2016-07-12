@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "0.9.0",
+    "version": "0.10.0",
     "title": "WSO2 API Manager - Admin",
     "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
     "contact": {
@@ -18,7 +18,7 @@
     "https"
   ],
   "host": "apis.wso2.com",
-  "basePath": "/api/am/admin/v0.9",
+  "basePath": "/api/am/admin/v0.10",
   "consumes": [
     "application/json"
   ],
@@ -63,12 +63,6 @@
         "description": "Get all Application level throttle policies\n",
         "parameters": [
           {
-            "$ref": "#/parameters/limit"
-          },
-          {
-            "$ref": "#/parameters/offset"
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -79,7 +73,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Application Policies"
         ],
         "responses": {
           "200": {
@@ -132,7 +126,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Application Policies"
         ],
         "responses": {
           "201": {
@@ -184,7 +178,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Application Policies"
         ],
         "responses": {
           "200": {
@@ -240,7 +234,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Application Policies"
         ],
         "responses": {
           "200": {
@@ -288,7 +282,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Application Policies"
         ],
         "responses": {
           "200": {
@@ -343,12 +337,6 @@
         "description": "Get all Subscription level throttle policies\n",
         "parameters": [
           {
-            "$ref": "#/parameters/limit"
-          },
-          {
-            "$ref": "#/parameters/offset"
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -359,7 +347,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -412,7 +400,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "201": {
@@ -464,7 +452,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -520,7 +508,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -568,7 +556,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -623,12 +611,6 @@
         "description": "Get all Custom Rules\n",
         "parameters": [
           {
-            "$ref": "#/parameters/limit"
-          },
-          {
-            "$ref": "#/parameters/offset"
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -639,7 +621,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Custom Rules"
         ],
         "responses": {
           "200": {
@@ -692,7 +674,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Custom Rules"
         ],
         "responses": {
           "201": {
@@ -744,7 +726,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Custom Rules"
         ],
         "responses": {
           "200": {
@@ -800,7 +782,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Custom Rules"
         ],
         "responses": {
           "200": {
@@ -848,7 +830,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Custom Rules"
         ],
         "responses": {
           "200": {
@@ -896,18 +878,12 @@
         }
       }
     },
-    "/throttling/policies/advanced-policies": {
+    "/throttling/policies/advanced": {
       "get": {
         "x-scope": "apim:tier_view",
         "summary": "Get all Advanced level throttle policies",
         "description": "Get all Advanced level throttle policies\n",
         "parameters": [
-          {
-            "$ref": "#/parameters/limit"
-          },
-          {
-            "$ref": "#/parameters/offset"
-          },
           {
             "$ref": "#/parameters/Accept"
           },
@@ -919,7 +895,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Advanced Policies"
         ],
         "responses": {
           "200": {
@@ -972,7 +948,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "201": {
@@ -1007,7 +983,7 @@
         }
       }
     },
-    "/throttling/policies/advanced-policies/{policyId}": {
+    "/throttling/policies/advanced/{policyId}": {
       "get": {
         "x-scope": "apim:tier_view",
         "summary": "Retrieve an Advanced Policy",
@@ -1024,7 +1000,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -1080,7 +1056,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -1128,7 +1104,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Subscription Policies"
         ],
         "responses": {
           "200": {
@@ -1183,12 +1159,6 @@
         "description": "Get all blocking condtions\n",
         "parameters": [
           {
-            "$ref": "#/parameters/limit"
-          },
-          {
-            "$ref": "#/parameters/offset"
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -1199,7 +1169,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Blacklist"
         ],
         "responses": {
           "200": {
@@ -1252,7 +1222,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Blacklist"
         ],
         "responses": {
           "201": {
@@ -1304,7 +1274,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Blacklist"
         ],
         "responses": {
           "200": {
@@ -1360,7 +1330,7 @@
           }
         ],
         "tags": [
-          "Throttling"
+          "Blacklist"
         ],
         "responses": {
           "200": {
@@ -1368,81 +1338,6 @@
           },
           "404": {
             "description": "Not Found.\nResource to be deleted does not exist.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "412": {
-            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "put": {
-        "x-scope": "apim:bl_manage",
-        "summary": "Update a Blocking condition",
-        "description": "Update a Blocking condition\n",
-        "parameters": [
-          {
-            "$ref": "#/parameters/conditionId"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Blocking condition object that needs to be modified\n",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/BlockingCondition"
-            }
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
-          },
-          {
-            "$ref": "#/parameters/If-Match"
-          },
-          {
-            "$ref": "#/parameters/If-Unmodified-Since"
-          }
-        ],
-        "tags": [
-          "Throttling"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK.\nPolicy updated.\n",
-            "schema": {
-              "$ref": "#/definitions/BlockingCondition"
-            },
-            "headers": {
-              "Location": {
-                "description": "The URL of the newly created resource.\n",
-                "type": "string"
-              },
-              "Content-Type": {
-                "description": "The content type of the body.\n",
-                "type": "string"
-              },
-              "ETag": {
-                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional request.\n",
-                "type": "string"
-              },
-              "Last-Modified": {
-                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n",
-                "type": "string"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.\nInvalid request or validation error.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found.\nThe resource to be updated does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1478,20 +1373,6 @@
       "description": "Blocking condition identifier \n",
       "type": "string",
       "required": true
-    },
-    "limit": {
-      "name": "limit",
-      "in": "query",
-      "description": "Maximum size of resource array to return.\n",
-      "default": 25,
-      "type": "integer"
-    },
-    "offset": {
-      "name": "offset",
-      "in": "query",
-      "description": "Starting point within the complete list of items qualified.\n",
-      "default": 0,
-      "type": "integer"
     },
     "Accept": {
       "name": "Accept",
@@ -1584,7 +1465,13 @@
     },
     "ThrottlePolicy": {
       "title": "Generic Throttle Policy",
+      "required": [
+        "policyName"
+      ],
       "properties": {
+        "policyId": {
+          "type": "string"
+        },
         "policyName": {
           "type": "string"
         },
@@ -1594,32 +1481,42 @@
         "description": {
           "type": "string"
         },
-        "defaultLimit": {
-          "$ref": "#/definitions/ThrottleLimit"
-        },
-        "tenantDomain": {
-          "type": "string"
-        },
         "isDeployed": {
           "type": "boolean"
         }
       }
     },
-    "AdvancedThrottlePolicy": {
+    "AdvancedThrottlePolicyInfo": {
       "title": "Advanced Throttling Policy",
+      "required": [
+        "defaultLimit"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
         },
         {
           "properties": {
-            "userLevel": {
-              "type": "string",
-              "description": "Applicable throttling level",
-              "enum": [
-                "apiLevel",
-                "userLevel"
-              ]
+            "defaultLimit": {
+              "$ref": "#/definitions/ThrottleLimit"
+            }
+          }
+        }
+      ]
+    },
+    "AdvancedThrottlePolicy": {
+      "title": "Advanced Throttling Policy",
+      "required": [
+        "defaultLimit"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/ThrottlePolicy"
+        },
+        {
+          "properties": {
+            "defaultLimit": {
+              "$ref": "#/definitions/ThrottleLimit"
             },
             "conditionalGroups": {
               "type": "array",
@@ -1639,27 +1536,29 @@
           "description": "Number of Advanced throttle policies returned.\n",
           "example": 1
         },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=2&query=\"\n"
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/advnced-policies?limit=1&offset=0&query=\"\n"
-        },
         "list": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AdvancedThrottlePolicy"
+            "$ref": "#/definitions/AdvancedThrottlePolicyInfo"
           }
         }
       }
     },
     "ApplicationThrottlePolicy": {
       "title": "Application Throttle Policy",
+      "required": [
+        "defaultLimit"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
+        },
+        {
+          "properties": {
+            "defaultLimit": {
+              "$ref": "#/definitions/ThrottleLimit"
+            }
+          }
         }
       ]
     },
@@ -1671,14 +1570,6 @@
           "description": "Number of Application throttle policies returned.\n",
           "example": 1
         },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/application?limit=1&offset=2&query=\"\n"
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/application?limit=1&offset=0&query=\"\n"
-        },
         "list": {
           "type": "array",
           "items": {
@@ -1689,12 +1580,18 @@
     },
     "SubscriptionThrottlePolicy": {
       "title": "Subscription Throttle Policy",
+      "required": [
+        "defaultLimit"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
         },
         {
           "properties": {
+            "defaultLimit": {
+              "$ref": "#/definitions/ThrottleLimit"
+            },
             "rateLimitCount": {
               "type": "integer"
             },
@@ -1730,14 +1627,6 @@
           "description": "Number of Subscription throttle policies returned.\n",
           "example": 1
         },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/subscription?limit=1&offset=2&query=\"\n"
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/subscription?limit=1&offset=0&query=\"\n"
-        },
         "list": {
           "type": "array",
           "items": {
@@ -1748,6 +1637,10 @@
     },
     "CustomRule": {
       "title": "Custom Rule",
+      "required": [
+        "siddhiQuery",
+        "keyTemplate"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottlePolicy"
@@ -1772,14 +1665,6 @@
           "description": "Number of Custom Rules returned.\n",
           "example": 1
         },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/custom?limit=1&offset=2&query=\"\n"
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/custom?limit=1&offset=0&query=\"\n"
-        },
         "list": {
           "type": "array",
           "items": {
@@ -1790,13 +1675,11 @@
     },
     "ConditionalGroup": {
       "title": "Conditional Groups for Throttling",
+      "required": [
+        "limit",
+        "conditions"
+      ],
       "properties": {
-        "id": {
-          "type": "integer"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
         "description": {
           "type": "string"
         },
@@ -1841,9 +1724,6 @@
           ]
         },
         "invertCondition": {
-          "type": "boolean"
-        },
-        "enabled": {
           "type": "boolean"
         }
       }
@@ -1898,6 +1778,10 @@
     },
     "HeaderCondition": {
       "title": "HTTP Header based throttle condition",
+      "required": [
+        "headerName",
+        "headerValue"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleCondition"
@@ -1916,6 +1800,9 @@
     },
     "IPCondition": {
       "title": "IP based throttle condition",
+      "required": [
+        "specificIP"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleCondition"
@@ -1944,6 +1831,10 @@
     },
     "JWTClaimsCondition": {
       "title": "JWT claim attibute based throttle condition",
+      "required": [
+        "claimUrl",
+        "attribute"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleCondition"
@@ -1962,6 +1853,10 @@
     },
     "QueryParameterCondition": {
       "title": "Query parameter based throttle condition",
+      "required": [
+        "parameterName",
+        "parameterValue"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleCondition"
@@ -1985,7 +1880,9 @@
         "BandwidthLimit"
       ],
       "required": [
-        "type"
+        "type",
+        "timeUnit",
+        "unitTime"
       ],
       "properties": {
         "type": {
@@ -2004,6 +1901,10 @@
       }
     },
     "BandwidthLimit": {
+      "required": [
+        "dataAmount",
+        "dataUnit"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleLimit"
@@ -2022,6 +1923,9 @@
       ]
     },
     "RequestCountLimit": {
+      "required": [
+        "requestCount"
+      ],
       "allOf": [
         {
           "$ref": "#/definitions/ThrottleLimit"
@@ -2039,12 +1943,13 @@
     "BlockingCondition": {
       "title": "Blocking Conditions",
       "description": "Blocking Conditions",
+      "required": [
+        "conditionType",
+        "conditionValue"
+      ],
       "properties": {
         "conditionId": {
           "type": "string"
-        },
-        "enabled": {
-          "type": "boolean"
         },
         "conditionType": {
           "type": "string"
@@ -2062,14 +1967,6 @@
           "description": "Number of Blocking Conditions returned.\n",
           "example": 1
         },
-        "next": {
-          "type": "string",
-          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/blocking-conditions?limit=1&offset=2&query=\"\n"
-        },
-        "previous": {
-          "type": "string",
-          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/blocking-conditions?limit=1&offset=0&query=\"\n"
-        },
         "list": {
           "type": "array",
           "items": {
@@ -2080,6 +1977,10 @@
     },
     "CustomAttribute": {
       "title": "Name-Value pair",
+      "required": [
+        "name",
+        "value"
+      ],
       "properties": {
         "name": {
           "type": "string"
