@@ -308,5 +308,8 @@
     "subscription": "subscription",
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
-    "timeWarn": "timeWarn"
+    "timeWarn": "timeWarn",
+    "All": "All",
+    "Prototyped":"Prototyped",
+    "Production":"Production"
 }

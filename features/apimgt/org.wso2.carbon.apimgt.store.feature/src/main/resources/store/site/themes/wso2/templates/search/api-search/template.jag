@@ -6,6 +6,14 @@ var tenant = jagg.getTenantDomain();
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
   <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
+      <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%=i18n.localize("All")%> <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li><a href="#"><%=i18n.localize("All")%></a></li>
+            <li><a href="#"><%=i18n.localize("Production")%></a></li>
+            <li><a href="#"><%=i18n.localize("Prototyped")%></a></li>
+          </ul>
+      </div>
       <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search Options")%>...">
       <div class="input-group-btn">
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
