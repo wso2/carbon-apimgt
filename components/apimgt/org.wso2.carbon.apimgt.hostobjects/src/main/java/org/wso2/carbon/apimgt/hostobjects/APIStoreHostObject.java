@@ -1072,7 +1072,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     
-
+    @Deprecated
     public static NativeObject jsFunction_searchPaginatedAPIsByType(Context cx,
                                                                     Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
