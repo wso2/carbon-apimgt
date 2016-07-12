@@ -260,6 +260,13 @@ a.remove_rating:hover{
     margin:0px;
 }
 
+.forum-edit-delete{
+    float:right;
+    position:relative;
+    top:5px;
+    padding-right:10px;
+    z-index:999;
+}
 /* =============================================================================
  * Same height columns support
  * ============================================================================= */
@@ -429,9 +436,16 @@ a.remove_rating:hover{
   border: 1px solid #f5f5f5;
   background: #f5f5f5;
 }
-
+.comment-text > *{
+    margin:0px;
+}
 .comment-message {
   color: #333;
+}
+.comment-message .successfully-added{
+  float:right;
+  font-weight:500;
+  color: #5cb85c;
 }
 .comment-extra{
     font-size:12px;

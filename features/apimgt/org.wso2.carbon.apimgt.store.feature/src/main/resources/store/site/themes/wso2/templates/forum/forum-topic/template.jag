@@ -4,7 +4,7 @@
 
   <div id="forum_topic_details_page">
     <div id="forum_topic_title_bar" class="title-section"></div>
-    <div id="forum_topic_content"></div>
+    <div id="forum_topic_content" class="white-wrapper add-padding-3x"></div>
   </div>
 
 <!-- STRAT : Handlebars templates -->
@@ -35,6 +35,7 @@
 <script id="forum_topic_details_template" type="text/x-handlebars-template">
 
   <div id="forum_topic_view_block">
+  <h4>Description</h4>
     <div id="forum_topic_description" class="forum-description word-break">
       {{# html_sanitize replies.topic.0.description }}{{/html_sanitize}}
     </div>
@@ -43,18 +44,18 @@
   <div id="forum_topic_edit_block" style="display: none">
     <div id="forum_topic_description_edit_block" class="topic_description_edit">
       <div id="forum_topic_description_edit_editor" data-id="{{ replies.topic.0.topicId}}"></div>
-      <div class="edit-topic-form-actions">
+      <div class="edit-topic-form-actions add-margin-top-2x">
         <a id="forum_save_updated_topic_button" class="btn btn-primary">
           <%=i18n.localize( 'save')%>
         </a>
-        <a id="forum_cancel_topic_edit_button" class="btn">
+        <a id="forum_cancel_topic_edit_button" class="btn btn-secondary">
           <%=i18n.localize( 'cancel')%>
         </a>
       </div>
     </div>
   </div>
 
-  <div id="forum_topic_rating_block" class="row">
+  <div id="forum_topic_rating_block" class="row add-margin-top-5x">
     <div class="col-xs-4 col-sm-4 col-md-1 col-lg-1">
         <div class="average-rating">
             <%=inputs.averageRating%>
@@ -74,66 +75,73 @@
       <label><strong><h4><%=i18n.localize('forum.addReply.title')%></h4></strong></label>
     </div>
     <div id="forum_reply_editor"></div>
-    <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('forum.addReply.replyToThread')%></a>
+    <div class="add-margin-top-2x">
+        <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('forum.addReply.replyToThread')%></a>
+    </div>
   </div>
 
   <%}%>
 </script>
 
 <script id="forum_replies_list_template" type="text/x-handlebars-template">
-        
+
   <div id="forum_replies_list" style="display: none;">
     <div class="replies-list-title"><h4><%=i18n.localize('forum.replies')%></h4></div>
-    <div class="clearfix">
-    <table class="table table-striped forum-replies">
-      <tbody id="reply_list_tbody">
-        <tr id="forum_reply_added_block" style="display: none;">
-          <td id="forum_reply_info_temp" class="col-sm-3"></td>
-          <td id="forum_reply_content_temp"></td>
-          <td></td>
-        </tr>
+
+        <div id="forum_reply_added_block" style="display: none;" class="comment-container">
+            <div class="comment-box">
+              <div class="comment-body">
+                  <span class="tip tip-down"></span>
+                  <div class="comment-message">
+                      <span class="successfully-added"><%=i18n.localize('Reply Successfully Added')%></span>
+                      <span id="forum_reply_content_temp" class="comment-text word-break"></span>
+                  </div>
+              </div>
+              <div id="forum_reply_info_temp" class="comment-extra"></div>
+            </div>
+        </div>
 
         {{#each replies.replies}}
 
-        <tr>
-          <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
-            {{# html_sanitize  reply }}{{/ html_sanitize }}
-          </td>
-          <td class="col-sm-3">
-            {{ date }}
-            <br/>{{ timeStamp }}
-            <br/>
-            <%=i18n.localize( 'forum.by')%> {{ createdBy }}
-            <br/>
+        <div class="comment-container" id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
 
+        <%if(jagg.getUser()){%>
+          {{#if_creator createdBy user}}
+          <div class="forum-edit-delete">
+            <a class="forum_edit_reply_icon btn add-padding-1x" data-id="{{ replyId }}" title="Edit this post">
+                <span class="fw-stack" style="font-size:10px">
+                    <i class="fw fw-edit fw-stack-1x"></i>
+                     <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span>
+            </a>
+            <a class="forum_delete_reply_icon btn add-padding-1x" data-id="{{ replyId }}" title="Delete post">
+                <span class="fw-stack" style="font-size:10px">
+                    <i class="fw fw-delete fw-stack-1x"></i>
+                     <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span>
+            </a>
+          </div>
+          {{/if_creator}}
+        <%}%>
 
-          </td>
-          <td>
-            <%if(jagg.getUser()){%>
-              {{#if_creator createdBy user}}
-                <a class="forum_edit_reply_icon btn btn-sm padding-reduce-on-grid-view" data-id="{{ replyId }}" title="Edit this post"><i class="fw fw-edit"></i></a>
-                <a class="forum_delete_reply_icon" data-id="{{ replyId }}" title="Delete post"><i class="fw fw-delete"></i></a>
-              {{/if_creator}}
-            <%}%>
-          </td>
-        </tr>
-        <tr>
-          <td id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}" colspan="2">
-            <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
-            <div class="forum-reply-actions">
-              <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}">
-                <%=i18n.localize( 'save')%>
-              </a>
-              <a class="btn forum_cancel_reply_edit_button" data-id="{{ replyId }}">
-                <%=i18n.localize( 'cancel')%>
-              </a>
+            <div class="comment-box">
+                <div class="comment-body">
+                    <span class="tip tip-down"></span>
+                    <div class="comment-message">
+                        <span class="comment-text word-break">{{# html_sanitize  reply }}{{/ html_sanitize }}</span>
+                    </div>
+                </div>
+                <div class="comment-extra">Posted <%=i18n.localize( 'forum.by')%><strong> {{ createdBy }}</strong> on <span class="dateFull">{{ date }}, {{ timeStamp }}</span></div>
             </div>
-          </td>
-        </tr>
+        </div>
+        <div id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}">
+            <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
+            <div class="forum-reply-actions add-margin-top-2x">
+                <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}"><%=i18n.localize( 'save')%></a>
+                <a class="btn btn-secondary forum_cancel_reply_edit_button" data-id="{{ replyId }}"><%=i18n.localize( 'cancel')%></a>
+            </div>
+        </div>
         {{/each}}
-
-      </tbody>
-    </table>
     <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
     <div><!-- clearfix -->
   </div>
