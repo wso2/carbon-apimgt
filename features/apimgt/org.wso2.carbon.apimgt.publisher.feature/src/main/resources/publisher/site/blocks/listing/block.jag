@@ -28,8 +28,9 @@ jagg.block("listing", {
         var start = itemsPerPage*(page-1);
         if (query) {
             mod = jagg.module("search");
-            result = mod.searchAPIs(null,query);
-            apis = result.apis;
+            result = mod.searchAPIs(null,query,String(start),String(itemsPerPage));
+            apis = result.response.apis;
+            length = result.response.totalLength;
             error=result.error,
             message=result.message,
             mode="search"

@@ -1375,12 +1375,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     /**
-     * Pagination API search based on solr indexing
-     *
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate 
+     * search in multiple fields. 
      * @param registry
-     * @param searchTerm
-     * @param searchType
-     * @return
+     * @param searchQuery. Ex: provider=*admin*&version=*1*
+     * @return API result
      * @throws APIManagementException
      */
 

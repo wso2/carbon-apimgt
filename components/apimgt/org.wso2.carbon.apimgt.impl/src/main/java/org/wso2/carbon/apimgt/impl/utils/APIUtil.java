@@ -5851,11 +5851,11 @@ public final class APIUtil {
                 throw new APIManagementException("Search term is missing. Try again with valid search query.");
             }
         } else {
-            if (!criteria.endsWith("*")) {
-                criteria = criteria + "*";
+            if (!searchValue.endsWith("*")) {
+                searchValue = searchValue + "*";
             }
-            if (!criteria.startsWith("*")) {
-                criteria = "*" + criteria;
+            if (!searchValue.startsWith("*")) {
+                searchValue = "*" + searchValue;
             }                            
         }
         if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchKey)) {
