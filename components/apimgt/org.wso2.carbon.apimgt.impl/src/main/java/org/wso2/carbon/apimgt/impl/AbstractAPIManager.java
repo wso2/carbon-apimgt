@@ -932,11 +932,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameExist(apiName, tenantName);
     }
 
-    public void addSubscriber(Subscriber subscriber, String groupingId)
-            throws APIManagementException {
-        apiMgtDAO.addSubscriber(subscriber, groupingId);
-    }
-
     public void addSubscriber(String username, String groupingId)
             throws APIManagementException {
 
@@ -949,11 +944,35 @@ public abstract class AbstractAPIManager implements APIManager {
                     .getTenantId(MultitenantUtils.getTenantDomain(username));
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
+            //Add a default application once subscriber is added
+            addDefaultApplicationForSubscriber(subscriber);
         } catch (APIManagementException e) {
             handleException("Error while adding the subscriber " + subscriber.getName(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             handleException("Error while adding the subscriber " + subscriber.getName(), e);
         }
+    }
+
+    /**
+     * Add default application on the first time a subscriber is added to the database
+     * @param subscriber Subscriber
+     *
+     * @throws APIManagementException if an error occurs while adding default application
+     */
+    private void addDefaultApplicationForSubscriber (Subscriber subscriber) throws APIManagementException {
+        Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
+        if (APIUtil.isEnabledUnlimitedTier()) {
+            defaultApp.setTier(APIConstants.UNLIMITED_TIER);
+        } else {
+            Map<String, Tier> throttlingTiers = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE,
+                                                                 MultitenantUtils.getTenantDomain(subscriber.getName()));
+            Set<Tier> tierValueList = new HashSet<Tier>(throttlingTiers.values());
+            List<Tier> sortedTierList = APIUtil.sortTiers(tierValueList);
+            defaultApp.setTier(sortedTierList.get(0).getName());
+        }
+        //application will not be shared within the group
+        defaultApp.setGroupId("");
+        apiMgtDAO.addApplication(defaultApp, subscriber.getName());
     }
 
     public void updateSubscriber(Subscriber subscriber)
