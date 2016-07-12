@@ -4476,8 +4476,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Checking whether EventPublisherName is provided.  An empty HashMap is set so that it can be used to keep transport.jms
         // .Header value.
-        if (throttleProperties.getJmsEventPublisherName() != null) {
-            eventAdapterService.publish(throttleProperties.getJmsEventPublisherName(), new HashMap<String, String>()
+        if (throttleProperties.getJmsPublisherParameters() != null) {
+            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, new HashMap<String, String>()
                     , blockingMessage);
         }
     }
@@ -4494,9 +4494,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Getting JMS Publisher name from config. An empty HashMap is set so that it can be used to keep transport.jms
         // .Header value.
-        if (throttleProperties.getJmsEventPublisherName() != null) {
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(throttleProperties
-                                                                                                .getJmsEventPublisherName(),
+        if (throttleProperties.getJmsPublisherParameters() != null) {
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(APIConstants.BLOCKING_EVENT_PUBLISHER,
                                                                                         new HashMap<String, String>()
                     , keyTemplateMap);
         }

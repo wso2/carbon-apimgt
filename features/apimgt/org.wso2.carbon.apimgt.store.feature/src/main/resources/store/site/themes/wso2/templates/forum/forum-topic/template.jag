@@ -10,18 +10,23 @@
 <!-- STRAT : Handlebars templates -->
 
 <script id="fourm_topic_title_template" type="text/x-handlebars-template">
-  
-  <h2 id="forum_topic_subject_lable">{{ replies.topic.0.subject}} 
-  <%if(jagg.getUser()){%>
-    {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
-        <small><i class="fa fa-pencil-square-o " id="forum_edit_topic_icon" data-id="{{ topicId }}"></i></small>
-    {{/if_creator}}
-  <%}%>
-  </h2>
-  <br>
+
+  <div class="page-header">
+      <h2 id="forum_topic_subject_lable" class="word-break">
+        <span>{{ replies.topic.0.subject}}</span>
+        <%if(jagg.getUser()){%>
+            {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
+                <a class="fw-stack" id="forum_edit_topic_icon" data-id="{{ topicId }}" style="font-size:12px">
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                    <i class="fw fw-edit fw-stack-1x"></i>
+                </a>
+            {{/if_creator}}
+          <%}%>
+      </h2>
+  </div>
+
   <div>
-    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control input-lg" style="display: none" value="{{ replies.topic.0.subject}}">
-    </input>
+    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control" style="display: none" value="{{ replies.topic.0.subject}}"></input>
   </div>
 
 </script>
@@ -30,13 +35,12 @@
 <script id="forum_topic_details_template" type="text/x-handlebars-template">
 
   <div id="forum_topic_view_block">
-    <div id="forum_topic_description" class="forum-description">
+    <div id="forum_topic_description" class="forum-description word-break">
       {{# html_sanitize replies.topic.0.description }}{{/html_sanitize}}
     </div>
   </div>
 
   <div id="forum_topic_edit_block" style="display: none">
-
     <div id="forum_topic_description_edit_block" class="topic_description_edit">
       <div id="forum_topic_description_edit_editor" data-id="{{ replies.topic.0.topicId}}"></div>
       <div class="edit-topic-form-actions">
@@ -48,44 +52,53 @@
         </a>
       </div>
     </div>
-
   </div>
 
-  <div class="col-sm-12"><hr /></div>
-  <div id="forum_topic_rating_block" class="col-sm-12">
-        <div class="average-rating col-sm-1">
-          <%=inputs.averageRating%>
+  <div id="forum_topic_rating_block" class="row">
+    <div class="col-xs-4 col-sm-4 col-md-1 col-lg-1">
+        <div class="average-rating">
+            <%=inputs.averageRating%>
         </div>
-        <div class="user_rating col-sm-11">
-          Your Rating : <span class="your_rating"><% if(inputs.userRating){%><%= inputs.userRating %>/5<% }else{ %>N/A<% } %></span><br />
-            <input type="hidden" class="rating-tooltip-manual rate_save" value="<%= inputs.userRating %>"/>
-          <a class="remove_rating"><i class="fa fa-times-circle"></i></a>
-        </div
-  </div>
-  </div>
-  <div class="col-sm-12"><hr /></div>
-
-  <div id="forum_replies_block" class="clearfix col-sm-12">
+    </div>
+    <div class="user_rating col-xs-8 col-sm-8 col-md-11 col-lg-11">
+        Your Rating : <span class="your_rating"><%if(inputs.userRating){%><%= inputs.userRating %>/5<%}else{ %>N/A<%} %></span><br>
+        <input class="rating-tooltip-manual rate_save" type="hidden" value="<%= inputs.userRating %>"> <a class="remove_rating"><i class="fa fa-times-circle"></i></a>
+    </div>
   </div>
 
+  <div id="forum_replies_block" class="add-padding-top-5x"></div>
+<%if(jagg.getUser()){%>
+
+  <div class="forum_form add-reply add-padding-top-5x">
+    <div>
+      <label><strong><h4><%=i18n.localize('Add Reply')%></h4></strong></label>
+    </div>
+    <div id="forum_reply_editor"></div>
+    <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('Reply to Thread')%></a>
+  </div>
+
+  <%}%>
 </script>
 
 <script id="forum_replies_list_template" type="text/x-handlebars-template">
         
   <div id="forum_replies_list" style="display: none;">
-    <div class="pull-left replies-list-title" style="vertical-align:middle;"><label><h4><%=i18n.localize("Replies")%></h4></label></div>
-    <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
+    <div class="replies-list-title"><h4><%=i18n.localize('Replies')%></h4></div>
     <div class="clearfix">
-    <table class="table table-striped table-bordered forum-replies">
+    <table class="table table-striped forum-replies">
       <tbody id="reply_list_tbody">
         <tr id="forum_reply_added_block" style="display: none;">
           <td id="forum_reply_info_temp" class="col-sm-3"></td>
           <td id="forum_reply_content_temp"></td>
+          <td></td>
         </tr>
 
         {{#each replies.replies}}
 
         <tr>
+          <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
+            {{# html_sanitize  reply }}{{/ html_sanitize }}
+          </td>
           <td class="col-sm-3">
             {{ date }}
             <br/>{{ timeStamp }}
@@ -93,17 +106,19 @@
             <%=i18n.localize("By")%> {{ createdBy }}
             <br/>
 
+
+          </td>
+          <td>
             <%if(jagg.getUser()){%>
               {{#if_creator createdBy user}}
-                <span class="glyphicon glyphicon-trash forum_delete_reply_icon" data-id="{{ replyId }}" ></span>
-                <span class="glyphicon glyphicon-edit forum_edit_reply_icon" data-id="{{ replyId }}" ></span>
+                <a class="forum_edit_reply_icon btn btn-sm padding-reduce-on-grid-view" data-id="{{ replyId }}" title="Edit this post"><i class="fw fw-edit"></i></a>
+                <a class="forum_delete_reply_icon" data-id="{{ replyId }}" title="Delete post"><i class="fw fw-delete"></i></a>
               {{/if_creator}}
             <%}%>
           </td>
-          <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
-            {{# html_sanitize  reply }}{{/ html_sanitize }}
-          </td>
-          <td id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}">
+        </tr>
+        <tr>
+          <td id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}" colspan="2">
             <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
             <div class="forum-reply-actions">
               <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}">
@@ -114,27 +129,15 @@
               </a>
             </div>
           </td>
-
         </tr>
         {{/each}}
 
       </tbody>
-    </table>  
-    <br />
+    </table>
+    <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
     <div><!-- clearfix -->
   </div>
 
-  <%if(jagg.getUser()){%>
-  
-  <form class="form-horizontal forum_form add-reply" >
-    <div>
-      <label><strong><h4><%=i18n.localize("Add Reply")%></h4></strong></label>
-    </div>
-    <div id="forum_reply_editor"></div>
-    <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize("Reply to Thread")%></a>
-  </form>
-
-  <%}%>
 
 </script>
 

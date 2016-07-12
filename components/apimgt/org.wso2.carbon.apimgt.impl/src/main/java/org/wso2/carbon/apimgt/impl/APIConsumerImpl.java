@@ -585,84 +585,86 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             
             
             criteria = criteria + APIUtil.getORBasedSearchCriteria(apiStatus);
-            
-            if (apiStatus != null && apiStatus.length > 0) {
-                List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts(criteria, userRegistry, 
-                                                                                      APIConstants.API_RXT_MEDIA_TYPE);
-                totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.size() == 0) {
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-
-                // Check to see if we can speculate that there are more APIs to be loaded
-                if (maxPaginationLimit == totalLength) {
-                    isMore = true;  // More APIs exist so we cannot determine the total API count without incurring a
-                            // performance hit
-                    --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
-                }
-                int tempLength=0;
-                for (GovernanceArtifact artifact : genericArtifacts) {
-
-                    API api  = null;
-                    try {
-                        api = APIUtil.getAPI(artifact);
-                    } catch (APIManagementException e) {
-                        //log and continue since we want to load the rest of the APIs.
-                        log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                                e);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
+            if (artifactManager != null) {
+                if (apiStatus != null && apiStatus.length > 0) {
+                    List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts(criteria, userRegistry,
+                            APIConstants.API_RXT_MEDIA_TYPE);
+                    totalLength = PaginationContext.getInstance().getLength();
+                    if (genericArtifacts == null || genericArtifacts.size() == 0) {
+                        result.put("apis", apiSortedSet);
+                        result.put("totalLength", totalLength);
+                        result.put("isMore", isMore);
+                        return result;
                     }
-                    if (api != null) {
-                        if (returnAPITags) {
-                            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-                            Set<String> tags = new HashSet<String>();
-                            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-                            for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
-                                tags.add(tag1.getTagName());
-                            }
-                            api.addTags(tags);
-                        }
 
-                        String key;
-                        //Check the configuration to allow showing multiple versions of an API true/false
-                        if (!displayMultipleVersions) { //If allow only showing the latest version of an API
-                            key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                            API existingAPI = latestPublishedAPIs.get(key);
-                            if (existingAPI != null) {
-                                // If we have already seen an API with the same name, make sure
-                                // this one has a higher version number
-                                if (versionComparator.compare(api, existingAPI) > 0) {
+                    // Check to see if we can speculate that there are more APIs to be loaded
+                    if (maxPaginationLimit == totalLength) {
+                        isMore = true;  // More APIs exist so we cannot determine the total API count without incurring a
+                        // performance hit
+                        --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
+                    }
+                    int tempLength = 0;
+                    for (GovernanceArtifact artifact : genericArtifacts) {
+
+                        API api = null;
+                        try {
+                            api = APIUtil.getAPI(artifact);
+                        } catch (APIManagementException e) {
+                            //log and continue since we want to load the rest of the APIs.
+                            log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                                    e);
+                        }
+                        if (api != null) {
+                            if (returnAPITags) {
+                                String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+                                Set<String> tags = new HashSet<String>();
+                                org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+                                for (org.wso2.carbon.registry.core.Tag tag1 : tag) {
+                                    tags.add(tag1.getTagName());
+                                }
+                                api.addTags(tags);
+                            }
+
+                            String key;
+                            //Check the configuration to allow showing multiple versions of an API true/false
+                            if (!displayMultipleVersions) { //If allow only showing the latest version of an API
+                                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                                API existingAPI = latestPublishedAPIs.get(key);
+                                if (existingAPI != null) {
+                                    // If we have already seen an API with the same name, make sure
+                                    // this one has a higher version number
+                                    if (versionComparator.compare(api, existingAPI) > 0) {
+                                        latestPublishedAPIs.put(key, api);
+                                    }
+                                } else {
+                                    // We haven't seen this API before
                                     latestPublishedAPIs.put(key, api);
                                 }
-                            } else {
-                                // We haven't seen this API before
-                                latestPublishedAPIs.put(key, api);
+                            } else { //If allow showing multiple versions of an API
+                                multiVersionedAPIs.add(api);
                             }
-                        } else { //If allow showing multiple versions of an API
-                            multiVersionedAPIs.add(api);
+                        }
+                        tempLength++;
+                        if (tempLength >= totalLength) {
+                            break;
                         }
                     }
-                    tempLength++;
-                    if (tempLength >= totalLength){
-                        break;
+                    if (!displayMultipleVersions) {
+                        apiSortedSet.addAll(latestPublishedAPIs.values());
+                        result.put("apis", apiSortedSet);
+                        result.put("totalLength", totalLength);
+                        result.put("isMore", isMore);
+                        return result;
+                    } else {
+                        apiVersionsSortedSet.addAll(multiVersionedAPIs);
+                        result.put("apis", apiVersionsSortedSet);
+                        result.put("totalLength", totalLength);
+                        result.put("isMore", isMore);
+                        return result;
                     }
                 }
-                if (!displayMultipleVersions) {
-                    apiSortedSet.addAll(latestPublishedAPIs.values());
-                    result.put("apis",apiSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                } else {
-                    apiVersionsSortedSet.addAll(multiVersionedAPIs);
-                    result.put("apis",apiVersionsSortedSet);
-                    result.put("totalLength",totalLength);
-                    result.put("isMore", isMore);
-                    return result;
-                }
-          }
+            }
         } catch (RegistryException e) {
             handleException("Failed to get all published APIs", e);
         } catch (UserStoreException e) {
@@ -1588,11 +1590,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             userNameWithoutDomain = nameParts[0];
         }
 
+        int loggedInUserTenantDomain = -1;
+        if(!StringUtils.isEmpty(loggedUsername)) {
+            loggedInUserTenantDomain = APIUtil.getTenantId(loggedUsername);
+        }
+
         if (loggedUsername.isEmpty()) {
             // Anonymous user is viewing.
             checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+        } else if (tenantId != loggedInUserTenantDomain) {
+            //Cross tenant scenario
+            providerId = APIUtil.replaceEmailDomainBack(providerId);
+            String[] nameParts = providerId.split("@");
+            String provideNameWithoutDomain = nameParts[0];
+            checkAuthorized = manager.isUserAuthorized(provideNameWithoutDomain, path, ActionConstants.GET);
         } else {
-            // Some user is logged in.
+            // Some user is logged in also user and api provider tenant domain are same.
             checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
         }
 

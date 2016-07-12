@@ -507,7 +507,14 @@
                 <JobQueueSize>10</JobQueueSize>
             </JMSTaskManager>
         </JMSConnectionDetails>
-        <JMSEventPublisherName>jmsEventPublisher</JMSEventPublisherName>
+        <JMSEventPublisherParameters>
+                <java.naming.factory.initial>org.wso2.andes.jndi.PropertiesFileInitialContextFactory</java.naming.factory.initial>
+                <java.naming.provider.url>repository/conf/jndi.properties</java.naming.provider.url>
+                <transport.jms.DestinationType>topic</transport.jms.DestinationType>
+                <transport.jms.Destination>throttleData</transport.jms.Destination>
+                <transport.jms.ConcurrentPublishers>allow</transport.jms.ConcurrentPublishers>
+                <transport.jms.ConnectionFactoryJNDIName>TopicConnectionFactory</transport.jms.ConnectionFactoryJNDIName>
+        </JMSEventPublisherParameters>
         <!--DefaultLimits>
             <SubscriptionTierLimits>
                 <Gold>5000</Gold>
@@ -532,17 +539,17 @@
         <EnableQueryParamConditions>false</EnableQueryParamConditions>
     </ThrottlingConfigurations>
 
-    <SwaggerCodegen>
+    <!-- Configure supported languages/Frameworks as comma separated values,
+         Supported Languages/Frameworks : android, java, scala, csharp, cpp, dart, flash, go, groovy, javascript, jmeter,
+             nodejs, perl, php, python, ruby, swift, clojure, aspNet5, asyncScala, spring, csharpDotNet2, haskell -->
+
+    <!--SwaggerCodegen>
         <ClientGeneration>
             <GroupId>org.wso2</GroupId>
             <ArtifactId>org.wso2.client.</ArtifactId>
             <ModelPackage>org.wso2.client.model.</ModelPackage>
             <ApiPackage>org.wso2.client.api.</ApiPackage>
-            <!-- Configure supported languages/Frameworks as comma separated values,
-             Supported Languages/Frameworks : android, java, scala, csharp, cpp, dart, flash, go, groovy, javascript, jmeter,
-             nodejs, perl, php, python, ruby, swift, clojure, aspNet5, asyncScala, spring, csharpDotNet2, haskell-->
-
             <SupportedLanguages>java,android</SupportedLanguages>
         </ClientGeneration>
-    </SwaggerCodegen>
+    </SwaggerCodegen-->
 </APIManager>

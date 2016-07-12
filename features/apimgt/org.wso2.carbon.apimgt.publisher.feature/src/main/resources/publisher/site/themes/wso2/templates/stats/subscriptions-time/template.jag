@@ -32,24 +32,19 @@
     </div>
 </div>
 
-<div class="col-md-5 filters" style="display:none">
-    <label class="control-label">API&nbsp;&nbsp;</label>
+<div class="col-md-5 filters">
+    <label class="control-label"><%=i18n.localize("API")%>&nbsp;&nbsp;</label>
     <select id="apiSelect" name="selValue" class="selectpicker" data-live-search="true" title="<%=i18n.localize("Select API")%>">
-       <option><%=i18n.localize("None")%></option>
+       <option><%=i18n.localize("All")%></option>
     </select>
-</div>
-
-<div id="spinner" class="center-wrapper">
-    <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
 </div>
 
 <div id="noData">
 </div>
         <br/ >
 
-        <div id="chartContainer"  class="col-sm-12" style="margin-bottom :20px;height: 100%"></div>
-            <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
-            <div id="tableContainer"></div>
+        <div id="chartContainer"  class="col-sm-12" style="margin-bottom :20px;height: 100%">
+            <svg style="height:600px;"></svg>
         </div>
     </div>
 </div>

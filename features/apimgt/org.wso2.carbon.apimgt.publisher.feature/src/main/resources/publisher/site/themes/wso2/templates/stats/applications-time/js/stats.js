@@ -82,9 +82,11 @@ $(document).ready(function(){
             .showXAxis(true);       //Show the x-axis
 
 
+
         chart.xAxis.axisLabel(i18n.t('Time'))
+        .rotateLabels(-20)
         .tickFormat(function (d) {
-             return d3.time.format('%m/%d %H:%M:%S')(new Date(d)) });
+             return d3.time.format('%m/%d %H:%M')(new Date(d)) });
 
         chart.yAxis.axisLabel(i18n.t('Application Count'))
             .tickFormat(d3.format('d'));

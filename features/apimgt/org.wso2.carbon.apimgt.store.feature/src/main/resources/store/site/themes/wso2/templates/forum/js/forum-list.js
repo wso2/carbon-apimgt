@@ -331,7 +331,7 @@ $(document).ready(function () {
 
         $('#forum_topic_view_block').hide();
         $('#forum_topic_edit_block').show();
-        $('#forum_topic_subject_lable').hide();
+        $('#forum_topic_subject_lable').parent().hide();
         $('#forum_topic_subject_edit_input').show();
         $('#forum_edit_topic_icon').hide();
         $('#forum_topic_subject_edit_input').focus();
@@ -343,7 +343,7 @@ $(document).ready(function () {
         $('#forum_topic_edit_block').hide();
         $('#forum_topic_view_block').show();
         $('#forum_edit_topic_icon').show();
-        $('#forum_topic_subject_lable').show();
+        $('#forum_topic_subject_lable').parent().show();
         $('#forum_topic_subject_edit_input').hide();
     });
 

@@ -16,6 +16,9 @@ public class ThrottlePolicyDTO  {
   
   
   
+  private String policyId = null;
+  
+  
   private String policyName = null;
   
   
@@ -32,6 +35,18 @@ public class ThrottlePolicyDTO  {
   
   
   private Boolean isDeployed = null;
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("policyId")
+  public String getPolicyId() {
+    return policyId;
+  }
+  public void setPolicyId(String policyId) {
+    this.policyId = policyId;
+  }
 
   
   /**
@@ -112,6 +127,7 @@ public class ThrottlePolicyDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottlePolicyDTO {\n");
     
+    sb.append("  policyId: ").append(policyId).append("\n");
     sb.append("  policyName: ").append(policyName).append("\n");
     sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  description: ").append(description).append("\n");
