@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
 
 import io.swagger.annotations.*;

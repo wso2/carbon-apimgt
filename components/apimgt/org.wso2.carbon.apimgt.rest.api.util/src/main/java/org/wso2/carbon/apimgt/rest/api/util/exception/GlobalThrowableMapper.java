@@ -17,12 +17,12 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -104,7 +104,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
         if (e instanceof JsonMappingException) {
             if (e instanceof UnrecognizedPropertyException) {
                 UnrecognizedPropertyException unrecognizedPropertyException = (UnrecognizedPropertyException) e;
-                String unrecognizedProperty = unrecognizedPropertyException.getUnrecognizedPropertyName();
+                String unrecognizedProperty = unrecognizedPropertyException.getPropertyName();
                 String errorMessage = "Unrecognized property '" + unrecognizedProperty + "'";
                 log.error(errorMessage, e);
                 //noinspection ThrowableResultOfMethodCallIgnored

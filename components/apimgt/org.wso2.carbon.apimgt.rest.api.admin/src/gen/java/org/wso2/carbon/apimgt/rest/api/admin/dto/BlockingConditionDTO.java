@@ -21,13 +21,10 @@ public class BlockingConditionDTO  {
   
   private String conditionId = null;
   
-  
-  private Boolean enabled = null;
-  
-  
+  @NotNull
   private String conditionType = null;
   
-  
+  @NotNull
   private String conditionValue = null;
 
   
@@ -45,19 +42,7 @@ public class BlockingConditionDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("enabled")
-  public Boolean getEnabled() {
-    return enabled;
-  }
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("conditionType")
   public String getConditionType() {
     return conditionType;
@@ -69,7 +54,7 @@ public class BlockingConditionDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("conditionValue")
   public String getConditionValue() {
     return conditionValue;
@@ -86,7 +71,6 @@ public class BlockingConditionDTO  {
     sb.append("class BlockingConditionDTO {\n");
     
     sb.append("  conditionId: ").append(conditionId).append("\n");
-    sb.append("  enabled: ").append(enabled).append("\n");
     sb.append("  conditionType: ").append(conditionType).append("\n");
     sb.append("  conditionValue: ").append(conditionValue).append("\n");
     sb.append("}\n");

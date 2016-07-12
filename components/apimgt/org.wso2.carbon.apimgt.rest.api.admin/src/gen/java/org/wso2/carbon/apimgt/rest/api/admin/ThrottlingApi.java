@@ -47,13 +47,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingBlacklistGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response throttlingBlacklistGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingBlacklistGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingBlacklistGet(accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
     @Path("/blacklist")
@@ -92,28 +90,6 @@ public class ThrottlingApi  {
     {
     return delegate.throttlingBlacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince);
     }
-    @PUT
-    @Path("/blacklist/{conditionId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Blocking condition", notes = "Update a Blocking condition\n", response = BlockingConditionDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nPolicy updated.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
-
-    public Response throttlingBlacklistConditionIdPut(@ApiParam(value = "Blocking condition identifier \n",required=true ) @PathParam("conditionId") String conditionId,
-    @ApiParam(value = "Blocking condition object that needs to be modified\n" ,required=true ) BlockingConditionDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.throttlingBlacklistConditionIdPut(conditionId,body,contentType,ifMatch,ifUnmodifiedSince);
-    }
     @DELETE
     @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
@@ -133,7 +109,7 @@ public class ThrottlingApi  {
     return delegate.throttlingBlacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince);
     }
     @GET
-    @Path("/policies/advanced-policies")
+    @Path("/policies/advanced")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all Advanced level throttle policies", notes = "Get all Advanced level throttle policies\n", response = AdvancedThrottlePolicyListDTO.class)
@@ -144,16 +120,14 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response throttlingPoliciesAdvancedGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesAdvancedGet(accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
-    @Path("/policies/advanced-policies")
+    @Path("/policies/advanced")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add an Advanced level throttle policy", notes = "Add an Advanced level throttle policy\n", response = AdvancedThrottlePolicyDTO.class)
@@ -164,13 +138,13 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPost(@ApiParam(value = "Advanced level policy object that should to be added\n" ,required=true ) AdvancedThrottlePolicyDTO body,
+    public Response throttlingPoliciesAdvancedPost(@ApiParam(value = "Advanced level policy object that should to be added\n" ,required=true ) AdvancedThrottlePolicyDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPost(body,contentType);
+    return delegate.throttlingPoliciesAdvancedPost(body,contentType);
     }
     @GET
-    @Path("/policies/advanced-policies/{policyId}")
+    @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Advanced Policy", notes = "Retrieve a Advanced Policy providing the policy name.\n", response = AdvancedThrottlePolicyDTO.class)
@@ -183,14 +157,14 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdGet(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
+    public Response throttlingPoliciesAdvancedPolicyIdGet(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesAdvancedPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince);
     }
     @PUT
-    @Path("/policies/advanced-policies/{policyId}")
+    @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an Advanced level throttle policy", notes = "Update an Advanced level throttle policy\n", response = AdvancedThrottlePolicyDTO.class)
@@ -203,16 +177,16 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdPut(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
+    public Response throttlingPoliciesAdvancedPolicyIdPut(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Policy object that needs to be modified\n" ,required=true ) AdvancedThrottlePolicyDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesAdvancedPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
-    @Path("/policies/advanced-policies/{policyId}")
+    @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an Advanced level throttle policy", notes = "Delete an Advanced level throttle policy\n", response = void.class)
@@ -223,11 +197,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
+    public Response throttlingPoliciesAdvancedPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID\n",required=true ) @PathParam("policyId") String policyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.throttlingPoliciesAdvancedPoliciesPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince);
+    return delegate.throttlingPoliciesAdvancedPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/policies/application")
@@ -241,13 +215,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesApplicationGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response throttlingPoliciesApplicationGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesApplicationGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesApplicationGet(accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
     @Path("/policies/application")
@@ -338,13 +310,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesCustomGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response throttlingPoliciesCustomGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesCustomGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesCustomGet(accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
     @Path("/policies/custom")
@@ -435,13 +405,11 @@ public class ThrottlingApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response throttlingPoliciesSubscriptionGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response throttlingPoliciesSubscriptionGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON.\n"  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.throttlingPoliciesSubscriptionGet(limit,offset,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.throttlingPoliciesSubscriptionGet(accept,ifNoneMatch,ifModifiedSince);
     }
     @POST
     @Path("/policies/subscription")

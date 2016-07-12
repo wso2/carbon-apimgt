@@ -21,12 +21,6 @@ public class ApplicationThrottlePolicyListDTO  {
   private Integer count = null;
   
   
-  private String next = null;
-  
-  
-  private String previous = null;
-  
-  
   private List<ApplicationThrottlePolicyDTO> list = new ArrayList<ApplicationThrottlePolicyDTO>();
 
   
@@ -40,32 +34,6 @@ public class ApplicationThrottlePolicyListDTO  {
   }
   public void setCount(Integer count) {
     this.count = count;
-  }
-
-  
-  /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/application?limit=1&offset=2&query=\"\n
-   **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\nexample: \"/throttling/policies/application?limit=1&offset=2&query=\"\n")
-  @JsonProperty("next")
-  public String getNext() {
-    return next;
-  }
-  public void setNext(String next) {
-    this.next = next;
-  }
-
-  
-  /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/application?limit=1&offset=0&query=\"\n
-   **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\nexample: \"/throttling/policies/application?limit=1&offset=0&query=\"\n")
-  @JsonProperty("previous")
-  public String getPrevious() {
-    return previous;
-  }
-  public void setPrevious(String previous) {
-    this.previous = previous;
   }
 
   
@@ -88,8 +56,6 @@ public class ApplicationThrottlePolicyListDTO  {
     sb.append("class ApplicationThrottlePolicyListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
-    sb.append("  next: ").append(next).append("\n");
-    sb.append("  previous: ").append(previous).append("\n");
     sb.append("  list: ").append(list).append("\n");
     sb.append("}\n");
     return sb.toString();

@@ -66,16 +66,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Retrieves all Advanced level policies
      *
-     * @param limit           maximum number of policies to return
-     * @param offset          starting index
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Advanced Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesGet(Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -98,7 +95,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPost(AdvancedThrottlePolicyDTO body, String contentType) {
+    public Response throttlingPoliciesAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -131,8 +128,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Required policy specified by name
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdGet(String policyId, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
@@ -156,8 +152,8 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdPut(String policyId,
-            AdvancedThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -189,7 +185,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPoliciesPolicyIdDelete(String policyId, String ifMatch,
+    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -207,16 +203,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Retrieves all Application Throttle Policies
      *
-     * @param limit           maximum number of policies to return
-     * @param offset          starting index
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return Retrieves all Application Throttle Policies
      */
     @Override
-    public Response throttlingPoliciesApplicationGet(Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response throttlingPoliciesApplicationGet(String accept, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -358,16 +351,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Retrieves all Subscription level policies
      *
-     * @param limit           maximum number of policies to return
-     * @param offset          starting index
      * @param accept           Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Subscription Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesSubscriptionGet(Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response throttlingPoliciesSubscriptionGet(String accept, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -508,16 +498,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Retrieves all Global level policies
      *
-     * @param limit           maximum number of policies to return
-     * @param offset          starting index
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Global Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesCustomGet(Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
+    public Response throttlingPoliciesCustomGet(String accept, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -670,16 +657,13 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
     /**
      * Retrieves all Block Conditions
      *
-     * @param limit           maximum number of block conditions to return
-     * @param offset          starting index
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingBlacklistGet(Integer limit, Integer offset, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
@@ -745,33 +729,6 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             return Response.ok().entity(dto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Block Condition. Id : " + conditionId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    /**
-     * Updates a given block condition specified by the condition Id
-     *
-     * @param conditionId       Id of the block condition
-     * @param body              DTO of block condition to be updated
-     * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return Updated block condition
-     */
-    @Override
-    public Response throttlingBlacklistConditionIdPut(String conditionId, BlockingConditionDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiProvider.updateBlockConditionByUUID(conditionId, body.getEnabled().toString());
-            //retrieves the updated condition and send back as the response
-            BlockConditionsDTO updatedBlockCondition = apiProvider.getBlockConditionByUUID(conditionId);
-            BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(updatedBlockCondition);
-            return Response.ok().entity(dto).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while updating Block Condition. Id : " + conditionId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
