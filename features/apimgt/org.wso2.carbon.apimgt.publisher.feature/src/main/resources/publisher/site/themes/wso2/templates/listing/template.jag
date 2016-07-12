@@ -1,7 +1,7 @@
 <% jagg.template("listing", function(inputs, outputs, jagg) { %>
 <div id="listing">
 	<div class="page-header">
- 		<h2><%=i18n.localize("allAPIs")%></h2>
+ 		<h2><%=i18n.localize("All APIs")%></h2>
  	</div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -163,7 +163,7 @@
 			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Design")%>">
 				                            <span class="fw-stack">
 				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Design")%>"></i>
-				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("design")%>"></i>
+				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("Design")%>"></i>
 				                            </span>
 			                            </a>
 			                            <a href='#' onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("DELETE")%>">

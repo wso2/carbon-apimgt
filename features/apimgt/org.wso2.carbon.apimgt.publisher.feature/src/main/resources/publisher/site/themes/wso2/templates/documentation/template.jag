@@ -122,7 +122,7 @@
 <ul class="nav">
 <li>
 		                    <label>
-		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("inline")%>
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("Inline")%>
 		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
            				        <p id="inlineDoc_help" class="hide">
            				            <%=i18n.localize("Documentation that is hosted in the system and can be edited directly from the UI")%>
@@ -131,7 +131,7 @@
 		               </li>
 		               <li>      
 		                    <label>
-		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("url")%>
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("URL")%>
 		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
            				        <p id="urlDoc_help" class="hide">
            				            <%=i18n.localize("Link to documentation managed by an external configuration management system")%>
@@ -144,7 +144,7 @@
 </li>  
 <li>
                             <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("file")%>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("File")%>
                                         <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
                                  <p id="fileDoc_help" class="hide"><%=i18n.localize("Upload a documentation file")%></p>
 		                    </label>

@@ -121,7 +121,7 @@
 		                    <a href="<%=apiUrl%>" title="<%=i18n.localize("Browse API")%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
 		                </li>
 		                <li class="active">
-		                    <a href="<%=implementMappedUrl%>?<%=apiUrlId%>" title="<%=i18n.localize("implement")%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("implement")%></a>
+		                    <a href="<%=implementMappedUrl%>?<%=apiUrlId%>" title="<%=i18n.localize("Implement")%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("Implement")%></a>
 		                </li>
                 	<% } else { %>
                 		<li>
@@ -129,7 +129,7 @@
 	                	</li>
 
 		                <li class="active">
-		                    <a href="<%=implementMappedUrl%>" title="<%=i18n.localize("implement")%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>',e:event})"><%=i18n.localize("implement")%></a>
+		                    <a href="<%=implementMappedUrl%>" title="<%=i18n.localize("Implement")%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>',e:event})"><%=i18n.localize("Implement")%></a>
 		                </li>
                 	<%} %>
                 
@@ -238,12 +238,12 @@
 	                    <%
 	                    var userTmpUrl = userMappedUrl + "?uname=" + encode.forUriComponent(request.getParameter("uname"))+urlPostfix;
 	                    %>
-	                    <a href="<%=userTmpUrl%>" title="<%=i18n.localize("user", "User")%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%= encode.forHtml(request.getParameter("uname"))%></a>
+	                    <a href="<%=userTmpUrl%>" title="<%=i18n.localize("User")%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%= encode.forHtml(request.getParameter("uname"))%></a>
 	                </li>
                 <% } %>
            		<% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>                
 	                <li class="active">
-	                    <a href="<%=subsMappedUrl%>" title="<%=i18n.localize("subscriptions", "Subscriptions")%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
+	                    <a href="<%=subsMappedUrl%>" title="<%=i18n.localize("Subscriptions")%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
 	                </li>
                 <% } %>
                 <% if(reqUrl.indexOf(inlineEditorUrl)>=0||reqUrl.indexOf(inlineEditorMappedUrl)>=0){%>

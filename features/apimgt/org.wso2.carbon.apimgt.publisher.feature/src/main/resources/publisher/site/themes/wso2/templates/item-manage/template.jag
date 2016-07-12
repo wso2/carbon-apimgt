@@ -462,7 +462,7 @@
                                                                           <p class="help-block">
                                         									  <i class="fw fw-info"></i>
                                                                               <%=i18n.localize("Refer ")%>
-                                                                              <a href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation ")%></a>
+                                                                              <a href="https://docs.wso2.com/display/AM200/Introducing+Throttling"><%=i18n.localize("documentation")%> </a>
                                                                               <%=i18n.localize("to find out details about each throttling setting.")%>
                                                                           </p>
                                                                     </div>

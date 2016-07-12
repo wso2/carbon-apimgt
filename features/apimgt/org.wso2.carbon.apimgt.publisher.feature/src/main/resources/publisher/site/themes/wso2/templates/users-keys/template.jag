@@ -146,8 +146,8 @@
 									        <div class="col-sm-6 text-right">
 										        <select class="select form-control" id="<%=radioInputName%>" name="blockType"  <%if (existingStatus=='PROD_ONLY_BLOCKED' || existingStatus=='BLOCKED') { %> disabled <%} %>>
 										            <%if (existingStatus=='PROD_ONLY_BLOCKED' || existingStatus=='BLOCKED') { %>
-										                <option value="blockProduction" <%if(existingStatus=='PROD_ONLY_BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("blockProduction")%></option>
-										                <option value="blockAll" <%if(existingStatus=='BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("blockAll")%></option>				              							                
+										                <option value="blockProduction" <%if(existingStatus=='PROD_ONLY_BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("Production Only")%></option>
+										                <option value="blockAll" <%if(existingStatus=='BLOCKED'){%> selected="selected" <%}%>><%=i18n.localize("Production & Sandbox")%></option>				              							                
 										            <%} else {%>
 										            	<option value="blockAll"><%=i18n.localize("Production & Sandbox")%></option>
 										                <option value="blockProduction"><%=i18n.localize("Production Only")%></option>
