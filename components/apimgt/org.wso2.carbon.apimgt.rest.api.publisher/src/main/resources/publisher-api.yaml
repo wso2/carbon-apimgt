@@ -2219,9 +2219,9 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      thumbnailUrl:
+      thumbnailUri:
         type: string
-        example: ""
+        example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
       visibility:
         type: string
         enum:

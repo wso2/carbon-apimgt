@@ -65,7 +65,7 @@ public class APIDTO  {
   private List<String> tiers = new ArrayList<String>();
   
   
-  private String thumbnailUrl = null;
+  private String thumbnailUri = null;
   
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
@@ -291,12 +291,12 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("thumbnailUrl")
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
+  @JsonProperty("thumbnailUri")
+  public String getThumbnailUri() {
+    return thumbnailUri;
   }
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public void setThumbnailUri(String thumbnailUri) {
+    this.thumbnailUri = thumbnailUri;
   }
 
   
@@ -442,7 +442,7 @@ public class APIDTO  {
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
-    sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");

@@ -141,7 +141,9 @@ public class APIMappingUtil {
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setEndpointConfig(model.getEndpointConfig());
-        dto.setThumbnailUrl(model.getThumbnailUrl());
+        if (!StringUtils.isBlank(model.getThumbnailUrl())) {
+            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
+        }
         List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
@@ -370,11 +372,6 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
-
-        if (dto.getThumbnailUrl() != null) {
-            model.setThumbnailUrl(dto.getThumbnailUrl());
-        }
-
         return model;
     }
 
@@ -562,5 +559,9 @@ public class APIMappingUtil {
             context = context + RestApiConstants.API_VERSION_PARAM;
         }
         return context;
+    }
+
+    private static String getThumbnailUri (String uuid) {
+        return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
 }
