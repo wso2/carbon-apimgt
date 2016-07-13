@@ -26,6 +26,7 @@ var tenant = jagg.getTenantDomain();
                 <li><%=i18n.localize("By API Version [ Syntax - version:xxxx ]  or")%></li>
                 <li><%=i18n.localize("By Context [ Syntax - context:xxxx ]  or")%></li>
                 <li><%=i18n.localize("By Description [ Syntax - description:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Tags [ Syntax - tags:xxxx ] or")%></li>
                 <li><%=i18n.localize("By Sub-Context [ Syntax - subcontext:xxxx ] or")%></li>
                 <li><%=i18n.localize("By Documentation Content [ Syntax - doc:xxxx ]")%></li>
             </ol>
