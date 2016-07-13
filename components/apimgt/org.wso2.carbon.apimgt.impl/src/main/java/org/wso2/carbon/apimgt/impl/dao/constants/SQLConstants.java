@@ -1337,9 +1337,9 @@ public class SQLConstants {
             " SELECT " +
             "   AKM.CONSUMER_KEY " +
             " FROM " +
-            "   AM_APPLICATION as APP," +
-            "   AM_APPLICATION_KEY_MAPPING as AKM," +
-            "   AM_SUBSCRIBER as SUB " +
+            "   AM_APPLICATION APP," +
+            "   AM_APPLICATION_KEY_MAPPING AKM," +
+            "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +

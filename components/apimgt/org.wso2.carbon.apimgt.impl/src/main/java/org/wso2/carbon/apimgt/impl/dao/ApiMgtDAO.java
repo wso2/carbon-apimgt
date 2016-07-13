@@ -4742,7 +4742,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_SQL;
-        String whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR " + "     (GROUP_ID='' AND SUB" +
+        String whereClauseWithGroupId = "   AND " + "     (APP.GROUP_ID= ? " + "      OR " + "     (APP.GROUP_ID='' AND SUB" +
                                         ".USER_ID=?))";
         String whereClause = "   AND " + " SUB.USER_ID=?";
 
