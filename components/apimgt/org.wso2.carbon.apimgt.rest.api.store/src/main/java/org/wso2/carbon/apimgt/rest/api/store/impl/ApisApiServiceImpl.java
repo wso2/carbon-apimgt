@@ -74,7 +74,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
+        query = query == null ? "" : query;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIListDTO apiListDTO = new APIListDTO();
         try {
@@ -88,7 +88,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //if query parameter is not specified, This will search by name
             String searchType = APIConstants.API_NAME;
             String searchContent = "*";
-            if (query != null) {
+            if (!StringUtils.isBlank(query)) {
                 String[] querySplit = query.split(":");
                 if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
                         .isNotBlank(querySplit[1])) {
