@@ -1,18 +1,8 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax296="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax288="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax297="http://util.java/xsd" xmlns:ax292="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax294="http://base.identity.carbon.wso2.org/xsd" xmlns:ax290="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2106="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax2108="http://base.identity.carbon.wso2.org/xsd" xmlns:ax2102="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2104="http://api.apimgt.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2111="http://util.java/xsd" xmlns:ax2110="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
    <wsdl:documentation>APIKeyMgtSubscriberService</wsdl:documentation>
    <wsdl:types>
-      <xs:schema xmlns:ax2100="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
+      <xs:schema xmlns:ax2114="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
          <xs:import namespace="http://util.java/xsd"/>
-         <xs:complexType name="Subscriber">
-            <xs:sequence>
-               <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="email" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="id" type="xs:int"/>
-               <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="subscribedDate" nillable="true" type="xs:date"/>
-               <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
-            </xs:sequence>
-         </xs:complexType>
          <xs:complexType name="OAuthApplicationInfo">
             <xs:sequence>
                <xs:element minOccurs="0" name="appOwner" nillable="true" type="xs:string"/>
@@ -22,7 +12,6 @@
                <xs:element minOccurs="0" name="clientSecret" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="isSaasApplication" type="xs:boolean"/>
                <xs:element minOccurs="0" name="jsonString" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="saasApplication" type="xs:boolean"/>
             </xs:sequence>
          </xs:complexType>
          <xs:complexType name="Application">
@@ -33,12 +22,23 @@
                <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="groupId" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="id" type="xs:int"/>
+               <xs:element minOccurs="0" name="isBlackListed" nillable="true" type="xs:boolean"/>
                <xs:element minOccurs="0" name="keys" nillable="true" type="xs:anyType"/>
                <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="status" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="subscribedAPIs" nillable="true" type="ax297:Set"/>
-               <xs:element minOccurs="0" name="subscriber" nillable="true" type="ax290:Subscriber"/>
+               <xs:element minOccurs="0" name="subscribedAPIs" nillable="true" type="ax2114:Set"/>
+               <xs:element minOccurs="0" name="subscriber" nillable="true" type="ax2106:Subscriber"/>
                <xs:element minOccurs="0" name="tier" nillable="true" type="xs:string"/>
+            </xs:sequence>
+         </xs:complexType>
+         <xs:complexType name="Subscriber">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="email" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="id" type="xs:int"/>
+               <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="subscribedDate" nillable="true" type="xs:date"/>
+               <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
@@ -49,51 +49,37 @@
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
-      <xs:schema xmlns:ax293="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax289="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax295="http://base.identity.carbon.wso2.org/xsd" xmlns:ax291="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ax299="http://dto.impl.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+      <xs:schema xmlns:ax2107="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2109="http://base.identity.carbon.wso2.org/xsd" xmlns:ax2113="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax2103="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax2105="http://api.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+         <xs:import namespace="http://keymgt.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://model.api.apimgt.carbon.wso2.org/xsd"/>
-         <xs:import namespace="http://keymgt.apimgt.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://base.identity.carbon.wso2.org/xsd"/>
          <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
-         <xs:element name="APIKeyMgtSubscriberServiceAPIManagementException">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax289:APIManagementException"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="revokeAccessTokenBySubscriber">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="subscriber" nillable="true" type="ax290:Subscriber"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
-         <xs:element name="revokeKeysByTier">
-            <xs:complexType>
-               <xs:sequence>
-                  <xs:element minOccurs="0" name="tierName" nillable="true" type="xs:string"/>
-               </xs:sequence>
-            </xs:complexType>
-         </xs:element>
          <xs:element name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax292:APIKeyMgtException"/>
+                  <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax2103:APIKeyMgtException"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax2105:APIManagementException"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
          <xs:element name="createOAuthApplicationByApplicationInfo">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="oauthApplicationInfo" nillable="true" type="ax290:OAuthApplicationInfo"/>
+                  <xs:element minOccurs="0" name="oauthApplicationInfo" nillable="true" type="ax2107:OAuthApplicationInfo"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
          <xs:element name="createOAuthApplicationByApplicationInfoResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax290:OAuthApplicationInfo"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2107:OAuthApplicationInfo"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -109,14 +95,14 @@
          <xs:element name="createOAuthApplicationResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax290:OAuthApplicationInfo"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2107:OAuthApplicationInfo"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
          <xs:element name="APIKeyMgtSubscriberServiceIdentityException">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax294:IdentityException"/>
+                  <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax2109:IdentityException"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -134,7 +120,7 @@
          <xs:element name="updateOAuthApplicationResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax290:OAuthApplicationInfo"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2107:OAuthApplicationInfo"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -148,7 +134,7 @@
          <xs:element name="retrieveOAuthApplicationResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="return" nillable="true" type="ax290:OAuthApplicationInfo"/>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2107:OAuthApplicationInfo"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -169,7 +155,7 @@
          <xs:element name="getSubscribedAPIsOfUserResponse">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax296:APIInfoDTO"/>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2113:APIInfoDTO"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -208,7 +194,7 @@
             <xs:complexType>
                <xs:sequence>
                   <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string"/>
-                  <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax296:APIInfoDTO"/>
+                  <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax2113:APIInfoDTO"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -224,7 +210,21 @@
          <xs:element name="revokeAccessTokenForApplication">
             <xs:complexType>
                <xs:sequence>
-                  <xs:element minOccurs="0" name="application" nillable="true" type="ax290:Application"/>
+                  <xs:element minOccurs="0" name="application" nillable="true" type="ax2107:Application"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="revokeAccessTokenBySubscriber">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="subscriber" nillable="true" type="ax2107:Subscriber"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="revokeKeysByTier">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="tierName" nillable="true" type="xs:string"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -236,13 +236,28 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="revokeTokensOfUserByApp">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="appName" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="revokeTokensOfUserByAppResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://keymgt.apimgt.carbon.wso2.org/xsd">
          <xs:complexType name="APIKeyMgtException">
             <xs:sequence/>
          </xs:complexType>
       </xs:schema>
-      <xs:schema xmlns:ax298="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
+      <xs:schema xmlns:ax2112="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
          <xs:import namespace="http://util.java/xsd"/>
          <xs:complexType name="APIInfoDTO">
             <xs:sequence>
@@ -250,14 +265,17 @@
                <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="providerId" nillable="true" type="xs:string"/>
-               <xs:element minOccurs="0" name="resources" nillable="true" type="ax297:Set"/>
+               <xs:element minOccurs="0" name="resources" nillable="true" type="ax2112:Set"/>
                <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
             </xs:sequence>
          </xs:complexType>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://base.identity.carbon.wso2.org/xsd">
          <xs:complexType name="IdentityException">
-            <xs:sequence/>
+            <xs:sequence>
+               <xs:element minOccurs="0" name="code" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="errorInfoList" nillable="true" type="xs:anyType"/>
+            </xs:sequence>
          </xs:complexType>
       </xs:schema>
       <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://api.apimgt.carbon.wso2.org/xsd">
@@ -316,6 +334,12 @@
    </wsdl:message>
    <wsdl:message name="createOAuthApplicationByApplicationInfoResponse">
       <wsdl:part name="parameters" element="ns1:createOAuthApplicationByApplicationInfoResponse"/>
+   </wsdl:message>
+   <wsdl:message name="revokeTokensOfUserByAppRequest">
+      <wsdl:part name="parameters" element="ns1:revokeTokensOfUserByApp"/>
+   </wsdl:message>
+   <wsdl:message name="revokeTokensOfUserByAppResponse">
+      <wsdl:part name="parameters" element="ns1:revokeTokensOfUserByAppResponse"/>
    </wsdl:message>
    <wsdl:message name="deleteOAuthApplicationRequest">
       <wsdl:part name="parameters" element="ns1:deleteOAuthApplication"/>
@@ -376,6 +400,11 @@
          <wsdl:output message="tns:createOAuthApplicationByApplicationInfoResponse" wsaw:Action="urn:createOAuthApplicationByApplicationInfoResponse"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:createOAuthApplicationByApplicationInfoAPIKeyMgtSubscriberServiceAPIKeyMgtException"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:createOAuthApplicationByApplicationInfoAPIKeyMgtSubscriberServiceAPIManagementException"/>
+      </wsdl:operation>
+      <wsdl:operation name="revokeTokensOfUserByApp">
+         <wsdl:input message="tns:revokeTokensOfUserByAppRequest" wsaw:Action="urn:revokeTokensOfUserByApp"/>
+         <wsdl:output message="tns:revokeTokensOfUserByAppResponse" wsaw:Action="urn:revokeTokensOfUserByAppResponse"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:revokeTokensOfUserByAppAPIKeyMgtSubscriberServiceAPIManagementException"/>
       </wsdl:operation>
       <wsdl:operation name="deleteOAuthApplication">
          <wsdl:input message="tns:deleteOAuthApplicationRequest" wsaw:Action="urn:deleteOAuthApplication"/>
@@ -503,6 +532,18 @@
          <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
             <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
          </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="revokeTokensOfUserByApp">
+         <soap:operation soapAction="urn:revokeTokensOfUserByApp" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
          <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
             <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
          </wsdl:fault>
@@ -669,6 +710,18 @@
             <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
          </wsdl:fault>
       </wsdl:operation>
+      <wsdl:operation name="revokeTokensOfUserByApp">
+         <soap12:operation soapAction="urn:revokeTokensOfUserByApp" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="deleteOAuthApplication">
          <soap12:operation soapAction="urn:deleteOAuthApplication" style="document"/>
          <wsdl:input>
@@ -789,6 +842,15 @@
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:output>
       </wsdl:operation>
+      <wsdl:operation name="revokeTokensOfUserByApp">
+         <http:operation location="revokeTokensOfUserByApp"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
       <wsdl:operation name="deleteOAuthApplication">
          <http:operation location="deleteOAuthApplication"/>
          <wsdl:input>
@@ -828,13 +890,13 @@
    </wsdl:binding>
    <wsdl:service name="APIKeyMgtSubscriberService">
       <wsdl:port name="APIKeyMgtSubscriberServiceHttpsSoap11Endpoint" binding="tns:APIKeyMgtSubscriberServiceSoap11Binding">
-         <soap:address location="https://shani-ThinkPad-T530:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap11Endpoint"/>
+         <soap:address location="https://hasitha-macbook-pro.local:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap11Endpoint"/>
       </wsdl:port>
       <wsdl:port name="APIKeyMgtSubscriberServiceHttpsSoap12Endpoint" binding="tns:APIKeyMgtSubscriberServiceSoap12Binding">
-         <soap12:address location="https://shani-ThinkPad-T530:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap12Endpoint"/>
+         <soap12:address location="https://hasitha-macbook-pro.local:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap12Endpoint"/>
       </wsdl:port>
       <wsdl:port name="APIKeyMgtSubscriberServiceHttpsEndpoint" binding="tns:APIKeyMgtSubscriberServiceHttpBinding">
-         <http:address location="https://shani-ThinkPad-T530:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsEndpoint"/>
+         <http:address location="https://hasitha-macbook-pro.local:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsEndpoint"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>

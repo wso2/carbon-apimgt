@@ -66,6 +66,9 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -697,6 +700,141 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oauthCache = OAuthCache.getInstance();
             oauthCache.clearCacheEntry(cacheKey);
         }
+    }
+
+
+    /**
+     * Service method to revoke all access tokens issued for given user under the given application. This will change
+     * access token status to revoked and remove cached access tokens from memory of all gateway nodes.
+     * @param userName end user name
+     * @param appName application name
+     * @return if operation is success
+     * @throws APIManagementException in case of revoke failure.
+     */
+    public boolean revokeTokensOfUserByApp(String userName, String appName)
+            throws APIManagementException {
+
+        try {
+
+            //find access tokens for user
+            List<AccessTokenInfo> accessTokens = ApiMgtDAO.getAccessTokenListForUser(userName,appName);
+            //find revoke urls
+            List<String> APIGatewayURLs = getAPIGatewayURLs();
+            List<String> APIRevokeURLs = new ArrayList<String>(APIGatewayURLs.size());
+
+            for (String apiGatewayURL : APIGatewayURLs) {
+                String [] apiGatewayURLs = apiGatewayURL.split(",");
+                if(apiGatewayURL.length()> 1) {
+                    //get https url
+                    String apiHTTPSURL = apiGatewayURLs[1];
+                    String revokeURL = apiHTTPSURL + getRevokeURLPath();
+                    APIRevokeURLs.add(revokeURL);
+                }
+            }
+
+            //for each access token call revoke
+            for (AccessTokenInfo accessToken : accessTokens) {
+                for (String apiRevokeURL : APIRevokeURLs) {
+                    revokeAccessToken(accessToken.getAccessToken(), accessToken.getConsumerKey(), accessToken
+                            .getConsumerSecret(), apiRevokeURL);
+                }
+            }
+
+            log.info("Successfully revoked all tokens issued for user=" + userName + "for application " + appName);
+            return true;
+
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while revoking token for user=" + userName + " app="+ appName, e);
+        }
+
+    }
+
+    /**
+     * Get API gateway URLs defined on apiManager.xml
+     * @return list of gateway urls
+     */
+    private  List<String> getAPIGatewayURLs() {
+        APIManagerConfiguration apiConfig = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        Map<String, Environment> APIEnvironments = apiConfig.getApiGatewayEnvironments();
+        List<String> gatewayURLs = new ArrayList<String>(2);
+        for (Environment environment : APIEnvironments.values()) {
+            gatewayURLs.add(environment.getApiGatewayEndpoint());
+        }
+        return gatewayURLs;
+    }
+
+    /**
+     * Get file name part of revoke url configured in APIMgt.xml file.
+     * (i.e revoke in https://${carbon.local.ip}:${https.nio.port}/revoke)
+     * @return file name part as a string
+     */
+    private String getRevokeURLPath() {
+        APIManagerConfiguration apiConfig = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String revokeURL = apiConfig.getFirstProperty(APIConstants.REVOKE_API_URL);
+        URL revokeEndpointURL = new URL(revokeURL);
+        return revokeEndpointURL.getFileName();
+    }
+
+    /**
+     * Revoke the given access token. This call will reach gateway and clear token caches there as well
+     * @param accessToken access token to revoke
+     * @param consumerKey consumer key
+     * @param consumerSecret consumer secret
+     * @param revokeEndpoint revoke endpoint of the gateway
+     * @throws APIManagementException
+     */
+    private void revokeAccessToken(String accessToken, String consumerKey, String consumerSecret, String
+            revokeEndpoint) throws APIManagementException {
+        try {
+            if (accessToken != null) {
+                URL revokeEndpointURL = new URL(revokeEndpoint);
+                String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
+                int revokeEndpointPort = revokeEndpointURL.getPort();
+
+                HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
+
+                HttpPost httpRevokePost = new HttpPost(revokeEndpoint);
+
+                // Request parameters.
+                List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, consumerKey));
+                revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, consumerSecret));
+                revokeParams.add(new BasicNameValuePair("token", accessToken));
+
+
+                //Revoke the Old Access Token
+                httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
+                HttpResponse revokeResponse = revokeEPClient.execute(httpRevokePost);
+
+                if (revokeResponse.getStatusLine().getStatusCode() != 200) {
+                    throw new RuntimeException("Token revoke failed : HTTP error code : " +
+                            revokeResponse.getStatusLine().getStatusCode());
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully submitted revoke request for user token " + accessToken+ ". HTTP " +
+                                "status : 200");
+                    }
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            handleException("Error while preparing request for token/revoke APIs", e);
+        } catch (IOException e) {
+            handleException("Error while creating tokens - " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * common method to throw exceptions.
+     *
+     * @param msg this parameter contain error message that we need to throw.
+     * @param e   Exception object.
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    private void handleException(String msg, Exception e) throws APIManagementException {
+        log.error(msg, e);
+        throw new APIManagementException(msg, e);
     }
 
     /**

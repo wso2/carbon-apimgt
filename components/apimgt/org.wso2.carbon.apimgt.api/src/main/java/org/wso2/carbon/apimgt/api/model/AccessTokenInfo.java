@@ -36,6 +36,8 @@ public class AccessTokenInfo {
 
     private String consumerKey;
 
+    private String consumerSecret;
+
     private String[] scope;
 
     private String tokenState;
@@ -98,6 +100,22 @@ public class AccessTokenInfo {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    /**
+     * Get consumer secret corresponding to the access token
+     * @return consumer secret
+     */
+    public String getConsumerSecret() {
+        return consumerSecret;
+    }
+
+    /**
+     * Set consumer secret corresponding to the access token
+     * @param consumerSecret consumer secret to set
+     */
+    public void setConsumerSecret(String consumerSecret) {
+        this.consumerSecret = consumerSecret;
     }
 
     public void setIssuedTime(long issuedTime) {
