@@ -235,6 +235,7 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
+        dto.setWsdlUri(model.getWsdlUrl());
         return dto;
     }
 
@@ -272,6 +273,7 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
+        model.setWsdlUrl(dto.getWsdlUri());
         if (dto.getStatus() != null) {
             model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
         }

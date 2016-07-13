@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "0.9.0"
+  version: "0.10.0"
   title: "WSO2 API Manager - Publisher API"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
@@ -2187,6 +2187,11 @@ definitions:
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
         example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+      wsdlUri:
+        description: |
+          WSDL URL if the API is based on a WSDL endpoint
+        type: string
+        example: "http://www.webservicex.com/globalweather.asmx?wsdl"
       status:
         type: string
         example: CREATED
