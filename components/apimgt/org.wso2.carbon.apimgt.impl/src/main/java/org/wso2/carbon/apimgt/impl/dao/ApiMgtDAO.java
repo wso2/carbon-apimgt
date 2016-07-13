@@ -8191,7 +8191,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery;
-            if(stakeHolder == "admin-dashboard"){
+            if(stakeHolder.equals("admin-dashboard")){
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
                 ps = conn.prepareStatement(sqlQuery);
             }else {
