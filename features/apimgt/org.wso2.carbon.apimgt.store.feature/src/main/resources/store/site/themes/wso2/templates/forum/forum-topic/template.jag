@@ -16,7 +16,7 @@
         <span>{{ replies.topic.0.subject}}</span>
         <%if(jagg.getUser()){%>
             {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
-                <a class="fw-stack" id="forum_edit_topic_icon" data-id="{{ topicId }}" style="font-size:12px">
+                <a title="forum edit" class="fw-stack" id="forum_edit_topic_icon" data-id="{{ topicId }}" style="font-size:12px">
                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-edit fw-stack-1x"></i>
                 </a>
@@ -46,7 +46,7 @@
     <div id="forum_topic_description_edit_block" class="topic_description_edit">
       <div id="forum_topic_description_edit_editor" data-id="{{ replies.topic.0.topicId}}"></div>
       <div class="edit-topic-form-actions add-margin-top-2x">
-        <a id="forum_save_updated_topic_button" class="btn btn-primary">
+        <a id="forum_save_updated_topic_button" class="btn btn-primary" title="edit forum">
           <%=i18n.localize("Save")%>
         </a>
         <a id="forum_cancel_topic_edit_button" class="btn btn-secondary">
@@ -64,7 +64,7 @@
     </div>
     <div class="user_rating col-xs-8 col-sm-8 col-md-11 col-lg-11">
         Your Rating : <span class="your_rating"><%if(inputs.userRating){%><%= inputs.userRating %>/5<%}else{ %>N/A<%} %></span><br>
-        <input class="rating-tooltip-manual rate_save" type="hidden" value="<%= inputs.userRating %>"> <a class="remove_rating"><i class="fa fa-times-circle"></i></a>
+        <input class="rating-tooltip-manual rate_save" type="hidden" value="<%= inputs.userRating %>"> <a class="remove_rating" title="remove_rating"><i class="fa fa-times-circle"></i></a>
     </div>
   </div>
 
@@ -77,7 +77,7 @@
     </div>
     <div id="forum_reply_editor"></div>
     <div class="add-margin-top-2x">
-        <a id="forum_add_reply_button" class="btn btn-primary"  ><%=i18n.localize('Reply to Thread')%></a>
+        <a id="forum_add_reply_button" class="btn btn-primary" title="<%=i18n.localize('Reply to Thread')%>"  ><%=i18n.localize('Reply to Thread')%></a>
     </div>
   </div>
 
@@ -143,8 +143,8 @@
         <div id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}">
             <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
             <div class="forum-reply-actions add-margin-top-2x">
-                <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}"><%=i18n.localize( 'Save')%></a>
-                <a class="btn btn-secondary forum_cancel_reply_edit_button" data-id="{{ replyId }}"><%=i18n.localize( 'Cancel')%></a>
+                <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}" title="<%=i18n.localize( 'Save')%>"><%=i18n.localize( 'Save')%></a>
+                <a class="btn btn-secondary forum_cancel_reply_edit_button" data-id="{{ replyId }}" title="<%=i18n.localize( 'Cancel')%>"><%=i18n.localize( 'Cancel')%></a>
             </div>
         </div>
         {{/each}}

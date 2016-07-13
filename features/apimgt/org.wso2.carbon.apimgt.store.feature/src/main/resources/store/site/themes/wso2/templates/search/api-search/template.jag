@@ -21,7 +21,7 @@ var tenant = jagg.getTenantDomain();
         </button> 
       </div>
       <div class="input-group-btn">
-        <a class="help_popup" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
+        <a class="help_popup" title="helpPopup" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
           <span class="icon fw-lg  add-margin-bottom-1x add-margin-left-1x" style="font-size:16px;">
             <i class="fw fw-info fw-inverse" title="Search options"></i>
           </span>            

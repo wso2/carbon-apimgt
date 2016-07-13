@@ -1337,9 +1337,9 @@ public class SQLConstants {
             " SELECT " +
             "   AKM.CONSUMER_KEY " +
             " FROM " +
-            "   AM_APPLICATION as APP," +
-            "   AM_APPLICATION_KEY_MAPPING as AKM," +
-            "   AM_SUBSCRIBER as SUB " +
+            "   AM_APPLICATION APP," +
+            "   AM_APPLICATION_KEY_MAPPING AKM," +
+            "   AM_SUBSCRIBER SUB " +
             " WHERE " +
             "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
@@ -2454,6 +2454,16 @@ public class SQLConstants {
             "DELETE FROM AM_POLICY_GLOBAL WHERE TENANT_ID = ? AND NAME = ?";
 
     public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
+
+    public static final String GET_ACCESS_TOKENS_BY_USER_SQL = "SELECT AKM.CONSUMER_KEY, CON_APP.CONSUMER_SECRET, TOKEN.ACCESS_TOKEN " +
+            "FROM " +
+            "IDN_OAUTH_CONSUMER_APPS CON_APP, AM_APPLICATION APP, IDN_OAUTH2_ACCESS_TOKEN  TOKEN, AM_APPLICATION_KEY_MAPPING AKM " +
+            "WHERE TOKEN.AUTHZ_USER =? " +
+            "AND APP.NAME=? " +
+            "AND TOKEN.TOKEN_STATE = 'ACTIVE' " +
+            "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
+            "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
+            "AND AKM.APPLICATION_ID = APP.APPLICATION_ID";
 
     /** Throttle related constants**/
 

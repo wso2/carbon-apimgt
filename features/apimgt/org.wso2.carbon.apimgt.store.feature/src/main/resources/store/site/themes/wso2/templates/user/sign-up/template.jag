@@ -103,7 +103,7 @@
                                     </div>
 								 <%} %>
 							    <% } %>
-                                <a class="add-margin-bottom-4x sign-up-additional"><%= i18n.localize("View Additional Details")%></a>
+                                <a class="add-margin-bottom-4x sign-up-additional" title="<%= i18n.localize("View Additional Details")%>"><%= i18n.localize("View Additional Details")%></a>
                                 
                                 <div class="extended-form"> 
                                 

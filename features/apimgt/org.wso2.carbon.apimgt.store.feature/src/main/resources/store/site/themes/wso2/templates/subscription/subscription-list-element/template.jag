@@ -25,7 +25,7 @@
 %>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><a data-toggle="collapse" data-target="#production-key-panel" aria-expanded="true" aria-controls="production-key-panel"><%=i18n.localize("keysPro")%><i class="glyphicon glyphicon-chevron-down pull-right"></i><i class="glyphicon glyphicon-chevron-up pull-right"></i></a></h3>
+    <h3 class="panel-title"><a data-toggle="collapse" data-target="#production-key-panel" title="<%=i18n.localize("keysPro")%>" aria-expanded="true" aria-controls="production-key-panel"><%=i18n.localize("keysPro")%><i class="glyphicon glyphicon-chevron-down pull-right"></i><i class="glyphicon glyphicon-chevron-up pull-right"></i></a></h3>
   </div>
   <div class="panel-body collapse in" id="production-key-panel">
     <input type="hidden"  class="prodAccessTokenHidden" id="prodAccessTokenHiddenID" value="<%=app.prodKey%>" >
@@ -160,7 +160,7 @@
 
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<a class="icon-question-sign help_popup_prod"></a>
-													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+													<button class="show-hide-key btn btn-primary" title="<%=i18n.localize("regenerate")%>" onclick="regenerate('<%=app.name%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 													<div id="prodtoken_help"></div>
 												</div>
 											</div>
@@ -267,12 +267,12 @@
                                <% if(app.prodKey != null ) { %>
                                <button class="btn btn-default" onclick="updateAccessAllowDomains('<%=app.name%>','PRODUCTION',200,this)" >Update Domains</button>
                                <div style="display:none" class="success-update-msg">Successfully updated.</div>
-                               <a class="icon-question-sign update_domain_popup_prod"></a>
+                               <a class="icon-question-sign update_domain_popup_prod" title="update_domain"></a>
                                <div id="update_help_prod"></div>
                                <% } else { %>
                                     Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshProdValidityTime" value="<%=prodValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
                                     <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-                                    <a class="icon-question-sign help_popup_prod"></a>
+                                    <a class="icon-question-sign help_popup_prod" title="helpProd"></a>
                                     <div id="prodtoken_help"></div>
                                <% } %>
                             </div>
@@ -302,7 +302,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><a data-toggle="collapse" data-target="#sandbox-key-panel" aria-expanded="true" aria-controls="production-key-panel"><%=i18n.localize("keysSand")%><i class="glyphicon glyphicon-chevron-down pull-right"></i><i class="glyphicon glyphicon-chevron-up pull-right"></i></a></h3>
+    <h3 class="panel-title"><a data-toggle="collapse" data-target="#sandbox-key-panel" aria-expanded="true" title="<%=i18n.localize("keysSand")%>" aria-controls="production-key-panel"><%=i18n.localize("keysSand")%><i class="glyphicon glyphicon-chevron-down pull-right"></i><i class="glyphicon glyphicon-chevron-up pull-right"></i></a></h3>
   </div>
   <div class="panel-body collapse in" id="sandbox-key-panel">      
 
@@ -406,7 +406,7 @@
 													<% } %>
 													Validity Time: <input type="text" class="form-control input-sm token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" /> Seconds
 		                            				<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-									<a class="icon-question-sign help_popup_sand"></a>		                            
+									<a class="icon-question-sign help_popup_sand" title="sandboxHelp"></a>
 		                            				<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=app.name%>','SANDBOX',200,this,'pull-right','<%=app.sandboxConsumerKey%>','<%=app.sandboxConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 									<div id="sandtoken_help"></div>
 												</div>
@@ -514,11 +514,11 @@
 		                              onclick="updateAccessAllowDomains('<%=app.name%>','SANDBOX',200,this,'allowDomainsSandRegenBtn')">Update Domains</button>
 		                        <div style="display:none" class="success-update-msg">Successfully updated.</div>
                                <a class="icon-question-sign update_domain_popup_sand"></a>
-                               <div id="update_help_sand"></div>
+                               <div id="update_help_sand" title="update_sandbox"></div>
 		                        <% } else { %>
 		                        Token Validity: <input type="text" class="input-mini token-validity-input" id="refreshSandValidityTime" value="<%=sandValidityTime%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  />  Seconds
 		                            <span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
-                                    <a class="icon-question-sign help_popup_sand"></a>
+                                    <a class="icon-question-sign help_popup_sand" title="sandbox_help"></a>
                                     <div id="sandtoken_help"></div>
 		                        <% } %>		                        
                             </div>
@@ -620,7 +620,7 @@
 				         <td><%=api.tier%></td>
 				         <td>
 							<% if(api.subStatus != "BLOCKED" || api.subStatus != "PROD_ONLY_BLOCKED" || api.status != "REJECTED"){ %>
-								<a onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" ><i class="fa fa-times"></i> Remove</a>                                
+								<a title="removeSubscription" onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" ><i class="fa fa-times"></i> Remove</a>
                             <%}%>
 				         </td>   			
             			</tr>

@@ -119,7 +119,7 @@ for(var i=0;i < outputs.tiers.length; i++){
         <%  var langsArray = supportedLangs.langs.split(",");
                 for(var i = 0 ; i < langsArray.length ; i++ ) { %>
                     <a href="/store/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=generateSdk&selectedApp=<%=application.name%>&language=<%=langsArray[i]%>"
-                          class="btn btn-primary " type="button">
+                          class="btn btn-primary " type="button" title="sdk generation">
                         <%=i18n.localize(langsArray[i],langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
                     </a>
         <%
