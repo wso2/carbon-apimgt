@@ -3,7 +3,7 @@
 		<div id="col-sm-12">
         <div id="manageAlerts">
 			<div class="page-header">
-				<h2><%=i18n.localize("manageAlertTypes")%></h2>
+				<h2><%=i18n.localize("Manage Alert Types")%></h2>
 			</div>
 			<div class="control-group">
                <%
@@ -55,9 +55,9 @@
                         </div>
                         </form>
                             <div class="" id="saveButtons">
-                                <button type="submit" class="btn btn-primary " id="saveBtn" >Save</button>
-                                <button type="submit" class="btn btn-primary " id="cancelBtn" >Cancel</button>
-                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" >Unsubscribe </button>
+                                <button type="submit" class="btn btn-primary " id="saveBtn" ><%=i18n.localize("Save")%></button>
+                                <button type="submit" class="btn btn-primary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
+                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" ><%=i18n.localize("Unsubscribe")%></button>
                             </div>
                     <%
                 }else{

@@ -74,8 +74,8 @@ function APISamples () {
     ":[\"application/json\"],\"info\":{\"title\":\"PizzaShackAPI\",\"description\":\"This document" +
     " describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\",\"license\":{\"name\"" +
     ":\"Apache 2.0\",\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"},\"contact\":" +
-    "{\"email\":\"architecture@PizzaShack.com\",\"name\":\"PizzaShack\",\"url\":" +
-    "\"http://PizzaShack.lk\"},\"version\":\"1.0.0\"}}";
+    "{\"email\":\"architecture@pizzashack.com\",\"name\":\"John Doe\",\"url\":" +
+    "\"http://www.pizzashack.com\"},\"version\":\"1.0.0\"}}";
     }
 
 APISamples.prototype.deploySampleApi = function (gatewayURL) {
@@ -95,18 +95,18 @@ APISamples.prototype.deploySampleApi = function (gatewayURL) {
                         } else {
                             $(".modal-body").removeClass("loadingButton");
                             jagg.message({
-                                content: "Error occurred while loading resource level tiers",
+                                content: i18n.t("Error occurred while loading resource level tiers"),
                                 type: "error",
-                                title: "Error"
+                                title: i18n.t("Error")
                             });
                         }
                     }, "json");
             } else {
                 $(".modal-body").removeClass("loadingButton");
                 jagg.message({
-                    content: "Error occurred while loading API level tiers",
+                    content: i18n.t("Error occurred while loading API level tiers"),
                     type: "error",
-                    title: "Error"
+                    title: i18n.t("Error")
                 });
             }
         }, "json");
@@ -127,10 +127,10 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
     $('#messageModal').modal({backdrop: 'static', keyboard: false });
     $(".modal-header .close").hide();
     $(".modal-footer").html("");
-    $(".modal-title").html("Please wait");
+    $(".modal-title").html(i18n.t("Please wait"));
     $(".modal-body").addClass("loadingButton");
     $(".modal-body").css({"margin-left": 25});
-    $(".modal-body").html("Sample API is Deploying");
+    $(".modal-body").html(i18n.t("Sample API is Deploying"));
 
     var _this = this;
     //add the sample api
@@ -169,10 +169,10 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                             provider: username, version: "1.0.0", default_version_checked: " ",
                             tier: defaultApiLevelTier, tiersCollection: defaultApiLevelTier,
                             transport_http: "http", transport_https: "https",
-                            bizOwner: "PizzaShack Business Owner",
-                            bizOwnerMail: "marketing@PizzaShack.com",
-                            techOwner: "PizzaShack Technical Owner",
-                            techOwnerMail: "architecture@PizzaShack.com",
+                            bizOwner: "Jane Roe",
+                            bizOwnerMail: "marketing@pizzashack.com",
+                            techOwner: "John Doe",
+                            techOwnerMail: "architecture@pizzashack.com",
                             swagger: _this.sample_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
@@ -185,9 +185,9 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                             if (!result.error) {
                                                 $(".modal-body").removeClass("loadingButton");
                                                 jagg.message({
-                                                    content: "Sample PizzaShackAPI is Deployed Successfully",
+                                                    content: i18n.t("Sample PizzaShackAPI is Deployed Successfully"),
                                                     type: "info",
-                                                    title: "Success",
+                                                    title: i18n.t("Success"),
                                                     cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                                 });
                                                 //Add document for the published sample
@@ -197,9 +197,9 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                                 } else {
                                     $(".modal-body").removeClass("loadingButton");
                                     jagg.message({
-                                        content: "Sample PizzaShackAPI is Created Successfully",
+                                        content: i18n.t("Sample PizzaShackAPI is Created Successfully"),
                                         type: "info",
-                                        title: "Success",
+                                        title: i18n.t("Success"),
                                         cbk:function(){window.location.assign(siteContext + "/site/pages/index.jag");}
                                     });
                                     //Add document for the created sample
@@ -214,9 +214,9 @@ APISamples.prototype.deploySampleApiToBackend = function (gatewayURL, defaultApi
                 }else {
                     $(".modal-body").removeClass("loadingButton");
                     jagg.message({
-                        content: "Error occurred while adding sample API",
+                        content: i18n.t("Error occurred while adding sample API"),
                         type: "error",
-                        title: "Error"
+                        title: i18n.t("Error")
                     });
                 }
             }
@@ -237,9 +237,9 @@ APISamples.prototype.addSampleAPIDoc = function () {
             if (apiDocResult.error) {
                 $(".modal-body").removeClass("loadingButton");
                 jagg.message({
-                    content: "Error occurred while adding sample API documentation",
+                    content: i18n.t("Error occurred while adding sample API documentation"),
                     type: "error",
-                    title: "Error"
+                    title: i18n.t("Error")
                 });
             }
         }, 'json');

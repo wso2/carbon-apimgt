@@ -37,17 +37,18 @@
     	        var environmentsPerType = environments[environmentType];
                 if(environmentType == "production"){
                     %>
-                    <h4>Production Endpoints</h4>
+                    <h4><%=i18n.localize("Production Endpoints")%></h4>
                     <%} else if(environmentType == "sandbox"){
                         %>
-                    <h4>Sandbox Endpoints</h4>
+                    <h4><%=i18n.localize("Sandbox Endpoints")%></h4>
                 <%} else {%>
-                	<h4>Production and Sandbox Endpoints</h4>
+                	<h4><%=i18n.localize("Production and Sandbox Endpoints")%></h4>
                 <%}
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
-                %>
-    	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
+                        // @todo: param_string
+                %> 
+    	            <h5 class="add-margin-top-2x"><%=i18n.localize(environmentName)%> <%=i18n.localize("URLs")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
@@ -57,7 +58,7 @@
 	                    if(environmenturls[urltype] != ""){ %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
 	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
-	    	            class="pull-right copy-button"  title="Copy"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
+	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
@@ -75,50 +76,50 @@
     <%}%>
     <% if(api.wsdl && api.wsdl != ""){ %>     
     <p>
-        <a title="<%=i18n.localize("wsdl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl))%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
+        <a title="<%=i18n.localize("Download WSDL")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl))%>" target="_blank"><h4><%=i18n.localize("Download WSDL")%></h4></a>
     </p>
     <% } %>
     <% if(api.wadl && api.wadl != ""){ %>
-        <h4 class="add-margin-top-5x"><%=i18n.localize("wadl")%>:</h4>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("WADL")%>:</h4>
     <p>
-        <a title="<%=i18n.localize("wadl")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile
+        <a title="<%=i18n.localize("WADL")%>" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile
         ("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl))%>" target="_blank"><%=encode.forHtml(api.wadl)%></a>
     </p>
         <% } %>
     <% if(api.description && api.description != ""){ %>
-        <h4 class="add-margin-top-5x"><%=i18n.localize("desc")%></h4>
+        <h4 class="add-margin-top-5x"><%=i18n.localize("Description")%></h4>
     <p>
         <%=api.description%>
     </p>
         <% } %>
 
 	 <% if((api.bizOwner && api.bizOwner != "") || (api.techOwner && api.techOwner != "")){ %>
-	 		<h4 class="add-margin-top-5x">Business Information</h4>
+	 		<h4 class="add-margin-top-5x"><%=i18n.localize("Business Information")%></h4>
 		    <% if(api.bizOwner&& api.bizOwner != ""){ %>
-		    		<p class="no-margin"><strong><%=i18n.localize("busiOwner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
+		    		<p class="no-margin"><strong><%=i18n.localize("Business Owner")%> : </strong><%=encode.forHtml(api.bizOwner)%>
 		    			<% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
-			           			[<a title="<%=i18n.localize("busiOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
+			           			[<a title="<%=i18n.localize("Business Owner")%>" href="mailto:<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
 			        	<%}%>
 		    		</p>
 
 		    <% } %>
 		    <% if(api.techOwner && api.techOwner != ""){ %>
-		    	<p class="no-margin"><strong><%=i18n.localize("techOwner")%> : </strong><%=encode.forHtml(api.techOwner)%>
+		    	<p class="no-margin"><strong><%=i18n.localize("Technical Owner")%> : </strong><%=encode.forHtml(api.techOwner)%>
 		    			<% if(api.techOwnerMail && api.techOwnerMail!=""){%>
-		           [<a title="<%=i18n.localize("techOwner")%>" href="mailto:<%=encode.forHtmlAttribute(api.techOwnerMail)%>"><%=encode.forHtml(api.techOwnerMail)%></a>]
+		           [<a title="<%=i18n.localize("Technical Owner")%>" href="mailto:<%=encode.forHtmlAttribute(api.techOwnerMail)%>"><%=encode.forHtml(api.techOwnerMail)%></a>]
 		        <%}%>
 		    		</p>
 		    <% } %>
 	   <%} %>
-    <h4 class="add-margin-top-5x"><%=i18n.localize("share")%></h4>
+    <h4 class="add-margin-top-5x"><%=i18n.localize("Share")%></h4>
     <ul class="nav nav-pills">
-      <li role="presentation" class="active"><a href="#" ref="social" class="share_links"><%=i18n.localize("SocialSites")%></a></li>
-      <li role="presentation"><a href="#" ref="embed" class="share_links"><%=i18n.localize("embed")%></a></li>
-      <li role="presentation"><a href="#" id="api_mailto"><%=i18n.localize("email")%></a></li>
+      <li role="presentation" class="active"><a href="#" ref="social" class="share_links"><%=i18n.localize("Social Sites")%></a></li>
+      <li role="presentation"><a href="#" ref="embed" class="share_links"><%=i18n.localize("Embed")%></a></li>
+      <li role="presentation"><a href="#" id="api_mailto"><%=i18n.localize("Email")%></a></li>
     </ul>
     <div class="share-container add-margin-top-2x">
         <div id="share_div_embed" class="share_dives highlight" style="display:none">
-            <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
+            <div class="well well-sm remove-margin"><a data-clipboard-text="" id="embed-copy" class="pull-right copy-button" title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><code id="embed_iframe" class="html hljs xml"></code></div>
         </div>
 
         <div id="share_div_social" class="share_dives">
@@ -138,7 +139,7 @@
 </div>
 <div class="row">
       <div class="col-md-12 col-lg-9">
-            <h4 class="add-margin-top-5x"><%=i18n.localize("comments")%></h4>
+            <h4 class="add-margin-top-5x"><%=i18n.localize("Comments")%></h4>
             <% if(user) jagg.includeBlock("comment/comment-add", null); %>
             <% jagg.includeBlock("comment/comment-list", {api:api}); %>
       </div>

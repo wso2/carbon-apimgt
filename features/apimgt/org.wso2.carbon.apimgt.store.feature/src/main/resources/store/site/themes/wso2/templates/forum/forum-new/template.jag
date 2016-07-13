@@ -7,28 +7,27 @@ var urlSuffix = jagg.getTenantURLPrefix();
 
 %>
 
-<div id="forum_add_new_topic_page">
-    
-    <div class="title-section">
-        <h2><%=i18n.localize('forum.topicCreation.title')%></h2>
-    </div>
+<div class="page-header">
+    <h2><%=i18n.localize('Create New Topic')%></h2>
+</div>
 
-    <form class="form-horizontal forum_form">
-        <table width="100%">
-            <tr>
-                <td width="100%">
-                    <input type="text" id="subject" title="<%=i18n.localize('forum.topicCreation.subject')%>" placeholder="<%=i18n.localize('forum.topicCreation.subject')%>" class="input-block-level form-control input-lg">
-                </td>
-            </tr>
-        </table>
+<div id="forum_add_new_topic_page">
+
+    <form class="forum_form">
+      <div class="form-group">
+        <h4><%=i18n.localize('Subject')%></h4>
+        <input type="text" id="subject" title="<%=i18n.localize('Subject')%>" class="form-control">
+      </div>
+        <h4><%=i18n.localize('Description')%></h4>
         <div id="topicDescriptioEditor"></div>
         <input type="hidden" id="parentId" name="parentId" value="<%= encode.forHtml(inputs.parentId)%>">
-        <div id="topic-add-actions">
-            <a title="<%=i18n.localize( 'forum.topicCreation.create')%>" class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
-                <%=i18n.localize( 'forum.topicCreation.create')%>
+        <div id="topic-add-actions" class="add-margin-top-2x">
+            <a title="<%=i18n.localize('Create')%>" class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
+                <%=i18n.localize( 'Create')%>
             </a>
-            <a title="<%=i18n.localize( 'cancel')%>" class="btn" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
-                <%=i18n.localize( 'cancel')%>
+            <a title="<%=i18n.localize( 'Cancel')%>" class="btn btn-secondary" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
+                <%=i18n.localize( 'Cancel')%>
+
             </a>
         </div>
     </form>

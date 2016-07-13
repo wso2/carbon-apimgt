@@ -9,7 +9,7 @@
 <div id="api-availability-page">
 
 <div class="page-header">
-    <h2>Availability of APIs</h2>
+    <h2><%=i18n.localize("Availability of APIs")%></h2>
 </div> 
 
 <br /> 

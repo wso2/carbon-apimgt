@@ -11,7 +11,7 @@ var tenantDomain = jagg.getTenantDomain();
    jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Create New Account",
+            "title":"Sign Up",
             "pagePath":"/site/pages/sign-up.jag",
             "body":[
                 {

@@ -140,7 +140,7 @@ if(analyticsConfigInstance.isAnalyticsEnabled()){%>
                 <form>
                     {{#has options}}
                     <div class="ues-options">
-                        <h4>Options</h4>
+                        <h4><%=i18n.localize("Options")%></h4>
                         {{#each options}}
                         <div class="form-group">
                             <div class="col-sm-12">
@@ -185,7 +185,7 @@ if(analyticsConfigInstance.isAnalyticsEnabled()){%>
                         {{/each}}
                     </div>
                     {{else}}
-                    <div class="alert alert-info">No properties to configure.</div>
+                    <div class="alert alert-info"><%=i18n.localize("No properties to configure.")%></div>
                     {{/has}}
                 </form>
             </div>

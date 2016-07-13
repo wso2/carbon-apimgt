@@ -6,7 +6,15 @@ var tenant = jagg.getTenantDomain();
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
   <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
-      <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("searchAPI")%>...">
+      <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%=i18n.localize("All")%> <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li><a href="#"><%=i18n.localize("All")%></a></li>
+            <li><a href="#"><%=i18n.localize("Production")%></a></li>
+            <li><a href="#"><%=i18n.localize("Prototyped")%></a></li>
+          </ul>
+      </div>
+      <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search Options")%>...">
       <div class="input-group-btn">
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="Search">
           <i class="fw fw-search" aria-hidden="true"></i>
@@ -21,13 +29,14 @@ var tenant = jagg.getTenantDomain();
       </div>
        <div id="apiSearchTips" class="hide help-popover-content" >
             <ol>
-                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+                <li><%=i18n.localize("By API Name [Default]")%></li>
+                <li><%=i18n.localize("By API Provider [ Syntax - provider:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By API Version [ Syntax - version:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By Context [ Syntax - context:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By Description [ Syntax - description:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Tags [ Syntax - tags:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Sub-Context [ Syntax - subcontext:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Documentation Content [ Syntax - doc:xxxx ]")%></li>
             </ol>
         </div>
       <%if(tenant != null){ %>
@@ -48,13 +57,13 @@ var tenant = jagg.getTenantDomain();
         </div>
         <div id="apiSearchHelp" class="hide help-popover-content" >
             <ol>
-                <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
-                <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+                 <li><%=i18n.localize("By API Name [Default]")%></li>
+                <li><%=i18n.localize("By API Provider [ Syntax - provider:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By API Version [ Syntax - version:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By Context [ Syntax - context:xxxx ]  or")%></li>
+                <li><%=i18n.localize("By Description [ Syntax - description:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Sub-Context [ Syntax - subcontext:xxxx ] or")%></li>
+                <li><%=i18n.localize("By Documentation Content [ Syntax - doc:xxxx ]")%></li>
             </ol>
         </div>
         <%if(tenant != null){ %>
@@ -62,7 +71,7 @@ var tenant = jagg.getTenantDomain();
         <%}%>        
     </form>
   </div>
-  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> Search Options</a>
+  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("Search Options")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> <%=i18n.localize("Search Options")%></a>
 </div>
 </div -->
 

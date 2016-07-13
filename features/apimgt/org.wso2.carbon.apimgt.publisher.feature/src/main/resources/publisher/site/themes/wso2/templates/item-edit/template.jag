@@ -11,10 +11,10 @@
 var TIERS = <%= result %>;
 
 var AUTH_TYPES = [
-  { "value": "<%=i18n.localize("none")%>", "key":"<%=i18n.localize("none")%>"} ,
-  { "value": "<%=i18n.localize("application")%>", "key":"<%=i18n.localize("application")%>"},
-  { "value": "<%=i18n.localize("applicationUser")%>", "key":"Application_User"},
-  { "value": "<%=i18n.localize("application&applicationUser")%>", "key":"Any"},
+  { "value": "<%=i18n.localize("None")%>", "key":"<%=i18n.localize("None")%>"} ,
+  { "value": "<%=i18n.localize("Application")%>", "key":"<%=i18n.localize("Application")%>"},
+  { "value": "<%=i18n.localize("Application User")%>", "key":"<%=i18n.localize("Application_User")%>"},
+  { "value": "<%=i18n.localize("Application & Application User")%>", "key":"<%=i18n.localize("Any")%>"},
 ];
 
 var RESOURCES = <%= api.resources %>;
@@ -54,10 +54,10 @@ var faultSequencesLoaded = false;
 <span id="editErrorSpan"></span>
 </div>
 <div class="alert alert-block" id="editAPIWarn" style="display:none">
-<span id="editWarnSpan"><b>Warning!</b><br/>
-You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-active subscriptions.<br/>
-API Definition for Swagger will not be overriden with the changes you will do to the API. 
+<span id="editWarnSpan"><b><%=i18n.localize("Warning!")%></b><br/>
+<%=i18n.localize("You are editing an API with active subscribers. Tier Availability changes will not be reflected on active subscriptions.")%>
+<br/>
+<%=i18n.localize("API Definition for Swagger will not be overridden with the changes you will do to the API.")%>
 </span>
 </div>
 <script type="text/javascript">
@@ -70,7 +70,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
     <div class="span12">
         <form method="POST" class="form-horizontal well" id="editAPIForm" action="<%= jagg.url("/site/blocks/item-add/ajax/add.jag")%>"  enctype="multipart/form-data">
             <fieldset>
-            <legend><%=i18n.localize("generalDetailsTitle")%></legend>
+            <legend><%=i18n.localize("General Details")%></legend>
             <input type="hidden" name="action" id="action" value="updateAPI"/>
             <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
             <input type="hidden" name="version" id="version" value="<%=api.version%>"/>
@@ -80,26 +80,28 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
 
             <div class="control-group">
-                <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
+                <label class="control-label" for="context"><%=i18n.localize("Context")%>:<span class="requiredAstrix">*
+                </span></label>
                 <div class="controls">
                     <input type="text" class="input-xlarge required validRegistryName validateForwardSlashAtEnd validInput contextExists noSpace" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
                     <a class="icon-question-sign help_popup" help_data="context_help" title="context_help"></a>
-                    <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
+                    <p id="context_help" class="hide"><%=i18n.localize("URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context")%></p>
                 </div>
             </div>
 
             <div class="control-group">
-                    <label  class="control-label" >Default Version</label>
+                    <label  class="control-label" ><%=i18n.localize("Default Version")%></label>
                      <div class="controls">
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
                         <a class="icon-question-sign help_popup" help_data="default_api_help" title="default_api_help"></a>
-                        <p id="default_api_help" class="hide">Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.</p>
+                        <p id="default_api_help" class="hide"><%=i18n.localize("Making an API version default will allow the subscribers to invoke it without the version attribute in the URI.")%></p>
 
                         <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
-                            <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                            <!--@todo: param_string-->
+                            <p class="help-block"><%=i18n.localize("Currently set to version : ")%><%=api.currentDefaultVersion%></p>
                         <%}else{%>
-                            <p class="help-block">No default version defined for the current API</p>
+                            <p class="help-block"><%=i18n.localize("No default version defined for the current API")%></p>
                         <%}}%>
 
                         <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
@@ -108,28 +110,28 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </div>
 
             <div class="control-group">
-                    <label class="control-label" for="editTier"><%=i18n.localize("subTier")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="editTier"><%=i18n.localize("Subscription Tiers")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <select id="editTier" class="selected" name="editTier"  multiple="multiple">
                        </select>
                        <a class="icon-question-sign help_popup" help_data="tier_help" title="tier_help"></a>
-                       <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                       <p id="tier_help" class="hide"><%=i18n.localize("The tiers you select here are the ones available for subscriber to subscribe this API. Each tier indicates the number of requests, the subscriber is granted for within a unit time.")%></p>
                     </div>
             </div>
 
             <div class="control-group transport-styles">
-               <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+               <label class="control-label" for="transports"><%=i18n.localize("Transports")%>:<span class="requiredAstrix">*</span></label>
                <div class="controls">
                    <div class="checkbox">
                        <label  class="checkbox inline" >
                            <input type="checkbox" class="required transports_check_http" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
                            <input type="hidden" id="http_checked" name="http_checked" <%if(api.transport_http == "checked"){%>value="http"<%}else{%>value=""<%}%>/>
-                           <%=i18n.localize("httpTransport")%>
+                           <%=i18n.localize("HTTP")%>
                        </label>
                        <label  class="checkbox inline" >
                            <input type="checkbox" class="required transports_check_https" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
                            <input type="hidden" id="https_checked" name="https_checked" <%if(api.transport_https == "checked"){%>value="https"<%}else{%>value=""<%}%>/>
-                           <%=i18n.localize("httpsTransport")%>
+                           <%=i18n.localize("HTTPS")%>
                        </label>
                    </div>
                </div>
@@ -137,25 +139,25 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
             <div class="control-group">
                 <div class="controls">
-                   <a href="#" class="more-options" ref="more-options-general" title="<%=i18n.localize("moreOptions")%>"><%=i18n.localize("moreOptions")%></a>
+                   <a href="#" class="more-options" ref="more-options-general" title="<%=i18n.localize("Show More Options")%>"><%=i18n.localize("Show More Options")%></a>
                 </div>
             </div>
             <div id="more-options-general" style="display:none">
 
          		<!--Response Caching -->
                 <div class="control-group">
-                    <label class="control-label" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
+                    <label class="control-label" for="responseCache"><%=i18n.localize("Response Caching")%>:</label>
                       <div class="controls"> 
                        <select class="select required" id="responseCache" name="responseCache" onchange="showCacheTimeout()">
-			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
-			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+			                <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Disabled")%></option>
+			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Enabled")%></option>
 		                </select>                                
                         <a class="icon-question-sign help_popup" help_data="cache_help" title="cache_help"></a>
-                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
+                        <p id="cache_help" class="hide"><%=i18n.localize("This option determines whether to cache the response messages of the API. Caching improves performance, because the backend server does not have to process the same data for a request multiple times. To offset the risk of stale data in the cache, set an appropriate timeout period when prompted.")%></p>
                      </div>
                 </div>
                 <div class="control-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
-                    <label class="control-label" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="cacheTimeout"><%=i18n.localize("Cache Timeout (seconds)")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <input type="text" style="text-align:right;" class="input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
                     </div>
@@ -163,46 +165,50 @@ API Definition for Swagger will not be overriden with the changes you will do to
             <!--Response Caching End -->
 
             <div class="control-group">
-               <label class="control-label" for="visibility"><%=i18n.localize("visibility")%>:<span class="requiredAstrix">*</span></label>
+               <label class="control-label" for="visibility"><%=i18n.localize("Visibility")%>:<span
+               class="requiredAstrix">*</span></label>
                <div class="controls">
                    <select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">
-                       <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
-                       <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n.localize("private")%></option>
-                       <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
+                       <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n
+                       .localize("Public")%></option>
+                       <option value="private" <%if(api.visibility=="private"){%> selected="selected" <%}%>><%=i18n
+                       .localize("Visible to my domain")%></option>
+                       <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected"
+                       <%}%>><%=i18n.localize("Restricted by roles")%></option>
                    </select>
                    <a class="icon-question-sign help_popup" help_data="role_help" title="role_help"></a>
-                   <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
+                   <p id="role_help" class="hide"><%=i18n.localize("<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify.")%></p>
                </div>
            </div>
            
            <div class="control-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
                 <label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">
-                    <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
+                    <%=i18n.localize("Visible to Roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
                 </label>
                 <div class="controls">
                     <input type="text" class="input required validInput validateRoles"
                     id="roles" name="roles"  value="<%=api.roles%>"/>
-                    <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+                    <p class="help-block" id="rolesHelp"><%=i18n.localize("Comma-separated list (e.g.: role1,role2,role3)")%></p>
                 </div>
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="imageUrl"><%=i18n.localize("thumbnail")%></label>
+                <label class="control-label" for="imageUrl"><%=i18n.localize("Thumbnail Image")%></label>
                 <div class="controls">
                     <div class="pull-left">
-                         <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="<%=i18n.localize("defaultAPIThumb")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
-                        <div><img id="apiEditThumb" alt="<%=i18n.localize("apiThumb")%>" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
+                         <% if(api.thumb==null){%> <div><img id="apiEditThumb" alt="<%=i18n.localize("Default API Thumbnail")%>" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>"/></div><%}else{%>
+                        <div><img id="apiEditThumb" alt="<%=i18n.localize("API Thumbnail")%>" src="<%=jagg.getRegistryPath(api.thumb)%>"/></div> <%}%>
                         <a onclick="javascript:$('#imageUrl').toggle('slow')" style="cursor: pointer" title="image url">
-                            <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
+                            <i class="icon-picture"></i> <%=i18n.localize("Change Icon")%>
                         </a>
                     </div>
                     <div class="pull-left" id="imageUrl" style="display:none;">
                         <div id="apiThumb-container" class="pull-left"> <input type="file" class="input-xlarge validateImageFile" name="apiThumb" /></div>
-                        <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                        <input class="pull-left btn" type="button" id="clearThumb" value="<%=i18n.localize("Clear")%>"/>
                         <div class="help-block pull-left inline-help">
                             <ul>
-                                <li><%=i18n.localize("imgHelpMsg")%></li>
-                                <li><%=i18n.localize("imgHelpMsg2")%></li>
+                                <li><%=i18n.localize("Size (max): 1MB")%></li>
+                                <li><%=i18n.localize("Dimensions (max): 100 x 100 pixels")%></li>
                             </ul>
                         </div>
                     </div>
@@ -211,55 +217,56 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="editDescription"><%=i18n.localize("description")%>:</label>
+                <label class="control-label" for="editDescription"><%=i18n.localize("Description")%>:</label>
                 <div class="controls">
+                <!-- @todo: param_string -->
                     <textarea class="input-xlarge" id="editDescription" rows="3"
                               style="margin-left: 0px; margin-right: 0px; width: 501px; " name="description"><%=api.description%></textarea>
                 </div>
             </div>
 
             <div class="control-group">
-                   <label class="control-label" for="editTags"><%=i18n.localize("tags")%>:</label>
+                   <label class="control-label" for="editTags"><%=i18n.localize("Tags")%>:</label>
                    <div class="controls">
                        <input type="text" class="input-xlarge validInput" id="editTags" name="tags" value="<%=api.tags%>"/>
-                       <p class="help-block"><%=i18n.localize("tagsHelpMsg")%></p>
+                       <p class="help-block"><%=i18n.localize("Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs.")%></p>
                    </div>
                </div>
 
             <% if (isSynapseGateway) { %>
             <div class="control-group">
-                <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+                <label class="control-label" for="sequence"><%=i18n.localize("Message Mediation Policies")%>:</label>
 
 
                 <div class="controls">
                 <label class="checkbox">
                     <input type="checkbox" onclick="toggleSequence(this)" name="sequence_check" id="sequence_check"
                         <% if(api.inSequence != null || api.outSequence != null || api.faultSequence != null){ %>
-                            checked="checked"><%}%><%=i18n.localize("sequenceMsg")%>
+                            checked="checked"><%}%><%=i18n.localize("Check to select a message mediation policy to be executed in the message flow")%>
                 </label>
                 <table class="table table-bordered table-striped" id="seqTable"
                         <% if(api.inSequence == null && api.outSequence == null && api.faultSequence == null){ %>style="display:none"<%}%>>
                     <thead>
                         <tr>
-                            <th><%=i18n.localize("inFlow")%></th>
-                            <th><%=i18n.localize("outFlow")%></th>
-                            <th><%=i18n.localize("faultFlow")%></th>
+                            <th><%=i18n.localize("In Flow")%></th>
+                            <th><%=i18n.localize("Out Flow")%></th>
+                            <th><%=i18n.localize("Fault Flow")%></th>
                         </tr>
                     </thead>
                         <tr>
                             <td>
                                 <select id="inSequence"  name="inSequence" >
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                    <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                 </select>
                             </td>
                             <td>
                                 <select id="outSequence"  name="outSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                    <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                 </select>
                             </td>
                             <td>
                                 <select id="faultSequence"  name="faultSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                    <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                 </select>
                             </td>
                         </tr>
@@ -271,17 +278,17 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </div><!-- end of more options div -->                            
             </fieldset>
             <fieldset>
-               <legend><%=i18n.localize("endpointTitle")%></legend>
+               <legend><%=i18n.localize("Endpoints")%></legend>
 
                <div class="control-group">
-                   <label class="control-label" for="endpoint_type">Endpoint Type:<span class="requiredAstrix">*</span></label>
+                   <label class="control-label" for="endpoint_type"><%=i18n.localize("Endpoint Type:")%><span class="requiredAstrix">*</span></label>
                        <div class="controls">
                            <select class="select required" id="endpoint_type" name="endpoint_type">
-                               <option value="http">HTTP Endpoint</option>
-                               <option value="address">Address Endpoint</option>
-                               <option value="wsdl">WSDL Endpoint</option>
-                               <option value="failover">Failover Endpoint</option>
-                               <option value="load_balance">Load balanced Endpoint</option>
+                               <option value="http"><%=i18n.localize("HTTP Endpoint")%></option>
+                               <option value="address"><%=i18n.localize("Address Endpoint")%></option>
+                               <option value="wsdl"><%=i18n.localize("WSDL Endpoint")%></option>
+                               <option value="failover"><%=i18n.localize("Failover Endpoint")%></option>
+                               <option value="load_balance"><%=i18n.localize("Load balanced Endpoint")%></option>
                            </select>
                            <a class="icon-question-sign help_popup" help_data="endpoint_help" title="endpoint_help"></a>
                        </div>
@@ -290,14 +297,14 @@ API Definition for Swagger will not be overriden with the changes you will do to
                <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 
                <div id="endpoint_help" class="hide">
-                <strong>HTTP Endpoint </strong><p>Defines a URI Template based REST Service endpoint</p>
-                <strong>Address Endpoint</strong><p>Defines the direct URL of the service</p>
-                <strong>WSDL Endpoint</strong><p>Defines the WSDL, Service and Port</p>
-                <strong>Failover Group </strong><p>Defines the endpoints that the service will try to connect to in case
-                        of a failure. This will take place in a round robin manner</p>
-                <strong>Load Balance</strong><p> Endpoint 	Defines groups of endpoints for replicated services.The
-                        incoming requests will be directed to these endpoints in a round robin manner. These endpoints
-                        automatically handle the fail-over cases as well</p>
+               <strong><%=i18n.localize("HTTP Endpoint")%> </strong><p>
+               <%=i18n.localize("Defines a URI Template based REST Service endpoint")%></p>
+               <strong><%=i18n.localize("Address Endpoint")%></strong><p><%=i18n.localize("Defines the direct URL of the service")%></p>
+               <strong><%=i18n.localize("WSDL Endpoint")%></strong><p><%=i18n.localize("Defines the WSDL, Service and Port")%></p>
+                <strong><%=i18n.localize("Failover Group")%> </strong>
+                <p><%=i18n.localize("Defines the endpoints that the service will try to connect to in case of a failure. This will take place in a round robin manner")%></p>
+                <strong><%=i18n.localize("Load Balance Endpoint")%></strong><p>
+                <%=i18n.localize("Defines groups of endpoints for replicated services.The incoming requests will be directed to these endpoints in a round robin manner. These endpoints automatically handle the fail-over cases as well")%> </p>
                </div>
 
                <div id="endpoint_form" class="endpoint_dives" >
@@ -305,36 +312,36 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                <div class="control-group">
                  <div class="controls">
-                        <a href="#" class="more-options" ref="more-options-endpoints" title="<%=i18n.localize("moreOptions")%>"><%=i18n.localize("moreOptions")%></a>
+                        <a href="#" class="more-options" ref="more-options-endpoints" title="<%=i18n.localize("Show More Options")%>"><%=i18n.localize("Show More Options")%></a>
                      </div>
                  </div>
                <div id="more-options-endpoints" style="display:none">
 
 
                 <div class="control-group">
-                    <label class="control-label" for="endpointType"><%=i18n.localize("endpointType")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="endpointType"><%=i18n.localize("Endpoint Security Scheme")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                     <select class="select required" id="endpointType" name="endpointType" onchange="showUTProductionURL()">
-                        <option value="nonsecured" <%if(api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
-                        <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
+                        <option value="nonsecured" <%if(api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("Non Secured")%></option>
+                        <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("Secured")%></option>
                     </select>
 
                     </div>
                 </div>
 
                 <div class="control-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-                    <label class="control-label" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="endpointAuthType"><%=i18n.localize("Endpoint Auth Type")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                     <select class="select required" id="endpointAuthType" name="endpointAuthType" >
-                        <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
-                        <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
+                        <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("Basic Auth")%></option>
+                        <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("Digest Auth")%></option>
                     </select>
 
                     </div>
                 </div>
 
                 <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
-                    <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="credentials"><%=i18n.localize("Credentials")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">
                         <input type="text" class="input-small required validInput" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
                         <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
@@ -342,37 +349,37 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 </div>
 
                 <div class="control-group api_wsdl">
-                    <label class="control-label" for="wsdl"><%=i18n.localize("wsdl")%>:</label>
+                    <label class="control-label" for="wsdl"><%=i18n.localize("WSDL")%>:</label>
                     <div class="controls">
                         <div class="input-append">
                         <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
-                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
                         </div>
-                        <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
+                        <p class="help-block"><%=i18n.localize("E.g.,:http://appserver/services/echo?wsdl")%></p>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="wadl"><%=i18n.localize("wadl")%>:</label>
+                    <label class="control-label" for="wadl"><%=i18n.localize("WADL")%>:</label>
                     <div class="controls">
                         <div class="input-append">
                         <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
-                        <button class="btn check_url_valid"  type="button"><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid"  type="button"><%=i18n.localize("Test URI")%></button>
                         </div>
-                        <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
+                        <p class="help-block"><%=i18n.localize("E.g.,:http://example.com/service.wadl")%></p>
                     </div>
                 </div>
 
                 <% if(isDataPublishingEnabled) { %>
                 <!--Southboud statistics -->
                 <div class="control-group">
-                    <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
+                    <label class="control-label" for="destinationStats"><%=i18n.localize("Destination-Based Usage Tracking")%>:</label>
                       <div class="controls">
                        <select class="select required" id="destinationStats" name="destinationStats">
-			                <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
-			                <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+			                <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Disabled")%></option>
+			                <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Enabled")%></option>
 		                </select>
                         <a class="icon-question-sign help_popup" help_data="stats_help" title="stats_help"></a>
-                        <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
+                        <p id="stats_help" class="hide"><%=i18n.localize("Enable this feature to see a graph (in the <strong>Statistics menu </strong>) of the number of requests that leave the API Gateway to destination endpoints (e.g., Load-balanced endpoints).")%></p>
                      </div>
                 </div>
                 <!--Southboud statistics End -->
@@ -382,28 +389,28 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </fieldset>
 
             <fieldset>
-                <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+                <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("Business Information")%> <i class="icon-chevron-right icon-keys"></i></legend>
                 <div style="display: none">
                     <div class="control-group">
-                        <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                        <label class="control-label" for="bizOwner"><%=i18n.localize("Business Owner")%>:</label>
                         <div class="controls">
                              <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
                         </div>
                     </div>
                      <div class="control-group">
-                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("Business Owner Email")%>:</label>
                         <div class="controls">
                              <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
                         </div>
                     </div>
                      <div class="control-group">
-                        <label class="control-label" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                        <label class="control-label" for="techOwner"><%=i18n.localize("Technical Owner")%>:</label>
                         <div class="controls">
                              <input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
                         </div>
                     </div>
                      <div class="control-group">
-                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("Technical Owner Email")%>:</label>
                         <div class="controls">
                              <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
                         </div>
@@ -412,40 +419,40 @@ API Definition for Swagger will not be overriden with the changes you will do to
             </fieldset>
 
 			<fieldset>
-                    <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("subscriptionsTitle")%><i class="icon-chevron-right icon-keys"></i></legend>
+                    <legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("Subscriptions")%><i class="icon-chevron-right icon-keys"></i></legend>
                     <div class="control-group" style="display: none">
-	                	<label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
+	                	<label class="control-label" for="subscriptions"><%=i18n.localize("Subscriptions")%>:</label>
 	                			
 						<div class="controls">
 		                	<select class="select required" id="subscriptions" name="subscriptions" onchange="showHideTenants()">
-			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
-			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
-			                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+			                	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
+			                	<option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+			                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
 		                	</select>
                             <a class="icon-question-sign help_popup" help_data="subscriptions_help" title="subscriptions_help"></a>
-                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                            <div id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></div>
 	                	</div>
 					                
                 <br/>
                 	<div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
 		                <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
-		                	<%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+		                	<%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
 		                </label>
 		                <div class="controls">
 		                    <input type="text" class="input required"
 		                    id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-	                        <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+	                        <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
 		                </div>
 	                
 	            	</div>
 	            </div>
 				</fieldset>
             <fieldset>
-            <legend class="legend-with-hidden-info"><%=i18n.localize("resources")%></legend>
+            <legend class="legend-with-hidden-info"><%=i18n.localize("API Resources")%></legend>
 
                 <div id="scopes_view"></div>
                 <div class="resource_container" data-index="idx">
-                        <span style="color:#999">URL Pattern&nbsp;</span>
+                        <span style="color:#999"><%=i18n.localize("URL Pattern&nbsp;")%></span>
                         <div class="input-prepend">
                             <span class="add-on">/{context}/{version}/</span>
                             <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern E.g.: path/to/resource" class="resource_url_pattern"/>
@@ -490,7 +497,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                             </ul>
                         </div>
-                            <button class="btn btn-secondary" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("addNewResource")%></button>
+                            <button class="btn btn-secondary" type="button" id="add_resource" style="margin:0 0 10px 10px;"><i class="icon-plus-sign"></i>&nbsp;<%=i18n.localize("Add Resource")%></button>
                         </div>
 
                 <div id="resource_view"></div>
@@ -515,11 +522,11 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
 
              <div class="form-actions" style="display:none" id="saveMessage">
-                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                    <div class="btn loadingButton"><%=i18n.localize("Saving API. Please wait..")%></div>
              </div>
             <div class="form-actions" id="saveButtons">
-                <input type="submit" id="updateButton" class="btn btn-primary" value="<%=i18n.localize("save")%>"/>
-                <input type="reset" id="cancelEdit" class="btn btn-secondary" value="<%=i18n.localize("cancel")%>">
+                <input type="submit" id="updateButton" class="btn btn-primary" value="<%=i18n.localize("Save")%>"/>
+                <input type="reset" id="cancelEdit" class="btn btn-secondary" value="<%=i18n.localize("Cancel")%>">
             </div>
 
         </form>
@@ -527,45 +534,47 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div  id="advance_endpoint_config" class="modal hide fade">
                          <div class="modal-header">
                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                         <h3 class="modal-title">Advanced Endpoint Configuration</h3>
+                         <h3 class="modal-title"><%=i18n.localize("Advanced Endpoint Configuration")%></h3>
                          </div>
                          <div class="modal-body form-horizontal">
                          <form id="advance_form"></form>
                          </div>
                          <div class="modal-footer">
                          <div id="res" class="hide" style="color:red;float:left"></div>
-                         <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("save")%>">Save changes</a>
-                         <a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
+                         <a href="#" class="btn btn-primary" id="advance_ep_submit" title="<%=i18n.localize("Save")
+                         %>"><%=i18n.localize("Save changes")%></a>
+                         <a href="#" class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("Close")
+                         %>"><%=i18n.localize("Close")%></a>
                          </div>
                     </div>
 
             <div  id="define_scope_modal" class="modal hide fade form-horizontal">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>Define Scope</h3>
+                <h3><%=i18n.localize("Define Scope")%></h3>
                 </div>
                 <div class="modal-body">
                 <form id="scope_form">
                     <div class="control-group">
-                        <label class="control-label" for="scopeKey">Scope Key</label>
+                        <label class="control-label" for="scopeKey"><%=i18n.localize("Scope Key")%></label>
                         <div class="controls">
                         <input type="text" id="scopeKey" placeholder="Eg: api_name_read">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="scopeName">Scope Name</label>
+                        <label class="control-label" for="scopeName"><%=i18n.localize("Scope Name")%></label>
                         <div class="controls">
                         <input type="text" id="scopeName" placeholder="Eg: Read My Data">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="scopeRoles">Roles</label>
+                        <label class="control-label" for="scopeRoles"><%=i18n.localize("Roles")%></label>
                         <div class="controls">
                         <input type="text" id="scopeRoles" placeholder="E.g.: role1,role2,role3">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="inputEmail">Description</label>
+                        <label class="control-label" for="inputEmail"><%=i18n.localize("Description")%></label>
                         <div class="controls">
                         <textarea id="scopeDescription" placeholder="Eg: Allows the Application to read your data"></textarea>
                         </div>
@@ -574,8 +583,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 </div>
                 <div class="modal-footer">
                 <div id="res" class="hide" style="color:red;float:left"></div>
-                <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("addScopes")%>">Add Scope</a>
-                <a class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("close")%>">Close</a>
+                <a class="btn btn-primary" id="scope_submit" title="<%=i18n.localize("Add Scopes")%>"><%=i18n.localize("Add Scopes")%></a>
+                <a class="btn btn-secondary" data-dismiss="modal" title="<%=i18n.localize("Close")%>"><%=i18n.localize("Close")%></a>
                 </div>
            </div>
     </div>
@@ -631,24 +640,24 @@ $(document).ready(function() {
 <script id="scopes-template" type="text/x-handlebars-template">
     <div class="resource_container scope_container">
     {{#if scopes}}
-        <h4>Scopes</h4>
+        <h4><%=i18n.localize("Scopes")%></h4>
         <ul>
             {{#each scopes}}
             <li>
-                <h6><a data-index='{{idx}}' class='delete_scope' title="<%=i18n.localize("deleteScope")%>"><i class='icon-trash' title="<%=i18n.localize("deleteScope")%>"></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
+                <h6><a data-index='{{idx}}' class='delete_scope' title="<%=i18n.localize("Remove Scope")%>"><i class='icon-trash' title="<%=i18n.localize("Remove Scope")%>"></i></a> &nbsp;&nbsp; {{ key }} : {{ name }}  </h6>
                 <p>{{ description }}</p>
             </li>
             {{/each}}
         </ul>
     {{/if}}
-        <a id="define_scopes" class="pointer btn" title="<%=i18n.localize("addScopes")%>"><i class="icon-plus-sign" title="<%=i18n.localize("addScopes")%>"></i>&nbsp;Add Scopes</a>
+        <a id="define_scopes" class="pointer btn" title="<%=i18n.localize("Add Scopes")%>"><i class="icon-plus-sign" title="<%=i18n.localize("Add Scopes")%>"></i>&nbsp;Add Scopes</a>
     </div>
 </script>
 
 <script id="resource-template" type="text/x-handlebars-template">
     {{#each resources}}
         <div class="resource_container" data-index="idx">
-                        <span style="color:#999">URL Pattern&nbsp;</span>
+                        <span style="color:#999"><%=i18n.localize("URL Pattern&nbsp;")%></span>
                         <span style="font-size:18px;font-weight:bold">/{{../context}}/{{../version}}/{{ url_pattern }}</span>
                             <blockquote class="pull-right">
                             <a data-index='{{idx}}' class='delete_resource' title="delete resource"><i class='icon-trash' title="delete resource"></i></a>&nbsp;
@@ -657,11 +666,11 @@ $(document).ready(function() {
                             </blockquote>
                         <table style="margin-left:80px;" class="table-hover">
                             <tr>
-                                <td style="color:#999; text-align:center">HTTP Verb</td>
-                                <td style="color:#999; text-align:center">Auth Type</td>
-                                <td style="color:#999; text-align:center">Throttling Tier</td>
+                                <td style="color:#999; text-align:center"><%=i18n.localize("HTTP Verb")%></td>
+                                <td style="color:#999; text-align:center"><%=i18n.localize("Auth Type")%></td>
+                                <td style="color:#999; text-align:center"><%=i18n.localize("Throttling Tier")%></td>
                                 {{#if ../scopes}}
-                                <td style="color:#999; text-align:center">Scope</td>
+                                <td style="color:#999; text-align:center"><%=i18n.localize("Scope")%></td>
                                 {{/if}}
                             </tr>
                         {{#each ../verbs }}

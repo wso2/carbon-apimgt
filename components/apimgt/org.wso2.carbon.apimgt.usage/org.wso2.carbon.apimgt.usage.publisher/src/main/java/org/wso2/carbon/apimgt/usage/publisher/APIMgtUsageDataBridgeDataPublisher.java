@@ -144,10 +144,12 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String serverPassword = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
                     .getDasReceiverServerPassword();
             String serverURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups();
+            String serverAuthURL = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
+                    .getDasReceiverAuthUrlGroups();
 
             try {
                 //Create new DataPublisher for the tenant.
-                dataPublisher = new DataPublisher(null, serverURL, null, serverUser, serverPassword);
+                dataPublisher = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
 
                 //Add created DataPublisher.
                 UsageComponent.addDataPublisher(tenantDomain, dataPublisher);

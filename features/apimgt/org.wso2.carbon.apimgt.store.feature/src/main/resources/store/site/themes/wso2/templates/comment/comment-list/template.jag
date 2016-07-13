@@ -14,13 +14,13 @@
                     <span class="comment-text word-break"><%=comment.comment%></span>
                 </div>
             </div>
-            <div class="comment-extra"><%=i18n.localize("postComment")%> <strong><%=comment.username%></strong> <%=i18n.localize("onText")%> <span class="dateFull"><%=comment.createdTime%></span></div>
+            <div class="comment-extra"><%=i18n.localize("Posted By")%> <strong><%=comment.username%></strong> <%=i18n.localize("on")%> <span class="dateFull"><%=comment.createdTime%></span></div>
         </div>
     </div>
     <% }
     } else {
     %>
-    <p><%=i18n.localize("noCommentMsg")%></p>
+    <p><%=i18n.localize("No comments yet")%></p>
     <% } %>
 </div>
 <script type="text/javascript">

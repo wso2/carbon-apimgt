@@ -211,15 +211,6 @@ public interface APIManager {
     SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Creates a new subscriber. The newly created subscriber id will be set in the given object.
-     *
-     * @param subscriber The subscriber to be added
-     * @param groupingId - the groupId to which the subscriber belongs to
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
-     */
-    void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
-
-    /**
      * Creates a new subscriber given the username and the grouping Id
      *
      * @param username Username of the subscriber to be added
@@ -432,8 +423,9 @@ public interface APIManager {
     Policy[] getPolicies(String username, String level) throws APIManagementException;
     
     /**
-     * Returns API Search result based on the provided query
-     * @param searchQuery search query
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate 
+     * search in multiple fields. 
+     * @param searchQuery search query. Ex: provider=*admin*&version=*1*
      * @param tenantDomain tenant domain 
      * @param start starting number
      * @param end ending number

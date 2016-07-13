@@ -7,10 +7,10 @@
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class=""><%=i18n.localize("tierName")%></th>
-                <th class=""><%=i18n.localize("requestCount")%></th>
-                <th class=""><%=i18n.localize("unitTime")%></th>
-                <th class=""><%=i18n.localize("stopOnQuotaReach")%></th>
+                <th class=""><%=i18n.localize("Tier Name")%></th>
+                <th class=""><%=i18n.localize("Request Count")%></th>
+                <th class=""><%=i18n.localize("Unit Time (Seconds)")%></th>
+                <th class=""><%=i18n.localize("Stop On Quota Reach")%></th>
                 <th class=""></th>
             </tr>
         </thead>
@@ -52,14 +52,14 @@
                                     <i class="fw fw-ring fw-stack-2x"></i>
                                     <i class="fw fw-edit fw-stack-1x"></i>
                                 </span>
-                                <span class="hidden-xs">Edit</span>
+                                <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
                             </a>                           
                             <a href="#" id="deleteButton'<%=count%>'" onclick="deleteTier('<%=tierName%>')" class="btn padding-reduce-on-grid-view">
                                 <span class="fw-stack">
                                     <i class="fw fw-ring fw-stack-2x"></i>
                                     <i class="fw fw-delete fw-stack-1x"></i>
                                 </span>
-                                <span class="hidden-xs">Delete</span>
+                                <span class="hidden-xs"><%=i18n.localize("Delete")%></span>
                             </a>
                     </td>
 

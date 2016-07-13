@@ -1,26 +1,26 @@
 <%
-var searchAPIs = function (username,apiName) {
-        var i,api,apis,length, log = new Log(),
-        provider = jagg.module("manager").getAPIProviderObj();
-        try {
-        apis = provider.searchAPIs(username,apiName);
+var searchAPIs = function (username,apiName, start, end) {
+    var i,api,apis,length, result, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	result = provider.searchPaginatedAPIs(username, apiName, start, end);
         if (log.isDebugEnabled()) {
-        log.debug("searchAPI : " + stringify(apis));
-        }
+	        log.debug("searchAPI : " + stringify(apis));
+       	}
 
-    return {
-            error:false,
-            apis:apis,
-            totalLength:apis.length
-            };
+    	return {
+    	    error:false,
+            response:result,
+            totalLength:result.totalLength
+           };
     } catch (e) {
-            log.error(e.message);
-            return {
-            error:true,
-            apis:null,
-            message:e.message.split(":")[1]
-            };
-    }
+        log.error(e.message);
+        return {
+        error:true,
+        apis:null,
+        message:e.message.split(":")[1]
+       	};
+   	}
     };
 
 var searchAccessTokens = function (query) {

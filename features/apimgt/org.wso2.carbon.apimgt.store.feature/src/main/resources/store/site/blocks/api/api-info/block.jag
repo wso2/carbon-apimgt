@@ -89,7 +89,7 @@ jagg.block("api/api-info", {
                         "tabs": {
                             "tabs": [
                                 {
-                                    "title": i18n.localize("overview.title"),
+                                    "title": i18n.localize("Overview"),
                                     "body": [
                                         {
                                             "name": "api/overview",
@@ -101,7 +101,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("apiconsole.title"),
+                                    "title": i18n.localize("API Console"),
                                     "body": [
                                         {
                                             "name": "api/swagger",
@@ -113,7 +113,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },                                
                                 {
-                                    "title": i18n.localize("documentation.title"),
+                                    "title": i18n.localize("Documentation"),
                                     "body": [
                                         {
                                             "name": "api/documentation",
@@ -130,7 +130,7 @@ jagg.block("api/api-info", {
                     if(isForumEnabled) {
                         result.tabs.tabs.push(
                             {
-                                "title": i18n.localize("forum"),
+                                "title": i18n.localize("Forum"),
                                 "body": [
                                     {
                                         "name": "forum/forum-list",
@@ -157,7 +157,7 @@ jagg.block("api/api-info", {
                         "tabs": {
                             "tabs": [
                                 {
-                                    "title": i18n.localize("overview.title"),
+                                    "title": i18n.localize("Overview"),
                                     "body": [
                                         {
                                             "name": "api/overview",
@@ -169,7 +169,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("documentation.title"),
+                                    "title": i18n.localize("Documentation"),
                                     "body": [
                                         {
                                             "name": "api/documentation",
@@ -186,7 +186,7 @@ jagg.block("api/api-info", {
                     if(isForumEnabled) {
                         result.tabs.tabs.push(
                             {
-                                "title": i18n.localize("forum"),
+                                "title": i18n.localize("Forum"),
                                 "body": [
                                     {
                                         "name": "forum/forum-list",
@@ -215,7 +215,7 @@ jagg.block("api/api-info", {
                         "tabs": {
                             "tabs": [
                                 {
-                                    "title": i18n.localize("overview.title"),
+                                    "title": i18n.localize("Overview"),
                                     "body": [
                                         {
                                             "name": "api/overview",
@@ -227,7 +227,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("apiconsole.title"),
+                                    "title": i18n.localize("API Console"),
                                     "body": [
                                         {
                                             "name": "api/swagger",
@@ -239,7 +239,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("documentation.title"),
+                                    "title": i18n.localize("Documentation"),
                                     "body": [
                                         {
                                             "name": "api/documentation",
@@ -265,7 +265,7 @@ jagg.block("api/api-info", {
                         "tabs": {
                             "tabs": [
                                 {
-                                    "title": i18n.localize("overview.title"),
+                                    "title": i18n.localize("Overview"),
                                     "body": [
                                         {
                                             "name": "api/overview",
@@ -277,7 +277,7 @@ jagg.block("api/api-info", {
                                     ]
                                 },
                                 {
-                                    "title": i18n.localize("documentation.title"),
+                                    "title": i18n.localize("Documentation"),
                                     "body": [
                                         {
                                             "name": "api/documentation",
@@ -306,7 +306,7 @@ jagg.block("api/api-info", {
                 "tabs": {
                     "tabs": [
                         {
-                            "title": i18n.localize("overview.title"),
+                            "title": i18n.localize("Overview"),
                             "body": [
                                 {
                                     "name": "api/overview",
