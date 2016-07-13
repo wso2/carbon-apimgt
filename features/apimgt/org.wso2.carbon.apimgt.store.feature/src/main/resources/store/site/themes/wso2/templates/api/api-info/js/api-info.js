@@ -109,7 +109,7 @@ function triggerSubscribe() {
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('You have successfully subscribed to the API.'));
                 }
                 $('#messageModal a.btn-primary').html(i18n.t('View Subscriptions'));
-                $('#messageModal a.btn-other').html(i18n.t('info.Stay on this page'));
+                $('#messageModal a.btn-other').html(i18n.t('Stay on this page'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
                 });
