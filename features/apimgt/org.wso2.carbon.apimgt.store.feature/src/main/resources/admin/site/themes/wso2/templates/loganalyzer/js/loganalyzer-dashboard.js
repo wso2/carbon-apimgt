@@ -535,7 +535,7 @@ var loganalyzerDashboard = {
                                 "x": 0,
                                 "y": 2,
                                 "width": 12,
-                                "height": 5,
+                                "height": 6,
                                 "banner": false
                             }
                         ]
@@ -651,7 +651,7 @@ var loganalyzerDashboard = {
                                 "x": 0,
                                 "y": 2,
                                 "width": 12,
-                                "height": 5,
+                                "height": 6,
                                 "banner": false
                             }
                         ]
