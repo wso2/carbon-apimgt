@@ -152,7 +152,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                             <div class="col-xs-5 col-sm-5">
                                                 <p class="form-control-static">
                                                     <input type="hidden" class="rating-tooltip-manual rate_save" value="<%= api.userRate %>"/>
-                                                    <a class="remove_rating"><i class="fw fw-error" style="font-size:11px;"></i></a>
+                                                    <a class="remove_rating" title="remove rates"><i class="fw fw-error" style="font-size:11px;"></i></a>
                                                 </p>
                                             </div>
                                             <% if(api.rates!=0) {%>
@@ -277,7 +277,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                 }
                                 var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
                               %>
-                                <a id="store-redirect-link" class="btn btn-primary btn-mobile"  href="<%=path%>" target="_">
+                                <a id="store-redirect-link" class="btn btn-primary btn-mobile"  href="<%=path%>" target="_" title="store url">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-subscribe fw-stack-1x"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x"></i>

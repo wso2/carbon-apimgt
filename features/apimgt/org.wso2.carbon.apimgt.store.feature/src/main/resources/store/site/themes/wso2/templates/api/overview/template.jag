@@ -113,9 +113,9 @@
 	   <%} %>
     <h4 class="add-margin-top-5x"><%=i18n.localize("Share")%></h4>
     <ul class="nav nav-pills">
-      <li role="presentation" class="active"><a href="#" ref="social" class="share_links"><%=i18n.localize("Social Sites")%></a></li>
-      <li role="presentation"><a href="#" ref="embed" class="share_links"><%=i18n.localize("Embed")%></a></li>
-      <li role="presentation"><a href="#" id="api_mailto"><%=i18n.localize("Email")%></a></li>
+      <li role="presentation" class="active"><a href="#" ref="social" class="share_links" title="<%=i18n.localize("Social Sites")%>"><%=i18n.localize("Social Sites")%></a></li>
+      <li role="presentation"><a href="#" ref="embed" class="share_links" title="<%=i18n.localize("Embed")%>" ><%=i18n.localize("Embed")%></a></li>
+      <li role="presentation"><a href="#" id="api_mailto" title="<%=i18n.localize("Email")%>"><%=i18n.localize("Email")%></a></li>
     </ul>
     <div class="share-container add-margin-top-2x">
         <div id="share_div_embed" class="share_dives highlight" style="display:none">

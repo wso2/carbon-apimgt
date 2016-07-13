@@ -76,8 +76,8 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
                             <tr>
                                 <td>
                                     <div class="thumbnail <% if(jagg.getUserTheme().base == "wso2" && jagg.getUserTheme().subtheme == null) { %>currentTheme<% } %>">
-                                        <a data-theme="wso2" data-subtheme="" class="badge themeLabel" onclick="applyTheme(this)">
-                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-wso2.png"))%>" />
+                                        <a data-theme="wso2" title="WSO2 theme" data-subtheme="" class="badge themeLabel" onclick="applyTheme(this)">
+                                            <img alt="WSO2 thumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-wso2.png"))%>" />
                                             <br /><div class="themeName">WSO2</div>
                                         </a>
                                     </div>
@@ -87,8 +87,8 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
                               <tr>
                                 <td>
                                     <div class="thumbnail <% if(jagg.getUserTheme().base == "dark" && jagg.getUserTheme().subtheme == null) { %>currentTheme<% } %>">
-                                        <a data-theme="wso2" data-subtheme="dark" class="badge themeLabel" onclick="applyTheme(this)">
-                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-dark.png"))%>" />
+                                        <a data-theme="wso2" data-subtheme="dark" title="dark theme" class="badge themeLabel" onclick="applyTheme(this)">
+                                            <img alt="dark thumb" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-dark.png"))%>" />
                                             <br /><div class="themeName"><%=i18n.localize("Dark")%></div>
                                         </a>
                                     </div>
@@ -156,7 +156,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 	            </li>
 	          <% } %>       
 	            <li class="visible-inline-block">
-	                <a id="login-link">
+	                <a title="login link" id="login-link">
 	                  <span class="icon fw-stack fw-lg">
 	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                  <i class="fw fw-sign-in fw-stack-1x"></i>

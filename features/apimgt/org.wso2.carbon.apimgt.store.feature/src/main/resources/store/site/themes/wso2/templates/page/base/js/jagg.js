@@ -45,7 +45,7 @@ var jagg = jagg || {};
         if(params.buttons != undefined){
             $('#messageModal a.btn-primary').hide();
             for(var i=0;i<params.buttons.length;i++){
-                $('#messageModal div.modal-footer').append($('<a class="btn '+params.buttons[i].cssClass+'">'+params.buttons[i].name+'</a>').click(params.buttons[i].cbk));
+                $('#messageModal div.modal-footer').append($('<a title="messageButton" class="btn '+params.buttons[i].cssClass+'">'+params.buttons[i].name+'</a>').click(params.buttons[i].cbk));
             }
         }else{
             $('#messageModal a.btn-primary').html('OK').click(function() {
