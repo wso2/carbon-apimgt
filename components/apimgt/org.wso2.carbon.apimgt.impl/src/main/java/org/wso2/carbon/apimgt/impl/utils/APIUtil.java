@@ -3604,7 +3604,28 @@ public final class APIUtil {
 
         return -1;
     }
-    
+
+    /**
+     * Helper method to get tenantDomain from tenantId
+     *
+     * @param tenantId tenant Id
+     * @return tenantId
+     */
+    public static String getTenantDomainFromTenantId(int tenantId) {
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+        if (realmService == null) {
+            return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        try {
+            return realmService.getTenantManager().getDomain(tenantId);
+        } catch (UserStoreException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     public static int getSuperTenantId(){
     	return MultitenantConstants.SUPER_TENANT_ID;
     }
