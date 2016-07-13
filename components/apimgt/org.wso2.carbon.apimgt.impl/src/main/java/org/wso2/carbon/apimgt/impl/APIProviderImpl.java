@@ -4298,6 +4298,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Returns true if key template given by the global policy already exists.
+     * But this check will exclude the policy represented by the policy name
+     *
+     * @param policy Global policy
+     * @return true if Global policy key template already exists
+     */
+    public boolean isGlobalPolicyKeyTemplateExists(GlobalPolicy policy) throws APIManagementException {
+        return apiMgtDAO.isKeyTemplatesExist(policy);
+    }
+
     public boolean hasAttachments(String username, String policyName, String policyType)throws APIManagementException{
     	int tenantID = APIUtil.getTenantId(username);
     	String tenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -4322,7 +4333,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public BlockConditionsDTO getBlockConditionByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getBlockConditionByUUID(uuid);
+        BlockConditionsDTO blockCondition = apiMgtDAO.getBlockConditionByUUID(uuid);
+        if (blockCondition == null) {
+            handleBlockConditionNotFoundException("Block condition: " + uuid + " was not found.");
+        }
+        return blockCondition;
     }
 
     @Override
@@ -4411,7 +4426,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APIPolicy getAPIPolicyByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIPolicyByUUID(uuid);
+        APIPolicy policy = apiMgtDAO.getAPIPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Advanced Policy: " + uuid + " was not found.");
+        }
+        return policy;
     }
 
     @Override
@@ -4421,7 +4440,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public ApplicationPolicy getApplicationPolicyByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getApplicationPolicyByUUID(uuid);
+        ApplicationPolicy policy = apiMgtDAO.getApplicationPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Application Policy: " + uuid + " was not found.");
+        }
+        return policy;
     }
 
     @Override
@@ -4431,7 +4454,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getSubscriptionPolicyByUUID(uuid);
+        SubscriptionPolicy policy = apiMgtDAO.getSubscriptionPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Subscription Policy: " + uuid + " was not found.");
+        }
+        return policy;
     }
 
     @Override
@@ -4441,7 +4468,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getGlobalPolicyByUUID(uuid);
+        GlobalPolicy policy = apiMgtDAO.getGlobalPolicyByUUID(uuid);
+        if (policy == null) {
+            handlePolicyNotFoundException("Global Policy: " + uuid + " was not found.");
+        }
+        return policy;
     }
 
     /**

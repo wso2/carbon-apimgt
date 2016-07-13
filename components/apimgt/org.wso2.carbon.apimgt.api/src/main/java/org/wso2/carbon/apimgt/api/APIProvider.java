@@ -200,6 +200,16 @@ public interface APIProvider extends APIManager {
      */
     GlobalPolicy getGlobalPolicyByUUID(String uuid) throws APIManagementException;
 
+
+    /**
+     * Returns true if key template given by the global policy already exists.
+     * But this check will exclude the policy represented by the policy name 
+     *
+     * @param policy Global policy
+     * @return true if Global policy key template already exists
+     */
+    boolean isGlobalPolicyKeyTemplateExists (GlobalPolicy policy) throws APIManagementException;
+
     /**
      * Updates throttle policy in global CEP, gateway and database.
      * <p>

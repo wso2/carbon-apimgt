@@ -19,19 +19,19 @@
 package org.wso2.carbon.apimgt.api;
 
 /**
- * Thrown when required policy cannot be found
+ * Thrown when required block condition cannot be found
  */
-public class PolicyNotFoundException extends APIMgtResourceNotFoundException {
+public class BlockConditionNotFoundException extends APIMgtResourceNotFoundException {
 
-    public PolicyNotFoundException(String msg) {
+    public BlockConditionNotFoundException(String msg) {
         super(msg);
     }
 
-    public PolicyNotFoundException(String msg, Throwable e) {
+    public BlockConditionNotFoundException(String msg, Throwable e) {
         super(msg, e);
     }
 
-    public PolicyNotFoundException(Throwable throwable) {
+    public BlockConditionNotFoundException(Throwable throwable) {
         super(throwable);
     }
 }
