@@ -21,10 +21,11 @@
                   </tr>
                   </thead>
               </table>
+              <div class="col-sm-12">
+                <div id="versionUserChart">
+              </div>
         </div>
-        <div class="col-sm-6">
-            <div id="versionUserChart">
-            </div>
+
         </div>
     </div>
     
@@ -36,10 +37,7 @@
     </div>
     <div class="row-fluid">
         <div id="apiUsageByVersionNoData"></div>
-        <div class="col-sm-6">
-            <div id="versionChart">
-            </div>
-        </div>
+
         <div class="col-sm-6">
             <br />
             <br />
@@ -51,6 +49,9 @@
                   </tr>
                   </thead>
               </table>
+            <div class="col-sm-12">
+                <div id="versionChart"></div>
+            </div>
         </div>
     </div>
 
