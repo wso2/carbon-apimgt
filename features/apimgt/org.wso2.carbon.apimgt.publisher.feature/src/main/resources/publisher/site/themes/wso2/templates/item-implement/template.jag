@@ -408,10 +408,10 @@
 
 																<div class="input-group">
 																	<select class="form-control selectpicker" id="inSequence"  name="inSequence" >
-							                                        	<optgroup label="Existing" id="inSequenceExistingOptGroup">
+							                                        	<optgroup label="<%=i18n.localize("Global mediation policies")%>" id="inSequenceExistingOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
-                                                                        <optgroup label="Added by you" id="inSequenceUserAddedOptGroup">
+                                                                        <optgroup label="<%=i18n.localize("API specific mediation policies")%>" id="inSequenceUserAddedOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
 							                                    	</select>
