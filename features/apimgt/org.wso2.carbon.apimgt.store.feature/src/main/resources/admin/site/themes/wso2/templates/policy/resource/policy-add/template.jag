@@ -3,7 +3,7 @@
     var log = new Log();
     var policyName = request.getParameter("policyName");
     policyName = policyName == null ? "" : policyName;
-    var pageTitle = "<%=i18n.localize("Add API Level Policy")%>";
+    var pageTitle = i18n.localize("Add API Level Policy");
     var nameFieldDisableStatus = "";
     var policyAction = request.getParameter("action");
     var policyDesc = "",policyLevel = "", defaultQuotaPolicy = "", defaultBandwidth = "" , defaultBandwidthUnit = "",
@@ -11,7 +11,7 @@
     var action = "new";
     if(policyName != null && policyName != ""){
         action = "edit";
-        pageTitle = "<%=i18n.localize("Edit API Level Policy")%>";
+        pageTitle = i18n.localize("Edit API Level Policy");
         nameFieldDisableStatus = "readonly";
         var mod = jagg.module("policy");
         var apiPolicy = mod.getAPIPolicy(policyName).apiPolicy;
