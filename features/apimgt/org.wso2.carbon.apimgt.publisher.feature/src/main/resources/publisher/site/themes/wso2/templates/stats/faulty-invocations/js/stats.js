@@ -119,10 +119,10 @@ var drawAPIResponseFaultCountTable = function(from,to){
                 var $dataTable =$('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiFaultyTable"></table>');
 
                 $dataTable.append($('<thead class="tableHead"><tr>'+
-                                        '<th>i18n.t("API")</th>'+
-                                        '<th>i18n.t("Version")</th>'+
-                                        '<th>i18n.t("Count")</th>'+
-                                        '<th width="20%" >i18n.t("Percentage")</th>'+
+                                        '<th>' + i18n.t("API")+ '</th>'+
+                                        '<th>' + i18n.t("Version") + '</th>'+
+                                        '<th>' + i18n.t("Count")+ '</th>'+
+                                        '<th width="20%" >' + i18n.t("Percentage")+ '</th>'+
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
