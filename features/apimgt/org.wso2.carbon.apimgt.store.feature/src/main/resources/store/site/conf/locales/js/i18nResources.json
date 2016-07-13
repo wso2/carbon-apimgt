@@ -76,7 +76,7 @@
     "created": "CREATED",
     "deprecated": "DEPRECATED",
     "healthAvailabilityPerMin_Desc": "This alert type should get triggered if at least one of the three cases below satisfied; Response time of an API > Response time upper percentile of that particular API or Request Count of an API per minute > Request count per minute lower percentile or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)",
-    "info.Stay on this page": "info.Stay on this page",
+    "Stay on this page": "Stay on this page",
     "private": "Visible to my domain",
     "public": "Public",
     "published": "PUBLISHED",
