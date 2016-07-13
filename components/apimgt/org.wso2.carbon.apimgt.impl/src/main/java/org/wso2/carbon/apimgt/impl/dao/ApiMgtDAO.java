@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -8799,7 +8800,7 @@ public class ApiMgtDAO {
     /**
      * Add a Global level throttling policy to database
      *
-     * @param policy
+     * @param policy Global Policy
      * @throws APIManagementException
      */
     public void addGlobalPolicy(GlobalPolicy policy) throws APIManagementException {
@@ -8843,7 +8844,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves global policy key templates for the given tenantID
      *
-     * @param tenantID tenantid
+     * @param tenantID tenant id
      * @return list of KeyTemplates
      * @throws APIManagementException
      */
@@ -8876,11 +8877,10 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns true if the keytemplate exist in DB
+     * Returns true if the key template exist in DB
      *
-     * @param tenantID
-     * @param keyTemplate
-     * @return
+     * @param policy Global Policy
+     * @return true if key template already exists
      * @throws APIManagementException
      */
     public boolean isKeyTemplatesExist(GlobalPolicy policy) throws APIManagementException {
@@ -8900,7 +8900,7 @@ public class ApiMgtDAO {
             ps.setString(2, policy.getKeyTemplate());
             ps.setString(3, policy.getPolicyName());
             rs = ps.executeQuery();
-            while (rs.next()) {
+            if (rs.next()) {
                 return true;
             }
 
@@ -9147,11 +9147,12 @@ public class ApiMgtDAO {
             ps.setString(1, policyName);
             rs = ps.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String siddhiQuery = null;
                 globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
@@ -9190,11 +9191,12 @@ public class ApiMgtDAO {
             ps.setString(1, uuid);
             rs = ps.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String siddhiQuery = null;
                 globalPolicy = new GlobalPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 globalPolicy.setDescription(rs.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
                 globalPolicy.setPolicyId(rs.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicy.setUUID(rs.getString(ThrottlePolicyConstants.COLUMN_UUID));
                 globalPolicy.setTenantId(rs.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 globalPolicy.setKeyTemplate(rs.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
                 globalPolicy.setDeployed(rs.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));
@@ -9245,9 +9247,6 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
                 policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
-            } else {
-                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get api policy: " + policyName + '-' + tenantId, e);
@@ -9288,9 +9287,6 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(policy, resultSet);
                 policy.setUserLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
                 policy.setPipelines(getPipelines(policy.getPolicyId()));
-            } else {
-                handleException("Policy:" + uuid + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get api policy: " + uuid, e);
@@ -9330,9 +9326,6 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
-            } else {
-                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
@@ -9370,9 +9363,6 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
-            } else {
-                handleException("Policy:" + uuid + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + uuid, e);
@@ -9421,9 +9411,6 @@ public class ApiMgtDAO {
                     byte[] customAttrib = blob.getBytes(1, (int) blob.length());
                     policy.setCustomAttributes(customAttrib);
                 }
-            } else {
-                handleException("Policy:" + policyName + '-' + tenantId + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
@@ -9470,9 +9457,6 @@ public class ApiMgtDAO {
                     byte[] customAttrib = blob.getBytes(1, (int) blob.length());
                     policy.setCustomAttributes(customAttrib);
                 }
-            } else {
-                handleException("Policy:" + uuid + " was not found.",
-                        new APIManagementException(""));
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + uuid, e);
@@ -10365,7 +10349,8 @@ public class ApiMgtDAO {
                     connection.commit();
                     status = true;
                 } else {
-                    throw new APIManagementException("Condition is already exist");
+                    throw new BlockConditionAlreadyExistsException(
+                            "Condition with type: " + conditionType + ", value: " + conditionValue + " already exists");
                 }
             }
         } catch (SQLException e) {
@@ -10408,12 +10393,13 @@ public class ApiMgtDAO {
             selectPreparedStatement = connection.prepareStatement(query);
             selectPreparedStatement.setInt(1, conditionId);
             resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("VALUE"));
                 blockCondition.setConditionId(conditionId);
+                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {
@@ -10450,12 +10436,13 @@ public class ApiMgtDAO {
             selectPreparedStatement = connection.prepareStatement(query);
             selectPreparedStatement.setString(1, uuid);
             resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 blockCondition = new BlockConditionsDTO();
                 blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
                 blockCondition.setConditionType(resultSet.getString("TYPE"));
                 blockCondition.setConditionValue(resultSet.getString("VALUE"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
+                blockCondition.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockCondition.setUUID(resultSet.getString("UUID"));
             }
         } catch (SQLException e) {
@@ -10492,6 +10479,7 @@ public class ApiMgtDAO {
                 blockConditionsDTO.setConditionValue(resultSet.getString("VALUE"));
                 blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockConditionsDTO.setUUID(resultSet.getString("UUID"));
+                blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
@@ -10652,6 +10640,7 @@ public class ApiMgtDAO {
         }
         return status;
     }
+
     private boolean isValidContext(String context) throws APIManagementException {
         Connection connection = null;
         PreparedStatement validateContextPreparedStatement = null;
