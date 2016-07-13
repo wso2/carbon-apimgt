@@ -57,6 +57,7 @@
     "By API Version [ Syntax - version:xxxx ]  or": "By API Version [ Syntax - version:xxxx ]  or",
     "By Context [ Syntax - context:xxxx ]  or": "By Context [ Syntax - context:xxxx ]  or",
     "By Description [ Syntax - description:xxxx ] or": "By Description [ Syntax - description:xxxx ] or",
+    "By Tags [ Syntax - tags:xxxx ] or": "By Tags [ Syntax - tags:xxxx ] or",
     "By Documentation Content [ Syntax - doc:xxxx ]": "By Documentation Content [ Syntax - doc:xxxx ]",
     "By Sub-Context [ Syntax - subcontext:xxxx ] or": "By Sub-Context [ Syntax - subcontext:xxxx ] or",
     "By:": "By:",
@@ -309,5 +310,8 @@
     "subscription": "subscription",
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
-    "timeWarn": "timeWarn"
+    "timeWarn": "timeWarn",
+    "All": "All",
+    "Prototyped":"Prototyped",
+    "Production":"Production"
 }
