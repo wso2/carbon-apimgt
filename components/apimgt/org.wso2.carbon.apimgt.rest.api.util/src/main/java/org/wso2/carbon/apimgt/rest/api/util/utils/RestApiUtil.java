@@ -416,8 +416,7 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToResourceNotFound(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceNotFoundException
-                || rootCause instanceof ResourceNotFoundException || rootCause instanceof PolicyNotFoundException;
+        return rootCause instanceof APIMgtResourceNotFoundException || rootCause instanceof ResourceNotFoundException;
     }
 
     /**

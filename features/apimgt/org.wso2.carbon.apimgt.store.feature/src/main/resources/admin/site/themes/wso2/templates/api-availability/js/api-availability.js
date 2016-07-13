@@ -6,7 +6,7 @@ $( document ).ready(function() {
         drawTable();
     } else {
         $('.content-data').empty();
-        $('.content-data').append('<h2>i18n.t("Stats are disabled.")</h2>');
+        $('.content-data').append('<h2>' + i18n.t("Stats are disabled.") + '</h2>');
     }
 
     function isDataPublishingEnabled() {

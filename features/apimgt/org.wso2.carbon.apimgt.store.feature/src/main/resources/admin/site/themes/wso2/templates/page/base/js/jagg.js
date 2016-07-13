@@ -151,7 +151,7 @@ var jagg = jagg || {};
          );
         $('#username').focus();
         $('#loginErrorBox').show();
-        $('#loginErrorMsg').html('<strong>i18n.t("Session Timed Out") </strong>'
+        $('#loginErrorMsg').html('<strong>' + i18n.t("Session Timed Out") + '</strong>'
         + i18n.t('- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. '));
     };
     jagg.login = function (username, password, params) {

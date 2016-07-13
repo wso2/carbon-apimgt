@@ -130,7 +130,7 @@ jagg.block("api/api-info", {
                     if(isForumEnabled) {
                         result.tabs.tabs.push(
                             {
-                                "title": i18n.localize("forum"),
+                                "title": i18n.localize("Forum"),
                                 "body": [
                                     {
                                         "name": "forum/forum-list",
@@ -186,7 +186,7 @@ jagg.block("api/api-info", {
                     if(isForumEnabled) {
                         result.tabs.tabs.push(
                             {
-                                "title": i18n.localize("forum"),
+                                "title": i18n.localize("Forum"),
                                 "body": [
                                     {
                                         "name": "forum/forum-list",

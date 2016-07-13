@@ -514,5 +514,7 @@
     "tierPermissions": "tierPermissions",
     "tiers": "tiers",
     "to find out details about each throttling setting.": "to find out details about each throttling setting.",
-    "user": "user"
+    "user": "user",
+    "Global mediation policies":"Global mediation policies",
+    "API specific mediation policies":"API specific mediation policies",
 }

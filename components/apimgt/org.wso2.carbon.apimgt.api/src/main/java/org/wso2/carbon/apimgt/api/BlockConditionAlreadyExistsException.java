@@ -19,19 +19,19 @@
 package org.wso2.carbon.apimgt.api;
 
 /**
- * Thrown when required policy cannot be found
+ * Thrown when the new block condition user tries to add already exists in the system
  */
-public class PolicyNotFoundException extends APIMgtResourceNotFoundException {
+public class BlockConditionAlreadyExistsException extends APIMgtResourceAlreadyExistsException {
 
-    public PolicyNotFoundException(String msg) {
+    public BlockConditionAlreadyExistsException(String msg) {
         super(msg);
     }
 
-    public PolicyNotFoundException(String msg, Throwable e) {
+    public BlockConditionAlreadyExistsException(String msg, Throwable e) {
         super(msg, e);
     }
 
-    public PolicyNotFoundException(Throwable throwable) {
+    public BlockConditionAlreadyExistsException(Throwable throwable) {
         super(throwable);
     }
 }

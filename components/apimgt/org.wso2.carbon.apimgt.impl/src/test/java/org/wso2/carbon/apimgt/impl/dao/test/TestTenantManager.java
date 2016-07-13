@@ -53,7 +53,7 @@ public class TestTenantManager implements TenantManager {
     }
 
     public String getDomain(int i) throws UserStoreException {
-        return null;
+        return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     }
 
     public int getTenantId(String s) throws UserStoreException {

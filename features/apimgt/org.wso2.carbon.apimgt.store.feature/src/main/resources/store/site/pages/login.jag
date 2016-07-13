@@ -11,7 +11,7 @@ var tenantDomain = jagg.getTenantDomain();
    jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Login",
+            "title":i18n.localize("Sign In"),
             "pagePath":"/site/pages/login.jag",
             "body":[
                 {

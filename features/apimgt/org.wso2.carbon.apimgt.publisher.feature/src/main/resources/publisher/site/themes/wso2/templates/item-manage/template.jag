@@ -212,6 +212,50 @@
                                                     <input type="text" class="form-control input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
                                                 </div>
                                             </div>
+
+
+                                            <% mod = jagg.module("api");
+                                                result = mod.isMultipleTenantsAvailable();
+                                                var isMultipleTenantsAvailable = result.status;
+                                                if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                                                    <div class="form-group">
+                                                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
+                                                            <a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
+                                                                <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                    <i class="fw fw-circle fw-stack-2x"></i>
+                                                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                </span>
+                                                            </a>
+                                                            <p id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></p>
+                                                        </label>
+                                                        <div class="col-sm-4">
+                                                            <% if(api.visibility!="public") {%>
+                                                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                                                <option value="current_tenant"  selected="selected"><%=i18n.localize("Available to current tenant only")%></option>
+                                                            </select>
+                                                            <%} else {%>
+                                                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
+                                                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
+                                                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
+                                                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
+                                                                    <% } %>
+                                                                </select>
+                                                            <%}%>
+                                                       </div>
+                                                       </div>
+                                                           <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                                                               <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
+                                                                   <%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
+                                                               </label>
+                                                               <div class="col-sm-4">
+                                                                   <input type="text" class="input form-control"
+                                                                   id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                                                   <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
+                                                               </div>
+
+                                                           </div>
+                                                    <% } %>                                            
                                         <!--Response Caching End -->
                             </div>
                         </div>
@@ -468,49 +512,6 @@
                                                                     </div>
                                                                 </div>
 
-
-                                                        <% mod = jagg.module("api");
-                                                    		result = mod.isMultipleTenantsAvailable();
-                                                        	var isMultipleTenantsAvailable = result.status;
-                                                    		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-                                                    			<div class="form-group">
-                                        	                        <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("Subscriptions")%>:
-                                        	                        	<a class="help_popup" help_data="subscriptions_help" title="subscriptions_help" data-trigger="hover" data-placement="bottom">
-                                        	                        		<span class="icon fw-stack fw-lg" style="font-size:6px">
-                                        										<i class="fw fw-circle fw-stack-2x"></i>
-                                        										<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                        									</span>
-                                        	                        	</a>
-                                        	                            <p id="subscriptions_help" class="hide"><%=i18n.localize("This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API")%></p>
-                                        	                        </label>
-                                        	                        <div class="col-sm-4">
-                                        	                            <% if(api.visibility!="public") {%>
-                                        	                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                        	                                <option value="current_tenant"  selected="selected"><%=i18n.localize("Available to current tenant only")%></option>
-                                        	                            </select>
-                                        	                            <%} else {%>
-                                        	                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
-                                        	                                <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("Available to current tenant only")%></option>
-                                        	                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to all the tenants")%></option>
-                                        	                                    <% if(!(enableSelectedTenantSubscription == 'false')) {%>
-                                        	                                    <option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("Available to specific tenants")%></option>
-                                        	                                    <% } %>
-                                        	                                </select>
-                                        	                            <%}%>
-                                        	                       </div>
-                                                                   </div>
-                                                                       <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                                                                           <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
-                                                                               <%=i18n.localize("Visible to Tenants")%>:<span class="requiredAstrix">*</span>
-                                                                           </label>
-                                                                           <div class="col-sm-4">
-                                                                               <input type="text" class="input form-control"
-                                                                               id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-                                                                               <p class="help-block" id="tenantsHelp"><%=i18n.localize("Comma separated list (e.g.,: tenant1,tenant2,tenant3)")%></p>
-                                                                           </div>
-
-                                                                       </div>
-                                                                <% } %>
 
                                         <!-- End of configuration panel -->
 
@@ -1065,7 +1066,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-sm-3" for="scopeName"><span class="requiredAstrix">*</span></label>
+            <label class="control-label col-sm-3" for="scopeName"><%=i18n.localize("Scope Name")%><span class="requiredAstrix">*</span></label>
             <div class="col-sm-4">
             <input type="text" id="scopeName" name="scopeName"  class="form-control required characterValidationExceptSpace" placeholder="<%=i18n.localize("Eg: Read My Data")%>">
             </div>

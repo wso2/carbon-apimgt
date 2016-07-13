@@ -100,7 +100,7 @@
         <li class="nav-header">
           <a href="#"><i class="fw fw-settings fw-2x" style="font-size:22px;"></i><%=i18n.localize("Settings")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
-            <li <%if (reqUrl.match("alerts-domain-list")){%> class="active" <% } %>><a
+            <li <%if (reqUrl.match("alerts-domain-manage")){%> class="active" <% } %>><a
               href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-statistics"></i><%= i18n.localize("Analytics") %></a>
@@ -193,7 +193,7 @@
         <li class="nav-header">
           <a href="#"><i class="fw fw-statistics fw-2x" style="font-size:22px;"></i><%=i18n.localize("Analytics")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
-            <li><a href="<%=apiAvailability%>"
+            <li  <%if (reqUrl.match("analytics-api-availability")){%> class="active" <% } %>><a href="<%=apiAvailability%>"
               onclick="jagg.sessionAwareJS({redirect:'<%=apiAvailability%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-checklist"></i><%=i18n.localize("API Availability")%></a>
             </li>
