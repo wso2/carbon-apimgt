@@ -245,5 +245,6 @@
     "roles": "Visible to Roles",
     "settings": "settings",
     "tasks": "tasks",
-    "tenants": "Visible to Tenants"
+    "tenants": "Visible to Tenants",
+    "Overview": "Overview"
 }
