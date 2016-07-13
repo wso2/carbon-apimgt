@@ -9959,6 +9959,7 @@ header .nav .dropdown-menu > li:not(.divider) {
   border-top: 1px solid #E2E2E2;
   background-color: white;
   padding: 10px 35px;
+  min-height: 210px;
 }
 
 .data-container form h3 {
@@ -10070,7 +10071,6 @@ header .nav .dropdown-menu > li:not(.divider) {
     color: #ffffff;
     background-color: #231F20;
     border: 1px solid #231F20;
-    width: 100%;
   }
 
   .social-container {
