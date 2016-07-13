@@ -10,7 +10,7 @@
         <p><%=i18n.localize("No applications yet. Click add applications in the action bar to add an application.")%></p>
   </div>
 
-  <div id="application-table-wrap" class="hide">
+  <div id="application-table-wrap" class="white-wrapper add-padding-5x hide">
     <table id="application-table" class="table table-striped table-hover table-bordered display data-table" cellspacing="0">
         <thead>
           <tr>
