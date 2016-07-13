@@ -291,7 +291,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Call the /revoke only if there's a token to be revoked.
         try {
-            if (tokenRequest.getTokenToRevoke() != null && tokenRequest.getTokenToRevoke() != "") {
+            if (tokenRequest.getTokenToRevoke() != null && !"".equals(tokenRequest.getTokenToRevoke())) {
                 URL revokeEndpointURL = new URL(revokeEndpoint);
                 String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
                 int revokeEndpointPort = revokeEndpointURL.getPort();
