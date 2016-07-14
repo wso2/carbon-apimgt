@@ -9,7 +9,7 @@ i18n.init(request,localeResourcesBasePath);
 
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result,
-            action = encode.forJavaScript(request.getParameter("action")),
+            action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag")
     allProviders = "__all_providers__";

@@ -6,7 +6,7 @@ include("/jagg/jagg.jag");
 
     response.contentType = "application/json; charset=UTF-8";
     var mod, obj, result, username,
-            action = encode.forJavaScript(request.getParameter("action")),
+            action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
     if (jagg.getUser() == null) {
