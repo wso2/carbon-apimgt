@@ -405,6 +405,20 @@ public interface APIConsumer extends APIManager {
 
     Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
+    /**
+     * Returns a list of applications for a given subscriber
+     *  @param subscriber Subscriber
+     * @param search
+     * @param start
+     * @param offset
+     * @param groupingId the groupId to which the applications must belong.  @return Applications
+     * @throws APIManagementException if failed to applications for given subscriber
+     */
+
+    Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
+            String search, String sortColumn, String sortOrder)
+            throws APIManagementException;
+
 
     /**
      * This will return APIM application by giving name and subscriber

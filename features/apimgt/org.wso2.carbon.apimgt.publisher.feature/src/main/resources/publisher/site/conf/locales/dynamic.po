@@ -144,3 +144,15 @@ msgstr "Re-Publish"
 
 msgid "retire" 
 msgstr "Retire"
+
+msgid "abnormalResponseTime"
+msgstr "Abnormal Response Time"
+
+msgid "abnormalBackendTime"
+msgstr "Abnormal Backend Time"
+
+msgid "AbnormalTierUsage"
+msgstr "Abnormal Tier Usage"
+
+msgid "healthAvailabilityPerMin"
+msgstr "Health Availability Per Minute"

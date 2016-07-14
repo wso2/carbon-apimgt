@@ -5,6 +5,7 @@ import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 
 import io.swagger.annotations.*;
@@ -67,6 +68,9 @@ public class APIDTO  {
   
   @NotNull
   private List<String> tiers = new ArrayList<String>();
+  
+  
+  private APIMaxTpsDTO maxTps = null;
   
   
   private String thumbnailUri = null;
@@ -311,6 +315,18 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("maxTps")
+  public APIMaxTpsDTO getMaxTps() {
+    return maxTps;
+  }
+  public void setMaxTps(APIMaxTpsDTO maxTps) {
+    this.maxTps = maxTps;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("thumbnailUri")
   public String getThumbnailUri() {
     return thumbnailUri;
@@ -475,6 +491,7 @@ public class APIDTO  {
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
+    sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");

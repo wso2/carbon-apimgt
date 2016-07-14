@@ -2224,6 +2224,16 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
+      maxTps:
+        properties:
+          production:
+            type: integer
+            format: int64
+            example: 1000
+          sandbox:
+            type: integer
+            format: int64
+            example: 1000
       thumbnailUri:
         type: string
         example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"

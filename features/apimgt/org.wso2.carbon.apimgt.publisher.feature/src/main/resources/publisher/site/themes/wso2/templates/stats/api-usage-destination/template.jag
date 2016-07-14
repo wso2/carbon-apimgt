@@ -1,8 +1,10 @@
 <% jagg.template("stats/api-usage-destination", function(inputs, outputs, jagg) { %>
-
-<div id="apiUsageDestination-stat-page" class="stat-page">
 <div class="page-header"> <h2><%=i18n.localize("API Usage by Destination")%></h2></div>
-
+<div id="apiUsageDestination-stat-page" class="stat-page">
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
         
         <div class="row">
         	<div class="form-group col-sm-2">
@@ -40,7 +42,9 @@
 
         <br/ >
         <div id="tableContainer"></div>
-
+    <%
+        }
+    %>
 </div>
 
 <% }); %>

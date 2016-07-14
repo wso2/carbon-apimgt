@@ -121,7 +121,7 @@ $(document).ready(function () {
                     jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
                 }
             } else {
-                jagg.message({content: i18n.t("Please select at least one alert typed") , type: "error"});
+                jagg.message({content: i18n.t("Please select at least one alert type") , type: "error"});
             }
         }
     });

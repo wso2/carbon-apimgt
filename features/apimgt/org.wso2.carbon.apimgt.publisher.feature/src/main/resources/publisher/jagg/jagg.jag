@@ -472,7 +472,7 @@ var getThemeFile = function (path) {
 
         var ProxyContextPath = getCarbonProxyContextPath();
         return ProxyContextPath + path;
-    }    
+    };
 
     var module = function (name, module) {
         if (module) {
