@@ -2248,6 +2248,20 @@ definitions:
       endpointConfig:
         type: string
         example: "{\"production_endpoints\":{\"url\":\"http://localhost:9763/am/sample/calculator/v1/api\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}"
+      endpointSecurity:
+        properties:
+          type:
+            type: string
+            example: basic
+            enum:
+              - basic
+              - digest
+          username:
+            type: string
+            example: admin
+          password:
+            type: string
+            example: password
       gatewayEnvironments:
         description: |
           Comma separated list of gateway environments.

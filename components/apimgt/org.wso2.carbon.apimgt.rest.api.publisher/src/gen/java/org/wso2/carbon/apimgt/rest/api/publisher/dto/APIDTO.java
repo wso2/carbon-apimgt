@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 
 import io.swagger.annotations.*;
@@ -84,6 +85,9 @@ public class APIDTO  {
   
   @NotNull
   private String endpointConfig = null;
+  
+  
+  private APIEndpointSecurityDTO endpointSecurity = null;
   
   
   private String gatewayEnvironments = null;
@@ -365,6 +369,18 @@ public class APIDTO  {
 
   
   /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("endpointSecurity")
+  public APIEndpointSecurityDTO getEndpointSecurity() {
+    return endpointSecurity;
+  }
+  public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
+    this.endpointSecurity = endpointSecurity;
+  }
+
+  
+  /**
    * Comma separated list of gateway environments.\n
    **/
   @ApiModelProperty(value = "Comma separated list of gateway environments.\n")
@@ -464,6 +480,7 @@ public class APIDTO  {
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
     sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
+    sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
     sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
