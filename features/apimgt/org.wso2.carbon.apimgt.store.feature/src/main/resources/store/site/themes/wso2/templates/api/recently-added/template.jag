@@ -69,7 +69,7 @@
               result.apis[i].thumbnailurl = null;
             }
             else{
-              result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;  
+              result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;
             }
             if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
               result.apis[i].displayOwner = result.apis[i].owner;

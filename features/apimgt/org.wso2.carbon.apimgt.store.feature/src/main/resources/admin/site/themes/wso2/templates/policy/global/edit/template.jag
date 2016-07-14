@@ -1,6 +1,6 @@
 <% jagg.template("policy/global/edit", function(inputs, outputs, jagg) { %>
 <%
-    var policyName = request.getParameter("policyName");
+    var policyName = encode.forJavaScript(request.getParameter("policyName"));
     var pageTitle = i18n.localize("Add Custom Rule");
     var nameFieldDisableStatus = "";
     var streamParameters = "apiContext,apiVersion,resourceKey,userId,appId,apiTenant,appTenant";

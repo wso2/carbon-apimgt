@@ -1,7 +1,12 @@
 <% jagg.template("search/api-search", function(inputs, outputs, jagg) {
 var query=request.getParameter("query");
 var tenant = jagg.getTenantDomain();
-
+var tenantPostfix = "";
+var tenantPrefix = "";
+if (tenant != null && tenant != "") {
+    tenantPostfix = "&tenant=" + tenant;
+    tenantPrefix = "?tenant=" + tenant;
+}
 //selected type text
 var type = i18n.localize("All");
 var param = "";
@@ -21,9 +26,9 @@ if(request.getParameter("type") == "prototyped"){
       <div class="input-group-btn">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="<%=i18n.localize("Category")%>"><%= type %> <span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>"><%=i18n.localize("All")%></a></li>
-            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=production"><%=i18n.localize("Production")%></a></li>
-            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=prototyped"><%=i18n.localize("Prototyped")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%><%=tenantPrefix%>"><%=i18n.localize("All")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=production<%=tenantPostfix%>"><%=i18n.localize("Production")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=prototyped<%=tenantPostfix%>"><%=i18n.localize("Prototyped")%></a></li>
           </ul>
       </div>
       <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search Options")%>...">
@@ -52,7 +57,7 @@ if(request.getParameter("type") == "prototyped"){
             </ol>
         </div>
       <%if(tenant != null){ %>
-        <input type="hidden" class="span5" name="tenant" value="<%= tenant %>" />
+        <input type="hidden" class="span5" name="tenant" value="<%= encode.forHtmlAttribute(tenant) %>" />
         <%}%> 
     </div><!-- /input-group -->
   </div>

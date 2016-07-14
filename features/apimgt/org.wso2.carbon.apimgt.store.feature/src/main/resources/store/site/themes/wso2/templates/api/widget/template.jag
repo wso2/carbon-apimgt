@@ -46,10 +46,10 @@
     <a href="<%= link %>" target="_blank" class="nostyle" title="<%=i18n.localize("API Thumbnail")%>">
     <img width="100" src="<%= thumbURL %>" style="float:left; margin-right:20px;" alt="<%=i18n.localize("API Thumbnail")%>">
     </a>
-    <a title="API" href="<%= link %>" target="_blank"  class="nostyle">
-    <h2><%=api.name%> - <%=api.version%></h2>
+    <a title="API" href="<%=encode.forHtmlAttribute(link)%>" target="_blank"  class="nostyle">
+    <h2><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h2>
     </a>
-    <p id="provider">Provider : <%=api.provider%></p>
+    <p id="provider">Provider : <%=encode.forHtml(api.provider)%></p>
     <p class="desc">
     <%
     	if(api.description != null){
@@ -60,7 +60,7 @@
                 print(api.description.substring(1,100).replace(/\b[a-z]$/,''));
                 print(' ...');
                 %>
-                    <a title="more" href="<%= link %>" target="_blank">
+                    <a title="more" href="<%=encode.forHtmlAttribute(link)%>" target="_blank">
                     more.
                     </a>
                 <%

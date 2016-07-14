@@ -22,9 +22,9 @@
                 // The reason is that the context will have the version now
                 for(var t=0;t < transports.length;t++){
                 %>
-                <div  class="well well-sm add-margin-bottom-1x"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
+                <div  class="well well-sm add-margin-bottom-1x"><%=encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){%>
-                        <br/><%= transports[t] %><%= contextWithoutTenant %>
+                        <br/><%= encode.forHtml(transports[t]) %><%= contextWithoutTenant %>
                     <%}%>
                 </div>
                 <%
@@ -58,12 +58,12 @@
 	                    if(environmenturls[urltype] != ""){ %>
 	    	            <div  class="endpoint-copybtn well well-sm add-margin-bottom-1x"><a
 	    	            data-clipboard-text="<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
-	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=environmenturls[urltype]%><%=encode.forHtml(api.context)%>
+	    	            class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
 	                            apiContext = apiContext.replace(api.version, "");%><br/>
-	                            <%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
+	                            <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>
 
@@ -89,7 +89,7 @@
     <% if(api.description && api.description != ""){ %>
         <h4 class="add-margin-top-5x"><%=i18n.localize("Description")%></h4>
     <p>
-        <%=api.description%>
+        <%=encode.forHtml(api.description)%>
     </p>
         <% } %>
 
