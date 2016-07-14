@@ -115,7 +115,7 @@ var faultSequencesLoaded = false;
                         <select id="editTier" class="selected" name="editTier"  multiple="multiple">
                        </select>
                        <a class="icon-question-sign help_popup" help_data="tier_help" title="tier_help"></a>
-                       <p id="tier_help" class="hide"><%=i18n.localize("The tiers you select here are the ones available for subscriber to subscribe this API. Each tier indicates the number of requests, the subscriber is granted for within a unit time.")%></p>
+                       <p id="tier_help" class="hide"><%=i18n.localize("The tiers selected here determine which tiers are available to a subscriber when subscribing to this API. Each tier indicates the number of requests the subscriber is granted within a unit time.")%></p>
                     </div>
             </div>
 
@@ -153,7 +153,7 @@ var faultSequencesLoaded = false;
 			                <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("Enabled")%></option>
 		                </select>                                
                         <a class="icon-question-sign help_popup" help_data="cache_help" title="cache_help"></a>
-                        <p id="cache_help" class="hide"><%=i18n.localize("This option determines whether to cache the response messages of the API. Caching improves performance, because the backend server does not have to process the same data for a request multiple times. To offset the risk of stale data in the cache, set an appropriate timeout period when prompted.")%></p>
+                        <p id="cache_help" class="hide"><%=i18n.localize("This option determines whether to cache the response messages of the API. Caching improves performance because the backend server does not have to process the same data multiple times. To offset the risk of stale data in the cache, set an appropriate timeout period when prompted.")%></p>
                      </div>
                 </div>
                 <div class="control-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>

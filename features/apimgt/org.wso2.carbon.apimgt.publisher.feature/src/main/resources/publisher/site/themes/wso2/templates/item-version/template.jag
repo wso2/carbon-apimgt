@@ -69,7 +69,7 @@
 											<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 										</span>
 									</a>
-									<p id="default_api_help" class="hide"><%=i18n.localize("Marks one API version in a group as the default, so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default, the previous default, published API will still be used as the default until the new default API is published")%></p>
+									<p id="default_api_help" class="hide"><%=i18n.localize("Marks one API version in a group as the default so that it can be invoked without specifying the version number in the URL. For example, if you mark http://host:port/youtube/2.0 as the default API, requests made to http://host:port/youtube/ are automatically routed to version 2.0. If you mark an unpublished API as the default the previous default, published API will still be used as the default until the new default API is published")%></p>
 								</label>
 								<div class="col-sm-4">
 									<label class="checkbox">
