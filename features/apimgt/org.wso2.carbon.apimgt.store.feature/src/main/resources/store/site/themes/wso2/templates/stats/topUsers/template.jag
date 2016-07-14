@@ -1,10 +1,12 @@
 <% jagg.template("stats/topUsers", function(inputs, outputs, jagg) { %>
-
-<div id="topUsers-stat-page"  class="stat-page">
-
-	<div class="page-header">     
+    <div class="page-header">
     			<h2><%=i18n.localize("Top Users For Applications")%></h2>
 	</div>
+<div id="topUsers-stat-page"  class="stat-page">
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
 	
     <div id="rangeSliderWrapper" >
        <div id="dateRangePickerContainer" style="text-align:right">
@@ -48,6 +50,9 @@
         <div class="col-md-12">
             <div id="topUsersView"></div>
         </div>
+    <%
+        }
+    %>
 </div>
 
 

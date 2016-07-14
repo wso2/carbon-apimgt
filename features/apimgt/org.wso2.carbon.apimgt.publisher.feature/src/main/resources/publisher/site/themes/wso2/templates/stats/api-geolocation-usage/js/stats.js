@@ -166,14 +166,12 @@ function renderGraph(fromDate,toDate){
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#temploadinglatencytTime').html('');
                     $('#noData').empty();
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
-                    $('#chartContainer').hide();
+                    showNoDataAnalyticsMsg();
 
                 }
                 else {
                          $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
+                    showEnableAnalyticsMsg();
            }
             }
             else {
@@ -186,8 +184,7 @@ function renderGraph(fromDate,toDate){
         }, "json");    
   }else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt="Thumbnail image when stats not configured"></div>'));
+                    showEnableAnalyticsMsg();
   }
 }
 

@@ -1,4 +1,4 @@
-var currentLocation = "allAPIs";
+var currentLocation = "allAPIs";$('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Thumbnail image when stats enabled"></div>'));
 var statsEnabled = isDataPublishingEnabled();
 var apiNameVersionMap = {};
 var apiName;
@@ -177,8 +177,7 @@ function renderGraph(fromDate,toDate){
                 else {
                           $('#noData').empty();
                          $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsEnabledThumb.png" alt='+i18n.t("Thumbnail image when stats enabled")+'></div>'));
+                    showEnableAnalyticsMsg();
            }
             }
             else {
@@ -192,8 +191,7 @@ function renderGraph(fromDate,toDate){
   }else{
                           $('#noData').empty();
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
-                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/wso2/images/statsThumb.png" alt='+i18n.t("Thumbnail image when stats not configured")+'></div>'));
+                    showEnableAnalyticsMsg();
   }
 }
 
