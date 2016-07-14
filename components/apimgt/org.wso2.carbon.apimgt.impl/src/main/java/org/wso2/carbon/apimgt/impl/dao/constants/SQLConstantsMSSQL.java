@@ -19,7 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-
+/**
+ * This class will hold MSSQL constants.
+ */
 public class SQLConstantsMSSQL extends SQLConstants{
 
 

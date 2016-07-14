@@ -19,7 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-
+/**
+ * This class holds postgre sql queries.
+ */
 public class SQLConstantPostgreSQL extends SQLConstants{
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID =

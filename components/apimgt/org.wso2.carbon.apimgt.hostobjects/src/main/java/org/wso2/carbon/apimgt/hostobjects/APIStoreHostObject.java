@@ -3147,6 +3147,16 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
+    /**
+     * This method responsible to get applications with server side pagination.
+     * @param cx
+     * @param thisObj
+     * @param args Argument list
+     * @param funObj
+     * @return application list.
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
     public static NativeArray jsFunction_getApplicationsWithPagination(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 

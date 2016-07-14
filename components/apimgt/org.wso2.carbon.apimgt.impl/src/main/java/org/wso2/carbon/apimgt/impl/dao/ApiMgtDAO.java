@@ -4518,20 +4518,13 @@ public class ApiMgtDAO {
             }
 
         }
-        //sqlQuery += " AND NAME like '%?%'";
-        //sqlQuery += SQLConstantManagerFactory.getSQlString("LIMIT_QUERY_SQL");
-        //sqlQuery += " Order By " +sortColumn+ " ASC";
+
         try {
             connection = APIMgtDBUtil.getConnection();
-//            if (connection.getMetaData().getDriverName().contains("MS SQL") ||
-//                    connection.getMetaData().getDriverName().contains("Microsoft")) {
-//                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME");
-//            }
 
             sqlQuery = sqlQuery.replace("$1", sortColumn);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
 
-            //String blockingFilerSql = " select distinct x.*,bl.* from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name))";
             prepStmt = connection.prepareStatement(sqlQuery);
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
@@ -4576,11 +4569,7 @@ public class ApiMgtDAO {
                 applicationsList.add(application);
 
             }
-//            Collections.sort(applicationsList, new Comparator<Application>() {
-//                public int compare(Application o1, Application o2) {
-//                    return o1.getName().compareToIgnoreCase(o2.getName());
-//                }
-//            });
+
             applications = applicationsList.toArray(new Application[applicationsList.size()]);
         } catch (SQLException e) {
             handleException("Error when reading the application information from" + " the persistence store.", e);

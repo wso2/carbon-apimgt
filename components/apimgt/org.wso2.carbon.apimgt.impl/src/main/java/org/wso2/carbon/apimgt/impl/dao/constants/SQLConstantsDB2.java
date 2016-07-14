@@ -19,7 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-
+/**
+ * This class will hold DB2 quires.
+ */
 public class SQLConstantsDB2 extends SQLConstants{
 
 

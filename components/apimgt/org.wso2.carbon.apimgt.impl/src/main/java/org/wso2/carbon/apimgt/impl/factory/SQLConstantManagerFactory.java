@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.factory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.*;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -28,7 +29,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * This is a factory class, which responsible to load relevant DAO class according to current jdbc Driver.
+ * This is a factory class, which responsible to load relevant constants class according to current jdbc Driver.
  * We will keep separate sql class
  */
 public class SQLConstantManagerFactory {
@@ -42,7 +43,11 @@ public class SQLConstantManagerFactory {
     private static SQLConstantOracle sqlConstantOracle = null;
     private static String dbType = null;
 
-    public static void initializeSQLConstantManager() {
+    /**
+     * This method initialize when server start up. And select relevant DB dirver and load the const class.
+     * @throws APIManagementException
+     */
+    public static void initializeSQLConstantManager() throws APIManagementException {
 
         Connection connection = null;
 
@@ -68,47 +73,54 @@ public class SQLConstantManagerFactory {
                 sqlConstantPostgreSQL = new SQLConstantPostgreSQL();
             } else if (connection.getMetaData().getDriverName().contains("Oracle")) {
                 dbType = "oracle";
-                 sqlConstantOracle = new SQLConstantOracle();
+                sqlConstantOracle = new SQLConstantOracle();
+            }else{
+                log.error("Could not find DB type to load constants");
+                throw new APIManagementException("Error occurred while instantiating KeyManager implementation");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error occurred while initializeSQLConstantManager");
+            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
         }
 
     }
 
-    public static String getSQlString(String sql) {
-
-        Class<?> c = null;
-
-        if ("h2mysql".equals(dbType)) {
-            c = sqlConstantsH2MySQL.getClass();
-        } else if ("mssql".equals(dbType)) {
-            c = sqlConstantsMSSQL.getClass();
-        } else if ("db2".equals(dbType)) {
-            c = sqlConstantsDB2.getClass();
-        }else if ("postgre".equals(dbType)) {
-            c = sqlConstantPostgreSQL.getClass();
-        }
-        else if ("oracle".equals(dbType)) {
-            c = sqlConstantOracle.getClass();
-        }else{
-            log.error("No DB type Found ");
-        }
-        Field f = null;
-        String valueOfMyColor = null;
+    /**
+     * This method will return the class's constant field's value by given string.
+     * @param sql Sql constant name
+     * @return sql string according to the database.
+     */
+    public static String getSQlString(String sql) throws APIManagementException {
+        String sqlString = null;
         try {
-            f = c.getDeclaredField(sql);
+            Class<?> clazz = null;
+
+            if ("h2mysql".equals(dbType)) {
+                clazz = sqlConstantsH2MySQL.getClass();
+            } else if ("mssql".equals(dbType)) {
+                clazz = sqlConstantsMSSQL.getClass();
+            } else if ("db2".equals(dbType)) {
+                clazz = sqlConstantsDB2.getClass();
+            } else if ("postgre".equals(dbType)) {
+                clazz = sqlConstantPostgreSQL.getClass();
+            } else if ("oracle".equals(dbType)) {
+                clazz = sqlConstantOracle.getClass();
+            } else {
+                log.error("No DB type Found ");
+            }
+            Field field;
+
+            field = clazz.getDeclaredField(sql);
+            field.setAccessible(true);
+            sqlString = (String) field.get(sqlConstantsH2MySQL);
+        }catch (IllegalAccessException e) {
+           log.error("Illegal Access attempt to sql constant class");
+            throw new APIManagementException("Illegal Access attempt to sql constant class", e);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            log.error("No such a field found in sql constant class" + sql);
+            throw new APIManagementException("No such a field found in sql constant class " + sql, e);
         }
-        f.setAccessible(true);
-
-        try {
-            valueOfMyColor = (String) f.get(sqlConstantsH2MySQL);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return valueOfMyColor;
+        return sqlString;
 
     }
 

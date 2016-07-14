@@ -19,7 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-
+/**
+ * This class will hold H2MYSQl quires.
+ */
 public class SQLConstantsH2MySQL extends SQLConstants{
 
     public static final String LIMIT_QUERY_SQL = " limit ? , ? ";

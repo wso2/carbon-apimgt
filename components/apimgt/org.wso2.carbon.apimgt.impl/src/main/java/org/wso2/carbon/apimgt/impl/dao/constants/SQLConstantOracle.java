@@ -19,7 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
-
+/**
+ * This class holds oracle specific constants.
+ */
 public class SQLConstantOracle extends SQLConstants{
 
 

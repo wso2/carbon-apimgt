@@ -438,14 +438,17 @@ $("#application-actions").each(function(){
     var application_name = Handlebars.compile(source);    
 
     var app_list = $('#application-table').datatables_extended({
+        serverSide: true,
+        processing: true,
+        paging: true,
         "ajax": {
-            "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplications",
+            "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplicationsWithPagination",
             "dataSrc": function ( json ) {
                 if(json.applications.length > 0){
-                    $('#application-table-wrap').removeClass("hide");                  
+                    $('#application-table-wrap').removeClass("hide");
                 }
                 else{
-                    $('#application-table-nodata').removeClass("hide"); 
+                    $('#application-table-nodata').removeClass("hide");
                 }
                 return json.applications
             }
