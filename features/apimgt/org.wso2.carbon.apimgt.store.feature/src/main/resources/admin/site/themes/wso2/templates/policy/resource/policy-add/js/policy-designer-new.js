@@ -388,10 +388,15 @@ var addPolicyToBackend = function () {
     var defaultPolicyUnit;
     var defaultPolicyUnitTime;
     var requiredMsg = $('#errorMsgRequired').val();
+    var errorHasSpacesMsg = $('#errorMessageSpaces').val();
 
     apiPolicyNew.policyName = policyName;
 
     if(!validateInput(policyName, $('#policy-name'), requiredMsg)) {
+        return false;
+    }
+
+    if (!validateForSpaces(policyName, $('#policy-name'), errorHasSpacesMsg)) {
         return false;
     }
 
@@ -619,6 +624,21 @@ function validateInput(text, element, errorMsg){
     var elementId = element.attr('id');
     text = text.trim();
     if(text == ""){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
+function validateForSpaces(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text.indexOf(' ') >= 0){
         element.css("border", "1px solid red");
         $('#label'+elementId).remove();
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
