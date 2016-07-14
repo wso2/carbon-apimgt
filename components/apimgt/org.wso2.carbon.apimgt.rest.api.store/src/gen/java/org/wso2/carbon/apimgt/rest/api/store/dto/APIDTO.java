@@ -39,6 +39,9 @@ public class APIDTO  {
   @NotNull
   private String apiDefinition = null;
   
+  
+  private String wsdlUri = null;
+  
   @NotNull
   private String status = null;
   
@@ -152,6 +155,19 @@ public class APIDTO  {
 
   
   /**
+   * WSDL URL if the API is based on a WSDL endpoint\n
+   **/
+  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
+  @JsonProperty("wsdlUri")
+  public String getWsdlUri() {
+    return wsdlUri;
+  }
+  public void setWsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("status")
@@ -260,6 +276,7 @@ public class APIDTO  {
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
+    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
     sb.append("  transport: ").append(transport).append("\n");

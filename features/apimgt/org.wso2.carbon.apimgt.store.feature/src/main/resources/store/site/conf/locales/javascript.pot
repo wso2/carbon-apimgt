@@ -230,7 +230,7 @@ msgid "View Subscriptions"
 msgstr ""
 
 #: site/themes/wso2/templates/api/api-info/js/api-info.js:112
-msgid "info.Stay on this page"
+msgid "Stay on this page"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:235

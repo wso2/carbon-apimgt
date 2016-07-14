@@ -113,6 +113,7 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
         dto.setThumbnailUrl(model.getThumbnailUrl());
+        dto.setWsdlUri(model.getWsdlUrl());
         return dto;
     }
 

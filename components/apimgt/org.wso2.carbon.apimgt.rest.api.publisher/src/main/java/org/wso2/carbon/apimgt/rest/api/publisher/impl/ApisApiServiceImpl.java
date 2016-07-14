@@ -156,7 +156,23 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
+
+            //check if the user has admin permission before applying a different provider than the current user
+            String provider = body.getProvider();
+            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
+                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("User " + username + " does not have admin permission ("
+                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
+                                + ") overridden with current user (" + username + ")");
+                    }
+                    provider = username;
+                }
+            } else {
+                //set username in case provider is null or empty
+                provider = username;
+            }
+            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
 
             if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
                 RestApiUtil.handleResourceAlreadyExistsError(
@@ -170,7 +186,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
-            apiToAdd.setApiOwner(username);
+            apiToAdd.setApiOwner(provider);
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
