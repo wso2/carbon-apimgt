@@ -147,6 +147,12 @@ public class APIExecutor implements Execution {
                 //update api related information for state change
                 executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
 
+                // Setting resource again to the context as it's updated within updateAPIStatus method
+                String apiPath = APIUtil.getAPIPath(api.getId());
+
+                apiResource = registry.get(apiPath);
+                context.setResource(apiResource);
+
                 if (log.isDebugEnabled()) {
                     String logMessage =
                             "API related information successfully updated. API Name: " + api.getId().getApiName()
@@ -187,13 +193,6 @@ public class APIExecutor implements Execution {
                     }            
                 }            
             }
-                       
-            
-            //Setting resource again to the context as it's updated within updateAPIStatus method
-            String apiPath = APIUtil.getAPIPath(api.getId());
-
-            apiResource = registry.get(apiPath);
-            context.setResource(apiResource);
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,

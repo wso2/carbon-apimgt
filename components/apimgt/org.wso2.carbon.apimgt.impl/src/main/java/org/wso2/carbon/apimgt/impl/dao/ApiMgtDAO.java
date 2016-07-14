@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -4742,7 +4742,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         String sqlQuery = SQLConstants.GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_SQL;
-        String whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR " + "     (GROUP_ID='' AND SUB" +
+        String whereClauseWithGroupId = "   AND " + "     (APP.GROUP_ID= ? " + "      OR " + "     (APP.GROUP_ID='' AND SUB" +
                                         ".USER_ID=?))";
         String whereClause = "   AND " + " SUB.USER_ID=?";
 
@@ -8191,7 +8191,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery;
-            if(stakeHolder == "admin-dashboard"){
+            if(stakeHolder.equals("admin-dashboard")){
                 sqlQuery = SQLConstants.GET_ALL_ALERT_TYPES_FOR_ADMIN;
                 ps = conn.prepareStatement(sqlQuery);
             }else {
@@ -10807,5 +10807,41 @@ public class ApiMgtDAO {
          }
          return status;
     	
+    }
+
+
+    /**
+     * Get a list of access tokens issued for given user under the given app. Returned object carries consumer key
+     * and secret information related to the access token
+     *
+     * @param userName end user name
+     * @param appName application name
+     * @return list of tokens
+     * @throws SQLException in case of a DB issue
+     */
+    public static List<AccessTokenInfo> getAccessTokenListForUser(String userName, String appName) throws SQLException {
+
+        List<AccessTokenInfo> accessTokens = new ArrayList<AccessTokenInfo>(5);
+        Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement consumerSecretIDPS = connection.prepareStatement(SQLConstants.GET_ACCESS_TOKENS_BY_USER_SQL);
+        consumerSecretIDPS.setString(1, userName);
+        consumerSecretIDPS.setString(2, appName);
+
+        ResultSet consumerSecretIDResult = consumerSecretIDPS.executeQuery();
+
+        while (consumerSecretIDResult.next()) {
+            String consumerKey = consumerSecretIDResult.getString(1);
+            String consumerSecret = consumerSecretIDResult.getString(2);
+            String accessToken = consumerSecretIDResult.getString(3);
+
+            AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+            accessTokenInfo.setConsumerKey(consumerKey);
+            accessTokenInfo.setConsumerSecret(consumerSecret);
+            accessTokenInfo.setAccessToken(accessToken);
+
+            accessTokens.add(accessTokenInfo);
+        }
+
+        return accessTokens;
     }
 }

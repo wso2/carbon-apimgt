@@ -175,7 +175,7 @@
     },
     digg : function(self){
       var sett = self.options.buttons.digg;
-      $(self.element).find('.buttons').append('<div class="button digg"><a class="DiggThisButton '+sett.type+'" rel="nofollow external" href="http://digg.com/submit?url='+encodeURIComponent((sett.url !== '' ? sett.url : self.options.url))+'"></a></div>');
+      $(self.element).find('.buttons').append('<div class="button digg"><a title="DiggThisButton" class="DiggThisButton '+sett.type+'" rel="nofollow external" href="http://digg.com/submit?url='+encodeURIComponent((sett.url !== '' ? sett.url : self.options.url))+'"></a></div>');
       var loading = 0;
       if(typeof __DBW === 'undefined' && loading == 0){
         loading = 1;
@@ -508,8 +508,8 @@
     }
     else{ //template by defaults
       $(this.element).html(
-                            '<div class="box"><a class="count" href="#">' + total + '</a>' + 
-                            (this.options.title !== '' ? '<a class="share" href="#">' + this.options.title + '</a>' : '') +
+                            '<div class="box"><a title="count" class="count" href="#">' + total + '</a>' +
+                            (this.options.title !== '' ? '<a class="share" title="share" href="#">' + this.options.title + '</a>' : '') +
                             '</div>'
                           );
     }

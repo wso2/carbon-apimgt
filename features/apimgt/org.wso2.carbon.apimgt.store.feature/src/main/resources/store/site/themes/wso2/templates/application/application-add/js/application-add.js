@@ -1,7 +1,7 @@
 function tierChanged(element){
     var index = element.selectedIndex;
     var selectedDesc = $("#tierDescriptions").val().split(",")[index];
-    $("#tierHelpStr").text(selectedDesc);
+    $("#tierHelpStr em").text(selectedDesc);
 }
 
 $(document).ready(function () {

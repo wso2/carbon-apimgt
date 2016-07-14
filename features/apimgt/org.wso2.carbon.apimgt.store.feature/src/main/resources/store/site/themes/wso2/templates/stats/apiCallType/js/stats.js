@@ -75,7 +75,7 @@ var statsEnabled = isDataPublishingEnabled();
                 else{
                     $('.stat-page').html("");
                     $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>' +
-                        '<a href=\'https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics\' target=\'_blank\' class=\'warningLink\'>' +
+                        '<a title=\'statsDoc\' href=\'https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics\' target=\'_blank\' class=\'warningLink\'>' +
                         i18n.t('Refer our wiki to configure DAS correctly') + '</a></span><br/><img src="../themes/wso2/images/statsThumb.png"' +
                         'alt="' + i18n.t('Stats Disabled') + '"></div>'));
                 }

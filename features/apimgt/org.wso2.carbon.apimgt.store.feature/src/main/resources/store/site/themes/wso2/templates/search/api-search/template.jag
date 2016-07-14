@@ -1,17 +1,29 @@
 <% jagg.template("search/api-search", function(inputs, outputs, jagg) {
 var query=request.getParameter("query");
 var tenant = jagg.getTenantDomain();
+
+//selected type text
+var type = i18n.localize("All");
+var param = "";
+if(request.getParameter("type") == "production"){
+  type = i18n.localize("Production");
+  param = "type=production";
+}
+if(request.getParameter("type") == "prototyped"){
+  type = i18n.localize("Prototyped");
+  param = "type=prototyped";
+}
 %>
 
-<form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>" id="search_apis">
+<form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?<%= param %>" id="search_apis">
   <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
       <div class="input-group-btn">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%=i18n.localize("All")%> <span class="caret"></span></button>
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="<%=i18n.localize("Category")%>"><%= type %> <span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li><a href="#"><%=i18n.localize("All")%></a></li>
-            <li><a href="#"><%=i18n.localize("Production")%></a></li>
-            <li><a href="#"><%=i18n.localize("Prototyped")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>"><%=i18n.localize("All")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=production"><%=i18n.localize("Production")%></a></li>
+            <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=prototyped"><%=i18n.localize("Prototyped")%></a></li>
           </ul>
       </div>
       <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search Options")%>...">
@@ -21,7 +33,7 @@ var tenant = jagg.getTenantDomain();
         </button> 
       </div>
       <div class="input-group-btn">
-        <a class="help_popup" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
+        <a class="help_popup" title="helpPopup" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
           <span class="icon fw-lg  add-margin-bottom-1x add-margin-left-1x" style="font-size:16px;">
             <i class="fw fw-info fw-inverse" title="Search options"></i>
           </span>            
