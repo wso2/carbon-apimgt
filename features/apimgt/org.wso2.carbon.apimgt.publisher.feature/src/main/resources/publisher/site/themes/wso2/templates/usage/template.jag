@@ -1,6 +1,6 @@
 <% jagg.template("usage", function(inputs, outputs, jagg) { %>
 
-<div class="page-header">
+<div class="page-header add-margin-top-4x">
 	<p class="lead"><%=i18n.localize("API Subscriptions by Versions")%></p>
 </div>
 
@@ -21,11 +21,10 @@
                   </tr>
                   </thead>
               </table>
-              <div class="col-sm-12">
-                <div id="versionUserChart">
-              </div>
         </div>
-
+        <div class="col-sm-6">
+            <div id="versionUserChart">
+        </div>
         </div>
     </div>
     
@@ -35,7 +34,7 @@
 <div id="apiUsageByVersionSpinner" class="center-wrapper">
         <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
     </div>
-    <div class="row-fluid">
+    <div class="row">
         <div id="apiUsageByVersionNoData"></div>
 
         <div class="col-sm-6">
@@ -49,9 +48,9 @@
                   </tr>
                   </thead>
               </table>
-            <div class="col-sm-12">
-                <div id="versionChart"></div>
-            </div>
+        </div>
+        <div class="col-sm-6">
+            <div id="versionChart"></div>
         </div>
     </div>
 
