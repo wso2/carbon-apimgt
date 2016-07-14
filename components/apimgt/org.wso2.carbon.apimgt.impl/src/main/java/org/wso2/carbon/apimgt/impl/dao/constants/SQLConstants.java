@@ -1283,7 +1283,60 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
 
-    public static final String GET_CONSUMER_KEYS_SQL =
+
+        public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITHGROUPID = "SELECT " +
+                "   count(*) count " +
+                " FROM" +
+                "   AM_APPLICATION APP, " +
+                "   AM_SUBSCRIBER SUB  " +
+                " WHERE " +
+                "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                " AND " +
+                "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))"+
+                " And "+
+                "    NAME like ?";
+
+
+        public static final String GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE_WITHGROUPID = "SELECT " +
+                "   count(*) count " +
+                " FROM" +
+                "   AM_APPLICATION APP, " +
+                "   AM_SUBSCRIBER SUB  " +
+                " WHERE " +
+                "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                " AND " +
+                "   (GROUP_ID= ?  OR (GROUP_ID='' AND SUB.USER_ID=?))" +
+                " And "+
+                "    NAME like ?";
+
+        public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE = "SELECT " +
+                "   count(*) count " +
+                " FROM" +
+                "   AM_APPLICATION APP, " +
+                "   AM_SUBSCRIBER SUB  " +
+                " WHERE " +
+                "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                " AND " +
+                "    LOWER(SUB.USER_ID) = LOWER(?)"+
+                " And "+
+                "    NAME like ?";
+
+        public static final String GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE = "SELECT " +
+                "   count(*) count " +
+                " FROM" +
+                "   AM_APPLICATION APP, " +
+                "   AM_SUBSCRIBER SUB  " +
+                " WHERE " +
+                "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                " AND " +
+                "   SUB.USER_ID=?" +
+                " And "+
+                "    NAME like ?";
+
+
+
+
+        public static final String GET_CONSUMER_KEYS_SQL =
             " SELECT " +
             "   MAP.CONSUMER_KEY " +
             " FROM " +

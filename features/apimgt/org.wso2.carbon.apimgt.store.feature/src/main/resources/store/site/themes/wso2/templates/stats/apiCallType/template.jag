@@ -1,12 +1,12 @@
 <% jagg.template("stats/apiCallType", function(inputs, outputs, jagg) { %>
-
-<div id="apiCallType-stat-page" class="stat-page">
-
-	
-    <div class="page-header">     
+	<div class="page-header">
     			<h2><%=i18n.localize("API Usage from Resource Path")%></h2>
 	</div>
-
+<div id="apiCallType-stat-page" class="stat-page">
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
 	<div class="row">
 	    <div id="rangeSliderWrapper" >
 	       <div id="dateRangePickerContainer" style="text-align:right">
@@ -43,6 +43,9 @@
         <div id="noData" class="hide message message-info">
 			<h4><i class="icon fw fw-info"></i>No Data Available.</h4>
 		</div>
+    <%
+        }
+    %>
 </div>
 
 <% }); %>

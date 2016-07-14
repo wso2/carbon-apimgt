@@ -49,6 +49,65 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
+    }else if (action == "getApplicationsWithPagination") {
+
+
+        if (!user) {
+            if(!ssoEnabled){
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+        var dir = "asc";
+        var search = request.getParameter("search[value]");
+        var start = request.getParameter("start");
+        var draw = request.getParameter("draw");
+        var offset = request.getParameter("length");
+        var columnId = request.getParameter("order[0][column]");
+        var sortOrder = request.getParameter("order[0][dir]");
+
+        var sortColumn = null;
+        if(columnId == 0){
+            sortColumn = "NAME";
+        }else if(columnId == 1){
+            sortColumn = "APPLICATION_TIER";
+        }else if(columnId == 2){
+            sortColumn = "APPLICATION_TIER";
+        }else if(columnId == 3){
+            sortColumn = "APPLICATION_STATUS";
+        }
+
+
+        username = user.username;
+        mod = jagg.module("application");
+        result = mod.getApplicationsWithPagination(username, start ,offset ,search ,sortColumn ,sortOrder);
+
+
+        var totalRecordsCount = 0;
+
+        if(result.applications.length > 0){
+
+            totalRecordsCount = result.applications[0].totalCount;
+        }
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                applications:result.applications,
+                draw:draw,
+                iTotalRecords:totalRecordsCount,
+                iTotalDisplayRecords:totalRecordsCount
+            }
+        }
+        print(obj);
     } else if(action == "getApplicationByName"){
         if (!user) {
             if(!ssoEnabled){

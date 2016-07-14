@@ -73,12 +73,12 @@ var statsEnabled = isDataPublishingEnabled();
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/wso2/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    showNoDataAnalyticsMsg();
                 }
 
                 else{
                     $('.stat-page').html("");
-                    $('.stat-page').append($('<br><div class="errorWrapper"><div class="message message-warning"><h4><i class="icon fw fw-warning"></i> Not Configured</h4><p>' +i18n.t("<a title='statsDocs' href='https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure DAS correctly</a>")+ '</p></div></span><div class="add-margin-top-5x"><img class="img-responsive" src="../themes/wso2/images/statsThumb.png" alt="Stats Disabled"></div></div>'));
+                    showEnableAnalyticsMsg();
                 }
             }
             else {
