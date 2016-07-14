@@ -26,9 +26,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -167,8 +165,8 @@ public class APIExecutor implements Execution {
             
             boolean deprecateOldVersions = false;
             boolean makeKeysForwardCompatible = false;
-            //If the API status is CREATED ,check for check list items of lifecycle
-            if (APIStatus.CREATED.equals(oldStatus)) {
+            //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
+            if (APIStatus.CREATED.equals(oldStatus)|| APIStatus.PROTOTYPED.equals(oldStatus)) {
                 deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
                 makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
             }
