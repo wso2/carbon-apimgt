@@ -74,9 +74,6 @@
     </div>
 
     </div>
-    <div class='form-actions'>
-        <input id="add-policy-btn" type='button' class='btn btn-primary' value='<%=i18n.localize("Add Tier")%>' />
-    </div>
 </div>
 
 <script>
@@ -85,11 +82,6 @@
             location.href = "<%= jagg.url('/subscription-policy-edit')%>?policyName="+policyName+"&action=update";
     }
 
-    $(document).ready(function(){
-        $('#add-policy-btn').on('click',function(){
-            location.href = "<%= jagg.url('/subscription-policy-edit?action=add')%>";
-        });
-    });
 </script>
 
 <% }); %>

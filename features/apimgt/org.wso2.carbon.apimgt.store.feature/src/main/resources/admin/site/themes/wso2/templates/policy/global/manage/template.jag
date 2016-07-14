@@ -63,9 +63,6 @@
 </div>
 
 </div>
-<div class='form-actions'>
-<input id="add-policy-btn" type='button' class='btn btn-primary' value='<%=i18n.localize("Define Rule")%>' />
-</div>
 </div>
 
 <script>
@@ -73,12 +70,6 @@
             console.log(policyName);
             location.href = "<%= jagg.url('/global-policy-edit')%>?policyName="+policyName;
     }
-
-    $(document).ready(function(){
-        $('#add-policy-btn').on('click',function(){
-            location.href = "<%= jagg.url('/global-policy-edit')%>";
-                });
-        });
 </script>
 
 <% }); %>
