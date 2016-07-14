@@ -5971,4 +5971,19 @@ public final class APIUtil {
             return 0;
         }
     }
+
+    public static boolean isQueryParamDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                                                            getThrottleProperties().isEnableQueryParamConditions();
+    }
+
+    public static boolean isHeaderDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableHeaderConditions();
+    }
+
+    public static boolean isJwtTokenPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableJwtConditions();
+    }
 }
