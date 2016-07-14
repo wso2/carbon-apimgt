@@ -57,6 +57,8 @@
                 value='<%=i18n.localize("Invalid")%>'/>
                 <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
                 value='<%=i18n.localize("Name contains one or more illegal characters ")%>'/>
+                <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces'
+                value='<%=i18n.localize("Name contains spaces")%>'/>
 
        		<div class="form-group">
 	            <label class="control-label col-sm-3"><%=i18n.localize("Tier Name")%>: <span class="requiredAstrix">*</span>

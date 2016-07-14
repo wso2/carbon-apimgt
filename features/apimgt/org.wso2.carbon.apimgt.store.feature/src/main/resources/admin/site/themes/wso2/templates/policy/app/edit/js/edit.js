@@ -206,6 +206,7 @@ function validateInputs(){
    var illegalChars = $('#errorMessageIllegalChar').val();
    var policyName = $('#policyName');
    var policyNameTxt = policyName.val();
+   var errorHasSpacesMsg = $('#errorMessageSpaces').val();
 
    if(!validateInput(policyNameTxt,policyName,requiredMsg)){
        return false;
@@ -214,6 +215,10 @@ function validateInputs(){
    if(!validateInputCharactors(policyNameTxt,policyName,illegalChars)){
        return false;
    }
+
+    if (!validateForSpaces(policyNameTxt, policyName, errorHasSpacesMsg)) {
+        return false;
+    }
 
     var defaultQuotaPolicy=$('input[name=select-quota-type]:checked').val();
     var defaultRequestCount = $('#defaultRequestCount');
@@ -256,3 +261,18 @@ function validateInputs(){
             }
             return true;
     };
+
+function validateForSpaces(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text.indexOf(' ') >= 0){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
