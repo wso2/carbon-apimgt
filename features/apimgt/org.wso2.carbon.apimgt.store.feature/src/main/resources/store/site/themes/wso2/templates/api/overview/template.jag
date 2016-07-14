@@ -48,7 +48,7 @@
                         var environmenturls = environmentsPerType[environmentName];
                         // @todo: param_string
                 %> 
-    	            <h5 class="add-margin-top-2x"><%=i18n.localize(environmentName)%> <%=i18n.localize("URLs")%>:</h5>
+    	            <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
 
     	        <%
                 // since we are using context versioning, we remove the api.version from the URL.
@@ -62,7 +62,7 @@
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
 	                            apiContext = apiContext.replace(api.version + "/", "");
-	                            apiContext = apiContext.replace(api.version, "");%>
+	                            apiContext = apiContext.replace(api.version, "");%><br/>
 	                            <%=environmenturls[urltype]%><%=encode.forHtml(apiContext)%>
 	                        <%}%>
 	                    </div>

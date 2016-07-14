@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 
 import io.swagger.annotations.*;
@@ -41,6 +42,9 @@ public class APIDTO  {
   private String apiDefinition = null;
   
   
+  private String wsdlUri = null;
+  
+  
   private String status = null;
   
   
@@ -65,7 +69,7 @@ public class APIDTO  {
   private List<String> tiers = new ArrayList<String>();
   
   
-  private String thumbnailUrl = null;
+  private String thumbnailUri = null;
   
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
@@ -81,6 +85,9 @@ public class APIDTO  {
   
   @NotNull
   private String endpointConfig = null;
+  
+  
+  private APIEndpointSecurityDTO endpointSecurity = null;
   
   
   private String gatewayEnvironments = null;
@@ -192,6 +199,19 @@ public class APIDTO  {
 
   
   /**
+   * WSDL URL if the API is based on a WSDL endpoint\n
+   **/
+  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
+  @JsonProperty("wsdlUri")
+  public String getWsdlUri() {
+    return wsdlUri;
+  }
+  public void setWsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")
@@ -291,12 +311,12 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("thumbnailUrl")
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
+  @JsonProperty("thumbnailUri")
+  public String getThumbnailUri() {
+    return thumbnailUri;
   }
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public void setThumbnailUri(String thumbnailUri) {
+    this.thumbnailUri = thumbnailUri;
   }
 
   
@@ -345,6 +365,18 @@ public class APIDTO  {
   }
   public void setEndpointConfig(String endpointConfig) {
     this.endpointConfig = endpointConfig;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("endpointSecurity")
+  public APIEndpointSecurityDTO getEndpointSecurity() {
+    return endpointSecurity;
+  }
+  public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
+    this.endpointSecurity = endpointSecurity;
   }
 
   
@@ -434,6 +466,7 @@ public class APIDTO  {
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
+    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  responseCaching: ").append(responseCaching).append("\n");
     sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
@@ -442,11 +475,12 @@ public class APIDTO  {
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
-    sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
     sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
+    sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
     sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");

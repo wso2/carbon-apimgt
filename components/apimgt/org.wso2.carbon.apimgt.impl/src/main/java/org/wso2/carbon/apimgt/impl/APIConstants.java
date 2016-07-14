@@ -393,8 +393,8 @@ public final class APIConstants {
         public static final String API_PUBLISH = "/permission/admin/manage/api/publish";
         public static final String API_SUBSCRIBE = "/permission/admin/manage/api/subscribe";
         public static final String API_WORKFLOWADMIN = "/permission/admin/manage/workflowadmin";
+        public static final String APIM_ADMIN = "/permission/admin/manage/apim_admin";
         public static final String MANAGE_TIERS = "/permission/admin/manage/manage_tiers";
-        
         private Permissions(){
             
         }

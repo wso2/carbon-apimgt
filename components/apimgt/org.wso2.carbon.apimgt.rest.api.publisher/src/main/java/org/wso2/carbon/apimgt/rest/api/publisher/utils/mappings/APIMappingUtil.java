@@ -141,7 +141,9 @@ public class APIMappingUtil {
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setEndpointConfig(model.getEndpointConfig());
-        dto.setThumbnailUrl(model.getThumbnailUrl());
+        if (!StringUtils.isBlank(model.getThumbnailUrl())) {
+            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
+        }
         List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
@@ -233,6 +235,9 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
+        dto.setWsdlUri(model.getWsdlUrl());
+        setEndpointSecurityFromModelToApiDTO(model, dto);
+
         return dto;
     }
 
@@ -270,6 +275,7 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
+        model.setWsdlUrl(dto.getWsdlUri());
         if (dto.getStatus() != null) {
             model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
         }
@@ -370,10 +376,7 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
-
-        if (dto.getThumbnailUrl() != null) {
-            model.setThumbnailUrl(dto.getThumbnailUrl());
-        }
+        setEndpointSecurityFromApiDTOToModel(dto, model);
 
         return model;
     }
@@ -458,6 +461,31 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
+    }
+
+    private static void setEndpointSecurityFromApiDTOToModel (APIDTO dto, API api) {
+        APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
+        if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
+            api.setEndpointSecured(true);
+            api.setEndpointUTUsername(securityDTO.getUsername());
+            api.setEndpointUTPassword(securityDTO.getPassword());
+            if (APIEndpointSecurityDTO.TypeEnum.digest.equals(securityDTO.getType())) {
+                api.setEndpointAuthDigest(true);
+            }
+        }
+    }
+
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto) {
+        if (api.isEndpointSecured()) {
+            APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
+            securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
+            securityDTO.setUsername(api.getEndpointUTUsername());
+            securityDTO.setPassword(api.getEndpointUTPassword());
+            if (api.isEndpointAuthDigest()) {
+                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
+            }
+            dto.setEndpointSecurity(securityDTO);
+        }
     }
 
     private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
@@ -562,5 +590,9 @@ public class APIMappingUtil {
             context = context + RestApiConstants.API_VERSION_PARAM;
         }
         return context;
+    }
+
+    private static String getThumbnailUri (String uuid) {
+        return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
 }

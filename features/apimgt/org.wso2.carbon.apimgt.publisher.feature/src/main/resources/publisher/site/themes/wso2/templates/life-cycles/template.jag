@@ -148,7 +148,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  var state=item.lifeCycleStatus;
                  %>
                  <% if(isVisible=="true"){%>
-                     <%if((state!="Created")||(state=="Created" && oldExist)){%>
+                      <%if(((state!="Created") && (state!="Prototyped"))||(state=="Created" && oldExist)||(state=="Prototyped" && oldExist)){%>
                       <div class="form-group">
                       	 <label class="control-label col-sm-3"></label>
 	                     <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
