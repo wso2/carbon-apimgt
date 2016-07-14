@@ -3588,8 +3588,8 @@ public class APIProviderHostObject extends ScriptableObject {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                                                                       ((APIProviderHostObject) thisObj).getUsername()));
             result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
-            
-            if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(newSearchQuery)) {
+
+            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2)) {
                 Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
                 if (apiDocMap != null) {
                     int i = 0;

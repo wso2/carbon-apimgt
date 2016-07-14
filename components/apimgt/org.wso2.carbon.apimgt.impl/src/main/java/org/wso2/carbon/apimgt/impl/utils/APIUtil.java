@@ -5857,7 +5857,7 @@ public final class APIUtil {
         
         if (criteria.contains(":")) {
             if (criteria.split(":").length > 1) {
-                searchKey = criteria.split(":")[0];
+                searchKey = criteria.split(":")[0].trim();
                 searchValue = criteria.split(":")[1];
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
                     if (!searchValue.endsWith("*")) {
