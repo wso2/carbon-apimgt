@@ -39,6 +39,12 @@ include("/jagg/jagg.jag");
         start = request.getParameter("start");
         end = request.getParameter("end");
         var limitAttributes =  request.getParameter("limitAttributes");
+        var state = null;
+        if (request.getParameter("type") == "production") {
+            state = "PUBLISHED";
+        } else if (request.getParameter("type") == "prototyped") {
+            state = "PROTOTYPED";
+        }
 
         mod = jagg.module("search");
 
@@ -46,7 +52,7 @@ include("/jagg/jagg.jag");
             limitAttributes = "false";
         }
 
-        resultSearch = mod.searchPaginatedAPIs(query, tenantDomain, start, end, limitAttributes);
+        resultSearch = mod.searchPaginatedAPIs(query, tenantDomain, start, end, limitAttributes, state);
 
         if (resultSearch.error) {
             obj = {
