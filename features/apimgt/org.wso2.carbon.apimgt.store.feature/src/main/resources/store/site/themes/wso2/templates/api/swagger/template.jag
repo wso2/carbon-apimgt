@@ -168,7 +168,7 @@ function checkOnKeyPress(e) {
           <div class="col-sm-9">
             <select id="sub_app_list" class="form-control subapp">
               <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-                <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>">
+                <option value="" data-sandbox="<%= encode.forHtmlAttribute(subscriptions[i].SANDBOX_KEY) %>" data-production="<%= encode.forHtmlAttribute(subscriptions[i].PRODUCTION_KEY)%>">
                      <%= encode.forHtml(subscriptions[i].application)%>
                 </option>
               <% } %>
@@ -198,7 +198,7 @@ function checkOnKeyPress(e) {
                   for(var endpoint in endpointType){
                       if(endpointType[endpoint]["showInConsole"]){
                       %>
-                         <option value="<%=endpoint%>" class="<%=types%>"><%=endpoint%></option>
+                         <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>"><%=encode.forHtml(endpoint)%></option>
                       <% }
                   }
                 }
@@ -213,7 +213,7 @@ function checkOnKeyPress(e) {
       <div class="col-sm-9">
         <select id="sub_app_list" class="inline">
         <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-          <option value="" data-sandbox="<%= subscriptions[i].SANDBOX_KEY %>" data-production="<%= subscriptions[i].PRODUCTION_KEY %>"><%= encode.forHtml(subscriptions[i].application)%></option>
+          <option value="" data-sandbox="<%= encode.forHtmlAttribute(subscriptions[i].SANDBOX_KEY) %>" data-production="<%= encode.forHtmlAttribute(subscriptions[i].PRODUCTION_KEY) %>"><%= encode.forHtml(subscriptions[i].application)%></option>
         <% } %>
         </select>
         <label> On </label>
@@ -262,7 +262,7 @@ function checkOnKeyPress(e) {
 <div class="col-md-12 col-lg-12">
     <div class="swagger-section">
     <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-    <div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=swaggerAPI%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
+    <div id="Download" style="float:right;font-size:14px"><a title="swagger" href='<%=encode.forHtmlAttribute(swaggerAPI)%>' target="_blank" style="font-size:14px"><i class="icon-share-alt" ></i> Swagger ( /swagger.json )</a></div>
     <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </div>
 </div>
