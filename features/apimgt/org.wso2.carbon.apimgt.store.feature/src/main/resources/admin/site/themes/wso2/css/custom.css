@@ -289,3 +289,8 @@ table.table-bordered th:last-child, table.table-bordered td:last-child {
 #pipeline-content .panel-group{
     margin-bottom:0px;
 }
+
+.popover-content span.wrap-long-text{
+    word-break: break-all;
+    white-space: pre-wrap;
+}

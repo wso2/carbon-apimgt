@@ -3100,6 +3100,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset
+            , String search, String sortColumn, String sortOrder)
+            throws APIManagementException {
+        return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset, search,sortColumn,sortOrder);
+    }
+
+    @Override
     public Application[] getApplications(Subscriber subscriber, String groupingId)
 			throws APIManagementException {
 		return apiMgtDAO.getApplications(subscriber, groupingId);
