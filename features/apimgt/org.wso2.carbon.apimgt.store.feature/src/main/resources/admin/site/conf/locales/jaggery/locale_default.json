@@ -98,7 +98,6 @@
     "Error occurred while saving policy (Cause:": "Error occurred while saving policy (Cause:",
     "Error!": "Error!",
     "Execution Policy": "Execution Policy",
-    "Following query will allow 5 request per minute for Admin user <br>Key Template : <b>$userId</b><br>Siddhi Query : <code><p>FROM RequestStream<br>SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey<br>  INSERT INTO EligibilityStream; <br><br>FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) <br> SELECT throttleKey, (count(userId) >= 5) as isThrottled, expiryTimeStamp  group by throttleKey <br> INSERT ALL EVENTS into ResultStream;</p></code>":"Following query will allow 5 request per minute for Admin user <br>Key Template : <b>$userId</b><br>Siddhi Query : <code><p>FROM RequestStream<br>SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey<br>  INSERT INTO EligibilityStream; <br><br>FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) <br> SELECT throttleKey, (count(userId) >= 5) as isThrottled, expiryTimeStamp  group by throttleKey <br> INSERT ALL EVENTS into ResultStream;</p></code>",
     "Format : ": "Format : ",
     "Free": "Free",
     "FrequentTierHittingAlert_Desc": "This alert type should get triggered if at least one of the two cases below satisfied; If a particular application gets throttled out for hitting the subscribed tier limit of that application, more than 10 times (by default) within a day (by default) or If a particular user of an application, gets throttled out for hitting the subscribed tier limit of a particular API, more than 10 times (by default) within a day (by default)",
@@ -259,5 +258,9 @@
     "Warning!" : "Warning!",
     "Add Advanced Throttle Policy":"Add Advanced Throttle Policy",
     "Edit Advanced Throttle Throttle Policy":"Edit Advanced Throttle Throttle Policy",
-    "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>":"keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>"
+    "Name contains spaces":"Name contains spaces",
+    "Key Template":"Key Template",
+    "Siddhi Query":"Siddhi Query",
+    "Following query will allow 5 request per minute for Admin user":"Following query will allow 5 request per minute for Admin user",
+    "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>" : "keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>"
 }

@@ -1051,6 +1051,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
+                        currentApi.put("status", currentApi, api.getStatus().toString());
                         currentApi.put("rates", currentApi, api.getRating());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("endpoint", currentApi, api.getUrl());
@@ -1091,6 +1092,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
+                        currentApi.put("status", currentApi, api.getStatus().toString());
                         currentApi.put("rates", currentApi, api.getRating());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("endpoint", currentApi, api.getUrl());
@@ -1301,7 +1303,13 @@ public class APIStoreHostObject extends ScriptableObject {
         NativeArray apiArray = new NativeArray(0);
         if (args != null && isStringArray(args)) {
             String tagName = args[0].toString();
-            String tenant = args[1].toString();
+            String tenant;
+            if (args[1] != null) {
+                tenant = (String) args[1];
+            } else {
+                tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
@@ -1335,6 +1343,12 @@ public class APIStoreHostObject extends ScriptableObject {
                         currentApi.put("thumbnailurl", currentApi,
                                 APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                     }
+                    currentApi.put("isAdvertiseOnly",currentApi,api.isAdvertiseOnly());
+                    if(api.isAdvertiseOnly()){
+                        currentApi.put("apiOwner",currentApi,APIUtil.replaceEmailDomainBack(api.getApiOwner()));
+                    }
+                    currentApi.put("apiBusinessOwner", currentApi,
+                                   APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
                     currentApi.put("visibility", currentApi, api.getVisibility());
                     currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                     currentApi.put("description", currentApi, api.getDescription());
@@ -1357,7 +1371,13 @@ public class APIStoreHostObject extends ScriptableObject {
             String tagName = args[0].toString();
             int start = Integer.parseInt(args[1].toString());
             int end = Integer.parseInt(args[2].toString());
-            String tenant = args[3].toString();
+            String tenant;
+            if (args[3] != null) {
+                tenant = (String) args[3];
+            } else {
+                tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
@@ -1392,6 +1412,12 @@ public class APIStoreHostObject extends ScriptableObject {
                         currentApi.put("thumbnailurl", currentApi,
                                 APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                     }
+                    currentApi.put("isAdvertiseOnly",currentApi,api.isAdvertiseOnly());
+                    if(api.isAdvertiseOnly()){
+                        currentApi.put("apiOwner",currentApi,APIUtil.replaceEmailDomainBack(api.getApiOwner()));
+                    }
+                    currentApi.put("apiBusinessOwner", currentApi,
+                                   APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
                     currentApi.put("visibility", currentApi, api.getVisibility());
                     currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                     currentApi.put("description", currentApi, api.getDescription());

@@ -53,6 +53,10 @@ $(document).ready(function() {
         var currentTab = $(e.target).attr("title"); // get current tab
         if (currentTab == 'Lifecycle') {
             loadLC();
+        } else if (currentTab == 'Versions') {
+            loadVersionUsageChart();
+        } else if (currentTab == 'Users') {
+            loadSubscriptionsChart();
         }
     });
 
@@ -356,6 +360,36 @@ function drawVersionChart(chartID,data) {
     nv.utils.windowResize(chart.update);
     return chart;
     });
+};
+
+var loadVersionUsageChart = function () {
+    jagg.post("/site/blocks/usage/ajax/usage.jag", {action: "getProviderAPIVersionUsage"},
+        function (json) {
+            if (!json.error) {
+                pushDataForTabs("versions");
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");
+};
+
+var loadSubscriptionsChart = function () {
+    jagg.post("/site/blocks/usage/ajax/usage.jag", {action: "getProviderAPIUserUsage"},
+        function (json) {
+            if (!json.error) {
+                pushDataForTabs("users");
+            } else {
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
+            }
+        }, "json");
 };
 
 var loadLC = function () {

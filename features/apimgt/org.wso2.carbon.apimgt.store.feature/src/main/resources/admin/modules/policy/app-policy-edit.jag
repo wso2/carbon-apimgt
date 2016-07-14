@@ -16,7 +16,6 @@ var saveAppPolicy = function (action, policyName, description, defaultQuotaPolic
         } else if (action == "update") {
             apiProvider.updatePolicy(policy);
         }
-        log.info(policy.toString());
         return {
             error: false
         };
