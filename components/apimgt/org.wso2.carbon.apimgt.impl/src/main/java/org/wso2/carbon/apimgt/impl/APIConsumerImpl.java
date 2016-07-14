@@ -160,7 +160,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         	
         }
 
-		isTenantModeStoreView = requestedTenantDomain != null && !"null".equals(requestedTenantDomain);
+        boolean isTenantMode = requestedTenantDomain != null && !"null".equalsIgnoreCase(requestedTenantDomain);
+		this.isTenantModeStoreView = isTenantMode;
 
 		if (requestedTenantDomain != null && !"null".equals(requestedTenantDomain)) {
 			this.requestedTenant = requestedTenantDomain;
@@ -170,33 +171,30 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		boolean isTenantFlowStarted = false;
 		Set<API> apisWithTag = null;
 		try {
-			// as a tenant, I'm browsing my own Store or I'm browsing a Store of
-			// another tenant..
-			if ((isTenantModeStoreView && tenantDomain == null)
-					|| (isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {
-				
-				int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-						.getTenantId(this.requestedTenant);
-				userRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
-						.getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-			} else {
-				userRegistry = registry;
-			}
+            //start the tenant flow prior to loading registry
+            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+                isTenantFlowStarted = true;
+            }
 
-			try {
-				if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-					isTenantFlowStarted = true;
-					PrivilegedCarbonContext.startTenantFlow();
-					PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
-				}
+            if ((isTenantMode && this.tenantDomain == null) ||
+                (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                     .getTenantId(requestedTenantDomain);
+                // explicitly load the tenant's registry
+                APIUtil.loadTenantRegistry(tenantId);
+                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+            } else {
+                userRegistry = registry;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            }
 
-			} finally {
-				if (isTenantFlowStarted) {
-					PrivilegedCarbonContext.endTenantFlow();
-				}
-			}
+            apisWithTag = getAPIsWithTag(userRegistry, tagName);
 
-			apisWithTag = getAPIsWithTag(requestedTenant, userRegistry, tagName);
 			/* Add the APIs against the tag name */
 			if (!apisWithTag.isEmpty()) {
 				if (taggedAPIs.containsKey(tagName)) {
@@ -212,7 +210,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			handleException("Failed to get api by the tag", e);
 		} catch (UserStoreException e) {
 			handleException("Failed to get api by the tag", e);
-		}
+		} finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
 
 		return apisWithTag;
 	}
@@ -264,35 +266,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns the set of APIs with the given tag, retrieved from registry
      *
-     * @param requestedTenant - Tenant domain of the accessed store
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag - The tag name
      * @return A {@link Set} of {@link API} objects.
      * @throws APIManagementException
      */
-    private Set<API> getAPIsWithTag(String requestedTenant, Registry registry, String tag)
+    private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        boolean isTenantFlowStarted = false;
+        String tagsKey = "tags=";
         try {
-            if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
-            }
+            List<GovernanceArtifact> genericArtifacts =
+                    GovernanceUtils.findGovernanceArtifacts( tagsKey + tag, registry, APIConstants.API_RXT_MEDIA_TYPE);
 
-            String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("1", tag);
-            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
-            Collection collection = registry.executeQuery(resourceByTagQueryPath, params);
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-
-            for (String row : collection.getChildren()) {
-                String uuid = row.substring(row.indexOf(';') + 1, row.length());
+            for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
-                    GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
                     if (genericArtifact != null && APIConstants.PUBLISHED.equals(genericArtifact.getAttribute
                             (APIConstants.API_OVERVIEW_STATUS))) {
                         API api = APIUtil.getAPI(genericArtifact);
@@ -306,10 +294,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         } catch (RegistryException e) {
             handleException("Failed to get API for tag " + tag, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
         return apiSet;
     }
