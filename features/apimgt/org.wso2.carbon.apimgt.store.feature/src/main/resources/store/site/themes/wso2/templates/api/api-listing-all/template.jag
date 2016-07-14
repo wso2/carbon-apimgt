@@ -5,7 +5,7 @@
           var urlPrefix = jagg.getTenantURLPrefix("&");
 if (outputs.error) { %>
           <div class="message message-info">
-            <strong><%=outputs.message%></strong>
+            <strong><%=encode.forHtml(outputs.message)%></strong>
           </div>
 <% }else {
 
@@ -168,14 +168,14 @@ var reqUrl = request.getRequestURI();
 				                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
 				                                    <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
 				                                    <%if(api.isAdvertiseOnly) {%>
-				                                    	<p class="truncate"><%=api.apiOwner%></p>
+				                                    	<p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
 				                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-				                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
+				                                    	<p class="truncate"><%=encode.forHtml(api.apiBusinessOwner)%></p>
 				                                    <%} else { %>
-				                                    	<p class="truncate"><%=api.provider%></p>
+				                                    	<p class="truncate"><%=encode.forHtml(api.provider)%></p>
 				                                    <% } %>
 				                                    <% if(isRatingActivated){ %>
-								                                  <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+								                                  <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rates)%>" />
 				                                    <% } %>
 				                                </div>
                							 </div>
@@ -221,17 +221,17 @@ var reqUrl = request.getRequestURI();
 	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=encode.forHtml(api.name)%>"><%=encode.forHtml(api.name)%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
-                                    	<p class="truncate"><%=api.apiOwner%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
                                     <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.apiBusinessOwner)%></p>
                                     <%} else { %>
-                                    	<p class="truncate"><%=api.provider%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.provider)%></p>
                                     <% } %>
                                     <% if(isRatingActivated){ %>
-                                        <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+                                        <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rates)%>" />
                                     <% } %>
                                 </div>
                             </div>

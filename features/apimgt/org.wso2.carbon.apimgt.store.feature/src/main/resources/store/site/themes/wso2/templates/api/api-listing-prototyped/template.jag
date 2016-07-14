@@ -4,7 +4,7 @@
           var tenant=request_tenant;          
           var urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
-				<label><b><%=outputs.message%></b></label>
+				<label><b><%=encode.forHtml(outputs.message)%></b></label>
 <% }else{
 
           var i, api, path, thumbURL, apis = outputs.apis,totalLength=outputs.totalLength;
@@ -98,13 +98,13 @@
                                     <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("Name")%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
-                                    	<p class="truncate"><%=api.apiOwner%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
                                     <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-                                    	<p class="truncate"><%=api.apiBusinessOwner%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.apiBusinessOwner)%></p>
                                     <%} else { %>
-                                    	<p class="truncate"><%=api.provider%></p>
+                                    	<p class="truncate"><%=encode.forHtml(api.provider)%></p>
                                     <% } %>
-                                    <input type="hidden" class="rating" disabled="disabled" value="<%=api.rates%>" />
+                                    <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtml(api.rates)%>" />
                                 </div>
                             </div>
                         </div>

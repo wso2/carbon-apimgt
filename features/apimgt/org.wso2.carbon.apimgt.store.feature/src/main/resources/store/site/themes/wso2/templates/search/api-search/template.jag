@@ -52,7 +52,7 @@ if(request.getParameter("type") == "prototyped"){
             </ol>
         </div>
       <%if(tenant != null){ %>
-        <input type="hidden" class="span5" name="tenant" value="<%= tenant %>" />
+        <input type="hidden" class="span5" name="tenant" value="<%= encode.forHtmlAttribute(tenant) %>" />
         <%}%> 
     </div><!-- /input-group -->
   </div>
