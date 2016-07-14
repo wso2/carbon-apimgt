@@ -25,7 +25,7 @@ function changeAppNameMode(linkObj){
         if($(this).val() == ""){
             error = i18n.t("This field is required.");
         }else if($(this).val().length>70){
-            error = i18n.t("Name exceeds character limit (70)");
+            error = i18n.t("Name exceeds the character limit (70)");
         }else if(/(["\'])/g.test($(this).val())){
             error = i18n.t("Name contains one or more illegal characters ")+'( " \' )';
         } else if ($(this).val().search(illegalChars) != -1) {
@@ -100,7 +100,7 @@ function updateApplication(linkObj){
     if (applicationNew == "") {
         error =  i18n.t("This field is required.");
     } else if (applicationNew.length > 70) {
-        error = i18n.t("Name exceeds character limit (70)");
+        error = i18n.t("Name exceeds the character limit (70)");
     } else if (/(["\'])/g.test(applicationNew)) {
         error = i18n.t("Name contains one or more illegal characters ")+'( " \' )';
     }else if (applicationNew.search(illegalChars)!=-1) {

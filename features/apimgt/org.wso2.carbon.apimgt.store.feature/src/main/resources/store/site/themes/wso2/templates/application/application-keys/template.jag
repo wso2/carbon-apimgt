@@ -28,7 +28,7 @@
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
             <h4><%=i18n.localize("Grant Types")%></h4>
-			<p><%=i18n.localize("Application can use the following grant types to generate Access Tokens. Based on the application requirement you can enable or disable grant types for this application.")%></p>
+			<p><%=i18n.localize("Application can use the following grant types to generate Access Tokens. Based on the application requirement, you can enable or disable grant types for this application.")%></p>
 			<div class="row add-padding-left-2x add-padding-bottom-2x">			
 			{{#each grants}}	
 			  <div class="col-xs-6 col-sm-3 add-padding-1x">			
@@ -80,13 +80,13 @@
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
 		  	<h4><%=i18n.localize("Generating Access Tokens")%></h4>
-		  	<p><%=i18n.localize("Following cURL command shows how to generate an access token using password grant type.")%></p>
+		  	<p><%=i18n.localize("The following cURL command shows how to generate an access token using the password grant type.")%></p>
 			<div class="highlight"><pre>
 		 <a data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
 	     <%= gatewayurlendpoint %>/token</textarea></pre>
 	        </div>
-	        <p><%=i18n.localize("In a similar manner you can generate an access token using client credential grant type with the following cURL command.")%></p>
+	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.")%></p>
 			<div class="highlight"><pre>
 			<a data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
@@ -136,16 +136,16 @@
   {{else if keyState}}
 
   	{{#ifCond keyState 'CREATED'}}
-    	<%=i18n.localize("Request to register this application has been sent.")%>
+    	<%=i18n.localize("A request to register this application has been sent.")%>
 	{{/ifCond}}
 
 	{{#ifCond keyState 'REJECTED'}}
-    	<%=i18n.localize("This application has been rejected of creating Production keys.")%>
+    	<%=i18n.localize("This application has been rejected from creating Production keys.")%>
 	{{/ifCond}}
 
 	{{#ifCond keyState 'COMPLETED'}}
-		<%=i18n.localize("Error! You have partially created keys. Please click on clean up button and try again.")%>
-		<button title="<%=i18n.localize("Error! You have partially created keys. Please click on clean up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
+		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
+		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 					data-keyType="PRODUCTION"
 					data-applicationName={{name}}>
 					Clean up
@@ -198,7 +198,7 @@
 		</div>
 	  	{{else}}
 	  	  <h4><%=i18n.localize("Map Existing OAuth Keys")%></h4>
-	  	  <p><%=i18n.localize("If you already has an OAuth application registered with the IdP you can use those keys without generating one.")%></p>
+	  	  <p><%=i18n.localize("If you already have an OAuth application registered with the IdP, you can use those keys without generating one.")%></p>
 		  <div class="form-group">	    
 		    <button  class="btn btn-secondory provide_keys"><%=i18n.localize("Provide Keys")%></button>
 		  </div>

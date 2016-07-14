@@ -2,12 +2,12 @@
 <div class="page-header" id="Message">
     <h2><%=i18n.localize("Applications")%></h2>
 </div>
-<p>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</p>
+<p><%=i18n.localize("An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.")%></p>
 
 <div id="application-list">
   <div  id="application-table-nodata" class="hide message message-info">
-        <h4><i class="icon fw fw-info"></i>No Applications</h4>
-        <p><%=i18n.localize("No applications yet. Click add applications in the action bar to add an application.")%></p>
+        <h4><i class="icon fw fw-info"></i><%=i18n.localize("No Applications")%></h4>
+        <p><%=i18n.localize("No applications yet. Click Add Applications in the action bar to add an application.")%></p>
   </div>
 
   <div id="application-table-wrap" class="white-wrapper add-padding-5x hide">
