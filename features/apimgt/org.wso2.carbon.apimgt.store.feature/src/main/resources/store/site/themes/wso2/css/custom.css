@@ -135,6 +135,7 @@ ul.nav.nav-tabs {
     line-height: 42px;
     text-indent: 12px;
     width: 40px;
+    margin-top:-8px;
 }
 /* Rating color */
 .rating-symbol {
@@ -312,6 +313,10 @@ a.remove_rating:hover{
     margin-top:0px;
     margin-bottom:0px;
 }
+
+ #tab3 .white-wrapper.add-padding-5x{
+    padding:0px!important;
+ }
 
 /* =============================================================================
  * Same height columns support
