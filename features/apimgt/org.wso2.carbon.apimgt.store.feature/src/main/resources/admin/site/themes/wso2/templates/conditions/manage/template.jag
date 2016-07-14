@@ -78,17 +78,11 @@
 				<p><%=i18n.localize("Blacklisted items are not defined")%></p>
 			</div>
     <%} %>
-    <div class="form-actions">
-        <input id="add-condition-btn" type="button" class="btn btn-primary" value="<%=i18n.localize("Add")%>">
-    </div>
 </div>
 
 <script>
     $(document).ready(function(){
-        $('#add-condition-btn').on('click',function(){
-            location.href = "<%= jagg.url('/site/pages/conditions-edit.jag')%>";
-                });
-        });
+
     function editCondition(conditionId){
         var state = $('#condition_'+conditionId).is(":checked");
  jagg.post("/site/blocks/conditions/edit/ajax/condition-edit.jag", {
