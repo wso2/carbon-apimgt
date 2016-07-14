@@ -1,6 +1,9 @@
 {
     "<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify.": "<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify.",
     "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role.": "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role.",
+    "abnormalResponseTime": "Abnormal Response Time",
+    "abnormalBackendTime": "Abnormal Backend Time",
+    "AbnormalTierUsage": "Abnormal Tier Usage",
     "A REST API endpoint based on a URI template": "A REST API endpoint based on a URI template",
     "A list of error codes. If these error codes are received from the endpoint, the request will be subjected to a timeout.": "A list of error codes. If these error codes are received from the endpoint, the request will be subjected to a timeout.",
     "A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.": "A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.",
@@ -209,6 +212,7 @@
     "Go Back": "Go Back",
     "Go to APIStore": "Go to APIStore",
     "Go to Overview": "Go to Overview",
+    "healthAvailabilityPerMin": "Health Availability Per Minute",
     "HTTP": "HTTP",
     "HTTP Endpoint": "HTTP Endpoint",
     "HTTP Verb": "HTTP Verb",
