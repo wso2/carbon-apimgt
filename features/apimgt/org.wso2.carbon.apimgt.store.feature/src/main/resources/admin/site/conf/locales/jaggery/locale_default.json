@@ -249,5 +249,13 @@
     "roles": "Visible to Roles",
     "settings": "settings",
     "tasks": "tasks",
-    "tenants": "Visible to Tenants"
+    "tenants": "Visible to Tenants",
+    "Publishing" : "Publishing",
+    "Query Params" : "Query Params",
+    "Header Data" : "Header Data",
+    "JWT Token" : "JWT Token",
+    "isn't configured. If a policy configured with any of these conditions, it won't be applied." : "isn't configured. If a policy configured with any of these conditions, it won't be applied.",
+    "Warning!" : "Warning!",
+    "Add Advanced Throttle Policy":"Add Advanced Throttle Policy",
+    "Edit Advanced Throttle Throttle Policy":"Edit Advanced Throttle Throttle Policy"
 }

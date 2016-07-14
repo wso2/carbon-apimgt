@@ -5857,7 +5857,7 @@ public final class APIUtil {
         
         if (criteria.contains(":")) {
             if (criteria.split(":").length > 1) {
-                searchKey = criteria.split(":")[0];
+                searchKey = criteria.split(":")[0].trim();
                 searchValue = criteria.split(":")[1];
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
                     if (!searchValue.endsWith("*")) {
@@ -5970,5 +5970,20 @@ public final class APIUtil {
             log.error("Invalid Port Offset: " + portOffset + ". Default value 0 will be used.", e);
             return 0;
         }
+    }
+
+    public static boolean isQueryParamDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                                                            getThrottleProperties().isEnableQueryParamConditions();
+    }
+
+    public static boolean isHeaderDataPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableHeaderConditions();
+    }
+
+    public static boolean isJwtTokenPublishingEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getThrottleProperties().isEnableJwtConditions();
     }
 }
