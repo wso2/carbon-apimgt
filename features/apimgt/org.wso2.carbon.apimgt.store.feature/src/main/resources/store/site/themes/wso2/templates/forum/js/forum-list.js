@@ -575,7 +575,7 @@ $(document).ready(function () {
         var deleteButton = this;
 
         $('#messageModal').html($('#confirmation-data').html());
-        $('#messageModal div.modal-body').html(i18n.t('Do you want to remove this reply ?'));
+        $('#messageModal div.modal-body').html(i18n.t('Do you want to remove this reply?'));
         $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
         $('#messageModal a.btn-primary').html(i18n.t('Yes'));
         $('#messageModal a.btn-other').html(i18n.t('Yes'));

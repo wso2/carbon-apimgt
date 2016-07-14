@@ -33,7 +33,7 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("New Password")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
-            <input type="password" title="<%=i18n.localize("Enter more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
+            <input type="password" title="<%=i18n.localize("Enter a more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
 
             <div class="help-block" id="password-help" style="display:none">
               <%=i18n.localize("For a more secure password:")%>
@@ -41,7 +41,7 @@
                     <li><%=i18n.localize("Use 6 to 30 characters")%></li>
                     <li><%=i18n.localize("Use both letters and numbers")%></li>
                     <li><%=i18n.localize("Add special characters (such as @, ?, #)")%></li>
-                    <li><%=i18n.localize("Mix capital and lowercase letters")%></li>
+                    <li><%=i18n.localize("Mix uppercase and lowercase letters")%></li>
                 </ul>
             </div>
 

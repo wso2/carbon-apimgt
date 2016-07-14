@@ -31,7 +31,7 @@ function triggerSubscribe() {
             if(result.status.subscriptionStatus == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
                 $('#messageModal h3.modal-title').html(i18n.t('Subscription Rejected'));
-                $('#messageModal div.modal-body').html('\n\n' + i18n.t('Your subscription is rejected, since it does not matched with authetication requirments. Please contact the api publisher for more information'));
+                $('#messageModal div.modal-body').html('\n\n' + i18n.t('Your subscription has been rejected, since it does not satisfy the authentication requirements. Please contact the API publisher for more information.'));
                 $('#messageModal a.btn-primary').html(i18n.t('OK'));
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();

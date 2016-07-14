@@ -6,7 +6,7 @@
 
 	<div  id="subscription-table-nodata" class="hide message message-info">
         <h4><i class="icon fw fw-info"></i><%= i18n.localize("No Subscriptions")%></h4>
-        <p><%= i18n.localize("This application has not yet subscribed to an API. To subscribe, select an API from  ")%>
+        <p><%= i18n.localize("This application has not yet been subscribed to an API. To subscribe, select an API from ")%>
         <a title="<%=i18n.localize("API listing page")%>" href="<%=jagg.urlTenanted("/")%>" ><%= i18n.localize("API listing page")%></a><%= i18n.localize(" and subscribe to it with an app.")%></p>
 	</div>
 
