@@ -14,7 +14,7 @@
     var templateType = "";
 
     if (request.getParameter("configurationName") != null) {
-        configurationName = request.getParameter("configurationName");
+        configurationName = encode.forJavaScript(request.getParameter("configurationName"));
     }
 
     if (request.getParameter("templateType") != null) {

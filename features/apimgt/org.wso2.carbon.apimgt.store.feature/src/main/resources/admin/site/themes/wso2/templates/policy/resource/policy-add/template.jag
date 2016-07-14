@@ -1,11 +1,11 @@
 <% jagg.template("policy/resource/policy-add", function(inputs, outputs, jagg) { %>
 <%
     var log = new Log();
-    var policyName = request.getParameter("policyName");
+    var policyName = encode.forJavaScript(request.getParameter("policyName"));
     policyName = policyName == null ? "" : policyName;
     var pageTitle = i18n.localize("Add Advanced Throttle Policy");
     var nameFieldDisableStatus = "";
-    var policyAction = request.getParameter("action");
+    var policyAction = encode.forJavaScript(request.getParameter("action"));
     var policyDesc = "",policyLevel = "", defaultQuotaPolicy = "", defaultBandwidth = "" , defaultBandwidthUnit = "",
                         defaultRequestCount = "", defaultUnitTime="", defaultTimeUnit="";
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
