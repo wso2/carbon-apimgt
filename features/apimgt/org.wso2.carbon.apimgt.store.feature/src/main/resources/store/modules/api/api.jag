@@ -127,13 +127,13 @@ var getAPIEndpointURLs = function (api, username) {
         };
     }
 };
-var getAllPaginatedAPIs = function (tenantDomain, start, end, returnAPITags) {
+var getAllPaginatedAPIs = function (tenantDomain, start, end, returnAPITags,state) {
     var list, i, length, api, result,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.getAllPaginatedAPIs(tenantDomain,String(start),String(end), returnAPITags);
+        result = store.getAllPaginatedAPIs(tenantDomain,String(start),String(end), returnAPITags,state);
         if (log.isDebugEnabled()) {
             log.debug("getAllPublishedAPIs : " + stringify(result.apis));
         }

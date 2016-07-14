@@ -30,14 +30,34 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -51,12 +71,12 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.keymgt.client.APIAuthenticationServiceClient;
-import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
-import org.wso2.carbon.apimgt.usage.client.dto.*;
-import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
-import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -80,12 +100,25 @@ import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 
 public class APIStoreHostObject extends ScriptableObject {
@@ -929,6 +962,7 @@ public class APIStoreHostObject extends ScriptableObject {
         NativeObject resultObj = new NativeObject();
         Map<String, Object> result = new HashMap<String, Object>();
         Set<API> apiSet = null;
+        String state = null;
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
 
         String inputSearchQuery = (String) args[0];
@@ -937,7 +971,12 @@ public class APIStoreHostObject extends ScriptableObject {
         int end = Integer.parseInt((String) args[3]);
         boolean limitAttributes = false;
         String newSearchQuery = "";
-        if (args.length == 5) {
+
+        if (args.length == 6 && args[5] != null) {
+            state = (String) args[5];
+        }
+
+        if (args.length >= 5) {
             limitAttributes = Boolean.parseBoolean((String) args[4]);
         }
         inputSearchQuery = inputSearchQuery.trim();
@@ -970,16 +1009,26 @@ public class APIStoreHostObject extends ScriptableObject {
         // based
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery) &&
             !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
-            String[] allStatusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED };
-            String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
-            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-
             boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+
+            String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
             if (displayAPIsWithMultipleStatus) {
-                lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(allStatusList);
-            } else {
-                lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
+                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
             }
+
+            // The following condition is used to support API category in store
+            if(null != state){
+                if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+                    statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
+                }else if(state == APIConstants.PUBLISHED ){
+                    statusList = new String[]{APIConstants.PUBLISHED};
+                }else if(state == APIConstants.PROTOTYPED){
+                    statusList = new String[]{APIConstants.PROTOTYPED};
+                }
+            }
+
+            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
+            lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
         }
@@ -1551,6 +1600,7 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         String tenantDomain;
         boolean retuenAPItags = false;
+        String state = null;
         
         Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
                
@@ -1567,17 +1617,28 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args.length > 3 && args[3] != null) {
             retuenAPItags = Boolean.parseBoolean((String) args[3]);
         }
-        
-               
-        if (displayAPIsWithMultipleStatus) {
-            String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED}; 
-            return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, retuenAPItags);
-        } else {
-            String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED}; 
-            return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, retuenAPItags);
+
+        if (args.length > 4 && args[4] != null) {
+            state = (String) args[4];
         }
-        
-        
+
+        String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
+        if (displayAPIsWithMultipleStatus) {
+            statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
+        }
+
+        // The following condition is used to support API category in store
+        if(null != state){
+            if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
+            }else if(state == APIConstants.PUBLISHED ){
+                statusList = new String[]{APIConstants.PUBLISHED};
+            }else if(state == APIConstants.PROTOTYPED){
+                statusList = new String[]{APIConstants.PROTOTYPED};
+            }
+        }
+
+        return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, retuenAPItags);
     }
     
     public static NativeObject jsFunction_getAllPaginatedPrototypedAPIs(Context cx, Scriptable thisObj,
@@ -1674,7 +1735,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     row.put("version", row, apiIdentifier.getVersion());
                     row.put("context", row, api.getContext());
-                    row.put("status", row, "Deployed"); // api.getStatus().toString()
+                    row.put("status", row, api.getStatus().toString()); // api.getStatus().toString()
                     if (api.getThumbnailUrl() == null) {
                         row.put("thumbnailurl", row, "images/api-default.png");
                     } else {
