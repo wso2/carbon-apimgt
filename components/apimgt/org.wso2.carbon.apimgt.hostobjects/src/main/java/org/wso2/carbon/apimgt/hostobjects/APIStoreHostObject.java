@@ -1051,6 +1051,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                        APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
+                        currentApi.put("status", currentApi, api.getStatus().toString());
                         currentApi.put("rates", currentApi, api.getRating());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("endpoint", currentApi, api.getUrl());
