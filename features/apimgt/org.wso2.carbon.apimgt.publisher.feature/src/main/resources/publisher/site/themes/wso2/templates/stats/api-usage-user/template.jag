@@ -1,6 +1,10 @@
 <% jagg.template("stats/api-usage-user", function(inputs, outputs, jagg) { %>
+<div class="page-header"> <h2><%=i18n.localize("Overall API Usage (Across All Versions)")%></h2></div>
 <div id="apiUsage-stat-page" class="stat-page">
-    <div class="page-header"> <h2><%=i18n.localize("Overall API Usage (Across All Versions)")%></h2></div>
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
 
 
 <div class="row">
@@ -45,7 +49,9 @@
         <div id="chartContainer" style="height: 100%"></div>
         <div id="displayMsg" style="height:20px;margin-bottom:5px;"></div>
         <div id="tableContainer"></div>
-        
+    <%
+        }
+    %>
 </div>
 
 <% }); %>

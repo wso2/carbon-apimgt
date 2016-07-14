@@ -3,6 +3,10 @@
     <h2><%=i18n.localize("API Usage per Application")%></h2>
 </div>
 <div id="apiUsage-stat-page" class="stat-page">
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
     <div id="rangeSliderWrapper" >
        <div id="dateRangePickerContainer" style="text-align:right">
            <div class="btn-group" role="group">
@@ -23,6 +27,8 @@
     <div class="class="col-md-12">
         <div id="apiUsage"></div>
     </div>
-
+    <%
+        }
+    %>
 </div>
 <% }); %>

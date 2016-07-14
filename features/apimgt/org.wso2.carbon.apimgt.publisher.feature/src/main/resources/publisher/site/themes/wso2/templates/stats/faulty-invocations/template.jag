@@ -1,8 +1,10 @@
 <% jagg.template("stats/faulty-invocations", function(inputs, outputs, jagg) { %>
-
+<div class="page-header"><h2><%=i18n.localize("Faulty Invocations")%></h2></div>
 <div id="faultInvocation-stat-page" class="stat-page">
-    <div class="page-header"><h2><%=i18n.localize("Faulty Invocations")%></h2></div>
-
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
      <div class="row">
      	<div class="form-group col-sm-2">
 	        <select class="select form-control" id="apiFilter" name="apiFilter">
@@ -42,6 +44,9 @@
             <div id="tableContainer" style="margin-top:20px"></div>
          </div>
      </div>
+    <%
+        }
+    %>
 </div>
 
 <% }); %>

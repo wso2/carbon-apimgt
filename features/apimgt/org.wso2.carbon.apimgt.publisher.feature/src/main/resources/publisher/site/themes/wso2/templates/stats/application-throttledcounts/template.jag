@@ -1,6 +1,10 @@
 <% jagg.template("stats/application-throttledcounts", function(inputs, outputs, jagg) { %>
+<div class="page-header"> <h2><%=i18n.localize("Application Throttled Out Requests")%></h2> </div>
 <div id="applicationThrottledCounts-stat-page" class="stat-page">
-    <div class="page-header"> <h2><%=i18n.localize("Application Throttled Out Requests")%></h2> </div>
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
     <div class="col-md-12" style="margin-top :10px">
 
 	<div class="row">
@@ -42,6 +46,9 @@
         <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
         <div id="tableContainer"></div>
     </div>
+    <%
+        }
+    %>
 </div>
 <% }); %>
 

@@ -2,6 +2,7 @@
 jagg.initializer("stats/faultCount", {
 
     preInitialize:function () {
+        jagg.addHeaderJS("stats", "common", "templates/stats/js/stats.js");
         jagg.addHeaderCSS("stats", " dataTable","libs/dataTables/css/dataTables.bootstrap.css");
         jagg.addHeaderCSS("stats", "datepicker","libs/datepicker/css/daterangepicker-bs3.css");
 

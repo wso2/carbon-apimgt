@@ -1,8 +1,10 @@
 <% jagg.template("stats/api-response-times", function(inputs, outputs, jagg) { %>
-
+<div class="page-header"> <h2><%=i18n.localize("API Response Times (Across All Versions)")%></h2> </div>
 <div id="apiResponseTimes-stat-page" class="stat-page">
-    <div class="page-header"> <h2><%=i18n.localize("API Response Times (Across All Versions)")%></h2> </div>
-
+    <%
+        //show content only if analytics enabled
+        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+    %>
     <div class="row">    
     	<div class="form-group col-sm-2">
 	        <select class="select form-control" id="apiFilter" name="apiFilter">
@@ -44,9 +46,12 @@
  <div id="noData"></div>
  <br/>
 
- <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
+    <div id="chartContainer"  style="margin-bottom :20px;height: 100%"></div>
  	<div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
     <div id="tableContainer"></div>
+    <%
+        }
+    %>
  </div>
 <% }); %>
 
