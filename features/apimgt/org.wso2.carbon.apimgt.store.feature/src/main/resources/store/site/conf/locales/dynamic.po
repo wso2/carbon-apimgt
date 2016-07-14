@@ -120,3 +120,18 @@ msgstr ""
 "of that particular API or Request Count of an API per minute > Request "
 "count per minute lower percentile or Response status code >= 500 (By "
 "Default) AND Response status code < 600 (By Default)"
+
+msgid "abnormalRequestsPerMin"
+msgstr "Abnormal Requests Per Minute"
+
+msgid "RequestPatternChanged"
+msgstr "Request Pattern Changed"
+
+msgid "UnusualIPAccessAlert"
+msgstr "Unusual IP Access Alert"
+
+msgid "AbnormalRefreshAlert"
+msgstr "Abnormal Refresh Alert"
+
+msgid "FrequentTierHittingAlert"
+msgstr "Frequent Tier Hitting Alert"
