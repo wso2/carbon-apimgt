@@ -33,12 +33,17 @@ function validateInputs(){
     var keyTemplateTxt = keyTemplate.val();
     var keyTemplate = $('#keyTemplate');
     var keyTemplateTxt = keyTemplate.val();
+    var errorHasSpacesMsg = $('#errorMessageSpaces').val();
 
     if(!validateInput(policyNameTxt,policyName,requiredMsg)){
         return false;
     }
 
     if(!validateInputCharactors(policyNameTxt,policyName,illegalChars)){
+        return false;
+    }
+
+    if (!validateForSpaces(policyNameTxt, policyName, errorHasSpacesMsg)) {
         return false;
     }
 
@@ -58,6 +63,21 @@ function validateInput(text, element, errorMsg){
     var elementId = element.attr('id');
     text = text.trim();
     if(text == ""){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
+function validateForSpaces(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text.indexOf(' ') >= 0){
         element.css("border", "1px solid red");
         $('#label'+elementId).remove();
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');

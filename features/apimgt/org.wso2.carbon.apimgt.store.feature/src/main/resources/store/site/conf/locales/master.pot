@@ -19,7 +19,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 18:53+0530\n"
+"POT-Creation-Date: 2016-07-14 18:45+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-12 18:53+0530\n"
+"POT-Creation-Date: 2016-07-14 18:45+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,7 +79,7 @@ msgstr ""
 #: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:53
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:50
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:146
-#: site/themes/wso2/templates/application/application-keys/template.jag:186
+#: site/themes/wso2/templates/application/application-keys/template.jag:193
 msgid "Save"
 msgstr ""
 
@@ -90,8 +90,8 @@ msgstr ""
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:53
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:147
 #: site/themes/wso2/templates/user/sign-up/template.jag:147
-#: site/themes/wso2/templates/application/application-keys/template.jag:187
-#: site/themes/wso2/templates/application/application-add/template.jag:92
+#: site/themes/wso2/templates/application/application-keys/template.jag:194
+#: site/themes/wso2/templates/application/application-add/template.jag:93
 msgid "Cancel"
 msgstr ""
 
@@ -192,8 +192,8 @@ msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:9
 msgid ""
-"This application has not yet subscribed to an API. To subscribe, select an "
-"API from  "
+"This application has not yet been subscribed to an API. To subscribe, select "
+"an API from "
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:10
@@ -244,8 +244,8 @@ msgstr ""
 #: site/themes/wso2/templates/api/recently-added/template.jag:30
 #: site/themes/wso2/templates/api/provider-apis/template.jag:40
 #: site/themes/wso2/templates/application/application-list/template.jag:17
-#: site/themes/wso2/templates/application/application-edit/template.jag:45
-#: site/themes/wso2/templates/application/application-add/template.jag:40
+#: site/themes/wso2/templates/application/application-edit/template.jag:46
+#: site/themes/wso2/templates/application/application-add/template.jag:41
 msgid "Name"
 msgstr ""
 
@@ -429,7 +429,7 @@ msgid "Comment exceeds character limit"
 msgstr ""
 
 #: site/themes/wso2/templates/comment/comment-add/template.jag:9
-#: site/themes/wso2/templates/application/application-add/template.jag:91
+#: site/themes/wso2/templates/application/application-add/template.jag:92
 msgid "Add"
 msgstr ""
 
@@ -543,6 +543,7 @@ msgid "Prototyped APIs"
 msgstr ""
 
 #: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:49
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:66
 #: site/themes/wso2/templates/api/api-listing-all/template.jag:91
 #: site/themes/wso2/templates/api/api-listing-all/template.jag:94
 #: site/themes/wso2/templates/menu/primary/template.jag:9
@@ -648,11 +649,11 @@ msgstr ""
 
 #: site/themes/wso2/templates/api/overview/template.jag:61
 #: site/themes/wso2/templates/api/overview/template.jag:122
-#: site/themes/wso2/templates/application/application-keys/template.jag:58
-#: site/themes/wso2/templates/application/application-keys/template.jag:69
-#: site/themes/wso2/templates/application/application-keys/template.jag:84
-#: site/themes/wso2/templates/application/application-keys/template.jag:90
-#: site/themes/wso2/templates/application/application-keys/template.jag:102
+#: site/themes/wso2/templates/application/application-keys/template.jag:57
+#: site/themes/wso2/templates/application/application-keys/template.jag:68
+#: site/themes/wso2/templates/application/application-keys/template.jag:85
+#: site/themes/wso2/templates/application/application-keys/template.jag:91
+#: site/themes/wso2/templates/application/application-keys/template.jag:103
 msgid "Copy"
 msgstr ""
 
@@ -714,7 +715,7 @@ msgstr ""
 #: site/themes/wso2/templates/api/swagger/template.jag:237
 msgid ""
 "You require an access token to try the API. Please login and subscribe to "
-"API to generate an access token."
+"the API to generate an access token."
 msgstr ""
 
 #: site/themes/wso2/templates/api/swagger/template.jag:242
@@ -723,8 +724,9 @@ msgstr ""
 
 #: site/themes/wso2/templates/api/swagger/template.jag:243
 msgid ""
-"Selected application do not have an access token for selected environment. "
-"Please go to subscription page and generate an access token first."
+"Selected application does not have an access token for the selected "
+"environment. Please go to the subscription page and generate an access token "
+"first."
 msgstr ""
 
 #: site/themes/wso2/templates/api/documentation/template.jag:58
@@ -767,7 +769,7 @@ msgid "No documents have been associated with this API so far."
 msgstr ""
 
 #: site/themes/wso2/templates/api/documentation/view/template.jag:10
-msgid "No document content have been added yet."
+msgid "No document content has been added yet."
 msgstr ""
 
 #: site/themes/wso2/templates/api/api-info/template.jag:89
@@ -932,6 +934,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/menu/header/template.jag:164
 #: site/themes/wso2/templates/user/login/template.jag:42
+#: site/pages/login.jag:14
 msgid "Sign In"
 msgstr ""
 
@@ -988,6 +991,8 @@ msgstr ""
 #: site/themes/wso2/templates/menu/primary/template.jag:27
 #: site/themes/wso2/templates/menu/primary/template.jag:39
 #: site/themes/wso2/templates/menu/primary/template.jag:64
+#: site/blocks/api/api-info/block.jag:133
+#: site/blocks/api/api-info/block.jag:189
 #: site/blocks/menu/primary/block.jag:47
 msgid "Forum"
 msgstr ""
@@ -1078,6 +1083,7 @@ msgid "Search Forum"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-list/template.jag:32
+#: site/themes/wso2/templates/search/api-search/template.jag:31
 msgid "Search"
 msgstr ""
 
@@ -1086,7 +1092,7 @@ msgid "No topics found."
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-list/template.jag:50
-msgid "There are no forum topic available."
+msgid "There are no forum topics available."
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-list/template.jag:65
@@ -1097,55 +1103,81 @@ msgstr ""
 msgid "Delete Comment"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:9
-#: site/themes/wso2/templates/search/api-search/template.jag:65
-msgid "Search Options"
-msgstr ""
-
+#. selected type text
+#: site/themes/wso2/templates/search/api-search/template.jag:6
 #: site/themes/wso2/templates/search/api-search/template.jag:24
-#: site/themes/wso2/templates/search/api-search/template.jag:51
-msgid "By API Name [Default]"
+msgid "All"
 msgstr ""
 
+#: site/themes/wso2/templates/search/api-search/template.jag:9
 #: site/themes/wso2/templates/search/api-search/template.jag:25
-#: site/themes/wso2/templates/search/api-search/template.jag:52
-msgid "By API Provider [ Syntax - provider:xxxx ]  or"
+msgid "Production"
 msgstr ""
 
+#: site/themes/wso2/templates/search/api-search/template.jag:13
 #: site/themes/wso2/templates/search/api-search/template.jag:26
-#: site/themes/wso2/templates/search/api-search/template.jag:53
-msgid "By API Version [ Syntax - version:xxxx ]  or"
+msgid "Prototyped"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:27
-#: site/themes/wso2/templates/search/api-search/template.jag:54
-msgid "By Context [ Syntax - context:xxxx ]  or"
-msgstr ""
-
-#: site/themes/wso2/templates/search/api-search/template.jag:28
-#: site/themes/wso2/templates/search/api-search/template.jag:55
-msgid "By Description [ Syntax - description:xxxx ] or"
+#: site/themes/wso2/templates/search/api-search/template.jag:22
+msgid "Category"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:29
-#: site/themes/wso2/templates/search/api-search/template.jag:56
+#: site/themes/wso2/templates/search/api-search/template.jag:36
+#: site/themes/wso2/templates/search/api-search/template.jag:38
+#: site/themes/wso2/templates/search/api-search/template.jag:86
+msgid "Search Options"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:44
+#: site/themes/wso2/templates/search/api-search/template.jag:72
+msgid "By API Name [Default]"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:45
+#: site/themes/wso2/templates/search/api-search/template.jag:73
+msgid "By API Provider [ Syntax - provider:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:46
+#: site/themes/wso2/templates/search/api-search/template.jag:74
+msgid "By API Version [ Syntax - version:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:47
+#: site/themes/wso2/templates/search/api-search/template.jag:75
+msgid "By Context [ Syntax - context:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:48
+#: site/themes/wso2/templates/search/api-search/template.jag:76
+msgid "By Description [ Syntax - description:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:49
+msgid "By Tags [ Syntax - tags:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:50
+#: site/themes/wso2/templates/search/api-search/template.jag:77
 msgid "By Sub-Context [ Syntax - subcontext:xxxx ] or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:30
-#: site/themes/wso2/templates/search/api-search/template.jag:57
+#: site/themes/wso2/templates/search/api-search/template.jag:51
+#: site/themes/wso2/templates/search/api-search/template.jag:78
 msgid "By Documentation Content [ Syntax - doc:xxxx ]"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:43
-#: site/themes/wso2/templates/search/api-search/template.jag:44
+#: site/themes/wso2/templates/search/api-search/template.jag:64
+#: site/themes/wso2/templates/search/api-search/template.jag:65
 msgid "searchAPI"
 msgstr ""
 
 #: site/themes/wso2/templates/sso/filter/template.jag:92
 msgid ""
 "You are now redirected to Identity. If the redirection fails, please click "
-"the post button."
+"the POST button."
 msgstr ""
 
 #: site/themes/wso2/templates/sso/filter/template.jag:106
@@ -1168,7 +1200,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/template.jag:53
 #: site/themes/wso2/templates/user/user-info/template.jag:36
-msgid "Enter more secure password"
+msgid "Enter a more secure password"
 msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/template.jag:56
@@ -1193,7 +1225,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/template.jag:61
 #: site/themes/wso2/templates/user/user-info/template.jag:44
-msgid "Mix capital and lowercase letters"
+msgid "Mix uppercase and lowercase letters"
 msgstr ""
 
 #: site/themes/wso2/templates/user/sign-up/template.jag:68
@@ -1241,9 +1273,22 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
+#: site/themes/wso2/templates/application/application-list/template.jag:5
+#: site/themes/wso2/templates/application/application-add/template.jag:24
+msgid ""
+"An application is a logical collection of APIs. Applications allow you to "
+"use a single access token to invoke a collection of APIs and to subscribe to "
+"one API multiple times with different SLA levels. The DefaultApplication is "
+"pre-created and allows unlimited access by default."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:9
+msgid "No Applications"
+msgstr ""
+
 #: site/themes/wso2/templates/application/application-list/template.jag:10
 msgid ""
-"No applications yet. Click add applications in the action bar to add an "
+"No applications yet. Click Add Applications in the action bar to add an "
 "application."
 msgstr ""
 
@@ -1294,20 +1339,20 @@ msgstr ""
 msgid "has been submitted and is now awaiting approval."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-edit/template.jag:54
-#: site/themes/wso2/templates/application/application-add/template.jag:49
+#: site/themes/wso2/templates/application/application-edit/template.jag:55
+#: site/themes/wso2/templates/application/application-add/template.jag:50
 msgid "Throttling Tier"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-edit/template.jag:56
+#: site/themes/wso2/templates/application/application-edit/template.jag:57
 #: site/themes/wso2/templates/application/application-view/template.jag:39
-#: site/themes/wso2/templates/application/application-add/template.jag:51
+#: site/themes/wso2/templates/application/application-add/template.jag:52
 msgid "Per Token Quota"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-edit/template.jag:83
+#: site/themes/wso2/templates/application/application-edit/template.jag:84
 #: site/themes/wso2/templates/application/application-view/template.jag:42
-#: site/themes/wso2/templates/application/application-add/template.jag:78
+#: site/themes/wso2/templates/application/application-add/template.jag:79
 msgid ""
 "This feature allows you to assign an API request quota per access token. "
 "Allocated quota will be shared among all the subscribed APIs of the "
@@ -1325,29 +1370,29 @@ msgstr ""
 #: site/themes/wso2/templates/application/application-keys/template.jag:31
 msgid ""
 "Application can use the following grant types to generate Access Tokens. "
-"Based on the application requirement you can enable or disable grant types "
+"Based on the application requirement, you can enable or disable grant types "
 "for this application."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:49
+#: site/themes/wso2/templates/application/application-keys/template.jag:50
 msgid "Hide Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:49
+#: site/themes/wso2/templates/application/application-keys/template.jag:50
 msgid "Show Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:54
-#: site/themes/wso2/templates/application/application-keys/template.jag:56
-#: site/themes/wso2/templates/application/application-keys/template.jag:178
-#: site/themes/wso2/templates/application/application-keys/template.jag:179
+#: site/themes/wso2/templates/application/application-keys/template.jag:53
+#: site/themes/wso2/templates/application/application-keys/template.jag:55
+#: site/themes/wso2/templates/application/application-keys/template.jag:185
+#: site/themes/wso2/templates/application/application-keys/template.jag:186
 msgid "Consumer Key"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:65
-#: site/themes/wso2/templates/application/application-keys/template.jag:67
-#: site/themes/wso2/templates/application/application-keys/template.jag:182
-#: site/themes/wso2/templates/application/application-keys/template.jag:183
+#: site/themes/wso2/templates/application/application-keys/template.jag:64
+#: site/themes/wso2/templates/application/application-keys/template.jag:66
+#: site/themes/wso2/templates/application/application-keys/template.jag:189
+#: site/themes/wso2/templates/application/application-keys/template.jag:190
 msgid "Consumer Secret"
 msgstr ""
 
@@ -1355,102 +1400,102 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:81
+#: site/themes/wso2/templates/application/application-keys/template.jag:82
 msgid "Generating Access Tokens"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:82
+#: site/themes/wso2/templates/application/application-keys/template.jag:83
 msgid ""
-"Following cURL command shows how to generate an access token using password "
-"grant type."
+"The following cURL command shows how to generate an access token using the "
+"password grant type."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:88
+#: site/themes/wso2/templates/application/application-keys/template.jag:89
 msgid ""
-"In a similar manner you can generate an access token using client credential "
-"grant type with the following cURL command."
-msgstr ""
-
-#: site/themes/wso2/templates/application/application-keys/template.jag:96
-msgid "Generate a Test Access Token"
+"In a similar manner, you can generate an access token using the client "
+"credential grant type with the following cURL command."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:98
-#: site/themes/wso2/templates/application/application-keys/template.jag:100
+msgid "Generate a Test Access Token"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:99
+#: site/themes/wso2/templates/application/application-keys/template.jag:101
 msgid "Access Token"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:109
+#: site/themes/wso2/templates/application/application-keys/template.jag:110
 msgid "Above token has a validity period of"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:109
+#: site/themes/wso2/templates/application/application-keys/template.jag:110
 msgid "seconds."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:111
+#: site/themes/wso2/templates/application/application-keys/template.jag:112
 msgid "And the token has"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:111
+#: site/themes/wso2/templates/application/application-keys/template.jag:112
 msgid "scopes."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:118
+#: site/themes/wso2/templates/application/application-keys/template.jag:117
 msgid "Scopes"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:124
+#: site/themes/wso2/templates/application/application-keys/template.jag:125
 msgid "Validity period"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:125
-#: site/themes/wso2/templates/application/application-keys/template.jag:165
+#: site/themes/wso2/templates/application/application-keys/template.jag:128
+#: site/themes/wso2/templates/application/application-keys/template.jag:170
 msgid "Seconds."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:126
+#: site/themes/wso2/templates/application/application-keys/template.jag:131
 msgid "Re-generate"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:135
-msgid "Request to register this application has been sent."
-msgstr ""
-
 #: site/themes/wso2/templates/application/application-keys/template.jag:139
-msgid "This application has been rejected of creating Production keys."
+msgid "A request to register this application has been sent."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:143
-#: site/themes/wso2/templates/application/application-keys/template.jag:144
+msgid "This application has been rejected from creating Production keys."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:147
+#: site/themes/wso2/templates/application/application-keys/template.jag:148
 msgid ""
-"Error! You have partially created keys. Please click on clean up button and "
+"Error! You have partially created keys. Please click the Clean Up button and "
 "try again."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:155
+#: site/themes/wso2/templates/application/application-keys/template.jag:159
 msgid "No keys are generated for this type in this application."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:164
+#: site/themes/wso2/templates/application/application-keys/template.jag:167
 msgid "Access token validity period"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:167
+#: site/themes/wso2/templates/application/application-keys/template.jag:174
 msgid "Generate keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:193
+#: site/themes/wso2/templates/application/application-keys/template.jag:200
 msgid "Map Existing OAuth Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:194
+#: site/themes/wso2/templates/application/application-keys/template.jag:201
 msgid ""
-"If you already has an OAuth application registered with the IdP you can use "
-"those keys without generating one."
+"If you already have an OAuth application registered with the IdP, you can "
+"use those keys without generating one."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:196
+#: site/themes/wso2/templates/application/application-keys/template.jag:203
 msgid "Provide Keys"
 msgstr ""
 
@@ -1479,19 +1524,11 @@ msgid "Not Given"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-view/template.jag:115
-msgid "Download client-side SDK for your Applications."
+msgid "Download client-side SDK for your applications."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-view/template.jag:129
 msgid "No SDK configured"
-msgstr ""
-
-#: site/themes/wso2/templates/application/application-add/template.jag:24
-msgid ""
-"An application is a logical collection of APIs. Applications allow you to "
-"use a single access token to invoke a collection of APIs and to subscribe to "
-"one API multiple times with different SLA levels. The DefaultApplication is "
-"pre-created and allows unlimited access by default."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-add/template.jag:32
@@ -1522,12 +1559,6 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: site/blocks/api/api-info/block.jag:133
-#: site/blocks/api/api-info/block.jag:189
-#: site/blocks/menu/primary/block.jag:51
-msgid "forum"
-msgstr ""
-
 #: site/blocks/menu/primary/block.jag:32
 msgid ""
 "Browse the latest versions of published APIs, make subscriptions and "
@@ -1538,6 +1569,10 @@ msgstr ""
 msgid ""
 "Browse and create applications. Applications are required to make API "
 "subscriptions and consume them."
+msgstr ""
+
+#: site/blocks/menu/primary/block.jag:51
+msgid "forum"
 msgstr ""
 
 #: site/pages/forum.jag:53 site/pages/forum.jag:59
@@ -1579,11 +1614,11 @@ msgstr "PUBLISHED"
 msgctxt "Desc"
 msgid "abnormalBackendTime"
 msgstr ""
-"This alert type should get triggered if there is a sudden increase of the "
-"backend time corresponds to a particular API resource. These alerts could be "
-"treated as an indication of a slow backend.In technical terms, if the "
+"This alert type should get triggered if there is a sudden increase in the "
+"backend time corresponding to a particular API resource. These alerts could "
+"be treated as an indication of a slow backend.In technical terms, if the "
 "backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a "
-"tenant, lies outside the Xth percentile value, we will send an alert out. "
+"tenant lies outside the Xth percentile value, we will send an alert out. "
 "Default percentile value is 95%. Here, we safely assume that the "
 "corresponding backend time of an API resource follows a normal distribution. "
 "Percentile value gets calculated daily by default. "
@@ -1591,7 +1626,7 @@ msgstr ""
 msgctxt "Desc"
 msgid "abnormalResponseTime"
 msgstr ""
-"This alert type should get triggered if there is a sudden increase of the "
+"This alert type should get triggered if there is a sudden increase in the "
 "response time of a particular API resource. These alerts could be treated as "
 "an indication of a slow WSO2 API Manager runtime or a slow backend. "
 
@@ -1609,7 +1644,7 @@ msgid "RequestPatternChanged"
 msgstr ""
 "This alert type should get triggered if there is a change in the resource "
 "access pattern of a user of a particular Application. These alerts could be "
-"treated as an indication of a suspicious activity done by a user over your "
+"treated as an indication of a suspicious activity made by a user over your "
 "application."
 
 msgctxt "Desc"
@@ -1617,9 +1652,9 @@ msgid "UnusualIPAccessAlert"
 msgstr ""
 "This alert type should get triggered if there is either a change in the "
 "request source IP for a particular API of an application or if the request "
-"is from a IP used before 30 days (default). These alerts could be treated as "
-"an indication of a suspicious activity done by a user over an API of an "
-"application. "
+"is from an IP used before a time period of 30 days (default). These alerts "
+"could be treated as an indication of a suspicious activity made by a user "
+"over an API of an application. "
 
 msgctxt "Desc"
 msgid "AbnormalRefreshAlert"
@@ -1632,27 +1667,27 @@ msgctxt "Desc"
 msgid "FrequentTierHittingAlert"
 msgstr ""
 "This alert type should get triggered if at least one of the two cases below "
-"satisfied; If a particular application gets throttled out for hitting the "
-"subscribed tier limit of that application, more than 10 times (by default) "
-"within a day (by default) or If a particular user of an application, gets "
-"throttled out for hitting the subscribed tier limit of a particular API, "
-"more than 10 times (by default) within a day (by default)"
+"are satisfied; if a particular application gets throttled out for hitting "
+"the subscribed tier limit of that application, more than 10 times (by "
+"default) within a day (by default) or if a particular user of an "
+"application, gets throttled out for hitting the subscribed tier limit of a "
+"particular API, more than 10 times (by default) within a day (by default)"
 
 msgctxt "Desc"
 msgid "AbnormalTierUsage"
 msgstr ""
 "This alert should get triggered if there is a drastic reduction in API usage "
-"for a given API for a given user. These type of alerts should be treated as "
-"an indication of a failure of the application which is using the altered API."
+"for a given API for a given user. These types of alerts should be treated as "
+"an indication of a failure of the application  using the altered API."
 
 msgctxt "Desc"
 msgid "healthAvailabilityPerMin"
 msgstr ""
 "This alert type should get triggered if at least one of the three cases "
-"below satisfied; Response time of an API > Response time upper percentile of "
-"that particular API or Request Count of an API per minute > Request count "
-"per minute lower percentile or Response status code >= 500 (By Default) AND "
-"Response status code < 600 (By Default)"
+"below are satisfied; Response time of an API > Response time upper "
+"percentile of that particular API or Request Count of an API per minute > "
+"Request count per minute lower percentile or Response status code >= 500 (By "
+"Default) AND Response status code < 600 (By Default)"
 
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:15
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:35
@@ -1668,7 +1703,7 @@ msgid "Please enter at least one email address"
 msgstr ""
 
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:124
-msgid "Please select at least one alert typed"
+msgid "Please select at least one alert type"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faultCount/js/stats.js:75
@@ -1677,11 +1712,10 @@ msgid "Stats Enabled"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faultCount/js/stats.js:81
-#: site/themes/wso2/templates/stats/perAppAPICount/js/stats.js:81
 msgid ""
 "<a href='https://docs.wso2.com/display/AM200/Configuring+API+Runtime"
-"+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure "
-"DAS correctly</a>"
+"+Statistics' title='statsDoc' target='_blank' class='warningLink'>Refer our "
+"wiki to configure DAS correctly</a>"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faultCount/js/stats.js:81
@@ -1711,6 +1745,13 @@ msgstr ""
 msgid "No Data Found ... "
 msgstr ""
 
+#: site/themes/wso2/templates/stats/perAppAPICount/js/stats.js:81
+msgid ""
+"<a title='statsDocs' href='https://docs.wso2.com/display/AM200/Configuring"
+"+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki "
+"to configure DAS correctly</a>"
+msgstr ""
+
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:137
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:175
 msgid "Please wait.."
@@ -1726,7 +1767,7 @@ msgstr ""
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:225
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:232
 msgid ""
-"Specify list of domains that are permitted to send requests to the gateway "
+"Specify list of domains that are permitted to send requests to the Gateway "
 "through this application."
 msgstr ""
 
@@ -1781,7 +1822,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:164
 #: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:431
-msgid "Callback URLs can not be empty"
+msgid "Callback URLs cannot be empty"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:179
@@ -1817,8 +1858,9 @@ msgstr ""
 
 #: site/themes/wso2/templates/api/api-info/js/api-info.js:34
 msgid ""
-"Your subscription is rejected, since it does not matched with authetication "
-"requirments. Please contact the api publisher for more information"
+"Your subscription has been rejected, since it does not satisfy the "
+"authentication requirements. Please contact the API publisher for more "
+"information."
 msgstr ""
 
 #: site/themes/wso2/templates/api/api-info/js/api-info.js:35
@@ -1883,7 +1925,7 @@ msgid "Cannot edit the reply. "
 msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:578
-msgid "Do you want to remove this reply ?"
+msgid "Do you want to remove this reply?"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/js/forum-list.js:594
@@ -1932,7 +1974,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/user/user-info/js/user-info.js:30
 msgid ""
-"User password changed successfully. You can now sign into the API store "
+"User password changed successfully. You can now sign in to the API store "
 "using the new password."
 msgstr ""
 
@@ -1943,7 +1985,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/application/application-list/js/application.js:28
 #: site/themes/wso2/templates/application/application-list/js/application.js:103
-msgid "Name exceeds character limit (70)"
+msgid "Name exceeds the character limit (70)"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-list/js/application.js:30

@@ -161,7 +161,7 @@ $(document).ready(function () {
 
                     }, "json");
                 }else{
-                    alert(i18n.t("Callback URLs can not be empty"));
+                    alert(i18n.t("Callback URLs cannot be empty"));
                 }
 
             });
@@ -428,7 +428,7 @@ $(document).ready(function () {
 
                     }, "json");
                 }else{
-                    alert(i18n.t("Callback URLs can not be empty"));
+                    alert(i18n.t("Callback URLs cannot be empty"));
                 }
 
             });

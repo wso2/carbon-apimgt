@@ -227,6 +227,7 @@ function showHideDefaultQuotaPolicy(){
 function validateInputs() {
     //validate name
     var requiredMsg = $('#errorMsgRequired').val();
+    var errorHasSpacesMsg = $('#errorMessageSpaces').val();
     var invalidErrorMsg = $('#errorMessageInvalid').val();
     var illegalChars = $('#errorMessageIllegalChar').val();
     var policyName = $('#policyName');
@@ -244,6 +245,10 @@ function validateInputs() {
 
 
     if (!validateInput(policyNameTxt, policyName, requiredMsg)) {
+        return false;
+    }
+
+    if (!validateForSpaces(policyNameTxt, policyName, errorHasSpacesMsg)) {
         return false;
     }
 
@@ -287,3 +292,18 @@ function validateInputs() {
     }
     return true;
 };
+
+function validateForSpaces(text, element, errorMsg){
+    var elementId = element.attr('id');
+    text = text.trim();
+    if(text.indexOf(' ') >= 0){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}

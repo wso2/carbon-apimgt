@@ -112,7 +112,7 @@ for(var i=0;i < outputs.tiers.length; i++){
         if (supportedLangs.langs != null) { %>
 
             <div class="row">
-                  <div class="col-md-12"> <%=i18n.localize("Download client-side SDK for your Applications.")%> </div>
+                  <div class="col-md-12"> <%=i18n.localize("Download client-side SDK for your applications.")%> </div>
             </div>
             <br>
 

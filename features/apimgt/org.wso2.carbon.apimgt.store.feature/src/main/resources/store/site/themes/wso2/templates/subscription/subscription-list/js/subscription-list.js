@@ -222,14 +222,14 @@ $(document).ready(function () {
 
     $('.update_domain_popup_prod').click(function () {
         $('#update_help_prod').toggle('fast', function () {
-            $('#update_help_prod').html(i18n.t('Specify list of domains that are permitted to send requests to the gateway through this application.'));
+            $('#update_help_prod').html(i18n.t('Specify list of domains that are permitted to send requests to the Gateway through this application.'));
         });
         return false;
     });
 
     $('.update_domain_popup_sand').click(function () {
         $('#update_help_sand').toggle('fast', function () {
-            $('#update_help_sand').html(i18n.t('Specify list of domains that are permitted to send requests to the gateway through this application.'));
+            $('#update_help_sand').html(i18n.t('Specify list of domains that are permitted to send requests to the Gateway through this application.'));
         });
         return false;
     });

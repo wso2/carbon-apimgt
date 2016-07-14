@@ -46,6 +46,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** This is the service implementation class for Store API related operations 
  *
@@ -390,6 +392,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
+
+            //removes x-mediation-script key:values
+            Pattern pattern = Pattern.compile(",?\"x-mediation-script\":\".*?(?<!\\\\)\",??");
+            Matcher matcher = pattern.matcher(apiSwagger);
+            while (matcher.find()) {
+                apiSwagger = apiSwagger.replace(matcher.group(), "");
+            }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

@@ -237,6 +237,7 @@ public class APIMappingUtil {
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
         dto.setWsdlUri(model.getWsdlUrl());
         setEndpointSecurityFromModelToApiDTO(model, dto);
+        setMaxTpsFromModelToApiDTO(model, dto);
 
         return dto;
     }
@@ -377,6 +378,7 @@ public class APIMappingUtil {
         }
         model.setCorsConfiguration(corsConfiguration);
         setEndpointSecurityFromApiDTOToModel(dto, model);
+        setMaxTpsFromApiDTOToModel(dto, model);
 
         return model;
     }
@@ -485,6 +487,37 @@ public class APIMappingUtil {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
             }
             dto.setEndpointSecurity(securityDTO);
+        }
+    }
+
+    private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
+        APIMaxTpsDTO maxTpsDTO = dto.getMaxTps();
+        if (maxTpsDTO != null) {
+            if (maxTpsDTO.getProduction() != null) {
+                api.setProductionMaxTps(maxTpsDTO.getProduction().toString());
+            }
+            if (maxTpsDTO.getSandbox() != null) {
+                api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
+            }
+        }
+    }
+
+    private static void setMaxTpsFromModelToApiDTO(API api, APIDTO dto) {
+        if (StringUtils.isBlank(api.getProductionMaxTps()) && StringUtils.isBlank(api.getSandboxMaxTps())) {
+            return;
+        }
+        APIMaxTpsDTO maxTpsDTO = new APIMaxTpsDTO();
+        try {
+            if (!StringUtils.isBlank(api.getProductionMaxTps())) {
+                maxTpsDTO.setProduction(Long.parseLong(api.getProductionMaxTps()));
+            }
+            if (!StringUtils.isBlank(api.getSandboxMaxTps())) {
+                maxTpsDTO.setSandbox(Long.parseLong(api.getSandboxMaxTps()));
+            }
+            dto.setMaxTps(maxTpsDTO);
+        } catch (NumberFormatException e) {
+            //logs the error and continues as this is not a blocker
+            log.error("Cannot convert to Long format when setting maxTps for API", e);
         }
     }
 

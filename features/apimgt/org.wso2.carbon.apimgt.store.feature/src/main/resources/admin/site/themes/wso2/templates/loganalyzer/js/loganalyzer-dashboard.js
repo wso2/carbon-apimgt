@@ -702,7 +702,7 @@ var loganalyzerDashboard = {
                             "id": "logAPIMMessageProcessing-number-of-failures",
                             "content": {
                                 "id": "logAPIMMessageProcessing",
-                                "title": "ERRORs in API Message Processing",
+                                "title": "Errors in API Message Processing",
                                 "type": "gadget",
                                 "thumbnail": "store://gadget/LogAPIMMessageProcessing/img/thumbnail.png",
                                 "data": {"url": "store://gadget/LogAPIMMessageProcessing/index.xml"},
@@ -723,10 +723,10 @@ var loganalyzerDashboard = {
                                     "hide_gadget": false,
                                     "borders": false,
                                     "titlePosition": "left",
-                                    "title": "ERRORs in API Message Processing"
+                                    "title": "Errors in API Message Processing"
                                 },
                                 "options": {},
-                                "locale_titles": {"en-US": "ERRORs in API Message Processing"},
+                                "locale_titles": {"en-US": "Errors in API Message Processing"},
                                 "settings": {}
                             }
                         }
@@ -822,7 +822,7 @@ var loganalyzerDashboard = {
                             "id": "logApiTokenByStatus-access-token-errors",
                             "content": {
                                 "id": "logApiTokenByStatus",
-                                "title": "API Token Status",
+                                "title": "Errors Distribution",
                                 "type": "gadget",
                                 "thumbnail": "store://gadget/LogApiTokenByStatus/img/thumbnail.png",
                                 "data": {"url": "store://gadget/LogApiTokenByStatus/index.xml"},
@@ -849,10 +849,10 @@ var loganalyzerDashboard = {
                                     "hide_gadget": false,
                                     "borders": false,
                                     "titlePosition": "left",
-                                    "title": "API Token Status"
+                                    "title": "Errors Distribution"
                                 },
                                 "options": {},
-                                "locale_titles": {"en-US": "API Token Status"},
+                                "locale_titles": {"en-US": "Errors Distribution"},
                                 "settings": {}
                             }
                         }
@@ -888,10 +888,10 @@ var loganalyzerDashboard = {
                                     "no_heading": false,
                                     "hide_gadget": false,
                                     "titlePosition": "left",
-                                    "title": "API Key Status"
+                                    "title": "Filtered Messages"
                                 },
                                 "options": {},
-                                "locale_titles": {"en-US": "API Key Status"},
+                                "locale_titles": {"en-US": "Filtered Messages"},
                                 "settings": {}
                             }
                         }
