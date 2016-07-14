@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -3144,6 +3145,61 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         }
         return false;
+    }
+
+    public static NativeArray jsFunction_getApplicationsWithPagination(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        NativeArray myn = new NativeArray(0);
+        if (args != null) {
+            String username = args[0].toString();
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application[] applications;
+            String groupId="";
+            int start = 0;
+            int offset = 10;
+            String search = null;
+            String sortColumn = null;
+            String sortOrder = null;
+            if(args.length >1 && args[1] != null){
+                groupId = args[1].toString();
+                start = Integer.parseInt(args[2].toString());
+                offset = Integer.parseInt(args[3].toString());
+                search = args[4].toString();
+                sortColumn = args[5].toString();
+                sortOrder = args[6].toString();
+            }
+            applications = apiConsumer.getApplicationsWithPagination(new Subscriber(username), groupId, start ,offset
+                    ,search,sortColumn,sortOrder);
+
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            int applicationCount = apiMgtDAO.getAllApplicationCount(new Subscriber(username), groupId,search);
+
+
+            Subscriber subscriber = new Subscriber(username);
+
+            if (applications != null) {
+                int i = 0;
+                for (Application application : applications) {
+                    int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber,application.getName(),groupId);
+                    NativeObject row = new NativeObject();
+                    row.put("name", row, application.getName());
+                    row.put("tier", row, application.getTier());
+                    row.put("id", row, application.getId());
+                    row.put("callbackUrl", row, application.getCallbackUrl());
+                    row.put("status", row, application.getStatus());
+                    row.put("description", row, application.getDescription());
+                    row.put("apiCount", row, subscriptionCount);
+                    row.put("groupId", row, application.getGroupId());
+                    row.put("isBlacklisted", row, application.getIsBlackListed());
+                    row.put("totalCount", row, applicationCount);
+                    myn.put(i++, myn, row);
+                }
+
+            }
+
+        }
+        return myn;
     }
 
     public static NativeArray jsFunction_getApplications(Context cx, Scriptable thisObj, Object[] args, Function funObj)

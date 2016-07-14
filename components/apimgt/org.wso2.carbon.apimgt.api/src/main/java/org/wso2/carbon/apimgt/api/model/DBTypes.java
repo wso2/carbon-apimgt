@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,14 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.factory;
-
-/**
- * This is a factory class, which responsible to load relevant DAO class according to current jdbc Driver.
- * We will keep separate sql class
- */
-public class DaoHolder {
+package org.wso2.carbon.apimgt.api.model;
 
 
-
+public enum DBTypes {
+    H2MYSQL, DB2, MSSQL, ORACLE, POSTGRESQL
 }

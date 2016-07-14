@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 //import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 //import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
@@ -4417,6 +4418,170 @@ public class ApiMgtDAO {
                 applications = new ArrayList<Application>();
                 applications.add(application);
             }
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from" + " the persistence store.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applications;
+    }
+
+    public int getAllApplicationCount(Subscriber subscriber, String groupingId, String search) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String sqlQuery = null;
+
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_CASESENSITVE_WITHGROUPID;
+            } else {
+                sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE_WITHGROUPID;
+            }
+
+        } else {
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_CASESENSITVE;
+            } else {
+                sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE;
+            }
+
+        }
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(sqlQuery);
+            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+                prepStmt.setString(1, groupingId);
+                prepStmt.setString(2, subscriber.getName());
+                prepStmt.setString(3, "%"+search+"%");
+
+            } else {
+                prepStmt.setString(1, subscriber.getName());
+                prepStmt.setString(2, "%"+search+"%");
+            }
+
+            resultSet = prepStmt.executeQuery();
+
+            int applicationCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    applicationCount = resultSet.getInt("count");
+                }
+            }
+            if (applicationCount > 0) {
+                return applicationCount;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get applicaiton count : " , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+
+        return 0;
+    }
+
+    /**
+     * #TODO later we might need to use only this method.
+     * @param subscriber
+     * @param groupingId
+     * @return
+     * @throws APIManagementException
+     */
+    public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start ,
+            int offset , String search, String sortColumn, String sortOrder) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Application[] applications = null;
+        String sqlQuery = null;
+
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID");
+            } else {
+                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID");
+            }
+
+        } else {
+
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
+            } else {
+                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE");
+            }
+
+        }
+        //sqlQuery += " AND NAME like '%?%'";
+        //sqlQuery += SQLConstantManagerFactory.getSQlString("LIMIT_QUERY_SQL");
+        //sqlQuery += " Order By " +sortColumn+ " ASC";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+//            if (connection.getMetaData().getDriverName().contains("MS SQL") ||
+//                    connection.getMetaData().getDriverName().contains("Microsoft")) {
+//                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME");
+//            }
+
+            sqlQuery = sqlQuery.replace("$1", sortColumn);
+            sqlQuery = sqlQuery.replace("$2", sortOrder);
+
+            //String blockingFilerSql = " select distinct x.*,bl.* from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name))";
+            prepStmt = connection.prepareStatement(sqlQuery);
+
+            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+                prepStmt.setString(1, groupingId);
+                prepStmt.setString(2, subscriber.getName());
+                prepStmt.setString(3, "%"+search+"%");
+                //prepStmt.setString(4, sortColumn + " " + sortOrder);
+                prepStmt.setInt(4,start);
+                prepStmt.setInt(5,offset);
+
+            } else {
+                prepStmt.setString(1, subscriber.getName());
+                prepStmt.setString(2, "%"+search+"%");
+                //prepStmt.setString(3, sortColumn + " " + sortOrder);
+                prepStmt.setInt(3,start);
+                prepStmt.setInt(4,offset);
+            }
+            rs = prepStmt.executeQuery();
+            ArrayList<Application> applicationsList = new ArrayList<Application>();
+            Application application;
+            while (rs.next()) {
+                application = new Application(rs.getString("NAME"), subscriber);
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setIsBlackListed(rs.getBoolean("ENABLED"));
+
+                Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
+                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+
+                for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
+                    application.addOAuthApp(entry.getKey(), entry.getValue());
+                }
+
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
+                applicationsList.add(application);
+
+            }
+//            Collections.sort(applicationsList, new Comparator<Application>() {
+//                public int compare(Application o1, Application o2) {
+//                    return o1.getName().compareToIgnoreCase(o2.getName());
+//                }
+//            });
+            applications = applicationsList.toArray(new Application[applicationsList.size()]);
         } catch (SQLException e) {
             handleException("Error when reading the application information from" + " the persistence store.", e);
         } finally {
