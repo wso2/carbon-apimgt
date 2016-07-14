@@ -139,17 +139,17 @@
         <DASServerURL>{tcp://localhost:7612}</DASServerURL>
         <!--DASAuthServerURL>{ssl://localhost:7712}</DASAuthServerURL-->
         <!-- Administrator username to login to the remote DAS server. -->
-        <DASUsername>admin</DASUsername>
+        <DASUsername>${admin.username}</DASUsername>
         <!-- Administrator password to login to the remote DAS server. -->
-        <DASPassword>admin</DASPassword>
+        <DASPassword>${admin.password}</DASPassword>
 
         <!-- For APIM implemented Statistic client for RDBMS -->
         <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl</StatsProviderImpl>
 
         <!-- DAS REST API configuration -->
         <DASRestApiURL>https://localhost:9444</DASRestApiURL>
-        <DASRestApiUsername>admin</DASRestApiUsername>
-        <DASRestApiPassword>admin</DASRestApiPassword>
+        <DASRestApiUsername>${admin.username}</DASRestApiUsername>
+        <DASRestApiPassword>${admin.password}</DASRestApiPassword>
 
         <!-- Below property is used to skip trying to connect to event receiver nodes when publishing events even if
             the stats enabled flag is set to true. -->
@@ -264,7 +264,7 @@
              In distributed deployment we should configure this property in key manager node by pointing
              gateway https( /http, we recommend users to use 'https' endpoints for security purpose) url.
              Also please note that we should point gateway revoke service to key manager -->
-        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
+        <RevokeAPIURL>https://localhost:${https.nio.port}/revoke</RevokeAPIURL>
         <!-- Whether to encrypt tokens when storing in the Database
         Note: If changing this value to true, change the value of <TokenPersistenceProcessor> to
         org.wso2.carbon.identity.oauth.tokenprocessor.EncryptionDecryptionPersistenceProcessor in the identity.xml -->
