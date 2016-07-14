@@ -71,7 +71,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h2 class="truncate-children"><span><%=api.name%> - <%=api.version%><span></h2>
+    <h2 class="truncate-children"><span><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%><span></h2>
     <%
             var tagDisplayName = "";
             var tag = "";
@@ -105,7 +105,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                 <div class="square-element setbgcolor">
                                     <div class="api-name-icon"></div>
                                         <div style="display: none">
-                                            <a href="" title="api name" class="api-name"><%=api.name%></a>
+                                            <a href="" title="api name" class="api-name"><%=encode.forHtml(api.name)%></a>
                                         </div>
                                 </div>
                              <% } else { %>
