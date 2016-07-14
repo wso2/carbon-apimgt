@@ -48,6 +48,13 @@
 
                 <state id="Prototyped">
                     <datamodel>
+                        <data name="checkItems">
+                            <item name="Deprecate Old Versions" forEvent="">
+                            </item>
+                            <item name="Require Re-Subscription" forEvent="">
+                            </item>
+                        </data>
+
                         <data name="transitionExecution">
                             <execution forEvent="Publish"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">

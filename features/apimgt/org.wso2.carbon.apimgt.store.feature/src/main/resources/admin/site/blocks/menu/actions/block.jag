@@ -1,0 +1,8 @@
+<%
+jagg.block("menu/actions", {
+    initializer:function (data) {
+
+    }
+
+});
+%>
