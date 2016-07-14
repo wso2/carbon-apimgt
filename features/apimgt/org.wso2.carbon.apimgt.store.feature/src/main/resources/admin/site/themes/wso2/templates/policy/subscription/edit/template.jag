@@ -1,9 +1,9 @@
 <% jagg.template("policy/subscription/edit", function(inputs, outputs, jagg) { %>
 <%
-    var policyName = request.getParameter("policyName");
+    var policyName = encode.forJavaScript(request.getParameter("policyName"));
     var pageTitle = i18n.localize("Add Subscription Tier");
     var nameFieldDisableStatus = "";
-    var policyAction = request.getParameter("action");
+    var policyAction = encode.forJavaScript(request.getParameter("action"));
 
     var denied = false;
     var roleList = "";
