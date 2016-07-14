@@ -25,9 +25,9 @@
 	{{/inline}}
 
 	{{#*inline "grants" }}
-		<div class="row">
-		  <div class="col-md-12">		  
-			<label class="" for="ConsumerKey"><%=i18n.localize("Grant Types")%></label>
+		<div class="row add-margin-top-5x">
+		  <div class="col-md-12">
+            <h4><%=i18n.localize("Grant Types")%></h4>
 			<p><%=i18n.localize("Application can use the following grant types to generate Access Tokens. Based on the application requirement you can enable or disable grant types for this application.")%></p>
 			<div class="row add-padding-left-2x add-padding-bottom-2x">			
 			{{#each grants}}	
@@ -45,11 +45,10 @@
 
   {{#if ConsumerKey }}
 	<div class="row">	  
-	  <div class="col-md-12 col-lg-6">
-	  	<button type="button" class="btn btn-default show_keys">{{# if show_keys }}<i class="fw fw-view"></i> <%=i18n.localize("Hide Keys")%>{{else}}<i class="fw fw-view"></i> <%=i18n.localize("Show Keys")%>{{/if}}</button>
-	  	<br /><br />
-	  	<form>
-	  	  <fieldset>
+	  <div class="col-md-12 col-lg-9">
+	    <div class="add-margin-bottom-4x">
+	  	    <button type="button" class="btn btn-secondary show_keys">{{# if show_keys }}<%=i18n.localize("Hide Keys")%>{{else}}<%=i18n.localize("Show Keys")%>{{/if}}</button>
+	  	</div>
 		  <div class="form-group">
 		    <label class="" for="ConsumerKey"><%=i18n.localize("Consumer Key")%></label>
 		    <div class="input-group">
@@ -72,11 +71,13 @@
 		      </div>
 		    </div>
 		  </div>
-		  {{> callback_url this}}
+
 		  {{> grants this}}
+		  {{> callback_url this}}
 		  <button class=" btn btn-primary update_grants"><%=i18n.localize("Update")%></button>
 
-		<div class="row">
+
+		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
 		  	<h4><%=i18n.localize("Generating Access Tokens")%></h4>
 		  	<p><%=i18n.localize("Following cURL command shows how to generate an access token using password grant type.")%></p>
@@ -92,9 +93,9 @@
 	     <%= gatewayurlendpoint %>/token</textarea></pre>
 	        </div>        
 		  </div>
-		</div>  
-		<h4><%=i18n.localize("Generate a Test Access Token")%></h4>
-		  <div class="form-group">
+		</div>
+		  <div class="form-group add-margin-top-5x">
+		    <h4><%=i18n.localize("Generate a Test Access Token")%></h4>
 		    <label class="" for="<%=type%>ConsumerKey"><%=i18n.localize("Access Token")%></label>
 		    <div class="input-group">
 		      <input type="{{# if show_keys }}text{{else}}password{{/if}}" title="<%=i18n.localize("Access Token")%>" class="form-control access_token" id="<%=type%>Key" placeholder="<%=i18n.localize("Access Token")%>" value="{{Key}}">
@@ -111,20 +112,23 @@
 			<%=i18n.localize("And the token has")%> ( <strong>{{KeyScope}}</strong> ) <%=i18n.localize("scopes.")%>
 		  {{/if}}
 		  </p>
-		  </fieldset>
-	  	</form>		  	
-	  	<form class="form-inline">
-		  <div class="form-group">		    
-		    <span><%=i18n.localize("Scopes")%> </span>
-		    <select class="selectpicker scope_select dropup"  multiple title="Select..">
-			{{#each Scopes}}
-				<option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
-			{{/each}}
-			</select>	    
-		    <span><%=i18n.localize("Validity period")%> </span>
-		    <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time"> <%=i18n.localize("Seconds.")%>
-			<button class=" btn btn-primary regenerate"><i class="fw fw-refresh"></i> <%=i18n.localize("Re-generate")%></button>
-		  </div> 		  
+	  	<form class="add-margin-top-5x well">
+	  	    <div class="form-group">
+                <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
+                  <select class="selectpicker scope_select dropup form-control"  multiple title="Select..">
+                    {{#each Scopes}}
+                        <option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
+                    {{/each}}
+                  </select>
+            </div>
+            <div class="form-group">
+                <label for="" class="control-label"><%=i18n.localize("Validity period")%></label>
+                    <div class="input-group col-sm-6">
+                      <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time">
+                      <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+                    </div>
+            </div>
+            <button class=" btn btn-primary regenerate"><%=i18n.localize("Re-generate")%></button>
 		</form>		  	
 	  </div>
 	</div>
@@ -150,19 +154,22 @@
 
 
   {{else}}
-    <div class="message message-info">
+    <div class="message message-info remove-margin">
     	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
         <p><%=i18n.localize("No keys are generated for this type in this application.")%></p>
     </div>
-  	<form class="">
   	  {{#unless provide_keys_form }}
 		<div class="row">
-		  <div class="col-md-12 col-lg-6">
-		  	  {{> callback_url this}}
+		  <div class="col-md-12 col-lg-9">
 		  	  {{> grants this}}
+		  	  {{> callback_url this}}
 			  <div class="form-group">	    
 			    <label><%=i18n.localize("Access token validity period")%> </label>
-			    <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control form-control-md validity_time"> <%=i18n.localize("Seconds.")%>
+			    <div class="input-group col-sm-6">
+                  <input type="text" size="10" title="validity_time" value='{{ValidityTime}}' class="form-control form-control-md validity_time">
+                  <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
+                </div>
+
 			  </div>
 			  <button  class="btn btn-primary generatekeys"><%=i18n.localize("Generate keys")%></button>
 		  </div>
@@ -197,7 +204,6 @@
 		  </div>
 		{{/if}}
 	  {{/if}}
-	</form>			    
   {{/if}}
 </script>
 
