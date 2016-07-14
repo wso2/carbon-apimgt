@@ -1,5 +1,7 @@
 $(document).ready(function(){
-    $( "body" ).delegate( "button.check_url_valid", "click", function() {
+    $( document ).on( "click focus", "button.check_url_valid", function() {
+        alert("test");
+        debugger;
         var btn = this;
         var url = $(this).parent().parent().find('input:first').val();
         var type = '';

@@ -21,6 +21,13 @@ jagg.block("api/api-listing-all", {
         }
 
         var log = new Log();
+        // map api type to state
+        var state = null;
+        if(request.getParameter("type") == "production"){
+            state = "PUBLISHED";
+        }else if(request.getParameter("type") == "prototyped"){
+            state = "PROTOTYPED";
+        }        
 
         if(tag == null) { tag = inputs.tag;}
         tenantDomain = jagg.getTenantDomain();
@@ -40,7 +47,7 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
         } else if (query) {
             mod = jagg.module("search");
-            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end, "true");
+            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end, "true", state);
             if(response.error){
                 error = true;
                 message = response.message;
@@ -61,8 +68,8 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
         } else {
             mod = jagg.module("api");
-	    var returnAPITags = "false";
-            response = mod.getAllPaginatedAPIs(tenantDomain, start, end, returnAPITags);
+	        var returnAPITags = "false";
+            response = mod.getAllPaginatedAPIs(tenantDomain, start, end, returnAPITags, state);
             apis = response.result.apis;
         }
 

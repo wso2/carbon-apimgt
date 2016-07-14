@@ -313,5 +313,6 @@
     "timeWarn": "timeWarn",
     "All": "All",
     "Prototyped":"Prototyped",
-    "Production":"Production"
+    "Production":"Production",
+    "Category":"Category"
 }
