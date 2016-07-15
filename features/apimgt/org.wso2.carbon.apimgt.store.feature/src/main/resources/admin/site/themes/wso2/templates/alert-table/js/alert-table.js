@@ -129,6 +129,7 @@ $( document ).ready(function() {
                     var reason = data['reason'];
                     var scope = data['scope'];
                     var consumerKey = data['consumerKey'];
+                    var subscriber = data['subscriber'];
 
                     var fullMessage = "";;
 
@@ -142,7 +143,7 @@ $( document ).ready(function() {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application Owner") + '</span>'+applicationOwner+'<br/>';
                     }
                     if (applicationId != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application ID") + '</span>'+applicationId+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Application Id") + '</span>'+applicationId+'<br/>';
                     }
                     if (api_version != null) {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API Version") + '</span>'+api_version+'<br/>';
@@ -176,6 +177,9 @@ $( document ).ready(function() {
                     }
                     if (consumerKey != null) {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Consumer Key") + '</span>'+consumerKey+'<br/>';
+                    }
+                    if (subscriber != null) {
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API Subscriber") + '</span>'+subscriber+'<br/>';
                     }
 
                     fullMessage = fullMessage + data['msg'];
@@ -222,4 +226,3 @@ $( document ).ready(function() {
 
 
 });
-     
