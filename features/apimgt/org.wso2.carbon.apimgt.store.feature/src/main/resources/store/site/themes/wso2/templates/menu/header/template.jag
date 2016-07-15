@@ -146,7 +146,7 @@ var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUt
 				
 			<%if(isSelfSignupEnabled){%>
 	            <li class="visible-inline-block">
-	                <a title="<%=i18n.localize("Sign-up")%>" id="register-link" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
+	                <a title="<%=i18n.localize("Sign-up")%>" id="register-link1" href="<%= jagg.urlTenanted('/site/pages/sign-up.jag')%>">
 	                  <span class="icon fw-stack fw-lg">
 	                  <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                  <i class="fw fw-register fw-stack-1x"></i>

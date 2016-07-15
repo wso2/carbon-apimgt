@@ -128,7 +128,7 @@
                       <div class="input-group-addon"><%=i18n.localize("Seconds.")%></div>
                     </div>
             </div>
-            <button class=" btn btn-primary regenerate"><%=i18n.localize("Re-generate")%></button>
+            <button class=" btn btn-primary regenerate" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
 		</form>		  	
 	  </div>
 	</div>
@@ -171,7 +171,7 @@
                 </div>
 
 			  </div>
-			  <button  class="btn btn-primary generatekeys"><%=i18n.localize("Generate keys")%></button>
+			  <button  class="btn btn-primary generatekeys" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Generate keys")%></button>
 		  </div>
 	    </div>
 	  {{/unless}}

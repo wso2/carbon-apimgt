@@ -1,7 +1,7 @@
 <% jagg.template("policy/resource/policy-add", function(inputs, outputs, jagg) { %>
 <%
     var log = new Log();
-    var policyName = encode.forJavaScript(request.getParameter("policyName"));
+    var policyName = request.getParameter("policyName");
     policyName = policyName == null ? "" : policyName;
     var pageTitle = i18n.localize("Add Advanced Throttle Policy");
     var nameFieldDisableStatus = "";
@@ -97,7 +97,7 @@
 								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
 							</span>                    
                     </a>
-                    <p id="level_help" class="hide"><strong>API Level :</strong><%=i18n.localize("Will be applicable to the whole API.")%> <br><strong> User Level :</strong>  <%=i18n.localize("Applicable in user level.")%><br></p>
+                    <p id="level_help" class="hide"><strong>API Level :</strong><%=i18n.localize("Will be applicable to the whole API.")%> <br><strong> User Level :</strong>  <%=i18n.localize("Applicable in the user level.")%><br></p>
                 </label>
                 <div class="col-sm-9">
                     <select class="form-control select required valid" id="policy-level" name="level">
@@ -351,7 +351,7 @@
                                             </label>
                                             <hr>
                                             <div class="panel-title-description">
-                                               <%=i18n.localize("This configuration use to define ip condition")%>
+                                               <%=i18n.localize("This configuration is used to throttle by IP address.")%>
                                             </div>
                                         </h2>
                                     </div>
@@ -447,7 +447,7 @@
                                             </label>
                                             <hr>
                                             <div class="panel-title-description">
-                                                <%=i18n.localize("This configuration use to define header conditions")%>
+                                                <%=i18n.localize("This configuration is used to throttle based on Headers.")%>
                                             </div>
                                         </h2>
                                     </div>
@@ -535,7 +535,7 @@
                                             </label>
                                             <hr>
                                             <div class="panel-title-description">
-                                                <%=i18n.localize("This configuration use to define query param conditions")%>
+                                                <%=i18n.localize("This configuration use to throttle based on query parameters.")%>
                                             </div>
                                         </h2>
                                     </div>
@@ -614,7 +614,7 @@
                                 <div class="panel panel-default operation-data" data-operation="jwt-claim-condition-{{executionFlow.id}}" data-operation-code="JWT_CLAIMS_CONDITION_POLICY">
                                     <div id="jwt-claim-condition-heading-{{../../executionFlow.id}}" class="panel-heading" role="tab">
                                         <h2 class="sub-title panel-title">
-                                            <%=i18n.localize("Jwt Condition Policy")%>
+                                            <%=i18n.localize("JWT Condition Policy")%>
                                             <label id="jwt-claims-condition-policy-lbl-{{../../executionFlow.id}}" class="wr-input-control switch" data-toggle="collapse" data-target="#jwt-claim-condition-body-{{../../executionFlow.id}}">
                                                 <input id="jwt-claim-condition-checkbox-{{../../executionFlow.id}}" onclick="changeStatusIcon({{../../executionFlow.id}}, 'JWTClaim', this)"  type="checkbox" {{#if ../enabled}}checked{{/if}}/>
                                                 <span class="helper"></span>
@@ -622,7 +622,7 @@
                                             </label>
                                             <hr>
                                             <div class="panel-title-description">
-                                               <%=i18n.localize("This configuration use to define jwt claims conditions")%>
+                                               <%=i18n.localize("This configuration is used to define JWT claims conditions")%>
                                             </div>
                                         </h2>
                                     </div>
@@ -645,7 +645,7 @@
                                                 <div class="col-sm-9">
                                                     <input type="text" class="form-control required validInput" id="jwt-claim-value-{{../../executionFlow.id}}" name="jwt-claim-value-{{../../executionFlow.id}}" autofocus="autofocus" value="">
                                                     <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help" data-original-title="" title=""></a>
-                                                    <p id="jwt-claim-value-help-{{executionFlow.id}}" class="hide"><%=i18n.localize("Value of the jwt claim.")%></p>
+                                                    <p id="jwt-claim-value-help-{{executionFlow.id}}" class="hide"><%=i18n.localize("Value of the JWT claim.")%></p>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -855,7 +855,7 @@ $(document).ready(function() {
        loadPolicy("<%=encode.forJavaScript(String(policyName))%>");
        
        var isNewPolicy = true;
-       if('<%=policyName%>' != 'null'){
+       if('<%=encode.forJavaScript(String(policyName))%>' != 'null'){
            isNewPolicy = false;
        }
        if (!isNewPolicy) {

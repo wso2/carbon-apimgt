@@ -3,8 +3,8 @@ function showEnableAnalyticsMsg() {
     var msg=  "<div class='message message-warning'>"+
             "<h4><i class='icon fw fw-warning'></i>" + i18n.t('Not Configured') + "</h4>" +
             "<p> <a href='https://docs.wso2.com/display/AM200/Configuring+API+Analytics' target='_blank'" +
-            "title= '"+i18n.t("WSO2 wiki documentation on APIM statistics")+"' class='warningLink'>" +
-            i18n.t('Refer our wiki to configure DAS correctly') + "</a></p>" +
+            "title= '"+i18n.t("WSO2 wiki documentation on APIM Analytics")+"' class='warningLink'>" +
+            i18n.t('Refer our documentation to configure API Manager Analytics correctly') + "</a></p>" +
             "</div>";
     $('.stat-page').append($(msg));
 }

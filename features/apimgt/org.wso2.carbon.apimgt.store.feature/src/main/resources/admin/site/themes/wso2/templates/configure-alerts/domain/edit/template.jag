@@ -14,7 +14,7 @@
     var templateType = "";
 
     if (request.getParameter("configurationName") != null) {
-        configurationName = encode.forJavaScript(request.getParameter("configurationName"));
+        configurationName = request.getParameter("configurationName");
     }
 
     if (request.getParameter("templateType") != null) {
@@ -83,13 +83,13 @@
                                 }
                             %>
                             <option <%=selectedValue%>
-                                    value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+configurationName+"&templateType="+scenarioInfoDTOs[i].getType())%>">
+                                    value="<%=jagg.url('/alerts-domain-edit?domainName='+encode.forUriComponent(domainName)+'&configurationName='+ encode.forUriComponent(configurationName)+"&templateType="+scenarioInfoDTOs[i].getType())%>">
                                 <%=scenarioInfoDTOs[i].getType()%>
                             </option>
                             <%}%>
                         </select>
 
-                        <div class="sectionHelp"><%=currentTemplate.getDescription()%>
+                        <div class="sectionHelp"><%=encode.forHtml(String(currentTemplate.getDescription()))%>
                         </div>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
 
                     <div class="col-md-9">
                         <input type="text" id="txtName" class="form-control"
-                               value="<%=configurationName%>"
+                               value="<%=encode.forHtmlAttribute(String(configurationName))%>"
                                 <% if (isExistingConfig) {
                                     print("readOnly");
                                 }%>/>
@@ -129,7 +129,7 @@
 
                     <div class="col-md-9">
                         <input type="text" id="txtDescription" class="form-control"
-                               value="<%=description%>"/>
+                               value="<%=encode.forHtml(String(description))%>"/>
                     </div>
                 </div>
 
@@ -177,7 +177,7 @@
                             if (parameterDTOs[i].getOptions() != null && !parameterDTOs[i].getOptions().trim().equals("")) {
                         %>
 
-                        <select id="<%=parameterDTOs[i].getName()%>" class="form-control">
+                        <select id="<%=encode.forHtmlAttribute(String(parameterDTOs[i].getName()))%>" class="form-control">
                             <%
                                 var options = parameterDTOs[i].getOptions().split(",");
                                 for (var option in options){
@@ -199,13 +199,13 @@
                         %>
 
                         <input type="text" id="<%=parameterDTOs[i].getName()%>" class="form-control"
-                               value="<%=parameterValue%>"/>
+                               value="<%=encode.forHtmlAttribute(String(parameterValue))%>"/>
                         <%
                             }
 
                             if (!parameterDTOs[i].getDescription().equals("")) {
                         %>
-                        <div class="sectionHelp"><%=parameterDTOs[i].getDescription()%>
+                        <div class="sectionHelp"><%=encode.forHtml(String(parameterDTOs[i].getDescription()))%>
                         </div>
                         <%}%>
                     </div>
@@ -240,7 +240,7 @@
                 <div class="action-container form-group">
 
                     <button type="button" class="btn btn-default btn-add"
-                            onclick="saveConfiguration('<%=domainName%>',
+                            onclick="saveConfiguration('<%=encode.forJavaScript(domainName)%>',
                                     document.getElementById('cBoxTemplates').options[document.getElementById('cBoxTemplates').selectedIndex].text,
                                     document.getElementById('txtName').value, document.getElementById('txtDescription').value,
                                     <%=parameterString%>)">

@@ -19,7 +19,7 @@
 %>
 
 		<div>
-		   <p><%=i18n.localize("You are now redirected to Stratos Identity. If the redirection fails, please click the post button.")%></p>
+		   <p><%=i18n.localize("You are now redirected to Stratos Identity. If the redirection fails, please click the POST button.")%></p>
 
 			<form id="logoutForm" method="post" action="<%=logoutURL%>">
 			<p>

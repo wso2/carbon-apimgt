@@ -146,9 +146,6 @@ public class GlobalThrottleEngineClient {
         try {
             String sessionID = login();
             deploy(name, executionPlan, sessionID);
-        } catch (Throwable e) {
-            throw new Exception("Error in deploying policy \n" + executionPlan + "\nin global " +
-                    "throttling engine", e);
         } finally {
             try {
                 logout();

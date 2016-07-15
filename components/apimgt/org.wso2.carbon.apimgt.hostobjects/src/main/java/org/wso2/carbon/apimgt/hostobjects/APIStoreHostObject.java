@@ -1387,9 +1387,6 @@ public class APIStoreHostObject extends ScriptableObject {
             } catch (APIManagementException e) {
                 log.error("Error from Registry API while getting APIs With Tag Information", e);
                 return resultObj;
-            } catch (Throwable e) {
-                log.error("Error while getting APIs With Tag Information", e);
-                return resultObj;
             }
             if (apiSet != null) {
                 Iterator it = apiSet.iterator();

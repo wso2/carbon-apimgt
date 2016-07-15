@@ -174,7 +174,7 @@
             </li>
             <li <%if (reqUrl.match("/admin/loganalyzer/api-deployment-stats")){%>class="active"<% } %>><a href="<%=loganalyzerApiDeploymentStats%>"
               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerApiDeploymentStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
-              <i class="fw fw-statistics"></i><%=i18n.localize("Api Deployment Stats")%></a>
+              <i class="fw fw-statistics"></i><%=i18n.localize("API Deployment Stats")%></a>
             </li>
             <li <%if (reqUrl.match("/admin/loganalyzer/login-errors")){%>class="active"<% } %>><a href="<%=loganalyzerLoginStats%>"
               onclick="jagg.sessionAwareJS({redirect:'<%=loganalyzerLoginStats%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
