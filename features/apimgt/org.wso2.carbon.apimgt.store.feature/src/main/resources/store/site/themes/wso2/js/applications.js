@@ -288,6 +288,8 @@ GrantTypes.prototype.getMap = function(selected){
             if(this.element.find("select.scope_select").val() != null) {
                 scopes = this.element.find("select.scope_select").val().join(" ");
             }
+            
+            $('.regenerate').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
                 application:this.app.name,
@@ -298,6 +300,7 @@ GrantTypes.prototype.getMap = function(selected){
                 validityTime:validity_time,
                 tokenScope:scopes
             }, $.proxy(function (result) {
+                $('.regenerate').buttonLoader('stop');
                 if (!result.error) {
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
