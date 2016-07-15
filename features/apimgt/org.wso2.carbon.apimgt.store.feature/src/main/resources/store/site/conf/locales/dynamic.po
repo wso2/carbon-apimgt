@@ -147,3 +147,6 @@ msgstr "Abnormal Tier Usage"
 
 msgid "healthAvailabilityPerMin"
 msgstr "Health Availability Per Minute"
+
+msgid "Please enable statistics to see this page"
+msgstr "Please configure API Manager Analytics to enable alerts."

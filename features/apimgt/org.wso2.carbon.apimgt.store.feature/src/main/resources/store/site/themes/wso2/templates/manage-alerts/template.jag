@@ -62,9 +62,10 @@
                     <%
                 }else{
                     %>
-                    <div class="alert alert-danger" id="loginError">
-                        <span id="loginErrorSpan"><%=encode.forHtml(outputs.alertTypesInformations.message) %></span>
-                    </div>
+                        <div class="message message-warning">
+                            <h4><i class="icon fw fw-warning"></i><%= i18n.localize("Not Configured")%></h4>
+                            <p><%= i18n.localize(encode.forHtml(outputs.alertTypesInformations.message),encode.forHtml(outputs.alertTypesInformations.message)) %></p>
+                        </div>
                     <%
                 }
                 %>
