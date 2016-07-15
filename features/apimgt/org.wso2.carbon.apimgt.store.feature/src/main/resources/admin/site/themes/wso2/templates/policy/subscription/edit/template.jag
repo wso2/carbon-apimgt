@@ -1,9 +1,9 @@
 <% jagg.template("policy/subscription/edit", function(inputs, outputs, jagg) { %>
 <%
-    var policyName = encode.forJavaScript(request.getParameter("policyName"));
+    var policyName = request.getParameter("policyName");
     var pageTitle = i18n.localize("Add Subscription Tier");
     var nameFieldDisableStatus = "";
-    var policyAction = encode.forJavaScript(request.getParameter("action"));
+    var policyAction = request.getParameter("action");
 
     var denied = false;
     var roleList = "";
@@ -78,7 +78,7 @@
 
 
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
-        <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
+        <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtmlAttribute(policyAction)%>" />
 
         <div class="page-header">
 	        <h2 id="tierTopic"><%=pageTitle%></h2>
@@ -305,7 +305,7 @@
               location.href = "<%= jagg.url('/subscription-policy-manage')%>";
         });
         var isNewPolicy = true;
-        if('<%=policyName%>' != 'null'){
+        if('<%=encode.forJavaScript(request.getParameter("policyName"))%>' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){
