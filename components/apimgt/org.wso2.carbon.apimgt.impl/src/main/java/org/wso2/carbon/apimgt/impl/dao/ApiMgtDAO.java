@@ -9209,12 +9209,6 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-                Blob blob = rs.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
-
-                if(blob != null){
-                    byte[] customAttrib = blob.getBytes(1,(int)blob.length());
-                    subPolicy.setCustomAttributes(customAttrib);
-                }
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if(binary != null){
                 	byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -9225,7 +9219,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while executing SQL", e);
         } catch (IOException e) {
-        	handleException("Error while executing SQL", e);
+        	handleException("Error while converting input stream to byte array", e);
 		} finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -9560,14 +9554,16 @@ public class ApiMgtDAO {
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-                Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
-                if (blob != null) {
-                    byte[] customAttrib = blob.getBytes(1, (int) blob.length());
+                InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(binary != null){
+                    byte[] customAttrib = APIUtil.toByteArray(binary);
                     policy.setCustomAttributes(customAttrib);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + policyName + '-' + tenantId, e);
+        } catch (IOException e) {
+            handleException("Error while converting input stream to byte array", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
@@ -9606,14 +9602,16 @@ public class ApiMgtDAO {
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
-                Blob blob = resultSet.getBlob(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
-                if (blob != null) {
-                    byte[] customAttrib = blob.getBytes(1, (int) blob.length());
+                InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if(binary != null){
+                    byte[] customAttrib = APIUtil.toByteArray(binary);
                     policy.setCustomAttributes(customAttrib);
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + uuid, e);
+        } catch (IOException e) {
+            handleException("Error while converting input stream to byte array", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectStatement, connection, resultSet);
         }
