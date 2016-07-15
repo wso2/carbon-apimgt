@@ -676,27 +676,27 @@ h6 .small, .h6 small,
 }
 
 h1, .h1 {
-  font-size: 31px;
+  font-size: 36px;
 }
 
 h2, .h2 {
-  font-size: 25px;
+  font-size: 30px;
 }
 
 h3, .h3 {
-  font-size: 21px;
+  font-size: 24px;
 }
 
 h4, .h4 {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 h5, .h5 {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 h6, .h6 {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 p {
@@ -7294,6 +7294,10 @@ button.close {
 [aria-expanded='true'] > .icon.fw-stack > .toggle-icon-right-arrow:before,
 [aria-expanded='true'] > .icon.toggle-icon-right-arrow:before {
   content: '\e68b';
+}
+[aria-expanded='true'] > .icon.fw-stack > .toggle-icon-cancel:before,
+[aria-expanded='true'] > .icon.toggle-icon-cancel:before {
+  content: '\e618';
 }
 
 /* ========================================================================

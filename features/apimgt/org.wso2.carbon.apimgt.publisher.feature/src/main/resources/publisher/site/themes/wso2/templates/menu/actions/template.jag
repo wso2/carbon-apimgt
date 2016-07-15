@@ -73,7 +73,7 @@
 					
 <a class="navbar-menu-toggle active" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="true" rel="leftmenu-sidebar">
                         <span class="icon fw-stack">
-                            <i class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
                         </span>
                         </a>
 					

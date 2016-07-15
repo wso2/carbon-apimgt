@@ -5,7 +5,7 @@
         <nav class="navbar navbar-default" data-spy="affix" data-offset-top="50" data-offset-bottom="40">
         	<a class="navbar-menu-toggle hidden-sm hidden-lg hidden-md" title="left-sidebar" data-toggle="sidebar" data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true" aria-expanded="false" rel="leftmenu-sidebar">
                         <span class="icon fw-stack">
-                            <i class="fw fw-menu fw-stack-1x toggle-icon-left-arrow"></i>
+                            <i class="fw fw-menu fw-stack-1x toggle-icon-cancel"></i>
                         </span>
            </a>
 			<% if(inputs.page == "api/listing"){%>                    
