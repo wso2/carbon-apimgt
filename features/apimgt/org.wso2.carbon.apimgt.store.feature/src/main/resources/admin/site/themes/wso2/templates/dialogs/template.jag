@@ -35,7 +35,7 @@ i18n.init(request,localeResourcesBasePath);%>
                         <div id="loginErrorMsg"></div>
                     </div>
                     <label for="username"><%=i18n.localize("Username")%>:</label>
-                    <input type="text" id="username" name="name" class="span3" placeholder=<%=i18n.localize("Enter your user name.")%> autofocus="autofocus" />
+                    <input type="text" id="username" name="name" class="span3" placeholder=<%=i18n.localize("Enter your username.")%> autofocus="autofocus" />
                     <label for="password"><%=i18n.localize("Password")%>:</label>
                     <input type="password" id="password" name="pass" class="span3"/>
 

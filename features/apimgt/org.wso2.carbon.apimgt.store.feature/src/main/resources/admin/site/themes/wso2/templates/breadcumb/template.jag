@@ -119,11 +119,11 @@
                 </li>
                 <% if (reqUrl.indexOf(apiDeploymentStatsUrl) >= 0 || reqUrl.indexOf(apiDeploymentStatsMappedUrl) >= 0 ) {%>
                     <li class="active">
-                        <a href="<%=apiDeploymentStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=apiDeploymentStatsMappedUrl%>',e:event})"><%=i18n.localize("Api Deployment Stats")%></a>
+                        <a href="<%=apiDeploymentStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=apiDeploymentStatsMappedUrl%>',e:event})"><%=i18n.localize("API Deployment Stats")%></a>
                     </li>
 		        <% } else if (reqUrl.indexOf(liveLogViewerUrl) >= 0 || reqUrl.indexOf(liveLogViewerMappedUrl) >= 0) {%>
                     <li class="active">
-                       <a href="<%=liveLogViewerMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewerMappedUrl%>',e:event})"><%=i18n.localize("Live log viewer")%></a>
+                       <a href="<%=liveLogViewerMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=liveLogViewerMappedUrl%>',e:event})"><%=i18n.localize("Live Log Viewer")%></a>
                     </li>
                 <% } else if (reqUrl.indexOf(overviewUrl) >= 0 || reqUrl.indexOf(overviewMappedUrl) >= 0) {%>
                     <li class="active">

@@ -28,7 +28,7 @@ var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, k
         if(errorMessage.indexOf("Invalid Execution Plan") > -1){
             errorMessage = i18n.localize("Siddhi Query deployment failed due to Siddhi syntax errors")
         }else if(errorMessage.indexOf("Key Template Already Exis") > -1){
-            errorMessage = i18n.localize("Key Template Already Exist. Add a new Key Template");
+            errorMessage = i18n.localize("Key Template Already Exists. Add a new Key Template");
         }
 
         return {
