@@ -400,7 +400,13 @@
 </script>
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">
-    <button class="btn btn-primary" id="update_swagger"><%=i18n.localize("Apply Changes")%></button>
+    <button class="btn btn-primary" id="update_swagger">
+		<span class="fw-stack fw-lg" style="font-size:1em"> 
+			<i class="fw fw-circle-outline fw-stack-2x"></i> 
+			<i class="fw fw-save fw-stack-1x"></i> 
+		</span>    	
+    	<%=i18n.localize("Apply Changes")%>
+    </button>
     <button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true" id="close_swagger_editor"><%=i18n.localize("Discard Changes")%></button>
     </div>              
 </div>   
