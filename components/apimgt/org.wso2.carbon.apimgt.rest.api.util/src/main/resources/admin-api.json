@@ -948,7 +948,7 @@
           }
         ],
         "tags": [
-          "Subscription Policies"
+          "Advanced Policies"
         ],
         "responses": {
           "201": {
@@ -1000,7 +1000,7 @@
           }
         ],
         "tags": [
-          "Subscription Policies"
+          "Advanced Policies"
         ],
         "responses": {
           "200": {
@@ -1056,7 +1056,7 @@
           }
         ],
         "tags": [
-          "Subscription Policies"
+          "Advanced Policies"
         ],
         "responses": {
           "200": {
@@ -1104,7 +1104,7 @@
           }
         ],
         "tags": [
-          "Subscription Policies"
+          "Advanced Policies"
         ],
         "responses": {
           "200": {
