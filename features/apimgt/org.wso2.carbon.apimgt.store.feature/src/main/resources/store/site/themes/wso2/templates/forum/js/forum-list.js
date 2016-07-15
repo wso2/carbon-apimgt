@@ -35,9 +35,11 @@ function forum_load_topics(page, search) {
 
             if(result.total_pages > 0){
                 $('#forum_topics_list').show();
+                $('.forum_topics_list').show();
                 $('#forum_no_topics').hide();
             }else{
                 $('#forum_topics_list').hide();
+                $('.forum_topics_list').hide();
                 $('#forum_no_topics').show();
             }
 

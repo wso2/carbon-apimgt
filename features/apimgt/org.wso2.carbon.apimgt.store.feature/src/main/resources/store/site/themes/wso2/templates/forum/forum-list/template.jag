@@ -21,6 +21,11 @@ if(inputs.api){
 var reqUrl = request.getRequestURI();
 
 %>
+<% if(!inputs.api){ %>
+<div class="page-header" id="Message">
+    <h2><%=i18n.localize("Forum")%></h2>
+</div>
+<% } %>
 <div id="forum_topics_list_page">
         <div class="form-horizontal form-search">
           <div class="form-group">
@@ -43,7 +48,7 @@ var reqUrl = request.getRequestURI();
         </div>
     <div class="row">
       <div class="col-md-12 col-lg-12">
-      <div class="white-wrapper add-padding-5x">
+      <div class="white-wrapper add-padding-5x forum_topics_list" style="display:none">
         <div id="forum_topics_list" style="display:none"></div>
       </div>
         <div id="forum_no_topics" style="display:none" class="message message-info">

@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-15 12:11+0530\n"
+"POT-Creation-Date: 2016-07-15 13:12+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -151,6 +151,10 @@ msgstr ""
 #: site/themes/wso2/templates/tag/tag-cloud/template.jag:4
 #: site/themes/wso2/templates/api/api-info/template.jag:90
 msgid "Tags"
+msgstr ""
+
+#: site/themes/wso2/templates/tag/tag-cloud/template.jag:21
+msgid "No tags to display."
 msgstr ""
 
 #. @todo api should have image and provider
@@ -933,8 +937,8 @@ msgstr ""
 #: site/themes/wso2/templates/menu/actions/template.jag:86
 #: site/themes/wso2/templates/menu/actions/template.jag:91
 #: site/themes/wso2/templates/forum/forum-new/template.jag:11
-#: site/themes/wso2/templates/forum/forum-list/template.jag:35
-#: site/themes/wso2/templates/forum/forum-list/template.jag:36
+#: site/themes/wso2/templates/forum/forum-list/template.jag:40
+#: site/themes/wso2/templates/forum/forum-list/template.jag:41
 msgid "Create New Topic"
 msgstr ""
 
@@ -960,6 +964,7 @@ msgstr ""
 #: site/themes/wso2/templates/menu/primary/template.jag:27
 #: site/themes/wso2/templates/menu/primary/template.jag:39
 #: site/themes/wso2/templates/menu/primary/template.jag:64
+#: site/themes/wso2/templates/forum/forum-list/template.jag:26
 #: site/blocks/api/api-info/block.jag:133
 #: site/blocks/api/api-info/block.jag:189
 #: site/blocks/menu/primary/block.jag:47
@@ -1034,7 +1039,7 @@ msgid "Reply to Thread"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:90
-#: site/themes/wso2/templates/forum/forum-list/template.jag:68
+#: site/themes/wso2/templates/forum/forum-list/template.jag:73
 msgid "Replies"
 msgstr ""
 
@@ -1043,32 +1048,32 @@ msgid "Reply Successfully Added"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:140
-#: site/themes/wso2/templates/forum/forum-list/template.jag:67
+#: site/themes/wso2/templates/forum/forum-list/template.jag:72
 msgid "By"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:29
+#: site/themes/wso2/templates/forum/forum-list/template.jag:34
 msgid "Search Forum"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:31
+#: site/themes/wso2/templates/forum/forum-list/template.jag:36
 #: site/themes/wso2/templates/search/api-search/template.jag:36
 msgid "Search"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:50
+#: site/themes/wso2/templates/forum/forum-list/template.jag:55
 msgid "No topics found."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:51
+#: site/themes/wso2/templates/forum/forum-list/template.jag:56
 msgid "There are no forum topics available."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:66
+#: site/themes/wso2/templates/forum/forum-list/template.jag:71
 msgid "Topic"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:84
+#: site/themes/wso2/templates/forum/forum-list/template.jag:89
 msgid "Delete Comment"
 msgstr ""
 
@@ -1424,6 +1429,7 @@ msgid "Seconds."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:131
+#: site/themes/wso2/templates/application/application-keys/template.jag:174
 msgid "Generating"
 msgstr ""
 
