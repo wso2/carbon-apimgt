@@ -5,6 +5,7 @@ include("/jagg/jagg.jag");
     response.contentType = "application/json; charset=UTF-8";
     var log=new Log();
     var action = request.getParameter("action");
+    var msg = require("/site/conf/ui-messages.jag");
     if (action === "sessionCheck" && request.getMethod() == 'POST') {
          if (log.isDebugEnabled()) {
             log.debug("session check for" + jagg.getUser());
