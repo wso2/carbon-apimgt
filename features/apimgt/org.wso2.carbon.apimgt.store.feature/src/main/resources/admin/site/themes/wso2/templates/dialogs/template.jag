@@ -37,7 +37,7 @@ i18n.init(request,localeResourcesBasePath);%>
                     <label for="username"><%=i18n.localize("Username")%>:</label>
                     <input type="text" id="username" name="name" class="span3" placeholder=<%=i18n.localize("Enter your username.")%> autofocus="autofocus" />
                     <label for="password"><%=i18n.localize("Password")%>:</label>
-                    <input type="password" id="password" name="pass" class="span3"/>
+                    <input type="password" autocomplete="off" id="password" name="pass" class="span3"/>
 
                 </div>
                 <div class="modal-footer">
