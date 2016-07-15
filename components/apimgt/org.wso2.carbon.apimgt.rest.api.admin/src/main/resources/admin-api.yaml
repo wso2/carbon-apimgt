@@ -933,7 +933,7 @@ paths:
             $ref: '#/definitions/AdvancedThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - Subscription Policies
+        - Advanced Policies
       responses:
         201:
           description: |
@@ -985,7 +985,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Subscription Policies
+        - Advanced Policies
       responses:
         200:
           description: |
@@ -1038,7 +1038,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Subscription Policies
+        - Advanced Policies
       responses:
         200:
           description: |
@@ -1078,7 +1078,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Subscription Policies
+        - Advanced Policies
       responses:
         200:
           description: |
