@@ -520,6 +520,10 @@ a.remove_rating:hover{
     font-weight:500;
 }
 
+.requiredAstrix{
+  color:red;
+}
+
 .api-prototype-icon {
     position:absolute;
     bottom:0px;
