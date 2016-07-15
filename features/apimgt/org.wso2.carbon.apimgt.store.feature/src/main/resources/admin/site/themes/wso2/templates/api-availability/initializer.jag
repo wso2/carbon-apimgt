@@ -3,7 +3,6 @@ jagg.initializer("api-availability", {
 
     preInitialize:function () {
         jagg.addHeaderCSS("api-availability", " dataTable","libs/data-tables_1.10.7/media/css/jquery.dataTables.css");
-        jagg.addHeaderCSS("api-availability", " api-availability","libs/font-wso2_1.0.2/css/font-wso2.css");
         jagg.addFooterJS("api-availability", "jagg", "templates/api-availability/js/api-availability.js");
     }
 });
