@@ -1445,8 +1445,13 @@ msgstr ""
 msgid "A request to register this application has been sent."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-keys/template.jag:143
-msgid "This application has been rejected from creating Production keys."
+#: site/themes/wso2/templates/application/application-keys/template.jag:144
+#: site/themes/wso2/templates/application/application-keys/template.jag:161
+msgid "No Keys Found"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:145
+msgid "This application has been rejected from generating keys."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:147

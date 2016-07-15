@@ -140,7 +140,10 @@
 	{{/ifCond}}
 
 	{{#ifCond keyState 'REJECTED'}}
-    	<%=i18n.localize("This application has been rejected from creating Production keys.")%>
+        <div class="message message-warning">
+            <h4><i class="icon fw fw-warning"></i><%=i18n.localize("No Keys Found")%></h4>
+            <p><%=i18n.localize("This application has been rejected from generating keys.")%></p>
+        </div>
 	{{/ifCond}}
 
 	{{#ifCond keyState 'COMPLETED'}}
@@ -155,7 +158,7 @@
 
   {{else}}
     <div class="message message-info remove-margin">
-    	<h4><i class="icon fw fw-info"></i>No Keys Found</h4>
+    	<h4><i class="icon fw fw-info"></i><%=i18n.localize("No Keys Found")%></h4>
         <p><%=i18n.localize("No keys are generated for this type in this application.")%></p>
     </div>
   	  {{#unless provide_keys_form }}
