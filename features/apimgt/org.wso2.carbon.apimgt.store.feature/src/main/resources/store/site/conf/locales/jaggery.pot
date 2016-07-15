@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-15 14:09+0530\n"
+"POT-Creation-Date: 2016-07-15 16:47+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -647,6 +647,7 @@ msgstr ""
 #: site/themes/wso2/templates/forum/forum-new/template.jag:21
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:39
 #: site/themes/wso2/templates/application/application-view/template.jag:50
+#: site/themes/wso2/templates/application/application-add/template.jag:84
 msgid "Description"
 msgstr ""
 
@@ -1061,6 +1062,7 @@ msgid "Search Forum"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-list/template.jag:36
+#: site/themes/wso2/templates/search/api-search/template.jag:35
 #: site/themes/wso2/templates/search/api-search/template.jag:37
 msgid "Search"
 msgstr ""
@@ -1101,7 +1103,6 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:35
 #: site/themes/wso2/templates/search/api-search/template.jag:42
 #: site/themes/wso2/templates/search/api-search/template.jag:44
 #: site/themes/wso2/templates/search/api-search/template.jag:92
