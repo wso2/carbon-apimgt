@@ -11,10 +11,10 @@ var urlSuffix = jagg.getTenantURLPrefix();
     <h2><%=i18n.localize('Create New Topic')%></h2>
 </div>
 
-<div id="forum_add_new_topic_page">
+<div id="forum_add_new_topic_page" class="white-wrapper add-padding-5x">
 
     <form class="forum_form">
-      <div class="form-group">
+      <div class="form-group add-margin-bottom-5x">
         <h4><%=i18n.localize('Subject')%></h4>
         <input type="text" id="subject" title="<%=i18n.localize('Subject')%>" class="form-control">
       </div>
