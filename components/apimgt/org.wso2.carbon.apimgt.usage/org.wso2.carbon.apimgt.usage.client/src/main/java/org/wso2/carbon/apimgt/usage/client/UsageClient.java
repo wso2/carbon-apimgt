@@ -432,6 +432,8 @@ public class UsageClient {
                 StringBuilder providers = new StringBuilder(" and api.api_provider in (");
                 if (providerList.size() > 0) {
                     providers.append("'").append(providerList.get(0)).append("'");
+                } else {
+                    providers.append("''");
                 }
                 for (int i = 1; i < providerList.size(); i++) {
                     providers.append(", '").append(providerList.get(i)).append("' ");
