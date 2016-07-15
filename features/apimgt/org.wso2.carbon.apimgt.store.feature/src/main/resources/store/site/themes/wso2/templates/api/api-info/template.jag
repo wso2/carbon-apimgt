@@ -71,7 +71,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
     <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%= jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
     var existingRating = <%=api.rating%>
     </script>
-    <h2 class="truncate-children"><span><%=api.name%> - <%=api.version%><span></h2>
+    <h2 class="truncate-children"><span><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%><span></h2>
     <%
             var tagDisplayName = "";
             var tag = "";
@@ -105,7 +105,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                 <div class="square-element setbgcolor">
                                     <div class="api-name-icon"></div>
                                         <div style="display: none">
-                                            <a href="" title="api name" class="api-name"><%=api.name%></a>
+                                            <a href="" title="api name" class="api-name"><%=encode.forHtml(api.name)%></a>
                                         </div>
                                 </div>
                              <% } else { %>
@@ -217,7 +217,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                   <!-- Load Tiers -->
                                 <%if(user && api) { %>
                                     <div class="form-group">
-                                        <label for="tier-select1" class="hidden-xs"><%=i18n.localize("Tiers")%></label>
+                                        <label for="tiers-list" class="hidden-xs"><%=i18n.localize("Tiers")%></label>
                                         <select id="tiers-list" name="tiers-list" class="form-control">
                                             <%
                                                 var tiersList = api.tiers, denied = false, tiersAvailable = false;
@@ -307,7 +307,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 						}
                     	var path = api.redirectURL + "/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.apiOwner +"&tenant=" + tenantDomain;
                     %>
-                    	<div id="store-redirect-link" class="span4 title-section"><a class="btn btn-primary" title="<%=i18n.localize("Visit Publisher Store")%>" href="<%=path%>" target="_"><%=i18n.localize("Visit Publisher Store")%></a></div>
+                    	<div id="store-redirect-link1" class="span4 title-section"><a class="btn btn-primary" title="<%=i18n.localize("Visit Publisher Store")%>" href="<%=path%>" target="_"><%=i18n.localize("Visit Publisher Store")%></a></div>
                     <%}%>
                 </div>
             </div>

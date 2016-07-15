@@ -23,8 +23,8 @@ var tenantDomains=outputs.tenantDomains;
                                 <%for(var i=0;i< tenantDomains.length;i++){
                                     var site = require("/site/conf/site.json");
                                 %>
-                                    <a class="list-group-item col-xs-12 col-sm-12 col-md-12 col-lg-12" href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=tenantDomains[i]%>">
-                                        <h3 class="list-group-item-heading"><%=tenantDomains[i]%></h3>
+                                    <a class="list-group-item col-xs-12 col-sm-12 col-md-12 col-lg-12" href="<%= encode.forHtmlAttribute(encode.forUri(jagg.getSiteContext() + "?tenant="+tenantDomains[i])) %>" title="<%=encode.forHtmlAttribute(tenantDomains[i])%>">
+                                        <h3 class="list-group-item-heading"><%=encode.forHtml(tenantDomains[i])%></h3>
                                         <p class="list-group-item-text"><%=i18n.localize("Visit Store")%></p>
                                     </a>
                                 <%}%>

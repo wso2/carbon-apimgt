@@ -15,7 +15,7 @@
 		    <%if(!doc.provider.content && doc.provider.content==""){%>
                 <div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("No Content")%></h4>
-                    <p><%=i18n.localize("No document content have been added yet.")%></p>
+                    <p><%=i18n.localize("No document content has been added yet.")%></p>
                 </div>                
 		    <%}else{%>
 		    	<p><%=doc.provider.content%></p>

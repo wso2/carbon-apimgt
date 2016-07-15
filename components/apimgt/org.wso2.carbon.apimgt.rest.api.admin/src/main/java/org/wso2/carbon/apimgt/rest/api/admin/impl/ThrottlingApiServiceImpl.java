@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;

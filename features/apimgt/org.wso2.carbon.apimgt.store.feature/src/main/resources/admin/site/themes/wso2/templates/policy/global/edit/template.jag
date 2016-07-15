@@ -119,7 +119,7 @@ var isNewPolicy = true;
              location.href = "<%= jagg.url('/global-policy-manage')%>";
         });
 
-        if('<%=policyName%>' != 'null'){
+        if('<%=encode.forJavaScript(String(policyName))%>' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){

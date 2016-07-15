@@ -47,8 +47,15 @@ if(jagg.isCSRFTokenValid())
                     url = url.trim();
                     var data = { };
                     try{
-                    var content = get(url, data ,"json");
+                    var content = get(url, data);
                     swagger = content.data;
+                    var keywords = [ /swagger/i, /info/i , /paths/i, /version/i ];
+                    var valid = true;
+                    for(var i =0 ;i< keywords.length; i++){
+                        if ((m = keywords[i].exec(content.data)) == null){
+                                swagger = "undefined";
+                        }
+                    }
                     }catch (e) {
                         print({error:true,message:url+" is not a valid Swagger Definition url"});
                         return;

@@ -39,7 +39,7 @@
         <p class="lead"></p>
     </div>
 
-    <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtml(String(policyAction))%>" />
+    <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtmlAttribute(String(policyAction))%>" />
     <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("Required")%>'/>
     <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("Invalid")%>'/>
     <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value="'<%=i18n.localize('Name contains one or more illegal characters')%>'+'( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).'"/>
@@ -146,12 +146,12 @@
         });
 
         var isNewPolicy = true;
-        if('<%=policyName%>' != 'null'){
+        if('<%=encode.forJavaScript(String(policyName))%>' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=policyName%>");
-          $('#description').val("<%=description%>");
+          $('#policyName').val("<%=encode.forJavaScript(String(policyName))%>");
+          $('#description').val("<%=encode.forJavaScript(String(description))%>");
           $('#defaultUnitTime').val("<%=defaultUnitTime%>");
           $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
 

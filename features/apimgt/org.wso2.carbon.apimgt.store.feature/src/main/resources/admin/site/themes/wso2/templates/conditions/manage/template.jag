@@ -25,7 +25,7 @@
     <table class="table table-responsive table-striped" id="manage-tiers">
         <thead>
             <tr>
-                <th class=""><%=i18n.localize("Condition Id")%></th>
+                <th class=""><%=i18n.localize("Condition ID")%></th>
                 <th class=""><%=i18n.localize("Condition Type")%></th>
                 <th class=""><%=i18n.localize("Condition Value")%></th>
                 <th class=""><%=i18n.localize("Condition Status")%></th>

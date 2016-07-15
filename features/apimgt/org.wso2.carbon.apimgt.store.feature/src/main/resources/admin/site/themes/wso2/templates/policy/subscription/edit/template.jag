@@ -78,7 +78,7 @@
 
 
     <div id='tier-add-container' class="row-fluid"  style="display:inline">
-        <input type="hidden" id="policyAction" name="policyAction" value="<%=policyAction%>" />
+        <input type="hidden" id="policyAction" name="policyAction" value="<%=encode.forHtmlAttribute(policyAction)%>" />
 
         <div class="page-header">
 	        <h2 id="tierTopic"><%=pageTitle%></h2>
@@ -305,7 +305,7 @@
               location.href = "<%= jagg.url('/subscription-policy-manage')%>";
         });
         var isNewPolicy = true;
-        if('<%=policyName%>' != 'null'){
+        if('encode.forJavaScript(String(policyName))' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){
