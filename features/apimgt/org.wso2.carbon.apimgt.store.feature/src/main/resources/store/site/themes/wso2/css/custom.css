@@ -323,6 +323,14 @@ a.remove_rating:hover{
  #tab3 .white-wrapper.add-padding-5x{
     padding:0px!important;
  }
+ .checkbox .helper{
+    padding-left:30px;
+ }
+ .checkbox p {
+     padding: 0 0 0 30px;
+     position: relative;
+     margin: 0;
+ }
 
 /* =============================================================================
  * Same height columns support
@@ -514,4 +522,26 @@ a.remove_rating:hover{
 
 .requiredAstrix{
   color:red;
+}
+
+.api-prototype-icon {
+    position:absolute;
+    bottom:0px;
+    left:0px;
+    opacity:1;
+}
+
+.square-element .api-prototype-icon{
+    display:block;
+    background:rgba(0, 0, 0, .3);
+    color:#fff;
+    width:40px;
+    height:40px;
+    position:absolute;
+    z-index: 999;
+}
+
+.square-element .api-prototype-icon i{
+    font-size:1.5em;
+    padding:12px 2px;
 }

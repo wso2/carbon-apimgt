@@ -3,7 +3,7 @@ var tasks=outputs.tasks;
 %>
 <div id="listing">
 	<div class="page-header">
-      <h2><%=i18n.localize("myTasks")%></h2>
+      <h2><%=i18n.localize("Approval Tasks")%></h2>
   </div>
 
         <%

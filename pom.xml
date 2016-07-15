@@ -1037,6 +1037,12 @@
                 <artifactId>org.wso2.carbon.metrics.manager</artifactId>
                 <version>${carbon.metrics.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.throttle.service.interceptors</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

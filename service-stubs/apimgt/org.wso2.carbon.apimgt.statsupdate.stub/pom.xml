@@ -28,7 +28,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>6.0.0-SNAPSHOT</version>
     <name>WSO2 Carbon - API Stat Publishing Status Update Service Stub</name>
     <url>http://wso2.org</url>
 
