@@ -31,7 +31,7 @@ public class ThrottleConditionDTO  {
   private TypeEnum type = null;
   
   
-  private Boolean invertCondition = null;
+  private Boolean invertCondition = false;
 
   
   /**

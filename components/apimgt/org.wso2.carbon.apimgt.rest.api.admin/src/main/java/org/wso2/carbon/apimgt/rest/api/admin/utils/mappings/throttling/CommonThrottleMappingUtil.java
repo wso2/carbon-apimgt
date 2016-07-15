@@ -533,7 +533,6 @@ public class CommonThrottleMappingUtil {
 
         policy.setTenantId(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
         policy.setDisplayName(dto.getDisplayName());
-        policy.setDeployed(dto.getIsDeployed());
         policy.setDescription(dto.getDescription());
         policy.setPolicyName(dto.getPolicyName());
         return policy;

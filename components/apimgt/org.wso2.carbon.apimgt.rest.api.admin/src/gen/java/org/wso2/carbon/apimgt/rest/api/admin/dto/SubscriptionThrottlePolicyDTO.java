@@ -32,7 +32,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
   
   
-  private Boolean stopOnQuotaReach = null;
+  private Boolean stopOnQuotaReach = false;
   
   
   private String billingPlan = null;

@@ -27,7 +27,7 @@ public class ThrottlePolicyDTO  {
   private String description = null;
   
   
-  private Boolean isDeployed = null;
+  private Boolean isDeployed = false;
 
   
   /**
