@@ -519,3 +519,25 @@ a.remove_rating:hover{
 .comment-extra strong{
     font-weight:500;
 }
+
+.api-prototype-icon {
+    position:absolute;
+    bottom:0px;
+    left:0px;
+    opacity:1;
+}
+
+.square-element .api-prototype-icon{
+    display:block;
+    background:rgba(0, 0, 0, .3);
+    color:#fff;
+    width:40px;
+    height:40px;
+    position:absolute;
+    z-index: 999;
+}
+
+.square-element .api-prototype-icon i{
+    font-size:1.5em;
+    padding:12px 2px;
+}

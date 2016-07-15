@@ -75,6 +75,9 @@
                                 <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
                                 		<div class="square-element setbgcolor">
+                                		    <% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
+                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                            <% } %>
 											<div class="api-name-icon"></div>
 											<div style="display: none">
 												<a href="" title="<%=i18n.localize("Name")%>" class="api-name"><%=api.name%></a>
@@ -83,6 +86,9 @@
                                     <% } else { %>
                                     	<div class="square-element">
                                     		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
+                                    		<% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
+                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                            <% } %>
                                     	</div>
                                     <% } %>
                                     <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">

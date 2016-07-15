@@ -35,7 +35,7 @@ if(tasks!=null && tasks!='null'){
     }
     if(tasks.length==0){%>
     <div class="message message-info">
-		<h4><i class="icon fw fw-info"></i><%=i18n.localize("No Custom Rules Found")%></h4>
+		<h4><i class="icon fw fw-info"></i><%=i18n.localize("No tasks assigned to the login user or no connectivity with BPS engine.")%></h4>
 	  </div>
 
   <%}else if(currentPage > numberOfPages){
