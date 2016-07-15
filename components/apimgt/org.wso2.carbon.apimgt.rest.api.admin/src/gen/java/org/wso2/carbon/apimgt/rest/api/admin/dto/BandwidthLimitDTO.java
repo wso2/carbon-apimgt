@@ -16,7 +16,7 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO {
   
   
   
-  private Long dataAmount = null;
+  private Long dataAmount = 0l;
   
   
   private String dataUnit = null;

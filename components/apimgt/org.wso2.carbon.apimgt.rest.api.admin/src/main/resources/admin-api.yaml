@@ -1480,6 +1480,7 @@ definitions:
         type: string
       isDeployed:
         type: boolean
+        default: false
   
 #-----------------------------------------------------
 # The Advanced Throttle Policy Info resource
@@ -1570,6 +1571,7 @@ definitions:
             $ref: '#/definitions/ThrottleLimit'
           rateLimitCount:
             type: integer
+            default: 0
           rateLimitTimeUnit:
             type: string
           customAttributes:
@@ -1583,6 +1585,7 @@ definitions:
             example: {}
           stopOnQuotaReach:
             type: boolean
+            default: false
           billingPlan:
             type: string
 
@@ -1676,6 +1679,7 @@ definitions:
           - QueryParameterCondition
       invertCondition:
         type: boolean
+        default: false
 
 #-----------------------------------------------------
 # The Throttle HTTP Header Condition resource
@@ -1769,6 +1773,7 @@ definitions:
         type: string
       unitTime:
         type: integer
+        default: 0
   
 #-----------------------------------------------------
 # The Throttle Bandwidth Limit resource
@@ -1783,6 +1788,7 @@ definitions:
           dataAmount:
             type: integer
             format: int64
+            default: 0
           dataUnit:
             type: string
 
@@ -1798,6 +1804,7 @@ definitions:
           requestCount:
             type: integer
             format: int64
+            default: 0
 
 #-----------------------------------------------------
 # The Throttle Blocking Condition resource
