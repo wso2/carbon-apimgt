@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-15 13:12+0530\n"
+"POT-Creation-Date: 2016-07-15 14:09+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,6 +69,10 @@ msgstr ""
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:27
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:32
 msgid "Unsubscribe"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:66
+msgid "Not Configured"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faultCount/template.jag:3
@@ -1057,7 +1061,7 @@ msgid "Search Forum"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-list/template.jag:36
-#: site/themes/wso2/templates/search/api-search/template.jag:36
+#: site/themes/wso2/templates/search/api-search/template.jag:37
 msgid "Search"
 msgstr ""
 
@@ -1079,72 +1083,72 @@ msgstr ""
 
 #. selected type text
 #: site/themes/wso2/templates/search/api-search/template.jag:11
-#: site/themes/wso2/templates/search/api-search/template.jag:29
+#: site/themes/wso2/templates/search/api-search/template.jag:30
 msgid "All"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:14
-#: site/themes/wso2/templates/search/api-search/template.jag:30
+#: site/themes/wso2/templates/search/api-search/template.jag:31
 msgid "Production"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:18
-#: site/themes/wso2/templates/search/api-search/template.jag:31
+#: site/themes/wso2/templates/search/api-search/template.jag:32
 msgid "Prototyped"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:27
+#: site/themes/wso2/templates/search/api-search/template.jag:28
 msgid "Category"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:34
-#: site/themes/wso2/templates/search/api-search/template.jag:41
-#: site/themes/wso2/templates/search/api-search/template.jag:43
-#: site/themes/wso2/templates/search/api-search/template.jag:91
+#: site/themes/wso2/templates/search/api-search/template.jag:35
+#: site/themes/wso2/templates/search/api-search/template.jag:42
+#: site/themes/wso2/templates/search/api-search/template.jag:44
+#: site/themes/wso2/templates/search/api-search/template.jag:92
 msgid "Search Options"
-msgstr ""
-
-#: site/themes/wso2/templates/search/api-search/template.jag:49
-#: site/themes/wso2/templates/search/api-search/template.jag:77
-msgid "By API Name [Default]"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:50
 #: site/themes/wso2/templates/search/api-search/template.jag:78
-msgid "By API Provider [ Syntax - provider:xxxx ]  or"
+msgid "By API Name [Default]"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:51
 #: site/themes/wso2/templates/search/api-search/template.jag:79
-msgid "By API Version [ Syntax - version:xxxx ]  or"
+msgid "By API Provider [ Syntax - provider:xxxx ]  or"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:52
 #: site/themes/wso2/templates/search/api-search/template.jag:80
-msgid "By Context [ Syntax - context:xxxx ]  or"
+msgid "By API Version [ Syntax - version:xxxx ]  or"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:53
 #: site/themes/wso2/templates/search/api-search/template.jag:81
-msgid "By Description [ Syntax - description:xxxx ] or"
+msgid "By Context [ Syntax - context:xxxx ]  or"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:54
-msgid "By Tags [ Syntax - tags:xxxx ] or"
+#: site/themes/wso2/templates/search/api-search/template.jag:82
+msgid "By Description [ Syntax - description:xxxx ] or"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:55
-#: site/themes/wso2/templates/search/api-search/template.jag:82
-msgid "By Sub-Context [ Syntax - subcontext:xxxx ] or"
+msgid "By Tags [ Syntax - tags:xxxx ] or"
 msgstr ""
 
 #: site/themes/wso2/templates/search/api-search/template.jag:56
 #: site/themes/wso2/templates/search/api-search/template.jag:83
+msgid "By Sub-Context [ Syntax - subcontext:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:57
+#: site/themes/wso2/templates/search/api-search/template.jag:84
 msgid "By Documentation Content [ Syntax - doc:xxxx ]"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:69
 #: site/themes/wso2/templates/search/api-search/template.jag:70
+#: site/themes/wso2/templates/search/api-search/template.jag:71
 msgid "searchAPI"
 msgstr ""
 
@@ -1694,3 +1698,6 @@ msgstr "Abnormal Tier Usage"
 
 msgid "healthAvailabilityPerMin"
 msgstr "Health Availability Per Minute"
+
+msgid "Please enable statistics to see this page"
+msgstr "Please configure API Manager Analytics to enable alerts."

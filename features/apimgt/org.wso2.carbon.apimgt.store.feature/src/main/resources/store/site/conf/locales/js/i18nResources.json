@@ -37,6 +37,7 @@
     "Not Configured": "Not Configured",
     "Number of API Calls": "Number of API Calls",
     "OK": "OK",
+    "Please enable statistics to see this page": "Please configure API Manager Analytics to enable alerts.",
     "Please enter at least one email address": "Please enter at least one email address",
     "Please select an application before subscribing": "Please select an application before subscribing",
     "Please select at least one alert type": "Please select at least one alert type",
