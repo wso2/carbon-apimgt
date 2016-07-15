@@ -25,7 +25,7 @@
        <% }else{ %>
        	  <div class="message message-info">
                     <h4><i class="icon fw fw-success"></i><%=i18n.localize("Info")%></h4>
-                    <p><%=i18n.localize("The theme should be a zip file containing css and images which is complient to API Manager theme format")%></p>
+                    <p><%=i18n.localize("The theme should be a zip file containing css and images compliant with the API Manager theme format")%></p>
            </div> 
         <% } %>
 
