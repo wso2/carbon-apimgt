@@ -5987,4 +5987,19 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getThrottleProperties().isEnableJwtConditions();
     }
+
+    public static String getAnalyticsServerURL() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasServerUrl();
+    }
+
+    public static String getAnalyticsServerUserName() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasReceiverServerUser();
+    }
+
+    public static String getAnalyticsServerPassword() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIAnalyticsConfiguration().
+                getDasReceiverServerPassword();
+    }
 }
