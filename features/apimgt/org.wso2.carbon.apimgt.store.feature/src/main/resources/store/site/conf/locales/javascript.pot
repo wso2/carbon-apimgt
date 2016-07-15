@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 18:45+0530\n"
+"POT-Creation-Date: 2016-07-15 12:11+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,54 +45,45 @@ msgstr ""
 msgid "Please select at least one alert type"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/js/stats.js:75
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:71
-msgid "Stats Enabled"
+#: site/themes/wso2/templates/stats/js/stats.js:4
+msgid "Not Configured"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/js/stats.js:81
-msgid ""
-"<a href='https://docs.wso2.com/display/AM200/Configuring+API+Runtime"
-"+Statistics' title='statsDoc' target='_blank' class='warningLink'>Refer our "
-"wiki to configure DAS correctly</a>"
+#: site/themes/wso2/templates/stats/js/stats.js:6
+msgid "WSO2 wiki documentation on APIM Analytics"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/js/stats.js:81
-#: site/themes/wso2/templates/stats/apiCallType/js/stats.js:80
-msgid "Stats Disabled"
+#: site/themes/wso2/templates/stats/js/stats.js:7
+msgid "Refer our documentation to configure API Manager Analytics correctly"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:77
-#: site/themes/wso2/templates/stats/apiCallType/js/stats.js:79
-msgid "Refer our wiki to configure DAS correctly"
+#: site/themes/wso2/templates/stats/js/stats.js:15
+msgid "Data Publishing Enabled"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:113
+#: site/themes/wso2/templates/stats/js/stats.js:16
+msgid "Generate Some traffic to see statistics"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
 msgid "Application Name: "
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:113
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
 msgid "User"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:113
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
 msgid "Number of API Calls"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:140
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:139
 msgid "No Data Available."
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:209
-#: site/themes/wso2/templates/stats/topUsers/js/stats.js:538
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:208
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:537
 msgid "No Data Found ... "
-msgstr ""
-
-#: site/themes/wso2/templates/stats/perAppAPICount/js/stats.js:81
-msgid ""
-"<a title='statsDocs' href='https://docs.wso2.com/display/AM200/Configuring"
-"+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki "
-"to configure DAS correctly</a>"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:137
@@ -472,3 +463,30 @@ msgstr ""
 "percentile of that particular API or Request Count of an API per minute > "
 "Request count per minute lower percentile or Response status code >= 500 (By "
 "Default) AND Response status code < 600 (By Default)"
+
+msgid "abnormalResponseTime"
+msgstr "Abnormal Response Time"
+
+msgid "abnormalBackendTime"
+msgstr "Abnormal Backend Time"
+
+msgid "abnormalRequestsPerMin"
+msgstr "Abnormal Requests Per Minute"
+
+msgid "RequestPatternChanged"
+msgstr "Request Pattern Changed"
+
+msgid "UnusualIPAccessAlert"
+msgstr "Unusual IP Access Alert"
+
+msgid "AbnormalRefreshAlert"
+msgstr "Abnormal Refresh Alert"
+
+msgid "FrequentTierHittingAlert"
+msgstr "Frequent Tier Hitting Alert"
+
+msgid "AbnormalTierUsage"
+msgstr "Abnormal Tier Usage"
+
+msgid "healthAvailabilityPerMin"
+msgstr "Health Availability Per Minute"

@@ -16,7 +16,7 @@ include("/jagg/jagg.jag");
     } else if (request.getMethod() == 'POST') {
         if (action == "deleteConfiguration" ) {
             var domainName =  request.getParameter("domainName", "UTF-8");
-            var configurationName = encode.forJavaScript(request.getParameter("configurationName", "UTF-8"));
+            var configurationName = request.getParameter("configurationName", "UTF-8");
             mod = jagg.module("configure-alerts");
 
             result = mod.deleteConfiguration(domainName, configurationName);
