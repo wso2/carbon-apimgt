@@ -333,7 +333,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 if (ttlValue != null) {
                     ttl = Long.parseLong(ttlValue);
                 } else {
-                    ttl = 15L;
+                    //15 * 60 (convert 15 minutes to seconds)
+                    ttl = Long.valueOf(900);
                 }
             }
             return ttl;
