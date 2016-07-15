@@ -57,6 +57,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
   	subsPermitted = false;
   }
 
+  var labelType = "label-default";
+  if(api.status == 'PROTOTYPED') {
+  	labelType = 'label-warning';
+  }else if(api.status == 'PUBLISHED'){
+    labelType = 'label-primary';
+  }
+
    var environments = api.serverURL.split("|");
    for(i=0; i<environments.length; i++){
         var environment = environments[i];
@@ -143,7 +150,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                     <div class="form-group">
                                         <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Status:")%></strong></label>
                                         <div class="col-xs-8 col-sm-8">
-                                            <p class="form-control-static"><span class="text-info"><i class="fw fw-publish fw-2x"></i> <%=api.status%></span></p>
+                                            <p class="form-control-static"><span class="label <%= labelType %>"><%=api.status%></span></p>
                                         </div>
                                     </div>
                                     <div class="form-group">
