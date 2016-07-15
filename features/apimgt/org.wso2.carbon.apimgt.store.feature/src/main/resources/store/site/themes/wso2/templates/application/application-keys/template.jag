@@ -136,7 +136,10 @@
   {{else if keyState}}
 
   	{{#ifCond keyState 'CREATED'}}
-    	<%=i18n.localize("A request to register this application has been sent.")%>
+    	<div class="message message-info">
+            <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info")%></h4>
+            <p><%=i18n.localize("A request to register this application has been sent.")%></p>
+        </div>
 	{{/ifCond}}
 
 	{{#ifCond keyState 'REJECTED'}}
