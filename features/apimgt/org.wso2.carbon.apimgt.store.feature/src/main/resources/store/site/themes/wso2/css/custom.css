@@ -511,3 +511,7 @@ a.remove_rating:hover{
 .comment-extra strong{
     font-weight:500;
 }
+
+.requiredAstrix{
+  color:red;
+}
