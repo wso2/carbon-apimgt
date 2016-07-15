@@ -313,6 +313,7 @@ GrantTypes.prototype.getMap = function(selected){
         },
 
         updateGrants: function(){
+            $('.update_grants').buttonLoader('start');
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
 
@@ -323,8 +324,8 @@ GrantTypes.prototype.getMap = function(selected){
                 jsonParams:'{"grant_types":"'+selected+'"}',
                 callbackUrl:this.app.callbackUrl
             }, $.proxy(function (result) {
+                $('.update_grants').buttonLoader('stop');
                 if (!result.error) {
-                    console.log(result);                    
                 } else {
                     //@todo: param_string
                     jagg.message({content:result.message,type:"error"});
