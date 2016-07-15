@@ -7,19 +7,19 @@ var error = {
         },
 
     backendError:function (action) {
-        return "Error occurred while executing the action " + action;
+        return "Error occurred while executing the action";
     },
 
     authError:function (action) {
-        return "Error occurred while executing the action " + action;
+        return "Error occurred while executing the action";
     },
 
     contentMissing:function(action) {
-        return "Please provide all needed content in order to " + action;
+        return "Please provide all needed parameters.";
     },
 
     invalidAction:function(action) {
-        return action + " is not supported";
+        return "Requested action is not supported.";
     },
     pageNotFoundAction:function() {
         return {title:"The page cannot be found.",

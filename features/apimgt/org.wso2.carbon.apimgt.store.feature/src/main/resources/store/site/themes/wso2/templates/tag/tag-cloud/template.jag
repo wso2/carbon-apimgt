@@ -18,7 +18,7 @@
               var path = "<%=jagg.urlTenanted("/site/pages/list-apis.jag",{ "page" : 1 })%>";
               var words = [];
               if(result.tags.length == 0){
-                $("#tag-content").append('<span class="text-muted">i18n.localize("No tags to display.")</span>');
+                $("#tag-content").append('<span class="text-muted"><%=i18n.localize("No tags to display.")%></span>');
               } else {
             	  $('#tagcloud').show();
               }

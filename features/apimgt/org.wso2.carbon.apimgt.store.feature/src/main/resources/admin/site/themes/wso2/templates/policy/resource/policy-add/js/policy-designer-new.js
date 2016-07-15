@@ -1,4 +1,11 @@
 var index = 0;
+$.fn.editableform.buttons =
+    '<button type="submit" class="btn btn-primary btn-sm editable-submit">'+
+    '<i class="fw fw-check"></i>'+
+    '</button>'+
+    '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
+    '<i class="fw fw-cancel"></i>'+
+    '</button>';
 
 Handlebars.registerHelper('if_eq', function (a, b, opts) {
   if (a == b) {

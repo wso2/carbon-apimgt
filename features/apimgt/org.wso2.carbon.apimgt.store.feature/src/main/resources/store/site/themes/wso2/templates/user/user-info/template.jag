@@ -22,7 +22,7 @@
 
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="currentPassword"><%=i18n.localize("Current Password")%>:<span class="requiredAstrix">*</span></label>
-			<div class="col-sm-4"><input type="password" title="currentPassword" class="password form-control" id="currentPassword" /></div>
+			<div class="col-sm-4"><input type="password"  autocomplete="off" title="currentPassword" class="password form-control" id="currentPassword" /></div>
 		</div>
 
 </form>
@@ -33,7 +33,7 @@
     <div class="form-group">
         <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("New Password")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
-            <input type="password" title="<%=i18n.localize("Enter a more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword" />
+            <input type="password" title="<%=i18n.localize("Enter a more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword"  autocomplete="off"/>
 
             <div class="help-block" id="password-help" style="display:none">
               <%=i18n.localize("For a more secure password:")%>
@@ -58,7 +58,7 @@
 
     <div class="form-group">
             <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("Re-type Password")%>:<span class="requiredAstrix">*</span></label>
-            <div class="col-sm-4"><input type="password" title="<%=i18n.localize("Password did not match")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm" /></div>
+            <div class="col-sm-4"><input type="password" title="<%=i18n.localize("Password did not match")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm"  autocomplete="off" /></div>
     </div>
 	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/> 
     <div class="row">

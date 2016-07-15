@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 18:45+0530\n"
+"POT-Creation-Date: 2016-07-15 14:09+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,40 +71,44 @@ msgstr ""
 msgid "Unsubscribe"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:6
+#: site/themes/wso2/templates/manage-alerts/template.jag:66
+msgid "Not Configured"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:3
 msgid "Faulty Invocations per Application"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:13
-#: site/themes/wso2/templates/stats/topUsers/template.jag:12
-#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:9
+#: site/themes/wso2/templates/stats/faultCount/template.jag:15
+#: site/themes/wso2/templates/stats/topUsers/template.jag:14
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:13
 msgid "Hour"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/faultCount/template.jag:14
-#: site/themes/wso2/templates/stats/topUsers/template.jag:13
-#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:10
-msgid "Day"
 msgstr ""
 
 #: site/themes/wso2/templates/stats/faultCount/template.jag:16
 #: site/themes/wso2/templates/stats/topUsers/template.jag:15
-#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:11
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:14
+msgid "Day"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:18
+#: site/themes/wso2/templates/stats/topUsers/template.jag:17
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:15
 msgid "Week"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:17
-#: site/themes/wso2/templates/stats/topUsers/template.jag:16
-#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:12
+#: site/themes/wso2/templates/stats/faultCount/template.jag:19
+#: site/themes/wso2/templates/stats/topUsers/template.jag:18
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:16
 msgid "Month"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:35
+#: site/themes/wso2/templates/stats/faultCount/template.jag:37
 #: site/themes/wso2/templates/stats/apiCallType/template.jag:35
 msgid "Application Name"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:36
+#: site/themes/wso2/templates/stats/faultCount/template.jag:38
 #: site/themes/wso2/templates/stats/apiCallType/template.jag:36
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:17
 #: site/themes/wso2/templates/api/api-listing-tag-wise/template.jag:40
@@ -115,24 +119,24 @@ msgstr ""
 msgid "API Name"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:37
+#: site/themes/wso2/templates/stats/faultCount/template.jag:39
 msgid "Faulty API Invocation Count"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/faultCount/template.jag:44
+#: site/themes/wso2/templates/stats/faultCount/template.jag:46
 msgid "No Data Available."
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/template.jag:6
-#: site/themes/wso2/templates/stats/topUsers/template.jag:41
+#: site/themes/wso2/templates/stats/topUsers/template.jag:3
+#: site/themes/wso2/templates/stats/topUsers/template.jag:43
 msgid "Top Users For Applications"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/topUsers/template.jag:26
+#: site/themes/wso2/templates/stats/topUsers/template.jag:28
 msgid "Registered Users For Applications"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/apiCallType/template.jag:7
+#: site/themes/wso2/templates/stats/apiCallType/template.jag:3
 msgid "API Usage from Resource Path"
 msgstr ""
 
@@ -151,6 +155,10 @@ msgstr ""
 #: site/themes/wso2/templates/tag/tag-cloud/template.jag:4
 #: site/themes/wso2/templates/api/api-info/template.jag:90
 msgid "Tags"
+msgstr ""
+
+#: site/themes/wso2/templates/tag/tag-cloud/template.jag:21
+msgid "No tags to display."
 msgstr ""
 
 #. @todo api should have image and provider
@@ -178,7 +186,7 @@ msgid "Subscription Tier"
 msgstr ""
 
 #: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:19
-#: site/themes/wso2/templates/application/application-view/template.jag:33
+#: site/themes/wso2/templates/application/application-view/template.jag:37
 msgid "Status"
 msgstr ""
 
@@ -638,7 +646,7 @@ msgstr ""
 #: site/themes/wso2/templates/api/overview/template.jag:90
 #: site/themes/wso2/templates/forum/forum-new/template.jag:21
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:39
-#: site/themes/wso2/templates/application/application-view/template.jag:46
+#: site/themes/wso2/templates/application/application-view/template.jag:50
 msgid "Description"
 msgstr ""
 
@@ -672,26 +680,26 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: site/themes/wso2/templates/api/swagger/template.jag:232
+#: site/themes/wso2/templates/api/swagger/template.jag:231
 msgid "Please subscribe to the API to generate an access token."
 msgstr ""
 
-#: site/themes/wso2/templates/api/swagger/template.jag:232
-#: site/themes/wso2/templates/api/swagger/template.jag:237
+#: site/themes/wso2/templates/api/swagger/template.jag:231
+#: site/themes/wso2/templates/api/swagger/template.jag:236
 msgid "If you already have an access token please provide it below."
 msgstr ""
 
-#: site/themes/wso2/templates/api/swagger/template.jag:237
+#: site/themes/wso2/templates/api/swagger/template.jag:236
 msgid ""
 "You require an access token to try the API. Please login and subscribe to "
 "the API to generate an access token."
 msgstr ""
 
-#: site/themes/wso2/templates/api/swagger/template.jag:242
+#: site/themes/wso2/templates/api/swagger/template.jag:241
 msgid "Warning!"
 msgstr ""
 
-#: site/themes/wso2/templates/api/swagger/template.jag:243
+#: site/themes/wso2/templates/api/swagger/template.jag:242
 msgid ""
 "Selected application does not have an access token for the selected "
 "environment. Please go to the subscription page and generate an access token "
@@ -933,8 +941,8 @@ msgstr ""
 #: site/themes/wso2/templates/menu/actions/template.jag:86
 #: site/themes/wso2/templates/menu/actions/template.jag:91
 #: site/themes/wso2/templates/forum/forum-new/template.jag:11
-#: site/themes/wso2/templates/forum/forum-list/template.jag:36
-#: site/themes/wso2/templates/forum/forum-list/template.jag:37
+#: site/themes/wso2/templates/forum/forum-list/template.jag:40
+#: site/themes/wso2/templates/forum/forum-list/template.jag:41
 msgid "Create New Topic"
 msgstr ""
 
@@ -960,6 +968,7 @@ msgstr ""
 #: site/themes/wso2/templates/menu/primary/template.jag:27
 #: site/themes/wso2/templates/menu/primary/template.jag:39
 #: site/themes/wso2/templates/menu/primary/template.jag:64
+#: site/themes/wso2/templates/forum/forum-list/template.jag:26
 #: site/blocks/api/api-info/block.jag:133
 #: site/blocks/api/api-info/block.jag:189
 #: site/blocks/menu/primary/block.jag:47
@@ -1034,7 +1043,7 @@ msgid "Reply to Thread"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:90
-#: site/themes/wso2/templates/forum/forum-list/template.jag:67
+#: site/themes/wso2/templates/forum/forum-list/template.jag:73
 msgid "Replies"
 msgstr ""
 
@@ -1043,103 +1052,103 @@ msgid "Reply Successfully Added"
 msgstr ""
 
 #: site/themes/wso2/templates/forum/forum-topic/template.jag:140
-#: site/themes/wso2/templates/forum/forum-list/template.jag:66
+#: site/themes/wso2/templates/forum/forum-list/template.jag:72
 msgid "By"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:30
+#: site/themes/wso2/templates/forum/forum-list/template.jag:34
 msgid "Search Forum"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:32
-#: site/themes/wso2/templates/search/api-search/template.jag:31
+#: site/themes/wso2/templates/forum/forum-list/template.jag:36
+#: site/themes/wso2/templates/search/api-search/template.jag:37
 msgid "Search"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:49
+#: site/themes/wso2/templates/forum/forum-list/template.jag:55
 msgid "No topics found."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:50
+#: site/themes/wso2/templates/forum/forum-list/template.jag:56
 msgid "There are no forum topics available."
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:65
+#: site/themes/wso2/templates/forum/forum-list/template.jag:71
 msgid "Topic"
 msgstr ""
 
-#: site/themes/wso2/templates/forum/forum-list/template.jag:83
+#: site/themes/wso2/templates/forum/forum-list/template.jag:89
 msgid "Delete Comment"
 msgstr ""
 
 #. selected type text
-#: site/themes/wso2/templates/search/api-search/template.jag:6
-#: site/themes/wso2/templates/search/api-search/template.jag:24
+#: site/themes/wso2/templates/search/api-search/template.jag:11
+#: site/themes/wso2/templates/search/api-search/template.jag:30
 msgid "All"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:9
-#: site/themes/wso2/templates/search/api-search/template.jag:25
+#: site/themes/wso2/templates/search/api-search/template.jag:14
+#: site/themes/wso2/templates/search/api-search/template.jag:31
 msgid "Production"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:13
-#: site/themes/wso2/templates/search/api-search/template.jag:26
+#: site/themes/wso2/templates/search/api-search/template.jag:18
+#: site/themes/wso2/templates/search/api-search/template.jag:32
 msgid "Prototyped"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:22
+#: site/themes/wso2/templates/search/api-search/template.jag:28
 msgid "Category"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:29
-#: site/themes/wso2/templates/search/api-search/template.jag:36
-#: site/themes/wso2/templates/search/api-search/template.jag:38
-#: site/themes/wso2/templates/search/api-search/template.jag:86
+#: site/themes/wso2/templates/search/api-search/template.jag:35
+#: site/themes/wso2/templates/search/api-search/template.jag:42
+#: site/themes/wso2/templates/search/api-search/template.jag:44
+#: site/themes/wso2/templates/search/api-search/template.jag:92
 msgid "Search Options"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:44
-#: site/themes/wso2/templates/search/api-search/template.jag:72
+#: site/themes/wso2/templates/search/api-search/template.jag:50
+#: site/themes/wso2/templates/search/api-search/template.jag:78
 msgid "By API Name [Default]"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:45
-#: site/themes/wso2/templates/search/api-search/template.jag:73
+#: site/themes/wso2/templates/search/api-search/template.jag:51
+#: site/themes/wso2/templates/search/api-search/template.jag:79
 msgid "By API Provider [ Syntax - provider:xxxx ]  or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:46
-#: site/themes/wso2/templates/search/api-search/template.jag:74
+#: site/themes/wso2/templates/search/api-search/template.jag:52
+#: site/themes/wso2/templates/search/api-search/template.jag:80
 msgid "By API Version [ Syntax - version:xxxx ]  or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:47
-#: site/themes/wso2/templates/search/api-search/template.jag:75
+#: site/themes/wso2/templates/search/api-search/template.jag:53
+#: site/themes/wso2/templates/search/api-search/template.jag:81
 msgid "By Context [ Syntax - context:xxxx ]  or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:48
-#: site/themes/wso2/templates/search/api-search/template.jag:76
+#: site/themes/wso2/templates/search/api-search/template.jag:54
+#: site/themes/wso2/templates/search/api-search/template.jag:82
 msgid "By Description [ Syntax - description:xxxx ] or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:49
+#: site/themes/wso2/templates/search/api-search/template.jag:55
 msgid "By Tags [ Syntax - tags:xxxx ] or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:50
-#: site/themes/wso2/templates/search/api-search/template.jag:77
+#: site/themes/wso2/templates/search/api-search/template.jag:56
+#: site/themes/wso2/templates/search/api-search/template.jag:83
 msgid "By Sub-Context [ Syntax - subcontext:xxxx ] or"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:51
-#: site/themes/wso2/templates/search/api-search/template.jag:78
+#: site/themes/wso2/templates/search/api-search/template.jag:57
+#: site/themes/wso2/templates/search/api-search/template.jag:84
 msgid "By Documentation Content [ Syntax - doc:xxxx ]"
 msgstr ""
 
-#: site/themes/wso2/templates/search/api-search/template.jag:64
-#: site/themes/wso2/templates/search/api-search/template.jag:65
+#: site/themes/wso2/templates/search/api-search/template.jag:70
+#: site/themes/wso2/templates/search/api-search/template.jag:71
 msgid "searchAPI"
 msgstr ""
 
@@ -1270,7 +1279,7 @@ msgid "Workflow Status"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-list/template.jag:20
-#: site/themes/wso2/templates/application/application-view/template.jag:23
+#: site/themes/wso2/templates/application/application-view/template.jag:25
 msgid "Subscriptions"
 msgstr ""
 
@@ -1314,13 +1323,13 @@ msgid "Throttling Tier"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-edit/template.jag:57
-#: site/themes/wso2/templates/application/application-view/template.jag:39
+#: site/themes/wso2/templates/application/application-view/template.jag:43
 #: site/themes/wso2/templates/application/application-add/template.jag:52
 msgid "Per Token Quota"
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-edit/template.jag:84
-#: site/themes/wso2/templates/application/application-view/template.jag:42
+#: site/themes/wso2/templates/application/application-view/template.jag:46
 #: site/themes/wso2/templates/application/application-add/template.jag:79
 msgid ""
 "This feature allows you to assign an API request quota per access token. "
@@ -1424,6 +1433,11 @@ msgid "Seconds."
 msgstr ""
 
 #: site/themes/wso2/templates/application/application-keys/template.jag:131
+#: site/themes/wso2/templates/application/application-keys/template.jag:174
+msgid "Generating"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:131
 msgid "Re-generate"
 msgstr ""
 
@@ -1468,35 +1482,35 @@ msgstr ""
 msgid "Provide Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:19
+#: site/themes/wso2/templates/application/application-view/template.jag:21
 msgid "Details"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:21
+#: site/themes/wso2/templates/application/application-view/template.jag:23
 msgid "Production Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:22
+#: site/themes/wso2/templates/application/application-view/template.jag:24
 msgid "Sandbox Keys"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:24
+#: site/themes/wso2/templates/application/application-view/template.jag:27
 msgid "SDKs"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:35
+#: site/themes/wso2/templates/application/application-view/template.jag:39
 msgid "INACTIVE"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:48
+#: site/themes/wso2/templates/application/application-view/template.jag:52
 msgid "Not Given"
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:115
+#: site/themes/wso2/templates/application/application-view/template.jag:119
 msgid "Download client-side SDK for your applications."
 msgstr ""
 
-#: site/themes/wso2/templates/application/application-view/template.jag:129
+#: site/themes/wso2/templates/application/application-view/template.jag:133
 msgid "No SDK configured"
 msgstr ""
 
@@ -1657,3 +1671,33 @@ msgstr ""
 "percentile of that particular API or Request Count of an API per minute > "
 "Request count per minute lower percentile or Response status code >= 500 (By "
 "Default) AND Response status code < 600 (By Default)"
+
+msgid "abnormalResponseTime"
+msgstr "Abnormal Response Time"
+
+msgid "abnormalBackendTime"
+msgstr "Abnormal Backend Time"
+
+msgid "abnormalRequestsPerMin"
+msgstr "Abnormal Requests Per Minute"
+
+msgid "RequestPatternChanged"
+msgstr "Request Pattern Changed"
+
+msgid "UnusualIPAccessAlert"
+msgstr "Unusual IP Access Alert"
+
+msgid "AbnormalRefreshAlert"
+msgstr "Abnormal Refresh Alert"
+
+msgid "FrequentTierHittingAlert"
+msgstr "Frequent Tier Hitting Alert"
+
+msgid "AbnormalTierUsage"
+msgstr "Abnormal Tier Usage"
+
+msgid "healthAvailabilityPerMin"
+msgstr "Health Availability Per Minute"
+
+msgid "Please enable statistics to see this page"
+msgstr "Please configure API Manager Analytics to enable alerts."

@@ -56,7 +56,7 @@
                                     &nbsp; &nbsp;
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
                                         <i class="fw fw-edit"></i>
-                                        <%=i18n.localize("common.button.edit")%>
+                                        <%=i18n.localize("Edit")%>
                                     </a>
                                 </td>
 
@@ -148,7 +148,7 @@
                                     &nbsp; &nbsp;
                                     <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
                                         <i class="fw fw-edit"></i>
-                                        <%=i18n.localize("common.button.edit")%>
+                                        <%=i18n.localize("Edit")%>
                                     </a>
                                 </td>
 

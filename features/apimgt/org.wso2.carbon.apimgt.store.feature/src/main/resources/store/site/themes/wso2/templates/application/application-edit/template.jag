@@ -73,16 +73,16 @@
                 unlimitedTierDesc = tiers[i].tierDescription;
             }
           %>
-          <option  title="<%=tiers[i].tierDisplayName%>" data-content="<span><strong><%=tiers[i].tierDisplayName%></strong><br /><%=tiers[i].tierDescription%></span>" value="<%=tiers[i].tierName%>" <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>          
-            <%=tiers[i].tierDisplayName%>
-          </option>
+          <option  title="<%= encode.forHtmlAttribute(tiers[i].tierDisplayName+"") %>" data-content="<span><strong><%=encode.forHtml(tiers[i].tierDisplayName+"")%></strong><br /><%=encode.forHtml(tiers[i].tierDescription+"")%></span>" value="<%=encode.forHtmlAttribute(tiers[i].tierName+"")%>"  <%if(tiers[i].tierName == app.tier ){print("selected=\"selected\"")}%>>          
+            <%=encode.forHtml(tiers[i].tierDisplayName+"")%>
+          </option>          
           <%}%>
           </select>   
           <div id="tierHelpStr" class="help-block" style="padding-left: 10px; display: inline;">
-            <em><%=unlimitedTierDesc%></em>
+            <em><%=encode.forHtml(unlimitedTierDesc+"")%></em>
           </div>          
           <div class="help-block"><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%> </div>
-          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=tierDescriptions%>"/>  
+          <input type="hidden"  id="tierDescriptions" name="tierDescriptions" value="<%=encode.forHtmlAttribute(tierDescriptions+"")%>"/>  
     </div>
   </div>
   <div class="form-group">

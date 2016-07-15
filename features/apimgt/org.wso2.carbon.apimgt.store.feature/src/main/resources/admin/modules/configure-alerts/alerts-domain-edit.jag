@@ -2,20 +2,11 @@
 var log = new Log();
 
 var getDomain = function (domainName) {
-        try {
-        var carbon = require('carbon');
-        var process = require('process');
-        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
-                buildRealmConfigurationFromFile();
-        var username = "admin";
-        var password = "admin";
-
-        var carbon = require('carbon'),
-        conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
-        username = conf.*::['Analytics'].*::['DASUsername'].text();
-        password = conf.*::['Analytics'].*::['DASPassword'].text();
-
+    try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var dasUrl = APIUtil.getAnalyticsServerURL();
+        var username = APIUtil.getAnalyticsServerUserName();
+        var password = APIUtil.getAnalyticsServerPassword();
 
         var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();
@@ -40,19 +31,11 @@ var getDomain = function (domainName) {
 };
 
 var getDomainConfiguration = function (domainName, configurationName) {
-        try {
-        var carbon = require('carbon');
-        var process = require('process');
-        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
-                buildRealmConfigurationFromFile();
-        var username = "admin";
-        var password = "admin";
-
-        var carbon = require('carbon'),
-        conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
-        username = conf.*::['Analytics'].*::['DASUsername'].text();
-        password = conf.*::['Analytics'].*::['DASPassword'].text();
+    try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var dasUrl = APIUtil.getAnalyticsServerURL();
+        var username = APIUtil.getAnalyticsServerUserName();
+        var password = APIUtil.getAnalyticsServerPassword();
 
         var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();
@@ -78,7 +61,7 @@ var getDomainConfiguration = function (domainName, configurationName) {
 
 
 var saveConfiguration = function (domainName, templateType, configurationName, description, parametersJson) {
-        try {
+    try {
 
         var valueSeparator = "::";
         
@@ -108,20 +91,11 @@ var saveConfiguration = function (domainName, templateType, configurationName, d
         }
 
         scenarioConfigurationDTO.setConfigurationParameterDTOs(parameters);
-        
-        var carbon = require('carbon');
-        var process = require('process');
-        var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().
-                buildRealmConfigurationFromFile();
-        var username = "admin";
-        var password = "admin";
 
-        var carbon = require('carbon'),
-        conf = carbon.server.loadConfig('api-manager.xml'),
-        dasUrl = conf.*::['Analytics'].*::['DASRestApiURL'].text();
-        username = conf.*::['Analytics'].*::['DASUsername'].text();
-        password = conf.*::['Analytics'].*::['DASPassword'].text();
-
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var dasUrl = APIUtil.getAnalyticsServerURL();
+        var username = APIUtil.getAnalyticsServerUserName();
+        var password = APIUtil.getAnalyticsServerPassword();
 
         var stub = new org.wso2.carbon.event.template.manager.stub.TemplateManagerAdminServiceStub(dasUrl + "/services/TemplateManagerAdminService");
         var client = stub._getServiceClient();

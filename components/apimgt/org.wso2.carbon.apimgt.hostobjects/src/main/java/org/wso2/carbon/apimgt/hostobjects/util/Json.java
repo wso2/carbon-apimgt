@@ -20,11 +20,16 @@ package org.wso2.carbon.apimgt.hostobjects.util;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /*This is a temporary solution to convert swagger object to json object. This class will be deleted
  once a fixed swagger parser version is released */
 public class Json {
 
     private static ObjectMapper mapper;
+
+    private static final Log log = LogFactory.getLog(Json.class);
 
     public static ObjectMapper mapper() {
         if (mapper == null) {
@@ -41,16 +46,8 @@ public class Json {
         try {
             return pretty().writeValueAsString(o);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error occurred while attempting to pretty the object ", e);
             return null;
-        }
-    }
-
-    public static void prettyPrint(Object o) {
-        try {
-            System.out.println(pretty().writeValueAsString(o).replace("\r", ""));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

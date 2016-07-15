@@ -305,12 +305,12 @@
               location.href = "<%= jagg.url('/subscription-policy-manage')%>";
         });
         var isNewPolicy = true;
-        if('encode.forJavaScript(String(policyName))' != 'null'){
+        if('<%=encode.forJavaScript(policyName)%>' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){
-          $('#policyName').val("<%=policyName%>");
-          $('#description').val("<%=description%>");
+          $('#policyName').val("<%=encode.forJavaScript(policyName)%>");
+          $('#description').val("<%=encode.forJavaScript(description+"")%>");
           $('#defaultUnitTime').val("<%=defaultUnitTime%>");
           $('#defaultTimeUnit').val("<%=defaultTimeUnit%>");
           $('#rateLimitCount').val("<%=rateLimitCount%>");

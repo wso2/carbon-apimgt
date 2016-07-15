@@ -38,8 +38,8 @@ public class JWTGenerator extends AbstractJWTGenerator {
             throws APIManagementException {
 
         //generating expiring timestamp
-        long currentTime = Calendar.getInstance().getTimeInMillis() / 1000 ;
-        long expireIn = currentTime + 60 * getTTL();
+        long currentTime = System.currentTimeMillis() ;
+        long expireIn = currentTime + getTTL() * 1000;
 
         String dialect;
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
