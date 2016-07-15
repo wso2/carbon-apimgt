@@ -1,7 +1,7 @@
 <% jagg.template("policy/resource/policy-add", function(inputs, outputs, jagg) { %>
 <%
     var log = new Log();
-    var policyName = encode.forJavaScript(request.getParameter("policyName"));
+    var policyName = request.getParameter("policyName");
     policyName = policyName == null ? "" : policyName;
     var pageTitle = i18n.localize("Add Advanced Throttle Policy");
     var nameFieldDisableStatus = "";
@@ -855,7 +855,7 @@ $(document).ready(function() {
        loadPolicy("<%=encode.forJavaScript(String(policyName))%>");
        
        var isNewPolicy = true;
-       if('<%=policyName%>' != 'null'){
+       if('<%=encode.forJavaScript(String(policyName))%>' != 'null'){
            isNewPolicy = false;
        }
        if (!isNewPolicy) {
