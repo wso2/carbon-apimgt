@@ -12,15 +12,16 @@ var type = i18n.localize("All");
 var param = "";
 if(request.getParameter("type") == "production"){
   type = i18n.localize("Production");
-  param = "type=production";
+  param = "<input type='hidden' name='type' value='production' />"
 }
 if(request.getParameter("type") == "prototyped"){
   type = i18n.localize("Prototyped");
-  param = "type=prototyped";
+  param = "<input type='hidden' name='type' value='prototyped' />"
 }
 %>
 
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?<%= param %>" id="search_apis">
+  <%= param %>
   <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
       <div class="input-group-btn">
