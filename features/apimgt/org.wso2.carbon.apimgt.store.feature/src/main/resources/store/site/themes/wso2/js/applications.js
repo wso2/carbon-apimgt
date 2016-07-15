@@ -252,11 +252,12 @@ GrantTypes.prototype.getMap = function(selected){
             }, "json");
         },
 
-        generateKeys: function(){
+        generateKeys: function(){            
             var validity_time = this.element.find(".validity_time").val();
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
-
+            
+            $('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action: "generateApplicationKey",
                 application: this.app.name,
@@ -266,6 +267,7 @@ GrantTypes.prototype.getMap = function(selected){
                 tokenScope:"",
                 jsonParams:'{"grant_types":"'+selected+'"}',
             }, $.proxy(function (result) {
+                $('.generatekeys').buttonLoader('stop');
                 if (!result.error) {
                     
                     this.app.ConsumerKey = result.data.key.consumerKey,
