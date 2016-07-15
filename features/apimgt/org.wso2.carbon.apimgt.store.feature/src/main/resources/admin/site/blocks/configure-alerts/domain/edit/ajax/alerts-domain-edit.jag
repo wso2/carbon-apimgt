@@ -17,7 +17,7 @@ include("/jagg/jagg.jag");
         if (action == "saveConfiguration" ) {
             var domainName =  request.getParameter("domainName", "UTF-8");
             var templateType =  request.getParameter("templateType", "UTF-8");
-            var configurationName =  encode.forJavaScript(request.getParameter("configurationName", "UTF-8"));
+            var configurationName =  request.getParameter("configurationName", "UTF-8");
             var description =  request.getParameter("description", "UTF-8");
             var parameters =  request.getParameter("parameters", "UTF-8");
             mod = jagg.module("configure-alerts");
