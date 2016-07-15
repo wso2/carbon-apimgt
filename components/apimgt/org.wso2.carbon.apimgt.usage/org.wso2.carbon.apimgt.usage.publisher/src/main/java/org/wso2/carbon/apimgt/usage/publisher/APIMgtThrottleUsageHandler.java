@@ -83,6 +83,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                         APIMgtGatewayConstants.APPLICATION_ID));
                 throttlePublisherDTO.setThrottledTime(currentTime);
                 throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
+                throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
                 publisher.publishEvent(throttlePublisherDTO);
 
 
