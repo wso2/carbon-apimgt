@@ -21,8 +21,8 @@ if(request.getParameter("type") == "prototyped"){
 %>
 
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?<%= param %>" id="search_apis">
+  <div class="col-xs-10 col-sm-12 col-md-6 col-lg-5">
   <%= param %>
-  <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
     <div class="input-group input-wrap search-wrap">
       <div class="input-group-btn">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="<%=i18n.localize("Category")%>"><%= type %> <span class="caret"></span></button>
@@ -32,7 +32,7 @@ if(request.getParameter("type") == "prototyped"){
             <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=prototyped<%=tenantPostfix%>"><%=i18n.localize("Prototyped")%></a></li>
           </ul>
       </div>
-      <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search Options")%>...">
+      <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search")%>...">
       <div class="input-group-btn">
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="<%=i18n.localize("Search")%>">
           <i class="fw fw-search" aria-hidden="true"></i>
@@ -40,7 +40,7 @@ if(request.getParameter("type") == "prototyped"){
       </div>
       <div class="input-group-btn">
         <a class="help_popup" title="<%=i18n.localize("Search Options")%>" rel="popover" data-popover-content="#apiSearchTips" data-placement="bottom">
-          <span class="icon fw-lg  add-margin-bottom-1x add-margin-left-1x" style="font-size:16px;">
+          <span class="icon fw-lg  add-margin-bottom-1x add-margin-left-2x" style="font-size:16px;">
             <i class="fw fw-info fw-inverse" title="<%=i18n.localize("Search Options")%>"></i>
           </span>            
         </a>

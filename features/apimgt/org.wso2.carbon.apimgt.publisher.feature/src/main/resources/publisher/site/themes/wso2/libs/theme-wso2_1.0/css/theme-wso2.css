@@ -7295,6 +7295,10 @@ button.close {
 [aria-expanded='true'] > .icon.toggle-icon-right-arrow:before {
   content: '\e68b';
 }
+[aria-expanded='true'] > .icon.fw-stack > .toggle-icon-cancel:before,
+[aria-expanded='true'] > .icon.toggle-icon-cancel:before {
+  content: '\e618';
+}
 
 /* ========================================================================
  * document styles
