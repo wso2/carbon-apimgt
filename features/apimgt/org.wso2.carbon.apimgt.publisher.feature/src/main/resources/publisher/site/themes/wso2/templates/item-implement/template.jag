@@ -1023,7 +1023,7 @@
 	{{#if corsConfigurationEnabled }}
 	<div id="corsFormElements">
 		<div class="form-group">
-			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("Access Control Allow")%><strong><%=i18n.localize("Origins")%></strong></p></label>
+			<label class="control-label col-sm-3" for="corsConfigurationManaged"><p><%=i18n.localize("Access Control Allow ")%><strong><%=i18n.localize("Origins")%></strong></p></label>
 			<div class="headerContainer tagContainer col-sm-6">
 				<label class="checkbox">
 					<input type="checkbox" class="allowAll" name="allowAll"  {{#if allowAll }}checked="checked" {{/if}} />
