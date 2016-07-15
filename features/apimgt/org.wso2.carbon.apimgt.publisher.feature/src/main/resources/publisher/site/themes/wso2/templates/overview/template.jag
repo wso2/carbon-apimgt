@@ -10,7 +10,7 @@
     </div>
     <div class="col-md-10">
     <%if(api.description!=''){%>
-        <h4><%= i18n.localize("description")%></h4>
+        <h4><%= i18n.localize("Description")%></h4>
         <div class="well" id="apiView"><%=api.description%></div>
     <%}%>
         <table class="table table-bordered">
