@@ -137,7 +137,7 @@ function APIDesigner(){
         }
         // checking for white spaces in URL template
         if (/\s/.test( $("#resource_url_pattern").val() )) {
-            jagg.message({content: i18n.t("URL pattern cannot contain whitespace"), type: "error"});
+            jagg.message({content: i18n.t("URL pattern cannot contain white space"), type: "error"});
             return;
         }
 
@@ -833,9 +833,10 @@ $(document).ready(function(){
 
     $('#swagger_import_file').change(function (event) {
         var file = event.target.files[0];
-        var fileReader = new FileReader();
+        var fileReader = new FileReader();        
         fileReader.addEventListener("load", function (event) {
             jsonFile = event.target;
+            jsonFile.file_name = file.name;
         });
         //Read the text file
         fileReader.readAsText(file);
@@ -857,7 +858,14 @@ $(document).ready(function(){
             $('#swagger_help').hide();
             $('#swagger_file_help').hide();
             try{
-                var data = JSON.parse(jsonFile.result); //swagger file content
+                var yaml = /\.yaml$/i;
+                var json = /\.json$/i;
+                if((m = yaml.exec(jsonFile.file_name)) !== null){
+                    var data = jsyaml.load(jsonFile.result);
+                }
+                if((m = json.exec(jsonFile.file_name)) !== null){
+                    var data = JSON.parse(jsonFile.result); //swagger file content
+                }                                
                 var designer = APIDesigner();
                 designer.load_api_document(data);
                 $('#import_swagger').buttonLoader('stop');
@@ -880,8 +888,20 @@ $(document).ready(function(){
                 $('#import_swagger').buttonLoader('stop');
                 $('#swagger_help').hide();
                 $("#swaggerUpload").modal('hide');
-                var designer = APIDesigner();
-                designer.load_api_document(data);
+                var swag = "";
+                try{
+                    swag = jsyaml.load(data);
+                }catch(err){
+                    try{
+                        swag = JSON.parse(data); //swagger file content
+                    }catch(err){
+
+                    }
+                }
+                if(swag != ""){
+                    var designer = APIDesigner();
+                    designer.load_api_document(swag);
+                }
             }).fail(function (data) {
                 $('#swagger_help').show();
                 $('#import_swagger').buttonLoader('stop');
@@ -992,7 +1012,7 @@ $(document).ready(function(){
 
             if(tagName.length > 30){
                 $tag.val(tagName.substring(0, 30));
-                $('.tags-error').html(i18n.t('The tag can have only 30 characters maximum.'));
+                $('.tags-error').html(i18n.t('The tag can only have a maximum of 30 characters.'));
             }
 
         });

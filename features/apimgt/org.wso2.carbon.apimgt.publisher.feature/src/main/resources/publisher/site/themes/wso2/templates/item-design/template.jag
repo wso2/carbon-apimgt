@@ -663,8 +663,20 @@
             var swagger = session.get("swagger");
             if(swagger){ %>
                 $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", { "action" : "session" } , function( data ) {
-                    var designer = APIDesigner();
-                    designer.load_api_document(data);
+                	var swag = "";
+	                try{
+	                    swag = jsyaml.load(data);
+	                }catch(err){
+	                    try{
+	                        swag = JSON.parse(data); //swagger file content
+	                    }catch(err){
+
+	                    }
+	                }	                
+	                if(swag != ""){
+	                    var designer = APIDesigner();
+	                    designer.load_api_document(swag);
+	                }
                 });
         <% } %>
     });

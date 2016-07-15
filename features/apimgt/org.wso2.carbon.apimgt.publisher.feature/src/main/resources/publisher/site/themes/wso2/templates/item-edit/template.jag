@@ -57,7 +57,7 @@ var faultSequencesLoaded = false;
 <span id="editWarnSpan"><b><%=i18n.localize("Warning!")%></b><br/>
 <%=i18n.localize("You are editing an API with active subscribers. Tier Availability changes will not be reflected on active subscriptions.")%>
 <br/>
-<%=i18n.localize("API Definition for Swagger will not be overridden with the changes you will do to the API.")%>
+<%=i18n.localize("API Definition for Swagger will not be overridden with the changes you do to the API.")%>
 </span>
 </div>
 <script type="text/javascript">

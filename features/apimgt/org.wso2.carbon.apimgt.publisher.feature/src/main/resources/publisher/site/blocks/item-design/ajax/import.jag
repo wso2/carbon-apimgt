@@ -8,7 +8,7 @@ if(jagg.getUser() == null){
     });
 }
 
-response.contentType = "application/json; charset=UTF-8";
+response.contentType = "text/plain; charset=UTF-8";
 
 //handle startup page imports
 var action = request.getParameter("action");
@@ -19,11 +19,25 @@ if(action == "session"){
 }else{
 	var url = request.getParameter("swagger_url");
 	url = url.trim();
-	//@todo need to validate returned swagger v2
 	var data = { };
-	var content = get(url, data ,"json");
+	var content = get(url, data );
+	//@todo need to validate returned swagger v2
+	//check for key words to validate if it is a swagger
+	// we cannot do a full validation since we have to tolerate invalid swagger importing
+	var keywords = [ /swagger/i, /info/i , /paths/i, /version/i ];
+	var valid = true;
+	for(var i =0 ;i< keywords.length; i++){
+		if ((m = keywords[i].exec(content.data)) == null){
+				valid = false;
+		}
+	}
 	var swaggerJson = content.data;
-	print(swaggerJson);
+	if(valid){
+		print(swaggerJson);
+	}else{
+		print("undefined");
+	}
+	
 	//@todo Error reporting
 
 }
