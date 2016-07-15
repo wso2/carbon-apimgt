@@ -324,7 +324,7 @@
 															   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 															</span>
 														</a>
-														<p id="wsdldesc_help" class="hide"><%=i18n.localize("The content the WSDL is saved as a resource in /system/governance/apimgt/applicationdata/wsdls registry location. API artifacts have a dependency to this resource. Its original service address is reset to the API Gateway's address to prevent direct calls to the service endpoint. The registry permlink of the WSDL resource is shown in the API Store and users can download and create a service out of it.")%></p>
+														<p id="wsdldesc_help" class="hide"><%=i18n.localize("The content the WSDL is saved as a resource in the /system/governance/apimgt/applicationdata/wsdls registry location. API artifacts have a dependency to this resource. Its original service address is reset to the API Gateway's address to prevent direct calls to the service endpoint. The registry permalink of the WSDL resource is shown in the API Store and users can download and create a service out of it.")%></p>
 												</label>
 												<div class="col-sm-6">
 													<div class="input-append">
@@ -437,7 +437,7 @@
 									</label>
 									<label class="radio">
 										<input class="select-url" name="import-definition" type="radio" value="swagger_import_url">
-										<span class="helper"><%=i18n.localize("Swagger Url")%></span>
+										<span class="helper"><%=i18n.localize("Swagger URL")%></span>
 									</label>
 								</div>
 							</div>
@@ -569,7 +569,7 @@
 										                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 										                </span>	
 							</a>
-                        <p id="options_help" class="hide"><%=i18n.localize("Select Options method to send OPTIONS calls to backed. If not selected API gateway will return OPTIONS call with the allowed methods in gateway.")%></p>
+                        <p id="options_help" class="hide"><%=i18n.localize("Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS method is not selected, OPTIONS calls will be returned from the gateway with Allowed methods.")%></p>
                     </label>  
 
                         <label id="less">
@@ -663,8 +663,20 @@
             var swagger = session.get("swagger");
             if(swagger){ %>
                 $.get( jagg.site.context + "/site/blocks/item-design/ajax/import.jag", { "action" : "session" } , function( data ) {
-                    var designer = APIDesigner();
-                    designer.load_api_document(data);
+                	var swag = "";
+	                try{
+	                    swag = jsyaml.load(data);
+	                }catch(err){
+	                    try{
+	                        swag = JSON.parse(data); //swagger file content
+	                    }catch(err){
+
+	                    }
+	                }	                
+	                if(swag != ""){
+	                    var designer = APIDesigner();
+	                    designer.load_api_document(swag);
+	                }
                 });
         <% } %>
     });

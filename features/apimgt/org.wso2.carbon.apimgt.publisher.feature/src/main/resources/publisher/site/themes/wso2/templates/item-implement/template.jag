@@ -152,7 +152,7 @@
 																{{/if}}																
 																{{/if}}
 																{{#if template_not_supported }}
-																<label class="error" for="name"><%=i18n.localize("Address endpoint do not support URI Templates.")%></label>
+																<label class="error" for="name"><%=i18n.localize("Address endpoint does not support URI Templates.")%></label>
 																{{/if}}
 															</div>
 							                            </div>
@@ -180,7 +180,7 @@
 							                            	<div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 															<div class="message message-info remove-margin">
 											                    <h4><i class="icon fw fw-info"></i>Notice</h4>
-											                    <p> <%=i18n.localize('You have selected \"Dynamic Endpoint\" which will send the message to the address specified in the \"To\" header. Please upload a mediation sequence file to Message Mediation Policies which sets the \"To\" header. ')%></p>
+											                    <p> <%=i18n.localize('You have selected \"Dynamic Endpoint\" which will send the message to the address specified in the \"To\" header. Please upload a mediation sequence file to Message Mediation Policies, which sets the \"To\" header. ')%></p>
 															</div>
 															</div>
 														</div>
@@ -358,7 +358,7 @@
 							
 							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("Endpoint Auth Type")%>:<span class="requiredAstrix">*</span>
-							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("Endpoint Auth Typ")%>" data-placement="bottom">
+							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("Endpoint Auth Type")%>" data-placement="bottom">
 							                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 												                   <i class="fw fw-circle fw-stack-2x"></i>
 												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -895,7 +895,7 @@
 							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 							</span>
 						</a>
-						<p id="suspendErrorCode_help" class="hide"><%=i18n.localize("A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
+						<p id="suspendErrorCode_help" class="hide"><%=i18n.localize("A list of error codes. If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
 					</label>
 					<div class="col-sm-6">
 						<select class="error_codes_selection form-control selectpicker" id="suspendErrorCode" multiple="multiple" name="suspendErrorCode">
@@ -912,7 +912,7 @@
 							<option value="101509">101509 : <%=i18n.localize("Send abort")%></option>
 							<option value="101510">101510 : <%=i18n.localize("Response processing failure")%></option>
 						</select>
-						<p class="help-block"><%=i18n.localize("A list of error codes.If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
+						<p class="help-block"><%=i18n.localize("A list of error codes. If these error codes are received from the endpoint, the endpoint will be suspended.")%></p>
 						<span class="help-block jsonform-errortext" style="display:none;"></span>
 					</div>
 				</div>
@@ -924,17 +924,17 @@
 							   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
 							</span>
 						</a>
-						<p id="suspendDuration_help" class="hide"><%=i18n.localize("The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.")%></p>
+						<p id="suspendDuration_help" class="hide"><%=i18n.localize("The duration for which the endpoint is suspended for the first time after the receiving the suspended error codes.")%></p>
 					</label>
 					<div class="col-sm-2">
 						<input class="form-control" id="suspendDuration" name="suspendDuration" type="text" value="">
-						<p class="help-block hide"><%=i18n.localize("The duration that the endpoint is suspended for the first time after the receiving the suspend error codes.")%></p>
+						<p class="help-block hide"><%=i18n.localize("The duration for which the endpoint is suspended for the first time after the receiving the suspended error codes.")%></p>
 					</div>
 
 					<label class="control-label col-sm-2" for="suspendMaxDuration">Max Duration (ms)</label>
 					<div class="col-sm-2">
 						<input class="form-control" id="suspendMaxDuration" name="suspendMaxDuration" type="text" value="">
-						<p class="help-block hide"><%=i18n.localize("The maximum duration that the endpoint is suspended after the receiving the suspend error codes .")%>.</p>
+						<p class="help-block hide"><%=i18n.localize("The maximum duration that the endpoint is suspended after receiving the suspended error codes .")%>.</p>
 					</div>
 				</div>
 				<div class="form-group">
@@ -973,7 +973,7 @@
                 <label class="control-label col-sm-3" for="retryTimeOut"><%=i18n.localize("Retries Before Suspension")%></label>
                 <div class="col-sm-2">
                     <input class="form-control" id="retryTimeOut" name="retryTimeOut" type="text" value="">    
-                    <p class="help-block hide"><%=i18n.localize("The number of re-tries in case of a timeout, caused by the above listed erro codes.")%>r
+                    <p class="help-block hide"><%=i18n.localize("The number of retries in case of a timeout, caused by the above listed error codes.")%>r
                     </p>
                 </div>
                 <label class="control-label col-sm-2" for="retryDelay">Retry Delay(ms)</label>
@@ -994,7 +994,7 @@
                         <option value="discard"><%=i18n.localize("Discard message")%></option>
                         <option selected value="fault"><%=i18n.localize("Execute fault sequence")%></option>
                     </select>
-                    <p class="help-block hide"><%=i18n.localize("The action to be done at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
+                    <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>
@@ -1002,7 +1002,7 @@
                 <label class="control-label col-sm-3" for="actionDuration"><%=i18n.localize("Duration (ms)")%></label>
                 <div class="col-sm-2">
                     <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="30000">
-                    <p class="help-block hide"><%=i18n.localize("The duration in milliseconds before considering a request as timeout.")%></p>
+                    <p class="help-block hide"><%=i18n.localize("The duration in milliseconds before considering a request as a timeout.")%></p>
                 </div>
             </div>
         </fieldset>

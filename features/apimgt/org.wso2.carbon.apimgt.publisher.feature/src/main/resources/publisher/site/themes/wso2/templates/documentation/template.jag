@@ -270,7 +270,7 @@
             <%} else { %>
              	<div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("No documentation associated with the API")%></h4>
-                    <p><%=i18n.localize("There are no documentation created for this API. You can add new documentation to this API by clicking \"Add New Document\" button.") %></p>
+                    <p><%=i18n.localize("There is no documentation created for this API. You can add new documentation to this API by clicking the \"Add New Document\" button.") %></p>
                 </div>
              <% } %>
 

@@ -53,8 +53,8 @@
 		<div class="message message-warning">
 		<h4><i class="icon fw fw-warning"></i><%=i18n.localize("Not Configured")%></h4>
         <p> <a href='https://docs.wso2.com/display/AM200/Configuring+API+Analytics' target='_blank'
-        title= '<%=i18n.localize("WSO2 wiki documentation on APIM statistics")%>' class='warningLink'>
-        <%=i18n.localize("Refer our wiki to configure DAS correctly")%> </a></p>
+        title= '<%=i18n.localize("WSO2 documentation on APIM Analytics")%>' class='warningLink'>
+        <%=i18n.localize("Refer our documentation to configure API Manager Analytics correctly")%> </a></p>
         </div>
     <%
 	 }

@@ -23,7 +23,7 @@ $(document).ready(function() {
                           }
                       });
         return this.optional(element) || apiNameExist != "true";
-    }, i18n.t('Duplicate api name.'));
+    }, i18n.t('Duplicate API name.'));
 
     $.validator.addMethod('selected', function(value, element) {
         return value!="";
@@ -41,7 +41,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('validTemplate', function(value, element) {
         return value.indexOf("{}") == -1
-    }, i18n.t('Empty curly brackets "{}" are not allowed in context field.'));
+    }, i18n.t('Empty curly brackets "{}" are not allowed in the context field.'));
 
     $.validator.addMethod('validateUrl', function(value, element){
         var validUrlRegex = /^(http|https):\/\/(.)+/g;
