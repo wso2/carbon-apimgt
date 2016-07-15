@@ -146,7 +146,7 @@ var reqUrl = request.getRequestURI();
 				                                	<% if(thumbURL == null) { %>
 				                                		<div class="square-element setbgcolor">
 				                                		    <% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
-                                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
                                                             <% } %>
 															<div class="api-name-icon"></div>
 															<div style="display: none">
@@ -157,7 +157,7 @@ var reqUrl = request.getRequestURI();
 				                                    	<div class="square-element">
 				                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
 				                                    		<% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
-                                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
                                                             <% } %>
 				                                    	</div>
 				                                    <% } %>
@@ -208,7 +208,7 @@ var reqUrl = request.getRequestURI();
                                 	<% if(thumbURL == null) { %>
                                 		<div class="square-element setbgcolor">
                                 		    <% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
-                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
                                             <% } %>
 											<div class="api-name-icon"></div>
 											<div style="display: none">
@@ -219,7 +219,7 @@ var reqUrl = request.getRequestURI();
                                     	<div class="square-element">
                                     		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
                                     		<% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
-                                                <span class="api-prototype-icon"><i class="fw fw-prototype fw-lg"></i></span>
+                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
                                             <% } %>
                                     	</div>
                                     <% } %>
