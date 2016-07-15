@@ -127,6 +127,7 @@
     "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.": "If you already have an OAuth application registered with the IdP, you can use those keys without generating one.",
     "If you already have an access token please provide it below.": "If you already have an access token please provide it below.",
     "In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.": "In a similar manner, you can generate an access token using the client credential grant type with the following cURL command.",
+    "Info": "Info",
     "Inline Documentation": "Inline Documentation",
     "Invocations": "Invocations",
     "January": "January",

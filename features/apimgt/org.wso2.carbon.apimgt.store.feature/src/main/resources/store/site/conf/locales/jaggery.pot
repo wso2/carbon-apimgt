@@ -1442,6 +1442,10 @@ msgstr ""
 msgid "Re-generate"
 msgstr ""
 
+#: site/themes/wso2/templates/application/application-keys/template.jag:140
+msgid "Info"
+msgstr ""
+
 #: site/themes/wso2/templates/application/application-keys/template.jag:139
 msgid "A request to register this application has been sent."
 msgstr ""
