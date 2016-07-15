@@ -74,7 +74,7 @@ var api = outputs.api;%>
       window.swaggerUi.load();
   });
   </script>
-
+<div class="row">
 <% if(api.status != "PROTOTYPED"){ %>
 
 <script language="javascript">
@@ -158,7 +158,6 @@ function checkOnKeyPress(e) {
     }
 }
 </script>
-<div class="row">
 <div id="authorizations" class="col-md-12 col-lg-12">
 
 <% if(subscriptions != null && subscriptions.length > 0) { %>

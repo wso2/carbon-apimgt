@@ -476,7 +476,7 @@
     "You are now redirected to Identity. If the redirection fails, please click the POST button.": "You are now redirected to Identity. If the redirection fails, please click the POST button.",
     "You are now redirected to Stratos Identity. If the redirection fails, please click the POST button.": "You are now redirected to Stratos Identity. If the redirection fails, please click the POST button.",
     "You are now redirected to Stratos Identity. If the redirection fails, please click the post button.": "You are now redirected to Stratos Identity. If the redirection fails, please click the post button.",
-    "You have selected \\\"Dynamic Endpoint\\\" which will send the message to the address specified in the \\\"To\\\" header. Please upload a mediation sequence file to Message Mediation Policies, which sets the \\\"To\\\" header. ": "You have selected \\\"Dynamic Endpoint\\\" which will send the message to the address specified in the \\\"To\\\" header. Please upload a mediation sequence file to Message Mediation Policies, which sets the \\\"To\\\" header. ",
+    "You have selected \"Dynamic Endpoint\" which will send the message to the address specified in the \"To\" header. Please upload a mediation sequence file to Message Mediation Policies, which sets the \"To\" header.": "You have selected \"Dynamic Endpoint\" which will send the message to the address specified in the \"To\" header. Please upload a mediation sequence file to Message Mediation Policies, which sets the \"To\" header.",
     "You have successfully published your API": "You have successfully published your API",
     "You have successfully saved the API.": "You have successfully saved the API.",
     "_Desc": "_Desc",
