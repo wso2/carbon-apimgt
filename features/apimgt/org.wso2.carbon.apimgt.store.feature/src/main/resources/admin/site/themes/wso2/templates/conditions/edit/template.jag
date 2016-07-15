@@ -78,27 +78,27 @@
         if("app" == type) {
             $('#formatTip').text("Format : ${userName}:${applicationName}");
             <% if(tenantDomain == "carbon.super") { %>
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + ": admin:DefaultApplication");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + ": admin:DefaultApplication");
             <%} else  { %>
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin@<%=tenantDomain%>:DefaultApplication");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : admin@<%=tenantDomain%>:DefaultApplication");
              <% } %>
         } else if("api" == type) {
             <% if(tenantDomain == "carbon.super") { %>
                 $('#formatTip').text("Format : ${context}");
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + ": test/1.0.0");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + ": test/1.0.0");
             <%} else  { %>
                 $('#formatTip').text("Format : /t/${tenantDomain}/${context}");
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : /t/<%=tenantDomain%>/test/1.0.0");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : /t/<%=tenantDomain%>/test/1.0.0");
              <% } %>
         } else if("ip" == type) {
             $('#formatTip').text("Format : ${ip}");
-            $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : 127.0.0.1");
+            $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : 127.0.0.1");
         }  else if("user" == type) {
             $('#formatTip').text("Format : ${userName}");
             <% if(tenantDomain == "carbon.super") { %>
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : admin");
             <%} else  { %>
-                $('#sampleformatTip').text(<%=i18n.localize("Eg ")%> + " : admin@<%=tenantDomain%>");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : admin@<%=tenantDomain%>");
              <% } %>
         }
     }
