@@ -1175,7 +1175,7 @@
         <!-- apache pdfbox version -->
         <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
-        <event.processor.stub.version>2.1.0-beta</event.processor.stub.version>
+        <event.processor.stub.version>2.1.0</event.processor.stub.version>
         <swagger.codegen.version>2.1.6.wso2v1</swagger.codegen.version>
         <swagger.core.version>1.5.8</swagger.core.version>
         <swagger.models.version>1.5.8</swagger.models.version>
