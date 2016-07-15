@@ -11,7 +11,7 @@
             <div class="comment-body">
                 <span class="tip tip-down"></span>
                 <div class="comment-message">
-                    <span class="comment-text word-break"><%=comment.comment%></span>
+                    <span class="comment-text word-break"><%=encode.forHtml(comment.comment)%></span>
                 </div>
             </div>
             <div class="comment-extra"><%=i18n.localize("Posted By")%> <strong><%=comment.username%></strong> <%=i18n.localize("on")%> <span class="dateFull"><%=comment.createdTime%></span></div>

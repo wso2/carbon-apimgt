@@ -87,8 +87,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Get all Application level throttle policies
       description: |
         Get all Application level throttle policies
@@ -136,8 +134,6 @@ paths:
 #-----------------------------------------------------  
     post:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Add an Application level throttle policy
       description: |
         Add an Application level throttle policy
@@ -195,8 +191,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Retrieve an Application Policy
       description: |
         Retrieve an Application Policy providing the policy name.
@@ -250,8 +244,6 @@ paths:
 #-----------------------------------------------------  
     delete:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete an Application level throttle policy
       description: |
         Delete an Application level throttle policy
@@ -284,9 +276,6 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
       summary: Update an Application level throttle policy
       description: |
         Update an Application level throttle policy
@@ -361,8 +350,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Get all Subscription level throttle policies
       description: |
         Get all Subscription level throttle policies
@@ -410,8 +397,6 @@ paths:
 #-----------------------------------------------------  
     post:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Add a Subscription level throttle policy
       description: |
         Add a Subscription level throttle policy
@@ -469,8 +454,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Retrieve a Subscription Policy
       description: |
         Retrieve a Subscription Policy providing the policy name.
@@ -524,8 +507,6 @@ paths:
 #-----------------------------------------------------  
     delete:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete a Subscription level throttle policy
       description: |
         Delete a Subscription level throttle policy
@@ -558,9 +539,6 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
       summary: Update a Subscription level throttle policy
       description: |
         Update a Subscription level throttle policy
@@ -633,8 +611,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Get all Custom Rules
       description: |
         Get all Custom Rules
@@ -682,8 +658,6 @@ paths:
 #-----------------------------------------------------  
     post:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Add a Custom Rule
       description: |
         Add a Custom Rule
@@ -741,8 +715,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Retrieve a Custom Rule
       description: |
         Retrieve a Custom Rule providing the policy name.
@@ -796,8 +768,6 @@ paths:
 #-----------------------------------------------------  
     delete:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete a Custom Rule
       description: |
         Delete a Custom Rule
@@ -830,9 +800,6 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
       summary: Update a Custom Rule
       description: |
         Update a Custom Rule
@@ -906,8 +873,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Get all Advanced level throttle policies
       description: |
         Get all Advanced level throttle policies
@@ -955,8 +920,6 @@ paths:
 #-----------------------------------------------------  
     post:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Add an Advanced level throttle policy
       description: |
         Add an Advanced level throttle policy
@@ -1014,8 +977,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
-#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Retrieve an Advanced Policy
       description: |
         Retrieve a Advanced Policy providing the policy name.
@@ -1069,8 +1030,6 @@ paths:
 #-----------------------------------------------------  
     delete:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete an Advanced level throttle policy
       description: |
         Delete an Advanced level throttle policy
@@ -1103,9 +1062,6 @@ paths:
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-request: "{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}"
       summary: Update an Advanced level throttle policy
       description: |
         Update an Advanced level throttle policy
@@ -1178,8 +1134,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:bl_view
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Get all blocking condtions
       description: |
         Get all blocking condtions
@@ -1227,8 +1181,6 @@ paths:
 #-----------------------------------------------------  
     post:
       x-scope: apim:bl_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Add a Blocking condition
       description: |
         Add a Blocking condition
@@ -1286,8 +1238,6 @@ paths:
 #-----------------------------------------------------
     get:
       x-scope: apim:bl_view
-#        x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Bronze"
-#        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: Retrieve a Blocking Condition
       description: |
         Retrieve a Blocking Condition providing the condition Id
@@ -1341,8 +1291,6 @@ paths:
 #-----------------------------------------------------  
     delete:
       x-scope: apim:bl_manage
-#      x-wso2-curl: "curl -H \"Authorization: Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -X POST \"http://127.0.0.1:9763/api/am/publisher/v0.9/tiers/api/Low\""
-#      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete a Blocking condition
       description: |
         Delete a Blocking condition

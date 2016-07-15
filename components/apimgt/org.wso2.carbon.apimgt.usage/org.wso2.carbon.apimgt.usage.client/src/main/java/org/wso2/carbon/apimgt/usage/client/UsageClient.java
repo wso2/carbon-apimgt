@@ -47,6 +47,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -242,28 +243,17 @@ public class UsageClient {
             String from;
             String where = "where sub.tenant_id=" + tenantId;
             String groupAndOrder = " group by sub.created_time order by sub.created_time asc";
-            String time = " and sub.created_time between '" + fromDate + "' and '" + toDate + "' ";
-
-            /*if ("All".equals(apiName)) {
-                from = "from AM_SUBSCRIBER sub ";
-                if (!"allAPIs".equals(apiFilter)) {
-                    from += " ,AM_API as api,AM_APPLICATION AS app, AM_SUBSCRIPTION as subc  ";
-                    where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
-                            + "sub.subscriber_id=app.subscriber_id and api.api_provider='" + provider + "'";
-                }
-            } else {
-                from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
-                where += " and api.api_id=subc.api_id and app.application_id=subc.application_id and "
-                        + "sub.subscriber_id=app.subscriber_id and api.api_name='" + apiName + "'";
-                if (!"allAPIs".equals(apiFilter)) {
-                    where += " and api.api_provider = '" + provider + "' ";
-                }
-            }*/
-            
+            String time = " and sub.created_time between ? and ? ";
             from = "from AM_SUBSCRIBER sub "; 
 
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
+            Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
+
+            statement.setTimestamp(1, fromTime);
+            statement.setTimestamp(2, toTime);
             //execute
             rs = statement.executeQuery();
             List<DevelopersByTimeDTO> list = new ArrayList<DevelopersByTimeDTO>();
@@ -331,12 +321,12 @@ public class UsageClient {
             String from;
             String where = "where sub.subscriber_id=app.subscriber_id and sub.tenant_id=" + tenantId;
             String groupAndOrder = " group by app.created_time order by app.created_time asc";
-            String time = " and app.created_time between '" + fromDate + "' and '" + toDate + "' ";
+            String time = " and app.created_time between ? and ? ";
 
             if ("All".equals(apiName) && "All".equals(developer)) {
-                from = "from AM_APPLICATION AS app,AM_SUBSCRIBER sub ";
-            }else{
-                from = "from AM_API as api,AM_APPLICATION AS app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION as subc ";
+                from = "from AM_APPLICATION app,AM_SUBSCRIBER sub ";
+            } else {
+                from = "from AM_API api,AM_APPLICATION app,AM_SUBSCRIBER sub, AM_SUBSCRIPTION subc ";
                 where += " and api.api_id=subc.api_id and app.application_id=subc.application_id";
 
                 if ("allAPIs".equals(apiFilter)) {
@@ -365,6 +355,12 @@ public class UsageClient {
             }
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
+            Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
+
+            statement.setTimestamp(1, fromTime);
+            statement.setTimestamp(2, toTime);
             //execute
             rs = statement.executeQuery();
 
@@ -425,10 +421,10 @@ public class UsageClient {
 
             String select =
                     "select count(subc.subscription_id) as subscription_count, subc.created_time as " + "created_time ";
-            String from = "from AM_API as api,  AM_SUBSCRIPTION as subc ";
+            String from = "from AM_API api,  AM_SUBSCRIPTION subc ";
             String where = "where api.api_id=subc.api_id ";
             String groupAndOrder = "group by subc.created_time" + " order by subc.created_time asc ";
-            String time = " and subc.created_time between '" + fromDate + "' and '" + toDate + "' ";
+            String time = " and subc.created_time between ? and ? ";
             if (!"allAPIs".equals(apiFilter)) {
                 where += " and api.api_provider = '" + provider + "' ";
             } else {
@@ -449,6 +445,12 @@ public class UsageClient {
             }
             String query = select + from + where + time + groupAndOrder;
             statement = connection.prepareStatement(query);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
+            Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
+
+            statement.setTimestamp(1, fromTime);
+            statement.setTimestamp(2, toTime);
             //execute
             rs = statement.executeQuery();
             List<SubscriptionOverTimeDTO> list = new ArrayList<SubscriptionOverTimeDTO>();
@@ -518,13 +520,18 @@ public class UsageClient {
             if (!"All".equals(apiCreator)) {
                 query += " CREATED_BY= ? and ";
             }
-            query += " CREATED_TIME between '" + fromDate + "' and '" + toDate
-                    + "' group by CREATED_TIME order by CREATED_TIME ASC ";
+            query += " CREATED_TIME between ? and ?" + " group by CREATED_TIME order by CREATED_TIME ASC ";
             statement = connection.prepareStatement(query);
+            int cnt = 0;
             if (!"All".equals(apiCreator)) {
-                statement.setString(1, apiCreator);
+                statement.setString(++cnt, apiCreator);
             }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Timestamp fromTime = new java.sql.Timestamp(dateFormat.parse(fromDate).getTime());
+            Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toDate).getTime());
 
+            statement.setTimestamp(++cnt, fromTime);
+            statement.setTimestamp(++cnt, toTime);
             //execute
             rs = statement.executeQuery();
             List<ApisByTimeDTO> list = new ArrayList<ApisByTimeDTO>();

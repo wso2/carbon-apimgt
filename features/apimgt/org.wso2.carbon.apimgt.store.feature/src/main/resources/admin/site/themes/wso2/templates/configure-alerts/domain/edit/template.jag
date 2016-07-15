@@ -14,7 +14,7 @@
     var templateType = "";
 
     if (request.getParameter("configurationName") != null) {
-        configurationName = encode.forJavaScript(request.getParameter("configurationName"));
+        configurationName = request.getParameter("configurationName");
     }
 
     if (request.getParameter("templateType") != null) {
@@ -83,7 +83,7 @@
                                 }
                             %>
                             <option <%=selectedValue%>
-                                    value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+configurationName+"&templateType="+scenarioInfoDTOs[i].getType())%>">
+                                    value="<%=jagg.url('/alerts-domain-edit?domainName='+domainName+'&configurationName='+ encode.forUriComponent(configurationName)+"&templateType="+scenarioInfoDTOs[i].getType())%>">
                                 <%=scenarioInfoDTOs[i].getType()%>
                             </option>
                             <%}%>
@@ -108,7 +108,7 @@
 
                     <div class="col-md-9">
                         <input type="text" id="txtName" class="form-control"
-                               value="<%=configurationName%>"
+                               value="<%=encode.forHtml(configurationName)%>"
                                 <% if (isExistingConfig) {
                                     print("readOnly");
                                 }%>/>

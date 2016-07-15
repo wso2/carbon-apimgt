@@ -9,6 +9,8 @@ for(var i=0;i < outputs.tiers.length; i++){
      app_tier = outputs.tiers[i]; 
   }
 }
+
+var supportedLangs = jagg.module("subscription").getSupportedLanguages();
 %>
 <div class="page-header" id="Message">
     <h2 id="application_name"><%= encode.forHtml(application.name) %></h2>
@@ -21,7 +23,9 @@ for(var i=0;i < outputs.tiers.length; i++){
       <li role="presentation"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
       <li role="presentation"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
       <li role="presentation"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
+      <% if (supportedLangs.langs != null) { %>
       <li role="presentation"><a title="<%=i18n.localize("SDKs")%>"  href="#sdks" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("SDKs")%></a></li>
+      <% } %>
       <% } %>
     </ul>
 

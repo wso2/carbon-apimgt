@@ -216,7 +216,7 @@ var validateResourceTable = function(){
             errors += i18n.t("URL Pattern has to be unique.") + "<strong>" + myVal + "</strong>" + i18n.t("has duplicated entries.") + "<br/>";
         }
         if(myVal == ""){
-            errors += i18n.t("URL Pattern can't be empty.") + "<br />";
+            errors += i18n.t("URL Pattern cannot be empty.") + "<br />";
         }
     });
 

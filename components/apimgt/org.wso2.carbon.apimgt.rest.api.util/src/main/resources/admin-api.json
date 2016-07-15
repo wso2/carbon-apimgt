@@ -1697,9 +1697,6 @@
     "ThrottleCondition": {
       "discriminator": "type",
       "x-wso2-subtypes": [
-        "DateCondition",
-        "DateRangeCondition",
-        "HTTPVerbCondition",
         "HeaderCondition",
         "IPCondition",
         "JWTClaimsCondition",
@@ -1714,9 +1711,6 @@
         "type": {
           "type": "string",
           "enum": [
-            "DateCondition",
-            "DateRangeCondition",
-            "HTTPVerbCondition",
             "HeaderCondition",
             "IPCondition",
             "JWTClaimsCondition",
@@ -1727,54 +1721,6 @@
           "type": "boolean"
         }
       }
-    },
-    "DateCondition": {
-      "title": "Date based throttle condition",
-      "allOf": [
-        {
-          "$ref": "#/definitions/ThrottleCondition"
-        },
-        {
-          "properties": {
-            "specificDate": {
-              "type": "string"
-            }
-          }
-        }
-      ]
-    },
-    "DateRangeCondition": {
-      "title": "Date range based throttle condition",
-      "allOf": [
-        {
-          "$ref": "#/definitions/ThrottleCondition"
-        },
-        {
-          "properties": {
-            "startingDate": {
-              "type": "string"
-            },
-            "endingDate": {
-              "type": "string"
-            }
-          }
-        }
-      ]
-    },
-    "HTTPVerbCondition": {
-      "title": "Http verb based throttle condition",
-      "allOf": [
-        {
-          "$ref": "#/definitions/ThrottleCondition"
-        },
-        {
-          "properties": {
-            "httpVerb": {
-              "type": "string"
-            }
-          }
-        }
-      ]
     },
     "HeaderCondition": {
       "title": "HTTP Header based throttle condition",
