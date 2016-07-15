@@ -146,7 +146,7 @@
         });
 
         var isNewPolicy = true;
-        if('<%=encode.forJavaScript(request.getParameter("policyName"))%>' != 'null'){
+        if('<%=encode.forJavaScript(String(policyName))%>' != 'null'){
             isNewPolicy = false;
         }
         if(!isNewPolicy){
