@@ -40,7 +40,7 @@
         <% } %>
     ];
 
-    var DEFAULT_TIER = "<%=default_tier%>";
+    var DEFAULT_TIER = "<%=encode.forJavaScript(default_tier)%>";
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
 
@@ -55,7 +55,7 @@
 <%
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
-    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);
 %>
 <!-- <center>
 <%if(createPermitted){%>
@@ -85,9 +85,9 @@
 	<div class="page-header">
  		<h2> <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>
         </h2>
- 	</div>     
+ 	</div>
     <div class="content-section shadow-up">
-    <div class="content-data">   
+    <div class="content-data">
 	    <div class="alert alert-danger" id="addAPIError" style="display:none">
 	        <span id="addErrorSpan"></span>
 	    </div>
@@ -97,7 +97,7 @@
                 <p><%=i18n.localize("You are editing an API with active subscribers. Tier Availability changes will not be reflected on active subscriptions.")%></p>
             </div>
 		  <%  }%>
-		  
+
 		  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
    		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!")%></strong>
                     <%=i18n.localize("You have successfully saved the API.")%>
@@ -107,8 +107,8 @@
                         </span>
                     </button>
    </div>
-		  
-		  
+
+
 		  <div class="">
                 <div class="row">
                     <div class="wizard col-xs-12">
@@ -122,7 +122,7 @@
 	                        <%} %>
                         </div>
                         <div class="wiz-content">
-                        
+
                         		   <div class="row">
         <div class="col-sm-12">
             <form class="form-horizontal apim-form" method="POST"
@@ -255,7 +255,7 @@
                                                                </div>
 
                                                            </div>
-                                                    <% } %>                                            
+                                                    <% } %>
                                         <!--Response Caching End -->
                             </div>
                         </div>
@@ -335,8 +335,8 @@
                                                             var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
                                                         %>
                                                         <label class="tier_checkbox_label checkbox add-padding-bottom-1x">
-                                                                <input type="checkbox" class="tier_check" name="tier" value="<%= tiers[i].tierName %>" <%if(isSelected){%>checked<%}%>>
-                                                                <span class="helper"><strong><%= tiers[i].tierDisplayName %></strong> : <%= tiers[i].tierDescription %></span>
+                                                                <input type="checkbox" class="tier_check" name="tier" value="<%= encode.forHtmlAttribute(String(tiers[i].tierName))%>" <%if(isSelected){%>checked<%}%>>
+                                                                <span class="helper"><strong><%= encode.forHtml(String(tiers[i].tierDisplayName)) %></strong> : <%= encode.forHtml(String(tiers[i].tierDescription)) %></span>
                                                         </label>
                                                         <%
                                                         }
@@ -565,7 +565,7 @@
                                 </td>
                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
                             </tr>
                          <%}}
                          else{
@@ -582,7 +582,7 @@
                                              </td>
                                              <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                              <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                             <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                             <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
                                         </tr>
                                   <%}else{%>
                                         <tr data-type="selectable">
@@ -596,7 +596,7 @@
                                              </td>
                                              <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                              <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
-                                             <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                                             <td><div class="environments_data"><%=encode.forHtml(environmentsList[i].description)%></div></td>
                                         </tr>
 
                                    <%}}}%>
@@ -641,7 +641,7 @@
                                  <div class="form-group">
                                     <label class="control-label col-sm-3" for="bizOwnerMail"><%=i18n.localize("Business Owner Email")%>:</label>
                                     <div class="controls col-sm-8">
-                                         <input type="text" class=" email form-control businessInfo" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                                         <input type="text" class=" email form-control businessInfo" id="bizOwnerMail" name="bizOwnerMail" value="<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"/>
                                     </div>
                                 </div>
                                  <div class="form-group">
@@ -653,7 +653,7 @@
                                  <div class="form-group">
                                     <label class="control-label col-sm-3" for="techOwnerMail"><%=i18n.localize("Technical Owner Email")%>:</label>
                                     <div class="controls col-sm-8">
-                                         <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                                         <input type="text" class=" email form-control businessInfo" id="techOwnerMail" name="techOwnerMail" value="<%=encode.forHtmlAttribute(api.techOwnerMail)%>"/>
                                     </div>
                                 </div>
                   </div>
@@ -745,12 +745,12 @@
                 </div>
             </div>
 
- 
+
     </div>
     </div>
 </div>
 
-<script id="designer-apidoc-template" type="text/x-handlebars-template">    
+<script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
@@ -767,7 +767,7 @@
         <th width="100px"><%=i18n.localize("Parameter Type")%></th>
         <th width="100px"><%=i18n.localize("Data Type")%></th>
         <th width="100px"><%=i18n.localize("Required")%></th>
-        </tr>    
+        </tr>
     {{#each parameters}}
         <tr>
         <td>{{ name }}</td>
@@ -775,16 +775,16 @@
         <td>{{ in }}</td>
         <td>{{ type }}</td>
         <td>{{toString required }}</td>
-        </tr> 
+        </tr>
     {{/each}}
     {{/if}}
     </table>
-</div>  
+</div>
 </script>
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <br />
-<table style="width:100%">                       
+<table style="width:100%">
 {{#each doc.paths}}
     {{# each this}}
         <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
@@ -799,7 +799,7 @@
         <tr><td colspan="6" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
-</table>                           
+</table>
 </script>
 
 <script id="scopes-template" type="text/x-handlebars-template">
@@ -955,8 +955,8 @@
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form) {
                     $('#'+thisID).buttonLoader('stop');
-                    if (!responseText.error) {                
-                        $( "body" ).trigger( "api_saved" );       
+                    if (!responseText.error) {
+                        $( "body" ).trigger( "api_saved" );
                     } else {
                          if (responseText.message == "timeout") {
                              if (ssoEnabled) {
@@ -1021,7 +1021,7 @@
                 // Setting text field values to null if check box is not selected.
                     $('#productionTps').val(null);
                     $('#sandboxTps').val(null);
-            } 
+            }
             $("#manage_form").submit();
         });
 
@@ -1031,7 +1031,7 @@
           setTimeout("hideMsg()", 3000);
         });
 
-        
+
         $('#responseCache').change(function(){
             var cache = $('#responseCache').find(":selected").val();
             if(cache == "enabled"){
@@ -1043,7 +1043,7 @@
         });
 
     });
-    
+
     var hideMsg=function () {
         $('#apiSaved').hide("slow");
     }
@@ -1082,7 +1082,7 @@
             <div class="col-sm-4">
             <textarea id="scopeDescription" class="form-control" placeholder="<%=i18n.localize("Eg: This scope will group all the administration APIs")%>"></textarea>
             </div>
-        </div>        
+        </div>
     </form>
     </div>
     <div class="modal-footer">
@@ -1131,7 +1131,7 @@
             }
             </script>
         </div>
-      </div>  
+      </div>
     </div>
 </div>
        <script type="text/javascript">

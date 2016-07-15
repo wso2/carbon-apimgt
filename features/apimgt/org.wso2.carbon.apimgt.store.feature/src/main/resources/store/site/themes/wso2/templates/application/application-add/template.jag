@@ -40,7 +40,7 @@
   <div class="form-group">
     <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
     <div class="col-md-9 col-lg-9">
-      <input type="text" class="form-control required validateSpecialChars validName" title="application_name" id="application-name" autofocus="autofocus"/>
+      <input type="text" class="form-control required validateSpecialChars validName" title="Application Name" id="application-name" autofocus="autofocus"/>
     </div>
   </div>
   <div class="form-group">

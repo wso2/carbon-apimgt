@@ -328,7 +328,7 @@
 												</label>
 												<div class="col-sm-6">
 													<div class="input-append">
-														<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
+														<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
 														<div class="btn-group">
 															<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
 														</div>
@@ -350,10 +350,10 @@
 
 										<hr/>
 										<%if(api!=null){%>
-											<input type = "hidden" name = "bizOwner" value = "<%=api.bizOwner%>" />
-											<input type = "hidden" name = "bizOwnerMail" value = "<%=api.bizOwnerMail%>" />
-											<input type = "hidden" name = "techOwner" value = "<%=api.techOwner%>" />
-											<input type = "hidden" name = "techOwnerMail" value = "<%=api.techOwnerMail%>" />
+											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />
+											<input type = "hidden" name = "bizOwnerMail" value = "<%=encode.forHtmlAttribute(api.bizOwnerMail)%>" />
+											<input type = "hidden" name = "techOwner" value = "<%=encode.forHtmlAttribute(api.techOwner)%>" />
+											<input type = "hidden" name = "techOwnerMail" value = "<%=encode.forHtmlAttribute(api.techOwnerMail)%>" />
 										<%}%>
 										<input type="hidden" name="action" value="design" />
 										<input type="hidden" id="swagger" name="swagger" value="" />

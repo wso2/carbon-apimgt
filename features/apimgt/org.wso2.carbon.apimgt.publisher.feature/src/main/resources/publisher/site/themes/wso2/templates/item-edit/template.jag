@@ -25,7 +25,7 @@ $(document).ready(function() {
     addSelectedTiers = function(target) {
         var tierDescs,tiersList,tiersDescList,tiers = [];
         tiersList = "<%=api.availableTiers%>";
-        tiersDescList = "<%=api.tierDescs%>";
+        tiersDescList = "<%=encode.forJavaScript(api.tierDescs)%>";
         tiers = tiersList.split(",");
         tierDescs = tiersDescList.split(",");
         for (var i = 0; i < tiers.length; i++) {
@@ -221,14 +221,14 @@ var faultSequencesLoaded = false;
                 <div class="controls">
                 <!-- @todo: param_string -->
                     <textarea class="input-xlarge" id="editDescription" rows="3"
-                              style="margin-left: 0px; margin-right: 0px; width: 501px; " name="description"><%=api.description%></textarea>
+                              style="margin-left: 0px; margin-right: 0px; width: 501px; " name="description"><%=encode.forHtml(api.description)%></textarea>
                 </div>
             </div>
 
             <div class="control-group">
                    <label class="control-label" for="editTags"><%=i18n.localize("Tags")%>:</label>
                    <div class="controls">
-                       <input type="text" class="input-xlarge validInput" id="editTags" name="tags" value="<%=api.tags%>"/>
+                       <input type="text" class="input-xlarge validInput" id="editTags" name="tags" value="<%=encode.forHtmlAttribute(api.tags)%>"/>
                        <p class="help-block"><%=i18n.localize("Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs.")%></p>
                    </div>
                </div>
@@ -352,7 +352,7 @@ var faultSequencesLoaded = false;
                     <label class="control-label" for="wsdl"><%=i18n.localize("WSDL")%>:</label>
                     <div class="controls">
                         <div class="input-append">
-                        <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
+                        <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=encode.forHtmlAttribute(api.wsdl)%>" />
                         <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
                         </div>
                         <p class="help-block"><%=i18n.localize("E.g.,:http://appserver/services/echo?wsdl")%></p>
@@ -362,7 +362,7 @@ var faultSequencesLoaded = false;
                     <label class="control-label" for="wadl"><%=i18n.localize("WADL")%>:</label>
                     <div class="controls">
                         <div class="input-append">
-                        <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
+                        <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=encode.forHtmlAttribute(api.wadl)%>" />
                         <button class="btn check_url_valid"  type="button"><%=i18n.localize("Test URI")%></button>
                         </div>
                         <p class="help-block"><%=i18n.localize("E.g.,:http://example.com/service.wadl")%></p>
@@ -400,7 +400,7 @@ var faultSequencesLoaded = false;
                      <div class="control-group">
                         <label class="control-label" for="bizOwnerMail"><%=i18n.localize("Business Owner Email")%>:</label>
                         <div class="controls">
-                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=encode.forHtmlAttribute(api.bizOwnerMail)%>"/>
                         </div>
                     </div>
                      <div class="control-group">
@@ -412,7 +412,7 @@ var faultSequencesLoaded = false;
                      <div class="control-group">
                         <label class="control-label" for="techOwnerMail"><%=i18n.localize("Technical Owner Email")%>:</label>
                         <div class="controls">
-                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=encode.forHtmlAttribute(api.techOwnerMail)%>"/>
                         </div>
                     </div>
                 </div>

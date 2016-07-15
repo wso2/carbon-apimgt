@@ -132,7 +132,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white" title="Stats-not-configured"></i>' +
-                        '<a href=\'https://docs.wso2.com/display/AM200/Configuring+API+Runtime+Statistics\' target=\'_blank\'' +
+                        '<a href=\'https://docs.wso2.com/display/AM200/Configuring+APIM+Runtime+Statistics\' target=\'_blank\'' +
 		       	        'title=' + i18n.t('WSO2 wiki documentation on APIM statistics') + ' class=\'warningLink\'>' +
 	                    i18n.t('Refer our wiki to configure DAS correctly') + '</a></span><br/>' +
 			            '<img src="../themes/wso2/images/statsThumb.png" alt="'+ i18n.t('Thumbnail image when stats not configured') + '"></div>'));
