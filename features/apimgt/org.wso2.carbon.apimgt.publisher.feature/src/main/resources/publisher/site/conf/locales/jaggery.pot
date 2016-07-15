@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-15 10:54+0530\n"
+"POT-Creation-Date: 2016-07-15 16:48+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -409,7 +409,7 @@ msgid "Design API"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:73
-#: site/themes/wso2/templates/item-design/template.jag:421
+#: site/themes/wso2/templates/item-design/template.jag:427
 msgid "Warning"
 msgstr ""
 
@@ -552,8 +552,9 @@ msgid "Image file exceeds the maximum limit of 1MB."
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:240
-#: site/themes/wso2/templates/item-design/template.jag:486
-#: site/themes/wso2/templates/item-design/template.jag:502
+#: site/themes/wso2/templates/item-design/template.jag:492
+#: site/themes/wso2/templates/item-design/template.jag:508
+#: site/themes/wso2/templates/overview/template.jag:13
 #: site/themes/wso2/templates/item-manage/template.jag:547
 #: site/themes/wso2/templates/item-manage/template.jag:758
 #: site/themes/wso2/templates/item-manage/template.jag:759
@@ -648,7 +649,7 @@ msgid "Test URI"
 msgstr ""
 
 #: site/themes/wso2/templates/item-design/template.jag:342
-#: site/themes/wso2/templates/item-design/template.jag:470
+#: site/themes/wso2/templates/item-design/template.jag:476
 msgid "Import"
 msgstr ""
 
@@ -667,43 +668,43 @@ msgstr ""
 msgid "Next: Implement"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:403
+#: site/themes/wso2/templates/item-design/template.jag:408
 msgid "Apply Changes"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:404
+#: site/themes/wso2/templates/item-design/template.jag:410
 msgid "Discard Changes"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:415
+#: site/themes/wso2/templates/item-design/template.jag:421
 msgid "Import API Definition"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:424
+#: site/themes/wso2/templates/item-design/template.jag:430
 msgid "Existing API Definition will be overwritten by the imported definition."
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:432
+#: site/themes/wso2/templates/item-design/template.jag:438
 msgid "Upload API definition as"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:436
+#: site/themes/wso2/templates/item-design/template.jag:442
 #: site/themes/wso2/templates/item-add/template.jag:32
 msgid "Swagger File"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:440
+#: site/themes/wso2/templates/item-design/template.jag:446
 #: site/themes/wso2/templates/item-add/template.jag:34
 msgid "Swagger URL"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:452
+#: site/themes/wso2/templates/item-design/template.jag:458
 #: site/themes/wso2/templates/item-implement/template.jag:682
 #: site/themes/wso2/templates/item-add/template.jag:46
 msgid "Browse"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:470
+#: site/themes/wso2/templates/item-design/template.jag:476
 #: site/themes/wso2/templates/item-manage/template.jag:429
 #: site/themes/wso2/templates/item-manage/template.jag:490
 #: site/themes/wso2/templates/item-manage/template.jag:1091
@@ -717,82 +718,78 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:490
+#: site/themes/wso2/templates/item-design/template.jag:496
 msgid "Produces"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:491
+#: site/themes/wso2/templates/item-design/template.jag:497
 msgid "Consumes"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:496
+#: site/themes/wso2/templates/item-design/template.jag:502
 #: site/themes/wso2/templates/item-manage/template.jag:761
 msgid "Parameters"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:501
+#: site/themes/wso2/templates/item-design/template.jag:507
 #: site/themes/wso2/templates/item-manage/template.jag:765
 #: site/themes/wso2/templates/item-implement/template.jag:722
 msgid "Parameter Name"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:503
+#: site/themes/wso2/templates/item-design/template.jag:509
 #: site/themes/wso2/templates/item-manage/template.jag:767
 #: site/themes/wso2/templates/item-implement/template.jag:724
 msgid "Parameter Type"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:504
+#: site/themes/wso2/templates/item-design/template.jag:510
 #: site/themes/wso2/templates/item-manage/template.jag:768
 #: site/themes/wso2/templates/item-implement/template.jag:725
 msgid "Data Type"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:505
+#: site/themes/wso2/templates/item-design/template.jag:511
 #: site/themes/wso2/templates/item-manage/template.jag:769
 #: site/themes/wso2/templates/item-implement/template.jag:726
 msgid "Required"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:506
+#: site/themes/wso2/templates/item-design/template.jag:512
 #: site/themes/wso2/templates/documentation/template.jag:257
 #: site/themes/wso2/templates/documentation/template.jag:262
 msgid "Delete"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:533
+#: site/themes/wso2/templates/item-design/template.jag:539
 msgid "Add Parameter"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:541
+#: site/themes/wso2/templates/item-design/template.jag:547
 msgid "URL Pattern"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:565
+#: site/themes/wso2/templates/item-design/template.jag:571
 msgid "OPTIONS"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:572
+#: site/themes/wso2/templates/item-design/template.jag:578
 msgid ""
 "Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS "
 "method is not selected, OPTIONS calls will be returned from the gateway with "
 "Allowed methods."
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:576
+#: site/themes/wso2/templates/item-design/template.jag:582
 msgid "less"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:580
+#: site/themes/wso2/templates/item-design/template.jag:586
 msgid "more"
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/template.jag:596
+#: site/themes/wso2/templates/item-design/template.jag:602
 msgid "Add"
-msgstr ""
-
-#: site/themes/wso2/templates/overview/template.jag:13
-msgid "description"
 msgstr ""
 
 #: site/themes/wso2/templates/overview/template.jag:22
@@ -2054,6 +2051,10 @@ msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:145
 msgid "Advanced Options"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/template.jag:146
+msgid "Test"
 msgstr ""
 
 #: site/themes/wso2/templates/item-implement/template.jag:151

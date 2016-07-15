@@ -143,7 +143,7 @@
 																  <input type="text" class="form-control endpoint_input" data-type="{{type}}" data-index="{{ @index }}" value="{{ url }}" placeholder="E.g.: http://appserver/resource">																  
 																  <span class="input-group-btn">
 																    <button class="btn btn-secondary ad_config" type="button" data-type="{{ type }}" data-index="{{ @index }}" title='<%=i18n.localize("Advanced Options")%>'><i class="fw fw-settings"></i></button>
-																    <button class="btn btn-secondary check_url_valid" type="button" >Test</button>
+																    <button class="btn btn-secondary check_url_valid" type="button" ><%= i18n.localize("Test")%></button>
 																  </span>
 																</div>
 																{{#if invalid }}
