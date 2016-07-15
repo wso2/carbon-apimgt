@@ -1,18 +1,17 @@
 <% jagg.template("manage-alerts", function(inputs, outputs, jagg) { %>
 
-		<div id="col-sm-12">
-        <div id="manageAlerts">
+		   <div id="manageAlerts">
 			<div class="page-header">
 				<h2><%=i18n.localize("Manage Alert Types")%></h2>
 			</div>
-			<div class="control-group">
+			<div class="">
                <%
                 var error = outputs.alertTypesInformations.error;
                 if(error == false){
                     var allAlertType = outputs.alertTypesInformations.allAlertTypeJson;
                     var savedAlertTypes = outputs.alertTypesInformations.savedAlertTypeJson;
                     %>
-                        <form class="form-horizontal">
+                        <div class="form-horizontal">
                     <%
                     for (var key in allAlertType) {
                         if (allAlertType.hasOwnProperty(key)) {
@@ -29,19 +28,21 @@
                                 }
                             }
                            %>
-                            <div class="form-group">
-                                <label class="col-sm-1"><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>></label>
-                                <div class="col-sm-10">
-                                  <p class=""><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></p>
-                                  <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
-                                </div>
-                            </div>
+                           <div class="form-group">
+                               <div class="col-sm-12">
+                                   <label class="checkbox">
+                                     <input type="checkbox" id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>>
+                                     <span class="helper"><strong><%= i18n.localize(encode.forHtml(allAlertType[key])) %></strong></span>
+                                     <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
+                                   </label>
+                               </div>
+                             </div>
                            <%
                         }
                     }
                     %>
                         <div class="form-group">
-                                <label class="col-sm-1 email"><p class=""><strong><%=i18n.localize("Email")%></strong></p></label>
+                                <label class="col-sm-2 control-label"><strong><%=i18n.localize("Email")%></strong></label>
                                 <%
                                     var savedEmailList ="";
                                     if(outputs.emailList.allSavedEmailListJson[0] != null){
@@ -53,12 +54,16 @@
                                     <input id="tokenfield" type="text" value="<%=encode.forHtml(savedEmailList)%>" data-role="tagsinput" />
                                 </div>
                         </div>
-                        </form>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
                             <div class="" id="saveButtons">
                                 <button type="submit" class="btn btn-primary " id="saveBtn" ><%=i18n.localize("Save")%></button>
-                                <button type="submit" class="btn btn-primary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
-                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" ><%=i18n.localize("Unsubscribe")%> </button>
+                                <button type="submit" class="btn btn-secondary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
+                                <button type="submit" class="btn btn-danger " style="display: none" id="unsubscribeBtn" ><%=i18n.localize("Unsubscribe")%> </button>
                             </div>
+                            </div>
+                        </div>
+                        </div>
                     <%
                 }else{
                     %>
@@ -69,6 +74,5 @@
                 }
                 %>
         </div>
-    </div>
     </div>
 <%});%>
