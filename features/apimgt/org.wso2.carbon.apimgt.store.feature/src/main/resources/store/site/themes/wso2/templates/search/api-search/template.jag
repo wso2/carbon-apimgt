@@ -21,7 +21,7 @@ if(request.getParameter("type") == "prototyped"){
 %>
 
 <form action="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?<%= param %>" id="search_apis">
-  <div class="col-xs-10 col-sm-12 col-md-12 col-lg-4">
+  <div class="col-xs-10 col-sm-12 col-md-6 col-lg-5">
     <div class="input-group input-wrap search-wrap">
       <div class="input-group-btn">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="<%=i18n.localize("Category")%>"><%= type %> <span class="caret"></span></button>

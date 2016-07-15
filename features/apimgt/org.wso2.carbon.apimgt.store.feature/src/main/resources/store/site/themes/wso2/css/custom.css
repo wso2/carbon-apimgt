@@ -308,6 +308,11 @@ a.remove_rating:hover{
     background-color: #444;
     border:1px solid #444;
 }
+@media (max-width: 480px) {
+    .navbar-menu-toggle.active + form .search-wrap{
+        display:none;
+    }
+}
 
 .tenent-store-list .list-group-item{
     margin-top:0px;
