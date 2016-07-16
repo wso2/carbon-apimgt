@@ -40,7 +40,7 @@
         <% } %>
     ];
 
-    var DEFAULT_TIER = "<%=encode.forJavaScript(default_tier)%>";
+    var DEFAULT_TIER = "<%=encode.forJavaScript(String(default_tier))%>";
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
 
