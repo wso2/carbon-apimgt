@@ -99,7 +99,6 @@ $(document).ready(function(){
 
         nv.utils.windowResize(chart.update);
         developerFilter();
-        getDateTime(to, from);
         return chart;
     });
 

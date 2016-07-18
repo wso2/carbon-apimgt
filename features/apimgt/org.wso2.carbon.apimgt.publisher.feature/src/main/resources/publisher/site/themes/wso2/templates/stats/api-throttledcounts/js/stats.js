@@ -79,16 +79,17 @@ $( document ).ready(function() {
                         apiName = this.value;
                         pupulateAppList(apiName);
                         var datePicker=$('#date-range').data('daterangepicker');
-                        getDateTime(to, from);
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
                     });
 
                     $("#appSelect").change(function (e) {
                         appName = this.value;
                         var datePicker=$('#date-range').data('daterangepicker');
-                        getDateTime(to, from);
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
                     });
 
                     pupulateAPIList();
+                    getDateTime(to, from);
                 } else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
                     showNoDataAnalyticsMsg();
