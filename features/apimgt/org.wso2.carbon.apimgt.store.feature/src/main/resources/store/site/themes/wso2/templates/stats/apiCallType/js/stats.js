@@ -59,7 +59,7 @@ var statsEnabled = isDataPublishingEnabled();
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    getDateTime(to,from);
+                    getDateTime(to,firstAccessDay);
 
                     $('body').on('click', '.btn-group button', function (e) {
                         $(this).addClass('active');
