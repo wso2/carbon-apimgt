@@ -73,7 +73,7 @@ $(document).ready(function(){
         apiFilter = this.value;
         apiFilterList();
         developerFilter();
-        getDateTime(to, from);
+        drawAppTime(from, to);
     });
 
     nv.addGraph(function () {
@@ -132,7 +132,7 @@ function developerFilter(){
 
             $('#developerSelect').on('change', function() {
                 selectedDeveloper = this.value;//selected value
-                getDateTime(to, from);
+                drawAppTime(from, to);
             });
         }
         else {
@@ -162,7 +162,7 @@ function apiFilterList(){
 
                 $('#apiSelect').on('change', function() {
                     subscribedApi = this.value;//selected value
-                    getDateTime(to, from);
+                    drawAppTime(from, to);
                 });
             }
         else {

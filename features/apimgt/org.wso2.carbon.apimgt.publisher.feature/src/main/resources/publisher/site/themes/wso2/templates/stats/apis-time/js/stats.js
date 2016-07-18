@@ -99,6 +99,7 @@ $(document).ready(function(){
 
         nv.utils.windowResize(chart.update);
         developerFilter();
+
         return chart;
     });
 
@@ -122,7 +123,7 @@ function developerFilter(){
 
             $('#developerSelect').on('change', function() {
                 selectedDeveloper = this.value;//selected value
-                getDateTime(to, from);
+                drawApiTime(from, to);
             });
         }
         else {
