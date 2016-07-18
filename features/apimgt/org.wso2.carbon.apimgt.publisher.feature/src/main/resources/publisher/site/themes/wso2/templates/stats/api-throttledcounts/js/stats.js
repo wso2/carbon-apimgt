@@ -18,6 +18,7 @@ $( document ).ready(function() {
 
                 if (json.usage && json.usage.length > 0) {
                     var d = new Date();
+                    from = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
 
                     //day picker
@@ -78,13 +79,13 @@ $( document ).ready(function() {
                         apiName = this.value;
                         pupulateAppList(apiName);
                         var datePicker=$('#date-range').data('daterangepicker');
-                        getDateTime(datePicker.endDate, datePicker.startDate);
+                        getDateTime(to, from);
                     });
 
                     $("#appSelect").change(function (e) {
                         appName = this.value;
                         var datePicker=$('#date-range').data('daterangepicker');
-                        getDateTime(datePicker.endDate, datePicker.startDate);
+                        getDateTime(to, from);
                     });
 
                     pupulateAPIList();

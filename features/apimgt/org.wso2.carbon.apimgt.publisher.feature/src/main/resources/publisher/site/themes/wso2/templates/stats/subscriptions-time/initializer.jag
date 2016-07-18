@@ -2,6 +2,7 @@
 jagg.initializer("stats/subscriptions-time", {
 
     preInitialize:function () {
+        jagg.addHeaderJS("stats", "common", "templates/stats/js/stats.js");
         jagg.addHeaderCSS("stats", "datepicker","libs/datepicker/css/daterangepicker-bs3.css");
         jagg.addHeaderCSS("stats", "nvd3","libs/nvd3/css/nv.d3.css");
         jagg.addHeaderCSS("stats", " dataTable","libs/dataTables/css/dataTables.bootstrap.css")

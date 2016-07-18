@@ -15,7 +15,7 @@
                <button id="today-btn" type="button" class="btn btn-default "><%=i18n.localize("Day")%>
                </button>
                <button id="week-btn" type="button" class="btn btn-default"><%=i18n.localize("Week")%></button>
-               <button id="month-btn" type="button" class="btn btn-default  active"><%=i18n.localize("Month")%></button>
+               <button id="month-btn" type="button" class="btn btn-default"><%=i18n.localize("Month")%></button>
                <button id="date-range" type="button" class="btn btn-default" >
                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                  <span></span> <b class="caret"></b>
