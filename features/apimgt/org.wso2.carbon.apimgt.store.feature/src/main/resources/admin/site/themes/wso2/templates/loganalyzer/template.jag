@@ -16,9 +16,6 @@ if(page == null) {
     page = 'live-log-viewer';
 }
 
-var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-var tenantDomain = MultitenantUtils.getTenantDomain(username);
-
 var carbon = require('carbon');
 var serverConfigService = carbon.server.osgiService('org.wso2.carbon.base.api.ServerConfigurationService');
 var hostName = serverConfigService.getFirstProperty("HostName");
@@ -201,7 +198,7 @@ if(analyticsConfigInstance.isAnalyticsEnabled()){%>
 
 
         <script>
-            ues.global.userDomain = "<%=tenantDomain%>";
+            ues.global.userDomain = "carbon.super";
             ues.global.urlDomain = null;
             ues.global.tenantPrefix = "/t";
             ues.global.type = 'default';
