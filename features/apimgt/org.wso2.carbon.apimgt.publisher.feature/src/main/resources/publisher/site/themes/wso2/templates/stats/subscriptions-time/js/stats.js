@@ -99,6 +99,7 @@ $(document).ready(function(){
         nv.utils.windowResize(chart.update);
         //update api list
         apiFilterList();
+        getDateTime(to, from);
         return chart;
     });
 });
@@ -117,10 +118,10 @@ function apiFilterList(){
                 $('#apiSelect')
                    .append(apiName)
                    .selectpicker('refresh');
-                getDateTime(to, from);
                 $('#apiSelect').on('change', function() {
-                    getDateTime(to, from);
+                    drawSubTime(from,to);
                 });
+                drawSubTime(from,to);
             }
         else {
             if (json.message == "AuthenticateError") {
