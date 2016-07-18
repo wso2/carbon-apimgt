@@ -42,7 +42,7 @@
                 }
                 %>
                     <div class="form-group">
-                            <label class="col-sm-2 control-label"><strong><%=i18n.localize("Email")%></strong></label>
+                            <label class="col-sm-1 control-label"><strong><%=i18n.localize("Email")%></strong></label>
                             <%
                                 var savedEmailList ="";
                                 if(outputs.emailList.allSavedEmailListJson[0] != null){
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
+                        <div class="col-sm-offset-0 col-sm-10">
                             <div class="" id="saveButtons">
                                 <button type="submit" class="btn btn-primary " id="saveBtn" ><%=i18n.localize("Save")%></button>
                                 <button type="submit" class="btn btn-secondary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
