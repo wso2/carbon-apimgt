@@ -96,8 +96,6 @@ $(document).ready(function(){
         nv.utils.windowResize(chart.update);
         //update api list
         apiFilterList();
-        //draw graph
-        getDateTime(to, from);
         return chart;
     });
 });
