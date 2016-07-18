@@ -1103,7 +1103,7 @@
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 
-        <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
+        <maven-scr-plugin.version>1.9.0</maven-scr-plugin.version>
         <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
