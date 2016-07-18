@@ -8570,7 +8570,13 @@ public class ApiMgtDAO {
 
                 String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
 
-                ps = connection.prepareStatement(emailListSaveQuery, Statement.RETURN_GENERATED_KEYS);
+                if (connection.getMetaData().getDriverName().contains("MS SQL") ||
+                        connection.getMetaData().getDriverName().contains("Microsoft")) {
+                    ps = connection.prepareStatement(emailListSaveQuery, Statement.RETURN_GENERATED_KEYS);
+                }else{
+                    ps = connection.prepareStatement(emailListSaveQuery);
+                }
+
                 ps.setString(1, userName);
                 ps.setString(2, stakeHolder);
                 ps.execute();
