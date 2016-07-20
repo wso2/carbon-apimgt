@@ -14,7 +14,7 @@ var jagg = jagg || {};
 
     jagg.post = function () {
         var args = Array.prototype.slice.call(arguments);
-        args[0] = this.site.context + args[0];
+        args[0] = this.url(args[0]);
         $.post.apply(this, args);
     };
 
@@ -23,7 +23,7 @@ var jagg = jagg || {};
     }
 
     jagg.syncPost = function(url, data, callback, type) {
-        url = this.site.context + url;
+        url = this.url(url);
         return jQuery.ajax({
                                type: "POST",
                                url: url,
@@ -183,6 +183,27 @@ var jagg = jagg || {};
 
                      }
                  }, "json");
+    };
+
+    jagg.url = function(url){
+        //append the site context
+        url = this.site.context + url;
+        //add tenant param
+        //check if tenant param already set
+        if(this.site.tenant){
+            //check if url has query params            
+            if(/\?/.test(url)){
+                if(/\?.*tenant=/.test(url)){
+                    //do nothing
+                }else{
+                    url = url + "&tenant=" + this.site.tenant;    
+                }
+            }else{
+                //if url do not have query params
+                url = url + "?tenant=" + this.site.tenant;    
+            }            
+        }  
+        return url;      
     };
 
     jagg.sessionExpired = function (){

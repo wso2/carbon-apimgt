@@ -115,7 +115,7 @@
 	  	<form class="add-margin-top-5x well">
 	  	    <div class="form-group">
                 <label for="" class="control-label"><%=i18n.localize("Scopes")%></label>
-                  <select class="selectpicker scope_select dropup form-control"  multiple title="Select..">
+                  <select class="selectpicker scope_select dropup form-control"  multiple title="{{#if Scopes}}Select..{{else}}No Scopes Found..{{/if}}" {{#if Scopes}}{{else}}disabled{{/if}}>
                     {{#each Scopes}}
                         <option title="{{scopeName}}" data-content="<strong>{{scopeKey}}</strong> : <span>{{scopeName}}.</span>">{{scopeKey}}</option>
                     {{/each}}
