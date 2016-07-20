@@ -445,7 +445,7 @@ public abstract class APIUsageStatisticsClient {
 
             //make the query
             query = "SELECT CONSUMER_KEY,AUTHZ_USER FROM (select * from IDN_OAUTH2_ACCESS_TOKEN where "
-                    + "TOKEN_STATE='ACTIVE') AS tokenTable INNER JOIN IDN_OAUTH_CONSUMER_APPS AS appsTable ON "
+                    + "TOKEN_STATE='ACTIVE') tokenTable INNER JOIN IDN_OAUTH_CONSUMER_APPS appsTable ON "
                     + "appsTable.ID=tokenTable.CONSUMER_KEY_ID";
 
             //get the result set
