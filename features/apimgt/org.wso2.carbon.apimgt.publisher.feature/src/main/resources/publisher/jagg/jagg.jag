@@ -363,7 +363,11 @@ var getThemeFile = function (path) {
     var getAbsoluteReqUrl = function (path) {
         var host = "";
         if(isReverseProxyEnabled()){
-            host = "https://" + site.reverseProxy.host ;
+            host = "https://" + site.reverseProxy.host;
+            if (path.indexOf(site.context) == 0) {
+                //replaces the site context with reverse proxy context
+                path = site.reverseProxy.context + path.substring(site.context.length, path.length);
+            }
         }
         return host + path;
     };
