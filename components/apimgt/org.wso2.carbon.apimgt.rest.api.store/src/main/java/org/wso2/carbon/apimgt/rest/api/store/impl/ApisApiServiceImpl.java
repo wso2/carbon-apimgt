@@ -392,13 +392,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
-
-            //removes x-mediation-script key:values
-            Pattern pattern = Pattern.compile(",?\"x-mediation-script\":\".*?(?<!\\\\)\",??");
-            Matcher matcher = pattern.matcher(apiSwagger);
-            while (matcher.find()) {
-                apiSwagger = apiSwagger.replace(matcher.group(), "");
-            }
+            apiSwagger = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwagger);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
