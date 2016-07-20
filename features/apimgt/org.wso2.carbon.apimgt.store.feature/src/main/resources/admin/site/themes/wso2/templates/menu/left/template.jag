@@ -107,11 +107,13 @@
               <i class="fw fw-statistics"></i><%= i18n.localize("Analytics") %></a>
             </li>
             <%}%>
+             <% if(tenantDomain != 'carbon.super') { %>
             <li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
               href="<%= jagg.url("/themeupload") %>"
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-upload"></i><%= i18n.localize("Upload Tenant Theme") %></a>
             </li>
+            <%}%>
           </ul>
         </li>
         <li class="nav-header">

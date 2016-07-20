@@ -17,7 +17,6 @@ var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, k
         } else if (action == "update") {
             apiProvider.updatePolicy(policy);
         }
-        log.info(policy.toString());
         return {
             error: false
         };
