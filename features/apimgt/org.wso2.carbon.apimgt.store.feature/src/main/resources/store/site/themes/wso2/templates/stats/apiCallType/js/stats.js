@@ -98,6 +98,7 @@ $(document).ready(function(){
     })
 })
 
+var dt = false;
 var drawAppAPICallType = function(from,to){
 
     var fromDate = from;
@@ -134,7 +135,10 @@ var drawAppAPICallType = function(from,to){
                                 }
                             }
                       }
-                    $('#AppApiCallTypeTable').datatables_extended();
+                    if(dt != false) {
+                        dt.destroy();
+                    }
+                    dt = $('#AppApiCallTypeTable').datatables_extended();
                 }
                 else if (length == 0) {
                     $('#noData').removeClass('hide');

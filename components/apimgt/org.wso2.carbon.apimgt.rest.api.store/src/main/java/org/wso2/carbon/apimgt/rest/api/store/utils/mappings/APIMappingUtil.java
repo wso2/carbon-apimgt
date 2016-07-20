@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -87,7 +88,7 @@ public class APIMappingUtil {
         String apiSwaggerDefinition;
 
         apiSwaggerDefinition = apiConsumer.getSwagger20Definition(model.getId());
-
+        apiSwaggerDefinition = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwaggerDefinition);
         dto.setApiDefinition(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
