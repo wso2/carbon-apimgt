@@ -448,7 +448,7 @@ $("#application-actions").each(function(){
         processing: true,
         paging: true,
         "ajax": {
-            "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplicationsWithPagination",
+            "url": jagg.url("/site/blocks/application/application-list/ajax/application-list.jag?action=getApplicationsWithPagination"),
             "dataSrc": function ( json ) {
                 if(json.applications.length > 0){
                     $('#application-table-wrap').removeClass("hide");

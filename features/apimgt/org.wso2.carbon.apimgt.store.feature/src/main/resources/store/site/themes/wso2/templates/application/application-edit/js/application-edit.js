@@ -39,7 +39,7 @@ $(document).ready(function () {
             descriptionNew:description
         }, function (result) {
             if (result.error == false) {                
-                window.location = "/store/site/pages/application.jag?name="+application;
+                window.location = jagg.url("/site/pages/application.jag?name="+application);
             } else {
                 jagg.message({content:result.message,type:"error"});
             }

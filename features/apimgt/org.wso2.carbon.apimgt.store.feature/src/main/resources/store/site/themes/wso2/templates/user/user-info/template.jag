@@ -15,13 +15,14 @@
 
 <div class="page-header" id="Message">
     <h2><%=i18n.localize("My Account")%></h2>
+    <p class="lead"><%=i18n.localize("Change Password")%></p>
 </div>
+<div class="white-wrapper add-padding-5x">
 
-<h3><%=i18n.localize("Change Password")%></h3>
 <form class="form-horizontal">
 
 		<div class="form-group">
-			<label class="control-label col-sm-2" for="currentPassword"><%=i18n.localize("Current Password")%>:<span class="requiredAstrix">*</span></label>
+			<label class="control-label col-sm-3" for="currentPassword"><%=i18n.localize("Current Password")%>:<span class="requiredAstrix">*</span></label>
 			<div class="col-sm-4"><input type="password"  autocomplete="off" title="currentPassword" class="password form-control" id="currentPassword" /></div>
 		</div>
 
@@ -31,7 +32,7 @@
     <input id="hiddenUsername" type="hidden" value="<%=username%>">
     <input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>">
     <div class="form-group">
-        <label class="control-label col-sm-2" for="newPassword"><%=i18n.localize("New Password")%>:<span class="requiredAstrix">*</span></label>
+        <label class="control-label col-sm-3" for="newPassword"><%=i18n.localize("New Password")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-4">
             <input type="password" title="<%=i18n.localize("Enter a more secure password")%>" class="input-large password validPassword form-control" id="newPassword" name="newPassword"  autocomplete="off"/>
 
@@ -57,12 +58,12 @@
     </div>
 
     <div class="form-group">
-            <label class="control-label col-sm-2" for="newPasswordConfirm"><%=i18n.localize("Re-type Password")%>:<span class="requiredAstrix">*</span></label>
+            <label class="control-label col-sm-3" for="newPasswordConfirm"><%=i18n.localize("Re-type Password")%>:<span class="requiredAstrix">*</span></label>
             <div class="col-sm-4"><input type="password" title="<%=i18n.localize("Password did not match")%>" class="matchPasswords input-large form-control" id="newPasswordConfirm"  autocomplete="off" /></div>
     </div>
 	<input type="hidden" id="fieldCount" name="fieldCount" value="<%=length%>"/> 
     <div class="row">
-        <div class= "col-md-2"></div>
+        <div class= "col-md-3"></div>
         <div class= "col-md-4">
             <input class="submit btn btn-primary" type="submit" value="<%=i18n.localize("Submit")%>"/>
         </div>
@@ -71,5 +72,5 @@
 <form id="signUpRedirectForm" method="post" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/user-info/redirector.jag"))%>">
         <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%= jagg.getSiteContext() %>" />
 </form> 
-
+</div>
 <% }); %>
