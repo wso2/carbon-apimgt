@@ -1053,7 +1053,7 @@
         <carbon.apimgt.version>6.0.3-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <analytics.shared.version>1.0.0</analytics.shared.version>
+        <analytics.shared.version>1.0.1</analytics.shared.version>
         <carbon.analytics.common.version>5.1.0</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.4.7</carbon.kernel.version>
