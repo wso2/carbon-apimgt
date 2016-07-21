@@ -278,11 +278,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             List<GovernanceArtifact> genericArtifacts =
                     GovernanceUtils.findGovernanceArtifacts(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag, registry,
                                                             APIConstants.API_RXT_MEDIA_TYPE);
-
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
-                    if (genericArtifact != null && APIConstants.PUBLISHED.equals(genericArtifact.getAttribute
-                            (APIConstants.API_OVERVIEW_STATUS))) {
+                    String apiStatus = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+                    if (genericArtifact != null && (APIConstants.PUBLISHED.equals(apiStatus)
+                         || APIConstants.PROTOTYPED.equals(apiStatus))) {
                         API api = APIUtil.getAPI(genericArtifact);
                         if (api != null) {
                             apiSet.add(api);
@@ -1254,7 +1254,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 userRegistry = registry;
             }
 
-            List<TermData> terms = null;
+            Map<String, Tag> tagsData = new HashMap<String, Tag>();
             try {
             	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
@@ -1263,20 +1263,44 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
+
+                Map <String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
+                criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
+                    add(APIConstants.PUBLISHED);
+                }});
                 //rxt api media type
-                terms = GovernanceUtils.getTermDataList(Collections.EMPTY_MAP, APIConstants.API_OVERVIEW_TAG, APIConstants.API_RXT_MEDIA_TYPE, true);
+                List<TermData> termsPublished = GovernanceUtils
+                        .getTermDataList(criteriaPublished, APIConstants.API_OVERVIEW_TAG,
+                                         APIConstants.API_RXT_MEDIA_TYPE, true);
+
+                if(termsPublished != null){
+                    for(TermData data : termsPublished){
+                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
+                    }
+                }
+
+                Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
+                criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
+                    add(APIConstants.PROTOTYPED);
+                }});
+                //rxt api media type
+                List<TermData> termsPrototyped = GovernanceUtils
+                        .getTermDataList(criteriaPrototyped, APIConstants.API_OVERVIEW_TAG,
+                                         APIConstants.API_RXT_MEDIA_TYPE, true);
+
+                if(termsPrototyped != null){
+                    for(TermData data : termsPrototyped){
+                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
+                    }
+                }
+
+
             } finally {
                 if (isTenantFlowStarted) {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
 
-            if(terms != null){
-            	for(TermData data : terms){
-            		tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
-            	}
-            }
-   
             synchronized (tagCacheMutex) {
                 lastUpdatedTime = System.currentTimeMillis();
                 this.tagSet = tempTagSet;

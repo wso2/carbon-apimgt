@@ -1127,6 +1127,7 @@ public final class APIConstants {
     
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
+    public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX2 = "doc=";
