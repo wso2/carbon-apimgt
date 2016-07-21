@@ -79,7 +79,7 @@ var reqUrl = request.getRequestURI();
             {{#each topics}} 
             <tr>
                 <td>
-                    <a title="forum topic" href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <span class="word-break"> {{subject}} </span></a >
+                    <a title="forum topic" href = "<%=jagg.getSiteContext()%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <span class="word-break"> {{subject}} </span></a >
                 </td>
                 <td>{{ topicOwner }}</td>
                 <td>{{ replyCount }}</td>
