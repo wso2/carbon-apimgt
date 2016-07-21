@@ -5,37 +5,37 @@
     api = outputs.api;
 
     var reqUrl = request.getRequestURI();
-    var tierManageUrl = jagg.getAbsoluteUrl("/site/pages/tier-manage.jag");
-    var tierManageMappedUrl = jagg.getMappedUrl("/site/pages/tier-manage.jag");
+    var tierManageUrl = "/site/pages/tier-manage.jag";
+    var tierManageMappedUrl = "/site/pages/tier-manage.jag";
 
-    var appPolicyEditUrl=jagg.getAbsoluteUrl("/app-policy-edit");
-    var appPolicyEditMappedUrl=jagg.getMappedUrl("/app-policy-edit");
+    var appPolicyEditUrl= "/app-policy-edit";
+    var appPolicyEditMappedUrl= "/app-policy-edit";
 
-    var appPolicyManageUrl=jagg.getAbsoluteUrl("/app-policy-manage");
-    var appPolicyManageMappedUrl=jagg.getMappedUrl("/app-policy-manage");
-    var conditionsManageUrl = jagg.getAbsoluteUrl("/site/pages/conditions-manage.jag");
-    var conditionsManageMappedUrl = jagg.getMappedUrl("/site/pages/conditions-manage.jag");
+    var appPolicyManageUrl= "/app-policy-manage";
+    var appPolicyManageMappedUrl= "/app-policy-manage";
+    var conditionsManageUrl = "/site/pages/conditions-manage.jag";
+    var conditionsManageMappedUrl = "/site/pages/conditions-manage.jag";
 
-    var conditionsEditUrl = jagg.getAbsoluteUrl("/site/pages/conditions-edit.jag");
-    var conditionsEditMappedUrl = jagg.getMappedUrl("/site/pages/conditions-edit.jag");
+    var conditionsEditUrl = "/site/pages/conditions-edit.jag";
+    var conditionsEditMappedUrl = "/site/pages/conditions-edit.jag";
 
-    var subscriptionPolicyEditUrl = jagg.getAbsoluteUrl("/subscription-policy-edit");
-    var subscriptionPolicyEditMappedUrl = jagg.getMappedUrl("/subscription-policy-edit");
+    var subscriptionPolicyEditUrl = "/subscription-policy-edit";
+    var subscriptionPolicyEditMappedUrl = "/subscription-policy-edit";
 
-    var subscriptionPolicyManageUrl = jagg.getAbsoluteUrl("/subscription-policy-manage");
-    var subscriptionPolicyManageMappedUrl = jagg.getMappedUrl("/subscription-policy-manage");
+    var subscriptionPolicyManageUrl = "/subscription-policy-manage";
+    var subscriptionPolicyManageMappedUrl = "/subscription-policy-manage";
 
-    var globalPolicyEditUrl = jagg.getAbsoluteUrl("/global-policy-edit");
-    var globalPolicyEditMappedUrl = jagg.getMappedUrl("/global-policy-edit");
+    var globalPolicyEditUrl = "/global-policy-edit";
+    var globalPolicyEditMappedUrl = "/global-policy-edit";
 
-    var globalPolicyManageUrl = jagg.getAbsoluteUrl("/site/pages/global-policy-manage.jag");
-    var globalPolicyManageMappedUrl = jagg.getMappedUrl("/site/pages/global-policy-manage.jag");
+    var globalPolicyManageUrl = "/site/pages/global-policy-manage.jag";
+    var globalPolicyManageMappedUrl = "/site/pages/global-policy-manage.jag";
 
-    var apiPolicyListUrl = jagg.getAbsoluteUrl("/api-policy-list");
-    var apiPolicyListMappedUrl = jagg.getMappedUrl("/api-policy-list");
+    var apiPolicyListUrl = "/api-policy-list";
+    var apiPolicyListMappedUrl = "/api-policy-list";
 
-    var apiPolicyEditUrl = jagg.getAbsoluteUrl("/api-policy-edit");
-    var apiPolicyEditMappedUrl = jagg.getMappedUrl("/api-policy-edit");
+    var apiPolicyEditUrl = "/api-policy-edit";
+    var apiPolicyEditMappedUrl = "/api-policy-edit";
     %>
 
 
@@ -69,9 +69,9 @@
 				<!-- Actions Bar -->
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
-					    <% if(appPolicyEditUrl.indexOf(reqUrl)>=0 || appPolicyEditMappedUrl.indexOf(reqUrl)>=0){ %>
+					    <% if(reqUrl.indexOf(appPolicyEditUrl)>=0 || reqUrl.indexOf(appPolicyEditMappedUrl)>=0){ %>
                             <li>
-                                <a href="<%=appPolicyManageMappedUrl%>" title="<%=i18n.localize("Go Back")%>">
+                                <a href="<%= jagg.url('/app-policy-manage')%>" title="<%=i18n.localize("Go Back")%>">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
@@ -80,9 +80,9 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(conditionsEditUrl.indexOf(reqUrl)>=0 || conditionsEditMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(conditionsEditUrl)>=0 || reqUrl.indexOf(conditionsEditMappedUrl)>=0){ %>
                             <li>
-                                <a href="<%=conditionsManageMappedUrl%>" title="<%=i18n.localize("Go Back")%>">
+                                <a href="<%= jagg.url('/site/pages/conditions-manage.jag')%>" title="<%=i18n.localize("Go Back")%>">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
@@ -91,9 +91,9 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(subscriptionPolicyEditUrl.indexOf(reqUrl)>=0 ||subscriptionPolicyEditMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(subscriptionPolicyEditUrl)>=0 || reqUrl.indexOf(subscriptionPolicyEditMappedUrl)>=0){ %>
                             <li>
-                                <a href="<%=subscriptionPolicyManageMappedUrl%>" title="<%=i18n.localize("Go Back")%>">
+                                <a href="<%= jagg.url('/subscription-policy-manage')%>" title="<%=i18n.localize("Go Back")%>">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
@@ -102,9 +102,9 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(globalPolicyEditUrl.indexOf(reqUrl)>=0 ||globalPolicyEditMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if( reqUrl.indexOf(globalPolicyEditUrl)>=0 || reqUrl.indexOf(globalPolicyEditMappedUrl)>=0){ %>
                             <li>
-                                <a href="<%=globalPolicyManageMappedUrl%>" title="<%=i18n.localize("Go Back")%>">
+                                <a href="<%= jagg.url('/site/pages/global-policy-manage.jag')%>" title="<%=i18n.localize("Go Back")%>">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
@@ -113,9 +113,9 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(apiPolicyEditUrl.indexOf(reqUrl)>=0 ||apiPolicyEditMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(apiPolicyEditUrl)>=0 ||reqUrl.indexOf(apiPolicyEditMappedUrl)>=0){ %>
                             <li>
-                                <a href="<%=apiPolicyListMappedUrl%>" title="<%=i18n.localize("Go Back")%>">
+                                <a href="<%= jagg.url('/api-policy-list') %>" title="<%=i18n.localize("Go Back")%>">
                                     <span class="icon fw-stack">
                                         <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
@@ -124,18 +124,18 @@
                                 </a>
                             </li>
                         <%} %>
-						<% if(tierManageUrl.indexOf(reqUrl)>=0 ||tierManageMappedUrl.indexOf(reqUrl)>=0){ %>
+						<% if(reqUrl.indexOf(tierManageUrl)>=0 ||reqUrl.indexOf(tierManageMappedUrl)>=0){ %>
 	                      <li>
 	                            <a href="<%= jagg.url('/tier-edit')%>">
 	                                <span class="icon fw-stack">
 	                                    <i class="fw fw-add fw-stack-1x"></i>
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                </span>
-	                                Add New Tier
+	                                <%=i18n.localize("Add New Tier")%>
 	                            </a>
 	                        </li>
                         <%} %>
-                        <% if(appPolicyManageUrl.indexOf(reqUrl)>=0 ||appPolicyManageMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(appPolicyManageUrl)>=0 ||reqUrl.indexOf(appPolicyManageMappedUrl)>=0){ %>
                             <li>
                                 <a href="<%= jagg.url('/app-policy-edit?action=add')%>" title="<%=i18n.localize("Add New Policy")%>">
                                     <span class="icon fw-stack">
@@ -146,7 +146,7 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(subscriptionPolicyManageUrl.indexOf(reqUrl)>=0 ||subscriptionPolicyManageMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(subscriptionPolicyManageUrl)>=0 ||reqUrl.indexOf(subscriptionPolicyManageMappedUrl)>=0){ %>
                             <li>
                                 <a href="<%= jagg.url('/subscription-policy-edit?action=add')%>" title="<%=i18n.localize("Add Tier")%>">
                                     <span class="icon fw-stack">
@@ -157,7 +157,7 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(globalPolicyManageUrl.indexOf(reqUrl)>=0 ||globalPolicyManageMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(globalPolicyManageUrl)>=0 ||reqUrl.indexOf(globalPolicyManageMappedUrl)>=0){ %>
                             <li>
                                 <a href="<%= jagg.url('/global-policy-edit')%>" title="<%=i18n.localize("Define Rule")%>">
                                     <span class="icon fw-stack">
@@ -168,7 +168,7 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(conditionsManageUrl.indexOf(reqUrl)>=0 ||conditionsManageMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(conditionsManageUrl)>=0 ||reqUrl.indexOf(conditionsManageMappedUrl)>=0){ %>
                             <li>
                                 <a href="<%= jagg.url('/site/pages/conditions-edit.jag')%>" title="<%=i18n.localize("Add Item")%>">
                                     <span class="icon fw-stack">
@@ -179,7 +179,7 @@
                                 </a>
                             </li>
                         <%} %>
-                        <% if(apiPolicyListUrl.indexOf(reqUrl)>=0 ||apiPolicyListMappedUrl.indexOf(reqUrl)>=0){ %>
+                        <% if(reqUrl.indexOf(apiPolicyListUrl)>=0 ||reqUrl.indexOf(apiPolicyListMappedUrl)>=0){ %>
                             <li>
                                 <a href="<%= jagg.url('/api-policy-edit')%>" title="<%=i18n.localize("Add Tier")%>">
                                     <span class="icon fw-stack">
