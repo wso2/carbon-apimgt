@@ -2306,12 +2306,20 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
+            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(oldId);
+            api.setScopes(scopes);
+
+            HashMap<String, String> resourceScopes;
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
+
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+                String resourceScopeKey = APIUtil.getResourceKey(oldContext, oldId.getVersion(), uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
+                uriTemplate.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
 
             }
             api.setUriTemplates(uriTemplates);
