@@ -537,7 +537,8 @@ public class APIManagerComponent {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration();
-            if (configuration.getThrottleProperties().getJmsPublisherParameters() != null) {
+            if (configuration.getThrottleProperties().getJmsPublisherParameters() != null && !configuration
+                    .getThrottleProperties().getJmsPublisherParameters().isEmpty()) {
                 adapterConfiguration
                         .setStaticProperties(configuration.getThrottleProperties().getJmsPublisherParameters());
 
