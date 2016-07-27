@@ -26,7 +26,7 @@ public class SQLConstantOracle extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   rownum r ," +
@@ -57,7 +57,7 @@ public class SQLConstantOracle extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   rownum r," +
@@ -85,7 +85,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " ORDER BY $1 $2 ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   rownum r," +
@@ -114,7 +114,7 @@ public class SQLConstantOracle extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   rownum r," +
