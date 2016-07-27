@@ -1706,7 +1706,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
-        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
             boolean isTenantFlowStarted = false;
             try {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -1736,15 +1736,25 @@ public final class APIUtil {
                 }
             }
         } else {
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (tierType == APIConstants.TIER_API_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
-            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
-            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
-                return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
-            } else {
-                throw new APIManagementException("No such a tier type : " + tierType);
+            boolean isTenantFlowStarted = false;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                if (tierType == APIConstants.TIER_API_TYPE) {
+                    return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+                } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                    return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+                } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                    return getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
+                } else {
+                    throw new APIManagementException("No such a tier type : " + tierType);
+                }
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
         }
     }
