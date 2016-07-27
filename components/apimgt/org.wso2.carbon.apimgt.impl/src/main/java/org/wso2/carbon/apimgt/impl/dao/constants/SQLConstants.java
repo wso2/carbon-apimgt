@@ -2633,7 +2633,7 @@ public class SQLConstants {
 				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
 				+ " ORDER BY AUM.URL_MAPPING_ID";
         public static final String ADD_BLOCK_CONDITIONS_SQL =
-                "INSERT INTO `AM_BLOCK_CONDITIONS` (`TYPE`,`VALUE`,`ENABLED`,`DOMAIN`,`UUID`) VALUES (?,?,?,?,?)";
+                "INSERT INTO AM_BLOCK_CONDITIONS (TYPE, VALUE,ENABLED,DOMAIN,UUID) VALUES (?,?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =?";
         public static final String GET_BLOCK_CONDITION_SQL =
@@ -2645,9 +2645,9 @@ public class SQLConstants {
         public static final String UPDATE_BLOCK_CONDITION_STATE_BY_UUID_SQL =
                 "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE UUID = ?";
         public static final String DELETE_BLOCK_CONDITION_SQL =
-                "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `CONDITION_ID`=?";
+                "DELETE FROM AM_BLOCK_CONDITIONS WHERE CONDITION_ID=?";
         public static final String DELETE_BLOCK_CONDITION_BY_UUID_SQL =
-                "DELETE FROM `AM_BLOCK_CONDITIONS` WHERE `UUID`=?";
+                "DELETE FROM AM_BLOCK_CONDITIONS WHERE UUID=?";
         public static final String BLOCK_CONDITION_EXIST_SQL =
                 "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,DOMAIN,UUID FROM AM_BLOCK_CONDITIONS WHERE DOMAIN =? AND TYPE =? " +
                         "AND VALUE =?";
