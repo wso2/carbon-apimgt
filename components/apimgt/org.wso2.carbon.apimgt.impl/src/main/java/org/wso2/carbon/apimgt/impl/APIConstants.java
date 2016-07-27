@@ -58,6 +58,8 @@ public final class APIConstants {
 
     //registry location of providers
     public static final String PROVIDERS_PATH = "/providers";
+
+    public static final String API_LIFE_CYCLE_HISTORY = "/repository/components/org.wso2.carbon.governance/lifecycles/history";
     
     public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION +"/applicationdata";
 
