@@ -197,7 +197,7 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             // Enabling API Publishers/Creators to make changes on life-cycle history.
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_LIFECYCLE_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
@@ -205,7 +205,8 @@ public class APIManagerComponent {
                                                                                               .API_LIFE_CYCLE_HISTORY),
                                                         APIConstants.Permissions.API_CREATE,
                                                         UserMgtConstants.EXECUTE_ACTION, null);
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
+
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                                                                       APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                                                                              RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
