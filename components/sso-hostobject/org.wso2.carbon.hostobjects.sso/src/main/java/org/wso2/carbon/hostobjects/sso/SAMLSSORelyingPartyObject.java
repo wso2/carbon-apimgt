@@ -1,3 +1,4 @@
+
 /*
 * Copyright (c) 2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -18,16 +19,21 @@ package org.wso2.carbon.hostobjects.sso;
 
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.hostobjects.web.SessionHostObject;
+import org.joda.time.DateTime;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.*;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.signature.Signature;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.SSOHostObjectDataHolder;
@@ -63,7 +69,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     //private static volatile Set<SessionHostObject> sho = new HashSet<SessionHostObject>();
     //used store logged in user name until put into jaggery session
     private String loggedInUserName;
-	private static long maxInactiveInterval = 1800000; //default 30min
+    private static long maxInactiveInterval = 1800000; //default 30min
 
 
     @Override
@@ -139,26 +145,29 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-
+            Signature signature = samlResponse.getSignature();
+            if (signature == null) {
+                log.error("SAMLResponse signing is enabled, but signature element not found in SAML Response element.");
+                return false;
+            }
             boolean sigValid = false;
             try {
                 //Try and validate the signature using the super tenant key store.
-                sigValid = Util.validateSignature(samlResponse,
+                sigValid = Util.validateSignature(signature,
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                         relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                         relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
                         MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
 
-            } catch(SignatureVerificationFailure e) {
+            } catch (SignatureVerificationFailure e) {
                 //do nothing at this point since we want to verify signature using the tenant key-store as well.
-                if(log.isDebugEnabled()){
-                    log.debug("Signature verification failed with Super-Tenant Key Store");
-                }
+                log.error("Signature verification failed with Super-Tenant Key Store", e);
+                return false;
             }
             //If not success, try and validate the signature using tenant key store.
             if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 try {
-                    sigValid = Util.validateSignature(samlResponse,
+                    sigValid = Util.validateSignature(signature,
                             relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                             relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
                             relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
@@ -201,7 +210,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
@@ -240,7 +249,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
@@ -258,14 +267,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      *
      * @param cx
      * @param thisObj
-     * @param args - args[0] response for passiveAuth required as XML
+     * @param args    - args[0] response for passiveAuth required as XML
      * @param funObj
      * @return
      * @throws Exception
      */
 
     public static boolean jsFunction_isPassiveAuthResponse(Context cx, Scriptable thisObj, Object[] args,
-                                                          Function funObj) throws Exception {
+                                                           Function funObj) throws Exception {
         int argLength = args.length;
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. Logout response xml is missing.");
@@ -279,21 +288,21 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
         String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
         XMLObject samlObject = Util.unmarshall(decodedString);
 
-        if(samlObject instanceof Response)  {
+        if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
 
             if (samlResponse.getStatus() != null &&
-                samlResponse.getStatus().getStatusCode() != null &&
-                samlResponse.getStatus().getStatusCode().getValue().equals("urn:oasis:names:tc:SAML:2.0:status:Responder") &&
-                samlResponse.getStatus().getStatusCode().getStatusCode() != null &&
-                samlResponse.getStatus().getStatusCode().getStatusCode().getValue().equals("urn:oasis:names:tc:SAML:2.0:status:NoPassive")) {
+                    samlResponse.getStatus().getStatusCode() != null &&
+                    samlResponse.getStatus().getStatusCode().getValue().equals("urn:oasis:names:tc:SAML:2.0:status:Responder") &&
+                    samlResponse.getStatus().getStatusCode().getStatusCode() != null &&
+                    samlResponse.getStatus().getStatusCode().getStatusCode().getValue().equals("urn:oasis:names:tc:SAML:2.0:status:NoPassive")) {
                 return true;
             }
 
@@ -328,7 +337,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 shouldDeflate = Boolean.parseBoolean(deflate);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_DEFLATE + " " + deflate);
+                        "" + SSOConstants.SAML_DEFLATE + " " + deflate);
             }
         }
         if (log.isDebugEnabled()) {
@@ -384,7 +393,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
         if (log.isDebugEnabled()) {
@@ -511,6 +520,69 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     }
 
     /**
+     * Validate the saml response and its contained assertion-check the response element count and assertion count
+     * is 1 and check the assertion validity period
+     *
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @return
+     * @throws Exception
+     */
+    public static boolean jsFunction_validateSAMLResponseSchema(Context cx, Scriptable thisObj,
+                                                                Object[] args,
+                                                                Function funObj)
+            throws Exception {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. The SAML response is missing.");
+        }
+
+        SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+        String encoded = getSSOSamlEncodingProperty(relyingPartyObject);
+        boolean isEncoded = true;
+        if (encoded != null) {
+            try {
+                isEncoded = Boolean.parseBoolean(encoded);
+            } catch (Exception e) {
+                throw new ScriptException("Invalid property value found for " +
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
+            }
+        }
+
+        String decodedString = isEncoded ? Util.decode((String) args[0]) : (String) args[0];
+        XMLObject samlObject = Util.unmarshall(decodedString);
+
+        if (samlObject instanceof Response) {
+            Response samlResponse = (Response) samlObject;
+            // Check for duplicate saml:Response
+            NodeList list = samlResponse.getDOM().getElementsByTagNameNS(SAMLConstants.SAML20P_NS, "Response");
+            if (list.getLength() > 0) {
+                log.error("Invalid schema for the SAML2 response.");
+                return false;
+            }
+
+            //Check for duplicate saml:assertions
+            NodeList assertionList = samlResponse.getDOM().getElementsByTagNameNS(SAMLConstants.SAML20_NS, "Assertion");
+            if (assertionList == null || assertionList.getLength() > 1) {
+                log.error("Invalid schema for the SAML2 response. Invalid number of assertions  detected.");
+                return false;
+            }
+            List<Assertion> assertions = samlResponse.getAssertions();
+            //Validate assertion validity period
+            boolean isTimeValid = relyingPartyObject.validateAssertionValidityPeriod(samlResponse.getAssertions().get(0));
+            if (isTimeValid) {
+                // Validate the audience restrictions
+                String issuerId = relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID);
+                return relyingPartyObject.validateAudienceRestriction(assertions.get(0), issuerId);
+            }
+
+        }
+        return false;
+    }
+
+    /**
      * Extract the name of authenticated user from SAML response.
      *
      * @param cx
@@ -537,7 +609,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
@@ -550,7 +622,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             List<Assertion> assertions = samlResponse.getAssertions();
 
             // extract the username
-            if (assertions != null && assertions.size() > 0) {
+            if (assertions != null && assertions.size() == 1) {
                 Subject subject = assertions.get(0).getSubject();
                 if (subject != null) {
                     if (subject.getNameID() != null) {
@@ -560,13 +632,17 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                         }
                     }
                 }
+            } else {
+                log.error("SAML Response contains invalid number of assertions.");
             }
+
         }
         if (username == null) {
             throw new Exception("Failed to get subject assertion from SAML response.");
         }
         return username;
     }
+
 
     /**
      * Set SSO Configuration key,values
@@ -693,7 +769,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
@@ -762,8 +838,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 3 || !(args[0] instanceof String) || 
-                !(args[1] instanceof String )|| !(args[2] instanceof SessionHostObject )) {
+        if (argLength != 3 || !(args[0] instanceof String) ||
+                !(args[1] instanceof String) || !(args[2] instanceof SessionHostObject)) {
             throw new ScriptException("Invalid argument. Current session id, SAML response and Session are missing.");
         }
 
@@ -775,7 +851,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 isEncoded = Boolean.parseBoolean(encoded);
             } catch (Exception e) {
                 throw new ScriptException("Invalid property value found for " +
-                                          "" + SSOConstants.SAML_ENCODED + " " + encoded);
+                        "" + SSOConstants.SAML_ENCODED + " " + encoded);
             }
         }
 
@@ -788,25 +864,26 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             List<Assertion> assertions = samlResponse.getAssertions();
 
             // extract the session index
-            if (assertions != null && assertions.size() > 0) {
-                List<AuthnStatement> authenticationStatements = assertions.get(0).getAuthnStatements();
+            if (assertions != null && assertions.size() == 1) {
+                Assertion assertion = assertions.get(0);
+                List<AuthnStatement> authenticationStatements = assertion.getAuthnStatements();
                 AuthnStatement authnStatement = authenticationStatements.get(0);
                 if (authnStatement != null) {
                     if (authnStatement.getSessionIndex() != null) {
                         sessionIndex = authnStatement.getSessionIndex();
                     }
                 }
-            }
-
-            // extract the username
-            if (assertions != null && assertions.size() > 0) {
-                Subject subject = assertions.get(0).getSubject();
+                Subject subject = assertion.getSubject();
                 if (subject != null) {
                     if (subject.getNameID() != null) {
                         username = subject.getNameID().getValue();
                     }
                 }
+
+            } else {
+                throw new ScriptException("SAML Response contains invalid number of assertions.");
             }
+
         }
         if (sessionIndex == null) {
             log.debug("No session index found in authentication statement in SAML response.");
@@ -826,7 +903,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         sessionInfo.setSamlToken((String) args[1]);//We expect an encoded SamlToken here.
         relyingPartyObject.addSessionInfo(sessionInfo);
         //relyingPartyObject.addSessionInfo(sessionIndex, SAMLSSORelyingPartyObject.sho);
-        
+
         SessionHostObject sho = (SessionHostObject) args[2];
         relyingPartyObject.addSessionInfo(sessionIndex, sho);
 
@@ -1072,12 +1149,12 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         sessionIndexMap.put(sessionIndex, sho);
     }
-    
+
     private void addSessionInfo(String sessionIndex, SessionHostObject sho) {
         if (log.isDebugEnabled()) {
             log.debug("Added session index:" + sessionIndex);
         }
-        if(sessionIndexMap.containsKey(sessionIndex)){
+        if (sessionIndexMap.containsKey(sessionIndex)) {
             Set<SessionHostObject> sessionSet = sessionIndexMap.get(sessionIndex);
             sessionSet.add(sho);
         } else {
@@ -1085,7 +1162,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sessionSet.add(sho);
             sessionIndexMap.put(sessionIndex, sessionSet);
         }
-        
+
     }
 
     /**
@@ -1126,47 +1203,47 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
-    public void clearSessionsSet(){
+    public void clearSessionsSet() {
 
-    	Date now = new Date();
-    	long lastAccessTime;    
-    	boolean hasExpired ;
-    	Iterator<Map.Entry<String, Set<SessionHostObject>>> iterator = sessionIndexMap.entrySet().iterator();
+        Date now = new Date();
+        long lastAccessTime;
+        boolean hasExpired;
+        Iterator<Map.Entry<String, Set<SessionHostObject>>> iterator = sessionIndexMap.entrySet().iterator();
         while (iterator.hasNext()) {
-        	hasExpired = true;        
-        	lastAccessTime = 0;
-        	
+            hasExpired = true;
+            lastAccessTime = 0;
+
             Map.Entry<String, Set<SessionHostObject>> entry = iterator.next();
             Set<SessionHostObject> sessions = new HashSet<SessionHostObject>(entry.getValue());
             if (log.isDebugEnabled()) {
                 log.debug("Cleanup: Checking session object status for  " + entry.getKey());
             }
-            //check atleast one hostobject is still active. 
+            //check atleast one hostobject is still active.
             for (SessionHostObject session : sessions) {
                 Object[] args = new Object[0];
                 try {
-					lastAccessTime = SessionHostObject.jsFunction_getLastAccessedTime(null, session, new Object[0], null);
-					//createdTime = SessionHostObject.jsFunction_getCreationTime(null, session, new Object[0], null);
-				} catch (Exception ignored) {
-					
-				}			
-    			if(lastAccessTime + maxInactiveInterval > now.getTime()){
-    				 if (log.isDebugEnabled()) {
- 		                log.debug("Cleanup: Contains active session hostobject");
-    				 }
-    				 hasExpired = false;
-    				 break;
-    			}
+                    lastAccessTime = SessionHostObject.jsFunction_getLastAccessedTime(null, session, new Object[0], null);
+                    //createdTime = SessionHostObject.jsFunction_getCreationTime(null, session, new Object[0], null);
+                } catch (Exception ignored) {
+
+                }
+                if (lastAccessTime + maxInactiveInterval > now.getTime()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cleanup: Contains active session hostobject");
+                    }
+                    hasExpired = false;
+                    break;
+                }
             }
-            if(hasExpired){ 
-            	if (log.isDebugEnabled()) {
+            if (hasExpired) {
+                if (log.isDebugEnabled()) {
                     log.debug("Cleanup: Removing expired session info for " + entry.getKey());
                 }
-        		removeSession(entry.getKey());    		
-        		sessionIdMap.remove(entry.getKey());
-        	}
-            
-        }  
+                removeSession(entry.getKey());
+                sessionIdMap.remove(entry.getKey());
+            }
+
+        }
     }
 
     public SessionHostObject getSession(String sessionIndex) {
@@ -1191,14 +1268,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sendSessionInvalidationClusterMessage(sessionIndex);
             return;
         }
-        
+
         clearSessionData(sessionIndex);
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
         }
     }
-    
+
     public void handleClusterLogout(String sessionIndex) {
         if (log.isDebugEnabled()) {
             log.debug("session index map value:" + sessionIndexMap);
@@ -1214,13 +1291,13 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
 
         clearSessionData(sessionIndex);
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
         }
     }
-    
-    private void clearSessionData(String sessionIndex){
+
+    private void clearSessionData(String sessionIndex) {
         try {
             ssho.invalidateSessionBySessionIndex(sessionIndex);
 
@@ -1232,8 +1309,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                         if (SessionHostObject.jsFunction_getId(null, session, args, null) != null) {
                             try {
                                 SessionHostObject.jsFunction_invalidate(null, session, args, null);
-                            } catch (Exception ex){
-                                if(ex.getMessage().contains("Session already invalidated")){ // can be ignored
+                            } catch (Exception ex) {
+                                if (ex.getMessage().contains("Session already invalidated")) { // can be ignored
                                     log.info(ex.getMessage());
                                 } else {
                                     throw ex;
@@ -1247,13 +1324,12 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             clearSessionsSet();
         } catch (Exception ignored) {
             if (log.isDebugEnabled()) {
-	        log.debug(ignored.getMessage());
+                log.debug(ignored.getMessage());
             }
             removeSession(sessionIndex);
             clearSessionsSet();
         }
     }
-
 
 
     public void sendSessionInvalidationClusterMessage(String sessionIndex) {
@@ -1276,10 +1352,10 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     if (numberOfRetries < 60) {
                         log.warn(
                                 "Could not send SSOSessionInvalidationClusterMessage. Retry will be attempted in 2s. Request: "
-                                + clusterMessage, e);
+                                        + clusterMessage, e);
                     } else {
                         log.error("Could not send SSOSessionInvalidationClusterMessage. Several retries failed. Request:"
-                                  + clusterMessage, e);
+                                + clusterMessage, e);
                     }
                     try {
                         Thread.sleep(2000);
@@ -1288,6 +1364,158 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 }
             }
         }
+    }
+
+    /**
+     * Validates the 'Not Before' and 'Not On Or After' conditions of the SAML Assertion
+     *
+     * @param assertion SAML Assertion element
+     * @throws ScriptException
+     */
+    private boolean validateAssertionValidityPeriod(Assertion assertion) throws ScriptException {
+
+        DateTime validFrom = assertion.getConditions().getNotBefore();
+        DateTime validTill = assertion.getConditions().getNotOnOrAfter();
+
+        if (validFrom != null && validFrom.isAfterNow()) {
+            log.error("SAML Response contains invalid number of assertions.");
+            return false;
+        }
+
+        if (validTill != null && validTill.isBeforeNow()) {
+            log.error("Failed to meet SAML Assertion Condition 'Not On Or After'");
+            return false;
+        }
+
+        if (validFrom != null && validTill != null && validFrom.isAfter(validTill)) {
+            log.error("SAML Assertion Condition 'Not Before' must be less than the value of 'Not On Or After'");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validate the AudienceRestriction of SAML2 Response
+     *
+     * @param assertion SAML2 Assertion
+     * @return validity
+     */
+    private boolean validateAudienceRestriction(Assertion assertion, String issuerId) throws ScriptException {
+
+        if (assertion != null) {
+            Conditions conditions = assertion.getConditions();
+            if (conditions != null) {
+                List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+                if (audienceRestrictions != null && !audienceRestrictions.isEmpty()) {
+                    for (AudienceRestriction audienceRestriction : audienceRestrictions) {
+                        if (CollectionUtils.isNotEmpty(audienceRestriction.getAudiences())) {
+                            boolean audienceFound = false;
+                            for (Audience audience : audienceRestriction.getAudiences()) {
+                                if (issuerId
+                                        .equals(audience.getAudienceURI())) {
+                                    audienceFound = true;
+                                    break;
+                                }
+                            }
+                            if (!audienceFound) {
+                                log.error("SAML Assertion Audience Restriction validation failed.");
+                                return false;
+                            }
+                        } else {
+                            log.error("SAML Response's AudienceRestriction doesn't contain Audiences.");
+                            return false;
+                        }
+                    }
+                } else {
+                    log.error("SAML Response doesn't contain AudienceRestrictions.");
+
+                    return false;
+                }
+            } else {
+                log.error("SAML Response doesn't contain Conditions.");
+
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param cx
+     * @param thisObj
+     * @param args    -args[0]- SAML response xml
+     * @param funObj
+     * @return
+     * @throws Exception
+     */
+    public static boolean jsFunction_validateAssertionSignature(Context cx, Scriptable thisObj, Object[] args,
+                                                                Function funObj) throws Exception {
+
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. SAML response is missing.");
+        }
+
+        String decodedString = Util.decode((String) args[0]);
+
+        XMLObject samlObject = Util.unmarshall(decodedString);
+        String tenantDomain = Util.getDomainName(samlObject);
+
+        int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
+
+        if (samlObject instanceof Response) {
+            Response samlResponse = (Response) samlObject;
+            SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+            List<Assertion> assertions = samlResponse.getAssertions();
+            boolean sigValid = false;
+            // validate the assertion signature
+            if (assertions != null && assertions.size() == 1) {
+                Assertion assertion = assertions.get(0);
+                Signature assertionSignature = assertion.getSignature();
+                try {
+                    //Try and validate the signature using the super tenant key store.
+
+                    if (assertionSignature == null) {
+                        log.error("SAMLAssertion signing is enabled, but signature element not found in " +
+                                "SAML Assertion element.");
+
+                        return false;
+                    }
+                    sigValid = Util.validateSignature(assertionSignature,
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                            relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                            MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
+                } catch (SignatureVerificationFailure e) {
+                    //do nothing at this point since we want to verify signature using the tenant key-store as well.
+                    log.error("Signature verification failed with Super-Tenant Key Store", e);
+                    return false;
+                }
+                //If not success, try and validate the signature using tenant key store.
+                if (!sigValid && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    try {
+                        sigValid = Util.validateSignature(assertionSignature,
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                tenantId, tenantDomain);
+
+                    } catch (SignatureVerificationFailure e) {
+                        log.error("Signature Verification Failed using super tenant and tenant key stores", e);
+                        return false;
+                    }
+                }
+            } else {
+                throw new ScriptException("SAML Response contains invalid number of assertions.");
+            }
+            return sigValid;
+        }
+        if (log.isWarnEnabled()) {
+            log.warn("SAML response in signature validation is not a SAML Response.");
+        }
+        return false;
+
     }
 
 
