@@ -277,9 +277,6 @@ public class Util {
                 signatureProfileValidator.validate(signature);
             } catch (ValidationException e) {
                 String logMsg = "The signature do not confirm to SAML signature profile. Possible XML Signature Wrapping Attack!";
-                if (log.isDebugEnabled()) {
-                    log.debug(logMsg, e);
-                }
                 log.error(e.getMessage(), e);
                 //Returning false,without throwing the exception as to propagate 401 to UI
                 return false;
