@@ -9,7 +9,7 @@
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
 
-    var reqUrl = request.getRequestURI();
+    var reqUrl = jagg.getAbsoluteReqUrl(request.getRequestURI());
     var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
     var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
     var infoUrl=jagg.getAbsoluteUrl("/site/pages/item-info.jag");

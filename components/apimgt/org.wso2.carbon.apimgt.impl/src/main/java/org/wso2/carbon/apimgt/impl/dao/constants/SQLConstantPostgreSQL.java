@@ -25,7 +25,7 @@ package org.wso2.carbon.apimgt.impl.dao.constants;
 public class SQLConstantPostgreSQL extends SQLConstants{
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     " SELECT " +
                     "   APPLICATION_ID, " +
                     "   NAME," +
@@ -52,7 +52,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT " +
                     "   APPLICATION_ID, " +
                     "   NAME," +
@@ -78,7 +78,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT " +
                     "   APPLICATION_ID, " +
                     "   NAME," +
@@ -104,7 +104,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
                     "SELECT " +
                     "   APPLICATION_ID, " +
                     "   NAME," +

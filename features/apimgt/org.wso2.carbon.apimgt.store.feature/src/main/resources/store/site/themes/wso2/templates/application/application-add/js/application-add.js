@@ -46,10 +46,10 @@ $(document).ready(function () {
                     jagg.message({content:i18n.t('Return back to API detail page?'),type:'confirm',okCallback:function(){
                     window.location.href = apiViewUrl + "?" +  apiPath;
                     },cancelCallback:function(){
-                        window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
+                        window.location = jagg.url("/site/pages/application.jag?name=" + application );
                     }});
                 } else{
-                    window.location = "/store/site/pages/application.jag?name=" + application + urlPrefix;
+                    window.location =  jagg.url("/site/pages/application.jag?name=" + application );
                 }
 
             } else {

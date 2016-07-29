@@ -33,15 +33,18 @@
                   "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_DAILY",
                   "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_MONTHLY",
                   "LOGANALYZER_APIM_ARTIFACT_DEPLOYED_WEEKLY",
-                  "MESSAGE_LEVEL_ERROR_DAILY",
-                  "MESSAGE_LEVEL_ERROR_MONTHLY",
-                  "MESSAGE_LEVEL_ERROR_WEEKLY",
-                  "CLASS_LEVEL_ERROR_DAILY",
-                  "CLASS_LEVEL_ERROR_MONTHLY",
-                  "CLASS_LEVEL_ERROR_WEEKLY",
+                  "LOGANALYZER_MESSAGE_LEVEL_ERROR_DAILY",
+                  "LOGANALYZER_MESSAGE_LEVEL_ERROR_MONTHLY",
+                  "LOGANALYZER_MESSAGE_LEVEL_ERROR_WEEKLY",
+                  "LOGANALYZER_CLASS_LEVEL_ERROR_DAILY",
+                  "LOGANALYZER_CLASS_LEVEL_ERROR_MONTHLY",
+                  "LOGANALYZER_CLASS_LEVEL_ERROR_WEEKLY",
                   "LOGANALYZER_ERROR_CODE_DISTRIBUTION_DAILY",
                   "LOGANALYZER_ERROR_CODE_DISTRIBUTION_WEEKLY",
-                  "LOGANALYZER_ERROR_CODE_DISTRIBUTION_MONTHLY"];
+                  "LOGANALYZER_ERROR_CODE_DISTRIBUTION_MONTHLY",
+                  "LOGANALYZER_INVALID_LOGIN_ATTEMPT_DAILY",
+                  "LOGANALYZER_INVALID_LOGIN_ATTEMPT_WEEKLY",
+                  "LOGANALYZER_INVALID_LOGIN_ATTEMPT_MONTHLY"];
 
         var uri = request.getRequestURI();
         var uriMatcher = new URIMatcher(String(uri));
@@ -65,13 +68,13 @@
         var method = request.getMethod();
         var targetURL = analyticsConfigInstance.getDasServerUrl() + "/portal/controllers/apis/analytics.jag";
         var payload = request.getContent();
-        var tableName = request.getParameter("tablename");
+        var tableName = request.getParameter("tableName");
 
         if(tables.indexOf(tableName) > -1){
           if(tenantId == "-1234"){
             payload.query = payload.query.concat(" AND tenantID:\"*\"");
           }else{
-            payload.query = payload.query.concat(" AND tenantID:\"" + tenantId + "\"");
+            payload.query = payload.query.concat(" AND tenantID:\"" + tenantDomain + "\"");
           }
      }
 
@@ -132,3 +135,4 @@
         }
     }());
 %>
+

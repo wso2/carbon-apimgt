@@ -63,7 +63,7 @@
                                 </span>
                             </a>
                             <p id="keytemplate_help" class="hide">
-                                <%=i18n.localize("keys should be separated by colon and each attribute should start with <B>$</B> <br> eg:- $apiContext:$apiVersion <br> <b>Allowed keys</b><br>")%> <span class="wrap-long-text"><%=streamParameters%></span>
+                                <%=i18n.localize("keys should be separated by colon and each attribute should start with")%>  <B>$</B> <br>eg:- $apiContext:$apiVersion <br> <b><%=i18n.localize("Allowed keys")%></b><br> <span class="wrap-long-text"><%=streamParameters%></span>
                             </p>
                             </label>
                             <div class="col-md-9">

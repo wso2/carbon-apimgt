@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label class="col-sm-1"><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>></label>
                                 <div class="col-sm-10">
-                                  <p class=""><strong><%=encode.forHtml(allAlertType[key])%></strong></p>
+                                  <p class=""><strong><%=i18n.localize(encode.forHtml(allAlertType[key]))%></strong></p>
                                   <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
                                 </div>
                             </div>

@@ -21,7 +21,7 @@ var addAppPolicy = function () {
         attributes:JSON.stringify(attributes)
         }, function (result) {
             if (result.error == false) {
-                location.href = 'site/pages/app-policy-manage.jag'
+                location.href = 'app-policy-manage'
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
