@@ -15,7 +15,7 @@ currentLocation=window.location.pathname;
 
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
+                    from = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
 

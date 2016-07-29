@@ -1482,7 +1482,8 @@
           "type": "string"
         },
         "isDeployed": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -1593,7 +1594,8 @@
               "$ref": "#/definitions/ThrottleLimit"
             },
             "rateLimitCount": {
-              "type": "integer"
+              "type": "integer",
+              "default": 0
             },
             "rateLimitTimeUnit": {
               "type": "string"
@@ -1610,7 +1612,8 @@
               "example": {}
             },
             "stopOnQuotaReach": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             },
             "billingPlan": {
               "type": "string"
@@ -1718,7 +1721,8 @@
           ]
         },
         "invertCondition": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -1842,7 +1846,8 @@
           "type": "string"
         },
         "unitTime": {
-          "type": "integer"
+          "type": "integer",
+          "default": 0
         }
       }
     },
@@ -1859,7 +1864,8 @@
           "properties": {
             "dataAmount": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "default": 0
             },
             "dataUnit": {
               "type": "string"
@@ -1880,7 +1886,8 @@
           "properties": {
             "requestCount": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "default": 0
             }
           }
         }

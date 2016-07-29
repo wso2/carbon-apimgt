@@ -62,7 +62,7 @@ var statsEnabled = isDataPublishingEnabled();
                     var to = new Date();
                     var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
-                    getDateTime(to,from);
+                    getDateTime(to,firstAccessDay);
 
                     $('body').on('click', '.btn-group button', function (e) {
                         $(this).addClass('active');
@@ -101,6 +101,7 @@ $(document).ready(function(){
     })
 })
 
+var dt = false;
 var drawAPIResponseFaultCountTable = function(from,to){
 
     var fromDate = from;
@@ -128,7 +129,10 @@ var drawAPIResponseFaultCountTable = function(from,to){
                              }
                          }
                     }
-                    $('#PerAppAPIFaultCountTable').datatables_extended();
+                    if(dt != false) {
+                        dt.destroy();
+                    }
+                    dt = $('#PerAppAPIFaultCountTable').datatables_extended();
                 }
                 else if(length == 0) {
                     $('#noData').removeClass('hide');

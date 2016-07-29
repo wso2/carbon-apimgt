@@ -99,8 +99,8 @@
 								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.basicauth.server:${carbon.identity-local-auth-basicauth.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.samlsso.server:${carbon.identity-outbound-auth-samlsso.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.claim.mgt:${carbon.identity.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.analytics.common.la.apim:${analytics.common.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.analytics.common.data.agents.log4j:${analytics.common.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.analytics.common.la.apim:${analytics.shared.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.analytics.common.data.agents.log4j:${analytics.shared.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

@@ -129,6 +129,7 @@ $( document ).ready(function() {
                     var reason = data['reason'];
                     var scope = data['scope'];
                     var consumerKey = data['consumerKey'];
+                    var subscriber = data['subscriber'];
 
                     var fullMessage = "";;
 
@@ -177,6 +178,9 @@ $( document ).ready(function() {
                     if (consumerKey != null) {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Consumer Key") + '</span>'+consumerKey+'<br/>';
                     }
+                    if (subscriber != null) {
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("API Subscriber") + '</span>'+subscriber+'<br/>';
+                    }
 
                     fullMessage = fullMessage + data['msg'];
                     return fullMessage;
@@ -222,4 +226,3 @@ $( document ).ready(function() {
 
 
 });
-     

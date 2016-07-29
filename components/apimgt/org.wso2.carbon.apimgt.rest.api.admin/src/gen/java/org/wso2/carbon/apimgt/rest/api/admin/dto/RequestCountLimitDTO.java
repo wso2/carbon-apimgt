@@ -16,7 +16,7 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO {
   
   
   
-  private Long requestCount = null;
+  private Long requestCount = 0l;
 
   
   /**

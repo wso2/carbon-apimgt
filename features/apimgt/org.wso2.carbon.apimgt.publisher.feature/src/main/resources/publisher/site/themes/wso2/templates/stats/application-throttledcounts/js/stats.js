@@ -15,6 +15,7 @@ $( document ).ready(function() {
             if (!json.error) {
                 if (json.usage && json.usage.length > 0) {
                     var d = new Date();
+                    from = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
 
                     //day picker
@@ -212,8 +213,8 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
 
 
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";

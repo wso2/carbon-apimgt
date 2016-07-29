@@ -274,10 +274,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Set<API> getAPIsWithTag(Registry registry, String tag)
             throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
-        String tagsKey = "tags=";
         try {
             List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts( tagsKey + tag, registry, APIConstants.API_RXT_MEDIA_TYPE);
+                    GovernanceUtils.findGovernanceArtifacts(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag, registry,
+                                                            APIConstants.API_RXT_MEDIA_TYPE);
 
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {

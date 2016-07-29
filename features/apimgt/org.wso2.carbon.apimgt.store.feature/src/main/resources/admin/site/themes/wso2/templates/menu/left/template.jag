@@ -100,11 +100,13 @@
         <li class="nav-header">
           <a href="#"><i class="fw fw-settings fw-2x" style="font-size:22px;"></i><%=i18n.localize("Settings")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
+            <% if(tenantDomain == 'carbon.super') { %>
             <li <%if (reqUrl.match("alerts-domain-manage")){%> class="active" <% } %>><a
               href="<%= jagg.url("/alerts-domain-manage?domainName=APIMAnalytics") %>"
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-statistics"></i><%= i18n.localize("Analytics") %></a>
             </li>
+            <%}%>
             <li <%if (reqUrl.match("themeupload")){%> class="active" <% } %>><a
               href="<%= jagg.url("/themeupload") %>"
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
