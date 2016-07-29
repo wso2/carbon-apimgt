@@ -3,6 +3,8 @@ include("/jagg/jagg.jag");
 
 (function () {
     response.contentType = "application/json; charset=UTF-8";
+    response.addHeader('Pragma', 'No-cache');
+    response.addHeader('Cache-control', 'no-cache');
     var mod, obj, result, username,
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),

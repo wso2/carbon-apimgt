@@ -38,7 +38,7 @@
       <a title="<%= i18n.localize("API browse")%>" href="<%=jagg.urlTenanted("/site/pages/item-info.jag?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}")%>">  
 			{{#if thumburl}}        
 				<div class="square-element">          
-					<img class="" src="{{ thumburl }}" alt="<%=i18n.localize("API Thumbnail")%>">          
+					<img class="" src="<%= jagg.getRegistryPath("") %>{{ thumburl }}" alt="<%=i18n.localize("API Thumbnail")%>">          
         </div>        										                               		
 			{{else}}     
           <div class="square-element setbgcolor">

@@ -1402,6 +1402,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     currentApi.put("version", currentApi,
                             apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
+                    currentApi.put("status", currentApi, api.getStatus().toString());
                     currentApi.put("rates", currentApi, api.getRating());
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi,

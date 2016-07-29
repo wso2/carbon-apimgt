@@ -67,15 +67,15 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
     public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING 
-            + "/blocking-conditions";
+            + "/blacklist";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED = RESOURCE_PATH_THROTTLING_POLICIES
-            + "/advanced-policies";
+            + "/advanced";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION = RESOURCE_PATH_THROTTLING_POLICIES
             + "/application";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION = RESOURCE_PATH_THROTTLING_POLICIES
             + "/subscription";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
-            + "/global";
+            + "/custom";
 
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";

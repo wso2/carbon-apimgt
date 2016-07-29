@@ -167,7 +167,7 @@ function checkOnKeyPress(e) {
           <div class="col-sm-9">
             <select id="sub_app_list" class="form-control subapp">
               <% for(var i = 0 ;subscriptions.length > i;i++){ %>
-                <option value="" data-sandbox="<%= encode.forHtmlAttribute(subscriptions[i].SANDBOX_KEY) %>" data-production="<%= encode.forHtmlAttribute(subscriptions[i].PRODUCTION_KEY)%>">
+                <option value="" data-sandbox="<%=subscriptions[i].SANDBOX_KEY%>" data-production="<%=subscriptions[i].PRODUCTION_KEY%>">
                      <%= encode.forHtml(subscriptions[i].application)%>
                 </option>
               <% } %>

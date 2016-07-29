@@ -27,7 +27,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
             "SELECT * FROM (" +
             "   SELECT " +
             "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row ," +
@@ -51,14 +51,14 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And " +
             "    NAME like ?" +
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
             " ORDER BY $1 $2 ";
 
 
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
             "SELECT * FROM (" +
             "   SELECT " +
             "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -82,11 +82,11 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
             " ORDER BY $1 $2 ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
             "SELECT * FROM (" +
             "   SELECT " +
             "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -110,12 +110,12 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
             " ORDER BY $1 $2 ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
-            "select distinct x.*,bl.* from (" +
+            "select distinct x.*,bl.ENABLED from (" +
             "SELECT * FROM (" +
             "   SELECT " +
             "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -139,7 +139,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
             " ORDER BY $1 $2 ";
 
 

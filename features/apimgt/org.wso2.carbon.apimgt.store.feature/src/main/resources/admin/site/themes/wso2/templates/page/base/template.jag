@@ -15,8 +15,13 @@ if(tenantDomain != null && tenantDomain != 'null'){
    urlPostfix='';
 }
 i18n.init(request,localeResourcesBasePath);
-
-var partWithContext = request.getRequestURL().split(request.getRequestURI())[0]+request.getContextPath();
+var fullUrl = null;
+var currentURL = jagg.getAbsoluteUrl('/');
+fullUrl = request.getRequestURI();
+if(request.getQueryString() != null){
+        fullUrl += '?'+request.getQueryString();
+}
+var partWithContext = currentURL
 %>
 <!DOCTYPE html>
 <html lang="en">

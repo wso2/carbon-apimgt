@@ -79,16 +79,25 @@ $( document ).ready(function() {
                         apiName = this.value;
                         pupulateAppList(apiName);
                         var datePicker=$('#date-range').data('daterangepicker');
+<<<<<<< HEAD
                         getDateTime(to, from);
+=======
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
+>>>>>>> release-6.0.0
                     });
 
                     $("#appSelect").change(function (e) {
                         appName = this.value;
                         var datePicker=$('#date-range').data('daterangepicker');
+<<<<<<< HEAD
                         getDateTime(to, from);
+=======
+                        drawThrottledTimeGraph(apiName, appName, from, to,apiFilter);
+>>>>>>> release-6.0.0
                     });
 
                     pupulateAPIList();
+                    getDateTime(to, from);
                 } else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('.stat-page').html("");
                     showNoDataAnalyticsMsg();

@@ -451,7 +451,9 @@ var getCustomCombinedInSequences = function (apiName, apiVersion, apiProviderNam
     try {
         var username = user.username;
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
-        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var emailDomainReplacedProviderName =
+            org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain(apiProviderName);
+        var apiIdentifierObj = APIIdentifier(emailDomainReplacedProviderName, apiName, apiVersion);
         var defaultSequences = apiProvider.getCustomInSequences();
         sequences.defaultSequences = [];
         for(var i = 0 ; i < defaultSequences.size(); i++) {
@@ -487,7 +489,9 @@ var getCustomCombinedOutSequences = function (apiName, apiVersion, apiProviderNa
     try {
         var username = user.username;
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
-        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var emailDomainReplacedProviderName =
+            org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain(apiProviderName);
+        var apiIdentifierObj = APIIdentifier(emailDomainReplacedProviderName, apiName, apiVersion);
         var defaultSequences = apiProvider.getCustomOutSequences();
         sequences.defaultSequences = [];
         for(var i = 0 ; i < defaultSequences.size(); i++) {
@@ -523,7 +527,9 @@ var getCustomCombinedFaultSequences = function (apiName, apiVersion, apiProvider
     try {
         var username = user.username;
         var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
-        var apiIdentifierObj = APIIdentifier(apiProviderName, apiName, apiVersion);
+        var emailDomainReplacedProviderName =
+            org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain(apiProviderName);
+        var apiIdentifierObj = APIIdentifier(emailDomainReplacedProviderName, apiName, apiVersion);
         var defaultSequences = apiProvider.getCustomFaultSequences();
         sequences.defaultSequences = [];
         for(var i = 0 ; i < defaultSequences.size(); i++) {
