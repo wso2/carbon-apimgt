@@ -363,7 +363,11 @@ var getThemeFile = function (path) {
     var getAbsoluteReqUrl = function (path) {
         var host = "";
         if(isReverseProxyEnabled()){
-            host = "https://" + site.reverseProxy.host ;
+            host = "https://" + site.reverseProxy.host;
+            if (path.indexOf(site.context) == 0) {
+                //replaces the site context with reverse proxy context
+                path = site.reverseProxy.context + path.substring(site.context.length, path.length);
+            }
         }
         return host + path;
     };
@@ -723,7 +727,7 @@ var getThemeFile = function (path) {
             var BigInteger = Packages.java.math.BigInteger;
             var token = new BigInteger(130, random).toString(32);
 
-            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/"};
+            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/", "secure": true};
             session.put('csrfuser',user);
             response.addCookie(cookie);
         }     

@@ -25,7 +25,7 @@ var addSubscriptionPolicy = function () {
         attributes:JSON.stringify(attributes)
         }, function (result) {
             if (result.error == false) {
-                location.href = 'site/pages/subscription-policy-manage.jag'
+                location.href = 'subscription-policy-manage'
             } else {
                 jagg.message({content:result.message,type:"error"});
             }

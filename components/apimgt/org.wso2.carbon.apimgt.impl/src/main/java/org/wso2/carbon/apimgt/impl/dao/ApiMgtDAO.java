@@ -776,7 +776,11 @@ public class ApiMgtDAO {
     public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
         boolean defaultVersionInvoked = false;
-
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
+        if(apiTenantDomain == null) {
+            apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        int apiOwnerTenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
         //Check if the api version has been prefixed with _default_
         if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
             defaultVersionInvoked = true;
@@ -807,8 +811,9 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
+            ps.setInt(3, apiOwnerTenantId);
             if (!defaultVersionInvoked) {
-                ps.setString(3, version);
+                ps.setString(4, version);
             }
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -4611,11 +4616,18 @@ public class ApiMgtDAO {
         }
         try {
             connection = APIMgtDBUtil.getConnection();
+            String blockingFilerSql = null;
             if (connection.getMetaData().getDriverName().contains("MS SQL") ||
                 connection.getMetaData().getDriverName().contains("Microsoft")) {
-                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME");
+                sqlQuery = sqlQuery.replaceAll("NAME", "cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS "
+                        + "as NAME");
+                blockingFilerSql = " select distinct x.*,bl.ENABLED from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl "
+                        + "on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)";
+            }else {
+                blockingFilerSql = " select distinct x.*,bl.ENABLED from ( " + sqlQuery
+                        + " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = "
+                        + "concat(concat(x.USER_ID,':'),x.name))";
             }
-            String blockingFilerSql = " select distinct x.*,bl.* from ( "+sqlQuery+" )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name))";
             prepStmt = connection.prepareStatement(blockingFilerSql);
             
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
@@ -8504,7 +8516,6 @@ public class ApiMgtDAO {
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
         try {
-            connection.setAutoCommit(false);
 
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
@@ -8520,12 +8531,20 @@ public class ApiMgtDAO {
                 List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
 
                 for (String alertTypeId : alertTypeIdList) {
-                    ps = connection.prepareStatement(alertTypesQuery);
-                    ps.setInt(1, Integer.parseInt(alertTypeId));
-                    ps.setString(2, userName);
-                    ps.setString(3, stakeHolder);
-                    ps.execute();
+                    PreparedStatement psAlertTypeId = null;
+                    try {
+                        psAlertTypeId = connection.prepareStatement(alertTypesQuery);
+                        psAlertTypeId.setInt(1, Integer.parseInt(alertTypeId));
+                        psAlertTypeId.setString(2, userName);
+                        psAlertTypeId.setString(3, stakeHolder);
+                        psAlertTypeId.execute();
+                    }catch (SQLException e){
+                        handleException("Error while adding alert types" ,e);
+                    }finally {
+                        APIMgtDBUtil.closeAllConnections(psAlertTypeId, null, null);
+                    }
                 }
+
 
             }
 
@@ -8551,10 +8570,17 @@ public class ApiMgtDAO {
                     String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
 
                     for (String email : extractedEmailList) {
-                        ps = connection.prepareStatement(saveEmailListDetailsQuery);
-                        ps.setInt(1, emailListId);
-                        ps.setString(2, email);
-                        ps.execute();
+                        PreparedStatement extractedEmailListPs = null;
+                        try {
+                            extractedEmailListPs = connection.prepareStatement(saveEmailListDetailsQuery);
+                            extractedEmailListPs.setInt(1, emailListId);
+                            extractedEmailListPs.setString(2, email);
+                            extractedEmailListPs.execute();
+                        }catch (SQLException e){
+                            handleException("Error while save email list.", e);
+                        }finally {
+                            APIMgtDBUtil.closeAllConnections(extractedEmailListPs, null, null);
+                        }
                     }
 
                 }
@@ -8563,12 +8589,17 @@ public class ApiMgtDAO {
 
                 String emailListSaveQuery = SQLConstants.ADD_ALERT_EMAIL_LIST;
 
-                ps = connection.prepareStatement(emailListSaveQuery, Statement.RETURN_GENERATED_KEYS);
+                String dbProductName = connection.getMetaData().getDatabaseProductName();
+
+                ps = connection.prepareStatement(emailListSaveQuery,new String[]{DBUtils.
+                        getConvertedAutoGeneratedColumnName(dbProductName, "EMAIL_LIST_ID")});
+
                 ps.setString(1, userName);
                 ps.setString(2, stakeHolder);
                 ps.execute();
 
                 rs = ps.getGeneratedKeys();
+
                 if (rs.next()) {
                     int generatedEmailIdList = rs.getInt(1);
                     if(!StringUtils.isEmpty(emailList)){
@@ -8578,10 +8609,17 @@ public class ApiMgtDAO {
                         String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
 
                         for (String email : extractedEmailList) {
-                            ps = connection.prepareStatement(saveEmailListDetailsQuery);
-                            ps.setInt(1, generatedEmailIdList);
-                            ps.setString(2, email);
-                            ps.execute();
+                            PreparedStatement elseExtractedEmailListPS = null;
+                            try {
+                                elseExtractedEmailListPS = connection.prepareStatement(saveEmailListDetailsQuery);
+                                elseExtractedEmailListPS.setInt(1, generatedEmailIdList);
+                                elseExtractedEmailListPS.setString(2, email);
+                                elseExtractedEmailListPS.execute();
+                            }catch (SQLException e){
+                                handleException("Error while save email list.", e);
+                            }finally {
+                                APIMgtDBUtil.closeAllConnections(elseExtractedEmailListPS, null, null);
+                            }
                         }
 
                     }
@@ -8594,7 +8632,6 @@ public class ApiMgtDAO {
             handleException("Failed to save alert preferences", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
-
         }
     }
 

@@ -257,7 +257,7 @@ GrantTypes.prototype.getMap = function(selected){
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
             
-            $('.generatekeys').buttonLoader('start');
+            this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action: "generateApplicationKey",
                 application: this.app.name,
@@ -267,7 +267,7 @@ GrantTypes.prototype.getMap = function(selected){
                 tokenScope:"",
                 jsonParams:'{"grant_types":"'+selected+'"}',
             }, $.proxy(function (result) {
-                $('.generatekeys').buttonLoader('stop');
+                this.element.find('.generatekeys').buttonLoader('stop');
                 if (!result.error) {
                     
                     this.app.ConsumerKey = result.data.key.consumerKey,
@@ -291,7 +291,7 @@ GrantTypes.prototype.getMap = function(selected){
                 scopes = this.element.find("select.scope_select").val().join(" ");
             }
             
-            $('.regenerate').buttonLoader('start');
+            this.element.find('.regenerate').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
                 application:this.app.name,
@@ -302,7 +302,7 @@ GrantTypes.prototype.getMap = function(selected){
                 validityTime:validity_time,
                 tokenScope:scopes
             }, $.proxy(function (result) {
-                $('.regenerate').buttonLoader('stop');
+                this.element.find('.regenerate').buttonLoader('stop');
                 if (!result.error) {
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
@@ -318,7 +318,7 @@ GrantTypes.prototype.getMap = function(selected){
         },
 
         updateGrants: function(){
-            $('.update_grants').buttonLoader('start');
+            this.element.find('.update_grants').buttonLoader('start');
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
 
@@ -329,7 +329,7 @@ GrantTypes.prototype.getMap = function(selected){
                 jsonParams:'{"grant_types":"'+selected+'"}',
                 callbackUrl:this.app.callbackUrl
             }, $.proxy(function (result) {
-                $('.update_grants').buttonLoader('stop');
+                this.element.find('.update_grants').buttonLoader('stop');
                 if (!result.error) {
                 } else {
                     //@todo: param_string
@@ -448,7 +448,7 @@ $("#application-actions").each(function(){
         processing: true,
         paging: true,
         "ajax": {
-            "url": jagg.getBaseUrl() + "/site/blocks/application/application-list/ajax/application-list.jag?action=getApplicationsWithPagination",
+            "url": jagg.url("/site/blocks/application/application-list/ajax/application-list.jag?action=getApplicationsWithPagination"),
             "dataSrc": function ( json ) {
                 if(json.applications.length > 0){
                     $('#application-table-wrap').removeClass("hide");

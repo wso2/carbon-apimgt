@@ -85,7 +85,7 @@ public class ThrottlePolicyTemplateBuilder {
         Set<String> conditionsSet = new HashSet<String>();
         
         if(!(policy instanceof APIPolicy)){
-            throw new APITemplateException("Invalid policy level : Has to be 'api'");
+            throw new APITemplateException("Invalid  policy level : Has to be 'api'");
         }
 
         try {
@@ -171,7 +171,9 @@ public class ThrottlePolicyTemplateBuilder {
             if (pipelines != null) {
                 for (Pipeline pipeline : pipelines) {
                     String conditionString = getPolicyConditionForDefault(pipeline.getConditions());
-                    conditionsSet.add(conditionString);
+                    if(!StringUtils.isEmpty(conditionString)) {
+                        conditionsSet.add(conditionString);
+                    }
                 }
             }
 

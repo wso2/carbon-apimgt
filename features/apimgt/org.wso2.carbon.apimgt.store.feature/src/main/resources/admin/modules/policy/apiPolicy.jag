@@ -349,12 +349,11 @@ var jsonToObject = function (policy) {
                 }
                 j++;
             }
-
-            //end of extracting conditions of a pipline
-            //adding conditions to pipe
-            pipe.setConditions(conditionsList);
             //adding pipe to pipelines object
-            pipeLines.add(pipe);
+            if(conditionsList.size() > 0) {
+                pipe.setConditions(conditionsList);
+                pipeLines.add(pipe);
+            }
         }
         //end of pipeline info extracttion
         //adding pipelines to policy if pipeline/executionflow is presented

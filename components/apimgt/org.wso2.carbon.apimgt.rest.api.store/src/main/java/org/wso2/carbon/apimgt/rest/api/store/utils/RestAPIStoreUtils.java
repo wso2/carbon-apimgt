@@ -44,6 +44,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *  This class contains REST API Store related utility operations
@@ -238,6 +240,27 @@ public class RestAPIStoreUtils {
         if (apiConsumer.isTierDeneid(tier)) {
             throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
         }
+    }
 
+    /**
+     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     * 
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-mediation-script elements
+     */
+    public static String removeXMediationScriptsFromSwagger (String apiSwagger) {
+        //removes x-mediation-script key:values
+        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
+        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(mediationScriptRegex + ",");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        return apiSwagger;
     }
 }

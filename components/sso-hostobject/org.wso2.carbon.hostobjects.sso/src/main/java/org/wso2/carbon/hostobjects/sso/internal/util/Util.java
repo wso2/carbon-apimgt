@@ -1,3 +1,4 @@
+
 /*
 *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -21,14 +22,15 @@ package org.wso2.carbon.hostobjects.sso.internal.util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDPolicy;
-import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
+import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
@@ -36,6 +38,7 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
@@ -54,18 +57,12 @@ import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.apache.xerces.impl.Constants;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -110,7 +107,7 @@ public class Util {
 
     /**
      * Builds an xml object with the given QName
-     * 
+     *
      * @param objectQName QName object
      * @return built XML object
      * @throws SSOHostObjectException
@@ -121,10 +118,10 @@ public class Util {
         XMLObjectBuilder builder = org.opensaml.xml.Configuration.getBuilderFactory().getBuilder(objectQName);
         if (builder == null) {
             throw new SSOHostObjectException("Unable to retrieve builder for object QName "
-                                + objectQName);
+                    + objectQName);
         }
         return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(),
-                                   objectQName.getPrefix());
+                objectQName.getPrefix());
     }
 
 
@@ -170,7 +167,7 @@ public class Util {
             return unmarshaller.unmarshall(element);
         } catch (Exception e) {
             throw new Exception("Error in constructing AuthRequest from " +
-                                "the encoded String ", e);
+                    "the encoded String ", e);
         }
     }
 
@@ -185,7 +182,7 @@ public class Util {
         try {
             doBootstrap();
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
-                               "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+                    "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
 
             MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(xmlObject);
@@ -233,7 +230,7 @@ public class Util {
 
         // Encoding the compressed message
         String encodedRequestMessage = Base64.encodeBytes(byteArrayOutputStream
-                                                                  .toByteArray(), Base64.DONT_BREAK_LINES);
+                .toByteArray(), Base64.DONT_BREAK_LINES);
         return encodedRequestMessage.trim();
 
     }
@@ -251,13 +248,13 @@ public class Util {
     /**
      * This method validates the signature of the SAML Response.
      *
-     * @param resp SAML Response
+     * @param signature Signature to verify
      * @return true, if signature is valid.
      */
-    public static boolean validateSignature(Response resp, String keyStoreName,
+    public static boolean validateSignature(Signature signature, String keyStoreName,
                                             String keyStorePassword, String alias, int tenantId,
                                             String tenantDomain) throws SignatureVerificationException,
-                                                                        SignatureVerificationFailure {
+            SignatureVerificationFailure {
         boolean isSigValid = false;
         try {
             KeyStore keyStore = null;
@@ -275,9 +272,21 @@ public class Util {
             if (log.isDebugEnabled()) {
                 log.debug("Validating against " + cert.getSubjectDN().getName());
             }
+            try {
+                SAMLSignatureProfileValidator signatureProfileValidator = new SAMLSignatureProfileValidator();
+                signatureProfileValidator.validate(signature);
+            } catch (ValidationException e) {
+                String logMsg = "The signature do not confirm to SAML signature profile. Possible XML Signature Wrapping Attack!";
+                if (log.isDebugEnabled()) {
+                    log.debug(logMsg, e);
+                }
+                log.error(e.getMessage(), e);
+                //Returning false,without throwing the exception as to propagate 401 to UI
+                return false;
+            }
             X509CredentialImpl credentialImpl = new X509CredentialImpl(cert);
             SignatureValidator signatureValidator = new SignatureValidator(credentialImpl);
-            signatureValidator.validate(resp.getSignature());
+            signatureValidator.validate(signature);
             isSigValid = true;
             return isSigValid;
 
@@ -297,6 +306,10 @@ public class Util {
             log.error("Could not load the keystore " + keyStoreName, e);
             throw new SignatureVerificationException(e);
         } catch (ValidationException e) {
+            String logMsg = "The signature do not confirm to SAML signature profile. Possible XML Signature Wrapping Attack!";
+            if (log.isDebugEnabled()) {
+                log.debug(logMsg, e);
+            }
             //Do not log the exception here. Clients of this method use it in a fall back fashion to verify signatures
             //using different public keys. Therefore logging an error would cause unnecessary logs. Throwing an
             //exception is sufficient so that clients can decide what to do with it.
@@ -304,7 +317,7 @@ public class Util {
         } catch (Exception e) {
             //keyStoreManager.getKeyStore throws a generic 'Exception'
             log.error("Error when getting key store of tenant " + tenantDomain, e);
-            throw new SignatureVerificationException(e);
+            throw new SignatureVerificationException(e.getMessage(), e);
         }
     }
 
@@ -338,7 +351,8 @@ public class Util {
         return Util.realmService;
     }
 
-    /** Build NameIDPolicy object given name ID policy format
+    /**
+     * Build NameIDPolicy object given name ID policy format
      *
      * @param nameIdPolicy Name ID policy format
      * @return SAML NameIDPolicy object
@@ -354,10 +368,11 @@ public class Util {
         return nameIDPolicyObj;
     }
 
-    /** Build NameID object given name ID format
+    /**
+     * Build NameID object given name ID format
      *
      * @param nameIdFormat Name ID format
-     * @param subject Subject
+     * @param subject      Subject
      * @return SAML NameID object
      */
     public static NameID buildNameID(String nameIdFormat, String subject) {
@@ -395,6 +410,7 @@ public class Util {
 
     /**
      * Returns a secured DocumentBuilderFactory instance
+     *
      * @return DocumentBuilderFactory
      */
     public static DocumentBuilderFactory getSecuredDocumentBuilder() {
