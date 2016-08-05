@@ -1,45 +1,57 @@
 <div class="main-content">
-    <h1><a name="SubscriptionCollectionApi"></a>SubscriptionCollectionApi</h1>
+    <h1><a name="Subscription (Collection)"></a>Subscription (Collection)</h1>
 
     
         
             <hr/>
-            <h3 class="operation-heading"><a name="subscriptionsGet"></a>Get subscription list.\n</h3>
-
+            <h3 class="operation-heading"><a name="subscriptionsGet"></a>Get all subscriptions
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.10/subscriptions</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Get subscription list.\nThe API Identifier or Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n</p>
+            <p class="marked">This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/subscriptions</code>
+1. Retrieving applications which are subscibed to a specific API.
+`GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
 
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>GET</code>
+2. Retrieving APIs which are subscribed by a specific application.
+`GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`
 
-            <h4 class="section-heading">Scope</h4>
-            
-                <code>apim:subscribe</code>
-            
-            
+**IMPORTANT:**
+* It is mandatory to provide either **apiId** or **applicationId**.
+</p>
 
-            <h4 class="section-heading">CURL Example</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; &quot;http://127.0.0.1:9763/api/am/store/v0.9/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             
             
 
+            <div class="pointer" data-toggle="collapse" data-target="#request-subscriptionsGet">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+            
             
 
             <div class="pointer" data-toggle="collapse" data-target="#response-subscriptionsGet">
                 <h4 class="section-heading">
-                    Sample Response
+                    Response
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
             </div>
             
-                <div id="response-subscriptionsGet" class="pre collapse"><code class="json">HTTP/1.1 200 OK
+                <div id="response-subscriptionsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -65,7 +77,14 @@ Content-Type: application/json
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -100,7 +119,10 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n</p>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+Should be formatted as **provider-name-version**.
+</p>
                             
                         </td>
                         <td>
@@ -130,7 +152,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.\n</p>
+                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.
+</p>
                             
                         </td>
                         <td>
@@ -160,7 +183,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Application Group Id\n</p>
+                            <p class="param-description marked">Application Group Id
+</p>
                             
                         </td>
                         <td>
@@ -190,7 +214,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.\n</p>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
                             
                         </td>
                         <td>
@@ -220,7 +245,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Maximum size of resource array to return.\n</p>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
                             
                         </td>
                         <td>
@@ -250,7 +276,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is JSON.\n</p>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -260,7 +287,7 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                 
@@ -280,7 +307,9 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n</p>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
                             
                         </td>
                         <td>
@@ -328,7 +357,7 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 

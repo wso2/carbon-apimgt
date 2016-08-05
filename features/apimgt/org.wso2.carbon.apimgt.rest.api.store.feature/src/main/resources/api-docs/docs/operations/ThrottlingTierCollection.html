@@ -1,69 +1,109 @@
 <div class="main-content">
-    <h1><a name="TagCollectionApi"></a>TagCollectionApi</h1>
+    <h1><a name="Throttling Tier (Collection)"></a>Throttling Tier (Collection)</h1>
 
     
         
             <hr/>
-            <h3 class="operation-heading"><a name="tagsGet"></a>Get a list of tags that are already added to APIs\n</h3>
-
+            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get available tiers
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.10/tiers/{tierLevel}</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Get a list of tags that are already added to APIs\n</p>
+            <p class="marked">This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of `api` and `application`.
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/tags</code>
+**NOTE**:
+* API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.
+</p>
 
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>GET</code>
-
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
             
-                <p>Scope not required</p>
+                <p>Not required</p>
             
 
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; &quot;http://127.0.0.1:9763/api/am/store/v0.9/tags&quot;</code></div>
-            
-            
-
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-tagsGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelGet">
                 <h4 class="section-heading">
-                    Sample Response
+                    Request
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
+            </div>
+
+            
+                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/tiers/api
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
             </div>
             
-                <div id="response-tagsGet" class="pre collapse"><code class="json">HTTP/1.1 200 OK
+                <div id="response-tiersTierLevelGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
    &quot;previous&quot;: &quot;&quot;,
    &quot;list&quot;:    [
             {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;mobile&quot;
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;requestCount&quot;: 1,
+         &quot;description&quot;: &quot;Allows 1 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Bronze&quot;,
+         &quot;attributes&quot;: {}
       },
             {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;multimedia&quot;
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;requestCount&quot;: 20,
+         &quot;description&quot;: &quot;Allows 20 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Gold&quot;,
+         &quot;attributes&quot;: {}
       },
             {
-         &quot;weight&quot;: 1,
-         &quot;name&quot;: &quot;phone&quot;
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;requestCount&quot;: 5,
+         &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Silver&quot;,
+         &quot;attributes&quot;: {}
+      },
+            {
+         &quot;unitTime&quot;: 0,
+         &quot;tierPlan&quot;: null,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;requestCount&quot;: 0,
+         &quot;description&quot;: &quot;Allows unlimited requests&quot;,
+         &quot;name&quot;: &quot;Unlimited&quot;,
+         &quot;attributes&quot;: {}
       }
    ],
-   &quot;count&quot;: 3,
+   &quot;count&quot;: 4,
    &quot;next&quot;: &quot;&quot;
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.10/tiers/api&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -85,6 +125,44 @@ Content-Type: application/json
                     <tr>
                         <td class="parameter">
                             
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>tierLevel</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">List API or Application type tiers.
+</p>
+                            
+                                <p><b>Accepted values: </b></p>
+
+<code>api</code>
+
+<code>application</code>
+
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
                             <span class="param-in">Query </span>
                             
                             
@@ -98,7 +176,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Maximum size of resource array to return.\n</p>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
                             
                         </td>
                         <td>
@@ -128,7 +207,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.\n</p>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
                             
                         </td>
                         <td>
@@ -158,7 +238,9 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n</p>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
                             
                         </td>
                         <td>
@@ -188,7 +270,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is JSON.\n</p>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -198,7 +281,7 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                 
@@ -218,7 +301,9 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n</p>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
                             
                         </td>
                         <td>
@@ -253,11 +338,11 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nTag list is returned.\n</p></td>
+                        <td class="parameter"><p class="marked">OK.\nList of tiers returned.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
-                                    <a href="#!/models#TagList">TagList</a>
+                                    <a href="#!/models#TierList">TierList</a>
                                 
                                 
                             </span>
@@ -266,7 +351,7 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -278,21 +363,8 @@ Content-Type: application/json
                     </tr>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Error">Error</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 

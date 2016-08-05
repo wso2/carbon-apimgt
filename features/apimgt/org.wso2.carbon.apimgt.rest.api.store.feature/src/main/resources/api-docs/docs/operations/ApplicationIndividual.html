@@ -1,566 +1,78 @@
 <div class="main-content">
-    <h1><a name="ApplicationindividualApi"></a>ApplicationindividualApi</h1>
+    <h1><a name="Application (Individual)"></a>Application (Individual)</h1>
 
     
         
             <hr/>
-            <h3 class="operation-heading"><a name="applicationsApplicationIdDelete"></a>Remove an application\n</h3>
-
+            <h3 class="operation-heading"><a name="applicationsPost"></a>Create a new application
+ <br><small>POST https://apis.wso2.com/api/am/store/v0.10/applications</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Remove an application\n</p>
+            <p class="marked">This operation can be used to create a new application specifying the details of the application in the payload.
+</p>
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/applications/{applicationId}</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>DELETE</code>
-
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
-                <code>apim:subscribe</code>
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             
             
 
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; -X DELETE &quot;http://127.0.0.1:9763/api/am/store/v0.9/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4&quot;</code></div>
-            
-            
-
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdDelete">
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsPost">
                 <h4 class="section-heading">
-                    Sample Response
+                    Request
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
             </div>
+
             
-                <div id="response-applicationsApplicationIdDelete" class="pre collapse"><code class="json">HTTP/1.1 200 OK</code></div>
-            
-            
-            <h4 class="section-heading">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>applicationId</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Unmodified-Since</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-            </table>
+                <div id="request-applicationsPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/store/v0.10/applications
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nResource successfully deleted.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                
-                                    
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nResource to be deleted does not exist.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Error">Error</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Error">Error</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                </tbody>
-            </table>
-        
-            <hr/>
-            <h3 class="operation-heading"><a name="applicationsApplicationIdGet"></a>Get application details\n</h3>
-
-            <p class="marked"></p>
-
-            <p class="marked">Get application details\n</p>
-
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/applications/{applicationId}</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>GET</code>
-
-            <h4 class="section-heading">Scope</h4>
-            
-                <code>apim:subscribe</code>
+{
+    &quot;throttlingTier&quot;: &quot;Unlimited&quot;,
+    &quot;description&quot;: &quot;sample app description&quot;,
+    &quot;name&quot;: &quot;sampleapp&quot;,
+    &quot;callbackUrl&quot;: &quot;http://my.server.com/callback&quot;
+}</code></div>
             
             
 
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; &quot;http://127.0.0.1:9763/api/am/store/v0.9/applications/896658a0-b4ee-4535-bbfa-806c894a4015&quot;</code></div>
-            
-            
-
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdGet">
+            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsPost">
                 <h4 class="section-heading">
-                    Sample Response
+                    Response
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
             </div>
             
-                <div id="response-applicationsApplicationIdGet" class="pre collapse"><code class="json">HTTP/1.1 200 OK
+                <div id="response-applicationsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://localhost:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
 Content-Type: application/json
 
 {
-   &quot;groupId&quot;: &quot;&quot;,
-   &quot;callbackUrl&quot;: null,
+   &quot;groupId&quot;: null,
+   &quot;callbackUrl&quot;: &quot;http://my.server.com/callback&quot;,
    &quot;subscriber&quot;: &quot;admin&quot;,
    &quot;throttlingTier&quot;: &quot;Unlimited&quot;,
-   &quot;applicationId&quot;: &quot;896658a0-b4ee-4535-bbfa-806c894a4015&quot;,
-   &quot;description&quot;: null,
-   &quot;status&quot;: &quot;APPROVED&quot;,
-   &quot;name&quot;: &quot;DefaultApplication&quot;,
-   &quot;keys&quot;: [   {
-      &quot;consumerKey&quot;: &quot;AVoREWiB16kY_GTIzscl40GYYZQa&quot;,
-      &quot;consumerSecret&quot;: &quot;KXQxmS8W3xDvvJH4AfR6xrhKIeIa&quot;,
-      &quot;keyState&quot;: &quot;COMPLETED&quot;,
-      &quot;keyType&quot;: &quot;PRODUCTION&quot;,
-      &quot;supportedGrantTypes&quot;: null,
-      &quot;token&quot;:       {
-         &quot;validityTime&quot;: 3600,
-         &quot;accessToken&quot;: &quot;3887da6d111f0429c6dff47a46e87209&quot;,
-         &quot;tokenScopes&quot;:          [
-            &quot;am_application_scope&quot;,
-            &quot;default&quot;
-         ]
-      }
-   }]
-}</code></div>
-            
-            
-            <h4 class="section-heading">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>applicationId</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>Accept</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is JSON.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">JSON</p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Modified-Since</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nApplication returned.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Application">Application</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                
-                                    
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nRequested application does not exist.\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Error">Error</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                
-                                    <a href="#!/models#Error">Error</a>
-                                
-                                
-                            </span>
-                        </td>
-                    </tr>
-                
-                </tbody>
-            </table>
-        
-            <hr/>
-            <h3 class="operation-heading"><a name="applicationsApplicationIdPut"></a>Update application details\n</h3>
-
-            <p class="marked"></p>
-
-            <p class="marked">Update application details\n</p>
-
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/applications/{applicationId}</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>PUT</code>
-
-            <h4 class="section-heading">Scope</h4>
-            
-                <code>apim:subscribe</code>
-            
-            
-
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;http://127.0.0.1:9763/api/am/store/v0.9/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;</code></div>
-            
-            
-
-            
-                <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdPut">
-                    <h4 class="section-heading">
-                        Sample Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h4>
-                </div>
-                <div id="request-applicationsApplicationIdPut"class="pre collapse"><code class="json">{
-   &quot;groupId&quot;: null,
-   &quot;callbackUrl&quot;: &quot;&quot;,
-   &quot;subscriber&quot;: &quot;admin&quot;,
-   &quot;throttlingTier&quot;: &quot;Bronze&quot;,
    &quot;applicationId&quot;: &quot;c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;,
-   &quot;description&quot;: &quot;sample app description updated&quot;,
-   &quot;status&quot;: &quot;APPROVED&quot;,
-   &quot;name&quot;: &quot;sampleapp&quot;
-}</code></div>
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdPut">
-                <h4 class="section-heading">
-                    Sample Response
-                    
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    
-            </h4>
-            </div>
-            
-                <div id="response-applicationsApplicationIdPut" class="pre collapse"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   &quot;groupId&quot;: null,
-   &quot;callbackUrl&quot;: &quot;&quot;,
-   &quot;subscriber&quot;: &quot;admin&quot;,
-   &quot;throttlingTier&quot;: &quot;Bronze&quot;,
-   &quot;applicationId&quot;: &quot;c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;,
-   &quot;description&quot;: &quot;sample app description updated&quot;,
+   &quot;description&quot;: &quot;sample app description&quot;,
    &quot;status&quot;: &quot;APPROVED&quot;,
    &quot;name&quot;: &quot;sampleapp&quot;,
    &quot;keys&quot;: []
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/store/v0.10/applications&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -578,36 +90,6 @@ Content-Type: application/json
                     <th>Default</th>
                 </tr>
                 </thead>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>applicationId</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
                 
                     <tr>
                         <td class="parameter">
@@ -625,7 +107,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Application object that needs to be updated\n</p>
+                            <p class="param-description marked">Application object that is to be created.
+</p>
                             
                         </td>
                         <td>
@@ -657,7 +140,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media type of the entity in the body. Default is JSON.\n</p>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -667,67 +151,7 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Unmodified-Since</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                 
@@ -751,8 +175,8 @@ Content-Type: application/json
                 <tbody>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nApplication updated.\n</p></td>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -777,8 +201,8 @@ Content-Type: application/json
                     </tr>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found.\nThe resource to be updated does not exist.\n</p></td>
+                        <td class="parameter"><p class="marked">409</p></td>
+                        <td class="parameter"><p class="marked">Conflict.\nApplication already exists.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -790,8 +214,8 @@ Content-Type: application/json
                     </tr>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n</p></td>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported media type.\nThe entity of the request was in a not supported format.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -806,55 +230,51 @@ Content-Type: application/json
             </table>
         
             <hr/>
-            <h3 class="operation-heading"><a name="applicationsGenerateKeysPost"></a>Generate keys for application\n</h3>
-
+            <h3 class="operation-heading"><a name="applicationsGenerateKeysPost"></a>Generate keys for application
+ <br><small>POST https://apis.wso2.com/api/am/store/v0.10/applications/generate-keys</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Generate keys for application\n</p>
+            <p class="marked">This operation can be used to generate client Id and client secret for an application
+</p>
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/applications/generate-keys</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>POST</code>
-
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
-                <code>apim:subscribe</code>
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             
             
 
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json  &quot;http://127.0.0.1:9763/api/am/store/v0.9/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;</code></div>
-            
-            
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsGenerateKeysPost">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
 
             
-                <div class="pointer" data-toggle="collapse" data-target="#request-applicationsGenerateKeysPost">
-                    <h4 class="section-heading">
-                        Sample Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h4>
-                </div>
-                <div id="request-applicationsGenerateKeysPost"class="pre collapse"><code class="json">{
+                <div id="request-applicationsGenerateKeysPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/store/v0.10/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+
+{
   &quot;validityTime&quot;: &quot;3600&quot;,
   &quot;keyType&quot;: &quot;PRODUCTION&quot;,
   &quot;accessAllowDomains&quot;: [&quot;ALL&quot;
   ]
 }</code></div>
             
+            
 
             <div class="pointer" data-toggle="collapse" data-target="#response-applicationsGenerateKeysPost">
                 <h4 class="section-heading">
-                    Sample Response
+                    Response
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
             </div>
             
-                <div id="response-applicationsGenerateKeysPost" class="pre collapse"><code class="json">HTTP/1.1 200 OK
+                <div id="response-applicationsGenerateKeysPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -880,7 +300,14 @@ Content-Type: application/json
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json  &quot;https://127.0.0.1:9443/api/am/store/v0.10/applications/generate-keys?applicationId=c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -915,7 +342,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.\n</p>
+                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.
+</p>
                             
                         </td>
                         <td>
@@ -945,7 +373,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Application object the keys of which are to be generated\n</p>
+                            <p class="param-description marked">Application object the keys of which are to be generated
+</p>
                             
                         </td>
                         <td>
@@ -977,7 +406,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media type of the entity in the body. Default is JSON.\n</p>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -987,7 +417,7 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                 
@@ -1007,7 +437,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.\n</p>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
                             
                         </td>
                         <td>
@@ -1037,7 +468,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.\n</p>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+</p>
                             
                         </td>
                         <td>
@@ -1111,7 +543,7 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -1126,74 +558,82 @@ Content-Type: application/json
             </table>
         
             <hr/>
-            <h3 class="operation-heading"><a name="applicationsPost"></a>Create a new application.\n</h3>
-
+            <h3 class="operation-heading"><a name="applicationsApplicationIdGet"></a>Get details of an application
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.10/applications/{applicationId}</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Create a new application.\n</p>
+            <p class="marked">This operation can be used to retrieve details of an individual application specifying the application id in the URI.
+</p>
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/applications</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>POST</code>
-
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
-                <code>apim:subscribe</code>
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             
             
 
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;http://127.0.0.1:9763/api/am/store/v0.9/applications&quot;</code></div>
-            
-            
-
-            
-                <div class="pointer" data-toggle="collapse" data-target="#request-applicationsPost">
-                    <h4 class="section-heading">
-                        Sample Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h4>
-                </div>
-                <div id="request-applicationsPost"class="pre collapse"><code class="json">{
-    &quot;groupId&quot;: &quot;&quot;,
-    &quot;subscriber&quot;: &quot;admin&quot;,
-    &quot;throttlingTier&quot;: &quot;Unlimited&quot;,
-    &quot;description&quot;: &quot;sample app description&quot;,
-    &quot;status&quot;: &quot;APPROVED&quot;,
-    &quot;name&quot;: &quot;sampleapp&quot;
-}</code></div>
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsPost">
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdGet">
                 <h4 class="section-heading">
-                    Sample Response
+                    Request
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
+            </div>
+
+            
+                <div id="request-applicationsApplicationIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/applications/896658a0-b4ee-4535-bbfa-806c894a4015
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
             </div>
             
-                <div id="response-applicationsPost" class="pre collapse"><code class="json">HTTP/1.1 201 Created
-Location: http://localhost:9763/api/am/store/v0.9/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
+                <div id="response-applicationsApplicationIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-   &quot;groupId&quot;: null,
+   &quot;groupId&quot;: &quot;&quot;,
    &quot;callbackUrl&quot;: null,
    &quot;subscriber&quot;: &quot;admin&quot;,
    &quot;throttlingTier&quot;: &quot;Unlimited&quot;,
-   &quot;applicationId&quot;: &quot;c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;,
-   &quot;description&quot;: &quot;sample app description&quot;,
+   &quot;applicationId&quot;: &quot;896658a0-b4ee-4535-bbfa-806c894a4015&quot;,
+   &quot;description&quot;: null,
    &quot;status&quot;: &quot;APPROVED&quot;,
-   &quot;name&quot;: &quot;sampleapp&quot;,
-   &quot;keys&quot;: []
+   &quot;name&quot;: &quot;DefaultApplication&quot;,
+   &quot;keys&quot;: [   {
+      &quot;consumerKey&quot;: &quot;AVoREWiB16kY_GTIzscl40GYYZQa&quot;,
+      &quot;consumerSecret&quot;: &quot;KXQxmS8W3xDvvJH4AfR6xrhKIeIa&quot;,
+      &quot;keyState&quot;: &quot;COMPLETED&quot;,
+      &quot;keyType&quot;: &quot;PRODUCTION&quot;,
+      &quot;supportedGrantTypes&quot;: null,
+      &quot;token&quot;:       {
+         &quot;validityTime&quot;: 3600,
+         &quot;accessToken&quot;: &quot;3887da6d111f0429c6dff47a46e87209&quot;,
+         &quot;tokenScopes&quot;:          [
+            &quot;am_application_scope&quot;,
+            &quot;default&quot;
+         ]
+      }
+   }]
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/store/v0.10/applications/896658a0-b4ee-4535-bbfa-806c894a4015&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -1216,6 +656,324 @@ Content-Type: application/json
                         <td class="parameter">
                             
                             
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>applicationId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nApplication returned.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Application">Application</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found.\nRequested application does not exist.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="applicationsApplicationIdPut"></a>Update an application
+ <br><small>PUT https://apis.wso2.com/api/am/store/v0.10/applications/{applicationId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdPut">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-applicationsApplicationIdPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+
+{
+   &quot;callbackUrl&quot;: &quot;&quot;,
+   &quot;throttlingTier&quot;: &quot;Bronze&quot;,
+   &quot;description&quot;: &quot;sample app description updated&quot;,
+   &quot;name&quot;: &quot;sampleapp&quot;
+}</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdPut">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-applicationsApplicationIdPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   &quot;groupId&quot;: null,
+   &quot;callbackUrl&quot;: &quot;&quot;,
+   &quot;subscriber&quot;: &quot;admin&quot;,
+   &quot;throttlingTier&quot;: &quot;Bronze&quot;,
+   &quot;applicationId&quot;: &quot;c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;,
+   &quot;description&quot;: &quot;sample app description updated&quot;,
+   &quot;status&quot;: &quot;APPROVED&quot;,
+   &quot;name&quot;: &quot;sampleapp&quot;,
+   &quot;keys&quot;: []
+}</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://127.0.0.1:9443/api/am/store/v0.10/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>applicationId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
                             
                             
                             <span class="param-in">Body </span>
@@ -1228,7 +986,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Application object that is to be created.\n</p>
+                            <p class="param-description marked">Application object that needs to be updated
+</p>
                             
                         </td>
                         <td>
@@ -1260,7 +1019,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media type of the entity in the body. Default is JSON.\n</p>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -1270,7 +1030,69 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Unmodified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
                         </td>
                     </tr>
                 
@@ -1294,8 +1116,8 @@ Content-Type: application/json
                 <tbody>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">201</p></td>
-                        <td class="parameter"><p class="marked">Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n</p></td>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nApplication updated.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -1320,8 +1142,8 @@ Content-Type: application/json
                     </tr>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">409</p></td>
-                        <td class="parameter"><p class="marked">Conflict.\nApplication already exists.\n</p></td>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found.\nThe resource to be updated does not exist.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -1333,8 +1155,230 @@ Content-Type: application/json
                     </tr>
                 
                     <tr>
-                        <td class="parameter"><p class="marked">415</p></td>
-                        <td class="parameter"><p class="marked">Unsupported media type.\nThe entity of the request was in a not supported format.\n</p></td>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="applicationsApplicationIdDelete"></a>Remove an application
+ <br><small>DELETE https://apis.wso2.com/api/am/store/v0.10/applications/{applicationId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to remove an application specifying its id.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationsApplicationIdDelete">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-applicationsApplicationIdDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/store/v0.10/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-applicationsApplicationIdDelete">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-applicationsApplicationIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://127.0.0.1:9443/api/am/store/v0.10/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>applicationId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Application Identifier** consisting of the UUID of the Application.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Unmodified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nResource successfully deleted.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found.\nResource to be deleted does not exist.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
