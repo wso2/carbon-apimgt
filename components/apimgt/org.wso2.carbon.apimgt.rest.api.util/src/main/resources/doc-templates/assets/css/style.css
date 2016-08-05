@@ -130,10 +130,11 @@
 .bs-docs-sidebar {
     margin-top: 20px;
     margin-bottom: 100px;
+    position: relative;
 }
 
 .bs-docs-sidebar > ul{
-    width: 230px;
+    width: 250px;
     overflow-y: auto;
     height: 100%;
 }
@@ -194,8 +195,8 @@ hr {
     background-color: #b9b9b9;
     border: 0;
     height: 1px;
-    margin-top: 60px;
-    margin-bottom: 60px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 code {
