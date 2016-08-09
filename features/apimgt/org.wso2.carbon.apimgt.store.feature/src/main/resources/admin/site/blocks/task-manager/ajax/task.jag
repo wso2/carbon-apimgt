@@ -13,12 +13,7 @@ include("/jagg/jagg.jag");
             error:true,
             message:'timeout'
         });
-    } else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
-        print({
-            error:true,
-            message: msg.error.csrfError
-        });        
-    }else{
+    } else{
 
         if (action === "getAllTasks" && request.getMethod() == 'POST') {
         mod = jagg.module("taskmanager");
