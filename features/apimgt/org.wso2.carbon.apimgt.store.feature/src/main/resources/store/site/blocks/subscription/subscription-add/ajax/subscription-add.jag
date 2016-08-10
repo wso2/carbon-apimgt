@@ -22,13 +22,7 @@ include("/jagg/jagg.jag");
                 error:true,
                 message: msg.error.invalidInputs(validation_errors)
             });        
-    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
-        print({
-            error:true,
-            message: msg.error.csrfError
-        });
-    }            
-    else if (action == "addSubscription" && request.getMethod() == 'POST') {
+    }else if (action == "addSubscription" && request.getMethod() == 'POST') {
         if (!user) {
             if(!ssoEnabled){
 		print({

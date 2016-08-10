@@ -37,9 +37,6 @@ var validation_errors = jagg.validateInputs(validation);
 if(validation_errors != true){
     message.error = true;
     message.message = msg.error.invalidInputs(validation_errors);
-}else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
-    message.error = true;
-    message.message = msg.error.csrfError;
 }else if(action == "rateTopic"){
 	var rating = parseInt(request.getParameter("rating"), 10);
 	var averageRating = forum.rateTopic(topicId, rating, user.username, tenantDomain);
