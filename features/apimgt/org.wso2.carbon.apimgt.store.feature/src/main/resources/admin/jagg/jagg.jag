@@ -693,38 +693,6 @@ return getThemePath() + path;
         return request.getParameter("tenant");
     }
 
-    var setCSRFToken = function(){
-        var cookie = request.getCookie("csrftoken");         
-        var user = jagg.getUser();
-        var csrfuser =  session.get('csrfuser');
-        //set CSRF if it is not set + you need to refresh the token if the user has changed.
-        if( !cookie || user != csrfuser){
-            //Use a secure random as the CSRF token.
-            var SecureRandom = Packages.java.security.SecureRandom;
-            var random = new SecureRandom();
-            var BigInteger = Packages.java.math.BigInteger;
-            var token = new BigInteger(130, random).toString(32);
-
-            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/" , "secure": true};
-            session.put('csrfuser',user);
-            response.addCookie(cookie);
-        }     
-    }
-
-    var isCSRFTokenValid = function(){
-        var log = new Log();
-        var cookie = request.getCookie("csrftoken");
-        var token = request.getHeader("X-CSRFToken");
-        var user = jagg.getUser();
-        if(cookie == null || cookie.value == token){
-            return true;
-        }
-        else{
-            log.info("CSRF Token error at "+request.getRequestURI());
-            return false;
-        }
-    }
-
     var validateInputs = function(config){
         var errors = [];
         //set most used parapeters
@@ -830,8 +798,6 @@ return getThemePath() + path;
         getSiteContext:getSiteContext,
         getHttpsUrl:getHttpsUrl,
         getTenantDomain:getTenantDomain,
-        setCSRFToken:setCSRFToken,
-        isCSRFTokenValid:isCSRFTokenValid,
         validateInputs:validateInputs,
     };
 

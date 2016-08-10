@@ -8,12 +8,7 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
-    if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
-        print({
-            error:true,
-            message: msg.error.csrfError
-        });            
-    }else if (action === "logout" && request.getMethod() == 'POST') {
+    if (action === "logout" && request.getMethod() == 'POST') {
         jagg.setUser(null);
         print({
             error:false
