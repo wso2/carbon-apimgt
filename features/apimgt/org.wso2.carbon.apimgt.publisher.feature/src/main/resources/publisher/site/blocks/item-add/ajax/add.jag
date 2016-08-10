@@ -5,7 +5,6 @@ function isPositiveInteger(s) {
     return !!s.match(/^[0-9]+$/);
 }
 
-if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     var mod, obj, result, username,

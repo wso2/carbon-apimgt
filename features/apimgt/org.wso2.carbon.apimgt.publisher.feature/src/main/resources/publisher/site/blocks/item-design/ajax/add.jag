@@ -17,7 +17,6 @@ function isPositiveInteger(s) {
     return !!s.match(/^[0-9]+$/);
 }
 
-if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.

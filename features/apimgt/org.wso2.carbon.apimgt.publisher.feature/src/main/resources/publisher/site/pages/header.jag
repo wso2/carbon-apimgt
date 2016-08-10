@@ -13,8 +13,6 @@ if (ssoEnabled === 'true') {
     jagg.includeBlock("oidc/filter", {});
 }
 
-jagg.setCSRFToken();
-
 var getRedirectPathForNonAuthenticatedUser = function () {
 
     // if reverse proxy enabled from site json, below code block will remove URI context from the absolute
