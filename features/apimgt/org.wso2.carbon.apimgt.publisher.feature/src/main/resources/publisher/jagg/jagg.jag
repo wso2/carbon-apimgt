@@ -715,41 +715,6 @@ var getThemeFile = function (path) {
         }
     };
 
-    var setCSRFToken = function(){
-        var cookie = request.getCookie("csrftoken");         
-        var user = jagg.getUser();
-        var csrfuser =  session.get('csrfuser');
-        //set CSRF if it is not set + you need to refresh the token if the user has changed.
-        if( !cookie || user != csrfuser){
-            //Use a secure random as the CSRF token.
-            var SecureRandom = Packages.java.security.SecureRandom;
-            var random = new SecureRandom();
-            var BigInteger = Packages.java.math.BigInteger;
-            var token = new BigInteger(130, random).toString(32);
-
-            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/", "secure": true};
-            session.put('csrfuser',user);
-            response.addCookie(cookie);
-        }     
-    }
-
-    var isCSRFTokenValid = function(){
-        var log = new Log();
-        var cookie = request.getCookie("csrftoken");
-        var token = request.getHeader("X-CSRFToken");
-        var user = jagg.getUser();
-        if(request.getMethod() == 'GET' || cookie == null || cookie.value == token){
-            return true;
-        }
-        else{
-            log.info("CSRF Token error at "+request.getRequestURI()+" "+request.getMethod());
-            msg = require("/site/conf/ui-messages.jag"),
-            response.contentType = "application/json; charset=UTF-8";
-            print({ error :true , message:msg.error.csrfError});
-            return false;
-        }
-    }    
-
     return {
         setUser:setUser,
         getUser:getUser,
@@ -793,8 +758,6 @@ var getThemeFile = function (path) {
         getHttpsUrl:getHttpsUrl,
         getTenantDomain:getTenantDomain,
 		getSiteContext:getSiteContext,
-        setCSRFToken:setCSRFToken,
-        isCSRFTokenValid:isCSRFTokenValid,
         getAbsoluteReqUrl:getAbsoluteReqUrl
     };
 
