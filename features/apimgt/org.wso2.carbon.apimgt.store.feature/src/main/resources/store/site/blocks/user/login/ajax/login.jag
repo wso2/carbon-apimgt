@@ -70,13 +70,7 @@ include("/jagg/jagg.jag");
         print({
             error:false
         });
-    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
-        print({
-            error:true,
-            message: msg.error.csrfError
-        });
-    }            
-    else if (action === "login" && request.getMethod() == 'POST') {
+    }else if (action === "login" && request.getMethod() == 'POST') {
         mod = jagg.module("user");
         username = request.getParameter("username");
         var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
