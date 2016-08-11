@@ -76,6 +76,11 @@ var validation_errors = jagg.validateInputs(validation);
 if(validation_errors != true){
     message.error = true;
     message.message = msg.error.invalidInputs(validation_errors);
+}else if( ( request.getMethod() == 'POST' || 
+      request.getMethod() == 'DELETE' || 
+      request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
+    message.error = true;
+    message.message = msg.error.csrfError;
 }else if (verb == "DELETE" && topicId != null) {
 
     var user = getUser();
