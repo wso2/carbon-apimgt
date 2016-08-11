@@ -1,6 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
+if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     var mod, obj, result, username,
