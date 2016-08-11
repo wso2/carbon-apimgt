@@ -65,7 +65,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private OAuthApplicationInfo retrievedApp;
-    private String applicationName, appName, userName;
+    private String appName;
     private String errorMsg;
 
     @POST
@@ -86,7 +86,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 //        String errorMsg;
 //        ErrorDTO errorDTO;
         Response response;
-        String errorMsg,userNameForSP,grantTypes,authUserName;
+        String errorMsg,userNameForSP,grantTypes,authUserName,applicationName = null;
         ErrorDTO errorDTO;
         OAuthApplicationInfo oauthApplicationInfo;
         ServiceProvider appServiceProvider = null;
@@ -174,7 +174,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
-                userName = MultitenantUtils.getTenantAwareUsername(userId);
+                String userName = MultitenantUtils.getTenantAwareUsername(userId);
                 userNameForSP = userName;
                 applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
 
@@ -193,31 +193,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 if (appServiceProvider != null) {
                     //retrieving the existing application
                     retrievedApp = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
-
-                    //check if the client request values and existing application's values are different
-                    if (retrievedApp.getIsSaasApplication() != oauthApplicationInfo.getIsSaasApplication() ||
-                            !retrievedApp.getCallBackURL().equals(oauthApplicationInfo.getCallBackURL())) {
-
-                        //checking if the callback urls is different in client request
-                        if (!retrievedApp.getCallBackURL().equals(oauthApplicationInfo.getCallBackURL())) {
-                            this.updateCallbackUrl(oauthApplicationInfo.getCallBackURL(),grantTypes,authUserName);
-                        }
-                        //checking if the IsSaasApplication is different in client request
-                        if (retrievedApp.getIsSaasApplication() != oauthApplicationInfo.getIsSaasApplication()) {
-                            this.updateSaasApp(oauthApplicationInfo.getIsSaasApplication(),appServiceProvider,
-                                    loggedInUserTenantDomain);
-                        }
-                        //parameter values are input insert into a map
-                        HashMap<String, String> returnMap = new HashMap<String,String>();
-                        returnMap.put(OAUTH_CLIENT_USERNAME, owner);
-
-                        //mapping updated values to a OAuthApplicationInfo object
-                        returnedAPP = this.settingUpdatingValues(retrievedApp.getClientId(), retrievedApp.getClientName(),
-                                oauthApplicationInfo.getCallBackURL(), retrievedApp.getClientSecret(),
-                                oauthApplicationInfo.getIsSaasApplication(), null, returnMap);
-                    } else {
                         returnedAPP = retrievedApp;
-                    }
                 } else {
                     //create a new client application if the application name doesn't exists.
                     returnedAPP = this.createApplication(appRequest,userNameForSP,grantTypes);
@@ -243,7 +219,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg);
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-        } catch (APIKeyMgtException e) {
+        } catch (APIManagementException e) {
             errorMsg = "Error occured while trying to create the client application " + applicationName;
             log.error(errorMsg);
             errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L, errorMsg);
@@ -335,8 +311,8 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @throws APIKeyMgtException
      */
     private OAuthApplicationInfo createApplication(OAuthAppRequest appRequest,String userNameForSP,
-                                                   String grantType) throws APIKeyMgtException {
-
+                                                   String grantType) throws APIManagementException {
+        String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
 
         String callbackUrl = applicationInfo.getCallBackURL();
@@ -379,11 +355,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs
                     (appName, tenantDomain);
             if (createdServiceProvider == null) {
-                throw new APIKeyMgtException("Error occured while creating Service Provider Application" + appName);
+                throw new APIManagementException ("Error occured while creating Service Provider Application" + appName);
             }
 
             //creating the OAuth app
-            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp(callbackUrl,grantType);
+            OAuthConsumerAppDTO createdOauthApp = this.createOAuthApp(callbackUrl,grantType,userName);
 
             // Set the OAuthApp in InboundAuthenticationConfig
             InboundAuthenticationConfig inboundAuthenticationConfig = new InboundAuthenticationConfig();
@@ -439,7 +415,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * @return created client App
      */
-    private OAuthConsumerAppDTO createOAuthApp(String callbackUrl,String grantTypes) {
+    private OAuthConsumerAppDTO createOAuthApp(String callbackUrl,String grantTypes,String userName) {
 
         OAuthConsumerAppDTO createdApp = null;
         OAuthAdminService oauthAdminService = new OAuthAdminService();
@@ -477,7 +453,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * updating the existing client application if the callback url is different from client request
      */
-    private void updateCallbackUrl(String callBackUrl,String grantTypes, String authUserName) {
+    private void updateCallbackUrl(String callBackUrl,String grantTypes, String authUserName, String applicationName) {
 
         OAuthConsumerAppDTO oAuthConsumerAppdto = new OAuthConsumerAppDTO();
 
@@ -521,8 +497,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
     /**
-     *
-     *
      * @param clientId client id
      * @param clientName client name
      * @param callbackUrl callback url
