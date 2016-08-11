@@ -1,6 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 
+if (jagg.isCSRFTokenValid())
     (function () {
         var log = new Log();
 

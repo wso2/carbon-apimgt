@@ -25,7 +25,13 @@ var log = new Log();
                 error:true,
                 message: msg.error.invalidInputs(validation_errors)
             });        
-    }else if (action == "changePassword" && request.getMethod() == 'POST') {
+    }else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    }            
+    else if (action == "changePassword" && request.getMethod() == 'POST') {
         username = request.getParameter("username");
         currentPassword = request.getParameter("currentPassword");
 		newPassword = request.getParameter("newPassword");

@@ -24,7 +24,7 @@ jagg.initializer("page/base", {
         //include jquery at the top
         jagg.addHeaderJS("page/base", "jquery1.11.0", "libs/jquery_1.11.0/jquery-1.11.3.min.js");   
         jagg.addHeaderJS("page/base", "i18n", "libs/i18n/i18next-1.5.9.js");
-        jagg.addHeaderJS("page/base", "csrf", "../../../csrf.js");
+        jagg.addHeaderJS("page/base", "csrf", "libs/jquery-csrf/jquery-csrf.js");
         jagg.addHeaderJS("page/base", "handlebars", "libs/handlebars-v4.0.5.js");
         jagg.addHeaderJS("page/base", "bootstrap-rating.js", "libs/bootstrap-rating/bootstrap-rating.js");
        
