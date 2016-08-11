@@ -1,84 +1,86 @@
 <div class="main-content">
-    <h1><a name="ApisAPIApi"></a>ApisAPIApi</h1>
+    <h1><a name="Subscription (Collection)"></a>Subscription (Collection)</h1>
 
     
         
             <hr/>
-            <h3 class="operation-heading"><a name="apisGet"></a>Retrieving APIs\n</h3>
-
+            <h3 class="operation-heading"><a name="subscriptionsGet"></a>Get all Subscriptions <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/subscriptions</small></h3>
             <p class="marked"></p>
 
-            <p class="marked">Get a list of available APIs qualifying under a given search condition.\n</p>
+            <p class="marked">This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
-            <h4 class="section-heading">URL</h4>
-            <code>https://apis.wso2.com/api/am/store/v0.9/apis</code>
+1. Retrieving all subscriptions for the user&#39;s APIs.
+`GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions`
 
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>GET</code>
+2. Retrieving subscriptions for a specific API.
+`GET https://127.0.0.1:9443/api/am/store/v0.10/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
+</p>
 
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             
-            
-                <p>Scope not required</p>
-            
-
-            <h4 class="section-heading">CURL Example</h4>
-            
-                <div class="pre"><code class="bash">curl -H &quot;Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d&quot; http://127.0.0.1:9763/api/am/store/v0.9/apis</code></div>
+                <code>apim:subscription_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscription_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             
             
 
-            
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-subscriptionsGet">
                 <h4 class="section-heading">
-                    Sample Response
+                    Request
                     
                         <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     
-            </h4>
+                </h4>
+            </div>
+
+            
+                <div id="request-subscriptionsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-subscriptionsGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
             </div>
             
-                <div id="response-apisGet" class="pre collapse"><code class="json">HTTP/1.1 200 OK
+                <div id="response-subscriptionsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
 Content-Type: application/json
-
+ 
 {
    &quot;previous&quot;: &quot;&quot;,
    &quot;list&quot;:    [
             {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;1.0.0&quot;,
-         &quot;description&quot;: &quot;This API provide Account Status Validation.&quot;,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;AccountVal&quot;,
-         &quot;context&quot;: &quot;/account/1.0.0&quot;,
-         &quot;id&quot;: &quot;2e81f147-c8a8-4f68-b4f0-69e0e7510b01&quot;
+         &quot;subscriptionId&quot;: &quot;64eca60b-2e55-4c38-8603-e9e6bad7d809&quot;,
+         &quot;tier&quot;: &quot;Gold&quot;,
+         &quot;apiIdentifier&quot;: &quot;admin-PhoneVerification-1.0.0&quot;,
+         &quot;applicationId&quot;: &quot;896658a0-b4ee-4535-bbfa-806c894a4015&quot;,
+         &quot;status&quot;: &quot;UNBLOCKED&quot;
       },
             {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;1.0.0&quot;,
-         &quot;description&quot;: null,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;api1&quot;,
-         &quot;context&quot;: &quot;/api1/1.0.0&quot;,
-         &quot;id&quot;: &quot;3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e&quot;
-      },
-            {
-         &quot;provider&quot;: &quot;admin&quot;,
-         &quot;version&quot;: &quot;2.0.0&quot;,
-         &quot;description&quot;: &quot;Verify a phone number&quot;,
-         &quot;status&quot;: &quot;PUBLISHED&quot;,
-         &quot;name&quot;: &quot;PhoneVerification&quot;,
-         &quot;context&quot;: &quot;/phoneverify/2.0.0&quot;,
-         &quot;id&quot;: &quot;c43a325c-260b-4302-81cb-768eafaa3aed&quot;
+         &quot;subscriptionId&quot;: &quot;7ac22c34-8745-4cfe-91e0-262c50b2f2e3&quot;,
+         &quot;tier&quot;: &quot;Gold&quot;,
+         &quot;apiIdentifier&quot;: &quot;admin-PhoneVerification-1.0.0&quot;,
+         &quot;applicationId&quot;: &quot;367a2361-8db5-4140-8133-c6c8dc7fa0c4&quot;,
+         &quot;status&quot;: &quot;UNBLOCKED&quot;
       }
    ],
-   &quot;count&quot;: 3,
-   &quot;next&quot;: &quot;&quot;
+   &quot;next&quot;: &quot;&quot;,
+   &quot;count&quot;: 2
 }</code></div>
             
             
-            <h4 class="section-heading">Parameters</h4>
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -106,6 +108,39 @@ Content-Type: application/json
                             
                         </td>
                         <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+Should be formatted as **provider-name-version**.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
                             <p>limit</p>
                             <p class="param-required">
                                 
@@ -113,7 +148,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Maximum size of resource array to return.\n</p>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
                             
                         </td>
                         <td>
@@ -143,7 +179,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.\n</p>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
                             
                         </td>
                         <td>
@@ -166,66 +203,6 @@ Content-Type: application/json
                             
                         </td>
                         <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>query</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Search condition**.\n\nYou can search in attributes by using an **\&quot;attribute:\&quot;** modifier.\n\nEg.\n\&quot;provider:wso2\&quot; will match an API if the provider of the API is exactly \&quot;wso2\&quot;.\n\nAdditionally you can use wildcards.\n\nEg.\n\&quot;provider:wso2\\*\&quot; will match an API if the provider of the API starts with \&quot;wso2\&quot;.\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag**]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n</p>
-                            
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                                
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
                             <p>Accept</p>
                             <p class="param-required">
                                 
@@ -233,7 +210,8 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is JSON.\n</p>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
                             
                         </td>
                         <td>
@@ -243,7 +221,7 @@ Content-Type: application/json
                             </span>
                         </td>
                         <td>
-                            <p class="marked">JSON</p>
+                            <p class="marked">application/json</p>
                         </td>
                     </tr>
                 
@@ -263,7 +241,9 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n</p>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
                             
                         </td>
                         <td>
@@ -298,11 +278,11 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK.\nList of qualifying APIs is returned.\n</p></td>
+                        <td class="parameter"><p class="marked">OK.\nSubscription list returned.\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
-                                    <a href="#!/models#APIList">APIList</a>
+                                    <a href="#!/models#SubscriptionList">SubscriptionList</a>
                                 
                                 
                             </span>
@@ -311,7 +291,7 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 
@@ -324,7 +304,7 @@ Content-Type: application/json
                 
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported\n</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                 

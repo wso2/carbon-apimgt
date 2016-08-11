@@ -788,7 +788,8 @@ public class ApiMgtDAO {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
         String sql;
-        if(!APIUtil.isAdvanceThrottlingEnabled()) {
+        boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        if(!isAdvancedThrottleEnabled) {
             if (defaultVersionInvoked) {
                 sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
             } else {
@@ -811,10 +812,17 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
-            ps.setInt(3, apiOwnerTenantId);
-            if (!defaultVersionInvoked) {
-                ps.setString(4, version);
+            if(isAdvancedThrottleEnabled) {
+                ps.setInt(3, apiOwnerTenantId);
+                if (!defaultVersionInvoked) {
+                    ps.setString(4, version);
+                }
+            } else {
+                if (!defaultVersionInvoked) {
+                    ps.setString(3, version);
+                }
             }
+
             rs = ps.executeQuery();
             if (rs.next()) {
                 String subscriptionStatus = rs.getString("SUB_STATUS");

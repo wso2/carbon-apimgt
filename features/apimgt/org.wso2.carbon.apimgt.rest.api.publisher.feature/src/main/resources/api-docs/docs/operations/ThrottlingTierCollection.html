@@ -1,0 +1,616 @@
+<div class="main-content">
+    <h1><a name="Throttling Tier (Collection)"></a>Throttling Tier (Collection)</h1>
+
+    
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="tiersTierLevelGet"></a>Get all tiers <br><small>GET https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to list the available tiers for a given tier level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+                <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelGet">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-tiersTierLevelGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+
+{
+   &quot;previous&quot;: &quot;&quot;,
+   &quot;list&quot;:    [
+            {
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;requestCount&quot;: 1,
+         &quot;description&quot;: &quot;Allows 1 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Bronze&quot;,
+         &quot;attributes&quot;: {}
+      },
+            {
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;requestCount&quot;: 20,
+         &quot;description&quot;: &quot;Allows 20 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Gold&quot;,
+         &quot;attributes&quot;: {}
+      },
+            {
+         &quot;unitTime&quot;: 60000,
+         &quot;tierPlan&quot;: &quot;FREE&quot;,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;requestCount&quot;: 5,
+         &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
+         &quot;name&quot;: &quot;Silver&quot;,
+         &quot;attributes&quot;: {}
+      },
+            {
+         &quot;unitTime&quot;: 0,
+         &quot;tierPlan&quot;: null,
+         &quot;tierLevel&quot;: &quot;api&quot;,
+         &quot;stopOnQuotaReach&quot;: true,
+         &quot;requestCount&quot;: 0,
+         &quot;description&quot;: &quot;Allows unlimited requests&quot;,
+         &quot;name&quot;: &quot;Unlimited&quot;,
+         &quot;attributes&quot;: {}
+      }
+   ],
+   &quot;next&quot;: &quot;&quot;,
+   &quot;count&quot;: 4
+}</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>tierLevel</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">List API or Application or Resource type tiers.
+</p>
+                            
+                                <p><b>Accepted values: </b></p>
+
+<code>api</code>
+
+<code>application</code>
+
+<code>resource</code>
+
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>limit</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">25</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>offset</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">0</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nList of tiers returned.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#TierList">TierList</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="tiersTierLevelPost"></a>Create a Tier <br><small>POST https://apis.wso2.com/api/am/publisher/v0.10/tiers/{tierLevel}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to create a new throttling tier. The only supported tier level is `api` tiers.
+`POST https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api`
+
+**IMPORTANT:**
+* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-tiersTierLevelPost">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-tiersTierLevelPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+Content-Type: application/json
+
+{
+    &quot;unitTime&quot;: 60000,
+    &quot;tierPlan&quot;: &quot;FREE&quot;,
+    &quot;tierLevel&quot;: &quot;api&quot;,
+    &quot;stopOnQuotaReach&quot;: true,
+    &quot;requestCount&quot;: 5,
+    &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
+    &quot;name&quot;: &quot;Low&quot;,
+    &quot;attributes&quot;: {
+            &quot;a&quot;:10,
+            &quot;b&quot;:30
+        }
+}</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelPost">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-tiersTierLevelPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/Low
+Content-Type: application/json
+
+{
+   &quot;unitTime&quot;: 60000,
+   &quot;tierPlan&quot;: &quot;FREE&quot;,
+   &quot;tierLevel&quot;: &quot;api&quot;,
+   &quot;stopOnQuotaReach&quot;: true,
+   &quot;requestCount&quot;: 5,
+   &quot;description&quot;: &quot;Allows 5 request(s) per minute.&quot;,
+   &quot;name&quot;: &quot;Low&quot;,
+   &quot;attributes&quot;:    {
+      &quot;b&quot;: &quot;30&quot;,
+      &quot;a&quot;: &quot;10&quot;
+   }
+}</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.10/tiers/api&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Tier object that should to be added
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Tier
+                                
+                                    (<a href="#!/models#Tier">Tier</a>)
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>tierLevel</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">List API or Application or Resource type tiers.
+</p>
+                            
+                                <p><b>Accepted values: </b></p>
+
+<code>api</code>
+
+<code>application</code>
+
+<code>resource</code>
+
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Content-Type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Tier">Tier</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request.\nInvalid request or validation error\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported media type.\nThe entity of the request was in a not supported format.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+    
+</div>

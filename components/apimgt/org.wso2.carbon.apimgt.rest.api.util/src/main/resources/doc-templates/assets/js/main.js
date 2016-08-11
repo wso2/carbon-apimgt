@@ -95,3 +95,7 @@
         $("#wrapper").toggleClass("toggled");
     });
 });
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
