@@ -24,7 +24,7 @@ $(document).ready(function() {
         var illegalChars = /([~!&@#$;%^*+={}\|\\<>\"\',])/;
         var illegalCharsCondition = illegalChars.test(docId.val());
         // @todo: param_string
-        validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
+        validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition);
 
         if(!illegalCharsCondition) {
             //Check the doc name is duplicated
@@ -231,7 +231,7 @@ var saveDoc=function(){
     var illegalCharsCondition = illegalChars.test(docId.val());
 
     // @todo: param_string
-    if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
+    if (!validInput(docId, 'Name contains one or more illegal characters  (~ ! & @ # $ ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .', illegalCharsCondition)) {
         return;
     }
     if($('#saveDocBtn').val() != "Update"){
