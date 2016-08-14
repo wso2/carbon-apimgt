@@ -21,7 +21,7 @@
     var appPolicyArray = outputs.appPolicies;
     var count = 0;
 
-    for(j = 0; j < appPolicyArray.length; j++) {
+    for(var j = 0; j < appPolicyArray.length; j++) {
         var appPolicy = appPolicyArray[j];
         var policyName = appPolicy.getPolicyName();
         if(policyName == "Unlimited") {

@@ -19,6 +19,14 @@
 
     Handlebars.registerHelper( 'concat', function(param1, param2) {
         return param1 + param2;
+    });Handlebars.registerHelper( 'concat', function(param1, param2) {
+        return param1 + param2;
+    });
+
+    Handlebars.registerHelper("contains", function( value, array, options ){
+        // fallback...
+        array = ( array instanceof Array ) ? array : [array];
+        return (array.indexOf(value) > -1) ? options.fn( this ) : "";
     });
 
     Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
@@ -103,8 +111,8 @@
             this.element.html(template(context));
         },        
 
-        render_advance: function(){
-            var context = jQuery.extend({}, this.config);
+        render_advance: function(selectedEndpointType, selectedEndpointIndex){
+            var context = jQuery.extend({}, this.config[selectedEndpointType][selectedEndpointIndex].config);
             context[this.config.endpoint_type] = true;
             var model = this.element.find("#advance_form").html(template2(context));
             this.element.find("#advance_endpoint_config").find('.selectpicker').selectpicker();
@@ -261,7 +269,7 @@
         _on_advance_endpoint: function(e){
             this.selected_ep_index = parseInt($(e.currentTarget).attr("data-index"));
             this.selected_ep_type = $(e.currentTarget).attr("data-type");
-            this.render_advance();
+            this.render_advance(this.selected_ep_type,this.selected_ep_index);
         },
 
         _on_advance_endpoint_submit: function(e){
