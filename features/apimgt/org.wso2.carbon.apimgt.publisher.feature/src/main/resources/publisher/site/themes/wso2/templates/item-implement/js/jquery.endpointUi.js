@@ -19,8 +19,6 @@
 
     Handlebars.registerHelper( 'concat', function(param1, param2) {
         return param1 + param2;
-    });Handlebars.registerHelper( 'concat', function(param1, param2) {
-        return param1 + param2;
     });
 
     Handlebars.registerHelper("contains", function( value, array, options ){
