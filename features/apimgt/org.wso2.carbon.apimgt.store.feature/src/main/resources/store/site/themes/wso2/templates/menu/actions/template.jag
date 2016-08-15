@@ -73,7 +73,27 @@
                                 </span>
                                 Go back
                             </a>
-                        </li> 	                        
+                        </li>
+                        <% }else if(inputs.page == "composite-api/composite-api-list"){%>
+                        	<li>
+                                <a title="<%=i18n.localize('Add Composite API')%>" href="<%= jagg.urlTenanted("/site/pages/composite-api-add.jag") %>">
+                                    <span class="icon fw-stack">
+                                        <i class="fw fw-add fw-stack-1x"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    </span>
+                                    <%=i18n.localize('Add Composite API')%>
+                                </a>
+                            </li>
+                        <% }else if(inputs.page == "composite-api/composite-api-add"){%>
+                        	<li>
+                        	    <a title="<%=i18n.localize('Composite API List')%>" href="<%= jagg.urlTenanted("/site/pages/composite-apis.jag") %>">
+                        	        <span class="icon fw-stack">
+                        	            <i class="fw fw-left fw-stack-1x"></i>
+                        	            <i class="fw fw-circle-outline fw-stack-2x"></i>
+                        	        </span>
+                        	        <%=i18n.localize('Composite API List')%>
+                        	    </a>
+                        	</li>
 	                    <% } else if(inputs.page == "forum/forum-list") {%>
 	                    	<%	var parentId = siteConf.forum.resourceIdentifier;
 	                    		var urlSuffix = jagg.getTenantURLPrefix();

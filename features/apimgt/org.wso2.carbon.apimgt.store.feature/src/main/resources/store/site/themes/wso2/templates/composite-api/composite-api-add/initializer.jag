@@ -1,0 +1,25 @@
+<%
+jagg.initializer("composite-api/composite-api-add", {
+
+    preInitialize:function () {
+        jagg.addHeaderCSS("api-designer.css", "jagg", "templates/composite-api/composite-api-add/css/composite-api-designer.css");
+        jagg.addHeaderJS("custom-validate", "jagg", "templates/utils/custom-validation/custom-validation.js");
+        jagg.addFooterJS("handlebars", "jagg", "libs/handlebars.min.js");
+        jagg.addFooterJS("ace", "jagg", "libs/src-noconflict/ace.js");
+        jagg.addFooterJS("ace-theme", "jagg", "libs/src-noconflict/theme-textmate.js");
+        jagg.addFooterJS("ace-mode", "jagg", "libs/src-noconflict/mode-json.js");
+        jagg.addFooterJS("ace-mode", "jagg", "libs/src-noconflict/mode-javascript.js");
+        jagg.addFooterJS("ace-mode", "jagg", "libs/src-noconflict/mode-yaml.js");
+        jagg.addFooterJS("jquery-ace", "jagg", "libs/jquery-ace.min.js");
+        //jagg.addFooterJS("bootstrap-min", "jagg", "lib/bootstrap/js/bootstrap.min.js");
+
+        jagg.addFooterJS("jsonpath-0.8.0", "jagg", "libs/jsonpath-0.8.0.js");
+
+
+        jagg.addFooterJS("yaml2json", "jagg", "libs/js-yaml.min.js");
+        jagg.addFooterJS("url-validation", "jagg", "templates/utils/url-validation/url-validation.js");
+        jagg.addFooterJS("design-api", "jagg", "templates/composite-api/composite-api-add/js/composite-api-design.js");
+
+    }
+});
+%>

@@ -14,7 +14,7 @@
     // check for state, if it doesn't match we bail early
     if (session.get("STATE") != state) {
         log.error("STATE does not match. Hence redirecting to error page. Sign-in fails.");
-        response.sendRedirect("../error.jag");
+        response.sendRedirect("../site/pages/error-pages/401.html");
         return;
     }
 
@@ -37,7 +37,7 @@
 
     if (!Boolean(isSignatureValid)) {
         log.error("OIDC signature is verification failed.");
-        response.sendRedirect("../error.jag");
+        response.sendRedirect("../site/pages/error-pages/401.html");
         return;
     }
 

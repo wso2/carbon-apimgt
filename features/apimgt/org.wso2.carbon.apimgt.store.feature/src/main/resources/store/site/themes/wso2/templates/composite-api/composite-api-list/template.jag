@@ -1,0 +1,5 @@
+<% jagg.template("composite-api/composite-api-list", function(inputs, outputs, jagg) { %>
+<div class="page-header" id="Message">
+    <h2><%=i18n.localize("Composite APIs")%></h2>
+</div>
+<% }); %>

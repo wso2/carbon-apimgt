@@ -1,0 +1,728 @@
+<div class="main-content">
+    <h1><a name="Document (Individual)"></a>Document (Individual)</h1>
+
+    
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdGet"></a>Get a document of an API
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis/{apiId}/documents/{documentId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve a particular document&#39;s metadata associated with an API.
+
+`X-WSO2-Tenant` header can be used to retrive a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
+**NOTE:**
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document, you need to provide Authorization header.        
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+            
+                <p>Not required</p>
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdDocumentsDocumentIdGet">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-apisApiIdDocumentsDocumentIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   &quot;sourceType&quot;: &quot;INLINE&quot;,
+   &quot;sourceUrl&quot;: null,
+   &quot;otherTypeName&quot;: null,
+   &quot;documentId&quot;: &quot;850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;,
+   &quot;summary&quot;: &quot;This is a sample documentation for v1.0.0&quot;,
+   &quot;name&quot;: &quot;PhoneVerification API Documentation&quot;,
+   &quot;type&quot;: &quot;HOWTO&quot;
+}</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.10/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+Should be formatted as **provider-name-version**.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>documentId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Document Identifier
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nDocument returned.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Document">Document</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found.\nRequested Document does not exist.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+            <hr/>
+            <h3 class="operation-heading"><a name="apisApiIdDocumentsDocumentIdContentGet"></a>Get the content of an API document
+ <br><small>GET https://apis.wso2.com/api/am/store/v0.10/apis/{apiId}/documents/{documentId}/content</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrive the content of an API&#39;s document.
+
+The document can be of 3 types. In each cases responses are different.
+
+1. **Inline type**:
+   The content of the document will be retrieved in `text/plain` content type
+2. **FILE type**: 
+   The file will be downloaded with the related content type (eg. `application/pdf`)
+3. **URL type**:
+    The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
+
+`X-WSO2-Tenant` header can be used to retrive the content of a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
+**NOTE:**
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document content, you need to provide Authorization header.        
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+            
+            
+                <p>Not required</p>
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdDocumentsDocumentIdContentGet">
+                <h4 class="section-heading">
+                    Request
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+
+            
+                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
+</code></div>
+            
+            
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdContentGet">
+                <h4 class="section-heading">
+                    Response
+                    
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    
+                </h4>
+            </div>
+            
+                <div id="response-apisApiIdDocumentsDocumentIdContentGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Disposition: attachment; filename=&quot;sample.pdf&quot;
+Content-Type: application/octet-stream
+Content-Length: 7802
+
+%PDF-1.4
+%äüöß
+2 0 obj
+&lt;&lt;/Length 3 0 R/Filter/FlateDecode&gt;&gt;
+stream
+..
+&gt;&gt;
+startxref
+7279
+%%EOF</code></div>
+            
+            
+
+            <h4 class="section-heading">Sample CURL</h4>
+            
+                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.10/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
+            
+            
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+Should be formatted as **provider-name-version**.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>documentId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Document Identifier
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                            
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                                
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK.\nFile or inline content returned.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">303</p></td>
+                        <td class="parameter"><p class="marked">See Other.\nSource can be retrived from the URL specified at the Location header.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                
+                                    
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found.\nRequested Document does not exist.\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable.\nThe requested media type is not supported\n</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                
+                                    <a href="#!/models#Error">Error</a>
+                                
+                                
+                            </span>
+                        </td>
+                    </tr>
+                
+                </tbody>
+            </table>
+        
+    
+</div>

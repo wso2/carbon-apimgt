@@ -1,0 +1,8 @@
+<%
+jagg.initializer("composite-api/composite-api-list", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

@@ -4,27 +4,51 @@
     {{#operations}}
         {{#operation}}
             <hr/>
-            <h3 class="operation-heading"><a name="{{nickname}}"></a>{{ summary }}</h3>
-
+            <h3 class="operation-heading"><a name="{{nickname}}"></a>{{ summary }} <br><small>{{httpMethod}} {{basePath}}{{path}}</small></h3>
             <p class="marked">{{description}}</p>
 
             {{#notes}}<p class="marked">{{notes}}</p>{{/notes}}
 
-            <h4 class="section-heading">URL</h4>
-            <code>{{basePath}}{{path}}</code>
-
-            <h4 class="section-heading">HTTP Method</h4>
-            <code>{{httpMethod}}</code>
-
-            <h4 class="section-heading">Scope</h4>
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
             {{#vendorExtensions.x-scope}}
-                <code>{{vendorExtensions.x-scope}}</code>
+                <code>{{vendorExtensions.x-scope}}</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has '{{vendorExtensions.x-scope}}' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             {{/vendorExtensions.x-scope}}
             {{^vendorExtensions.x-scope}}
-                <p>Scope not required</p>
+                <p>Not required</p>
             {{/vendorExtensions.x-scope}}
 
-            <h4 class="section-heading">CURL Example</h4>
+            <div class="pointer" data-toggle="collapse" data-target="#request-{{operationId}}">
+                <h4 class="section-heading">
+                    Request
+                    {{#vendorExtensions.x-wso2-request}}
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    {{/vendorExtensions.x-wso2-request}}
+                </h4>
+            </div>
+
+            {{#vendorExtensions.x-wso2-request}}
+                <div id="request-{{operationId}}"class="pre collapse in"><code class="json">{{vendorExtensions.x-wso2-request}}</code></div>
+            {{/vendorExtensions.x-wso2-request}}
+            {{^vendorExtensions.x-wso2-request}}
+                <code class="bash">{{httpMethod}} {{basePath}}{{path}}</code>
+            {{/vendorExtensions.x-wso2-request}}
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-{{operationId}}">
+                <h4 class="section-heading">
+                    Response
+                    {{#vendorExtensions.x-wso2-response}}
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    {{/vendorExtensions.x-wso2-response}}
+                </h4>
+            </div>
+            {{#vendorExtensions.x-wso2-response}}
+                <div id="response-{{operationId}}" class="pre collapse in"><code class="json">{{vendorExtensions.x-wso2-response}}</code></div>
+            {{/vendorExtensions.x-wso2-response}}
+            {{^vendorExtensions.x-wso2-response}}
+                <p>Not Available</p>
+            {{/vendorExtensions.x-wso2-response}}
+
+            <h4 class="section-heading">Sample CURL</h4>
             {{#vendorExtensions.x-wso2-curl}}
                 <div class="pre"><code class="bash">{{vendorExtensions.x-wso2-curl}}</code></div>
             {{/vendorExtensions.x-wso2-curl}}
@@ -32,31 +56,7 @@
                 <p>Not Available</p>
             {{/vendorExtensions.x-wso2-curl}}
 
-            {{#vendorExtensions.x-wso2-request}}
-                <div class="pointer" data-toggle="collapse" data-target="#request-{{operationId}}">
-                    <h4 class="section-heading">
-                        Sample Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h4>
-                </div>
-                <div id="request-{{operationId}}"class="pre collapse"><code class="json">{{vendorExtensions.x-wso2-request}}</code></div>
-            {{/vendorExtensions.x-wso2-request}}
-
-            <div class="pointer" data-toggle="collapse" data-target="#response-{{operationId}}">
-                <h4 class="section-heading">
-                    Sample Response
-                    {{#vendorExtensions.x-wso2-response}}
-                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    {{/vendorExtensions.x-wso2-response}}
-            </h4>
-            </div>
-            {{#vendorExtensions.x-wso2-response}}
-                <div id="response-{{operationId}}" class="pre collapse"><code class="json">{{vendorExtensions.x-wso2-response}}</code></div>
-            {{/vendorExtensions.x-wso2-response}}
-            {{^vendorExtensions.x-wso2-response}}
-                <p>Not Available</p>
-            {{/vendorExtensions.x-wso2-response}}
-            <h4 class="section-heading">Parameters</h4>
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
