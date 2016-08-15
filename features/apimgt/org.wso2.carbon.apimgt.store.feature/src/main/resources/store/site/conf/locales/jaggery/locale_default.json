@@ -330,5 +330,22 @@
     "subscription": "subscription",
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
-    "timeWarn": "timeWarn"
+    "timeWarn": "timeWarn",
+    "Add Composite API": "Add Composite API",
+    "Composite API List": "Composite API List",
+    "Composite APIs": "Composite APIs",
+    "Add Composite API": "Add Composite API",
+    "General Details": "General Details",
+    "Context": "Context",
+    "API Definition": "API Definition",
+    "Import": "Import",
+    "Edit Source": "Edit Source",
+    "more": "more",
+    "less": "less",
+    "URL Pattern": "URL Pattern",
+    "Maximum 20000 characters.": "Maximum 20000 characters.",
+    "Display name to be shown in the API Store.": "Display name to be shown in the API Store.",
+    "URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2./foo/bar<br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context": "URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context",
+    "Primary APIs": "Primary APIs"
+
 }

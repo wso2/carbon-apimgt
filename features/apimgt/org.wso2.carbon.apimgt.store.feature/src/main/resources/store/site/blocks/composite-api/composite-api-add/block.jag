@@ -1,0 +1,25 @@
+<%
+jagg.block("composite-api/composite-api-add", {
+    initializer:function (data) {
+
+    },
+
+    getOutputs:function (inputs) {
+        var applications, result, user = inputs.user;
+        result = jagg.module("application").getApplications(user.username);
+        applications = result.applications;
+
+        if (result.error) {
+            return  {
+                error:true,
+                message:result.error
+            };
+        } else {
+            return {
+                "applications":applications,
+            };
+        }
+    }
+
+});
+%>

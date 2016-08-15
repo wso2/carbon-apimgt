@@ -1,0 +1,7 @@
+<%
+jagg.block("composite-api/composite-api-list", {
+    initializer:function (data) {
+
+    }
+});
+%>
