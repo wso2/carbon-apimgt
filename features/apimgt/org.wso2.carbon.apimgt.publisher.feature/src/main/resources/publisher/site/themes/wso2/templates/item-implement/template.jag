@@ -969,7 +969,7 @@
             <div class="form-group ">
                 <label class="control-label col-sm-3" for="actionDuration"><%=i18n.localize("Duration (ms)")%></label>
                 <div class="col-sm-2">
-                    <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="{{actionDuration}}">
+                    <input class="form-control" id="actionDuration" name="actionDuration" type="text" value="{{#if actionDuration}}{{actionDuration}}{{else}}30000{{/if}}">
                     <p class="help-block hide"><%=i18n.localize("The duration in milliseconds before considering a request as a timeout.")%></p>
                 </div>
             </div>

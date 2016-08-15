@@ -315,12 +315,16 @@
         _convert_to_object:function(arr){
             var obj = {};
             for(var i=0; i < arr.length; i++){
-                if(arr[i].value == undefined || arr[i].value == "")continue;
+                if(arr[i].value == undefined || arr[i].value == "") {
+                    continue;
+                }
+
                 if(obj[arr[i].name] != undefined ){
                     if(obj[arr[i].name] instanceof Array){
                         obj[arr[i].name].push(arr[i].value);
                     }else{
                         obj[arr[i].name] = [ obj[arr[i].name] ];
+                        obj[arr[i].name].push(arr[i].value);
                     }
                 }else{
                     obj[arr[i].name] = arr[i].value;
