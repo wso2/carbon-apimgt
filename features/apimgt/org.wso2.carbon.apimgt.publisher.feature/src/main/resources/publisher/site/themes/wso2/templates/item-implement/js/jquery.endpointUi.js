@@ -104,8 +104,9 @@
             context[this.config.endpoint_type] = true;
             //if loadbalanced and failover is enables set the ep type
             context[this._get_selected_ep()] = true;
-            if(this.config.failOver == "False")
+            if(this.config.failOver == "False") {
                 context.failOver = false;
+            }
             this.element.html(template(context));
         },        
 
@@ -139,11 +140,31 @@
 
         _on_failover_checked:function(e){
             if(e.target.checked && this.config.endpoint_type != "load_balance"){
+                $('#load_balance').prop('checked', false);
                 this.config.endpoint_type = "failover";
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
                 this.config.production_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
                 this.config.sandbox_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
             }else if(e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="True";
+                this.config.endpoint_type = "failover";
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
+                this.config.production_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
+                this.config.sandbox_failovers = [ { url:"", endpoint_type:this._get_selected_ep() }];
             }else if(!e.target.checked && this.config.endpoint_type == "load_balance"){
                 this.config.failOver ="False";
             }else{
@@ -156,15 +177,25 @@
 
         _on_load_balance_checked: function(e){
             if(e.target.checked){
+                $('#failover').prop('checked', false);
                 if(this.config.endpoint_type == "failover"){
-                    this.config.failOver ="True";
+                    this.config.failOver ="False";
                 }
+
+                if(this.config.production_endpoints.length > 0) {
+                    this.config.production_endpoints = [this.config.production_endpoints[0]];
+                }
+
+                if(this.config.sandbox_endpoints.length > 0) {
+                    this.config.sandbox_endpoints = [this.config.sandbox_endpoints[0]];
+                }
+
                 this.config.endpoint_type = "load_balance";                
                 this.config.algoCombo = "org.apache.synapse.endpoints.algorithms.RoundRobin";
                 this.config.algoClassName = "";
                 this.config.sessionManagement = "";
                 this.config.sessionTimeOut = "";
-            }else{
+            } else {
                 this.config.endpoint_type = this.element.find("#endpoint_type").val();
                 if(this.config.failOver === "True"){
                     this.config.endpoint_type = "failover";
