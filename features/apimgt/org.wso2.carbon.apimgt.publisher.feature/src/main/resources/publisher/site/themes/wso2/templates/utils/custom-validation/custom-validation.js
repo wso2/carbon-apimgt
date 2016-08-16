@@ -39,6 +39,13 @@ $(document).ready(function() {
         return !illegalChars.test(value);
     }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; &gt;, \' " \\ ) .'));
 
+    $.validator.addMethod('validateVersionOnlyContext', function (value, element) {
+        if (value == "{version}" || value == "/{version}") {
+            return false;
+        }
+        return true;
+    }, i18n.t('"{version}" or "/{version}" cannot be used solely in the context field.'));
+
     $.validator.addMethod('validTemplate', function(value, element) {
         return value.indexOf("{}") == -1
     }, i18n.t('Empty curly brackets "{}" are not allowed in the context field.'));
