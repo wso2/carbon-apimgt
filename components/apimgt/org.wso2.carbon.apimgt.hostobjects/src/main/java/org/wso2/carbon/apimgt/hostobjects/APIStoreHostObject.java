@@ -25,6 +25,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1929,7 +1930,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("name", row, apiIdentifier.getApiName());
                         row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         row.put("version", row, apiIdentifier.getVersion());
-                        row.put("description", row, api.getDescription());
+                        row.put("description", row, StringEscapeUtils.unescapeHtml(api.getDescription()));
                         row.put("rates", row, api.getRating());
                         row.put("endpoint", row, api.getUrl());
                         row.put("wsdl", row, api.getWsdlUrl());
