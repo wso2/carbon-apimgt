@@ -778,6 +778,12 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
 
+            //Validate if the API has an unsupported context before setting it in the artifact
+            String invalidContext = "/" + APIConstants.VERSION_PLACEHOLDER;
+            if (invalidContext.equals(api.getContextTemplate())) {
+                throw new APIManagementException("API : " + api.getId() + " has an unsupported context : "
+                        + api.getContextTemplate());
+            }
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
