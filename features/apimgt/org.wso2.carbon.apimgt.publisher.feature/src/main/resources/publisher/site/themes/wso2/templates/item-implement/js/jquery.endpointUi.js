@@ -255,7 +255,7 @@
                 this.invalid = false;
             }   
 
-            this.validate();
+            this.validate_for_endpoint_change();
         },     
 
         get_endpoint_config: function(){
@@ -355,6 +355,28 @@
             }
 
             return r;            
+        },
+
+        validate_for_endpoint_change: function(){
+            this.config.invalid = {};
+            var r = true;
+            if((this.config.production_endpoints != undefined
+                && this.config.production_endpoints[0].url != "") ||
+                (this.config.sandbox_endpoints != undefined
+                && this.config.sandbox_endpoints[0].url != "")
+            ){
+                delete this.config.invalid.endpoint;
+            }else{
+                this.config.invalid.endpoint = true;
+                r = false;
+            }
+
+            //if template is given for address endpoint
+            if(this.invalid != undefined && this.invalid){
+                return false;
+            }
+
+            return r;
         },
 
         _get_selected_ep: function(){
