@@ -30,14 +30,21 @@ $(document).ready(function() {
     }, i18n.t('Select a value for the tier.'));
 
     $.validator.addMethod('validRegistryName', function(value, element) {
-        var illegalChars = /([~!@#;%^*+={}\|\\<>\"\',])/;
+        var illegalChars = /([~!@#;%^&*+={}\|\\<>\"\',]&)/;
         return !illegalChars.test(value);
-    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' " \\ ) .'));
+    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .'));
 
     $.validator.addMethod('validContextTemplate', function(value, element) {
-        var illegalChars = /([~!@#;%^*+=\|\\<>\"\',])/;
+        var illegalChars = /([~!@#;%^&*+=\|\\<>\"\',])/;
         return !illegalChars.test(value);
-    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; &gt;, \' " \\ ) .'));
+    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; &gt;, \' " \\ ) .'));
+
+    $.validator.addMethod('validateVersionOnlyContext', function (value, element) {
+        if (value == "{version}" || value == "/{version}") {
+            return false;
+        }
+        return true;
+    }, i18n.t('"{version}" or "/{version}" cannot be used solely in the context field.'));
 
     $.validator.addMethod('validTemplate', function(value, element) {
         return value.indexOf("{}") == -1
@@ -135,9 +142,9 @@ $(document).ready(function() {
     }, i18n.t('Name or Context contains / at the end'));
 
     $.validator.addMethod('validateAPIVersion', function(value, element)    {
-        var illegalChars = /([~!@#;%^*+=\|\\<>\"\'\/,])/;
+        var illegalChars = /([~!@#;%^&*+=\|\\<>\"\'\/,])/;
         return !illegalChars.test(value);
-    }, i18n.t('Version contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; &gt;, \' " \\) .'));
+    }, i18n.t('Version contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; &gt;, \' " \\) .'));
 
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;

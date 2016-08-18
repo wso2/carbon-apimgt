@@ -5401,6 +5401,12 @@ public class ApiMgtDAO {
             prepStmt.setString(3, api.getId().getVersion());
             prepStmt.setString(4, api.getContext());
             String contextTemplate = api.getContextTemplate();
+            //Validate if the API has an unsupported context before executing the query
+            String invalidContext = "/" + APIConstants.VERSION_PLACEHOLDER;
+            if (invalidContext.equals(contextTemplate)) {
+                throw new APIManagementException("Cannot add API : " + api.getId() + " with unsupported context : "
+                        + contextTemplate);
+            }
             //If the context template ends with {version} this means that the version will be at the end of the context.
             if (contextTemplate.endsWith("/" + APIConstants.VERSION_PLACEHOLDER)) {
                 //Remove the {version} part from the context template.

@@ -270,13 +270,13 @@ msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:35
 msgid ""
-"Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | "
+"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | "
 "&lt; &gt;, ' \" \\ ) ."
 msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:40
 msgid ""
-"Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; "
+"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; "
 "&gt;, ' \" \\ ) ."
 msgstr ""
 
@@ -328,7 +328,7 @@ msgstr ""
 
 #: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:140
 msgid ""
-"Version contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | "
+"Version contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | "
 "&lt; &gt;, ' \" \\) ."
 msgstr ""
 

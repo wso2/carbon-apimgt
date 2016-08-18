@@ -819,9 +819,11 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
         String sessionId = (String) args[0];
         String sessionIndex = relyingPartyObject.getSessionIndex(sessionId);
-        relyingPartyObject.handleLogout(sessionIndex);
-
-
+        if (sessionIndex != null) {
+            relyingPartyObject.handleLogout(sessionIndex);
+        } else {
+            relyingPartyObject.handleLogoutBySessionId(sessionId);
+        }
     }
 
     /**
@@ -901,12 +903,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             log.debug("Encoded SAML token that is set on session info is " + args[1]);
         }
         sessionInfo.setSamlToken((String) args[1]);//We expect an encoded SamlToken here.
+        SessionHostObject sho = (SessionHostObject) args[2];
+        sessionInfo.setSessionHostObject(sho);
         relyingPartyObject.addSessionInfo(sessionInfo);
         //relyingPartyObject.addSessionInfo(sessionIndex, SAMLSSORelyingPartyObject.sho);
 
-        SessionHostObject sho = (SessionHostObject) args[2];
-        relyingPartyObject.addSessionInfo(sessionIndex, sho);
-
+        if (sessionIndex != null) {
+            relyingPartyObject.addSessionToSessionIndexMap(sessionIndex, sho);
+        }
     }
 
     /**
@@ -1078,21 +1082,26 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     }
 
     private boolean isSessionIdExists(String sessionId) throws Exception {
-        Iterator<Map.Entry<String, Set<SessionHostObject>>> iterator = sessionIndexMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<SessionHostObject>> entry = iterator.next();
+        for (Map.Entry<String, Set<SessionHostObject>> entry : sessionIndexMap.entrySet()) {
             Set<SessionHostObject> sessions = new HashSet<SessionHostObject>(entry.getValue());
             for (SessionHostObject session : sessions) {
                 Object[] args = new Object[0];
-                if (session != null && sessionId.equals(SessionHostObject.jsFunction_getId(null, session, args, null))) {
+                if (session != null && sessionId
+                        .equals(SessionHostObject.jsFunction_getId(null, session, args, null))) {
                     if (log.isDebugEnabled()) {
                         log.debug("Session Id exists:" + SessionHostObject.jsFunction_getId(null, session, args, null));
                     }
                     return true;
                 }
             }
-            //}
         }
+        log.debug("Session Id does not exist in sessionIndexMap. Now searching in sessionIdMap.");
+        if (getSessionInfo(sessionId) != null) {
+            log.debug("Session Id exists in sessionIdMap : " + sessionId);
+            return true;
+        }
+
+        log.debug("Session Id does not exist in sessionIdMap : " + sessionId);
         return false;
     }
 
@@ -1140,17 +1149,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
-    /**
-     * Add current browser session with session index.
-     */
-    private void addSessionInfo(String sessionIndex, Set<SessionHostObject> sho) {
-        if (log.isDebugEnabled()) {
-            log.debug("Added session index:" + sessionIndex);
-        }
-        sessionIndexMap.put(sessionIndex, sho);
-    }
-
-    private void addSessionInfo(String sessionIndex, SessionHostObject sho) {
+    private void addSessionToSessionIndexMap(String sessionIndex, SessionHostObject sho) {
         if (log.isDebugEnabled()) {
             log.debug("Added session index:" + sessionIndex);
         }
@@ -1162,7 +1161,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sessionSet.add(sho);
             sessionIndexMap.put(sessionIndex, sessionSet);
         }
-
     }
 
     /**
@@ -1276,6 +1274,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
+    public void handleLogoutBySessionId(String sessionId) {
+        clearSessionDataFromSessionId(sessionId);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session id:" + sessionId + "in handle logout method");
+        }
+    }
+
     public void handleClusterLogout(String sessionIndex) {
         if (log.isDebugEnabled()) {
             log.debug("session index map value:" + sessionIndexMap);
@@ -1331,6 +1337,31 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
+    private void clearSessionDataFromSessionId(String sessionIdToClear) {
+        SessionInfo sessionInfo = getSessionInfo(sessionIdToClear);
+        if (sessionInfo != null) {
+            SessionHostObject sessionHostObject = sessionInfo.getSessionHostObject();
+            if (sessionHostObject != null) {
+                try {
+                    Object[] args = new Object[0];
+                    SessionHostObject.jsFunction_invalidate(null, sessionHostObject, args, null);
+                } catch (Exception ex) {
+                    //catches generic exception since we do not need to stop the
+                    // process due to invalidating one single session
+                    if (ex.getMessage().contains("Session already invalidated")) { // can be ignored
+                        log.info(ex.getMessage());
+                    } else {
+                        //log the error and continues since this does not brake the flow.
+                        log.error("Error while invalidating the session " + sessionIdToClear, ex);
+                    }
+                }
+            }
+        }
+        ssho.invalidateSessionBySessionId(sessionIdToClear);
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIdToClear + "in handle logout method");
+        }
+    }
 
     public void sendSessionInvalidationClusterMessage(String sessionIndex) {
 
