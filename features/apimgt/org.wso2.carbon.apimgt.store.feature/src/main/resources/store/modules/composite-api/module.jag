@@ -1,0 +1,18 @@
+<%
+jagg.module("composite-api", {
+
+    createCompositeAPI:function () {
+        return jagg.require(jagg.getModulesDir() + "composite-api/add.jag").createCompositeAPI.apply(this, arguments);
+    },
+    updateCompositeAPIDesign:function () {
+        return jagg.require(jagg.getModulesDir() + "composite-api/add.jag").updateCompositeAPIDesign.apply(this, arguments);
+    },     
+    getSwagger12Resource:function () {
+        return jagg.require(jagg.getModulesDir() + "composite-api/add.jag").getSwagger12Resource.apply(this, arguments);
+    },
+    checkIfResourceExists:function () {
+        return jagg.require(jagg.getModulesDir() + "composite-api/add.jag").checkIfResourceExists.apply(this,
+        arguments);
+    }
+});
+%>

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +29,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -45,6 +48,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -61,7 +65,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import org.wso2.carbon.registry.common.TermData;
 
+import javax.cache.Cache;
 import javax.cache.Caching;
+import javax.xml.namespace.QName;
 
 import java.nio.charset.Charset;
 import java.util.*;
@@ -84,6 +90,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
     public static final char COLON_CHAR = ':';
     public static final String EMPTY_STRING = "";
+    private final String userNameWithoutChange;
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -100,13 +107,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public APIConsumerImpl() throws APIManagementException {
         super();
+        this.userNameWithoutChange = "";
         readTagCacheConfigs();
     }
 
     public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
         super(username);
+        this.userNameWithoutChange = username;
         readTagCacheConfigs();
         this.apimRegistryService = apimRegistryService;
+    }
+
+    protected String getUserNameWithoutChange() {
+        return userNameWithoutChange;
     }
 
     private void readTagCacheConfigs() {
@@ -3314,6 +3327,305 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return false;
+    }
+
+    /**
+     * Adds a new API to the Store
+     *
+     * @param api API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to add composite API
+     */
+    @Override
+    public void addCompositeAPI(API api) throws APIManagementException {
+        try {
+            createCompositeAPI(api);
+            //Nothing has saved in db yet
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error in adding API :" + api.getId().getApiName(), e);
+        }
+    }
+
+	/**
+     *
+     * @param api
+     * @throws APIManagementException
+     */
+    private void createCompositeAPI(API api) throws APIManagementException {
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.COMPOSITE_API_KEY);
+
+        //Validate Transports
+        validateAndSetTransports(api);
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            GenericArtifact genericArtifact = artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
+            GenericArtifact artifact = APIUtil.createCompositeAPIArtifactContent(genericArtifact, api);
+            artifactManager.addGenericArtifact(artifact);
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = APIUtil.getCompositeAPIProviderPath(api.getId());
+            //provider ------provides----> API
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
+            //to gain performance
+            String apiStatus = api.getStatus().getStatus();
+            saveCompositeAPIStatus(artifactPath, apiStatus);
+
+            //Give permissions to consumer - do we need this?
+            /*APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                                           artifactPath);*/
+            registry.commitTransaction();
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                        + " created";
+                log.debug(logMessage);
+            }
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API: " +
+                          api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
+            }
+        }
+    }
+
+	/**
+     *
+     * @param api
+     * @throws APIManagementException
+     */
+    //do we need this?
+    private void validateAndSetTransports(API api) throws APIManagementException {
+        String transports = api.getTransports();
+        /*if(transports != null && !("null".equalsIgnoreCase(transports)))    {
+            if (transports.contains(",")) {
+                StringTokenizer st = new StringTokenizer(transports, ",");
+                while (st.hasMoreTokens()) {
+                    checkIfValidTransport(st.nextToken());
+                }
+            } else  {
+                checkIfValidTransport(transports);
+            }
+        } else  {*/
+            api.setTransports(Constants.TRANSPORT_HTTP + ',' + Constants.TRANSPORT_HTTPS);
+        //}
+    }
+
+    /**
+     * Persist API Status into a property of API Registry resource
+     *
+     * @param artifactId API artifact ID
+     * @param apiStatus Current status of the API
+     * @throws APIManagementException on error
+     */
+    private void saveCompositeAPIStatus(String artifactId, String apiStatus) throws APIManagementException{
+        try{
+            Resource resource = registry.get(artifactId);
+            if (resource != null) {
+                String propValue = resource.getProperty(APIConstants.API_STATUS);
+                if (propValue == null) {
+                    resource.addProperty(APIConstants.API_STATUS, apiStatus);
+                } else {
+                    resource.setProperty(APIConstants.API_STATUS, apiStatus);
+                }
+                registry.put(artifactId,resource);
+            }
+        }catch (RegistryException e) {
+            handleException("Error while adding API", e);
+        }
+    }
+
+    @Override
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            definitionFromSwagger20.saveAPIDefinition(getCompositeAPI(apiId), jsonText, registry);
+
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public boolean isCompositeAPIUpdateValid(API api) throws APIManagementException{
+        String apiSourcePath = APIUtil.getCompositeAPIPath(api.getId());
+        boolean isValid = false;
+
+        try{
+            Resource apiSourceArtifact = registry.get(apiSourcePath);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.COMPOSITE_API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
+            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+
+            if (!APIConstants.CREATED.equals(status)) {
+                //api at least is in published status
+                if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
+                    //user has publish permission
+                    isValid = true;
+                }
+            }else if(APIConstants.CREATED.equals(status)){
+                //api in create status
+                if(APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_CREATE) ||
+                   APIUtil.hasPermission(getUserNameWithoutChange(), APIConstants.Permissions.API_PUBLISH)){
+                    //user has creat or publish permission
+                    isValid = true;
+                }
+            }
+
+        }catch(RegistryException ex){
+            handleException("Error while validate user for API publishing", ex);
+        }
+        return isValid;
+
+    }
+
+    /**
+     * Function returns true if the specified API already exists in the registry
+     * @param identifier
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean checkIfCompositeAPIExists(APIIdentifier identifier) throws APIManagementException {
+        String apiPath = APIUtil.getCompositeAPIPath(identifier);
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            Registry registry;
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                               .getTenantId(tenantDomain);
+                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null
+                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    if (this.tenantDomain != null
+                        && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                        registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                                identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                    } else {
+                        registry = this.registry;
+                    }
+                }
+            }
+
+            return registry.resourceExists(apiPath);
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return false;
+        } catch (UserStoreException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return false;
+        }
+    }
+
+	/**
+     * Nothing related to gateway has been handled
+     * @param api
+     * @throws APIManagementException
+     * @throws FaultGatewaysException
+     */
+    @Override
+    public void updateCompositeAPI(API api) throws APIManagementException {
+        boolean isValid = isCompositeAPIUpdateValid(api);
+        if(!isValid){
+            throw new APIManagementException(" User doesn't have permission for update");
+        }
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+        API oldApi = getCompositeAPI(api.getId());
+        if (oldApi.getStatus().equals(api.getStatus())) {
+
+            //Versioning is not considered at the moment
+            /*String previousDefaultVersion = getDefaultVersion(api.getId());
+            String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
+
+            if(previousDefaultVersion!=null){
+
+                APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
+                                                               previousDefaultVersion);
+                if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
+                    // happen
+                    // Remove the previous default API entry from the Registry
+                    updateDefaultAPIInRegistry(defaultAPIId, false);
+                    if (!api.isDefaultVersion()) {// default api tick is removed
+                        // todo: if it is ok, these two variables can be put to the top of the function to remove
+                        // duplication
+                        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                                                                               .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                        String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                        if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                            removeDefaultAPIFromGateway(api);
+                        }
+                    }
+                }
+            }*/
+
+
+
+            boolean updatePermissions = false;
+            //updateApiArtifact(api, true,updatePermissions);
+            if (!oldApi.getContext().equals(api.getContext())) {
+                api.setApiHeaderChanged(true);
+            }
+
+            int tenantId;
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                 .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                throw new APIManagementException(
+                        "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
+            }
+            //todo : db schema for composite API
+            //apiMgtDAO.updateAPI(api,tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the API: " + api.getId() + " in the database");
+            }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
+            // update apiContext cache
+            if (APIUtil.isAPIManagementEnabled()) {
+                Cache contextCache = APIUtil.getAPIContextCache();
+                contextCache.remove(oldApi.getContext());
+                contextCache.put(api.getContext(), Boolean.TRUE);
+            }
+
+
+        } else {
+            // We don't allow API status updates via this method.
+            // Use changeAPIStatus for that kind of updates.
+            throw new APIManagementException("Invalid API update operation involving API status changes");
+        }
     }
 
 }

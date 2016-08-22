@@ -559,6 +559,64 @@ public final class APIUtil {
         return api;
     }
 
+    /**
+     * Returns a composite API object from extracting data from registry artifact and database
+     *
+     * @param artifact Registry artifact
+     * @param registry registry
+     * @return API composite APO
+     * @throws APIManagementException
+     */
+    public static API getCompositeAPIForPublishing(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            // TODO: save required fields in db
+            //int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+
+            /*if (apiId == -1) {
+                return null;
+            }*/
+
+            api = new API(apiIdentifier);
+            //set uuid
+            api.setUUID(artifact.getId());
+            // set rating
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+
+            //set description
+            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            //set last access time
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            // set url
+            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+
+
+            // This contains the resolved context
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            // We set the context template here
+            api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+
+
+            api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            //URL templates not filled as nothing has sent to db
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
+    }
+
 
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
@@ -851,6 +909,59 @@ public final class APIUtil {
     }
 
     /**
+     * Create Governance artifact from given attributes
+     *
+     * @param artifact initial governance artifact
+     * @param api      composite API object with the attributes value
+     * @return GenericArtifact Artifact with composite API data
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
+     */
+    public static GenericArtifact createCompositeAPIArtifactContent(GenericArtifact artifact, API api)
+            throws APIManagementException {
+        try {
+            String apiStatus = api.getStatus().getStatus();
+            artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiStatus);
+
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+
+
+
+            if (APIConstants.PUBLISHED.equals(apiStatus)) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
+            }
+            String[] keys = artifact.getAttributeKeys();
+            for (String key : keys) {
+                if (key.contains("URITemplate")) {
+                    artifact.removeAttribute(key);
+                }
+            }
+
+            Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+            int i = 0;
+            for (URITemplate uriTemplate : uriTemplateSet) {
+                artifact.addAttribute(APIConstants.API_URI_PATTERN + i, uriTemplate.getUriTemplate());
+                artifact.addAttribute(APIConstants.API_URI_HTTP_METHOD + i, uriTemplate.getHTTPVerb());
+
+                i++;
+
+            }
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to create API for : " + api.getId().getApiName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return artifact;
+    }
+
+    /**
      * Create the Documentation from artifact
      *
      * @param artifact Documentation artifact
@@ -1078,6 +1189,18 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method to get composite api path from APIIdentifier
+     *
+     * @param identifier composite APIIdentifier
+     * @return composite API path
+     */
+    public static String getCompositeAPIPath(APIIdentifier identifier) {
+        return APIConstants.COMPOSITE_API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+               identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+               identifier.getApiName() + APIConstants.COMPOSITE_API_RESOURCE_NAME;
+    }
+
+    /**
      * Utility method to get API provider path
      *
      * @param identifier APIIdentifier
@@ -1085,6 +1208,16 @@ public final class APIUtil {
      */
     public static String getAPIProviderPath(APIIdentifier identifier) {
         return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+    }
+
+    /**
+     * Utility method to get composite API provider path
+     *
+     * @param identifier composite APIIdentifier
+     * @return composite API provider path
+     */
+    public static String getCompositeAPIProviderPath(APIIdentifier identifier) {
+        return APIConstants.COMPOSITE_API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
     }
 
     /**
